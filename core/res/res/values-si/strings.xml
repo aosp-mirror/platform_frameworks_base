@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ක්‍රියාවිරහිතයි"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ඕනෑම දින දර්ශනයක්"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> සමහර ශබ්ද නිහඬ කරමින්"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ඔබේ උපාංගය සමගින් ගැටලුවක් ඇති අතර, ඔබේ කර්මාන්තශාලා දත්ත යළි සකසන තෙක් එය අස්ථායි විය හැකිය."</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ඇමතුම් සහ දැනුම්දීම් කම්පනය වනු ඇත"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ඇමතුම් සහ දැනුම්දීම් නිහඬ වනු ඇත"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"පද්ධති වෙනස් කිරීම්"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"බාධා නොකරන්න"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"නව: බාධා නොකරන්න දැනුම්දීම් සඟවමින්"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"තව දැන ගැනීමට සහ වෙනස් කිරීමට තට්ටු කරන්න."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"බාධා නොකරන්න වෙනස් කර ඇත"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"දැනුම්දීම් සැකසීම් සමාලෝචනය කරන්න"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 හි සිට ආරම්භ වෙමින්, ඔබ ස්ථාපනය කරන යෙදුම්වලට දැනුම්දීම් යැවීමට ඔබගේ අවසරය අවශ්‍ය වේ. තිබෙන යෙදුම් සඳහා මෙම අවසරය වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"මට පසුව මතක් කරන්න"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ජංගම හෝ Wi-Fi ජාලයකින් තොරව පණිවිඩ යැවීම සහ ලැබීම"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages විවෘත කරන්න"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"එය ක්‍රියා කරන ආකාරය"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"පොරොත්තුයි..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ඇඟිලි සලකුණු අගුලු හැරීම නැවත සකසන්න"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> තවදුරටත් හඳුනා ගත නොහැක."</string>

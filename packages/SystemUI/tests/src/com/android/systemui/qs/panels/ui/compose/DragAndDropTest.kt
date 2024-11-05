@@ -67,6 +67,8 @@ class DragAndDropTest : SysuiTestCase() {
             onRemoveTile = {},
             onSetTiles = onSetTiles,
             onResize = { _, _ -> },
+            onStopEditing = {},
+            onReset = null,
         )
     }
 

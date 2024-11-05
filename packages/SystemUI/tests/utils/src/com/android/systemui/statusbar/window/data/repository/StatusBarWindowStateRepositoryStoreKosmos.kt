@@ -21,6 +21,9 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.statusbar.commandQueue
 
+val Kosmos.fakeStatusBarWindowStatePerDisplayRepository by
+    Kosmos.Fixture { FakeStatusBarWindowStatePerDisplayRepository() }
+
 val Kosmos.fakeStatusBarWindowStateRepositoryStore by
     Kosmos.Fixture { FakeStatusBarWindowStateRepositoryStore() }
 

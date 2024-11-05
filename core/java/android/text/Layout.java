@@ -73,8 +73,11 @@ import java.util.Locale;
 public abstract class Layout {
 
     // These should match the constants in framework/base/libs/hwui/hwui/DrawTextFunctor.h
-    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_MIN_PX = 4f;
-    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR = 0.2f;
+    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_MIN_PX = 0f;
+    private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR = 0f;
+    private static final float HIGH_CONTRAST_TEXT_BACKGROUND_CORNER_RADIUS_DP = 5f;
+    // since we're not using soft light yet, this needs to be much lower than the spec'd 0.8
+    private static final float HIGH_CONTRAST_TEXT_BACKGROUND_ALPHA_PERCENTAGE = 0.5f;
 
     /** @hide */
     @IntDef(prefix = { "BREAK_STRATEGY_" }, value = {
@@ -1025,11 +1028,18 @@ public abstract class Layout {
 
         var padding = Math.max(HIGH_CONTRAST_TEXT_BORDER_WIDTH_MIN_PX,
                 mPaint.getTextSize() * HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR);
+        var cornerRadius = mPaint.density * HIGH_CONTRAST_TEXT_BACKGROUND_CORNER_RADIUS_DP;
+
+        // We set the alpha on the color itself instead of Paint.setAlpha(), because that function
+        // actually mutates the color in... *ehem* very strange ways. Also the color might get reset
+        // for various reasons, which also resets the alpha.
+        var white = Color.argb(HIGH_CONTRAST_TEXT_BACKGROUND_ALPHA_PERCENTAGE, 1f, 1f, 1f);
+        var black = Color.argb(HIGH_CONTRAST_TEXT_BACKGROUND_ALPHA_PERCENTAGE, 0f, 0f, 0f);
 
         var originalTextColor = mPaint.getColor();
         var bgPaint = mWorkPlainPaint;
         bgPaint.reset();
-        bgPaint.setColor(isHighContrastTextDark(originalTextColor) ? Color.WHITE : Color.BLACK);
+        bgPaint.setColor(isHighContrastTextDark(originalTextColor) ? white : black);
         bgPaint.setStyle(Paint.Style.FILL);
 
         int start = getLineStart(firstLine);
@@ -1082,7 +1092,12 @@ public abstract class Layout {
                     private void drawRect() {
                         if (!mLineBackground.isEmpty()) {
                             mLineBackground.inset(-padding, -padding);
-                            canvas.drawRect(mLineBackground, bgPaint);
+                            canvas.drawRoundRect(
+                                    mLineBackground,
+                                    cornerRadius,
+                                    cornerRadius,
+                                    bgPaint
+                            );
                         }
                     }
 
@@ -1104,7 +1119,7 @@ public abstract class Layout {
                         if (hasColorChanged) {
                             mLastColor = textColor;
 
-                            return isHighContrastTextDark(textColor) ? Color.WHITE : Color.BLACK;
+                            return isHighContrastTextDark(textColor) ? white : black;
                         }
 
                         return bgPaint.getColor();

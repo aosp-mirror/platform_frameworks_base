@@ -24,6 +24,7 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.os.userManager
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
@@ -31,6 +32,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_COMMUNAL_WIDGET_RESIZING
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
@@ -1076,6 +1078,108 @@ class CommunalInteractorTest : SysuiTestCase() {
             underTest.unpauseWorkProfile()
 
             assertThat(managedProfileController.isWorkModeEnabled()).isTrue()
+        }
+
+    @Test
+    @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING)
+    fun resizeWidget_withoutUpdatingOrder() =
+        testScope.runTest {
+            val userInfos = listOf(MAIN_USER_INFO)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(userInfos = userInfos, selectedUserIndex = 0)
+            runCurrent()
+
+            // Widgets available.
+            widgetRepository.addWidget(
+                appWidgetId = 1,
+                userId = MAIN_USER_INFO.id,
+                rank = 0,
+                spanY = CommunalContentSize.HALF.span,
+            )
+            widgetRepository.addWidget(
+                appWidgetId = 2,
+                userId = MAIN_USER_INFO.id,
+                rank = 1,
+                spanY = CommunalContentSize.HALF.span,
+            )
+            widgetRepository.addWidget(
+                appWidgetId = 3,
+                userId = MAIN_USER_INFO.id,
+                rank = 2,
+                spanY = CommunalContentSize.HALF.span,
+            )
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+
+            assertThat(widgetContent?.map { it.appWidgetId to it.size })
+                .containsExactly(
+                    1 to CommunalContentSize.HALF,
+                    2 to CommunalContentSize.HALF,
+                    3 to CommunalContentSize.HALF,
+                )
+                .inOrder()
+
+            underTest.resizeWidget(2, CommunalContentSize.FULL.span, emptyMap())
+
+            // Widget 2 should have been resized to FULL
+            assertThat(widgetContent?.map { it.appWidgetId to it.size })
+                .containsExactly(
+                    1 to CommunalContentSize.HALF,
+                    2 to CommunalContentSize.FULL,
+                    3 to CommunalContentSize.HALF,
+                )
+                .inOrder()
+        }
+
+    @Test
+    @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING)
+    fun resizeWidget_andUpdateOrder() =
+        testScope.runTest {
+            val userInfos = listOf(MAIN_USER_INFO)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(userInfos = userInfos, selectedUserIndex = 0)
+            runCurrent()
+
+            // Widgets available.
+            widgetRepository.addWidget(
+                appWidgetId = 1,
+                userId = MAIN_USER_INFO.id,
+                rank = 0,
+                spanY = CommunalContentSize.HALF.span,
+            )
+            widgetRepository.addWidget(
+                appWidgetId = 2,
+                userId = MAIN_USER_INFO.id,
+                rank = 1,
+                spanY = CommunalContentSize.HALF.span,
+            )
+            widgetRepository.addWidget(
+                appWidgetId = 3,
+                userId = MAIN_USER_INFO.id,
+                rank = 2,
+                spanY = CommunalContentSize.HALF.span,
+            )
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+
+            assertThat(widgetContent?.map { it.appWidgetId to it.size })
+                .containsExactly(
+                    1 to CommunalContentSize.HALF,
+                    2 to CommunalContentSize.HALF,
+                    3 to CommunalContentSize.HALF,
+                )
+                .inOrder()
+
+            underTest.resizeWidget(2, CommunalContentSize.FULL.span, mapOf(2 to 0, 1 to 1))
+
+            // Widget 2 should have been resized to FULL and moved to the front of the list
+            assertThat(widgetContent?.map { it.appWidgetId to it.size })
+                .containsExactly(
+                    2 to CommunalContentSize.FULL,
+                    1 to CommunalContentSize.HALF,
+                    3 to CommunalContentSize.HALF,
+                )
+                .inOrder()
         }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {

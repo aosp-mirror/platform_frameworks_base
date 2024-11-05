@@ -20,14 +20,18 @@ import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FL
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
+import static com.android.hardware.input.Flags.enableCustomizableInputGestures;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
-import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
+import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
+import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
-import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
+import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.keyboardRepeatKeys;
 
 import android.Manifest;
@@ -68,6 +72,20 @@ public class InputSettings {
      */
     @SuppressLint("UnflaggedApi") // TestApi without associated feature.
     public static final int DEFAULT_POINTER_SPEED = 0;
+
+    /**
+     * Bounce Keys Threshold: The default value of the threshold (500 ms).
+     *
+     * @hide
+     */
+    public static final int DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS = 500;
+
+    /**
+     * Slow Keys Threshold: The default value of the threshold (500 ms).
+     *
+     * @hide
+     */
+    public static final int DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS = 500;
 
     /**
      * The maximum allowed obscuring opacity by UID to propagate touches (0 <= x <= 1).
@@ -363,6 +381,31 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if the feature flag for the touchpad three-finger tap shortcut is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadThreeFingerTapShortcutFeatureFlagEnabled() {
+        return enableCustomizableInputGestures() && touchpadThreeFingerTapShortcut();
+    }
+
+    /**
+     * Returns true if the feature flag for mouse reverse vertical scrolling is enabled.
+     * @hide
+     */
+    public static boolean isMouseReverseVerticalScrollingFeatureFlagEnabled() {
+        return mouseReverseVerticalScrolling();
+    }
+
+    /**
+     * Returns true if the feature flag for mouse swap primary button is enabled.
+     * @hide
+     */
+    public static boolean isMouseSwapPrimaryButtonFeatureFlagEnabled() {
+        return mouseSwapPrimaryButton();
+    }
+
+    /**
      * Returns true if the touchpad visualizer is allowed to appear.
      *
      * @param context The application context.
@@ -466,6 +509,22 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if three-finger taps on the touchpad should trigger a customizable shortcut
+     * rather than a middle click.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether three-finger taps should trigger the shortcut.
+     *
+     * @hide
+     */
+    public static boolean useTouchpadThreeFingerTapShortcut(@NonNull Context context) {
+        // TODO(b/365063048): determine whether to enable the shortcut based on the settings.
+        return isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
+    }
+
+    /**
      * Whether a pointer icon will be shown over the location of a stylus pointer.
      *
      * @hide
@@ -498,6 +557,86 @@ public class InputSettings {
      */
     public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
         return isStylusPointerIconEnabled(context, false /* forceReloadSetting */);
+    }
+
+    /**
+     * Whether mouse vertical scrolling is enabled, this applies only to connected mice.
+     *
+     * @param context The application context.
+     * @return Whether the mouse will have its vertical scrolling reversed
+     * (scroll down to move up).
+     *
+     * @hide
+     */
+    public static boolean isMouseReverseVerticalScrollingEnabled(@NonNull Context context) {
+        if (!isMouseReverseVerticalScrollingFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Sets whether the connected mouse will have its vertical scrolling reversed.
+     *
+     * @param context The application context.
+     * @param reverseScrolling Whether reverse scrolling is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseReverseVerticalScrolling(@NonNull Context context,
+            boolean reverseScrolling) {
+        if (!isMouseReverseVerticalScrollingFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING, reverseScrolling ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether the primary mouse button is swapped on connected mice.
+     *
+     * @param context The application context.
+     * @return Whether mice will have their primary buttons swapped, so that left clicking will
+     * perform the secondary action (e.g. show menu) and right clicking will perform the primary
+     * action.
+     *
+     * @hide
+     */
+    public static boolean isMouseSwapPrimaryButtonEnabled(@NonNull Context context) {
+        if (!isMouseSwapPrimaryButtonFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Sets whether mice will have their primary buttons swapped between left and right
+     * clicks.
+     *
+     * @param context The application context.
+     * @param swapPrimaryButton Whether swapping the primary button is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseSwapPrimaryButton(@NonNull Context context,
+            boolean swapPrimaryButton) {
+        if (!isMouseSwapPrimaryButtonFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, swapPrimaryButton ? 1 : 0,
+                UserHandle.USER_CURRENT);
     }
 
     /**

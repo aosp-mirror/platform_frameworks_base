@@ -38,8 +38,8 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.window.DesktopModeFlags;
 import android.window.WindowContainerToken;
-import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -47,7 +47,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.ProtoLog;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -289,6 +288,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     @Override
+    public void onTaskChangedThroughTransition(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        notifyTaskInfoChanged(taskInfo);
+    }
+
+    @Override
     public void onTaskMovedToFrontThroughTransition(
             ActivityManager.RunningTaskInfo runningTaskInfo) {
         notifyTaskMovedToFront(runningTaskInfo);
@@ -352,6 +356,19 @@ public class RecentTasksController implements TaskStackListenerCallback,
             mListener.onRunningTaskChanged(taskInfo);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed call onRunningTaskChanged", e);
+        }
+    }
+
+    private void notifyTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mListener == null
+                || !DesktopModeFlags.ENABLE_TASK_STACK_OBSERVER_IN_SHELL.isTrue()
+                || taskInfo.realActivity == null) {
+            return;
+        }
+        try {
+            mListener.onTaskInfoChanged(taskInfo);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed call onTaskInfoChanged", e);
         }
     }
 
@@ -426,7 +443,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 // If task has their app bounds set to null which happens after reboot, set the
                 // app bounds to persisted lastFullscreenBounds. Also set the position in parent
                 // to the top left of the bounds.
-                if (Flags.enableDesktopWindowingPersistence()
+                if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()
                         && taskInfo.configuration.windowConfiguration.getAppBounds() == null) {
                     taskInfo.configuration.windowConfiguration.setAppBounds(
                             taskInfo.lastNonFullscreenBounds);
@@ -540,6 +557,14 @@ public class RecentTasksController implements TaskStackListenerCallback,
         return null;
     }
 
+    /**
+     * Remove the background task that match the given taskId. This will remove the task regardless
+     * of whether it's active or recent.
+     */
+    public boolean removeBackgroundTask(int taskId) {
+        return mActivityTaskManager.removeTask(taskId);
+    }
+
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
@@ -627,6 +652,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
             @Override
             public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
                 mListener.call(l -> l.onTaskMovedToFront(taskInfo));
+            }
+
+            @Override
+            public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+                mListener.call(l -> l.onTaskInfoChanged(taskInfo));
             }
         };
 

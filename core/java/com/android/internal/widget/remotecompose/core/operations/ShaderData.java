@@ -15,12 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.BYTE;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT_ARRAY;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT_ARRAY;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.SHORT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.UTF8;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.BYTE;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.UTF8;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -28,15 +28,15 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- * Operation to deal with bitmap data
- * On getting an Image during a draw call the bitmap is compressed and saved
- * in playback the image is decompressed
+ * Operation to deal with bitmap data On getting an Image during a draw call the bitmap is
+ * compressed and saved in playback the image is decompressed
  */
 public class ShaderData implements Operation, VariableSupport {
     private static final int OP_CODE = Operations.DATA_SHADER;
@@ -48,11 +48,12 @@ public class ShaderData implements Operation, VariableSupport {
     HashMap<String, int[]> mUniformIntMap = null;
     HashMap<String, Integer> mUniformBitmapMap = null;
 
-    public ShaderData(int shaderID,
-                      int shaderTextId,
-                      HashMap<String, float[]> floatMap,
-                      HashMap<String, int[]> intMap,
-                      HashMap<String, Integer> bitmapMap) {
+    public ShaderData(
+            int shaderID,
+            int shaderTextId,
+            HashMap<String, float[]> floatMap,
+            HashMap<String, int[]> intMap,
+            HashMap<String, Integer> bitmapMap) {
         mShaderID = shaderID;
         mShaderTextId = shaderTextId;
         if (floatMap != null) {
@@ -77,7 +78,6 @@ public class ShaderData implements Operation, VariableSupport {
                 mUniformBitmapMap.put(name, bitmapMap.get(name));
             }
         }
-
     }
 
     public int getShaderTextId() {
@@ -107,7 +107,7 @@ public class ShaderData implements Operation, VariableSupport {
     /**
      * get the name of all know uniform integers
      *
-     * @return  Name of all integer uniforms
+     * @return Name of all integer uniforms
      */
     public String[] getUniformIntegerNames() {
         if (mUniformIntMap == null) return new String[0];
@@ -146,8 +146,13 @@ public class ShaderData implements Operation, VariableSupport {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mShaderID, mShaderTextId,
-                mUniformFloatMap, mUniformIntMap, mUniformBitmapMap);
+        apply(
+                buffer,
+                mShaderID,
+                mShaderTextId,
+                mUniformFloatMap,
+                mUniformIntMap,
+                mUniformBitmapMap);
     }
 
     @Override
@@ -202,10 +207,13 @@ public class ShaderData implements Operation, VariableSupport {
      * @param intMap the map of int uniforms
      * @param bitmapMap the map of bitmap uniforms
      */
-    public static void apply(WireBuffer buffer, int shaderID, int shaderTextId,
-                             HashMap<String, float[]> floatMap,
-                             HashMap<String, int[]> intMap,
-                             HashMap<String, Integer> bitmapMap) {
+    public static void apply(
+            WireBuffer buffer,
+            int shaderID,
+            int shaderTextId,
+            HashMap<String, float[]> floatMap,
+            HashMap<String, int[]> intMap,
+            HashMap<String, Integer> bitmapMap) {
         buffer.start(OP_CODE);
         buffer.writeInt(shaderID);
 
@@ -247,7 +255,6 @@ public class ShaderData implements Operation, VariableSupport {
             }
         }
     }
-
 
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int shaderID = buffer.readInt();
@@ -298,16 +305,13 @@ public class ShaderData implements Operation, VariableSupport {
                 bitmapMap.put(name, val);
             }
         }
-        operations.add(new ShaderData(shaderID, shaderTextId,
-                floatMap, intMap, bitmapMap));
+        operations.add(new ShaderData(shaderID, shaderTextId, floatMap, intMap, bitmapMap));
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Shader")
-                .field(INT, "shaderID", "id of shader")
+                .field(DocumentedOperation.INT, "shaderID", "id of shader")
                 .field(BYTE, " floatSize", "number of float uniforms")
                 .field(BYTE, " intSize", "number of int uniform")
                 .field(SHORT, " intSize", "number of int uniform")
@@ -319,7 +323,6 @@ public class ShaderData implements Operation, VariableSupport {
                 .field(INT_ARRAY, "VALUE", "int uniform (max 4)")
                 .field(UTF8, "bitmapName", "name of bitmap")
                 .field(INT, "VALUE", "id of bitmap");
-
     }
 
     @Override

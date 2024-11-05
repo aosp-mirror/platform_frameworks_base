@@ -21,21 +21,12 @@ import android.graphics.Rect
 import android.util.RotationUtils
 import android.view.Display
 import android.view.DisplayCutout
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.display.naturalBounds
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-@SysUISingleton
-class SysUICutoutProvider
-@Inject
-constructor(
-    private val context: Context,
-    private val cameraProtectionLoader: CameraProtectionLoader,
-) {
-
-    private val cameraProtectionList by lazy {
-        cameraProtectionLoader.loadCameraProtectionInfoList()
-    }
+interface SysUICutoutProvider {
 
     /**
      * Returns the [SysUICutoutInformation] for the current display and the current rotation.
@@ -43,7 +34,21 @@ constructor(
      * This means that the bounds of the display cutout and the camera protection will be
      * adjusted/rotated for the current rotation.
      */
-    fun cutoutInfoForCurrentDisplayAndRotation(): SysUICutoutInformation? {
+    fun cutoutInfoForCurrentDisplayAndRotation(): SysUICutoutInformation?
+}
+
+class SysUICutoutProviderImpl
+@AssistedInject
+constructor(
+    @Assisted private val context: Context,
+    @Assisted private val cameraProtectionLoader: CameraProtectionLoader,
+) : SysUICutoutProvider {
+
+    private val cameraProtectionList by lazy {
+        cameraProtectionLoader.loadCameraProtectionInfoList()
+    }
+
+    override fun cutoutInfoForCurrentDisplayAndRotation(): SysUICutoutInformation? {
         val display = context.display
         val displayCutout: DisplayCutout = display.cutout ?: return null
         return SysUICutoutInformation(displayCutout, getCameraProtectionForDisplay(display))
@@ -72,8 +77,16 @@ constructor(
             /* inOutBounds = */ rotatedBoundsOut,
             /* parentWidth = */ displayNaturalBounds.width(),
             /* parentHeight = */ displayNaturalBounds.height(),
-            /* rotation = */ display.rotation
+            /* rotation = */ display.rotation,
         )
         return rotatedBoundsOut
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            context: Context,
+            cameraProtectionLoader: CameraProtectionLoader,
+        ): SysUICutoutProviderImpl
     }
 }

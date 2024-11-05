@@ -110,6 +110,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.ZygoteProcess;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -442,6 +443,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetForegroundServiceDelegate(pw);
                 case "capabilities":
                     return runCapabilities(pw);
+                case "set-app-zygote-preload-timeout":
+                    return runSetAppZygotePreloadTimeout(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -449,6 +452,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    int runSetAppZygotePreloadTimeout(PrintWriter pw) throws RemoteException {
+        final String timeout = getNextArgRequired();
+        final int timeoutMs = Integer.parseInt(timeout);
+
+        ZygoteProcess.setAppZygotePreloadTimeout(timeoutMs);
+
+        return 0;
     }
 
     int runCapabilities(PrintWriter pw) throws RemoteException {
@@ -4623,6 +4635,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  capabilities [--protobuf]");
             pw.println("         Output am supported features (text format). Options are:");
             pw.println("         --protobuf: format output using protobuffer");
+            pw.println("  set-app-zygote-preload-timeout <TIMEOUT_IN_MS>");
+            pw.println("         Set the timeout for preloading code in the app-zygote");
             Intent.printIntentArgsHelp(pw, "");
         }
     }

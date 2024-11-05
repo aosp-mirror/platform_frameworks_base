@@ -1529,8 +1529,6 @@ public class SoundTrigger {
          * config that can be used by
          * {@link SoundTriggerModule#startRecognition(int, RecognitionConfig)}
          *
-         * @deprecated should use builder-based constructor instead.
-         *             TODO(b/368042125): remove this method.
          * @param captureRequested Whether the DSP should capture the trigger sound.
          * @param allowMultipleTriggers Whether the service should restart listening after the DSP
          *                              triggers.
@@ -1538,15 +1536,10 @@ public class SoundTrigger {
          * @param data Opaque data for use by system applications who know about voice engine
          *             internals, typically during enrollment.
          * @param audioCapabilities Bit field encoding of the AudioCapabilities.
-         *
-         * @hide
          */
-        @Deprecated
-        @SuppressWarnings("Todo")
-        @TestApi
-        public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
-                @SuppressLint("ArrayReturn") @Nullable KeyphraseRecognitionExtra[] keyphrases,
-                @Nullable byte[] data, int audioCapabilities) {
+        private RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
+                @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data,
+                int audioCapabilities) {
             this.mCaptureRequested = captureRequested;
             this.mAllowMultipleTriggers = allowMultipleTriggers;
             this.mKeyphrases = keyphrases != null ? keyphrases : new KeyphraseRecognitionExtra[0];
@@ -1558,6 +1551,7 @@ public class SoundTrigger {
          * Constructor for {@link RecognitionConfig} without audioCapabilities. The
          * audioCapabilities is set to 0.
          *
+         * @deprecated Use {@link Builder} instead.
          * @param captureRequested Whether the DSP should capture the trigger sound.
          * @param allowMultipleTriggers Whether the service should restart listening after the DSP
          *                              triggers.
@@ -1567,10 +1561,10 @@ public class SoundTrigger {
          * @hide
          */
         @UnsupportedAppUsage
+        @Deprecated
         @TestApi
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
-                @SuppressLint("ArrayReturn") @Nullable KeyphraseRecognitionExtra[] keyphrases,
-                @Nullable byte[] data) {
+                @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data) {
             this(captureRequested, allowMultipleTriggers, keyphrases, data, 0);
         }
 
@@ -1633,7 +1627,7 @@ public class SoundTrigger {
             boolean allowMultipleTriggers = in.readBoolean();
             KeyphraseRecognitionExtra[] keyphrases =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
-            byte[] data = in.readBlob();
+            byte[] data = in.createByteArray();
             int audioCapabilities = in.readInt();
             return new RecognitionConfig(captureRequested, allowMultipleTriggers, keyphrases, data,
                     audioCapabilities);
@@ -1644,7 +1638,7 @@ public class SoundTrigger {
             dest.writeBoolean(mCaptureRequested);
             dest.writeBoolean(mAllowMultipleTriggers);
             dest.writeTypedArray(mKeyphrases, flags);
-            dest.writeBlob(mData);
+            dest.writeByteArray(mData);
             dest.writeInt(mAudioCapabilities);
         }
 
@@ -1718,7 +1712,7 @@ public class SoundTrigger {
 
             /**
              * Sets capture requested state.
-             * @param captureRequested The new requested state.
+             * @param captureRequested Whether the DSP should capture the trigger sound.
              * @return the same Builder instance.
              */
             public @NonNull Builder setCaptureRequested(boolean captureRequested) {
@@ -1728,7 +1722,8 @@ public class SoundTrigger {
 
             /**
              * Sets allow multiple triggers state.
-             * @param allowMultipleTriggers The new allow multiple triggers state.
+             * @param allowMultipleTriggers Whether the service should restart listening after the
+             *                              DSP triggers.
              * @return the same Builder instance.
              */
             public @NonNull Builder setAllowMultipleTriggers(boolean allowMultipleTriggers) {
@@ -1738,7 +1733,8 @@ public class SoundTrigger {
 
             /**
              * Sets the keyphrases field.
-             * @param keyphrases The new keyphrases.
+             * @param keyphrases The list of keyphrase specific data associated with this
+             *                   recognition session.
              * @return the same Builder instance.
              */
             public @NonNull Builder setKeyphrases(
@@ -1749,7 +1745,9 @@ public class SoundTrigger {
 
             /**
              * Sets the data field.
-             * @param data The new data.
+             * @param data Opaque data provided to the DSP associated with this recognition session,
+             *             which is used by system applications who know about voice engine
+             *             internals, typically during enrollment.
              * @return the same Builder instance.
              */
             public @NonNull Builder setData(@Nullable byte[] data) {
@@ -1759,7 +1757,8 @@ public class SoundTrigger {
 
             /**
              * Sets the audio capabilities field.
-             * @param audioCapabilities The new audio capabilities.
+             * @param audioCapabilities The bit field encoding of the audio capabilities associated
+             *                          with this recognition session.
              * @return the same Builder instance.
              */
             public @NonNull Builder setAudioCapabilities(int audioCapabilities) {

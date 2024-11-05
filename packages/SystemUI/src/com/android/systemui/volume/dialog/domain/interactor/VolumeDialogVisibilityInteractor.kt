@@ -17,11 +17,16 @@
 package com.android.systemui.volume.dialog.domain.interactor
 
 import android.annotation.SuppressLint
+import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
+import com.android.systemui.volume.dialog.data.VolumeDialogVisibilityRepository
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
-import com.android.systemui.volume.dialog.domain.model.VolumeDialogVisibilityModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel.Dismissed
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel.Visible
+import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -30,15 +35,16 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 
-private val maxDialogShowTime: Duration = 3.seconds
+private val MAX_DIALOG_SHOW_TIME: Duration = 3.seconds
 
 /**
  * Handles Volume Dialog visibility state. It might change from several sources:
@@ -53,29 +59,32 @@ class VolumeDialogVisibilityInteractor
 constructor(
     @VolumeDialogPlugin coroutineScope: CoroutineScope,
     callbacksInteractor: VolumeDialogCallbacksInteractor,
+    private val tracer: VolumeTracer,
+    private val repository: VolumeDialogVisibilityRepository,
+    private val controller: VolumeDialogController,
 ) {
 
     @SuppressLint("SharedFlowCreation")
-    private val mutableDismissDialogEvents = MutableSharedFlow<Unit>()
-    private val mutableDialogVisibility =
-        MutableStateFlow<VolumeDialogVisibilityModel>(VolumeDialogVisibilityModel.Invisible)
-
-    val dialogVisibility: Flow<VolumeDialogVisibilityModel> = mutableDialogVisibility.asStateFlow()
+    private val mutableDismissDialogEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val dialogVisibility: Flow<VolumeDialogVisibilityModel> =
+        repository.dialogVisibility
+            .onEach { controller.notifyVisible(it is Visible) }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .filterNotNull()
 
     init {
         merge(
                 mutableDismissDialogEvents.mapLatest {
-                    delay(maxDialogShowTime)
+                    delay(MAX_DIALOG_SHOW_TIME)
                     VolumeDialogEventModel.DismissRequested(Events.DISMISS_REASON_TIMEOUT)
                 },
                 callbacksInteractor.event,
             )
-            .onEach { event ->
-                VolumeDialogVisibilityModel.fromEvent(event)?.let { model ->
-                    mutableDialogVisibility.value = model
-                    if (model is VolumeDialogVisibilityModel.Visible) {
-                        resetDismissTimeout()
-                    }
+            .mapNotNull { it.toVisibilityModel() }
+            .onEach { model ->
+                updateVisibility { model }
+                if (model is Visible) {
+                    resetDismissTimeout()
                 }
             }
             .launchIn(coroutineScope)
@@ -86,17 +95,32 @@ constructor(
      * [dialogVisibility].
      */
     fun dismissDialog(reason: Int) {
-        mutableDialogVisibility.update {
-            if (it is VolumeDialogVisibilityModel.Dismissed) {
-                it
+        updateVisibility { visibilityModel ->
+            if (visibilityModel is Dismissed) {
+                visibilityModel
             } else {
-                VolumeDialogVisibilityModel.Dismissed(reason)
+                Dismissed(reason)
             }
         }
     }
 
     /** Resets current dialog timeout. */
-    suspend fun resetDismissTimeout() {
-        mutableDismissDialogEvents.emit(Unit)
+    fun resetDismissTimeout() {
+        mutableDismissDialogEvents.tryEmit(Unit)
+    }
+
+    private fun updateVisibility(
+        update: (VolumeDialogVisibilityModel) -> VolumeDialogVisibilityModel
+    ) {
+        repository.updateVisibility { update(it).also(tracer::traceVisibilityStart) }
+    }
+
+    private fun VolumeDialogEventModel.toVisibilityModel(): VolumeDialogVisibilityModel? {
+        return when (this) {
+            is VolumeDialogEventModel.DismissRequested -> Dismissed(reason)
+            is VolumeDialogEventModel.ShowRequested ->
+                Visible(reason, keyguardLocked, lockTaskModeState)
+            else -> null
+        }
     }
 }

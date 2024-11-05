@@ -379,7 +379,7 @@ public class ProtoLogConfigurationServiceImpl extends IProtoLogConfigurationServ
             @NonNull String viewerConfigFilePath) {
         Utils.dumpViewerConfig(dataSource, () -> {
             try {
-                return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
+                return new AutoClosableProtoInputStream(new FileInputStream(viewerConfigFilePath));
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(
                         "Failed to load viewer config file " + viewerConfigFilePath, e);

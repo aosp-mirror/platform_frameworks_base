@@ -369,6 +369,7 @@ package android.app {
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
+    method @FlaggedApi("android.service.notification.notification_conversation_channel_management") @NonNull public android.app.NotificationChannel copy();
     method public int getOriginalImportance();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
     method public void lockFields(int);
@@ -376,7 +377,7 @@ package android.app {
     method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
-    method public void setImportantConversation(boolean);
+    method @FlaggedApi("android.service.notification.notification_conversation_channel_management") public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
     method public void setUserVisibleTaskShown(boolean);
     field @FlaggedApi("android.service.notification.notification_classification") public static final String NEWS_ID = "android.app.news";
@@ -393,7 +394,9 @@ package android.app {
 
   public class NotificationManager {
     method @FlaggedApi("android.app.modes_api") @NonNull public String addAutomaticZenRule(@NonNull android.app.AutomaticZenRule, boolean);
+    method @FlaggedApi("android.service.notification.notification_classification") public void allowAssistantAdjustment(@NonNull String);
     method public void cleanUpCallersAfter(long);
+    method @FlaggedApi("android.service.notification.notification_classification") public void disallowAssistantAdjustment(@NonNull String);
     method @FlaggedApi("android.app.modes_api") @NonNull public android.service.notification.ZenPolicy getDefaultZenPolicy();
     method public android.content.ComponentName getEffectsSuppressor();
     method @FlaggedApi("android.service.notification.notification_classification") @NonNull public java.util.Set<java.lang.String> getUnsupportedAdjustmentTypes();
@@ -914,6 +917,7 @@ package android.companion {
     ctor public AssociationInfo.Builder(@NonNull android.companion.AssociationInfo);
     method @NonNull public android.companion.AssociationInfo build();
     method @NonNull public android.companion.AssociationInfo.Builder setAssociatedDevice(@Nullable android.companion.AssociatedDevice);
+    method @FlaggedApi("android.companion.association_device_icon") @NonNull public android.companion.AssociationInfo.Builder setDeviceIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.companion.AssociationInfo.Builder setDeviceMacAddress(@Nullable android.net.MacAddress);
     method @NonNull public android.companion.AssociationInfo.Builder setDeviceProfile(@Nullable String);
     method @NonNull public android.companion.AssociationInfo.Builder setDisplayName(@Nullable CharSequence);
@@ -1026,6 +1030,7 @@ package android.content {
   public abstract class Context {
     method @NonNull public java.io.File getCrateDir(@NonNull String);
     method public abstract int getDisplayId();
+    method @NonNull public java.util.List<android.content.IntentFilter> getRegisteredIntentFilters(@NonNull android.content.BroadcastReceiver);
     method @NonNull public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
@@ -1098,6 +1103,7 @@ package android.content.pm {
     field public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L; // 0xfd27b38L
     field public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L; // 0xf4156bcL
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
+    field public static final long UNIVERSAL_RESIZABLE_BY_DEFAULT = 357141415L; // 0x15498ba7L
   }
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -1888,8 +1894,7 @@ package android.hardware.soundtrigger {
   }
 
   @FlaggedApi("android.media.soundtrigger.manager_api") public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
-    ctor @Deprecated public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[], int);
-    ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[]);
+    ctor @Deprecated public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[]);
   }
 
   public static class SoundTrigger.RecognitionEvent {
@@ -2603,7 +2608,7 @@ package android.os {
 
   public abstract class Vibrator {
     method public int getDefaultVibrationIntensity(int);
-    method @Nullable public android.os.vibrator.VibratorFrequencyProfile getFrequencyProfile();
+    method @Nullable public android.os.vibrator.VibratorFrequencyProfileLegacy getFrequencyProfileLegacy();
     method public boolean hasFrequencyControl();
     field public static final int VIBRATION_INTENSITY_HIGH = 3; // 0x3
     field public static final int VIBRATION_INTENSITY_LOW = 1; // 0x1
@@ -2768,6 +2773,17 @@ package android.os.vibrator {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PrimitiveSegment> CREATOR;
   }
 
+  @FlaggedApi("android.os.vibrator.normalized_pwle_effects") public final class PwleSegment extends android.os.vibrator.VibrationEffectSegment {
+    method public int describeContents();
+    method public long getDuration();
+    method public float getEndAmplitude();
+    method public float getEndFrequencyHz();
+    method public float getStartAmplitude();
+    method public float getStartFrequencyHz();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.PwleSegment> CREATOR;
+  }
+
   public final class RampSegment extends android.os.vibrator.VibrationEffectSegment {
     method public int describeContents();
     method public long getDuration();
@@ -2793,7 +2809,7 @@ package android.os.vibrator {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.VibrationEffectSegment> CREATOR;
   }
 
-  public final class VibratorFrequencyProfile {
+  public final class VibratorFrequencyProfileLegacy {
     method public float getMaxAmplitudeMeasurementInterval();
     method @FloatRange(from=0, to=1) @NonNull public float[] getMaxAmplitudeMeasurements();
     method public float getMaxFrequency();
@@ -3283,14 +3299,6 @@ package android.service.voice {
   public static class VoiceInteractionSession.ActivityId {
     method @NonNull public android.os.IBinder getAssistToken();
     method public int getTaskId();
-  }
-
-}
-
-package android.service.watchdog {
-
-  public abstract class ExplicitHealthCheckService extends android.app.Service {
-    method public void setCallback(@Nullable android.os.RemoteCallback);
   }
 
 }

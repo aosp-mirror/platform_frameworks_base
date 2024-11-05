@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -27,8 +27,8 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /**
- * Represents a padding modifier.
- * Padding modifiers can be chained and will impact following modifiers.
+ * Represents a padding modifier. Padding modifiers can be chained and will impact following
+ * modifiers.
  */
 public class PaddingModifierOperation implements ModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_PADDING;
@@ -84,13 +84,12 @@ public class PaddingModifierOperation implements ModifierOperation {
 
     @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, "PADDING = [" + mLeft + ", " + mTop + ", "
-                + mRight + ", " + mBottom + "]");
+        serializer.append(
+                indent, "PADDING = [" + mLeft + ", " + mTop + ", " + mRight + ", " + mBottom + "]");
     }
 
     @Override
-    public void apply(RemoteContext context) {
-    }
+    public void apply(RemoteContext context) {}
 
     @Override
     public String deepToString(String indent) {
@@ -99,8 +98,15 @@ public class PaddingModifierOperation implements ModifierOperation {
 
     @Override
     public String toString() {
-        return "PaddingModifierOperation(" + mLeft + ", " + mTop
-                + ", " + mRight + ", " + mBottom + ")";
+        return "PaddingModifierOperation("
+                + mLeft
+                + ", "
+                + mTop
+                + ", "
+                + mRight
+                + ", "
+                + mBottom
+                + ")";
     }
 
     public static String name() {
@@ -111,8 +117,7 @@ public class PaddingModifierOperation implements ModifierOperation {
         return Operations.MODIFIER_PADDING;
     }
 
-    public static void apply(WireBuffer buffer,
-                             float left, float top, float right, float bottom) {
+    public static void apply(WireBuffer buffer, float left, float top, float right, float bottom) {
         buffer.start(Operations.MODIFIER_PADDING);
         buffer.writeFloat(left);
         buffer.writeFloat(top);
@@ -129,9 +134,7 @@ public class PaddingModifierOperation implements ModifierOperation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Modifier Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Padding Modifier")
                 .field(FLOAT, "left", "")
                 .field(FLOAT, "top", "")

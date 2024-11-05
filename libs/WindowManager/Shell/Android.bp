@@ -57,7 +57,7 @@ filegroup {
     path: "src",
 }
 
-genrule {
+java_genrule {
     name: "wm_shell_protolog_src",
     srcs: [
         ":protolog-impl",
@@ -77,7 +77,7 @@ genrule {
     out: ["wm_shell_protolog.srcjar"],
 }
 
-genrule {
+java_genrule {
     name: "generate-wm_shell_protolog.json",
     srcs: [
         ":wm_shell_protolog-groups",
@@ -94,7 +94,7 @@ genrule {
     out: ["wm_shell_protolog.json"],
 }
 
-genrule {
+java_genrule {
     name: "gen-wmshell.protolog.pb",
     srcs: [
         ":wm_shell_protolog-groups",
@@ -111,7 +111,7 @@ genrule {
     out: ["wmshell.protolog.pb"],
 }
 
-genrule {
+java_genrule {
     name: "protolog.json.gz",
     srcs: [":generate-wm_shell_protolog.json"],
     out: ["wmshell.protolog.json.gz"],
@@ -154,6 +154,13 @@ java_library {
     proto: {
         type: "lite",
     },
+}
+
+filegroup {
+    name: "wm_shell-shared-utils",
+    srcs: [
+        "shared/src/com/android/wm/shell/shared/TransitionUtil.java",
+    ],
 }
 
 filegroup {
@@ -234,10 +241,6 @@ android_library {
         // *.kt sources are inside a filegroup.
         "kotlin-annotations",
     ],
-    required: [
-        "wmshell.protolog.json.gz",
-        "wmshell.protolog.pb",
-    ],
     flags_packages: [
         "com_android_wm_shell_flags",
     ],
@@ -245,4 +248,12 @@ android_library {
     manifest: "AndroidManifest.xml",
     plugins: ["dagger2-compiler"],
     use_resource_processor: true,
+}
+
+java_defaults {
+    name: "wmshell_defaults",
+    required: [
+        "wmshell.protolog.json.gz",
+        "wmshell.protolog.pb",
+    ],
 }

@@ -1527,8 +1527,11 @@ public class UsbService extends IUsbManager.Stub {
             }
             mLockdownModeStatus = lockDownTriggeredByUser;
             for (UsbPort port: mPortManager.getPorts()) {
-                enableUsbData(port.getId(), !lockDownTriggeredByUser, STRONG_AUTH_OPERATION_ID,
-                        new IUsbOperationInternal.Default());
+                enableUsbDataInternal(port.getId(), !lockDownTriggeredByUser,
+                    STRONG_AUTH_OPERATION_ID,
+                    new IUsbOperationInternal.Default(),
+                    UsbManagerInternal.OS_USB_DISABLE_REASON_LOCKDOWN_MODE,
+                    true);
             }
         }
     }

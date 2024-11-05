@@ -151,7 +151,9 @@ public class SnapshotDrawerUtils {
         @VisibleForTesting
         public void setFrames(Rect frame, Rect systemBarInsets) {
             mFrame.set(frame);
-            mSizeMismatch = (mFrame.width() != mSnapshotW || mFrame.height() != mSnapshotH);
+            final Rect letterboxInsets = mSnapshot.getLetterboxInsets();
+            mSizeMismatch = (mFrame.width() != mSnapshotW || mFrame.height() != mSnapshotH)
+                    || letterboxInsets.left != 0 || letterboxInsets.top != 0;
             if (!Flags.drawSnapshotAspectRatioMatch() && systemBarInsets != null) {
                 mSystemBarInsets.set(systemBarInsets);
                 mSystemBarBackgroundPainter.setInsets(systemBarInsets);

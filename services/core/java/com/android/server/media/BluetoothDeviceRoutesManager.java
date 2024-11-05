@@ -141,6 +141,11 @@ import java.util.stream.Collectors;
         mContext.unregisterReceiver(mDeviceStateChangedReceiver);
     }
 
+    /** Returns true if the given address corresponds to a currently-bonded Bluetooth device. */
+    public synchronized boolean containsBondedDeviceWithAddress(@Nullable String address) {
+        return mAddressToBondedDevice.containsKey(address);
+    }
+
     @Nullable
     public synchronized String getRouteIdForBluetoothAddress(@Nullable String address) {
         BluetoothDevice bluetoothDevice = mAddressToBondedDevice.get(address);

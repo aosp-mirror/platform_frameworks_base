@@ -18,6 +18,7 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import android.graphics.drawable.Animatable
 import android.text.TextUtils
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
@@ -31,7 +32,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
@@ -54,9 +58,12 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.compose.modifiers.background
+import com.android.compose.modifiers.size
 import com.android.compose.modifiers.thenIf
+import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
@@ -64,7 +71,6 @@ import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.longPressLabel
 import com.android.systemui.qs.panels.ui.viewmodel.AccessibilityUiState
 import com.android.systemui.res.R
-import kotlinx.coroutines.delay
 
 private const val TEST_TAG_TOGGLE = "qs_tile_toggle_target"
 
@@ -76,27 +82,29 @@ fun LargeTileContent(
     colors: TileColors,
     squishiness: () -> Float,
     accessibilityUiState: AccessibilityUiState? = null,
-    toggleClickSupported: Boolean = false,
     iconShape: Shape = RoundedCornerShape(CommonTileDefaults.InactiveCornerRadius),
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
+    toggleClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = tileHorizontalArrangement(),
     ) {
         // Icon
-        val longPressLabel = longPressLabel()
+        val longPressLabel = longPressLabel().takeIf { onLongClick != null }
+        val animatedBackgroundColor by
+            animateColorAsState(colors.iconBackground, label = "QSTileDualTargetBackgroundColor")
         Box(
             modifier =
-                Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClickSupported) {
+                Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClick != null) {
                     Modifier.clip(iconShape)
                         .verticalSquish(squishiness)
-                        .background(colors.iconBackground, { 1f })
+                        .drawBehind { drawRect(animatedBackgroundColor) }
                         .combinedClickable(
-                            onClick = onClick,
+                            onClick = toggleClick!!,
                             onLongClick = onLongClick,
                             onLongClickLabel = longPressLabel,
+                            hapticFeedbackEnabled = !Flags.msdlFeedback(),
                         )
                         .thenIf(accessibilityUiState != null) {
                             Modifier.semantics {
@@ -115,6 +123,7 @@ fun LargeTileContent(
             SmallTileContent(
                 icon = icon,
                 color = colors.icon,
+                size = { CommonTileDefaults.LargeTileIconSize },
                 modifier = Modifier.align(Alignment.Center),
             )
         }
@@ -137,14 +146,25 @@ fun LargeTileLabels(
     modifier: Modifier = Modifier,
     accessibilityUiState: AccessibilityUiState? = null,
 ) {
+    val animatedLabelColor by animateColorAsState(colors.label, label = "QSTileLabelColor")
+    val animatedSecondaryLabelColor by
+        animateColorAsState(colors.secondaryLabel, label = "QSTileSecondaryLabelColor")
     Column(verticalArrangement = Arrangement.Center, modifier = modifier.fillMaxHeight()) {
-        Text(label, color = colors.label, modifier = Modifier.tileMarquee())
+        BasicText(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = { animatedLabelColor },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
         if (!TextUtils.isEmpty(secondaryLabel)) {
-            Text(
+            BasicText(
                 secondaryLabel ?: "",
-                color = colors.secondaryLabel,
+                color = { animatedSecondaryLabelColor },
+                maxLines = 1,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier =
-                    Modifier.tileMarquee().thenIf(
+                    Modifier.thenIf(
                         accessibilityUiState?.stateDescription?.contains(secondaryLabel ?: "") ==
                             true
                     ) {
@@ -161,9 +181,11 @@ fun SmallTileContent(
     modifier: Modifier = Modifier,
     icon: Icon,
     color: Color,
+    size: () -> Dp = { CommonTileDefaults.IconSize },
     animateToEnd: Boolean = false,
 ) {
-    val iconModifier = modifier.size(CommonTileDefaults.IconSize)
+    val animatedColor by animateColorAsState(color, label = "QSTileIconColor")
+    val iconModifier = modifier.size({ size().roundToPx() }, { size().roundToPx() })
     val context = LocalContext.current
     val loadedDrawable =
         remember(icon, context) {
@@ -173,7 +195,7 @@ fun SmallTileContent(
             }
         }
     if (loadedDrawable !is Animatable) {
-        Icon(icon = icon, tint = color, modifier = iconModifier)
+        Icon(icon = icon, tint = animatedColor, modifier = iconModifier)
     } else if (icon is Icon.Resource) {
         val image = AnimatedImageVector.animatedVectorResource(id = icon.res)
         val painter =
@@ -182,24 +204,22 @@ fun SmallTileContent(
                     rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = true)
                 } else {
                     var atEnd by remember(icon.res) { mutableStateOf(false) }
-                    LaunchedEffect(key1 = icon.res) {
-                        delay(350)
-                        atEnd = true
-                    }
+                    LaunchedEffect(key1 = icon.res) { atEnd = true }
                     rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = atEnd)
                 }
             }
         Image(
             painter = painter,
             contentDescription = icon.contentDescription?.load(),
-            colorFilter = ColorFilter.tint(color = color),
+            colorFilter = ColorFilter.tint(color = animatedColor),
             modifier = iconModifier,
         )
     }
 }
 
 object CommonTileDefaults {
-    val IconSize = 24.dp
+    val IconSize = 32.dp
+    val LargeTileIconSize = 28.dp
     val ToggleTargetSize = 56.dp
     val TileHeight = 72.dp
     val TilePadding = 8.dp

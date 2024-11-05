@@ -42,12 +42,48 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Provides app functions related functionalities.
+ * Provides access to app functions.
  *
- * <p>App function is a specific piece of functionality that an app offers to the system. These
- * functionalities can be integrated into various system features.
+ * <p>An app function is a piece of functionality that apps expose to the system for cross-app
+ * orchestration.
+ *
+ * <p>**Building App Functions:**
+ *
+ * <p>Most developers should build app functions through the AppFunctions SDK. This SDK library
+ * offers a more convenient and type-safe way to build app functions. The SDK provides predefined
+ * function schemas for common use cases and associated data classes for function parameters and
+ * return values. Apps only have to implement the provided interfaces. Internally, the SDK converts
+ * these data classes into {@link ExecuteAppFunctionRequest#getParameters()} and {@link
+ * ExecuteAppFunctionResponse#getResultDocument()}.
+ *
+ * <p>**Discovering App Functions:**
+ *
+ * <p>When there is a package change or the device starts up, the metadata of available functions is
+ * indexed on-device by {@link AppSearchManager}. AppSearch stores the indexed information as an
+ * {@code AppFunctionStaticMetadata} document. This document contains the {@code functionIdentifier}
+ * and the schema information that the app function implements. This allows other apps and the app
+ * itself to discover these functions using the AppSearch search APIs. Visibility to this metadata
+ * document is based on the packages that have visibility to the app providing the app functions.
+ * AppFunction SDK provides a convenient way to achieve this and is the preferred method.
+ *
+ * <p>**Executing App Functions:**
+ *
+ * <p>To execute an app function, the caller app can retrieve the {@code functionIdentifier} from
+ * the {@code AppFunctionStaticMetadata} document and use it to build an {@link
+ * ExecuteAppFunctionRequest}. Then, invoke {@link #executeAppFunction} with the request to execute
+ * the app function. Callers need the {@code android.permission.EXECUTE_APP_FUNCTIONS} or {@code
+ * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} permission to execute app functions from other
+ * apps. An app can always execute its own app functions and doesn't need these permissions.
+ * AppFunction SDK provides a convenient way to achieve this and is the preferred method.
+ *
+ * <p>**Example:**
+ *
+ * <p>An assistant app is trying to fulfill the user request "Save XYZ into my note". The assistant
+ * app should first list all available app functions as {@code AppFunctionStaticMetadata} documents
+ * from AppSearch. Then, it should identify an app function that implements the {@code CreateNote}
+ * schema. Finally, the assistant app can invoke {@link #executeAppFunction} with the {@code
+ * functionIdentifier} of the chosen function.
  */
-// TODO(b/357551503): Implement get and set enabled app function APIs.
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 @SystemService(Context.APP_FUNCTION_SERVICE)
 public final class AppFunctionManager {
@@ -110,52 +146,20 @@ public final class AppFunctionManager {
      *
      * @param request the request to execute the app function
      * @param executor the executor to run the callback
-     * @param callback the callback to receive the function execution result. if the calling app
-     *     does not own the app function or does not have {@code
-     *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
-     *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
-     *     ExecuteAppFunctionResponse.RESULT_DENIED}.
-     * @deprecated Use {@link #executeAppFunction(ExecuteAppFunctionRequest, Executor,
-     *     CancellationSignal, Consumer)} instead. This method will be removed once usage references
-     *     are updated.
-     */
-    @RequiresPermission(
-            anyOf = {
-                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
-                Manifest.permission.EXECUTE_APP_FUNCTIONS
-            },
-            conditional = true)
-    @UserHandleAware
-    @Deprecated
-    public void executeAppFunction(
-            @NonNull ExecuteAppFunctionRequest request,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
-        executeAppFunction(request, executor, new CancellationSignal(), callback);
-    }
-
-    /**
-     * Executes the app function.
-     *
-     * <p>Note: Applications can execute functions they define. To execute functions defined in
-     * another component, apps would need to have {@code
-     * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
-     * android.permission.EXECUTE_APP_FUNCTIONS}.
-     *
-     * @param request the request to execute the app function
-     * @param executor the executor to run the callback
      * @param cancellationSignal the cancellation signal to cancel the execution.
-     * @param callback the callback to receive the function execution result. if the calling app
-     *     does not own the app function or does not have {@code
+     * @param callback the callback to receive the function execution result.
+     *     <p>If the calling app does not own the app function or does not have {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
      *     ExecuteAppFunctionResponse.RESULT_DENIED}.
+     *     <p>If the caller only has {@code android.permission.EXECUTE_APP_FUNCTIONS} but the
+     *     function requires {@code android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}, the execution
+     *     result will contain {@code ExecuteAppFunctionResponse.RESULT_DENIED}
+     *     <p>If the function requested for execution is disabled, then the execution result will
+     *     contain {@code ExecuteAppFunctionResponse.RESULT_DISABLED}
+     *     <p>If the cancellation signal is issued, the operation is cancelled and no response is
+     *     returned to the caller.
      */
-    // TODO(b/357551503): Document the behavior when the cancellation signal is issued.
-    // TODO(b/360864791): Document that apps can opt-out from being executed by callers with
-    //   EXECUTE_APP_FUNCTIONS and how a caller knows whether a function is opted out.
-    // TODO(b/357551503): Update documentation when get / set APIs are implemented that this will
-    //   also return RESULT_DENIED if the app function is disabled.
     @RequiresPermission(
             anyOf = {
                 Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
@@ -208,12 +212,13 @@ public final class AppFunctionManager {
     /**
      * Returns a boolean through a callback, indicating whether the app function is enabled.
      *
-     * <p>* This method can only check app functions owned by the caller, or those where the caller
+     * <p>This method can only check app functions owned by the caller, or those where the caller
      * has visibility to the owner package and holds either the {@link
      * Manifest.permission#EXECUTE_APP_FUNCTIONS} or {@link
      * Manifest.permission#EXECUTE_APP_FUNCTIONS_TRUSTED} permission.
      *
-     * <p>If operation fails, the callback's {@link OutcomeReceiver#onError} is called with errors:
+     * <p>If the operation fails, the callback's {@link OutcomeReceiver#onError} is called with
+     * errors:
      *
      * <ul>
      *   <li>{@link IllegalArgumentException}, if the function is not found or the caller does not
@@ -227,23 +232,47 @@ public final class AppFunctionManager {
      * @param executor the executor to run the request
      * @param callback the callback to receive the function enabled check result
      */
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
+                Manifest.permission.EXECUTE_APP_FUNCTIONS
+            },
+            conditional = true)
     public void isAppFunctionEnabled(
             @NonNull String functionIdentifier,
             @NonNull String targetPackage,
             @NonNull Executor executor,
             @NonNull OutcomeReceiver<Boolean, Exception> callback) {
-        Objects.requireNonNull(functionIdentifier);
-        Objects.requireNonNull(targetPackage);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-        AppSearchManager appSearchManager = mContext.getSystemService(AppSearchManager.class);
-        if (appSearchManager == null) {
-            callback.onError(new IllegalStateException("Failed to get AppSearchManager."));
-            return;
-        }
+        isAppFunctionEnabledInternal(functionIdentifier, targetPackage, executor, callback);
+    }
 
-        AppFunctionManagerHelper.isAppFunctionEnabled(
-                functionIdentifier, targetPackage, appSearchManager, executor, callback);
+    /**
+     * Returns a boolean through a callback, indicating whether the app function is enabled.
+     *
+     * <p>This method can only check app functions owned by the caller, unlike {@link
+     * #isAppFunctionEnabled(String, String, Executor, OutcomeReceiver)}, which allows specifying a
+     * different target package.
+     *
+     * <p>If the operation fails, the callback's {@link OutcomeReceiver#onError} is called with
+     * errors:
+     *
+     * <ul>
+     *   <li>{@link IllegalArgumentException}, if the function is not found or the caller does not
+     *       have access to it.
+     * </ul>
+     *
+     * @param functionIdentifier the identifier of the app function to check (unique within the
+     *     target package) and in most cases, these are automatically generated by the AppFunctions
+     *     SDK
+     * @param executor the executor to run the request
+     * @param callback the callback to receive the function enabled check result
+     */
+    public void isAppFunctionEnabled(
+            @NonNull String functionIdentifier,
+            @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Boolean, Exception> callback) {
+        isAppFunctionEnabledInternal(
+                functionIdentifier, mContext.getPackageName(), executor, callback);
     }
 
     /**
@@ -284,6 +313,25 @@ public final class AppFunctionManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private void isAppFunctionEnabledInternal(
+            @NonNull String functionIdentifier,
+            @NonNull String targetPackage,
+            @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Boolean, Exception> callback) {
+        Objects.requireNonNull(functionIdentifier);
+        Objects.requireNonNull(targetPackage);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        AppSearchManager appSearchManager = mContext.getSystemService(AppSearchManager.class);
+        if (appSearchManager == null) {
+            callback.onError(new IllegalStateException("Failed to get AppSearchManager."));
+            return;
+        }
+
+        AppFunctionManagerHelper.isAppFunctionEnabled(
+                functionIdentifier, targetPackage, appSearchManager, executor, callback);
     }
 
     private static class CallbackWrapper extends IAppFunctionEnabledCallback.Stub {

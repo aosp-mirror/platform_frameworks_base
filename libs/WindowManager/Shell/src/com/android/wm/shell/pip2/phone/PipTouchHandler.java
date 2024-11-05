@@ -406,12 +406,9 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         // We need to remove the callback even if the shelf is visible, in case it the delayed
         // callback hasn't been executed yet to avoid the wrong final state.
         mMainExecutor.removeCallbacks(mMoveOnShelVisibilityChanged);
-        if (shelfVisible) {
-            mMoveOnShelVisibilityChanged.run();
-        } else {
-            // Postpone moving in response to hide of Launcher in case there's another change
-            mMainExecutor.executeDelayed(mMoveOnShelVisibilityChanged, PIP_KEEP_CLEAR_AREAS_DELAY);
-        }
+
+        // Postpone moving in response to hide of Launcher in case there's another change
+        mMainExecutor.executeDelayed(mMoveOnShelVisibilityChanged, PIP_KEEP_CLEAR_AREAS_DELAY);
     }
 
     /**
@@ -582,7 +579,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             return true;
         }
 
-        /*
         if ((ev.getAction() == MotionEvent.ACTION_DOWN || mTouchState.isUserInteracting())
                 && mPipDismissTargetHandler.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
@@ -599,6 +595,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             return true;
         }
 
+        /*
         // Ignore the motion event When the entry animation is waiting to be started
         if (!mTouchState.isUserInteracting() && mPipTaskOrganizer.isEntryScheduled()) {
             ProtoLog.wtf(WM_SHELL_PICTURE_IN_PICTURE,
@@ -1014,21 +1011,6 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             }
             cleanUpHighPerfSessionMaybe();
             return true;
-        }
-
-        private void stashEndAction() {
-            if (mPipBoundsState.getBounds().left < 0
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
-                mPipUiEventLogger.log(
-                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_LEFT);
-                mPipBoundsState.setStashed(STASH_TYPE_LEFT);
-            } else if (mPipBoundsState.getBounds().left >= 0
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT) {
-                mPipUiEventLogger.log(
-                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_RIGHT);
-                mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
-            }
-            mMenuController.hideMenu();
         }
 
         private void flingEndAction() {

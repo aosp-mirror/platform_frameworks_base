@@ -27,17 +27,20 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
+import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
 import com.android.systemui.util.kotlin.ActivatableFlowDumper
 import com.android.systemui.util.kotlin.ActivatableFlowDumperImpl
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.util.function.Consumer
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -140,9 +143,9 @@ constructor(
     /** The bottom bound of the currently focused remote input notification row. */
     val remoteInputRowBottomBound = remoteInputInteractor.remoteInputRowBottomBound
 
-    /** Sets whether the notification stack is scrolled to the top. */
-    fun setScrolledToTop(scrolledToTop: Boolean) {
-        interactor.setScrolledToTop(scrolledToTop)
+    /** Updates the current scroll state of the notification shade. */
+    fun setScrollState(scrollState: ShadeScrollState) {
+        interactor.setScrollState(scrollState)
     }
 
     /** Sets whether the heads up notification is animating away. */
@@ -153,6 +156,11 @@ constructor(
     /** Snooze the currently pinned HUN. */
     fun snoozeHun() {
         headsUpNotificationInteractor.snooze()
+    }
+
+    /** Set a consumer for accessibility events to be handled by the placeholder. */
+    fun setAccessibilityScrollEventConsumer(consumer: Consumer<AccessibilityScrollEvent>?) {
+        interactor.setAccessibilityScrollEventConsumer(consumer)
     }
 
     @AssistedFactory

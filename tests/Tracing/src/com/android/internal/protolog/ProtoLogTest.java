@@ -47,12 +47,12 @@ public class ProtoLogTest {
     }
 
     @Test
-    public void throwOnRegisteringDuplicateGroup() {
-        final var assertion = assertThrows(RuntimeException.class,
-                () -> ProtoLog.init(TEST_GROUP_1, TEST_GROUP_1, TEST_GROUP_2));
+    public void deduplicatesRegisteringDuplicateGroup() {
+        ProtoLog.init(TEST_GROUP_1, TEST_GROUP_1, TEST_GROUP_2);
 
-        Truth.assertThat(assertion).hasMessageThat().contains("" + TEST_GROUP_1.getId());
-        Truth.assertThat(assertion).hasMessageThat().contains("duplicate");
+        final var instance = ProtoLog.getSingleInstance();
+        Truth.assertThat(instance.getRegisteredGroups())
+                .containsExactly(TEST_GROUP_1, TEST_GROUP_2);
     }
 
     @Test

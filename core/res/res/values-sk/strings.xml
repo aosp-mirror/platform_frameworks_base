@@ -1945,6 +1945,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Vypnuté"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Ľubovoľný kalendár"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vypína niektoré zvuky"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Vo vašom zariadení došlo k internému problému. Môže byť nestabilné, kým neobnovíte jeho výrobné nastavenia."</string>
@@ -2131,11 +2133,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Hovory a upozornenia budú vibrovať"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Hovory a upozornenia budú stlmené"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Zmeny systému"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Režim bez vyrušení"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novinka: režim bez vyrušení skrýva upozornenia"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Klepnutím získate ďalšie informácie a budete môcť vykonať zmeny."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režim bez vyrušení sa zmenil"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím skontrolujete, čo je blokované."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Kontrola nastavení upozornení"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"V Androide verzie 13 a novších vyžadujú nainštalované aplikácie povolenie, aby mohli odosielať upozornenia. Klepnutím môžete zmeniť toto povolenie pre existujúce aplikácie."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Pripomenúť neskôr"</string>
@@ -2410,13 +2407,13 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> a <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Môžete to zmeniť klepnutím."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyzické klávesnice sú nakonfigurované"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klávesnice si zobrazíte klepnutím"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Súkromný"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Súkromné"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Pracovný"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Pracovné"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"2. pracovný"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"3. pracovný"</string>
-    <string name="profile_label_test" msgid="9168641926186071947">"Testovací"</string>
-    <string name="profile_label_communal" msgid="8743921499944800427">"Spoločný"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Spoločné"</string>
     <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Pracovný profil"</string>
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Súkromný priestor"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
@@ -2431,6 +2428,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Odosielajte a prijímajte správy bez mobilnej siete či siete Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ako to funguje"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nespracovaná…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Znova nastavte odomknutie odtlačkom prsta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> sa už nedari rozpoznať."</string>

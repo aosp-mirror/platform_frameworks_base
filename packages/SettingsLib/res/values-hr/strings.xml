@@ -287,7 +287,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Neka kôd za pokretanje sustava bude otključan"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Želite li dopustiti OEM otključavanje?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"UPOZORENJE: značajke za zaštitu uređaja neće funkcionirati na ovom uređaju dok je ta postavka uključena."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Odabir aplikacije za lažnu lokaciju"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Odaberi aplikaciju za lažnu lokaciju"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aplikacija za lažnu lokaciju nije postavljena"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacija za lažnu lokaciju: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Umrežavanje"</string>
@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Omogućuje značajku Poboljšana povezivost."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Omogući aplikaciju terminala koja nudi pristup lokalnoj ovojnici"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linuxovo razvojno okruženje"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Pokrenite Linux terminal na Androidu"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP provjera"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Postavke HDCP provjere"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Otklanjanje pogrešaka"</string>
@@ -418,7 +420,7 @@
     <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Omogućeno na neograničeno vrijeme"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Brzina animacije prozora"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Brzina animacije prijelaza"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Razmjer duljine animatora"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Brzina generiranja animacija"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulacija sekundarnih zaslona"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ukloni aktivnosti"</string>
@@ -585,7 +587,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Ovo računalo (interno)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Mikrofon (ugrađeni)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Zvučnik priključne stanice"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Vanjski uređaj"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Povezani uređaj"</string>
@@ -673,7 +674,7 @@
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Spremi"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Izađi iz načina rada za goste"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Poništi gostujuću sesiju"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izlaz iz gostujuće sesije"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Zatvori sesiju gosta"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve će se aktivnosti izbrisati po izlasku"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Svoje aktivnosti možete spremiti ili izbrisati na izlasku"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Poništite da odmah izbrišete aktivnost sesije. Inače je možete spremiti ili izbrisati na izlasku."</string>
@@ -687,10 +688,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Omogućeno"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Uređaj se mora ponovno pokrenuti da bi se ta promjena primijenila. Ponovo pokrenite uređaj odmah ili odustanite."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Žičane slušalice"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Slušalice"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB zvučnik"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Utičnica za mikrofon"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB mikrofon"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Žičane slušalice"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB zvučnik"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Žičani mikrofon"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB mikrofon"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT mikrofon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Uključeno"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Isključeno"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Promjena mreže mobilnog operatera"</string>

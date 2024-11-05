@@ -19,6 +19,7 @@
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
 import android.content.Intent
+import android.content.applicationContext
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -38,9 +39,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -55,14 +58,20 @@ class ModesDialogViewModelTest : SysuiTestCase() {
     private val mockDialogDelegate = kosmos.mockModesDialogDelegate
     private val mockDialogEventLogger = kosmos.mockModesDialogEventLogger
 
-    private val underTest =
-        ModesDialogViewModel(
-            context,
-            interactor,
-            kosmos.testDispatcher,
-            mockDialogDelegate,
-            mockDialogEventLogger,
-        )
+    private lateinit var underTest: ModesDialogViewModel
+
+    @Before
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
+        underTest =
+            ModesDialogViewModel(
+                kosmos.applicationContext,
+                interactor,
+                kosmos.testDispatcher,
+                kosmos.mockModesDialogDelegate,
+                kosmos.mockModesDialogEventLogger,
+            )
+    }
 
     @Test
     fun tiles_filtersOutUserDisabledModes() =

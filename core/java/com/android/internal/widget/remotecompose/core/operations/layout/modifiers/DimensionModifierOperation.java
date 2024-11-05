@@ -20,13 +20,16 @@ import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
-/**
- * Base class for dimension modifiers
- */
+/** Base class for dimension modifiers */
 public abstract class DimensionModifierOperation implements ModifierOperation, VariableSupport {
 
     public enum Type {
-        EXACT, FILL, WRAP, WEIGHT, INTRINSIC_MIN, INTRINSIC_MAX;
+        EXACT,
+        FILL,
+        WRAP,
+        WEIGHT,
+        INTRINSIC_MIN,
+        INTRINSIC_MAX;
 
         static Type fromInt(int value) {
             switch (value) {
@@ -67,10 +70,8 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
     @Override
     public void updateVariables(RemoteContext context) {
         if (mType == Type.EXACT) {
-            mOutValue = (Float.isNaN(mValue))
-                    ? context.getFloat(Utils.idFromNan(mValue)) : mValue;
+            mOutValue = Float.isNaN(mValue) ? context.getFloat(Utils.idFromNan(mValue)) : mValue;
         }
-
     }
 
     @Override
@@ -80,9 +81,7 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
                 context.listensTo(Utils.idFromNan(mValue), this);
             }
         }
-
     }
-
 
     public boolean hasWeight() {
         return mType == Type.WEIGHT;
@@ -108,7 +107,6 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
         mOutValue = mValue = value;
     }
 
-
     public String serializedName() {
         return "DIMENSION";
     }
@@ -121,8 +119,7 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
     }
 
     @Override
-    public void apply(RemoteContext context) {
-    }
+    public void apply(RemoteContext context) {}
 
     @Override
     public String deepToString(String indent) {

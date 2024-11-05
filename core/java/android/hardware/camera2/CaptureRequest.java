@@ -1086,11 +1086,17 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #COLOR_CORRECTION_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
      * </ul>
      *
+     * <p><b>Available values for this device:</b><br>
+     * Starting from API level 36, {@link CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_MODES android.colorCorrection.availableModes}
+     * can be used to check the list of supported values. Prior to API level 36,
+     * TRANSFORM_MATRIX, HIGH_QUALITY, and FAST are guaranteed to be available
+     * as valid modes on devices that support this key.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_MODES
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
@@ -1193,6 +1199,60 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @NonNull
     public static final Key<Integer> COLOR_CORRECTION_ABERRATION_MODE =
             new Key<Integer>("android.colorCorrection.aberrationMode", int.class);
+
+    /**
+     * <p>Specifies the color temperature for CCT mode in Kelvin
+     * to adjust the white balance of the image.</p>
+     * <p>Sets the color temperature in Kelvin units for when
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is CCT to adjust the
+     * white balance of the image.</p>
+     * <p>If CCT mode is enabled without a requested color temperature,
+     * a default value will be set by the camera device. The default value can be
+     * retrieved by checking the corresponding capture result. Color temperatures
+     * requested outside the advertised {@link CameraCharacteristics#COLOR_CORRECTION_COLOR_TEMPERATURE_RANGE android.colorCorrection.colorTemperatureRange}
+     * will be clamped.</p>
+     * <p><b>Units</b>: Kelvin</p>
+     * <p><b>Range of valid values:</b><br>
+     * {@link CameraCharacteristics#COLOR_CORRECTION_COLOR_TEMPERATURE_RANGE android.colorCorrection.colorTemperatureRange}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#COLOR_CORRECTION_COLOR_TEMPERATURE_RANGE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final Key<Integer> COLOR_CORRECTION_COLOR_TEMPERATURE =
+            new Key<Integer>("android.colorCorrection.colorTemperature", int.class);
+
+    /**
+     * <p>Specifies the color tint for CCT mode to adjust the white
+     * balance of the image.</p>
+     * <p>Sets the color tint for when {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}
+     * is CCT to adjust the white balance of the image.</p>
+     * <p>If CCT mode is enabled without a requested color tint,
+     * a default value will be set by the camera device. The default value can be
+     * retrieved by checking the corresponding capture result. Color tints requested
+     * outside the supported range will be clamped to the nearest limit (-50 or +50).</p>
+     * <p><b>Units</b>: D_uv defined as the distance from the Planckian locus on the CIE 1931 xy
+     * chromaticity diagram, with the range ±50 mapping to ±0.01 D_uv</p>
+     * <p><b>Range of valid values:</b><br>
+     * The supported range, -50 to +50, corresponds to a D_uv distance
+     * of ±0.01 below and above the Planckian locus. Some camera devices may have
+     * limitations to achieving the full ±0.01 D_uv range at some color temperatures
+     * (e.g., below 1500K). In these cases, the applied D_uv value may be clamped and
+     * the actual color tint will be reported in the {@link CaptureRequest#COLOR_CORRECTION_COLOR_TINT android.colorCorrection.colorTint}
+     * result.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_COLOR_TINT
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final Key<Integer> COLOR_CORRECTION_COLOR_TINT =
+            new Key<Integer>("android.colorCorrection.colorTint", int.class);
 
     /**
      * <p>The desired setting for the camera device's auto-exposure
@@ -1358,6 +1418,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * camera device auto-exposure routine for the overridden
      * fields for a given capture will be available in its
      * CaptureResult.</p>
+     * <p>When {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is AE_MODE_ON and if the device
+     * supports manual flash strength control, i.e.,
+     * if {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} are greater than 1, then
+     * the auto-exposure (AE) precapture metering sequence should be
+     * triggered to avoid the image being incorrectly exposed at
+     * different {@link CaptureRequest#FLASH_STRENGTH_LEVEL android.flash.strengthLevel}.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #CONTROL_AE_MODE_OFF OFF}</li>
@@ -1373,9 +1440,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES
+     * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#FLASH_MODE
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
+     * @see CaptureRequest#FLASH_STRENGTH_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
@@ -1454,7 +1525,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where
      * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
@@ -1704,7 +1775,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where
      * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}},
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
@@ -1929,7 +2000,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where
      * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}},
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
@@ -3274,8 +3345,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>For camera devices with the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
-     * <p>{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>

@@ -15,28 +15,35 @@
  */
 package com.android.internal.widget.remotecompose.core.types;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.LONG;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.LONG;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Used to represent a long
- */
+/** Used to represent a long */
 public class LongConstant implements Operation {
     private static final int OP_CODE = Operations.DATA_LONG;
-    long mValue;
+    private long mValue;
     private int mId;
 
     public LongConstant(int id, long value) {
         mId = id;
         mValue = value;
+    }
+
+    /**
+     * Get the value of the long constant
+     *
+     * @return the value of the long
+     */
+    public long getValue() {
+        return mValue;
     }
 
     @Override
@@ -46,6 +53,7 @@ public class LongConstant implements Operation {
 
     @Override
     public void apply(RemoteContext context) {
+        context.putObject(mId, this);
     }
 
     @Override
@@ -79,14 +87,9 @@ public class LongConstant implements Operation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        "LongConstant")
+        doc.operation("Expressions Operations", OP_CODE, "LongConstant")
                 .description("A boolean and its associated id")
-                .field(INT, "id", "id of Int")
-                .field(LONG, "value",
-                        "The long Value");
-
+                .field(DocumentedOperation.INT, "id", "id of Int")
+                .field(LONG, "value", "The long Value");
     }
-
 }

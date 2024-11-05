@@ -30,8 +30,11 @@ import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.data.repository.contextualEducationRepository
 import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.education.shared.model.EducationUiType
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
+import com.android.systemui.inputdevice.tutorial.tutorialSchedulerRepository
 import com.android.systemui.keyboard.data.repository.keyboardRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.testKosmos
 import com.android.systemui.touchpad.data.repository.touchpadRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -42,10 +45,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
@@ -56,14 +62,19 @@ class KeyboardTouchpadEduInteractorTest(private val gestureType: GestureType) : 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val contextualEduInteractor = kosmos.contextualEducationInteractor
+    private val repository = kosmos.contextualEducationRepository
     private val touchpadRepository = kosmos.touchpadRepository
     private val keyboardRepository = kosmos.keyboardRepository
+    private val tutorialSchedulerRepository = kosmos.tutorialSchedulerRepository
     private val userRepository = kosmos.fakeUserRepository
+    private val overviewProxyService = kosmos.mockOverviewProxyService
 
     private val underTest: KeyboardTouchpadEduInteractor = kosmos.keyboardTouchpadEduInteractor
     private val eduClock = kosmos.fakeEduClock
     private val minDurationForNextEdu =
         KeyboardTouchpadEduInteractor.minIntervalBetweenEdu + 1.seconds
+    private val initialDelayElapsedDuration =
+        KeyboardTouchpadEduInteractor.initialDelayDuration + 1.seconds
 
     @Before
     fun setup() {
@@ -176,7 +187,7 @@ class KeyboardTouchpadEduInteractorTest(private val gestureType: GestureType) : 
                         signalCount = 1,
                         usageSessionStartTime = secondSignalReceivedTime,
                         userId = 0,
-                        gestureType = gestureType
+                        gestureType = gestureType,
                     )
                 )
         }
@@ -271,6 +282,154 @@ class KeyboardTouchpadEduInteractorTest(private val gestureType: GestureType) : 
             assertThat(model?.lastShortcutTriggeredTime).isEqualTo(eduClock.instant())
         }
 
+    @Test
+    fun dataUpdatedOnIncrementSignalCountWhenTouchpadConnected() =
+        testScope.runTest {
+            assumeTrue(gestureType != ALL_APPS)
+            setUpForInitialDelayElapse()
+            touchpadRepository.setIsAnyTouchpadConnected(true)
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            val listener = getOverviewProxyListener()
+            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue + 1)
+        }
+
+    @Test
+    fun dataUnchangedOnIncrementSignalCountWhenTouchpadDisconnected() =
+        testScope.runTest {
+            setUpForInitialDelayElapse()
+            touchpadRepository.setIsAnyTouchpadConnected(false)
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            val listener = getOverviewProxyListener()
+            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue)
+        }
+
+    @Test
+    fun dataUpdatedOnIncrementSignalCountWhenKeyboardConnected() =
+        testScope.runTest {
+            assumeTrue(gestureType == ALL_APPS)
+            setUpForInitialDelayElapse()
+            keyboardRepository.setIsAnyKeyboardConnected(true)
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            val listener = getOverviewProxyListener()
+            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue + 1)
+        }
+
+    @Test
+    fun dataUnchangedOnIncrementSignalCountWhenKeyboardDisconnected() =
+        testScope.runTest {
+            setUpForInitialDelayElapse()
+            keyboardRepository.setIsAnyKeyboardConnected(false)
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            val listener = getOverviewProxyListener()
+            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue)
+        }
+
+    @Test
+    fun dataAddedOnUpdateShortcutTriggerTime() =
+        testScope.runTest {
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            assertThat(model?.lastShortcutTriggeredTime).isNull()
+
+            val listener = getOverviewProxyListener()
+            listener.updateContextualEduStats(/* isTrackpadGesture= */ true, gestureType)
+
+            assertThat(model?.lastShortcutTriggeredTime).isEqualTo(kosmos.fakeEduClock.instant())
+        }
+
+    @Test
+    fun dataUpdatedOnIncrementSignalCountAfterInitialDelay() =
+        testScope.runTest {
+            setUpForDeviceConnection()
+            tutorialSchedulerRepository.updateLaunchTime(DeviceType.TOUCHPAD, eduClock.instant())
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            eduClock.offset(initialDelayElapsedDuration)
+            val listener = getOverviewProxyListener()
+            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue + 1)
+        }
+
+    @Test
+    fun dataUnchangedOnIncrementSignalCountBeforeInitialDelay() =
+        testScope.runTest {
+            setUpForDeviceConnection()
+            tutorialSchedulerRepository.updateLaunchTime(DeviceType.TOUCHPAD, eduClock.instant())
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            // No offset to the clock to simulate update before initial delay
+            val listener = getOverviewProxyListener()
+            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue)
+        }
+
+    @Test
+    fun dataUnchangedOnIncrementSignalCountWithoutOobeLaunchTime() =
+        testScope.runTest {
+            // No update to OOBE launch time to simulate no OOBE is launched yet
+            setUpForDeviceConnection()
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            val listener = getOverviewProxyListener()
+            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue)
+        }
+
+    private suspend fun setUpForInitialDelayElapse() {
+        tutorialSchedulerRepository.updateLaunchTime(DeviceType.TOUCHPAD, eduClock.instant())
+        tutorialSchedulerRepository.updateLaunchTime(DeviceType.KEYBOARD, eduClock.instant())
+        eduClock.offset(initialDelayElapsedDuration)
+    }
+
+    fun logMetricsForToastEducation() =
+        testScope.runTest {
+            triggerMaxEducationSignals(gestureType)
+            runCurrent()
+
+            verify(kosmos.mockEduMetricsLogger)
+                .logContextualEducationTriggered(gestureType, EducationUiType.Toast)
+        }
+
+    @Test
+    fun logMetricsForNotificationEducation() =
+        testScope.runTest {
+            triggerMaxEducationSignals(gestureType)
+            runCurrent()
+
+            eduClock.offset(minDurationForNextEdu)
+            triggerMaxEducationSignals(gestureType)
+            runCurrent()
+
+            verify(kosmos.mockEduMetricsLogger)
+                .logContextualEducationTriggered(gestureType, EducationUiType.Notification)
+        }
+
+    @After
+    fun clear() {
+        testScope.launch { tutorialSchedulerRepository.clear() }
+    }
+
     private suspend fun triggerMaxEducationSignals(gestureType: GestureType) {
         // Increment max number of signal to try triggering education
         for (i in 1..KeyboardTouchpadEduInteractor.MAX_SIGNAL_COUNT) {
@@ -288,9 +447,15 @@ class KeyboardTouchpadEduInteractorTest(private val gestureType: GestureType) : 
         runCurrent()
     }
 
-    private suspend fun setUpForDeviceConnection() {
-        contextualEduInteractor.updateKeyboardFirstConnectionTime()
-        contextualEduInteractor.updateTouchpadFirstConnectionTime()
+    private fun setUpForDeviceConnection() {
+        touchpadRepository.setIsAnyTouchpadConnected(true)
+        keyboardRepository.setIsAnyKeyboardConnected(true)
+    }
+
+    private fun getOverviewProxyListener(): OverviewProxyListener {
+        val listenerCaptor = argumentCaptor<OverviewProxyListener>()
+        verify(overviewProxyService).addCallback(listenerCaptor.capture())
+        return listenerCaptor.firstValue
     }
 
     companion object {

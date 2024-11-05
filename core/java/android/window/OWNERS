@@ -1,3 +1,5 @@
 set noparent
 
 include /services/core/java/com/android/server/wm/OWNERS
+
+per-file DesktopModeFlags.java = file:/libs/WindowManager/Shell/src/com/android/wm/shell/desktopmode/OWNERS

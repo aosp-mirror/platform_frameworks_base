@@ -23,7 +23,7 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
@@ -40,7 +40,6 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
-import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
@@ -108,7 +107,6 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     communalSettingsInteractor: CommunalSettingsInteractor,
-    private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
@@ -399,6 +397,10 @@ constructor(
     fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) =
         widgetRepository.updateWidgetOrder(widgetIdToRankMap)
 
+    fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {
+        widgetRepository.resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
+    }
+
     /** Request to unpause work profile that is currently in quiet mode. */
     fun unpauseWorkProfile() {
         managedProfileController.setWorkModeEnabled(true)
@@ -447,8 +449,8 @@ constructor(
                             appWidgetId = widget.appWidgetId,
                             rank = widget.rank,
                             providerInfo = widget.providerInfo,
-                            appWidgetHost = appWidgetHost,
                             inQuietMode = isQuietModeEnabled(widget.providerInfo.profile),
+                            size = CommunalContentSize.toSize(widget.spanY),
                         )
                     }
                     is CommunalWidgetContentModel.Pending -> {
@@ -457,6 +459,7 @@ constructor(
                             rank = widget.rank,
                             componentName = widget.componentName,
                             icon = widget.icon,
+                            size = CommunalContentSize.toSize(widget.spanY),
                         )
                     }
                 }

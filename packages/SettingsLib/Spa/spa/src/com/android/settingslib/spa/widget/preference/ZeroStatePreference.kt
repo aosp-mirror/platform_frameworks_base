@@ -54,7 +54,7 @@ fun ZeroStatePreference(icon: ImageVector, text: String? = null, description: St
     val zeroStateShape = remember {
         RoundedPolygon.star(
             numVerticesPerRadius = 6,
-            innerRadius = 0.75f,
+            innerRadius = 0.8f,
             rounding = CornerRounding(0.3f)
         )
     }

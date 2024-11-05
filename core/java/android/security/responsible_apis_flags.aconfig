@@ -33,7 +33,6 @@ flag {
   }
 }
 
-
 flag {
     name: "content_uri_permission_apis"
     is_exported: true
@@ -65,9 +64,41 @@ flag {
 }
 
 flag {
+    name: "aapm_api"
+    namespace: "responsible_apis"
+    description: "Android Advanced Protection Mode Service and Manager"
+    bug: "352420507"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "prevent_intent_redirect"
     namespace: "responsible_apis"
     description: "Prevent intent redirect attacks"
     bug: "361143368"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "prevent_intent_redirect_abort_or_throw_exception"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks by aborting or throwing security exception"
+    bug: "361143368"
+}
+
+flag {
+    name: "prevent_intent_redirect_show_toast"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks by showing a toast when activity start is blocked"
+    bug: "361143368"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_intent_matching_flags"
+    is_exported: true
+    namespace: "permissions"
+    is_fixed_read_only: true
+    description: "Applies intentMatchingFlags while matching intents to application components"
+    bug: "364354494"
 }

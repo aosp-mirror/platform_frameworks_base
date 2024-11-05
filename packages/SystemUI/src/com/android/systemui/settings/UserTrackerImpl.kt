@@ -49,7 +49,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.sync.Mutex
 
 /**
@@ -204,7 +204,7 @@ internal constructor(
                     if (isBackgroundUserSwitchEnabled) {
                         userSwitchingJob?.cancel()
                         userSwitchingJob =
-                            appScope.launch(backgroundContext) {
+                            appScope.launch(context = backgroundContext) {
                                 handleUserSwitchingCoroutines(newUserId) { reply?.sendResult(null) }
                             }
                     } else {
@@ -218,7 +218,7 @@ internal constructor(
                     if (isBackgroundUserSwitchEnabled) {
                         afterUserSwitchingJob?.cancel()
                         afterUserSwitchingJob =
-                            appScope.launch(backgroundContext) {
+                            appScope.launch(context = backgroundContext) {
                                 handleUserSwitchComplete(newUserId)
                             }
                     } else {
@@ -260,10 +260,10 @@ internal constructor(
 
             for (callbackDataItem in synchronized(callbacks) { callbacks.toList() }) {
                 val callback: UserTracker.Callback = callbackDataItem.callback.get() ?: continue
-                launch(callbackDataItem.executor.asCoroutineDispatcher()) {
+                launch(context = callbackDataItem.executor.asCoroutineDispatcher()) {
                         val mutex = Mutex(true)
                         val thresholdLogJob =
-                            launch(backgroundContext) {
+                            launch(context = backgroundContext) {
                                 delay(USER_CHANGE_THRESHOLD)
                                 Log.e(TAG, "Failed to finish $callback in time")
                             }

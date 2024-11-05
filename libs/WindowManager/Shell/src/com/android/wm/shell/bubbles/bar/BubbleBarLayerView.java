@@ -34,10 +34,12 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
+import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
@@ -69,6 +71,7 @@ public class BubbleBarLayerView extends FrameLayout
     private final BubbleController mBubbleController;
     private final BubbleData mBubbleData;
     private final BubblePositioner mPositioner;
+    private final BubbleLogger mBubbleLogger;
     private final BubbleBarAnimationHelper mAnimationHelper;
     private final BubbleEducationViewController mEducationViewController;
     private final View mScrimView;
@@ -93,11 +96,13 @@ public class BubbleBarLayerView extends FrameLayout
     private TouchDelegate mHandleTouchDelegate;
     private final Rect mHandleTouchBounds = new Rect();
 
-    public BubbleBarLayerView(Context context, BubbleController controller, BubbleData bubbleData) {
+    public BubbleBarLayerView(Context context, BubbleController controller, BubbleData bubbleData,
+            BubbleLogger bubbleLogger) {
         super(context);
         mBubbleController = controller;
         mBubbleData = bubbleData;
         mPositioner = mBubbleController.getPositioner();
+        mBubbleLogger = bubbleLogger;
 
         mAnimationHelper = new BubbleBarAnimationHelper(context,
                 this, mPositioner);
@@ -233,6 +238,11 @@ public class BubbleBarLayerView extends FrameLayout
             DragListener dragListener = inDismiss -> {
                 if (inDismiss && mExpandedBubble != null) {
                     mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
+                    if (mExpandedBubble instanceof Bubble) {
+                        // Only a bubble can be dragged to dismiss
+                        mBubbleLogger.log((Bubble) mExpandedBubble,
+                                BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_EXP_VIEW);
+                    }
                 }
             };
             mDragController = new BubbleBarExpandedViewDragController(
@@ -411,6 +421,12 @@ public class BubbleBarLayerView extends FrameLayout
             getBoundsOnScreen(mTempRect);
             outRegion.op(mTempRect, Region.Op.UNION);
         }
+    }
+
+    @Nullable
+    @VisibleForTesting
+    public BubbleBarExpandedViewDragController getDragController() {
+        return mDragController;
     }
 
 }

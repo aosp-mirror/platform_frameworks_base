@@ -17,12 +17,11 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
-import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 
 import android.app.ActivityManager;
-import android.app.BackgroundStartPrivileges;
 import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.content.Intent;
@@ -136,7 +135,7 @@ class AppTaskImpl extends IAppTask.Stub {
                         -1,
                         callerApp,
                         null,
-                        BackgroundStartPrivileges.NONE,
+                        false,
                         null,
                         null,
                         null);
@@ -160,6 +159,7 @@ class AppTaskImpl extends IAppTask.Stub {
             Intent intent, String resolvedType, Bundle bOptions) {
         checkCallerOrSystemOrRoot();
         mService.assertPackageMatchesCallingUid(callingPackage);
+        mService.mAmInternal.addCreatorToken(intent, callingPackage);
 
         int callingUser = UserHandle.getCallingUserId();
         Task task;
@@ -175,13 +175,14 @@ class AppTaskImpl extends IAppTask.Stub {
                 throw new IllegalArgumentException("Bad app thread " + appThread);
             }
         }
-
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
         return mService.getActivityStartController().obtainStarter(intent, "AppTaskImpl")
                 .setCaller(appThread)
                 .setCallingPackage(callingPackage)
                 .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
-                .setActivityOptions(bOptions)
+                .setActivityOptions(bOptions, callingPid, callingUid)
                 .setUserId(callingUser)
                 .setInTask(task)
                 .execute();

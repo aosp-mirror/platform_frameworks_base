@@ -21,65 +21,74 @@ import com.android.systemui.res.R
 
 class RoundedCornerDecorProviderFactory(
     private val roundedCornerResDelegate: RoundedCornerResDelegate
-) : DecorProviderFactory() {
+) : DecorProviderFactory {
 
     override val hasProviders: Boolean
-        get() = roundedCornerResDelegate.run {
-            hasTop || hasBottom
-        }
+        get() = roundedCornerResDelegate.run { hasTop || hasBottom }
 
     override val providers: List<DecorProvider>
-    get() {
-        val hasTop = roundedCornerResDelegate.hasTop
-        val hasBottom = roundedCornerResDelegate.hasBottom
-        return when {
-            hasTop && hasBottom -> listOf(
-                RoundedCornerDecorProviderImpl(
-                    viewId = R.id.rounded_corner_top_left,
-                    alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
-                    alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                    roundedCornerResDelegate = roundedCornerResDelegate),
-                RoundedCornerDecorProviderImpl(
-                    viewId = R.id.rounded_corner_top_right,
-                    alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
-                    alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
-                    roundedCornerResDelegate = roundedCornerResDelegate),
-                RoundedCornerDecorProviderImpl(
-                    viewId = R.id.rounded_corner_bottom_left,
-                    alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
-                    alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                    roundedCornerResDelegate = roundedCornerResDelegate),
-                RoundedCornerDecorProviderImpl(
-                    viewId = R.id.rounded_corner_bottom_right,
-                    alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
-                    alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
-                    roundedCornerResDelegate = roundedCornerResDelegate)
-            )
-            hasTop -> listOf(
-                RoundedCornerDecorProviderImpl(
-                    viewId = R.id.rounded_corner_top_left,
-                    alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
-                    alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                    roundedCornerResDelegate = roundedCornerResDelegate),
-                RoundedCornerDecorProviderImpl(
-                    viewId = R.id.rounded_corner_top_right,
-                    alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
-                    alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
-                    roundedCornerResDelegate = roundedCornerResDelegate)
-            )
-            hasBottom -> listOf(
-                RoundedCornerDecorProviderImpl(
-                    viewId = R.id.rounded_corner_bottom_left,
-                    alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
-                    alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                    roundedCornerResDelegate = roundedCornerResDelegate),
-                RoundedCornerDecorProviderImpl(
-                    viewId = R.id.rounded_corner_bottom_right,
-                    alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
-                    alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
-                    roundedCornerResDelegate = roundedCornerResDelegate)
-            )
-            else -> emptyList()
+        get() {
+            val hasTop = roundedCornerResDelegate.hasTop
+            val hasBottom = roundedCornerResDelegate.hasBottom
+            return when {
+                hasTop && hasBottom ->
+                    listOf(
+                        RoundedCornerDecorProviderImpl(
+                            viewId = R.id.rounded_corner_top_left,
+                            alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
+                            alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
+                            roundedCornerResDelegate = roundedCornerResDelegate,
+                        ),
+                        RoundedCornerDecorProviderImpl(
+                            viewId = R.id.rounded_corner_top_right,
+                            alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
+                            alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
+                            roundedCornerResDelegate = roundedCornerResDelegate,
+                        ),
+                        RoundedCornerDecorProviderImpl(
+                            viewId = R.id.rounded_corner_bottom_left,
+                            alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
+                            alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
+                            roundedCornerResDelegate = roundedCornerResDelegate,
+                        ),
+                        RoundedCornerDecorProviderImpl(
+                            viewId = R.id.rounded_corner_bottom_right,
+                            alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
+                            alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
+                            roundedCornerResDelegate = roundedCornerResDelegate,
+                        ),
+                    )
+                hasTop ->
+                    listOf(
+                        RoundedCornerDecorProviderImpl(
+                            viewId = R.id.rounded_corner_top_left,
+                            alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
+                            alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
+                            roundedCornerResDelegate = roundedCornerResDelegate,
+                        ),
+                        RoundedCornerDecorProviderImpl(
+                            viewId = R.id.rounded_corner_top_right,
+                            alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
+                            alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
+                            roundedCornerResDelegate = roundedCornerResDelegate,
+                        ),
+                    )
+                hasBottom ->
+                    listOf(
+                        RoundedCornerDecorProviderImpl(
+                            viewId = R.id.rounded_corner_bottom_left,
+                            alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
+                            alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
+                            roundedCornerResDelegate = roundedCornerResDelegate,
+                        ),
+                        RoundedCornerDecorProviderImpl(
+                            viewId = R.id.rounded_corner_bottom_right,
+                            alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
+                            alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
+                            roundedCornerResDelegate = roundedCornerResDelegate,
+                        ),
+                    )
+                else -> emptyList()
+            }
         }
-    }
 }

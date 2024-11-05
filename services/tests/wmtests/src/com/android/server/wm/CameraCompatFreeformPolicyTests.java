@@ -223,10 +223,13 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         setDisplayRotation(Surface.ROTATION_270);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        callOnActivityConfigurationChanging(mActivity);
+        callOnActivityConfigurationChanging(mActivity, /* letterboxNew= */ true,
+                /* lastLetterbox= */ false);
         mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        callOnActivityConfigurationChanging(mActivity);
+        // Activity is letterboxed from the previous configuration change.
+        callOnActivityConfigurationChanging(mActivity, /* letterboxNew= */ true,
+                /* lastLetterbox= */ true);
 
         assertInCameraCompatMode(CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE);
         assertActivityRefreshRequested(/* refreshRequested */ true);
@@ -260,6 +263,48 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
         assertTrue(mCameraCompatFreeformPolicy.isCameraCompatForFreeformEnabledForActivity(
                 mActivity));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testShouldRefreshActivity_appBoundsChanged_returnsTrue() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        Configuration oldConfiguration = createConfiguration(/* letterbox= */ false);
+        Configuration newConfiguration = createConfiguration(/* letterbox= */ true);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertTrue(mCameraCompatFreeformPolicy.shouldRefreshActivity(mActivity, newConfiguration,
+                oldConfiguration));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testShouldRefreshActivity_displayRotationChanged_returnsTrue() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        Configuration oldConfiguration = createConfiguration(/* letterbox= */ true);
+        Configuration newConfiguration = createConfiguration(/* letterbox= */ true);
+
+        oldConfiguration.windowConfiguration.setDisplayRotation(0);
+        newConfiguration.windowConfiguration.setDisplayRotation(90);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertTrue(mCameraCompatFreeformPolicy.shouldRefreshActivity(mActivity, newConfiguration,
+                oldConfiguration));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testShouldRefreshActivity_appBoundsNorDisplayChanged_returnsFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        Configuration oldConfiguration = createConfiguration(/* letterbox= */ true);
+        Configuration newConfiguration = createConfiguration(/* letterbox= */ true);
+
+        oldConfiguration.windowConfiguration.setDisplayRotation(0);
+        newConfiguration.windowConfiguration.setDisplayRotation(0);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertFalse(mCameraCompatFreeformPolicy.shouldRefreshActivity(mActivity, newConfiguration,
+                oldConfiguration));
     }
 
     @Test
@@ -306,6 +351,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testGetCameraCompatAspectRatio_activityNotInCameraCompat_returnsDefaultAspRatio() {
         configureActivity(SCREEN_ORIENTATION_FULL_USER);
 
@@ -318,6 +364,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testGetCameraCompatAspectRatio_activityInCameraCompat_returnsConfigAspectRatio() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         final float configAspectRatio = 1.5f;
@@ -331,8 +378,8 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 /* delta= */ 0.001);
     }
 
-
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testGetCameraCompatAspectRatio_inCameraCompatPerAppOverride_returnDefAspectRatio() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         final float configAspectRatio = 1.5f;
@@ -406,14 +453,20 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
-                .scheduleTransactionAndLifecycleItems(mActivity.app.getThread(),
+                .scheduleTransactionItems(mActivity.app.getThread(),
                         refreshCallbackItem, resumeActivityItem);
     }
 
     private void callOnActivityConfigurationChanging(ActivityRecord activity) {
+        callOnActivityConfigurationChanging(activity, /* letterboxNew= */ true,
+                /* lastLetterbox= */false);
+    }
+
+    private void callOnActivityConfigurationChanging(ActivityRecord activity, boolean letterboxNew,
+            boolean lastLetterbox) {
         mActivityRefresher.onActivityConfigurationChanging(activity,
-                /* newConfig */ createConfiguration(/*letterbox=*/ true),
-                /* lastReportedConfig */ createConfiguration(/*letterbox=*/ false));
+                /* newConfig */ createConfiguration(letterboxNew),
+                /* lastReportedConfig */ createConfiguration(lastLetterbox));
     }
 
     private Configuration createConfiguration(boolean letterbox) {

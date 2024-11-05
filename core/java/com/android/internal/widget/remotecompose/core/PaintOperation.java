@@ -16,8 +16,8 @@
 package com.android.internal.widget.remotecompose.core;
 
 /**
- * PaintOperation interface, used for operations aimed at painting
- * (while any operation _can_ paint, this make it a little more explicit)
+ * PaintOperation interface, used for operations aimed at painting (while any operation _can_ paint,
+ * this make it a little more explicit)
  */
 public abstract class PaintOperation implements Operation {
 
@@ -37,4 +37,13 @@ public abstract class PaintOperation implements Operation {
     }
 
     public abstract void paint(PaintContext context);
+
+    /**
+     * Will return true if the operation is similar enough to the current one, in the context of an
+     * animated transition.
+     */
+    public boolean suitableForTransition(Operation op) {
+        // by default expects the op to not be suitable
+        return false;
+    }
 }

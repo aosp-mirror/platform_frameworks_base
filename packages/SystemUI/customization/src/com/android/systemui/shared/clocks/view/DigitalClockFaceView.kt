@@ -25,12 +25,13 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.AlarmData
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
-import com.android.systemui.shared.clocks.AssetLoader
 import com.android.systemui.shared.clocks.LogUtil
 import java.util.Locale
 
+// TODO(b/364680879): Merge w/ only subclass FlexClockView
 abstract class DigitalClockFaceView(ctx: Context, messageBuffer: MessageBuffer) : FrameLayout(ctx) {
     protected val logger = Logger(messageBuffer, this::class.simpleName!!)
         get() = field ?: LogUtil.FALLBACK_INIT_LOGGER
@@ -121,9 +122,14 @@ abstract class DigitalClockFaceView(ctx: Context, messageBuffer: MessageBuffer) 
 
     open fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
 
-    fun updateColors(assets: AssetLoader, isRegionDark: Boolean) {
-        digitalClockTextViewMap.forEach { _, view -> view.updateColors(assets, isRegionDark) }
+    fun updateColor(color: Int) {
+        digitalClockTextViewMap.forEach { _, view -> view.updateColor(color) }
         invalidate()
+    }
+
+    fun updateAxes(axes: List<ClockFontAxisSetting>) {
+        digitalClockTextViewMap.forEach { _, view -> view.updateAxes(axes) }
+        requestLayout()
     }
 
     fun onFontSettingChanged(fontSizePx: Float) {
@@ -140,7 +146,6 @@ abstract class DigitalClockFaceView(ctx: Context, messageBuffer: MessageBuffer) 
     open val useCustomClockScene
         get() = false
 
-    // TODO: implement ClockEventUnion?
     open fun onLocaleChanged(locale: Locale) {}
 
     open fun onWeatherDataChanged(data: WeatherData) {}

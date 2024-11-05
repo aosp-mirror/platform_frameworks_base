@@ -27,7 +27,7 @@ import android.graphics.Rect;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.window.flags.DesktopModeFlags;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;

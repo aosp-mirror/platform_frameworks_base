@@ -84,6 +84,7 @@ import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
 import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
+import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
@@ -148,7 +149,9 @@ import android.hardware.hdmi.HdmiAudioSystemClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
+import android.hardware.input.AppLaunchData;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputSettings;
 import android.hardware.input.KeyGestureEvent;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -731,7 +734,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     KeyEvent.KEYCODE_ASSIST,
                     KeyEvent.KEYCODE_VOICE_ASSIST,
                     KeyEvent.KEYCODE_MUTE,
-                    KeyEvent.KEYCODE_VOLUME_MUTE
+                    KeyEvent.KEYCODE_VOLUME_MUTE,
+                    KeyEvent.KEYCODE_RECENT_APPS,
+                    KeyEvent.KEYCODE_APP_SWITCH,
+                    KeyEvent.KEYCODE_NOTIFICATION
             ));
 
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -1612,7 +1618,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TRIPLE_PRESS_PRIMARY_NOTHING:
                 break;
             case TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY:
-                mTalkbackShortcutController.toggleTalkback(mCurrentUserId);
+                mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
+                        TalkbackShortcutController.ShortcutSource.GESTURE);
                 if (mTalkbackShortcutController.isTalkBackShortcutGestureEnabled()) {
                     performHapticFeedback(HapticFeedbackConstants.CONFIRM,
                             "Stem primary - Triple Press - Toggle Accessibility");
@@ -2082,12 +2089,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             switch (mDoubleTapOnHomeBehavior) {
                 case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "toggleRecentApps")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH);
                     mHomeConsumed = true;
                     toggleRecentApps();
                     break;
                 case DOUBLE_TAP_HOME_PIP_MENU:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(),
+                            "showPictureInPictureMenu")) {
+                        break;
+                    }
                     mHomeConsumed = true;
                     showPictureInPictureMenuInternal();
                     break;
@@ -2116,12 +2132,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     break;
                 case LONG_PRESS_HOME_ASSIST:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "launchAssistAction")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
                     launchAssistAction(null, event.getDeviceId(), event.getEventTime(),
                             AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "toggleNotificationPanel")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL);
                     toggleNotificationPanel();
@@ -3390,6 +3414,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        if (useKeyGestureEventHandler()) {
+            return mModifierShortcutManager.getApplicationLaunchKeyboardShortcuts(deviceId,
+                    mInputManager.getAppLaunchBookmarks());
+        }
         return mModifierShortcutManager.getApplicationLaunchKeyboardShortcuts(deviceId);
     }
 
@@ -3497,7 +3525,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (isUserSetupComplete() && !keyguardOn) {
             if (mModifierShortcutManager.interceptKey(event)) {
-                dismissKeyboardShortcutsMenu();
+                if (isKeyEventForCurrentUser(
+                        event.getDisplayId(), event.getKeyCode(),
+                        "dismissKeyboardShortcutsMenu")) {
+                    dismissKeyboardShortcutsMenu();
+                }
                 mPendingMetaAction = false;
                 mPendingCapsLockToggle = false;
                 return true;
@@ -3579,12 +3611,87 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
                 break;
+            case KeyEvent.KEYCODE_T:
+                if (keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
+                                TalkbackShortcutController.ShortcutSource.KEYBOARD);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK);
+                        return true;
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_3:
+                if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed()
+                            && event.isAltPressed()) {
+                        final boolean bounceKeysEnabled =
+                                InputSettings.isAccessibilityBounceKeysEnabled(
+                                        mContext);
+                        InputSettings.setAccessibilityBounceKeysThreshold(mContext,
+                                bounceKeysEnabled ? 0
+                                        : InputSettings.DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS);
+                        return true;
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_4:
+                if (InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        final boolean mouseKeysEnabled =
+                                InputSettings.isAccessibilityMouseKeysEnabled(
+                                        mContext);
+                        InputSettings.setAccessibilityMouseKeysEnabled(mContext,
+                                !mouseKeysEnabled);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS);
+                        return true;
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_5:
+                if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        final boolean stickyKeysEnabled =
+                                InputSettings.isAccessibilityStickyKeysEnabled(
+                                        mContext);
+                        InputSettings.setAccessibilityStickyKeysEnabled(mContext,
+                                !stickyKeysEnabled);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS);
+                        return true;
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_6:
+                if (InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
+                        final boolean slowKeysEnabled =
+                                InputSettings.isAccessibilitySlowKeysEnabled(mContext);
+                        InputSettings.setAccessibilitySlowKeysThreshold(mContext,
+                                slowKeysEnabled ? 0
+                                        : InputSettings.DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS);
+                        notifyKeyGestureCompleted(event,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS);
+                        return true;
+                    }
+                }
+                break;
             case KeyEvent.KEYCODE_DEL:
                 if (newBugreportKeyboardShortcut()) {
                     if (mEnableBugReportKeyboardShortcut && firstDown
                             && event.isMetaPressed() && event.isCtrlPressed()) {
                         try {
-                            mActivityManagerService.requestInteractiveBugReport();
+                            if (!mActivityManagerService.launchBugReportHandlerApp()) {
+                                mActivityManagerService.requestInteractiveBugReport();
+                            }
                         } catch (RemoteException e) {
                             Slog.d(TAG, "Error taking bugreport", e);
                         }
@@ -3901,14 +4008,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean interceptSystemKeysAndShortcutsNew(IBinder focusedToken, KeyEvent event) {
         final int keyCode = event.getKeyCode();
         final int metaState = event.getMetaState();
-        final boolean keyguardOn = keyguardOn();
 
-        if (isUserSetupComplete() && !keyguardOn) {
-            if (mModifierShortcutManager.interceptKey(event)) {
-                dismissKeyboardShortcutsMenu();
-                return true;
-            }
-        }
         switch (keyCode) {
             case KeyEvent.KEYCODE_HOME:
                 return handleHomeShortcuts(focusedToken, event);
@@ -3998,6 +4098,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION:
                         return true;
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD:
@@ -4010,6 +4111,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD:
                         return mDefaultDisplayPolicy.isAwake() && mAccessibilityShortcutController
                                 .isAccessibilityShortcutAvailable(false);
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
+                        return keyboardA11yShortcutControl();
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
+                        return InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
+                                && keyboardA11yShortcutControl();
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
+                        return InputSettings.isAccessibilityBounceKeysFeatureEnabled()
+                                && keyboardA11yShortcutControl();
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
+                        return InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()
+                                && keyboardA11yShortcutControl();
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
+                        return InputSettings.isAccessibilityStickyKeysFeatureEnabled()
+                                && keyboardA11yShortcutControl();
                     default:
                         return false;
                 }
@@ -4078,7 +4193,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT:
                 if (complete && mEnableBugReportKeyboardShortcut) {
                     try {
-                        mActivityManagerService.requestInteractiveBugReport();
+                        if (!mActivityManagerService.launchBugReportHandlerApp()) {
+                            mActivityManagerService.requestInteractiveBugReport();
+                        }
                     } catch (RemoteException e) {
                         Slog.d(TAG, "Error taking bugreport", e);
                     }
@@ -4227,6 +4344,74 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mContext.closeSystemDialogs();
                 }
                 return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
+                if (keyboardA11yShortcutControl()) {
+                    if (complete) {
+                        mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
+                                TalkbackShortcutController.ShortcutSource.KEYBOARD);
+                    }
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION:
+                AppLaunchData data = event.getAppLaunchData();
+                if (complete && isUserSetupComplete() && !keyguardOn
+                        && data != null && mModifierShortcutManager.launchApplication(data)) {
+                    dismissKeyboardShortcutsMenu();
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
+                if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (complete) {
+                        final boolean bounceKeysEnabled =
+                                InputSettings.isAccessibilityBounceKeysEnabled(
+                                        mContext);
+                        InputSettings.setAccessibilityBounceKeysThreshold(mContext,
+                                bounceKeysEnabled ? 0
+                                        : InputSettings.DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS);
+                    }
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
+                if (InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (complete) {
+                        final boolean mouseKeysEnabled =
+                                InputSettings.isAccessibilityMouseKeysEnabled(
+                                        mContext);
+                        InputSettings.setAccessibilityMouseKeysEnabled(mContext,
+                                !mouseKeysEnabled);
+                    }
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
+                if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (complete) {
+                        final boolean stickyKeysEnabled =
+                                InputSettings.isAccessibilityStickyKeysEnabled(mContext);
+                        InputSettings.setAccessibilityStickyKeysEnabled(mContext,
+                                !stickyKeysEnabled);
+                    }
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
+                if (InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
+                        && keyboardA11yShortcutControl()) {
+                    if (complete) {
+                        final boolean slowKeysEnabled =
+                                InputSettings.isAccessibilitySlowKeysEnabled(mContext);
+                        InputSettings.setAccessibilitySlowKeysThreshold(mContext,
+                                slowKeysEnabled ? 0
+                                        : InputSettings.DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS);
+                    }
+                    return true;
+                }
+                break;
         }
         return false;
     }
@@ -4565,6 +4750,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)
             throws RemoteException {
         synchronized (mLock) {
+            if (useKeyGestureEventHandler()) {
+                mInputManagerInternal.registerShortcutKey(shortcutCode, shortcutService);
+                return;
+            }
             mModifierShortcutManager.registerShortcutKey(shortcutCode, shortcutService);
         }
     }
@@ -4820,7 +5009,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // no keyguard stuff to worry about, just launch home!
-        if (mRecentsVisible) {
+        // If Recents is visible and the action is not from visible background users,
+        // hide Recents and notify it to launch Home.
+        if (mRecentsVisible
+                && (!mVisibleBackgroundUsersEnabled || displayId == DEFAULT_DISPLAY)) {
             try {
                 ActivityManager.getService().stopAppSwitches();
             } catch (RemoteException e) {}
@@ -5570,6 +5762,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Notify the StatusBar that a system key was pressed.
      */
     private void sendSystemKeyToStatusBar(KeyEvent key) {
+        if (!isKeyEventForCurrentUser(key.getDisplayId(), key.getKeyCode(), "handleSystemKey")) {
+            return;
+        }
         IStatusBarService statusBar = getStatusBarService();
         if (statusBar != null) {
             try {
@@ -6890,6 +7085,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (modifierShortcutManagerMultiuser()) {
             mModifierShortcutManager.setCurrentUser(UserHandle.of(newUserId));
         }
+        mInputManagerInternal.setCurrentUser(newUserId);
     }
 
     @Override

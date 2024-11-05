@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.windowdecor;
 
-import static android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING;
+import static android.window.DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING;
 
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
@@ -174,18 +174,19 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     }
 
     @Override
-    void relayout(RunningTaskInfo taskInfo) {
+    void relayout(RunningTaskInfo taskInfo, boolean hasGlobalFocus) {
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         // The crop and position of the task should only be set when a task is fluid resizing. In
         // all other cases, it is expected that the transition handler positions and crops the task
         // in order to allow the handler time to animate before the task before the final
         // position and crop are set.
-        final boolean shouldSetTaskPositionAndCrop = mTaskDragResizer.isResizingOrAnimating();
+        final boolean shouldSetTaskVisibilityPositionAndCrop =
+                mTaskDragResizer.isResizingOrAnimating();
         // Use |applyStartTransactionOnDraw| so that the transaction (that applies task crop) is
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
         relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
-                shouldSetTaskPositionAndCrop);
+                shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus);
     }
 
     @VisibleForTesting
@@ -193,19 +194,20 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             RelayoutParams relayoutParams,
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
-            boolean setTaskCropAndPosition,
+            boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean isStatusBarVisible,
             boolean isKeyguardVisibleAndOccluded,
-            InsetsState displayInsetsState) {
+            InsetsState displayInsetsState,
+            boolean hasGlobalFocus) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId = R.layout.caption_window_decor;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
-        relayoutParams.mShadowRadiusId = taskInfo.isFocused
+        relayoutParams.mShadowRadiusId = hasGlobalFocus
                 ? R.dimen.freeform_decor_shadow_focused_thickness
                 : R.dimen.freeform_decor_shadow_unfocused_thickness;
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
-        relayoutParams.mSetTaskPositionAndCrop = setTaskCropAndPosition;
+        relayoutParams.mSetTaskVisibilityPositionAndCrop = shouldSetTaskVisibilityPositionAndCrop;
         relayoutParams.mIsCaptionVisible = taskInfo.isFreeform()
                 || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
 
@@ -233,7 +235,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @SuppressLint("MissingPermission")
     void relayout(RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition) {
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
+            boolean hasGlobalFocus) {
         final boolean isFreeform =
                 taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
         final boolean isDragResizeable = ENABLE_WINDOWING_SCALED_RESIZING.isTrue()
@@ -244,8 +247,9 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
-                setTaskCropAndPosition, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
-                mDisplayController.getInsetsState(taskInfo.displayId));
+                shouldSetTaskVisibilityPositionAndCrop, mIsStatusBarVisible,
+                mIsKeyguardVisibleAndOccluded,
+                mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus);
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
@@ -272,6 +276,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             closeDragResizeListener();
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
+                    mTaskInfo,
                     mHandler,
                     mChoreographer,
                     mDisplay.getDisplayId(),
@@ -287,9 +292,11 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
         final Resources res = mResult.mRootView.getResources();
         mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
-                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
-                getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
-                getLargeResizeCornerSize(res)), touchSlop);
+                        new Size(mResult.mWidth, mResult.mHeight),
+                        getResizeEdgeHandleSize(res),
+                        getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
+                        getLargeResizeCornerSize(res), DragResizeWindowGeometry.DisabledEdge.NONE),
+                touchSlop);
     }
 
     /**

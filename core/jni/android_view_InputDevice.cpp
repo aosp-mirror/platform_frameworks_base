@@ -60,7 +60,7 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                                                                   ? layoutInfo->layoutType.c_str()
                                                                   : NULL));
 
-    std::shared_ptr<KeyCharacterMap> map = deviceInfo.getKeyCharacterMap();
+    const KeyCharacterMap* map = deviceInfo.getKeyCharacterMap();
     std::unique_ptr<KeyCharacterMap> mapCopy;
     if (map != nullptr) {
         mapCopy = std::make_unique<KeyCharacterMap>(*map);

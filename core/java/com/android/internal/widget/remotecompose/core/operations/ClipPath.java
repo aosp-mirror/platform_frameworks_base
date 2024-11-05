@@ -15,21 +15,19 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
 /**
- * Defines a path that clips a the subsequent drawing commands
- * Use MatrixSave and MatrixRestore commands to remove clip
- * TODO allow id 0 to mean null?
+ * Defines a path that clips a the subsequent drawing commands Use MatrixSave and MatrixRestore
+ * commands to remove clip TODO allow id 0 to mean null?
  */
 public class ClipPath extends PaintOperation {
     private static final int OP_CODE = Operations.CLIP_PATH;
@@ -68,7 +66,6 @@ public class ClipPath extends PaintOperation {
         return "ClipPath " + mId + ";";
     }
 
-
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int pack = buffer.readInt();
         int id = pack & 0xFFFFF;
@@ -77,11 +74,9 @@ public class ClipPath extends PaintOperation {
         operations.add(op);
     }
 
-
     public static String name() {
         return CLASS_NAME;
     }
-
 
     public static int id() {
         return OP_CODE;
@@ -93,14 +88,10 @@ public class ClipPath extends PaintOperation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Intersect the current clip with the path")
-                .field(INT, "id",
-                        "id of the path");
+                .field(DocumentedOperation.INT, "id", "id of the path");
     }
-
 
     @Override
     public void paint(PaintContext context) {

@@ -576,6 +576,13 @@ public final class JobStatus {
     private String mSystemTraceTag;
 
     /**
+     * Job maybe abandoned by not calling
+     * {@link android.app.job.JobService#jobFinished(JobParameters, boolean)} while
+     * the strong reference to {@link android.app.job.JobParameters} is lost
+     */
+    private boolean mIsAbandoned;
+
+    /**
      * Core constructor for JobStatus instances.  All other ctors funnel down to this one.
      *
      * @param job The actual requested parameters for the job
@@ -725,6 +732,8 @@ public final class JobStatus {
         updateNetworkBytesLocked();
 
         updateMediaBackupExemptionStatus();
+
+        mIsAbandoned = false;
     }
 
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
@@ -1059,6 +1068,16 @@ public final class JobStatus {
     @Nullable
     public String getAppTraceTag() {
         return job.getTraceTag();
+    }
+
+    /** Returns if the job maybe abandoned */
+    public boolean isAbandoned() {
+        return mIsAbandoned;
+    }
+
+    /** Set the job maybe abandoned state*/
+    public void setAbandoned(boolean abandoned) {
+        mIsAbandoned = abandoned;
     }
 
     /** Returns a trace tag using debug information provided by job scheduler service. */

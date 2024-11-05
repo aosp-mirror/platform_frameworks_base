@@ -237,6 +237,7 @@ import com.android.internal.os.DebugStore;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SafeZipPathValidatorCallback;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.DecorView;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -1746,7 +1747,7 @@ public final class ActivityThread extends ClientTransactionHandler
             printRow(pw, TWO_COUNT_COLUMNS, "Death Recipients:", binderDeathObjectCount,
                     "WebViews:", webviewInstanceCount);
 
-            if (com.android.libcore.Flags.nativeMetrics()) {
+            if (com.android.libcore.readonly.Flags.nativeMetrics()) {
                 dumpMemInfoNativeAllocations(pw);
             }
 
@@ -2680,7 +2681,10 @@ public final class ActivityThread extends ClientTransactionHandler
                     handleUnstableProviderDied((IBinder)msg.obj, false);
                     break;
                 case REQUEST_ASSIST_CONTEXT_EXTRAS:
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                            "handleRequestAssistContextExtras");
                     handleRequestAssistContextExtras((RequestAssistContextExtras)msg.obj);
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case TRANSLUCENT_CONVERSION_COMPLETE:
                     handleTranslucentConversionComplete((IBinder)msg.obj, msg.arg1 == 1);
@@ -3839,6 +3843,18 @@ public final class ActivityThread extends ClientTransactionHandler
     public final Activity getActivity(IBinder token) {
         final ActivityClientRecord activityRecord = mActivities.get(token);
         return activityRecord != null ? activityRecord.activity : null;
+    }
+
+    /**
+     * Returns the most recent created activity that's still running.
+     */
+    @Nullable
+    public Activity getLastCreatedActivity() {
+        if (mActivities.isEmpty()) {
+            return null;
+        }
+
+        return mActivities.valueAt(mActivities.size() - 1).activity;
     }
 
     @Override
@@ -7334,6 +7350,8 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        VMDebug.setUserId(UserHandle.myUserId());
+        VMDebug.addApplication(data.appInfo.packageName);
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName,
@@ -7661,6 +7679,18 @@ public final class ActivityThread extends ClientTransactionHandler
                 }
             }
         });
+
+        // Register callback to report native memory metrics post GC cleanup
+        // Note: we do not report memory metrics of isolated processes unless
+        // their native allocations become more significant
+        if (!Process.isIsolated() && Flags.reportPostgcMemoryMetrics() &&
+            com.android.libcore.readonly.Flags.postCleanupApis()) {
+            VMRuntime.addPostCleanupCallback(new Runnable() {
+                @Override public void run() {
+                    MetricsLoggerWrapper.logPostGcMemorySnapshot();
+                }
+            });
+        }
     }
 
     @UnsupportedAppUsage
@@ -7856,9 +7886,20 @@ public final class ActivityThread extends ClientTransactionHandler
             file.getParentFile().mkdirs();
             Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
         }
+
+        if (ii.packageName != null) {
+            VMDebug.addApplication(ii.packageName);
+        }
     }
 
     private void handleFinishInstrumentationWithoutRestart() {
+        LoadedApk loadedApk = getApplication().mLoadedApk;
+        // Only remove instrumentation app if this was not a self-testing app.
+        if (mInstrumentationPackageName != null && loadedApk != null && !mInstrumentationPackageName
+                .equals(loadedApk.mPackageName)) {
+            VMDebug.removeApplication(mInstrumentationPackageName);
+        }
+
         mInstrumentation.onDestroy();
         mInstrumentationPackageName = null;
         mInstrumentationAppDir = null;
@@ -8890,6 +8931,11 @@ public final class ActivityThread extends ClientTransactionHandler
         } catch (RemoteException ignored) {
         }
         return false;
+    }
+
+    void addApplication(@NonNull Application app) {
+        mAllApplications.add(app);
+        VMDebug.addApplication(app.mLoadedApk.mPackageName);
     }
 
     @Override

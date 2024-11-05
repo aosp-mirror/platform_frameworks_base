@@ -32,16 +32,24 @@ interface IDeviceStateManager {
     DeviceStateInfo getDeviceStateInfo();
 
     /**
-     * Registers a callback to receive notifications from the device state manager. Only one
-     * callback can be registered per-process.
+     * Registers a callback to receive notifications from the device state manager and returns the
+     * current {@link DeviceStateInfo}. Only one callback can be registered per-process.
      * <p>
      * As the callback mechanism is used to alert the caller of changes to request status a callback
      * <b>MUST</b> be registered before calling {@link #requestState(IBinder, int, int)} or
      * {@link #cancelRequest(IBinder)}, otherwise an exception will be thrown.
+     * <p>
+     * Upon successful registration, this method returns the committed {@link DeviceStateInfo} if
+     * available, ensuring the availability of the device state after the callback is registered.
+     * This guarantees that the client will have access to the latest device state immediately upon
+     * completion of the two-way IPC call.
      *
+     * @param callback the callback to register for device state notifications.
+     * @return DeviceStateInfo the current device state information including the committed state
+     *         or null if no state has been committed by the {@link DeviceStateProvider} yet.
      * @throws SecurityException if a callback is already registered for the calling process.
      */
-    void registerCallback(in IDeviceStateManagerCallback callback);
+    @nullable DeviceStateInfo registerCallback(in IDeviceStateManagerCallback callback);
 
     /**
      * Requests that the device enter the supplied {@code state}. A callback <b>MUST</b> have been

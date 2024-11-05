@@ -20,8 +20,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.Componen
 import java.util.HashMap;
 
 /**
- * Represents the result of a measure pass on the entire hierarchy
- * TODO: optimize to use a flat array vs the current hashmap
+ * Represents the result of a measure pass on the entire hierarchy TODO: optimize to use a flat
+ * array vs the current hashmap
  */
 public class MeasurePass {
     HashMap<Integer, ComponentMeasure> mList = new HashMap<>();
@@ -43,8 +43,9 @@ public class MeasurePass {
 
     public ComponentMeasure get(Component c) {
         if (!mList.containsKey(c.getComponentId())) {
-            ComponentMeasure measure = new ComponentMeasure(c.getComponentId(),
-                    c.getX(), c.getY(), c.getWidth(), c.getHeight());
+            ComponentMeasure measure =
+                    new ComponentMeasure(
+                            c.getComponentId(), c.getX(), c.getY(), c.getWidth(), c.getHeight());
             mList.put(c.getComponentId(), measure);
             return measure;
         }
@@ -53,8 +54,8 @@ public class MeasurePass {
 
     public ComponentMeasure get(int id) {
         if (!mList.containsKey(id)) {
-            ComponentMeasure measure = new ComponentMeasure(id,
-                    0f, 0f, 0f, 0f, Component.Visibility.GONE);
+            ComponentMeasure measure =
+                    new ComponentMeasure(id, 0f, 0f, 0f, 0f, Component.Visibility.GONE);
             mList.put(id, measure);
             return measure;
         }

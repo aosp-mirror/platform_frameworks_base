@@ -47,8 +47,7 @@ import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -61,7 +60,6 @@ import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Rule
@@ -95,9 +93,6 @@ class BackActionInteractorTest : SysuiTestCase() {
     @Mock private lateinit var onBackInvokedDispatcher: WindowOnBackInvokedDispatcher
     @Mock private lateinit var iStatusBarService: IStatusBarService
     @Mock private lateinit var headsUpManager: HeadsUpManager
-    private val activeNotificationsRepository = ActiveNotificationListRepository()
-    private val activeNotificationsInteractor =
-        ActiveNotificationsInteractor(activeNotificationsRepository, StandardTestDispatcher())
 
     private val keyguardRepository = FakeKeyguardRepository()
     private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor by lazy {
@@ -107,7 +102,7 @@ class BackActionInteractorTest : SysuiTestCase() {
             keyguardRepository,
             headsUpManager,
             powerInteractor,
-            activeNotificationsInteractor,
+            kosmos.activeNotificationsInteractor,
             kosmos::sceneInteractor,
         )
     }

@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.ui.composable
 
 import android.app.AlertDialog
+import android.content.testableContext
 import android.platform.test.annotations.MotionTest
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -38,8 +39,11 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.motion.createSysUiComposeMotionTestRule
+import com.android.systemui.res.R
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.testKosmos
+import kotlin.time.Duration.Companion.seconds
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -76,6 +80,17 @@ class BouncerContentTest : SysuiTestCase() {
         kosmos.sceneContainerStartable.start()
         kosmos.fakeFeatureFlagsClassic.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
         kosmos.fakeAuthenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+        kosmos.testableContext.orCreateTestableResources.addOverride(
+            R.bool.config_enableBouncerUserSwitcher,
+            true,
+        )
+    }
+
+    @After
+    fun teardown() {
+        kosmos.testableContext.orCreateTestableResources.removeOverride(
+            R.bool.config_enableBouncerUserSwitcher
+        )
     }
 
     @Composable
@@ -88,14 +103,14 @@ class BouncerContentTest : SysuiTestCase() {
                     },
                 layout = BouncerSceneLayout.BESIDE_USER_SWITCHER,
                 modifier = Modifier.fillMaxSize().testTag("BouncerContent"),
-                dialogFactory = bouncerDialogFactory
+                dialogFactory = bouncerDialogFactory,
             )
         }
     }
 
     @Test
     fun doubleClick_swapSide() =
-        motionTestRule.runTest {
+        motionTestRule.runTest(timeout = 30.seconds) {
             val motion =
                 recordMotion(
                     content = { BouncerContentUnderTest() },
@@ -110,11 +125,19 @@ class BouncerContentTest : SysuiTestCase() {
                             }
                         }
                     ) {
-                        feature(hasTestTag("UserSwitcher"), positionInRoot, "userSwitcher_pos")
-                        feature(hasTestTag("UserSwitcher"), alpha, "userSwitcher_alpha")
+                        feature(
+                            hasTestTag("com.android.systemui:id/UserSwitcher"),
+                            positionInRoot,
+                            "userSwitcher_pos",
+                        )
+                        feature(
+                            hasTestTag("com.android.systemui:id/UserSwitcher"),
+                            alpha,
+                            "userSwitcher_alpha",
+                        )
                         feature(hasTestTag("FoldAware"), positionInRoot, "foldAware_pos")
                         feature(hasTestTag("FoldAware"), alpha, "foldAware_alpha")
-                    }
+                    },
                 )
 
             assertThat(motion).timeSeriesMatchesGolden()

@@ -23,7 +23,6 @@ import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
-import com.android.systemui.volume.dialog.domain.model.VolumeDialogStateModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ProducerScope
@@ -50,7 +49,7 @@ constructor(
     @Background private val bgHandler: Handler,
 ) {
 
-    @SuppressLint("SharedFlowCreation") // event-but needed
+    @SuppressLint("SharedFlowCreation") // event-bus needed
     val event: Flow<VolumeDialogEventModel> =
         callbackFlow {
                 val producer = VolumeDialogEventModelProducer(this)
@@ -79,7 +78,7 @@ constructor(
 
         override fun onStateChanged(state: VolumeDialogController.State?) {
             if (state != null) {
-                scope.trySend(VolumeDialogEventModel.StateChanged(VolumeDialogStateModel(state)))
+                scope.trySend(VolumeDialogEventModel.StateChanged(state))
             }
         }
 
@@ -106,8 +105,8 @@ constructor(
             scope.trySend(VolumeDialogEventModel.ShowSafetyWarning(flags))
         }
 
-        override fun onAccessibilityModeChanged(showA11yStream: Boolean) {
-            scope.trySend(VolumeDialogEventModel.AccessibilityModeChanged(showA11yStream))
+        override fun onAccessibilityModeChanged(showA11yStream: Boolean?) {
+            scope.trySend(VolumeDialogEventModel.AccessibilityModeChanged(showA11yStream == true))
         }
 
         // Captions button is remove from the Volume Dialog

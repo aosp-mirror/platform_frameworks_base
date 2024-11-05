@@ -150,6 +150,53 @@ class KeyguardInteractorTest : SysuiTestCase() {
             assertThat(secureCameraActive()).isFalse()
         }
 
+    /** Regression test for b/373700726. */
+    @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testSecureCameraStillFalseAfterDeviceUnlocked() =
+        testScope.runTest {
+            val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
+            runCurrent()
+
+            // Launch camera
+            underTest.onCameraLaunchDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
+            assertThat(secureCameraActive()).isTrue()
+
+            // Go back to keyguard
+            repository.setKeyguardShowing(true)
+            repository.setKeyguardOccluded(false)
+            assertThat(secureCameraActive()).isFalse()
+
+            // WHEN device is unlocked (and therefore keyguard is no longer showing)
+            repository.setKeyguardShowing(false)
+
+            // THEN we still show secure camera as *not* active
+            assertThat(secureCameraActive()).isFalse()
+        }
+
+    /** Regression test for b/373700726. */
+    @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testSecureCameraStillFalseAfterBouncerDismissed() =
+        testScope.runTest {
+            val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
+            runCurrent()
+
+            // Launch camera
+            underTest.onCameraLaunchDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
+            assertThat(secureCameraActive()).isTrue()
+
+            // Show bouncer
+            bouncerRepository.setPrimaryShow(true)
+            assertThat(secureCameraActive()).isFalse()
+
+            // WHEN device is unlocked (and therefore the bouncer is no longer showing)
+            bouncerRepository.setPrimaryShow(false)
+
+            // THEN we still show secure camera as *not* active
+            assertThat(secureCameraActive()).isFalse()
+        }
+
     @Test
     @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun keyguardVisibilityIsDefinedAsKeyguardShowingButNotOccluded() = runTest {
@@ -182,11 +229,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             val dismissAlpha by collectLastValue(underTest.dismissAlpha)
             assertThat(dismissAlpha).isEqualTo(1f)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = AOD,
-                to = LOCKSCREEN,
-                testScope,
-            )
+            keyguardTransitionRepository.sendTransitionSteps(from = AOD, to = LOCKSCREEN, testScope)
 
             repository.setStatusBarState(StatusBarState.KEYGUARD)
             // User begins to swipe up
@@ -208,11 +251,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             assertThat(dismissAlpha[0]).isEqualTo(1f)
             assertThat(dismissAlpha.size).isEqualTo(1)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = AOD,
-                to = LOCKSCREEN,
-                testScope,
-            )
+            keyguardTransitionRepository.sendTransitionSteps(from = AOD, to = LOCKSCREEN, testScope)
 
             // User begins to swipe up
             repository.setStatusBarState(StatusBarState.KEYGUARD)
@@ -328,11 +367,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
             shadeRepository.setLegacyShadeExpansion(0f)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = AOD,
-                to = LOCKSCREEN,
-                testScope,
-            )
+            keyguardTransitionRepository.sendTransitionSteps(from = AOD, to = LOCKSCREEN, testScope)
 
             assertThat(keyguardTranslationY).isEqualTo(0f)
         }
@@ -350,11 +385,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
             shadeRepository.setLegacyShadeExpansion(1f)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = AOD,
-                to = LOCKSCREEN,
-                testScope,
-            )
+            keyguardTransitionRepository.sendTransitionSteps(from = AOD, to = LOCKSCREEN, testScope)
 
             assertThat(keyguardTranslationY).isEqualTo(0f)
         }

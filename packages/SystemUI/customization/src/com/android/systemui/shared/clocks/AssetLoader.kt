@@ -17,34 +17,24 @@
 package com.android.systemui.shared.clocks
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.content.res.Resources
-import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
-import com.android.internal.graphics.ColorUtils
-import com.android.internal.graphics.cam.Cam
-import com.android.internal.graphics.cam.CamUtils
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.core.MessageBuffer
-import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style as MonetStyle
-import com.android.systemui.monet.TonalPalette
 import java.io.IOException
-import kotlin.math.abs
 
 class AssetLoader
 private constructor(
     private val pluginCtx: Context,
     private val sysuiCtx: Context,
     private val baseDir: String,
-    var colorScheme: ColorScheme?,
     var seedColor: Int?,
     var overrideChroma: Float?,
     val typefaceCache: TypefaceCache,
-    val getThemeSeedColor: (Context) -> Int,
     messageBuffer: MessageBuffer,
 ) {
     val logger = Logger(messageBuffer, TAG)
@@ -59,17 +49,17 @@ private constructor(
         sysuiCtx: Context,
         baseDir: String,
         messageBuffer: MessageBuffer,
-        getThemeSeedColor: ((Context) -> Int)? = null,
     ) : this(
         pluginCtx,
         sysuiCtx,
         baseDir,
-        colorScheme = null,
         seedColor = null,
         overrideChroma = null,
         typefaceCache =
-            TypefaceCache(messageBuffer) { Typeface.createFromAsset(pluginCtx.assets, it) },
-        getThemeSeedColor = getThemeSeedColor ?: Companion::getThemeSeedColor,
+            TypefaceCache(messageBuffer) {
+                // TODO(b/364680873): Move constant to config_clockFontFamily when shipping
+                return@TypefaceCache Typeface.create("google-sans-flex-clock", Typeface.NORMAL)
+            },
         messageBuffer = messageBuffer,
     )
 
@@ -87,107 +77,6 @@ private constructor(
 
         val (res, id) = resPair
         return res.getString(id)
-    }
-
-    fun tryReadColor(resStr: String): Int? = tryRead(resStr, ::readColor)
-
-    fun readColor(resStr: String): Int {
-        if (resStr.startsWith("#")) {
-            return Color.parseColor(resStr)
-        }
-
-        val schemeColor = tryParseColorFromScheme(resStr)
-        if (schemeColor != null) {
-            logColor("ColorScheme: $resStr", schemeColor)
-            return checkChroma(schemeColor)
-        }
-
-        val result = resolveColorResourceId(resStr)
-        if (result == null) {
-            throw IOException("Failed to parse color: $resStr")
-        }
-
-        val (res, colorId, targetTone) = result
-        val color = res.getColor(colorId)
-        if (targetTone == null || TonalPalette.SHADE_KEYS.contains(targetTone.toInt())) {
-            logColor("Resources: $resStr", color)
-            return checkChroma(color)
-        } else {
-            val interpolatedColor =
-                ColorStateList.valueOf(color)
-                    .withLStar((1000f - targetTone) / 10f)
-                    .getDefaultColor()
-            logColor("Resources (interpolated tone): $resStr", interpolatedColor)
-            return checkChroma(interpolatedColor)
-        }
-    }
-
-    private fun checkChroma(color: Int): Int {
-        return overrideChroma?.let {
-            val cam = Cam.fromInt(color)
-            val tone = CamUtils.lstarFromInt(color)
-            val result = ColorUtils.CAMToColor(cam.hue, it, tone)
-            logColor("Chroma override", result)
-            result
-        } ?: color
-    }
-
-    private fun tryParseColorFromScheme(resStr: String): Int? {
-        val colorScheme = this.colorScheme
-        if (colorScheme == null) {
-            logger.w("No color scheme available")
-            return null
-        }
-
-        val (packageName, category, name) = parseResourceId(resStr)
-        if (packageName != "android" || category != "color") {
-            logger.w("Failed to parse package from $resStr")
-            return null
-        }
-
-        var parts = name.split('_')
-        if (parts.size != 3) {
-            logger.w("Failed to find palette and shade from $name")
-            return null
-        }
-        val (_, paletteKey, shadeKeyStr) = parts
-
-        val palette =
-            when (paletteKey) {
-                "accent1" -> colorScheme.accent1
-                "accent2" -> colorScheme.accent2
-                "accent3" -> colorScheme.accent3
-                "neutral1" -> colorScheme.neutral1
-                "neutral2" -> colorScheme.neutral2
-                else -> return null
-            }
-
-        if (shadeKeyStr.contains("+") || shadeKeyStr.contains("-")) {
-            val signIndex = shadeKeyStr.indexOfLast { it == '-' || it == '+' }
-            // Use the tone of the seed color if it was set explicitly.
-            var baseTone =
-                if (seedColor != null) colorScheme.seedTone.toFloat()
-                else shadeKeyStr.substring(0, signIndex).toFloatOrNull()
-            val diff = shadeKeyStr.substring(signIndex).toFloatOrNull()
-
-            if (baseTone == null) {
-                logger.w("Failed to parse base tone from $shadeKeyStr")
-                return null
-            }
-
-            if (diff == null) {
-                logger.w("Failed to parse relative tone from $shadeKeyStr")
-                return null
-            }
-            return palette.getAtTone(baseTone + diff)
-        } else {
-            val shadeKey = shadeKeyStr.toIntOrNull()
-            if (shadeKey == null) {
-                logger.w("Failed to parse tone from $shadeKeyStr")
-                return null
-            }
-            return palette.allShadesMapped.get(shadeKey) ?: palette.getAtTone(shadeKey.toFloat())
-        }
     }
 
     fun readFontAsset(resStr: String): Typeface = typefaceCache.getTypeface(resStr)
@@ -247,52 +136,6 @@ private constructor(
         }
     }
 
-    fun resolveColorResourceId(resStr: String): Triple<Resources, Int, Float?>? {
-        var (packageName, category, name) = parseResourceId(resStr)
-
-        // Convert relative tonal specifiers to standard
-        val relIndex = name.indexOfLast { it == '_' }
-        val isToneRelative = name.contains("-") || name.contains("+")
-        val targetTone =
-            if (packageName != "android") {
-                null
-            } else if (isToneRelative) {
-                val signIndex = name.indexOfLast { it == '-' || it == '+' }
-                val baseTone = name.substring(relIndex + 1, signIndex).toFloatOrNull()
-                var diff = name.substring(signIndex).toFloatOrNull()
-                if (baseTone == null || diff == null) {
-                    logger.w("Failed to parse relative tone from $name")
-                    return null
-                }
-                baseTone + diff
-            } else {
-                val absTone = name.substring(relIndex + 1).toFloatOrNull()
-                if (absTone == null) {
-                    logger.w("Failed to parse absolute tone from $name")
-                    return null
-                }
-                absTone
-            }
-
-        if (
-            targetTone != null &&
-                (isToneRelative || !TonalPalette.SHADE_KEYS.contains(targetTone.toInt()))
-        ) {
-            val closeTone = TonalPalette.SHADE_KEYS.minBy { abs(it - targetTone) }
-            val prevName = name
-            name = name.substring(0, relIndex + 1) + closeTone
-            logger.i("Converted $prevName to $name")
-        }
-
-        val result = resolveResourceId(packageName, category, name)
-        if (result == null) {
-            return null
-        }
-
-        val (res, resId) = result
-        return Triple(res, resId, targetTone)
-    }
-
     fun resolveResourceId(resStr: String): Pair<Resources, Int>? {
         val (packageName, category, name) = parseResourceId(resStr)
         return resolveResourceId(packageName, category, name)
@@ -328,8 +171,7 @@ private constructor(
         try {
             if (path.startsWith("@")) {
                 val pair = resolveResourceId(path)
-                val colorPair = resolveColorResourceId(path)
-                return pair != null || colorPair != null
+                return pair != null
             } else {
                 val stream = pluginCtx.resources.assets.open("$baseDir$path")
                 if (stream == null) {
@@ -349,37 +191,14 @@ private constructor(
             pluginCtx,
             sysuiCtx,
             baseDir,
-            colorScheme,
             seedColor,
             overrideChroma,
             typefaceCache,
-            getThemeSeedColor,
             messageBuffer ?: logger.buffer,
         )
 
     fun setSeedColor(seedColor: Int?, style: MonetStyle?) {
         this.seedColor = seedColor
-        refreshColorPalette(style)
-    }
-
-    fun refreshColorPalette(style: MonetStyle?) {
-        val seedColor =
-            this.seedColor ?: getThemeSeedColor(sysuiCtx).also { logColor("Theme Seed Color", it) }
-        this.colorScheme =
-            ColorScheme(
-                seedColor,
-                false, // darkTheme is not used for palette generation
-                style ?: MonetStyle.CLOCK,
-            )
-
-        // Enforce low chroma on output colors if low chroma theme is selected
-        this.overrideChroma = run {
-            val cam = colorScheme?.seed?.let { Cam.fromInt(it) }
-            if (cam != null && cam.chroma < LOW_CHROMA_LIMIT) {
-                return@run cam.chroma * LOW_CHROMA_SCALE
-            }
-            return@run null
-        }
     }
 
     fun getClockPaddingStart(): Int {
@@ -427,22 +246,7 @@ private constructor(
         throw Exception("Cannot find id of $name from $TAG")
     }
 
-    private fun logColor(name: String, color: Int) {
-        if (DEBUG_COLOR) {
-            val cam = Cam.fromInt(color)
-            val tone = CamUtils.lstarFromInt(color)
-            logger.i("$name -> (hue: ${cam.hue}, chroma: ${cam.chroma}, tone: $tone)")
-        }
-    }
-
     companion object {
-        private val DEBUG_COLOR = true
-        private val LOW_CHROMA_LIMIT = 15
-        private val LOW_CHROMA_SCALE = 1.5f
         private val TAG = AssetLoader::class.simpleName!!
-
-        private fun getThemeSeedColor(ctx: Context): Int {
-            return ctx.resources.getColor(android.R.color.system_palette_key_color_primary_light)
-        }
     }
 }

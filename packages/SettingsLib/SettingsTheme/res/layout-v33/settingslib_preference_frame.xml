@@ -29,7 +29,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:textAlignment="viewStart"
-        android:text="Title"
         android:maxLines="2"
         android:hyphenationFrequency="normalFast"
         android:lineBreakWordStyle="phrase"
@@ -47,7 +46,6 @@
         android:textAlignment="viewStart"
         android:textColor="?android:attr/textColorSecondary"
         android:maxLines="10"
-        android:text="Summary summary summary"
         android:hyphenationFrequency="normalFast"
         android:lineBreakWordStyle="phrase"
         style="@style/PreferenceSummaryTextStyle"/>

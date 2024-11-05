@@ -57,7 +57,7 @@ import java.util.List;
  * 1. User sets invisible for button. ex: ActionButtonPreference.setButton1Visible(false)
  * 2. User doesn't set any title or icon for button.
  */
-public class ActionButtonsPreference extends Preference {
+public class ActionButtonsPreference extends Preference implements GroupSectionDividerMixin {
 
     private static final String TAG = "ActionButtonPreference";
     private static final boolean mIsAtLeastS = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;

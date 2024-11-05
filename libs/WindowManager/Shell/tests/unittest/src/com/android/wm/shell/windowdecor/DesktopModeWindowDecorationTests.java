@@ -106,6 +106,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -210,6 +211,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private MultiInstanceHelper mMockMultiInstanceHelper;
     @Mock
     private WindowDecorCaptionHandleRepository mMockCaptionHandleRepository;
+    @Mock
+    private DesktopModeEventLogger mDesktopModeEventLogger;
     @Captor
     private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
     @Captor
@@ -259,7 +262,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
         when(mMockHandleMenuFactory.create(any(), any(), anyInt(), any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(), anyInt()))
+                anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(),
+                anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
         when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
@@ -279,7 +283,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration spyWindowDecor =
                 spy(createWindowDecoration(taskInfo));
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, false /* hasGlobalFocus */);
 
         // Menus should close if open before the task being invisible causes relayout to return.
         verify(spyWindowDecor).closeHandleMenu();
@@ -298,7 +302,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mShadowRadiusId).isNotEqualTo(Resources.ID_NULL);
     }
@@ -318,7 +323,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mCornerRadius).isGreaterThan(0);
     }
@@ -343,7 +349,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mWindowDecorConfig.densityDpi).isEqualTo(customTaskDensity);
     }
@@ -369,7 +376,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mWindowDecorConfig.densityDpi).isEqualTo(systemDensity);
     }
@@ -391,7 +399,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.hasInputFeatureSpy()).isTrue();
     }
@@ -412,7 +421,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.hasInputFeatureSpy()).isFalse();
     }
@@ -432,7 +442,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.hasInputFeatureSpy()).isFalse();
     }
@@ -452,7 +463,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(hasNoInputChannelFeature(relayoutParams)).isFalse();
     }
@@ -473,7 +485,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(hasNoInputChannelFeature(relayoutParams)).isTrue();
     }
@@ -494,7 +507,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(hasNoInputChannelFeature(relayoutParams)).isTrue();
     }
@@ -516,7 +530,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat((relayoutParams.mInsetSourceFlags & FLAG_FORCE_CONSUMING) != 0).isTrue();
     }
@@ -539,7 +554,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat((relayoutParams.mInsetSourceFlags & FLAG_FORCE_CONSUMING) == 0).isTrue();
     }
@@ -560,7 +576,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(
                 (relayoutParams.mInsetSourceFlags & FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR) != 0)
@@ -583,7 +600,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(
                 (relayoutParams.mInsetSourceFlags & FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR) == 0)
@@ -612,7 +630,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ true,
-                insetsState);
+                insetsState,
+                /* hasGlobalFocus= */ true);
 
         // Takes status bar inset as padding, ignores caption bar inset.
         assertThat(relayoutParams.mCaptionTopPadding).isEqualTo(50);
@@ -634,7 +653,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ true,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mIsInsetSource).isFalse();
     }
@@ -655,7 +675,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ false,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         // Header is always shown because it's assumed the status bar is always visible.
         assertThat(relayoutParams.mIsCaptionVisible).isTrue();
@@ -676,7 +697,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mIsCaptionVisible).isTrue();
     }
@@ -696,7 +718,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ false,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mIsCaptionVisible).isFalse();
     }
@@ -716,7 +739,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ true,
                 /* inFullImmersiveMode */ false,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mIsCaptionVisible).isFalse();
     }
@@ -737,7 +761,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ true,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mIsCaptionVisible).isTrue();
 
@@ -750,7 +775,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ false,
                 /* isKeyguardVisibleAndOccluded */ false,
                 /* inFullImmersiveMode */ true,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mIsCaptionVisible).isFalse();
     }
@@ -771,7 +797,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ true,
                 /* inFullImmersiveMode */ true,
-                new InsetsState());
+                new InsetsState(),
+                /* hasGlobalFocus= */ true);
 
         assertThat(relayoutParams.mIsCaptionVisible).isFalse();
     }
@@ -782,7 +809,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockTransaction).apply();
         verify(mMockRootSurfaceControl, never()).applyTransactionOnDraw(any());
@@ -797,7 +824,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         // Make non-resizable to avoid dealing with input-permissions (MONITOR_INPUT)
         taskInfo.isResizeable = false;
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockTransaction, never()).apply();
         verify(mMockRootSurfaceControl).applyTransactionOnDraw(mMockTransaction);
@@ -809,7 +836,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockSurfaceControlViewHostFactory, never()).create(any(), any(), any());
     }
@@ -821,7 +848,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
         ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         // Once for view host, the other for the AppHandle input layer.
         verify(mMockHandler, times(2)).post(runnableArgument.capture());
@@ -838,7 +865,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         // Make non-resizable to avoid dealing with input-permissions (MONITOR_INPUT)
         taskInfo.isResizeable = false;
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockSurfaceControlViewHostFactory).create(any(), any(), any());
         verify(mMockHandler, never()).post(any());
@@ -850,11 +877,11 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
         // Once for view host, the other for the AppHandle input layer.
         verify(mMockHandler, times(2)).post(runnableArgument.capture());
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockHandler).removeCallbacks(runnableArgument.getValue());
     }
@@ -865,7 +892,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
         // Once for view host, the other for the AppHandle input layer.
         verify(mMockHandler, times(2)).post(runnableArgument.capture());
 
@@ -882,8 +909,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 new FakeMaximizeMenuFactory(menu));
         assertFalse(decoration.isMaximizeMenuActive());
 
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
 
+        verify(menu).show(anyBoolean(), anyInt(), anyBoolean(), anyBoolean(), any(), any(), any(),
+                any(), mOnMaxMenuHoverChangeListener.capture(), any());
         assertTrue(decoration.isMaximizeMenuActive());
     }
 
@@ -894,7 +923,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 new FakeMaximizeMenuFactory(menu));
         decoration.setAppHeaderMaximizeButtonHovered(false);
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
+        verify(menu).show(anyBoolean(), anyInt(), anyBoolean(), anyBoolean(), any(), any(), any(),
+                any(), mOnMaxMenuHoverChangeListener.capture(), any());
 
         mOnMaxMenuHoverChangeListener.getValue().invoke(false);
 
@@ -913,7 +944,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 new FakeMaximizeMenuFactory(menu));
         decoration.setAppHeaderMaximizeButtonHovered(true);
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
 
         decoration.setAppHeaderMaximizeButtonHovered(false);
 
@@ -931,7 +962,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final MaximizeMenu menu = mock(MaximizeMenu.class);
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 new FakeMaximizeMenuFactory(menu));
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
+        verify(menu).show(anyBoolean(), anyInt(), anyBoolean(), anyBoolean(), any(), any(), any(),
+                any(), mOnMaxMenuHoverChangeListener.capture(), any());
 
         mOnMaxMenuHoverChangeListener.getValue().invoke(true);
 
@@ -944,13 +977,114 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final MaximizeMenu menu = mock(MaximizeMenu.class);
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 new FakeMaximizeMenuFactory(menu));
-        createMaximizeMenu(decoration, menu);
+        createMaximizeMenu(decoration);
+        verify(menu).show(anyBoolean(), anyInt(), anyBoolean(), anyBoolean(), any(), any(), any(),
+                any(), mOnMaxMenuHoverChangeListener.capture(), any());
 
         decoration.setAppHeaderMaximizeButtonHovered(true);
 
         verify(mMockHandler).removeCallbacks(any());
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void createMaximizeMenu_taskRequestsImmersive_showsImmersiveOption() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        taskInfo.requestedVisibleTypes = ~statusBars();
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+
+        createMaximizeMenu(decoration);
+
+        verify(menu).show(
+                anyBoolean(),
+                anyInt(),
+                /* showImmersiveOption= */ eq(true),
+                anyBoolean(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void createMaximizeMenu_taskDoesNotRequestImmersive_hiddenImmersiveOption() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        taskInfo.requestedVisibleTypes = statusBars();
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+
+        createMaximizeMenu(decoration);
+
+        verify(menu).show(
+                anyBoolean(),
+                anyInt(),
+                /* showImmersiveOption= */ eq(false),
+                anyBoolean(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void createMaximizeMenu_taskResizable_showsSnapOptions() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        taskInfo.isResizeable = true;
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+
+        createMaximizeMenu(decoration);
+
+        verify(menu).show(
+                anyBoolean(),
+                anyInt(),
+                anyBoolean(),
+                /* showSnapOptions= */ eq(true),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void createMaximizeMenu_taskUnresizable_hiddenSnapOptions() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        taskInfo.isResizeable = false;
+        final MaximizeMenu menu = mock(MaximizeMenu.class);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                new FakeMaximizeMenuFactory(menu));
+
+        createMaximizeMenu(decoration);
+
+        verify(menu).show(
+                anyBoolean(),
+                anyInt(),
+                anyBoolean(),
+                /* showSnapOptions= */ eq(false),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+    }
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
@@ -998,7 +1132,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         runnableArgument.getValue().run();
 
         // Relayout decor with same captured link
-        decor.relayout(taskInfo);
+        decor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         // Verify handle menu's browser link not set to captured link since link is expired
         createHandleMenu(decor);
@@ -1044,10 +1178,12 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 any(),
+                any(),
                 openInBrowserCaptor.capture(),
                 any(),
                 any(),
-                any()
+                any(),
+                anyBoolean()
         );
         openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
 
@@ -1073,10 +1209,12 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 any(),
+                any(),
                 openInBrowserCaptor.capture(),
                 any(),
                 any(),
-                any()
+                any(),
+                anyBoolean()
         );
 
         openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
@@ -1127,8 +1265,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 any(),
+                any(),
                 closeClickListener.capture(),
-                any()
+                any(),
+                anyBoolean()
         );
 
         closeClickListener.getValue().invoke();
@@ -1138,7 +1278,33 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    public void createHandleMenu_immersiveWindow_forceShowsSystemBars() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
+                true /* relayout */);
+        when(mMockDesktopRepository.isTaskInFullImmersiveState(taskInfo.taskId))
+                .thenReturn(true);
+
+        createHandleMenu(decoration);
+
+        verify(mMockHandleMenu).show(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                /* forceShowSystemBars= */ eq(true)
+        );
+    }
+
+    @Test
+    @DisableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION,
+            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION})
     public void notifyCaptionStateChanged_flagDisabled_doNoNotify() {
         when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
@@ -1147,7 +1313,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockCaptionHandleRepository, never()).notifyCaptionChanged(any());
     }
@@ -1164,7 +1330,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
                 CaptionState.class);
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockCaptionHandleRepository, atLeastOnce()).notifyCaptionChanged(
                 captionStateArgumentCaptor.capture());
@@ -1191,7 +1357,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
                 CaptionState.class);
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
         verify(mMockAppHeaderViewHolder, atLeastOnce()).runOnAppChipGlobalLayout(
                 runnableArgumentCaptor.capture());
         runnableArgumentCaptor.getValue().invoke();
@@ -1214,7 +1380,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
                 CaptionState.class);
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, false /* hasGlobalFocus */);
 
         verify(mMockCaptionHandleRepository, atLeastOnce()).notifyCaptionChanged(
                 captionStateArgumentCaptor.capture());
@@ -1234,7 +1400,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
                 CaptionState.class);
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
         createHandleMenu(spyWindowDecor);
 
         verify(mMockCaptionHandleRepository, atLeastOnce()).notifyCaptionChanged(
@@ -1259,7 +1425,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
                 CaptionState.class);
 
-        spyWindowDecor.relayout(taskInfo);
+        spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
         createHandleMenu(spyWindowDecor);
         spyWindowDecor.closeHandleMenu();
 
@@ -1276,18 +1442,18 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
         verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
-                any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 argThat(intent -> (uri == null && intent == null) || intent.getData().equals(uri)),
-                anyInt(), anyInt(), anyInt());
+                anyInt(), anyInt(), anyInt(), anyInt());
     }
 
-    private void createMaximizeMenu(DesktopModeWindowDecoration decoration, MaximizeMenu menu) {
+    private void createMaximizeMenu(DesktopModeWindowDecoration decoration) {
         final Function0<Unit> l = () -> Unit.INSTANCE;
         decoration.setOnMaximizeOrRestoreClickListener(l);
+        decoration.setOnImmersiveOrRestoreClickListener(l);
         decoration.setOnLeftSnapClickListener(l);
         decoration.setOnRightSnapClickListener(l);
         decoration.createMaximizeMenu();
-        verify(menu).show(any(), any(), any(), mOnMaxMenuHoverChangeListener.capture(), any());
     }
 
     private void fillRoundedCornersResources(int fillValue) {
@@ -1349,14 +1515,14 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
                 new WindowManagerWrapper(mMockWindowManager), mMockSurfaceControlViewHostFactory,
                 maximizeMenuFactory, mMockHandleMenuFactory,
-                mMockMultiInstanceHelper, mMockCaptionHandleRepository);
+                mMockMultiInstanceHelper, mMockCaptionHandleRepository, mDesktopModeEventLogger);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);
         windowDecor.setExclusionRegionListener(mMockExclusionRegionListener);
         windowDecor.setOpenInBrowserClickListener(mMockOpenInBrowserClickListener);
         windowDecor.mDecorWindowContext = mContext;
         if (relayout) {
-            windowDecor.relayout(taskInfo);
+            windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
         }
         return windowDecor;
     }

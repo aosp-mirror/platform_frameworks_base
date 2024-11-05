@@ -22,7 +22,7 @@ import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Logic around the keyguard being enabled/disabled, per [KeyguardService]. If the keyguard is not
@@ -74,11 +74,9 @@ constructor(
             .onEach { SceneContainerFlag.assertInLegacyMode() }
             // Whenever the keyguard is disabled...
             .filter { enabled -> !enabled }
-            .sampleCombine(
-                internalTransitionInteractor.currentTransitionInfoInternal,
-                biometricSettingsRepository.isCurrentUserInLockdown,
-            )
-            .map { (_, transitionInfo, inLockdown) ->
+            .sample(biometricSettingsRepository.isCurrentUserInLockdown, ::Pair)
+            .map { (_, inLockdown) ->
+                val transitionInfo = internalTransitionInteractor.currentTransitionInfoInternal()
                 // ...we hide the keyguard, if it's showing and we're not in lockdown. In that case,
                 // we want to remember that and re-show it when keyguard is enabled again.
                 transitionInfo.to != KeyguardState.GONE && !inLockdown
@@ -93,11 +91,10 @@ constructor(
             if (!SceneContainerFlag.isEnabled) {
                 repository.isKeyguardEnabled
                     .filter { enabled -> !enabled }
-                    .sampleCombine(
-                        biometricSettingsRepository.isCurrentUserInLockdown,
-                        internalTransitionInteractor.currentTransitionInfoInternal,
-                    )
-                    .collect { (_, inLockdown, currentTransitionInfo) ->
+                    .sample(biometricSettingsRepository.isCurrentUserInLockdown, ::Pair)
+                    .collect { (_, inLockdown) ->
+                        val currentTransitionInfo =
+                            internalTransitionInteractor.currentTransitionInfoInternal()
                         if (currentTransitionInfo.to != KeyguardState.GONE && !inLockdown) {
                             keyguardDismissTransitionInteractor.startDismissKeyguardTransition(
                                 "keyguard disabled"

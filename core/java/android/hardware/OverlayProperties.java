@@ -50,6 +50,8 @@ public final class OverlayProperties implements Parcelable {
     // Invoked on destruction
     private Runnable mCloser;
 
+    private LutProperties[] mLutProperties;
+
     private OverlayProperties(long nativeObject) {
         if (nativeObject != 0) {
             mCloser = sRegistry.registerNativeAllocation(this, nativeObject);
@@ -67,6 +69,20 @@ public final class OverlayProperties implements Parcelable {
             sDefaultOverlayProperties = new OverlayProperties(nCreateDefault());
         }
         return sDefaultOverlayProperties;
+    }
+
+    /**
+     * Gets the lut properties of the display.
+     * @hide
+     */
+    public LutProperties[] getLutProperties() {
+        if (mNativeObject == 0) {
+            return null;
+        }
+        if (mLutProperties == null) {
+            mLutProperties = nGetLutProperties(mNativeObject);
+        }
+        return mLutProperties;
     }
 
     /**
@@ -140,4 +156,5 @@ public final class OverlayProperties implements Parcelable {
             long nativeObject, int dataspace, int format);
     private static native void nWriteOverlayPropertiesToParcel(long nativeObject, Parcel dest);
     private static native long nReadOverlayPropertiesFromParcel(Parcel in);
+    private static native LutProperties[] nGetLutProperties(long nativeObject);
 }

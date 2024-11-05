@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
-import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -29,8 +29,8 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * View model for describing the system's current mobile cellular connections. The result is a list
@@ -116,7 +116,7 @@ constructor(
 
     private fun createViewModel(subId: Int): Pair<MobileIconViewModel, CoroutineScope> {
         // Create a child scope so we can cancel it
-        val vmScope = scope.createChildScope(createCoroutineTracingContext("MobileIconViewModel"))
+        val vmScope = scope.createChildScope(newTracingContext("MobileIconViewModel"))
         val vm =
             MobileIconViewModel(
                 subId,

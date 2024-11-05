@@ -93,14 +93,15 @@ class InputManagerServiceTests {
         )
     }
 
-    @JvmField
-    @Rule
+    @get:Rule
     val extendedMockitoRule =
-        ExtendedMockitoRule.Builder(this).mockStatic(LocalServices::class.java)
-            .mockStatic(PermissionChecker::class.java).build()!!
+        ExtendedMockitoRule.Builder(this)
+            .mockStatic(LocalServices::class.java)
+            .mockStatic(PermissionChecker::class.java)
+            .mockStatic(KeyCharacterMap::class.java)
+            .build()!!
 
-    @JvmField
-    @Rule
+    @get:Rule
     val setFlagsRule = SetFlagsRule()
 
     @get:Rule
@@ -123,6 +124,9 @@ class InputManagerServiceTests {
 
     @Mock
     private lateinit var kbdController: InputManagerService.KeyboardBacklightControllerInterface
+
+    @Mock
+    private lateinit var kcm: KeyCharacterMap
 
     private lateinit var service: InputManagerService
     private lateinit var localService: InputManagerInternal
@@ -173,6 +177,9 @@ class InputManagerServiceTests {
         ExtendedMockito.doReturn(packageManagerInternal).`when` {
             LocalServices.getService(eq(PackageManagerInternal::class.java))
         }
+        ExtendedMockito.doReturn(kcm).`when` {
+            KeyCharacterMap.load(anyInt())
+        }
 
         assertTrue("Local service must be registered", this::localService.isInitialized)
         service.setWindowManagerCallbacks(wmCallbacks)
@@ -208,6 +215,7 @@ class InputManagerServiceTests {
         verify(native).setTouchpadTapDraggingEnabled(anyBoolean())
         verify(native).setShouldNotifyTouchpadHardwareState(anyBoolean())
         verify(native).setTouchpadRightClickZoneEnabled(anyBoolean())
+        verify(native).setTouchpadThreeFingerTapShortcutEnabled(anyBoolean())
         verify(native).setShowTouches(anyBoolean())
         verify(native).setMotionClassifierEnabled(anyBoolean())
         verify(native).setMaximumObscuringOpacityForTouch(anyFloat())

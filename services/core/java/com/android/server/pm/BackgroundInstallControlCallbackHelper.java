@@ -35,6 +35,7 @@ public class BackgroundInstallControlCallbackHelper {
 
     @VisibleForTesting static final String FLAGGED_PACKAGE_NAME_KEY = "packageName";
     @VisibleForTesting static final String FLAGGED_USER_ID_KEY = "userId";
+    @VisibleForTesting static final String INSTALL_EVENT_TYPE_KEY = "installEventType";
     private static final String TAG = "BackgroundInstallControlCallbackHelper";
 
     private final Handler mHandler;
@@ -74,10 +75,14 @@ public class BackgroundInstallControlCallbackHelper {
      * Invokes all registered callbacks Callbacks are processed through user provided-threads and
      * parameters are passed in via {@link BackgroundInstallControlManager} InstallEvent
      */
-    public void notifyAllCallbacks(int userId, String packageName) {
+    public void notifyAllCallbacks(
+            int userId,
+            String packageName,
+            @BackgroundInstallControlService.InstallEventType int installEventType) {
         Bundle extras = new Bundle();
         extras.putCharSequence(FLAGGED_PACKAGE_NAME_KEY, packageName);
         extras.putInt(FLAGGED_USER_ID_KEY, userId);
+        extras.putInt(INSTALL_EVENT_TYPE_KEY, installEventType);
         synchronized (mCallbacks) {
             mHandler.post(
                     () ->

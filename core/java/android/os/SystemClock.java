@@ -62,7 +62,7 @@ import java.time.ZoneOffset;
  *     sleep (CPU off, display dark, device waiting for external input),
  *     but is not affected by clock scaling, idle, or other power saving
  *     mechanisms.  This is the basis for most interval timing
- *     such as {@link Thread#sleep(long) Thread.sleep(millls)},
+ *     such as {@link Thread#sleep(long) Thread.sleep(millis)},
  *     {@link Object#wait(long) Object.wait(millis)}, and
  *     {@link System#nanoTime System.nanoTime()}.  This clock is guaranteed
  *     to be monotonic, and is suitable for interval timing when the

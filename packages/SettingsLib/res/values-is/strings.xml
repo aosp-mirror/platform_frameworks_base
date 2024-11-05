@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Virkjar eiginleika aukinnar tengigetu."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Staðbundin skipanalína"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Virkja skipanalínuforrit sem leyfir staðbundinn skeljaraðgang"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Þróunarumhverfi Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Keyra Linux-útstöð í Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-athugun"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Velja virkni HDCP-ath."</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Villuleit"</string>
@@ -585,7 +587,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Þessi tölva (innbyggður)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Hljóðnemi (innbyggður)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Hátalaradokka"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ytra tæki"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Tengt tæki"</string>
@@ -687,10 +688,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Virkt"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Endurræsa þarf tækið til að þessi breyting taki gildi. Endurræstu núna eða hættu við."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Heyrnartól með snúru"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Heyrnartól"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB-hátalari"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Hljóðnematengi"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB-hljóðnemi"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Heyrnartól með snúru"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-hljóð"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Hljóðnemi með snúru"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-hljóðnemi"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT-hljóðnemi"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Kveikt"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Slökkt"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Skiptir um farsímakerfi"</string>

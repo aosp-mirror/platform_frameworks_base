@@ -83,11 +83,7 @@ constructor(
             }
 
         val state = remember {
-            MutableSceneTransitionLayoutState(
-                currentScene,
-                ClockTransition.defaultClockTransitions,
-                enableInterruptions = false,
-            )
+            MutableSceneTransitionLayoutState(currentScene, ClockTransition.defaultClockTransitions)
         }
 
         // Update state whenever currentSceneKey has changed.
@@ -102,7 +98,7 @@ constructor(
                 scene(splitShadeLargeClockScene) {
                     LargeClockWithSmartSpace(
                         smartSpacePaddingTop = smartSpacePaddingTop,
-                        shouldOffSetClockToOneHalf = !hasCustomPositionUpdatedAnimation
+                        shouldOffSetClockToOneHalf = !hasCustomPositionUpdatedAnimation,
                     )
                 }
 
@@ -114,21 +110,15 @@ constructor(
                 }
 
                 scene(smallClockScene) {
-                    SmallClockWithSmartSpace(
-                        smartSpacePaddingTop = smartSpacePaddingTop,
-                    )
+                    SmallClockWithSmartSpace(smartSpacePaddingTop = smartSpacePaddingTop)
                 }
 
                 scene(largeClockScene) {
-                    LargeClockWithSmartSpace(
-                        smartSpacePaddingTop = smartSpacePaddingTop,
-                    )
+                    LargeClockWithSmartSpace(smartSpacePaddingTop = smartSpacePaddingTop)
                 }
 
                 scene(WeatherClockScenes.largeClockScene) {
-                    WeatherLargeClockWithSmartSpace(
-                        smartSpacePaddingTop = smartSpacePaddingTop,
-                    )
+                    WeatherLargeClockWithSmartSpace(smartSpacePaddingTop = smartSpacePaddingTop)
                 }
 
                 scene(WeatherClockScenes.splitShadeLargeClockScene) {
@@ -154,7 +144,7 @@ constructor(
                 SmallClock(
                     burnInParams = burnIn.parameters,
                     onTopChanged = burnIn.onSmallClockTopChanged,
-                    modifier = Modifier.wrapContentSize()
+                    modifier = Modifier.wrapContentSize(),
                 )
             }
             with(smartSpaceSection) {
@@ -202,7 +192,7 @@ constructor(
                                     y = 0,
                                 )
                             }
-                        }
+                        },
                 )
             }
         }
@@ -226,10 +216,7 @@ constructor(
         Column(modifier = modifier) {
             val currentClock = currentClockState.value ?: return@Column
             with(weatherClockSection) {
-                Time(
-                    clock = currentClock,
-                    burnInParams = burnIn.parameters,
-                )
+                Time(clock = currentClock, burnInParams = burnIn.parameters)
             }
             val density = LocalDensity.current
             val context = LocalContext.current
@@ -242,7 +229,7 @@ constructor(
                     modifier =
                         Modifier.heightIn(
                             min = getDimen(context, "enhanced_smartspace_height", density)
-                        )
+                        ),
                 )
             }
             with(weatherClockSection) {

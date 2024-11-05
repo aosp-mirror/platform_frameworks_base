@@ -26,5 +26,11 @@ public interface FocusTransitionListener {
     /**
      * Called when a transition changes the top, focused display.
      */
-    void onFocusedDisplayChanged(int displayId);
+    default void onFocusedDisplayChanged(int displayId) {}
+
+    /**
+     * Called when the per-app or system-wide focus state has changed for a task.
+     */
+    default void onFocusedTaskChanged(int taskId, boolean isFocusedOnDisplay,
+            boolean isFocusedGlobally) {}
 }

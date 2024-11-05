@@ -1081,7 +1081,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayRotation dr = dc.getDisplayRotation();
         spyOn(dr);
         doReturn(false).when(dr).useDefaultSettingsProvider();
-        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setComponent(getUniqueComponentName(mContext.getPackageName())).build();
         app.setOrientation(SCREEN_ORIENTATION_LANDSCAPE, app);
 
         assertFalse(dc.getRotationReversionController().isAnyOverrideActive());
@@ -1608,8 +1609,10 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityRecord app = mAppWindow.mActivityRecord;
         app.setVisible(false);
-        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
-        mDisplayContent.mOpeningApps.add(app);
+        app.setVisibleRequested(false);
+        registerTestTransitionPlayer();
+        mDisplayContent.requestTransitionAndLegacyPrepare(WindowManager.TRANSIT_OPEN, 0);
+        app.setVisibility(true);
         final int newOrientation = getRotatedOrientation(mDisplayContent);
         app.setRequestedOrientation(newOrientation);
 
@@ -1640,14 +1643,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(state.isSourceOrDefaultVisible(statusBarId, statusBars()),
                 rotatedState.isSourceOrDefaultVisible(statusBarId, statusBars()));
 
-        final Rect outFrame = new Rect();
-        final Rect outInsets = new Rect();
-        final Rect outStableInsets = new Rect();
-        final Rect outSurfaceInsets = new Rect();
-        mAppWindow.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
-        // The animation frames should not be rotated because display hasn't rotated.
-        assertEquals(mDisplayContent.getBounds(), outFrame);
-
         // The display should keep current orientation and the rotated configuration should apply
         // to the activity.
         assertEquals(config.orientation, mDisplayContent.getConfiguration().orientation);
@@ -1675,9 +1670,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // Launch another activity before the transition is finished.
         final Task task2 = new TaskBuilder(mSupervisor).setDisplay(mDisplayContent).build();
         final ActivityRecord app2 = new ActivityBuilder(mAtm).setTask(task2)
-                .setUseProcess(app.app).build();
-        app2.setVisible(false);
-        mDisplayContent.mOpeningApps.add(app2);
+                .setUseProcess(app.app).setVisible(false).build();
+        app2.setVisibility(true);
         app2.setRequestedOrientation(newOrientation);
 
         // The activity should share the same transform state as the existing one. The activity
@@ -1700,14 +1694,15 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(mImeWindow.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
 
         // The fixed rotation transform can only be finished when all animation finished.
-        doReturn(false).when(app2).isAnimating(anyInt(), anyInt());
-        mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app2.token);
+        doReturn(false).when(app2).inTransition();
+        mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app2.token);
         assertTrue(app.hasFixedRotationTransform());
         assertTrue(app2.hasFixedRotationTransform());
 
         // The display should be rotated after the launch is finished.
-        doReturn(false).when(app).isAnimating(anyInt(), anyInt());
-        mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
+        app.setVisible(true);
+        doReturn(false).when(app).inTransition();
+        mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
         mStatusBarWindow.finishSeamlessRotation(t);
         mNavBarWindow.finishSeamlessRotation(t);
 
@@ -1725,7 +1720,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final Task task = app.getTask();
         final ActivityRecord app2 = new ActivityBuilder(mWm.mAtmService).setTask(task).build();
         mDisplayContent.setFixedRotationLaunchingApp(app2, (mDisplayContent.getRotation() + 1) % 4);
-        doReturn(true).when(app).inTransitionSelfOrParent();
+        doReturn(true).when(app).inTransition();
         // If the task contains a transition, this should be no-op.
         mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
 
@@ -1735,7 +1730,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // The display should be unlikely to be in transition, but if it happens, the fixed
         // rotation should proceed to finish because the activity/task level transition is finished.
         doReturn(true).when(mDisplayContent).inTransition();
-        doReturn(false).when(app).inTransitionSelfOrParent();
+        doReturn(false).when(app).inTransition();
         // Although this notifies app instead of app2 that uses the fixed rotation, app2 should
         // still finish the transform because there is no more transition event.
         mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);

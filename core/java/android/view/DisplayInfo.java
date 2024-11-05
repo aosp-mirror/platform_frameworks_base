@@ -198,6 +198,18 @@ public final class DisplayInfo implements Parcelable {
     public float renderFrameRate;
 
     /**
+     * If {@code true} this Display supports adaptive refresh rates.
+     * // TODO(b/372526856) Add a link to the documentation for ARR.
+     */
+    public boolean hasArrSupport;
+
+    /**
+     * Represents frame rate for the FrameRateCategory Normal and High.
+     * @see android.view.Display#getSuggestedFrameRate(int) for more details.
+     */
+    public FrameRateCategoryRate frameRateCategoryRate;
+
+    /**
      * The default display mode.
      */
     public int defaultModeId;
@@ -436,6 +448,8 @@ public final class DisplayInfo implements Parcelable {
                 && rotation == other.rotation
                 && modeId == other.modeId
                 && renderFrameRate == other.renderFrameRate
+                && hasArrSupport == other.hasArrSupport
+                && Objects.equals(frameRateCategoryRate, other.frameRateCategoryRate)
                 && defaultModeId == other.defaultModeId
                 && userPreferredModeId == other.userPreferredModeId
                 && Arrays.equals(supportedModes, other.supportedModes)
@@ -497,6 +511,8 @@ public final class DisplayInfo implements Parcelable {
         rotation = other.rotation;
         modeId = other.modeId;
         renderFrameRate = other.renderFrameRate;
+        hasArrSupport = other.hasArrSupport;
+        frameRateCategoryRate = other.frameRateCategoryRate;
         defaultModeId = other.defaultModeId;
         userPreferredModeId = other.userPreferredModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
@@ -553,6 +569,9 @@ public final class DisplayInfo implements Parcelable {
         rotation = source.readInt();
         modeId = source.readInt();
         renderFrameRate = source.readFloat();
+        hasArrSupport = source.readBoolean();
+        frameRateCategoryRate = source.readParcelable(null,
+                android.view.FrameRateCategoryRate.class);
         defaultModeId = source.readInt();
         userPreferredModeId = source.readInt();
         int nModes = source.readInt();
@@ -626,6 +645,8 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(rotation);
         dest.writeInt(modeId);
         dest.writeFloat(renderFrameRate);
+        dest.writeBoolean(hasArrSupport);
+        dest.writeParcelable(frameRateCategoryRate, flags);
         dest.writeInt(defaultModeId);
         dest.writeInt(userPreferredModeId);
         dest.writeInt(supportedModes.length);
@@ -871,6 +892,10 @@ public final class DisplayInfo implements Parcelable {
         sb.append(modeId);
         sb.append(", renderFrameRate ");
         sb.append(renderFrameRate);
+        sb.append(", hasArrSupport ");
+        sb.append(hasArrSupport);
+        sb.append(", frameRateCategoryRate ");
+        sb.append(frameRateCategoryRate);
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
         sb.append(", userPreferredModeId ");

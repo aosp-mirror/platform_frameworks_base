@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal
 
+import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
@@ -77,7 +78,11 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     @Before
     fun setUp() {
         with(kosmos) {
-            fakeSettings.putInt(Settings.System.SCREEN_OFF_TIMEOUT, SCREEN_TIMEOUT)
+            fakeSettings.putIntForUser(
+                Settings.System.SCREEN_OFF_TIMEOUT,
+                SCREEN_TIMEOUT,
+                UserHandle.USER_CURRENT,
+            )
             kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
 
             underTest =

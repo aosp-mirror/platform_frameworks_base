@@ -148,13 +148,13 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Inject
     public NotificationShadeWindowControllerImpl(
-            Context context,
+            @ShadeDisplayAware Context context,
             WindowRootViewComponent.Factory windowRootViewComponentFactory,
             ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             IActivityManager activityManager,
             DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             KeyguardViewMediator keyguardViewMediator,
             KeyguardBypassController keyguardBypassController,
             @Main Executor mainExecutor,

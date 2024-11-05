@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
  * Setup: Launch A|B in split and secondaryApp, return to home. Transitions: Let AE Split A|B enter
  * splitscreen with secondaryApp. Resulting in A|B|secondaryApp.
  *
- * To run this test: `atest FlickerTestsOther:EnterSystemSplitTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:EnterSystemSplitTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

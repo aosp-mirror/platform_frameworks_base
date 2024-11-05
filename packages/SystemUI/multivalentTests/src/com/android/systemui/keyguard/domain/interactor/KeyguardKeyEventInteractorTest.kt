@@ -32,6 +32,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -46,12 +47,14 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.isNull
 
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardKeyEventInteractorTest : SysuiTestCase() {
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
+    private val kosmos = testKosmos()
 
     private val actionDownVolumeDownKeyEvent =
         KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_DOWN)
@@ -84,6 +87,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
                 mediaSessionLegacyHelperWrapper,
                 backActionInteractor,
                 powerInteractor,
+                kosmos.keyguardMediaKeyInteractor,
             )
     }
 
@@ -96,7 +100,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             .sendVolumeKeyEvent(
                 eq(actionDownVolumeDownKeyEvent),
                 eq(AudioManager.USE_DEFAULT_STREAM_TYPE),
-                eq(true)
+                eq(true),
             )
 
         assertThat(underTest.dispatchKeyEvent(actionDownVolumeUpKeyEvent)).isTrue()
@@ -104,7 +108,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             .sendVolumeKeyEvent(
                 eq(actionDownVolumeUpKeyEvent),
                 eq(AudioManager.USE_DEFAULT_STREAM_TYPE),
-                eq(true)
+                eq(true),
             )
     }
 
@@ -117,7 +121,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             .sendVolumeKeyEvent(
                 eq(actionDownVolumeDownKeyEvent),
                 eq(AudioManager.USE_DEFAULT_STREAM_TYPE),
-                eq(true)
+                eq(true),
             )
 
         assertThat(underTest.dispatchKeyEvent(actionDownVolumeUpKeyEvent)).isFalse()
@@ -125,7 +129,7 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             .sendVolumeKeyEvent(
                 eq(actionDownVolumeUpKeyEvent),
                 eq(AudioManager.USE_DEFAULT_STREAM_TYPE),
-                eq(true)
+                eq(true),
             )
     }
 
@@ -135,7 +139,9 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
         whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
 
-        verifyActionUpCollapsesTheShade(KeyEvent.KEYCODE_MENU)
+        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MENU)
+        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isTrue()
+        verify(statusBarKeyguardViewManager).dismissWithAction(any(), isNull(), eq(false))
     }
 
     @Test

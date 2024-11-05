@@ -24,6 +24,8 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.platform.test.annotations.DisabledOnRavenwood;
 
+import androidx.test.platform.app.InstrumentationRegistry;
+
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import org.junit.rules.TestRule;
@@ -139,7 +141,10 @@ public final class RavenwoodRule implements TestRule {
         /**
          * Configure a "main" thread to be available for the duration of the test, as defined
          * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
+         *
+         * @deprecated
          */
+        @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
             mBuilder.setProvideMainThread(provideMainThread);
             return this;
@@ -216,8 +221,7 @@ public final class RavenwoodRule implements TestRule {
      */
     @Deprecated
     public Context getContext() {
-        return Objects.requireNonNull(mConfiguration.mInstContext,
-                "Context is only available during @Test execution");
+        return InstrumentationRegistry.getInstrumentation().getContext();
     }
 
     /**
@@ -227,8 +231,7 @@ public final class RavenwoodRule implements TestRule {
      */
     @Deprecated
     public Instrumentation getInstrumentation() {
-        return Objects.requireNonNull(mConfiguration.mInstrumentation,
-                "Instrumentation is only available during @Test execution");
+        return InstrumentationRegistry.getInstrumentation();
     }
 
     @Override
@@ -239,15 +242,11 @@ public final class RavenwoodRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                RavenwoodAwareTestRunnerHook.onRavenwoodRuleEnter(
-                        RavenwoodAwareTestRunner.getCurrentRunner(), description,
-                        RavenwoodRule.this);
+                RavenwoodAwareTestRunner.onRavenwoodRuleEnter(description, RavenwoodRule.this);
                 try {
                     base.evaluate();
                 } finally {
-                    RavenwoodAwareTestRunnerHook.onRavenwoodRuleExit(
-                            RavenwoodAwareTestRunner.getCurrentRunner(), description,
-                            RavenwoodRule.this);
+                    RavenwoodAwareTestRunner.onRavenwoodRuleExit(description, RavenwoodRule.this);
                 }
             }
         };

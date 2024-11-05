@@ -29,7 +29,11 @@
 
 #include "core_jni_helpers.h"
 
+#include "android_app_PropertyInvalidatedCache.h"
+
 namespace {
+
+using namespace android::app::PropertyInvalidatedCache;
 
 // Atomics should be safe to use across processes if they are lock free.
 static_assert(std::atomic<int64_t>::is_always_lock_free == true,
@@ -64,12 +68,15 @@ public:
     void setLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis(int64_t offset) {
         latestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis = offset;
     }
+
+    // The nonce storage for pic.  The sizing is suitable for the system server module.
+    SystemCacheNonce systemPic;
 };
 
 // Update the expected value when modifying the members of SharedMemory.
 // The goal of this assertion is to ensure that the data structure is the same size across 32-bit
 // and 64-bit systems.
-static_assert(sizeof(SharedMemory) == 8, "Unexpected SharedMemory size");
+static_assert(sizeof(SharedMemory) == 8 + sizeof(SystemCacheNonce), "Unexpected SharedMemory size");
 
 static jint nativeCreate(JNIEnv* env, jclass) {
     // Create anonymous shared memory region
@@ -133,6 +140,12 @@ static jlong nativeGetLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMilli
     return sharedMemory->getLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis();
 }
 
+// This is a FastNative method.  It takes the usual JNIEnv* and jclass* arguments.
+static jlong nativeGetSystemNonceBlock(JNIEnv*, jclass*, jlong ptr) {
+    SharedMemory* sharedMemory = reinterpret_cast<SharedMemory*>(ptr);
+    return reinterpret_cast<jlong>(&sharedMemory->systemPic);
+}
+
 static const JNINativeMethod gMethods[] = {
         {"nativeCreate", "()I", (void*)nativeCreate},
         {"nativeMap", "(IZ)J", (void*)nativeMap},
@@ -143,15 +156,16 @@ static const JNINativeMethod gMethods[] = {
          (void*)nativeSetLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis},
         {"nativeGetLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis", "(J)J",
          (void*)nativeGetLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis},
+        {"nativeGetSystemNonceBlock", "(J)J", (void*) nativeGetSystemNonceBlock},
 };
-
-} // anonymous namespace
-
-namespace android {
 
 static const char kApplicationSharedMemoryClassName[] =
         "com/android/internal/os/ApplicationSharedMemory";
 static jclass gApplicationSharedMemoryClass;
+
+} // anonymous namespace
+
+namespace android {
 
 int register_com_android_internal_os_ApplicationSharedMemory(JNIEnv* env) {
     gApplicationSharedMemoryClass =

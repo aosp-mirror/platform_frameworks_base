@@ -32,6 +32,8 @@ import "frameworks/base/core/proto/android/content/res/color_state_list.proto";
  *
  * Do not change the tag number or type of any fields in order to maintain compatibility with
  * previous versions. If a field is deleted, use `reserved` to mark its tag number.
+ *
+ * Next tag: 17
  */
 message RemoteViewsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -290,6 +292,7 @@ message RemoteViewsProto {
         }
     }
 
+    // Next tag: 23
     message Action {
         oneof action {
             AttributeReflectionAction attribute_reflection_action = 1;
@@ -307,6 +310,13 @@ message RemoteViewsProto {
             SetRadioGroupCheckedAction set_radio_group_checked_action = 13;
             SetRemoteCollectionItemListAdapterAction set_remote_collection_item_list_adapter_action = 14;
             SetRippleDrawableColorAction set_ripple_drawable_color_action = 15;
+            SetViewOutlinePreferredRadiusAction set_view_outline_preferred_radius_action = 16;
+            TextViewDrawableAction text_view_drawable_action = 17;
+            TextViewSizeAction text_view_size_action = 18;
+            ViewGroupAddAction view_group_add_action = 19;
+            ViewGroupRemoveAction view_group_remove_action = 20;
+            ViewPaddingAction view_padding_action = 21;
+            SetDrawInstructionAction set_draw_instruction_action = 22;
         }
     }
 
@@ -427,6 +437,65 @@ message RemoteViewsProto {
     message SetRippleDrawableColorAction {
         optional string view_id = 1;
         optional android.content.res.ColorStateListProto color_state_list = 2;
+    }
+
+    message SetViewOutlinePreferredRadiusAction {
+        optional string view_id = 1;
+        optional int32 value_type = 2;
+        optional int32 value = 3;
+    }
+
+    message TextViewDrawableAction {
+        optional string view_id = 1;
+        optional bool is_relative = 2;
+        oneof drawables {
+            Resources resources = 3;
+            Icons icons = 4;
+        };
+
+        message Resources {
+            optional string one = 1;
+            optional string two = 2;
+            optional string three = 3;
+            optional string four = 4;
+        }
+
+        message Icons {
+            optional Icon one = 1;
+            optional Icon two = 2;
+            optional Icon three = 3;
+            optional Icon four = 4;
+        }
+    }
+
+    message TextViewSizeAction {
+        optional string view_id = 1;
+        optional int32 units = 2;
+        optional float size = 3;
+    }
+
+    message ViewGroupAddAction {
+        optional string view_id = 1;
+        optional RemoteViewsProto nested_views = 2;
+        optional int32 index = 3;
+        optional int32 stableId = 4;
+    }
+
+    message ViewGroupRemoveAction {
+        optional string view_id = 1;
+        optional string view_id_to_keep = 2;
+    }
+
+    message ViewPaddingAction {
+        optional string view_id = 1;
+        optional int32 left = 2;
+        optional int32 right = 3;
+        optional int32 top = 4;
+        optional int32 bottom = 5;
+    }
+
+    message SetDrawInstructionAction {
+        repeated bytes instructions = 1;
     }
 }
 

@@ -80,6 +80,14 @@ public final class NfcOemExtension {
     private boolean mCardEmulationActivated = false;
     private boolean mRfFieldActivated = false;
     private boolean mRfDiscoveryStarted = false;
+    private boolean mEeListenActivated = false;
+
+    /**
+     * Broadcast Action: Sent on NFC stack initialization when NFC OEM extensions are enabled.
+     * <p> OEM extension modules should use this intent to start their extension service </p>
+     * @hide
+     */
+    public static final String ACTION_OEM_EXTENSION_INIT = "android.nfc.action.OEM_EXTENSION_INIT";
 
     /**
      * Mode Type for {@link #setControllerAlwaysOnMode(int)}.
@@ -188,9 +196,8 @@ public final class NfcOemExtension {
          * ex - if tag is connected  notify cover and Nfctest app if app is in testing mode
          *
          * @param connected status of the tag true if tag is connected otherwise false
-         * @param tag Tag details
          */
-        void onTagConnected(boolean connected, @NonNull Tag tag);
+        void onTagConnected(boolean connected);
 
         /**
          * Update the Nfc Adapter State
@@ -320,6 +327,13 @@ public final class NfcOemExtension {
         void onRfDiscoveryStarted(boolean isDiscoveryStarted);
 
         /**
+        * Notifies the NFCEE (NFC Execution Environment) Listen has been activated.
+        *
+        * @param isActivated true, if EE Listen is ON, else EE Listen is OFF.
+        */
+        void onEeListenActivated(boolean isActivated);
+
+        /**
          * Gets the intent to find the OEM package in the OEM App market. If the consumer returns
          * {@code null} or a timeout occurs, the intent from the first available package will be
          * used instead.
@@ -430,6 +444,7 @@ public final class NfcOemExtension {
                 callback.onCardEmulationActivated(mCardEmulationActivated);
                 callback.onRfFieldActivated(mRfFieldActivated);
                 callback.onRfDiscoveryStarted(mRfDiscoveryStarted);
+                callback.onEeListenActivated(mEeListenActivated);
             });
         }
     }
@@ -569,8 +584,9 @@ public final class NfcOemExtension {
     }
 
     /**
-     * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond. If polling must be
-     * resumed before timeout, use {@link #resumePolling()}.
+     * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
+     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
+     * use {@link #resumePolling() to resume the polling.
      * @param timeoutInMs the pause polling duration in millisecond
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
@@ -581,7 +597,7 @@ public final class NfcOemExtension {
 
     /**
      * Resumes default NFC tag reader mode polling for the current device state if polling is
-     * paused. Calling this while polling is not paused is a no-op.
+     * paused. Calling this while already in polling is a no-op.
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
@@ -647,33 +663,38 @@ public final class NfcOemExtension {
      *                   {@link ProtocolAndTechnologyRoute}
      * @param emptyAid Zero-length AID route destination, where the possible inputs are defined in
      *                 {@link ProtocolAndTechnologyRoute}
+     * @param systemCode System Code route destination, where the possible inputs are defined in
+     *                   {@link ProtocolAndTechnologyRoute}
      */
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public void overwriteRoutingTable(
             @CardEmulation.ProtocolAndTechnologyRoute int protocol,
             @CardEmulation.ProtocolAndTechnologyRoute int technology,
-            @CardEmulation.ProtocolAndTechnologyRoute int emptyAid) {
+            @CardEmulation.ProtocolAndTechnologyRoute int emptyAid,
+            @CardEmulation.ProtocolAndTechnologyRoute int systemCode) {
 
         String protocolRoute = routeIntToString(protocol);
         String technologyRoute = routeIntToString(technology);
         String emptyAidRoute = routeIntToString(emptyAid);
+        String systemCodeRoute = routeIntToString(systemCode);
 
         NfcAdapter.callService(() ->
                 NfcAdapter.sCardEmulationService.overwriteRoutingTable(
                         mContext.getUser().getIdentifier(),
                         emptyAidRoute,
                         protocolRoute,
-                        technologyRoute
+                        technologyRoute,
+                        systemCodeRoute
                 ));
     }
 
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
 
         @Override
-        public void onTagConnected(boolean connected, Tag tag) throws RemoteException {
+        public void onTagConnected(boolean connected) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
-                    handleVoid2ArgCallback(connected, tag, cb::onTagConnected, ex));
+                    handleVoidCallback(connected, cb::onTagConnected, ex));
         }
 
         @Override
@@ -695,6 +716,13 @@ public final class NfcOemExtension {
             mRfDiscoveryStarted = isDiscoveryStarted;
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(isDiscoveryStarted, cb::onRfDiscoveryStarted, ex));
+        }
+
+        @Override
+        public void onEeListenActivated(boolean isActivated) throws RemoteException {
+            mEeListenActivated = isActivated;
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(isActivated, cb::onEeListenActivated, ex));
         }
 
         @Override
@@ -917,12 +945,15 @@ public final class NfcOemExtension {
     }
 
     private @CardEmulation.ProtocolAndTechnologyRoute int routeStringToInt(String route) {
-        return switch (route) {
-            case "DH" -> PROTOCOL_AND_TECHNOLOGY_ROUTE_DH;
-            case "eSE" -> PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE;
-            case "SIM" -> PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC;
-            default -> throw new IllegalStateException("Unexpected value: " + route);
-        };
+        if (route.equals("DH")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_DH;
+        } else if (route.startsWith("eSE")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE;
+        } else if (route.startsWith("SIM")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC;
+        } else {
+            throw new IllegalStateException("Unexpected value: " + route);
+        }
     }
 
     private class ReceiverWrapper<T> implements Consumer<T> {

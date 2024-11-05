@@ -322,7 +322,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"တည်နေရာ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ဤစက်ပစ္စည်း၏ တည်နေရာကို ရယူရန်"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"ပြက္ခဒိန်"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"ဖိုင်များ"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ပိတ်"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"၊ "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"မည်သည့်ပြက္ခဒိန်မဆို"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> သည် အချို့အသံကို ပိတ်နေသည်"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များ တုန်ခါပါမည်"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များကို အသံပိတ်ထားပါမည်"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"စနစ် အပြောင်းအလဲများ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"မနှောင့်ယှက်ရ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"အသစ်− \'မနှောင့်ယှက်ရ\' က အကြောင်းကြားချက်များကို ဖျောက်ထားသည်"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ပိုမိုလေ့လာရန်နှင့် ပြောင်းလဲရန် တို့ပါ။"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"အကြောင်းကြားချက် ဆက်တင်များ စိစစ်ရန်"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 မှစ၍ ထည့်သွင်းသော အက်ပ်များသည် အကြောင်းကြားချက်များပို့ရန် သင်၏ခွင့်ပြုချက် လိုအပ်ပါမည်။ ရှိပြီးသားအက်ပ်များအတွက် ဤခွင့်ပြုချက်ကိုပြောင်းရန် တို့ပါ။"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"နောက်မှ သတိပေးပါ"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များ ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ဖွင့်ရန်"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"အလုပ်လုပ်ပုံ"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ဆိုင်းငံ့ထားသည်…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"‘လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း’ ကို စနစ်ထပ်မံထည့်သွင်းပါ"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ကို မသိရှိနိုင်တော့ပါ။"</string>

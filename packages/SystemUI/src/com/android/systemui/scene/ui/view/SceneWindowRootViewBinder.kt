@@ -42,6 +42,7 @@ import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -51,6 +52,7 @@ import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -74,6 +76,7 @@ object SceneWindowRootViewBinder {
         overlays: Set<Overlay>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
+        qsSceneAdapter: Provider<QSSceneAdapter>,
         alternateBouncerDependencies: AlternateBouncerDependencies,
     ) {
         val unsortedSceneByKey: Map<SceneKey, Scene> = scenes.associateBy { scene -> scene.key }
@@ -132,6 +135,7 @@ object SceneWindowRootViewBinder {
                                 sceneByKey = sortedSceneByKey,
                                 overlayByKey = sortedOverlayByKey,
                                 dataSourceDelegator = dataSourceDelegator,
+                                qsSceneAdapter = qsSceneAdapter,
                                 containerConfig = containerConfig,
                             )
                             .also { it.id = R.id.scene_container_root_composable }
@@ -177,6 +181,7 @@ object SceneWindowRootViewBinder {
         sceneByKey: Map<SceneKey, Scene>,
         overlayByKey: Map<OverlayKey, Overlay>,
         dataSourceDelegator: SceneDataSourceDelegator,
+        qsSceneAdapter: Provider<QSSceneAdapter>,
         containerConfig: SceneContainerConfig,
     ): View {
         return ComposeView(context).apply {
@@ -192,6 +197,7 @@ object SceneWindowRootViewBinder {
                             overlayByKey = overlayByKey,
                             initialSceneKey = containerConfig.initialSceneKey,
                             dataSourceDelegator = dataSourceDelegator,
+                            qsSceneAdapter = qsSceneAdapter,
                         )
                     }
                 }

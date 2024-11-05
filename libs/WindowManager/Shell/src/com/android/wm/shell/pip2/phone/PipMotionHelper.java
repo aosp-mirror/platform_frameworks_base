@@ -336,7 +336,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
-        // mPipTaskOrganizer.exitPip(skipAnimation ? 0 : LEAVE_PIP_DURATION, enterSplit);
+        mPipScheduler.scheduleExitPipViaExpand();
     }
 
     /**
@@ -350,7 +350,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_DISMISS, false /* resize */);
-        // mPipTaskOrganizer.removePip();
+        mPipScheduler.removePipAfterAnimation();
     }
 
     /** Sets the movement bounds to use to constrain PIP position animations. */
@@ -752,11 +752,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                                 PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION));
                 break;
             case PipTransitionState.CHANGING_PIP_BOUNDS:
-                SurfaceControl.Transaction startTx = extra.getParcelable(
+                final SurfaceControl.Transaction startTx = extra.getParcelable(
                         PipTransition.PIP_START_TX, SurfaceControl.Transaction.class);
-                SurfaceControl.Transaction finishTx = extra.getParcelable(
+                final SurfaceControl.Transaction finishTx = extra.getParcelable(
                         PipTransition.PIP_FINISH_TX, SurfaceControl.Transaction.class);
-                Rect destinationBounds = extra.getParcelable(
+                final Rect destinationBounds = extra.getParcelable(
                         PipTransition.PIP_DESTINATION_BOUNDS, Rect.class);
                 final int duration = extra.getInt(ANIMATING_BOUNDS_CHANGE_DURATION,
                         PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION);
@@ -776,6 +776,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 cancelPhysicsAnimation();
                 settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
                 break;
+            case PipTransitionState.CHANGED_PIP_BOUNDS:
+                // Check whether changed bounds imply we need to update stash state too.
+                stashEndActionIfNeeded();
+                break;
         }
     }
 
@@ -790,7 +794,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         cleanUpHighPerfSessionMaybe();
 
         // Signal that the transition is done - should update transition state by default.
-        mPipScheduler.scheduleFinishResizePip(destinationBounds, false /* configAtEnd */);
+        mPipScheduler.scheduleFinishResizePip(destinationBounds);
     }
 
     private void startResizeAnimation(SurfaceControl.Transaction startTx,
@@ -799,11 +803,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         Preconditions.checkState(pipLeash != null,
                 "No leash cached by mPipTransitionState=" + mPipTransitionState);
 
-        startTx.setWindowCrop(pipLeash, mPipBoundsState.getBounds().width(),
-                mPipBoundsState.getBounds().height());
-
         PipResizeAnimator animator = new PipResizeAnimator(mContext, pipLeash,
-                startTx, finishTx, mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
+                startTx, finishTx, destinationBounds, mPipBoundsState.getBounds(),
                 destinationBounds, duration, 0f /* angle */);
         animator.setAnimationEndCallback(() -> {
             // In case an ongoing drag/fling was present before a deterministic resize transition
@@ -814,7 +815,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
             cleanUpHighPerfSessionMaybe();
             // Signal that we are done with resize transition
-            mPipScheduler.scheduleFinishResizePip(destinationBounds, true /* configAtEnd */);
+            mPipScheduler.scheduleFinishResizePip(destinationBounds);
         });
         animator.start();
     }
@@ -829,9 +830,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();
         mSpringingToTouch = false;
         mDismissalPending = false;
-
-        // Check whether new bounds after fling imply we need to update stash state too.
-        stashEndActionIfNeeded();
     }
 
     private void stashEndActionIfNeeded() {

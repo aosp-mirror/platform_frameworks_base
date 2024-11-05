@@ -29,90 +29,10 @@ filegroup {
     srcs: ["src/**/apps/*.kt"],
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Begin cleanup after gcl merges
-
-filegroup {
-    name: "WMShellFlickerTestsPip1-src",
-    srcs: [
-        "src/**/A*.kt",
-        "src/**/B*.kt",
-        "src/**/C*.kt",
-        "src/**/D*.kt",
-        "src/**/F*.kt",
-        "src/**/S*.kt",
-    ],
-}
-
-filegroup {
-    name: "WMShellFlickerTestsPip2-src",
-    srcs: [
-        "src/**/E*.kt",
-    ],
-}
-
-filegroup {
-    name: "WMShellFlickerTestsPip3-src",
-    srcs: ["src/**/*.kt"],
-}
-
 filegroup {
     name: "WMShellFlickerTestsPipCommon-src",
     srcs: ["src/**/common/*.kt"],
 }
-
-android_test {
-    name: "WMShellFlickerTestsPip1",
-    defaults: ["WMShellFlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.wm.shell.flicker.pip",
-    instrumentation_target_package: "com.android.wm.shell.flicker.pip",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [
-        ":WMShellFlickerTestsPip1-src",
-        ":WMShellFlickerTestsPipCommon-src",
-    ],
-    static_libs: ["WMShellFlickerTestsBase"],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "WMShellFlickerTestsPip2",
-    defaults: ["WMShellFlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.wm.shell.flicker.pip",
-    instrumentation_target_package: "com.android.wm.shell.flicker.pip",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [
-        ":WMShellFlickerTestsPip2-src",
-        ":WMShellFlickerTestsPipCommon-src",
-    ],
-    static_libs: ["WMShellFlickerTestsBase"],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "WMShellFlickerTestsPip3",
-    defaults: ["WMShellFlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.wm.shell.flicker.pip",
-    instrumentation_target_package: "com.android.wm.shell.flicker.pip",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [
-        ":WMShellFlickerTestsPip3-src",
-        ":WMShellFlickerTestsPipCommon-src",
-    ],
-    exclude_srcs: [
-        ":WMShellFlickerTestsPip1-src",
-        ":WMShellFlickerTestsPip2-src",
-        ":WMShellFlickerTestsPipApps-src",
-    ],
-    static_libs: ["WMShellFlickerTestsBase"],
-    data: ["trace_config/*"],
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// End cleanup after gcl merges
 
 android_test {
     name: "WMShellFlickerTestsPip",

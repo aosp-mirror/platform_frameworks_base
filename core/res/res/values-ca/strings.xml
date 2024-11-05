@@ -1944,6 +1944,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivat"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualsevol calendari"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> està silenciant alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"S\'ha produït un error intern al dispositiu i és possible que funcioni de manera inestable fins que restableixis les dades de fàbrica."</string>
@@ -2130,11 +2132,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Les trucades i les notificacions vibraran"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Les trucades i les notificacions se silenciaran"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Canvis del sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"No molestis"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novetat: el mode No molestis està amagant notificacions"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toca per obtenir més informació i canviar la configuració."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"S\'ha canviat el mode No molestis"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca per consultar què s\'ha bloquejat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulta la configuració de notificacions"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"A partir de la versió Android 13, les aplicacions que instal·les necessiten el teu permís per enviar notificacions. Toca per canviar aquest permís per a les aplicacions existents."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Recorda-m\'ho més tard"</string>
@@ -2394,12 +2391,12 @@
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Utilitza un altre cable i torna-ho a provar"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"El dispositiu està massa calent i no pot duplicar a la pantalla fins que es refredi"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La pantalla dual està activada"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Pantalla dual està activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> està utilitzant les dues pantalles per mostrar contingut"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositiu està massa calent"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"La pantalla dual no està disponible perquè el telèfon està massa calent"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen no està disponible"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen no està disponible perquè la funció Estalvi de bateria està activada. Pots desactivar aquesta opció a Configuració."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Pantalla dual no està disponible perquè el telèfon està massa calent"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Pantalla dual no està disponible"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Pantalla dual no està disponible perquè la funció Estalvi de bateria està activada. Pots desactivar aquesta opció a Configuració."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ves a Configuració"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactiva"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> configurat"</string>
@@ -2430,6 +2427,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envia i rep missatges sense una xarxa mòbil o Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Com funciona"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendent..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Torna a configurar Desbloqueig amb empremta digital"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ja no es pot reconèixer."</string>

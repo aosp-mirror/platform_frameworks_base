@@ -33,9 +33,9 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.SystemBarUtils
-import com.android.systemui.customization.R as customizationR
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection.Companion.getDimen
@@ -50,6 +50,8 @@ import kotlin.reflect.KSuspendFunction1
 
 /** Binder for the small clock view, large clock view. */
 object KeyguardPreviewClockViewBinder {
+    val lockId = View.generateViewId()
+
     @JvmStatic
     fun bind(
         largeClockHostView: View,
@@ -112,7 +114,18 @@ object KeyguardPreviewClockViewBinder {
                     }
                     .invokeOnCompletion {
                         // recover seed color especially for Transit clock
-                        lastClock?.events?.onSeedColorChanged(clockRegistry.seedColor)
+                        lastClock?.apply {
+                            smallClock.run {
+                                events.onThemeChanged(
+                                    theme.copy(seedColor = clockRegistry.seedColor)
+                                )
+                            }
+                            largeClock.run {
+                                events.onThemeChanged(
+                                    theme.copy(seedColor = clockRegistry.seedColor)
+                                )
+                            }
+                        }
                     }
             }
         }
@@ -120,35 +133,38 @@ object KeyguardPreviewClockViewBinder {
 
     private fun applyClockDefaultConstraints(context: Context, constraints: ConstraintSet) {
         constraints.apply {
-            constrainWidth(R.id.lockscreen_clock_view_large, ConstraintSet.WRAP_CONTENT)
+            constrainWidth(customR.id.lockscreen_clock_view_large, ConstraintSet.WRAP_CONTENT)
             // The following two lines make lockscreen_clock_view_large is constrained to available
             // height when it goes beyond constraints; otherwise, it use WRAP_CONTENT
-            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
-            constrainMaxHeight(R.id.lockscreen_clock_view_large, 0)
+            constrainHeight(customR.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            constrainMaxHeight(customR.id.lockscreen_clock_view_large, 0)
             val largeClockTopMargin =
                 SystemBarUtils.getStatusBarHeight(context) +
-                    context.resources.getDimensionPixelSize(
-                        customizationR.dimen.small_clock_padding_top
-                    ) +
+                    context.resources.getDimensionPixelSize(customR.dimen.small_clock_padding_top) +
                     context.resources.getDimensionPixelSize(
                         R.dimen.keyguard_smartspace_top_offset
                     ) +
                     getDimen(context, DATE_WEATHER_VIEW_HEIGHT) +
                     getDimen(context, ENHANCED_SMARTSPACE_HEIGHT)
-            connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
-            connect(R.id.lockscreen_clock_view_large, START, PARENT_ID, START)
             connect(
-                R.id.lockscreen_clock_view_large,
+                customR.id.lockscreen_clock_view_large,
+                TOP,
+                PARENT_ID,
+                TOP,
+                largeClockTopMargin,
+            )
+            connect(customR.id.lockscreen_clock_view_large, START, PARENT_ID, START)
+            connect(
+                customR.id.lockscreen_clock_view_large,
                 ConstraintSet.END,
                 PARENT_ID,
                 ConstraintSet.END,
             )
 
-            // In preview, we'll show UDFPS icon for UDFPS devices
-            // and nothing for non-UDFPS devices,
-            // but we need position of device entry icon to constrain clock
-            if (getConstraint(R.id.lock_icon_view) != null) {
-                connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.lock_icon_view, TOP)
+            // In preview, we'll show UDFPS icon for UDFPS devices and nothing for non-UDFPS
+            // devices, but we need position of device entry icon to constrain clock
+            if (getConstraint(lockId) != null) {
+                connect(customR.id.lockscreen_clock_view_large, BOTTOM, lockId, TOP)
             } else {
                 // Copied calculation codes from applyConstraints in DefaultDeviceEntrySection
                 val bottomPaddingPx =
@@ -159,7 +175,7 @@ object KeyguardPreviewClockViewBinder {
                 val lockIconRadiusPx = (defaultDensity * 36).toInt()
                 val clockBottomMargin = bottomPaddingPx + 2 * lockIconRadiusPx
                 connect(
-                    R.id.lockscreen_clock_view_large,
+                    customR.id.lockscreen_clock_view_large,
                     BOTTOM,
                     PARENT_ID,
                     BOTTOM,
@@ -167,23 +183,23 @@ object KeyguardPreviewClockViewBinder {
                 )
             }
 
-            constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
+            constrainWidth(customR.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
-                R.id.lockscreen_clock_view,
-                context.resources.getDimensionPixelSize(customizationR.dimen.small_clock_height),
+                customR.id.lockscreen_clock_view,
+                context.resources.getDimensionPixelSize(customR.dimen.small_clock_height),
             )
             connect(
-                R.id.lockscreen_clock_view,
+                customR.id.lockscreen_clock_view,
                 START,
                 PARENT_ID,
                 START,
-                context.resources.getDimensionPixelSize(customizationR.dimen.clock_padding_start) +
+                context.resources.getDimensionPixelSize(customR.dimen.clock_padding_start) +
                     context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal),
             )
             val smallClockTopMargin =
                 context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
                     Utils.getStatusBarHeaderHeightKeyguard(context)
-            connect(R.id.lockscreen_clock_view, TOP, PARENT_ID, TOP, smallClockTopMargin)
+            connect(customR.id.lockscreen_clock_view, TOP, PARENT_ID, TOP, smallClockTopMargin)
         }
     }
 

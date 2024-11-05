@@ -78,6 +78,10 @@ class FakeZenModeRepository : ZenModeRepository {
         mutableModesFlow.value = (mutableModesFlow.value.filter { it.id != modeId }) + mode
     }
 
+    fun clearModes() {
+        mutableModesFlow.value = listOf()
+    }
+
     fun getMode(id: String): ZenMode? {
         return mutableModesFlow.value.find { it.id == id }
     }

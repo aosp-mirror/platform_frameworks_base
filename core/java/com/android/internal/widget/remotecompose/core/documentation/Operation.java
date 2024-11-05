@@ -46,20 +46,30 @@ public class Operation {
     int mExamplesWidth = 100;
     int mExamplesHeight = 100;
 
-
     public static String getType(int type) {
         switch (type) {
-            case (INT): return "INT";
-            case (FLOAT): return "FLOAT";
-            case (BOOLEAN): return "BOOLEAN";
-            case (BUFFER): return "BUFFER";
-            case (UTF8): return "UTF8";
-            case (BYTE): return "BYTE";
-            case (VALUE): return "VALUE";
-            case (LONG): return "LONG";
-            case (SHORT): return "SHORT";
-            case (FLOAT_ARRAY): return "FLOAT[]";
-            case (INT_ARRAY): return "INT[]";
+            case INT:
+                return "INT";
+            case FLOAT:
+                return "FLOAT";
+            case BOOLEAN:
+                return "BOOLEAN";
+            case BUFFER:
+                return "BUFFER";
+            case UTF8:
+                return "UTF8";
+            case BYTE:
+                return "BYTE";
+            case VALUE:
+                return "VALUE";
+            case LONG:
+                return "LONG";
+            case SHORT:
+                return "SHORT";
+            case FLOAT_ARRAY:
+                return "FLOAT[]";
+            case INT_ARRAY:
+                return "INT[]";
         }
         return "UNKNOWN";
     }

@@ -19,13 +19,16 @@ package com.android.systemui.communal.util
 import android.content.Context
 import android.os.Bundle
 import android.util.SizeF
-import com.android.app.tracing.coroutines.withContext
+import com.android.app.tracing.coroutines.withContextTraced as withContext
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.communal.widgets.AppWidgetHostListenerDelegate
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostView
+import com.android.systemui.communal.widgets.GlanceableHubWidgetManager
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.qualifiers.UiBackground
+import dagger.Lazy
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -36,14 +39,16 @@ class WidgetViewFactory
 constructor(
     @UiBackground private val uiBgContext: CoroutineContext,
     @UiBackground private val uiBgExecutor: Executor,
-    private val appWidgetHost: CommunalAppWidgetHost,
+    private val appWidgetHostLazy: Lazy<CommunalAppWidgetHost>,
     private val interactionHandler: WidgetInteractionHandler,
     private val listenerFactory: AppWidgetHostListenerDelegate.Factory,
+    private val glanceableHubWidgetManagerLazy: Lazy<GlanceableHubWidgetManager>,
+    private val multiUserHelper: GlanceableHubMultiUserHelper,
 ) {
     suspend fun createWidget(
         context: Context,
         model: CommunalContentModel.WidgetContent.Widget,
-        size: SizeF,
+        size: SizeF?,
     ): CommunalAppWidgetHostView =
         withContext("$TAG#createWidget", uiBgContext) {
             val view =
@@ -51,17 +56,35 @@ constructor(
                     setExecutor(uiBgExecutor)
                     setAppWidget(model.appWidgetId, model.providerInfo)
                 }
-            // Instead of setting the view as the listener directly, we wrap the view in a delegate
-            // which ensures the callbacks always get called on the main thread.
-            appWidgetHost.setListener(model.appWidgetId, listenerFactory.create(view))
-            view.updateAppWidgetSize(
-                /* newOptions = */ Bundle(),
-                /* minWidth = */ size.width.toInt(),
-                /* minHeight = */ size.height.toInt(),
-                /* maxWidth = */ size.width.toInt(),
-                /* maxHeight = */ size.height.toInt(),
-                /* ignorePadding = */ true,
-            )
+
+            if (
+                multiUserHelper.glanceableHubHsumFlagEnabled &&
+                    multiUserHelper.isInHeadlessSystemUser()
+            ) {
+                // If the widget view is created in the headless system user, the widget host lives
+                // remotely in the foreground user, and therefore the host listener needs to be
+                // registered through the widget manager.
+                with(glanceableHubWidgetManagerLazy.get()) {
+                    setAppWidgetHostListener(model.appWidgetId, listenerFactory.create(view))
+                }
+            } else {
+                // Instead of setting the view as the listener directly, we wrap the view in a
+                // delegate which ensures the callbacks always get called on the main thread.
+                with(appWidgetHostLazy.get()) {
+                    setListener(model.appWidgetId, listenerFactory.create(view))
+                }
+            }
+
+            if (size != null) {
+                view.updateAppWidgetSize(
+                    /* newOptions = */ Bundle(),
+                    /* minWidth = */ size.width.toInt(),
+                    /* minHeight = */ size.height.toInt(),
+                    /* maxWidth = */ size.width.toInt(),
+                    /* maxHeight = */ size.height.toInt(),
+                    /* ignorePadding = */ true,
+                )
+            }
             view
         }
 

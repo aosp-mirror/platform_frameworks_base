@@ -22,19 +22,52 @@ interface ElementMatcher {
     fun matches(key: ElementKey, content: ContentKey): Boolean
 }
 
-/**
- * Returns an [ElementMatcher] that matches elements in [content] also matching [this]
- * [ElementMatcher].
- */
-fun ElementMatcher.inContent(content: ContentKey): ElementMatcher {
-    val delegate = this
-    val matcherScene = content
+/** Returns an [ElementMatcher] that matches any element in [content]. */
+fun inContent(content: ContentKey): ElementMatcher {
+    val matcherContent = content
     return object : ElementMatcher {
         override fun matches(key: ElementKey, content: ContentKey): Boolean {
-            return content == matcherScene && delegate.matches(key, content)
+            return content == matcherContent
         }
     }
 }
 
-@Deprecated("Use inContent() instead", replaceWith = ReplaceWith("inContent(scene)"))
-fun ElementMatcher.inScene(scene: SceneKey) = inContent(scene)
+/** Returns an [ElementMatcher] that matches all elements not matching [this] matcher. */
+operator fun ElementMatcher.not(): ElementMatcher {
+    val delegate = this
+    return object : ElementMatcher {
+        override fun matches(key: ElementKey, content: ContentKey): Boolean {
+            return !delegate.matches(key, content)
+        }
+    }
+}
+
+/**
+ * Returns an [ElementMatcher] that matches all elements matching both [this] matcher and [other].
+ */
+infix fun ElementMatcher.and(other: ElementMatcher): ElementMatcher {
+    val delegate = this
+    return object : ElementMatcher {
+        override fun matches(key: ElementKey, content: ContentKey): Boolean {
+            return delegate.matches(key, content) && other.matches(key, content)
+        }
+    }
+}
+
+/**
+ * Returns an [ElementMatcher] that matches all elements either [this] matcher, or [other], or both.
+ */
+infix fun ElementMatcher.or(other: ElementMatcher): ElementMatcher {
+    val delegate = this
+    return object : ElementMatcher {
+        override fun matches(key: ElementKey, content: ContentKey): Boolean {
+            return delegate.matches(key, content) || other.matches(key, content)
+        }
+    }
+}
+
+@Deprecated(
+    "Use `this and inContent()` instead",
+    replaceWith = ReplaceWith("this and inContent(scene)"),
+)
+fun ElementMatcher.inScene(scene: SceneKey) = this and inContent(scene)

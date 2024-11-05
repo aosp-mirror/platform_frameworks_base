@@ -70,7 +70,7 @@ import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Controller that's responsible for the glanceable hub container view and its touch handling.

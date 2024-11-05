@@ -31,7 +31,8 @@ public final class AppFunctionExecutors {
                     /* maxConcurrency= */ Runtime.getRuntime().availableProcessors(),
                     /* keepAliveTime= */ 0L,
                     /* unit= */ TimeUnit.SECONDS,
-                    /* workQueue= */ new LinkedBlockingQueue<>());
+                    /* workQueue= */ new LinkedBlockingQueue<>(),
+                    new NamedThreadFactory("AppFunctionExecutors"));
 
     private AppFunctionExecutors() {}
 }

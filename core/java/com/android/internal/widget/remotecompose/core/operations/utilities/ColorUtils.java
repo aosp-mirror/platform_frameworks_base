@@ -16,21 +16,14 @@
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
 /**
- * These are tools to use long Color as variables
- * long colors are stored a 0xXXXXXXXX XXXXXX??
- * in SRGB the colors are stored 0xAARRGGBB,00000000
- * SRGB color sapce is color space 0
- * Our Color will use color float with a
- * Current android supports
- * SRGB, LINEAR_SRGB, EXTENDED_SRGB, LINEAR_EXTENDED_SRGB, BT709, BT2020,
- * DCI_P3, DISPLAY_P3, NTSC_1953, SMPTE_C, ADOBE_RGB, PRO_PHOTO_RGB, ACES,
- * ACESCG, CIE_XYZ, CIE_LAB, BT2020_HLG, BT2020_PQ 0..17 respectively
+ * These are tools to use long Color as variables long colors are stored a 0xXXXXXXXX XXXXXX?? in
+ * SRGB the colors are stored 0xAARRGGBB,00000000 SRGB color sapce is color space 0 Our Color will
+ * use color float with a Current android supports SRGB, LINEAR_SRGB, EXTENDED_SRGB,
+ * LINEAR_EXTENDED_SRGB, BT709, BT2020, DCI_P3, DISPLAY_P3, NTSC_1953, SMPTE_C, ADOBE_RGB,
+ * PRO_PHOTO_RGB, ACES, ACESCG, CIE_XYZ, CIE_LAB, BT2020_HLG, BT2020_PQ 0..17 respectively
  *
- * Our color space will be 62 (MAX_ID-1). (0x3E)
- * Storing the default value in SRGB format and having the
- * id of the color between the ARGB values and the 62 i.e.
- * 0xAARRGGBB 00 00 00 3E
- *
+ * <p>Our color space will be 62 (MAX_ID-1). (0x3E) Storing the default value in SRGB format and
+ * having the id of the color between the ARGB values and the 62 i.e. 0xAARRGGBB 00 00 00 3E
  */
 public class ColorUtils {
     public static int RC_COLOR = 62;
@@ -53,6 +46,7 @@ public class ColorUtils {
 
     /**
      * get default color from long color
+     *
      * @param color
      * @return
      */

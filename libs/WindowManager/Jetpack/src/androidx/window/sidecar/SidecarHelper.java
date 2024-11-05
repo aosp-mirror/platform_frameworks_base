@@ -24,7 +24,9 @@ import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
+import android.view.DisplayInfo;
 
 import androidx.window.common.layout.CommonFoldingFeature;
 
@@ -96,13 +98,18 @@ class SidecarHelper {
             return Collections.emptyList();
         }
 
-        final List<SidecarDisplayFeature> features = new ArrayList<>();
+        // We will transform the feature bounds to the Activity window, so using the rotation
+        // from the same source (WindowConfiguration) to make sure they are synchronized.
         final int rotation = activity.getResources().getConfiguration().windowConfiguration
                 .getDisplayRotation();
+        final DisplayInfo displayInfo =
+                DisplayManagerGlobal.getInstance().getDisplayInfo(displayId);
+
+        final List<SidecarDisplayFeature> features = new ArrayList<>();
         for (CommonFoldingFeature baseFeature : featureList) {
             final SidecarDisplayFeature feature = new SidecarDisplayFeature();
             final Rect featureRect = baseFeature.getRect();
-            rotateRectToDisplayRotation(displayId, rotation, featureRect);
+            rotateRectToDisplayRotation(displayInfo, rotation, featureRect);
             transformToWindowSpaceRect(activity, featureRect);
             feature.setRect(featureRect);
             feature.setType(baseFeature.getType());

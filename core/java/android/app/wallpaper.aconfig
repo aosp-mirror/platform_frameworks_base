@@ -14,3 +14,11 @@ flag {
   description: "Fixes timing of wallpaper changed notification and adds extra information. Only effective after rebooting."
   bug: "369814294"
 }
+
+flag {
+  name: "live_wallpaper_content_handling"
+  namespace: "systemui"
+  description: "Support for user-generated content in live wallpapers. Only effective after rebooting."
+  bug: "347235611"
+  is_exported: true
+}

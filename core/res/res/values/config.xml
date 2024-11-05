@@ -287,6 +287,11 @@
          vibration params. -->
     <integer name="config_requestVibrationParamsTimeout">50</integer>
 
+    <!-- The max duration (in milliseconds) that the vibrator service will allow effects to be
+         pipelined (i.e. service will wait for ongoing vibration to finish instead of cancelling it
+         to start the new one). Value should be positive. Zero will disable effect pipelining. -->
+    <integer name="config_vibrationPipelineMaxDuration">25</integer>
+
     <!-- Array containing the usages that should request vibration params before they are played.
          These usages don't have strong latency requirements, e.g. ringtone and notification, and
          can be slightly delayed. -->
@@ -3082,6 +3087,12 @@
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
+    <!-- Indicates the boot strategy in Headless System User Mode (HSUM)
+         This config has no effect if the device is not in HSUM.
+         0 (Default) : boot to the previous foreground user if there is one, otherwise the first switchable user.
+         1 : boot to the first switchable full user for initial boot (unprovisioned device), else to the headless system user, i.e. user 0. -->
+    <integer name="config_hsumBootStrategy">0</integer>
+
     <!-- Whether to boot system with the headless system user, i.e. user 0. If set to true,
          system will be booted with the headless system user, or user 0. It has no effect if device
          is not in Headless System User Mode (HSUM). -->
@@ -4447,17 +4458,25 @@
     <string-array translatable="false" name="config_defaultPinnerServiceFiles">
     </string-array>
 
-    <!-- True if camera app should be pinned via Pinner Service -->
+    <!-- Note: This config is deprecated, use config_pinnerCameraPinBytes instead.
+         True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
 
-    <!-- Bytes that the PinnerService will pin for Home app -->
-    <integer name="config_pinnerHomePinBytes">0</integer>
+    <!-- Default: 60 MB. Bytes that the PinnerService will pin for Home app -->
+    <integer name="config_pinnerHomePinBytes">62914560</integer>
 
-    <!-- True if assistant app should be pinned via Pinner Service -->
+    <!-- Default: 80 MB. Bytes that the PinnerService will pin for Camera app -->
+    <integer name="config_pinnerCameraPinBytes">83886080</integer>
+
+    <!-- Note: This config is deprecated, use config_pinnerAssistantPinBytes instead.
+         True if assistant app should be pinned via Pinner Service -->
     <bool name="config_pinnerAssistantApp">false</bool>
 
-    <!-- Bytes that the PinnerService will pin for WebView -->
-    <integer name="config_pinnerWebviewPinBytes">0</integer>
+     <!-- Default: 60 MB. Bytes that the PinnerService will pin for Assistant -->
+    <integer name="config_pinnerAssistantPinBytes">62914560</integer>
+
+    <!-- Default: 20 MB. Bytes that the PinnerService will pin for WebView -->
+    <integer name="config_pinnerWebviewPinBytes">20971520</integer>
 
     <!-- Maximum memory that PinnerService will pin for apps expressed
          as a percentage of total device memory [0,100].
@@ -4721,6 +4740,11 @@
    -->
     <string name="config_defaultWearableSensingService" translatable="false"></string>
 
+    <!-- The maximum number of concurrent connections allowed between the WearableSensingService and
+        wearable devices.
+        -->
+    <integer name="config_maxWearableSensingServiceConcurrentConnections">5</integer>
+
 
     <!-- The component name for the default system on-device intelligence service, -->
     <string name="config_defaultOnDeviceIntelligenceService" translatable="false"></string>
@@ -4857,7 +4881,7 @@
      See android.credentials.CredentialManager
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
-    
+
     <!-- The component name, flattened to a string, for the system's credential manager
       autofill service. This service allows interceding autofill requests and routing
       them to credential manager.
@@ -5769,6 +5793,9 @@
     <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
+
+    <!-- The list of packages that will use ANGLE as the GLES driver -->
+    <string-array name="config_angleAllowList"></string-array>
 
     <!-- The list of packages to automatically opt in to refresh rate suppressing by small area
     detection. Format of this array should be packageName:threshold and threshold value should
@@ -6918,6 +6945,14 @@
          entering the corresponding modes -->
     <string name="config_rearDisplayPhysicalAddress" translatable="false"></string>
 
+    <!-- The maximum number of virtual displays that can exist at the same time.
+         It must be >= 1. -->
+    <integer name="config_virtualDisplayLimit">100</integer>
+
+    <!-- The maximum number of virtual displays per package that can exist at the same time.
+         It must be >= 1. -->
+    <integer name="config_virtualDisplayLimitPerPackage">50</integer>
+
     <!-- List of certificate to be used for font fs-verity integrity verification -->
     <string-array translatable="false" name="config_fontManagerServiceCerts">
     </string-array>
@@ -7030,6 +7065,9 @@
          RSS is being collected instead. -->
     <item name="config_am_pssToRssThresholdModifier" format="float" type="dimen">1.5</item>
 
+    <!-- The size of the UI tier if cached app oom_adj_score tiers are enabled. -->
+    <integer name="config_am_tieredCachedAdjUiTierSize">10</integer>
+
     <!-- Whether unlocking and waking a device are sequenced -->
     <bool name="config_orderUnlockAndWake">false</bool>
 
@@ -7111,6 +7149,10 @@
          root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM. -->
     <bool name="config_enterDesktopByDefaultOnFreeformDisplay">false</bool>
 
+    <!-- Whether a desktop window should be maximized when it's dragged to the top edge of the
+         screen. -->
+    <bool name="config_dragToMaximizeInDesktopMode">false</bool>
+
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
@@ -7151,4 +7193,10 @@
     <string name="identity_check_settings_action"></string>
     <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
     <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
+
+    <!-- The name of the service for forensic backup transport. -->
+    <string name="config_forensicBackupTransport" translatable="false"></string>
+
+    <!-- Whether to enable fp unlock when screen turns off on udfps devices -->
+    <bool name="config_screen_off_udfps_enabled">false</bool>
 </resources>

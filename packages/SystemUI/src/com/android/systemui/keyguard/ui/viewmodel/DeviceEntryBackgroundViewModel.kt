@@ -60,6 +60,7 @@ constructor(
     primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
     primaryBouncerToDozingTransitionViewModel: PrimaryBouncerToDozingTransitionViewModel,
     primaryBouncerToLockscreenTransitionViewModel: PrimaryBouncerToLockscreenTransitionViewModel,
+    lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
 ) {
     val color: Flow<Int> =
         deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBackground ->
@@ -103,7 +104,9 @@ constructor(
                         offToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         primaryBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         primaryBouncerToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        primaryBouncerToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        primaryBouncerToLockscreenTransitionViewModel
+                            .deviceEntryBackgroundViewAlpha,
+                        lockscreenToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
                     )
                     .merge()
                     .onStart {
@@ -111,7 +114,6 @@ constructor(
                             keyguardTransitionInteractor.currentKeyguardState.replayCache.last()
                         ) {
                             KeyguardState.GLANCEABLE_HUB,
-                            KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
                             KeyguardState.GONE,
                             KeyguardState.OCCLUDED,
                             KeyguardState.OFF,

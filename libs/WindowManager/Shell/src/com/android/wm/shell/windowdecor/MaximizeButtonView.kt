@@ -33,7 +33,7 @@ import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.content.ContextCompat
 import com.android.wm.shell.R
-import android.window.flags.DesktopModeFlags
+import android.window.DesktopModeFlags
 
 private const val OPEN_MAXIMIZE_MENU_DELAY_ON_HOVER_MS = 350
 private const val MAX_DRAWABLE_ALPHA = 255

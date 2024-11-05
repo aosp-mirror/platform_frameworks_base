@@ -127,22 +127,23 @@ interface SceneTransitionLayoutScope {
 /** A scope that can be used to query the target state of an element or scene. */
 interface ElementStateScope {
     /**
-     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
-     * when idle, or `null` if the element is not composed and measured in that scene (yet).
+     * Return the *target* size of [this] element in the given [content], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and measured in that content
+     * (yet).
      */
-    fun ElementKey.targetSize(scene: SceneKey): IntSize?
+    fun ElementKey.targetSize(content: ContentKey): IntSize?
 
     /**
-     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
-     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
+     * Return the *target* offset of [this] element in the given [content], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and placed in that content (yet).
      */
-    fun ElementKey.targetOffset(scene: SceneKey): Offset?
+    fun ElementKey.targetOffset(content: ContentKey): Offset?
 
     /**
-     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
-     * the scene was never composed.
+     * Return the *target* size of [this] content, i.e. the size of the content when idle, or `null`
+     * if the content was not composed (yet).
      */
-    fun SceneKey.targetSize(): IntSize?
+    fun ContentKey.targetSize(): IntSize?
 }
 
 @Stable

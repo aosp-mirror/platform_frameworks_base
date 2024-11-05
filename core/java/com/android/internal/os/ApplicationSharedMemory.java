@@ -21,6 +21,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
 
 import libcore.io.IoUtils;
 
@@ -293,4 +294,34 @@ public class ApplicationSharedMemory implements AutoCloseable {
             throw new IllegalStateException("Not mutable");
         }
     }
+
+    /**
+     * Return true if the memory has been mapped.  This never throws.
+     */
+    public boolean isMapped() {
+        return mPtr != 0;
+    }
+
+    /**
+     * Return true if the memory is mapped and mutable.  This never throws.  Note that it returns
+     * false if the memory is not mapped.
+     */
+    public boolean isMutable() {
+        return isMapped() && mMutable;
+    }
+
+    /**
+     * Provide access to the nonce block needed by {@link PropertyInvalidatedCache}.  This method
+     * returns 0 if the shared memory is not (yet) mapped.
+     */
+    public long getSystemNonceBlock() {
+        return isMapped() ? nativeGetSystemNonceBlock(mPtr) : 0;
+    }
+
+    /**
+     * Return a pointer to the system nonce cache in the shared memory region.  The method is
+     * idempotent.
+     */
+    @FastNative
+    private static native long nativeGetSystemNonceBlock(long ptr);
 }

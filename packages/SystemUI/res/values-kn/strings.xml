@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬೇಕೇ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ಒಂದು ಆ್ಯಪ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ನೀವು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ ಮೇಲೆ ಗೋಚರಿಸುವ ಎಲ್ಲವನ್ನೂ ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಮತ್ತು ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಬಗ್ಗೆ ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸಿರುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡಿದ ಎಲ್ಲವನ್ನೂ ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಮತ್ತು ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಬಗ್ಗೆ ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
@@ -136,11 +138,17 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"ನೀವು ಪ್ರಸ್ತುತ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತಿದ್ದೀರಿ"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ರೆಕಾರ್ಡಿಂಗ್ ನಿಲ್ಲಿಸಿ"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"ಪರದೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"</string>
+    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
+    <skip />
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ಸ್ಕ್ರೀನ್ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ನಿಲ್ಲಿಸಬೇಕೆ?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
+    <skip />
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"ನೀವು ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು <xliff:g id="HOST_APP_NAME">%1$s</xliff:g> ನೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"ನೀವು ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆ್ಯಪ್‌ನೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"ನೀವು ಪ್ರಸ್ತುತ <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"ನೀವು ಪ್ರಸ್ತುತ ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ"</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
+    <skip />
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ನಿಲ್ಲಿಸಿ"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"ಬಿತ್ತರಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಬೇಕೆ?"</string>
@@ -312,6 +320,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ಆಡಿಯೋವನ್ನು ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನಮೂದಿಸಿ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"ಈ ಸಾಧನದ ಸಂಗೀತ ಮತ್ತು ವೀಡಿಯೊಗಳು ಎರಡೂ ಜೋಡಿ ಹೆಡ್‌ಫೋನ್‌ಗಳಲ್ಲಿ ಪ್ಲೇ ಆಗುತ್ತವೆ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"ನಿಮ್ಮ ಆಡಿಯೋವನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> ಮತ್ತು <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> ಗೆ ಬದಲಿಸಿ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ಆಡಿಯೋ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ಹೆಡ್‌ಸೆಟ್"</string>
@@ -440,7 +452,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"ಆನ್ ಆಗಿದೆ"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g> • ನಲ್ಲಿ"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"ಸೆಟಪ್ ಮಾಡಿ"</string>
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"ಸೆಟ್ ಮಾಡಿಲ್ಲ"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ನಿರ್ವಹಿಸಿ"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{ಯಾವುದೇ ಸಕ್ರಿಯ ಮೋಡ್‌ಗಳಿಲ್ಲ}=1{{mode} ಸಕ್ರಿಯವಾಗಿದೆ}one{# ಮೋಡ್‌ಗಳು ಸಕ್ರಿಯವಾಗಿವೆ}other{# ಮೋಡ್‌ಗಳು ಸಕ್ರಿಯವಾಗಿವೆ}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ಅಲಾರಾಂಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಹಾಗೂ ನೀವು ಸೂಚಿಸಿರುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ ಬೇರಾವುದೇ ಸದ್ದುಗಳು ಅಥವಾ ವೈಬ್ರೇಶನ್‌ಗಳು ನಿಮಗೆ ತೊಂದರೆ ನೀಡುವುದಿಲ್ಲ. ಹಾಗಿದ್ದರೂ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಸಂಗೀತ, ವೀಡಿಯೊಗಳು ಮತ್ತು ಆಟಗಳ ಆಡಿಯೊವನ್ನು ನೀವು ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
@@ -511,6 +523,10 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ವಿಜೆಟ್‌ಗಳು"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಲಾಕ್ ಆಗಿದ್ದರೂ ಸಹ ಯಾರಾದರೂ ನಿಮ್ಮ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ವಿಜೆಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ವಿಜೆಟ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಬೇಡಿ"</string>
+    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ವಿಜೆಟ್‌ಗಳು"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ವಿಜೆಟ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಆ್ಯಪ್ ತೆರೆಯಲು, ಇದು ನೀವೇ ಎಂದು ನೀವು ದೃಢೀಕರಿಸಬೇಕಾಗುತ್ತದೆ. ಅಲ್ಲದೆ, ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಲಾಕ್ ಆಗಿದ್ದರೂ ಸಹ ಯಾರಾದರೂ ಅವುಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಎಂಬುದನ್ನು ನೆನಪಿನಲ್ಲಿಡಿ. ಕೆಲವು ವಿಜೆಟ್‌ಗಳು ನಿಮ್ಮ ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ಗಾಗಿ ಉದ್ದೇಶಿಸದೇ ಇರಬಹುದು ಮತ್ತು ಇಲ್ಲಿ ಸೇರಿಸುವುದು ಸುರಕ್ಷಿತವಲ್ಲದಿರಬಹುದು."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ಅರ್ಥವಾಯಿತು"</string>
@@ -567,14 +583,15 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ನಿರ್ವಹಿಸಿ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ಇತಿಹಾಸ"</string>
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"ನೋಟಿಫಿಕೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"ನೋಟಿಫಿಕೇಶನ್ ಇತಿಹಾಸ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"ಹೊಸತು"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ನಿಶ್ಶಬ್ದ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ಸಂಭಾಷಣೆಗಳು"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ಎಲ್ಲಾ ನಿಶ್ಶಬ್ಧ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಎನ್ನುವ ಮೂಲಕ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{ಯಾವುದೇ ನೋಟಿಫಿಕೇಶನ್‌ಗಳು ಇಲ್ಲ}=1{ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು {mode} ವಿರಾಮಗೊಳಿಸಿದೆ}=2{ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು {mode} ಹಾಗೂ ಇತರ ಒಂದು ಮೋಡ್ ವಿರಾಮಗೊಳಿಸಿವೆ}one{ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು {mode} ಹಾಗೂ ಇತರ # ಮೋಡ್‌ಗಳು ವಿರಾಮಗೊಳಿಸಿವೆ}other{ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು {mode} ಹಾಗೂ ಇತರ # ಮೋಡ್‌ಗಳು ವಿರಾಮಗೊಳಿಸಿವೆ}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ಯಾವುದೇ ಹೊಸ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
@@ -673,6 +690,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"ರಿಂಗ್ ಮ್ಯೂಟ್ ಆಗಿರುವ ಕಾರಣ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಫೀಚರ್ ಆನ್ ಆಗಿರುವುದರಿಂದ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಫೀಚರ್ ಆನ್ ಆಗಿರುವುದರಿಂದ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"<xliff:g id="MODE">%s</xliff:g> ಆನ್ ಆಗಿರುವ ಕಾರಣ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. ಕಂಪನಕ್ಕೆ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
@@ -706,6 +725,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ಡೆಮೊ ಮೋಡ್ ತೋರಿಸು"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ಇಥರ್ನೆಟ್"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ಅಲಾರಮ್"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> ಆನ್ ಆಗಿದೆ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"ವಾಲೆಟ್"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ನಿಮ್ಮ ಫೋನ್ ಮೂಲಕ ವೇಗವಾದ, ಹೆಚ್ಚು ಸುರಕ್ಷಿತ ಖರೀದಿಗಳನ್ನು ಮಾಡಲು ಸೆಟಪ್ ಮಾಡಿಕೊಳ್ಳಿ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ಎಲ್ಲವನ್ನೂ ತೋರಿಸಿ"</string>
@@ -1393,38 +1413,45 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"ಪ್ರಸ್ತುತ ಆ್ಯಪ್"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ಹುಡುಕಾಟದ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ಯಾವುದೇ ಹುಡುಕಾಟ ಫಲಿತಾಂಶಗಳಿಲ್ಲ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ಕುಗ್ಗಿಸುವ ಐಕಾನ್"</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ವಿಸ್ತೃತಗೊಳಿಸುವ ಐಕಾನ್"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ಅಥವಾ"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ಡ್ರ್ಯಾಗ್‌ ಹ್ಯಾಂಡಲ್‌"</string>
+    <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"ಕೀಬೋರ್ಡ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಬಳಸಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಕಲಿಯಿರಿ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಬಳಸಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ಟಚ್‌ಪ್ಯಾಡ್ ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಕಲಿಯಿರಿ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಮತ್ತು ಟಚ್‌ಪ್ಯಾಡ್ ಬಳಸಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ಟಚ್‌ಪ್ಯಾಡ್ ಗೆಸ್ಚರ್‌ಗಳು, ಕೀಬೋರ್ಡ್‌ಗಳ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ತಿಳಿಯಿರಿ"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ಹಿಂಬದಿ ಗೆಸ್ಚರ್"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ಹೋಮ್ ಗೆಸ್ಚರ್"</string>
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"ಹಿಂದಿರುಗಿ"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ಮುಖಪುಟಕ್ಕೆ ಹೋಗಿ"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ಮುಗಿದಿದೆ"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ಹಿಂತಿರುಗಿ"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ಹಿಂತಿರುಗಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಎಲ್ಲಿಯಾದರೂ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಎಡ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ.\n\nಇದಕ್ಕಾಗಿ ನೀವು ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್ Action + ESC ಅನ್ನು ಸಹ ಬಳಸಬಹುದು."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ಭೇಷ್!"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಎಡ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"ಚೆನ್ನಾಗಿದೆ!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ನೀವು ಗೋ ಬ್ಯಾಕ್ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ಮುಖಪುಟಕ್ಕೆ ಹೋಗಿ"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಹೋಗಲು, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಕೆಳಗಿನಿಂದ ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ಭೇಷ್!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ನೀವು ಗೋ ಹೋಮ್ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"ಭೇಷ್!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"ನೀವು ಗೋ ಹೋಮ್ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಹೋಲ್ಡ್ ಮಾಡಿ"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ಭೇಷ್‌!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ನೀವು ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳ ಗೆಸ್ಚರ್‌ ವೀಕ್ಷಣೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ಆ್ಯಕ್ಷನ್‌ ಕೀ"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ನಿಮ್ಮ ಆ್ಯಪ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು, ನಿಮ್ಮ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿರುವ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ಅಭಿನಂದನೆಗಳು!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"ನೀವು ಆ್ಯಕ್ಷನ್‌ ಕೀ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ.\n\nನಿಮಗೆ ಲಭ್ಯವಿರುವ ಎಲ್ಲಾ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಆ್ಯಕ್ಷನ್‌ + / ತೋರಿಸುತ್ತದೆ."</string>
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿ"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ಭೇಷ್!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"ನೀವು ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳ ಗೆಸ್ಚರ್‌ ವೀಕ್ಷಣೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ಕೀಬೋರ್ಡ್ ಬ್ಯಾಕ್‌ಲೈಟ್"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ರಲ್ಲಿ %1$d ಮಟ್ಟ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ಮನೆ ನಿಯಂತ್ರಣಗಳು"</string>
@@ -1436,6 +1463,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ನಿಮ್ಮ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು, ನಿಮ್ಮ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿರುವ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"ಅರ್ಥಬದ್ಧವಾಗಿಸಲಾಗಿದೆ"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ನೋಡಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"ಸಂದರ್ಭೋಚಿತ ಶಿಕ್ಷಣ"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"ಹಿಂತಿರುಗಲು ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಅನ್ನು ಬಳಸಿ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"ಮೂರು ಬೆರಳುಗಳಿಂದ ಎಡಕ್ಕೆ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ಹೋಮ್‌ಗೆ ಹೋಗಲು ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಅನ್ನು ಬಳಸಿ"</string>
@@ -1455,4 +1483,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"ಆ್ಯಪ್‌ಗಳಿಂದ ಒದಗಿಸಲಾಗಿದೆ"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"ಡಿಸ್‌ಪ್ಲೇ"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"ಅಪರಿಚಿತ"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"ಟೈಲ್‌ಗಳನ್ನು ರೀಸೆಟ್ ಮಾಡಿ"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"ಟೈಲ್‌ಗಳನ್ನು ಅವುಗಳ ಮೂಲ ಆರ್ಡರ್ ಮತ್ತು ಗಾತ್ರಗಳಿಗೆ ರೀಸೆಟ್ ಮಾಡಬೇಕೇ?"</string>
 </resources>

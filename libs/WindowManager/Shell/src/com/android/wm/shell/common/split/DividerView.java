@@ -480,6 +480,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                     mLastDraggingPosition,
                     position,
                     mSplitLayout.FLING_RESIZE_DURATION,
+                    Interpolators.FAST_OUT_SLOW_IN,
                     () -> mSplitLayout.setDividerPosition(position, true /* applyLayoutChange */));
             mMoving = false;
         }

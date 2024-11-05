@@ -36,11 +36,13 @@ object PreferenceMainPageProvider : SettingsPageProvider {
             Category {
                 PreferencePageProvider.Entry()
                 ListPreferencePageProvider.Entry()
+                CheckBoxPreferencePageProvider.Entry()
             }
             Category {
                 SwitchPreferencePageProvider.Entry()
                 MainSwitchPreferencePageProvider.Entry()
                 TwoTargetSwitchPreferencePageProvider.Entry()
+                TwoTargetButtonPreferencePageProvider.Entry()
             }
             Category {
                 ZeroStatePreferencePageProvider.Entry()

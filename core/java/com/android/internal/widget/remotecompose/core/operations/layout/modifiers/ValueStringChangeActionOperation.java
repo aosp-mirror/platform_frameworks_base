@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -29,9 +29,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Apply a value change on a string variable.
- */
+/** Apply a value change on a string variable. */
 public class ValueStringChangeActionOperation implements ActionOperation {
     private static final int OP_CODE = Operations.VALUE_STRING_CHANGE_ACTION;
 
@@ -62,8 +60,7 @@ public class ValueStringChangeActionOperation implements ActionOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
-    }
+    public void apply(RemoteContext context) {}
 
     @Override
     public String deepToString(String indent) {
@@ -71,13 +68,11 @@ public class ValueStringChangeActionOperation implements ActionOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
-
-    }
+    public void write(WireBuffer buffer) {}
 
     @Override
-    public void runAction(RemoteContext context, CoreDocument document,
-                          Component component, float x, float y) {
+    public void runAction(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
         context.overrideText(mTargetValueId, mValueId);
     }
 
@@ -95,13 +90,14 @@ public class ValueStringChangeActionOperation implements ActionOperation {
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ValueStringChangeActionOperation")
-                .description("ValueStrin gChange action. "
-                        + " This operation represents a String change (referenced by id) "
-                        + "for the given string id")
+                .description(
+                        "ValueStrin gChange action. "
+                                + " This operation represents a String change (referenced by id) "
+                                + "for the given string id")
                 .field(INT, "TARGET_ID", "Target Value ID")
-                .field(INT, "VALUE_ID", "Value ID to be assigned to the target "
-                        + "value as a string")
-        ;
+                .field(
+                        INT,
+                        "VALUE_ID",
+                        "Value ID to be assigned to the target " + "value as a string");
     }
-
 }

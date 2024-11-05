@@ -242,7 +242,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         boolean enabled = true;
         final int userId = UserHandle.getUserId(uid);
         for (String packageName : packages) {
-            final var appInfo = getApplicationInfo(packageName, userId);
+            final var appInfo =
+                fixTargetSdk(getApplicationInfo(packageName, userId), uid);
             enabled &= isChangeEnabledInternal(changeId, appInfo);
         }
         return enabled;
@@ -261,7 +262,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         boolean enabled = true;
         final int userId = UserHandle.getUserId(uid);
         for (String packageName : packages) {
-            final var appInfo = getApplicationInfo(packageName, userId);
+            final var appInfo =
+                fixTargetSdk(getApplicationInfo(packageName, userId), uid);
             enabled &= isChangeEnabledInternalNoLogging(changeId, appInfo);
         }
         return enabled;
@@ -502,6 +504,15 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     private ApplicationInfo getApplicationInfo(String packageName, int userId) {
         return LocalServices.getService(PackageManagerInternal.class).getApplicationInfo(
                 packageName, 0, Process.myUid(), userId);
+    }
+
+    private ApplicationInfo fixTargetSdk(ApplicationInfo appInfo, int uid) {
+        // b/282922910 - we don't want apps sharing system uid and targeting
+        // older target sdk to impact all system uid apps
+        if (Flags.systemUidTargetSystemSdk() && uid == Process.SYSTEM_UID) {
+            appInfo.targetSdkVersion = Build.VERSION.SDK_INT;
+        }
+        return appInfo;
     }
 
     private void killPackage(String packageName) {

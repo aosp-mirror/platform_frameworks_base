@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ಆಫ್ ಆಗಿದೆ"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ಯಾವುದೇ ಕ್ಯಾಲೆಂಡರ್"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಧ್ವನಿ ಮ್ಯೂಟ್ ಮಾಡುತ್ತಿದ್ದಾರೆ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ರೀಸೆಟ್ ಮಾಡುವವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ಕರೆಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳು ವೈಬ್ರೇಟ್‌ ಆಗುತ್ತವೆ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ಕರೆಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳನ್ನು ಮ್ಯೂಟ್ ಮಾಡಲಾಗುತ್ತದೆ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ಸಿಸ್ಟಂ ಬದಲಾವಣೆಗಳು"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಮೋಡ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮರೆಮಾಡುತ್ತಿದೆ"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಮತ್ತು ಬದಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಬದಲಾಗಿದೆ"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ನೋಟಿಫಿಕೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 ನಿಂದ ಪ್ರಾರಂಭಿಸಿ, ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುವ ಆ್ಯಪ್‌ಗಳಿಗೆ, ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಲು ನಿಮ್ಮ ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗಳಿಗಾಗಿ ಈ ಅನುಮತಿಯನ್ನು ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ನಂತರ ರಿಮೈಂಡ್ ಮಾಡಿ"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ಮೊಬೈಲ್ ಅಥವಾ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್ ಇಲ್ಲದೆಯೇ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ ಮತ್ತು ಸ್ವೀಕರಿಸಿ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ಬಾಕಿ ಉಳಿದಿದೆ..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಸೆಟಪ್ ಮಾಡಿ"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ಅನ್ನು ಇನ್ನು ಮುಂದೆ ಗುರುತಿಸಲಾಗುವುದಿಲ್ಲ."</string>

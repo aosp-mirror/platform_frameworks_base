@@ -105,18 +105,19 @@ class PowerStatsExporter {
                     maxEndTime = spanMaxTime;
                 }
 
-                PowerStatsSpan span = mPowerStatsStore.loadPowerStatsSpan(metadata.getId(),
-                        AggregatedPowerStatsSection.TYPE);
-                if (span == null) {
-                    Slog.e(TAG, "Could not read PowerStatsStore section " + metadata);
-                    continue;
-                }
-                List<PowerStatsSpan.Section> sections = span.getSections();
-                for (int k = 0; k < sections.size(); k++) {
-                    hasStoredSpans = true;
-                    PowerStatsSpan.Section section = sections.get(k);
-                    populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder,
-                            ((AggregatedPowerStatsSection) section).getAggregatedPowerStats());
+                try (PowerStatsSpan span = mPowerStatsStore.loadPowerStatsSpan(metadata.getId(),
+                        AggregatedPowerStatsSection.TYPE)) {
+                    if (span == null) {
+                        Slog.e(TAG, "Could not read PowerStatsStore section " + metadata);
+                        continue;
+                    }
+                    List<PowerStatsSpan.Section> sections = span.getSections();
+                    for (int k = 0; k < sections.size(); k++) {
+                        hasStoredSpans = true;
+                        PowerStatsSpan.Section section = sections.get(k);
+                        populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder,
+                                ((AggregatedPowerStatsSection) section).getAggregatedPowerStats());
+                    }
                 }
             }
 
@@ -197,6 +198,7 @@ class PowerStatsExporter {
                 && powerState == BatteryConsumer.POWER_STATE_BATTERY;
 
         double[] totalPower = new double[1];
+        long[] durationMs = new long[1];
         MultiStateStats.States.forEachTrackedStateCombination(
                 powerComponentStats.getConfig().getDeviceStateConfig(),
                 states -> {
@@ -209,6 +211,7 @@ class PowerStatsExporter {
                     }
 
                     totalPower[0] += layout.getDevicePowerEstimate(deviceStats);
+                    durationMs[0] += layout.getUsageDuration(deviceStats);
 
                     if (hasBatteryLevelProperties) {
                         gatherBatteryLevelInfo(batteryLevelInfo, deviceStats);
@@ -223,9 +226,13 @@ class PowerStatsExporter {
         if (key != null) {
             deviceScope.addConsumedPower(key, totalPower[0],
                     BatteryConsumer.POWER_MODEL_UNDEFINED);
+            deviceScope.addUsageDurationMillis(key, durationMs[0]);
         }
-        deviceScope.addConsumedPower(powerComponentId, totalPower[0],
-                BatteryConsumer.POWER_MODEL_UNDEFINED);
+        key = deviceScope.getKey(powerComponentId, BatteryConsumer.PROCESS_STATE_UNSPECIFIED);
+        if (key != null) {
+            deviceScope.addConsumedPower(key, totalPower[0], BatteryConsumer.POWER_MODEL_UNDEFINED);
+            deviceScope.addUsageDurationMillis(key, durationMs[0]);
+        }
     }
 
     private void gatherBatteryLevelInfo(BatteryLevelInfo batteryLevelInfo, long[] deviceStats) {
@@ -373,9 +380,15 @@ class PowerStatsExporter {
 
             if (resultScreenState != BatteryConsumer.SCREEN_STATE_UNSPECIFIED
                     || resultPowerState != BatteryConsumer.POWER_STATE_UNSPECIFIED) {
-                builder.addConsumedPower(powerComponentId,
-                        powerByProcState[BatteryConsumer.PROCESS_STATE_UNSPECIFIED],
-                        BatteryConsumer.POWER_MODEL_UNDEFINED);
+                BatteryConsumer.Key key = builder.getKey(powerComponentId,
+                        BatteryConsumer.PROCESS_STATE_UNSPECIFIED);
+                if (key != null) {
+                    builder.addConsumedPower(key,
+                            powerByProcState[BatteryConsumer.PROCESS_STATE_UNSPECIFIED],
+                            BatteryConsumer.POWER_MODEL_UNDEFINED);
+                    builder.addUsageDurationMillis(key,
+                            durationByProcState[BatteryConsumer.PROCESS_STATE_UNSPECIFIED]);
+                }
             }
             powerAllApps += powerByProcState[BatteryConsumer.PROCESS_STATE_UNSPECIFIED];
         }

@@ -49,13 +49,15 @@ per-file User* = file:/MULTIUSER_OWNERS
 
 # Broadcasts
 per-file Broadcast* = file:/BROADCASTS_OWNERS
+per-file broadcasts_flags.aconfig = file:/BROADCASTS_OWNERS
 
 # Permissions & Packages
 per-file *Permission* = patb@google.com
 per-file *Package* = patb@google.com
 
-# OOM Adjuster
+# OOM Adjuster & ProcessStateController
 per-file *Oom* = file:/OOM_ADJUSTER_OWNERS
+per-file ProcessStateController.java = file:/OOM_ADJUSTER_OWNERS
 
 # Miscellaneous
 per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com, dzshen@google.com, zhidou@google.com, tedbauer@google.com

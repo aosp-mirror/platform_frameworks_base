@@ -51,6 +51,11 @@ class AccumulatedBatteryUsageStatsSection extends PowerStatsSpan.Section {
         mBatteryUsageStats.build().dump(ipw, "");
     }
 
+    @Override
+    public void close() {
+        mBatteryUsageStats.discard();
+    }
+
     static class Reader implements PowerStatsSpan.SectionReader {
         @Override
         public String getType() {

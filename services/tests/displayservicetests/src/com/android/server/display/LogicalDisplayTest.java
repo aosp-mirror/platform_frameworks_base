@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -87,7 +88,7 @@ public class LogicalDisplayTest {
         mDisplayDeviceInfo.supportedModes = new Display.Mode[] {new Display.Mode(MODE_ID,
                 DISPLAY_WIDTH, DISPLAY_HEIGHT, /* refreshRate= */ 60)};
         when(mDisplayDevice.getDisplayDeviceInfoLocked()).thenReturn(mDisplayDeviceInfo);
-        when(mSyntheticModeManager.createAppSupportedModes(any(), any())).thenAnswer(
+        when(mSyntheticModeManager.createAppSupportedModes(any(), any(), anyBoolean())).thenAnswer(
                 AdditionalAnswers.returnsSecondArg());
 
         // Disable binder caches in this process.
@@ -582,7 +583,8 @@ public class LogicalDisplayTest {
         Display.Mode[] appSupportedModes = new Display.Mode[] {new Display.Mode(OTHER_MODE_ID,
                 DISPLAY_WIDTH, DISPLAY_HEIGHT, /* refreshRate= */ 45)};
         when(mSyntheticModeManager.createAppSupportedModes(
-                any(), eq(mDisplayDeviceInfo.supportedModes))).thenReturn(appSupportedModes);
+                any(), eq(mDisplayDeviceInfo.supportedModes), anyBoolean()))
+                .thenReturn(appSupportedModes);
 
         mLogicalDisplay.updateLocked(mDeviceRepo, mSyntheticModeManager);
         DisplayInfo info = mLogicalDisplay.getDisplayInfoLocked();

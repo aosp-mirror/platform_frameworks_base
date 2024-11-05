@@ -20,6 +20,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -43,6 +44,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.internal.os.IResultReceiver;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
@@ -141,8 +143,9 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     }
 
     @Test
-    public void testStartSyntheticRecentsTransition_callsOnAnimationStart() throws Exception {
+    public void testStartSyntheticRecentsTransition_callsOnAnimationStartAndFinishCallback() throws Exception {
         final IRecentsAnimationRunner runner = mock(IRecentsAnimationRunner.class);
+        final IResultReceiver finishCallback = mock(IResultReceiver.class);
         doReturn(new Binder()).when(runner).asBinder();
         Bundle options = new Bundle();
         options.putBoolean("is_synthetic_recents_transition", true);
@@ -151,10 +154,11 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
                 runner);
         verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any());
 
-        // Finish and verify no transition remains
+        // Finish and verify no transition remains and that the provided finish callback is called
         mRecentsTransitionHandler.findController(transition).finish(true /* toHome */,
-                false /* sendUserLeaveHint */, null /* finishCb */);
+                false /* sendUserLeaveHint */, finishCallback);
         mMainExecutor.flushAll();
+        verify(finishCallback).send(anyInt(), any());
         assertNull(mRecentsTransitionHandler.findController(transition));
     }
 

@@ -300,7 +300,7 @@ internal constructor(
     }
 
     private fun getProgressBarBackground(dialog: SystemUIDialog): View {
-        return dialog.requireViewById(R.id.bluetooth_tile_dialog_progress_animation)
+        return dialog.requireViewById(R.id.bluetooth_tile_dialog_progress_background)
     }
 
     private fun getScrollViewContent(dialog: SystemUIDialog): View {

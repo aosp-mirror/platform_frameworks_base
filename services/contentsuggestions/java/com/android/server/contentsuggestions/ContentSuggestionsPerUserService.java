@@ -27,15 +27,13 @@ import android.app.contentsuggestions.SelectionsRequest;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.hardware.HardwareBuffer;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
-import com.android.server.wm.ActivityTaskManagerInternal;
 
 /**
  * Per user delegate of {@link ContentSuggestionsManagerService}.
@@ -52,13 +50,9 @@ public final class ContentSuggestionsPerUserService extends
     @GuardedBy("mLock")
     private RemoteContentSuggestionsService mRemoteService;
 
-    @NonNull
-    private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
-
     ContentSuggestionsPerUserService(
             ContentSuggestionsManagerService master, Object lock, int userId) {
         super(master, lock, userId);
-        mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
     }
 
     @GuardedBy("mLock")
@@ -94,16 +88,15 @@ public final class ContentSuggestionsPerUserService extends
     @GuardedBy("mLock")
     void provideContextImageFromBitmapLocked(@NonNull Bundle bitmapContainingExtras) {
         // No task or snapshot provided, the bitmap is contained in the extras
-        provideContextImageLocked(-1, null, 0, bitmapContainingExtras);
+        provideContextImageLocked(-1, null, bitmapContainingExtras);
     }
 
     @GuardedBy("mLock")
-    void provideContextImageLocked(int taskId, @Nullable HardwareBuffer snapshot,
-            int colorSpaceIdForSnapshot, @NonNull Bundle imageContextRequestExtras) {
+    void provideContextImageLocked(int taskId, @Nullable TaskSnapshot snapshot,
+            @NonNull Bundle imageContextRequestExtras) {
         RemoteContentSuggestionsService service = ensureRemoteServiceLocked();
         if (service != null) {
-            service.provideContextImage(taskId, snapshot, colorSpaceIdForSnapshot,
-                    imageContextRequestExtras);
+            service.provideContextImage(taskId, snapshot, imageContextRequestExtras);
         }
     }
 

@@ -54,7 +54,28 @@ class TouchpadGestureBuilderTest : SysuiTestCase() {
                 ACTION_MOVE,
                 ACTION_POINTER_UP,
                 ACTION_POINTER_UP,
-                ACTION_UP
+                ACTION_UP,
+            )
+            .inOrder()
+    }
+
+    @Test
+    fun threeFingerGestureInProgressProducesCorrectEvents() {
+        val events =
+            ThreeFingerGesture.eventsForGestureInProgress {
+                move(deltaX = 10f)
+                move(deltaX = 20f)
+            }
+
+        val actions = events.map { it.actionMasked }
+        assertWithMessage("Events have expected action type")
+            .that(actions)
+            .containsExactly(
+                ACTION_DOWN,
+                ACTION_POINTER_DOWN,
+                ACTION_POINTER_DOWN,
+                ACTION_MOVE,
+                ACTION_MOVE,
             )
             .inOrder()
     }
@@ -80,7 +101,7 @@ class TouchpadGestureBuilderTest : SysuiTestCase() {
                 ACTION_POINTER_UP,
                 ACTION_POINTER_UP,
                 ACTION_POINTER_UP,
-                ACTION_UP
+                ACTION_UP,
             )
             .inOrder()
     }
@@ -109,7 +130,7 @@ class TouchpadGestureBuilderTest : SysuiTestCase() {
     @Test
     fun gestureBuilderProducesCorrectEventCoordinates() {
         val events =
-            ThreeFingerGesture.createEvents {
+            ThreeFingerGesture.eventsForFullGesture {
                 move(deltaX = 50f)
                 move(deltaX = 100f)
             }
@@ -127,7 +148,7 @@ class TouchpadGestureBuilderTest : SysuiTestCase() {
                 // up events
                 DEFAULT_X + 100f to DEFAULT_Y,
                 DEFAULT_X + 100f to DEFAULT_Y,
-                DEFAULT_X + 100f to DEFAULT_Y
+                DEFAULT_X + 100f to DEFAULT_Y,
             )
             .inOrder()
     }

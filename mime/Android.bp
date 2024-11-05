@@ -92,7 +92,7 @@ filegroup {
     visibility: [
         "//visibility:private",
     ],
-    srcs: [
+    device_common_srcs: [
         ":debian.mime.types.minimized",
         ":android.mime.types.minimized",
         ":vendor.mime.types.minimized",

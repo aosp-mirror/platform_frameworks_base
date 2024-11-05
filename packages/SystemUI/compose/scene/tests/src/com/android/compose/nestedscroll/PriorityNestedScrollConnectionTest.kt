@@ -18,11 +18,15 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -34,29 +38,55 @@ class PriorityNestedScrollConnectionTest {
     private var canStartPreScroll = false
     private var canStartPostScroll = false
     private var canStartPostFling = false
-    private var canContinueScroll = false
+    private var canStopOnPreFling = true
     private var isStarted = false
     private var lastScroll: Float? = null
-    private var returnOnScroll = 0f
+    private var consumeScroll = true
     private var lastStop: Float? = null
-    private var returnOnStop = 0f
+    private var isCancelled: Boolean = false
+    private var onStopConsumeFlingToScroll = false
+    private var onStopConsumeAll = true
+
+    private val customFlingBehavior =
+        object : FlingBehavior {
+            override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                scrollBy(initialVelocity)
+                return initialVelocity / 2f
+            }
+        }
 
     private val scrollConnection =
         PriorityNestedScrollConnection(
             orientation = Orientation.Vertical,
-            canStartPreScroll = { _, _ -> canStartPreScroll },
-            canStartPostScroll = { _, _ -> canStartPostScroll },
+            canStartPreScroll = { _, _, _ -> canStartPreScroll },
+            canStartPostScroll = { _, _, _ -> canStartPostScroll },
             canStartPostFling = { canStartPostFling },
-            canContinueScroll = { canContinueScroll },
-            canScrollOnFling = false,
-            onStart = { isStarted = true },
-            onScroll = {
-                lastScroll = it
-                returnOnScroll
-            },
-            onStop = {
-                lastStop = it
-                { returnOnStop }
+            onStart = { _ ->
+                isStarted = true
+                object : ScrollController {
+                    override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+                        lastScroll = deltaScroll
+                        return if (consumeScroll) deltaScroll else 0f
+                    }
+
+                    override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
+                        lastStop = initialVelocity
+                        var velocityConsumed = 0f
+                        if (onStopConsumeFlingToScroll) {
+                            velocityConsumed = flingToScroll(initialVelocity, customFlingBehavior)
+                        }
+                        if (onStopConsumeAll) {
+                            velocityConsumed = initialVelocity
+                        }
+                        return velocityConsumed
+                    }
+
+                    override fun onCancel() {
+                        isCancelled = true
+                    }
+
+                    override fun canStopOnPreFling() = canStopOnPreFling
+                }
             },
         )
 
@@ -85,7 +115,7 @@ class PriorityNestedScrollConnectionTest {
         canStartPostScroll = true
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
-            available = Offset.Zero,
+            available = Offset(1f, 1f),
             source = UserInput,
         )
     }
@@ -136,45 +166,71 @@ class PriorityNestedScrollConnectionTest {
     @Test
     fun step2_onPriorityMode_shouldContinueIfAllowed() {
         startPriorityModePostScroll()
-        canContinueScroll = true
 
-        scrollConnection.onPreScroll(available = Offset(1f, 1f), source = UserInput)
+        val scroll1 = scrollConnection.onPreScroll(available = Offset(0f, 1f), source = UserInput)
         assertThat(lastScroll).isEqualTo(1f)
+        assertThat(scroll1.y).isEqualTo(1f)
 
-        canContinueScroll = false
-        scrollConnection.onPreScroll(available = Offset(2f, 2f), source = UserInput)
-        assertThat(lastScroll).isNotEqualTo(2f)
-        assertThat(lastScroll).isEqualTo(1f)
+        consumeScroll = false
+        val scroll2 = scrollConnection.onPreScroll(available = Offset(0f, 2f), source = UserInput)
+        assertThat(lastScroll).isEqualTo(2f)
+        assertThat(scroll2.y).isEqualTo(0f)
     }
 
     @Test
-    fun step3a_onPriorityMode_shouldStopIfCannotContinue() {
+    fun step3a_onPriorityMode_shouldCancelIfCannotContinue() {
         startPriorityModePostScroll()
-        canContinueScroll = false
+        consumeScroll = false
 
-        scrollConnection.onPreScroll(available = Offset.Zero, source = UserInput)
+        scrollConnection.onPreScroll(available = Offset(0f, 1f), source = UserInput)
 
-        assertThat(lastStop).isNotNull()
+        assertThat(isCancelled).isTrue()
     }
 
     @Test
     fun step3b_onPriorityMode_shouldStopOnFling() = runTest {
         startPriorityModePostScroll()
-        canContinueScroll = true
 
         scrollConnection.onPreFling(available = Velocity.Zero)
 
-        assertThat(lastStop).isNotNull()
+        assertThat(lastStop).isEqualTo(0f)
     }
 
     @Test
-    fun step3c_onPriorityMode_shouldStopOnReset() {
+    fun onStopScrollUsingFlingToScroll() = runMonotonicClockTest {
         startPriorityModePostScroll()
-        canContinueScroll = true
+        onStopConsumeFlingToScroll = true
+        onStopConsumeAll = false
+        lastScroll = Float.NaN
+
+        val consumed = scrollConnection.onPreFling(available = Velocity(2f, 2f))
+
+        assertThat(lastStop).isEqualTo(2f)
+        // flingToScroll should try to scroll the content, customFlingBehavior uses the velocity.
+        assertThat(lastScroll).isEqualTo(2f)
+        // customFlingBehavior returns half of the vertical velocity.
+        assertThat(consumed).isEqualTo(Velocity(0f, 1f))
+    }
+
+    @Test
+    fun ifCannotStopOnPreFling_shouldStopOnPostFling() = runTest {
+        startPriorityModePostScroll()
+        canStopOnPreFling = false
+
+        scrollConnection.onPreFling(available = Velocity.Zero)
+        assertThat(lastStop).isNull()
+
+        scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
+        assertThat(lastStop).isEqualTo(0f)
+    }
+
+    @Test
+    fun step3c_onPriorityMode_shouldCancelOnReset() {
+        startPriorityModePostScroll()
 
         scrollConnection.reset()
 
-        assertThat(lastStop).isNotNull()
+        assertThat(isCancelled).isTrue()
     }
 
     @Test

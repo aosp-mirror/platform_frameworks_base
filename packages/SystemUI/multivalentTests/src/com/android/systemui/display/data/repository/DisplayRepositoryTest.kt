@@ -440,6 +440,28 @@ class DisplayRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun displayAdditionEvent_emptyByDefault() =
+        testScope.runTest {
+            setDisplays(1, 2, 3)
+
+            val lastAddedDisplay by lastDisplayAdditionEvent()
+
+            assertThat(lastAddedDisplay).isNull()
+        }
+
+    @Test
+    fun displayAdditionEvent_displaysAdded_doesNotReplayEventsToNewSubscribers() =
+        testScope.runTest {
+            val priorDisplayAdded by lastDisplayAdditionEvent()
+            setDisplays(1)
+            sendOnDisplayAdded(1)
+            assertThat(priorDisplayAdded?.displayId).isEqualTo(1)
+
+            val lastAddedDisplay by collectLastValue(displayRepository.displayAdditionEvent)
+            assertThat(lastAddedDisplay).isNull()
+        }
+
+    @Test
     fun defaultDisplayOff_changes() =
         testScope.runTest {
             val defaultDisplayOff by latestDefaultDisplayOffFlowValue()

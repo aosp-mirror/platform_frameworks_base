@@ -81,6 +81,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardLockWhileAwakeInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardStateCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardWakeDirectlyToGoneInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
@@ -329,6 +330,8 @@ public class KeyguardService extends Service {
             return new FoldGracePeriodProvider();
         }
     };
+    private final KeyguardLockWhileAwakeInteractor
+            mKeyguardLockWhileAwakeInteractor;
 
     @Inject
     public KeyguardService(
@@ -353,7 +356,8 @@ public class KeyguardService extends Service {
             KeyguardWakeDirectlyToGoneInteractor keyguardWakeDirectlyToGoneInteractor,
             KeyguardDismissInteractor keyguardDismissInteractor,
             Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy,
-            KeyguardStateCallbackInteractor keyguardStateCallbackInteractor) {
+            KeyguardStateCallbackInteractor keyguardStateCallbackInteractor,
+            KeyguardLockWhileAwakeInteractor keyguardLockWhileAwakeInteractor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -385,6 +389,7 @@ public class KeyguardService extends Service {
         mKeyguardEnabledInteractor = keyguardEnabledInteractor;
         mKeyguardWakeDirectlyToGoneInteractor = keyguardWakeDirectlyToGoneInteractor;
         mKeyguardDismissInteractor = keyguardDismissInteractor;
+        mKeyguardLockWhileAwakeInteractor = keyguardLockWhileAwakeInteractor;
     }
 
     @Override
@@ -656,6 +661,11 @@ public class KeyguardService extends Service {
         public void doKeyguardTimeout(Bundle options) {
             trace("doKeyguardTimeout");
             checkPermission();
+
+            if (KeyguardWmStateRefactor.isEnabled()) {
+                mKeyguardLockWhileAwakeInteractor.onKeyguardServiceDoKeyguardTimeout(options);
+            }
+
             mKeyguardViewMediator.doKeyguardTimeout(options);
         }
 

@@ -20,11 +20,10 @@ import static com.android.wm.shell.bubbles.BadgedImageView.DEFAULT_PATH_SIZE;
 import static com.android.wm.shell.bubbles.BadgedImageView.WHITE_SCRIM_ALPHA;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.shared.bubbles.FlyoutDrawableLoader.loadFlyoutDrawable;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
@@ -33,7 +32,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.PathParser;
@@ -50,7 +48,6 @@ import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.shared.handles.RegionSamplingHelper;
 
 import java.lang.ref.WeakReference;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -81,6 +78,7 @@ public class BubbleViewInfoTaskLegacy extends
     private WeakReference<BubbleExpandedViewManager> mExpandedViewManager;
     private WeakReference<BubbleTaskViewFactory> mTaskViewFactory;
     private WeakReference<BubblePositioner> mPositioner;
+    private WeakReference<BubbleLogger>  mBubbleLogger;
     private WeakReference<BubbleStackView> mStackView;
     private WeakReference<BubbleBarLayerView> mLayerView;
     private BubbleIconFactory mIconFactory;
@@ -98,6 +96,7 @@ public class BubbleViewInfoTaskLegacy extends
             BubbleExpandedViewManager expandedViewManager,
             BubbleTaskViewFactory taskViewFactory,
             BubblePositioner positioner,
+            BubbleLogger bubbleLogger,
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory factory,
@@ -110,6 +109,7 @@ public class BubbleViewInfoTaskLegacy extends
         mExpandedViewManager = new WeakReference<>(expandedViewManager);
         mTaskViewFactory = new WeakReference<>(taskViewFactory);
         mPositioner = new WeakReference<>(positioner);
+        mBubbleLogger = new WeakReference<>(bubbleLogger);
         mStackView = new WeakReference<>(stackView);
         mLayerView = new WeakReference<>(layerView);
         mIconFactory = factory;
@@ -127,8 +127,9 @@ public class BubbleViewInfoTaskLegacy extends
         }
         if (mLayerView.get() != null) {
             return BubbleViewInfo.populateForBubbleBar(mContext.get(), mExpandedViewManager.get(),
-                    mTaskViewFactory.get(), mPositioner.get(), mLayerView.get(), mIconFactory,
-                    mBubble, mSkipInflation, mMainExecutor, mBackgroundExecutor);
+                    mTaskViewFactory.get(), mPositioner.get(), mBubbleLogger.get(),
+                    mLayerView.get(), mIconFactory, mBubble, mSkipInflation, mMainExecutor,
+                    mBackgroundExecutor);
         } else {
             return BubbleViewInfo.populate(mContext.get(), mExpandedViewManager.get(),
                     mTaskViewFactory.get(), mPositioner.get(), mStackView.get(), mIconFactory,
@@ -181,7 +182,7 @@ public class BubbleViewInfoTaskLegacy extends
         @Nullable BubbleExpandedView expandedView;
         int dotColor;
         Path dotPath;
-        @Nullable Bubble.FlyoutMessage flyoutMessage;
+        Bubble.FlyoutMessage flyoutMessage;
         Bitmap bubbleBitmap;
         Bitmap badgeBitmap;
 
@@ -190,6 +191,7 @@ public class BubbleViewInfoTaskLegacy extends
                 BubbleExpandedViewManager expandedViewManager,
                 BubbleTaskViewFactory taskViewFactory,
                 BubblePositioner positioner,
+                BubbleLogger bubbleLogger,
                 BubbleBarLayerView layerView,
                 BubbleIconFactory iconFactory,
                 Bubble b,
@@ -203,9 +205,9 @@ public class BubbleViewInfoTaskLegacy extends
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.bubbleBarExpandedView = (BubbleBarExpandedView) inflater.inflate(
                         R.layout.bubble_bar_expanded_view, layerView, false /* attachToRoot */);
-                info.bubbleBarExpandedView.initialize(
-                        expandedViewManager, positioner, false /* isOverflow */, bubbleTaskView,
-                        mainExecutor, backgroundExecutor, new RegionSamplingProvider() {
+                info.bubbleBarExpandedView.initialize(expandedViewManager, positioner, bubbleLogger,
+                        false /* isOverflow */, bubbleTaskView, mainExecutor, backgroundExecutor,
+                        new RegionSamplingProvider() {
                             @Override
                             public RegionSamplingHelper createHelper(View sampledView,
                                     RegionSamplingHelper.SamplingCallback callback,
@@ -220,6 +222,10 @@ public class BubbleViewInfoTaskLegacy extends
                 // if we failed to update common fields return null
                 return null;
             }
+
+            // set the flyout message but don't load the avatar because we can't pass it on the
+            // binder to launcher
+            info.flyoutMessage = b.getFlyoutMessage();
 
             return info;
         }
@@ -260,7 +266,7 @@ public class BubbleViewInfoTaskLegacy extends
             info.flyoutMessage = b.getFlyoutMessage();
             if (info.flyoutMessage != null) {
                 info.flyoutMessage.senderAvatar =
-                        loadSenderAvatar(c, info.flyoutMessage.senderIcon);
+                        loadFlyoutDrawable(info.flyoutMessage.senderIcon, c);
             }
             return info;
         }
@@ -341,22 +347,5 @@ public class BubbleViewInfoTaskLegacy extends
         info.dotColor = ColorUtils.blendARGB(badgeBitmapInfo.color,
                 Color.WHITE, WHITE_SCRIM_ALPHA);
         return true;
-    }
-
-    @Nullable
-    static Drawable loadSenderAvatar(@NonNull final Context context, @Nullable final Icon icon) {
-        Objects.requireNonNull(context);
-        if (icon == null) return null;
-        try {
-            if (icon.getType() == Icon.TYPE_URI
-                    || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
-                context.grantUriPermission(context.getPackageName(),
-                        icon.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            }
-            return icon.loadDrawable(context);
-        } catch (Exception e) {
-            Log.w(TAG, "loadSenderAvatar failed: " + e.getMessage());
-            return null;
-        }
     }
 }

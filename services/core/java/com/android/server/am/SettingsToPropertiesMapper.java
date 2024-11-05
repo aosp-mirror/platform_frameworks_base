@@ -41,6 +41,7 @@ import android.aconfigd.Aconfigd.StorageReturnMessage;
 import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
+import static com.android.aconfig_new_storage.Flags.supportClearLocalOverridesImmediately;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -138,6 +139,7 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "aaos_sdv",
         "accessibility",
         "android_core_networking",
         "android_health_services",
@@ -149,7 +151,9 @@ public class SettingsToPropertiesMapper {
         "art_mainline",
         "art_performance",
         "attack_tools",
+        "automotive_cast",
         "avic",
+        "desktop_firmware",
         "biometrics",
         "biometrics_framework",
         "biometrics_integration",
@@ -173,6 +177,8 @@ public class SettingsToPropertiesMapper {
         "core_libraries",
         "crumpet",
         "dck_framework",
+        "desktop_hwsec",
+        "desktop_stats",
         "devoptions_settings",
         "game",
         "gpu",
@@ -188,6 +194,7 @@ public class SettingsToPropertiesMapper {
         "make_pixel_haptics",
         "media_audio",
         "media_drm",
+        "media_projection",
         "media_reliability",
         "media_solutions",
         "media_tv",
@@ -200,8 +207,10 @@ public class SettingsToPropertiesMapper {
         "pixel_bluetooth",
         "pixel_connectivity_gps",
         "pixel_continuity",
+        "pixel_perf",
         "pixel_sensors",
         "pixel_system_sw_video",
+        "pixel_video_sw",
         "pixel_watch",
         "platform_compat",
         "platform_security",
@@ -211,6 +220,7 @@ public class SettingsToPropertiesMapper {
         "preload_safety",
         "printing",
         "privacy_infra_policy",
+        "ravenwood",
         "resource_manager",
         "responsible_apis",
         "rust",
@@ -227,6 +237,7 @@ public class SettingsToPropertiesMapper {
         "text",
         "threadnetwork",
         "treble",
+        "tv_os_media",
         "tv_system_ui",
         "usb",
         "vibrator",
@@ -243,8 +254,10 @@ public class SettingsToPropertiesMapper {
         "wear_system_health",
         "wear_systems",
         "wear_sysui",
+        "wear_system_managed_surfaces",
         "window_surfaces",
         "windowing_frontend",
+        "xr",
     };
 
     public static final String NAMESPACE_REBOOT_STAGING = "staged";
@@ -514,14 +527,21 @@ public class SettingsToPropertiesMapper {
      * @param proto
      * @param packageName the package of the flag
      * @param flagName the name of the flag
+     * @param immediate if true, clear immediately; otherwise, clear on next reboot
+     *
+     * @hide
      */
-    static void writeFlagOverrideRemovalRequest(
-        ProtoOutputStream proto, String packageName, String flagName) {
+    public static void writeFlagOverrideRemovalRequest(
+        ProtoOutputStream proto, String packageName, String flagName, boolean immediate) {
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
       long msgToken = proto.start(StorageRequestMessage.REMOVE_LOCAL_OVERRIDE_MESSAGE);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.PACKAGE_NAME, packageName);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.FLAG_NAME, flagName);
       proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.REMOVE_ALL, false);
+      proto.write(StorageRequestMessage.RemoveLocalOverrideMessage.REMOVE_OVERRIDE_TYPE,
+          immediate
+              ? StorageRequestMessage.REMOVE_LOCAL_IMMEDIATE
+              : StorageRequestMessage.REMOVE_LOCAL_ON_REBOOT);
       proto.end(msgToken);
       proto.end(msgsToken);
     }
@@ -598,7 +618,11 @@ public class SettingsToPropertiesMapper {
             String realFlagName = fullFlagName.substring(idx+1);
 
             if (Flags.syncLocalOverridesRemovalNewStorage() && flagValue == null) {
-              writeFlagOverrideRemovalRequest(requests, packageName, realFlagName);
+              if (supportClearLocalOverridesImmediately()) {
+                writeFlagOverrideRemovalRequest(requests, packageName, realFlagName, true);
+              } else {
+                writeFlagOverrideRemovalRequest(requests, packageName, realFlagName, false);
+              }
             } else {
               writeFlagOverrideRequest(requests, packageName, realFlagName, flagValue, true);
             }

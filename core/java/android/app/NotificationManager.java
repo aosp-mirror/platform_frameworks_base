@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.service.notification.Flags.notificationClassification;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -37,6 +39,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
@@ -752,6 +755,11 @@ public class NotificationManager {
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
 
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(notification.getChannelId())) {
+            return;
+        }
+
         try {
             if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
@@ -1131,6 +1139,10 @@ public class NotificationManager {
      * had before it was deleted.
      */
     public void deleteNotificationChannel(String channelId) {
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(channelId)) {
+            return;
+        }
         INotificationManager service = getService();
         try {
             service.deleteNotificationChannel(mContext.getPackageName(), channelId);
@@ -1333,10 +1345,14 @@ public class NotificationManager {
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public boolean areAutomaticZenRulesUserManaged() {
-        // modes ui is dependent on modes api
-        return Flags.modesApi() && Flags.modesUi();
+        if (Flags.modesApi() && Flags.modesUi()) {
+            PackageManager pm = mContext.getPackageManager();
+            return !pm.hasSystemFeature(PackageManager.FEATURE_WATCH)
+                    && !pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+        } else {
+            return false;
+        }
     }
-
 
     /**
      * Returns AutomaticZenRules owned by the caller.
@@ -1785,6 +1801,34 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.getAllowedAssistantAdjustments(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void allowAssistantAdjustment(@NonNull String capability) {
+        INotificationManager service = getService();
+        try {
+            service.allowAssistantAdjustment(capability);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void disallowAssistantAdjustment(@NonNull String capability) {
+        INotificationManager service = getService();
+        try {
+            service.disallowAssistantAdjustment(capability);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

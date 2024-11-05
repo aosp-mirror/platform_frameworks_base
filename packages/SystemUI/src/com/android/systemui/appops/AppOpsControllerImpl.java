@@ -319,7 +319,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             if (item == null && active) {
                 item = new AppOpItem(code, uid, packageName, mClock.elapsedRealtime());
                 if (isOpMicrophone(code)) {
-                    item.setDisabled(isAnyRecordingPausedLocked(uid));
+                    item.setDisabled(isAllRecordingPausedLocked(uid));
                 } else if (isOpCamera(code)) {
                     item.setDisabled(mCameraDisabled);
                 }
@@ -521,18 +521,21 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
 
     }
 
-    private boolean isAnyRecordingPausedLocked(int uid) {
+    // TODO(b/365843152) remove AudioRecordingConfiguration listening
+    private boolean isAllRecordingPausedLocked(int uid) {
         if (mMicMuted) {
             return true;
         }
         List<AudioRecordingConfiguration> configs = mRecordingsByUid.get(uid);
         if (configs == null) return false;
+        // If we are aware of AudioRecordConfigs, suppress the indicator if all of them are known
+        // to be silenced.
         int configsNum = configs.size();
         for (int i = 0; i < configsNum; i++) {
             AudioRecordingConfiguration config = configs.get(i);
-            if (config.isClientSilenced()) return true;
+            if (!config.isClientSilenced()) return false;
         }
-        return false;
+        return true;
     }
 
     private void updateSensorDisabledStatus() {
@@ -543,7 +546,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
 
                 boolean paused = false;
                 if (isOpMicrophone(item.getCode())) {
-                    paused = isAnyRecordingPausedLocked(item.getUid());
+                    paused = isAllRecordingPausedLocked(item.getUid());
                 } else if (isOpCamera(item.getCode())) {
                     paused = mCameraDisabled;
                 }

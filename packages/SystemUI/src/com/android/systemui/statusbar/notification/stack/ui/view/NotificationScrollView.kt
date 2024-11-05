@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.notification.stack.ui.view
 
 import android.view.View
+import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
 import java.util.function.Consumer
 
 /**
@@ -34,6 +36,9 @@ interface NotificationScrollView {
 
     /** Height in pixels required to display the top HeadsUp Notification. */
     val topHeadsUpHeight: Int
+
+    /** Bottom inset of the Notification Stack that us used to display the Shelf. */
+    val stackBottomInset: Int
 
     /**
      * Since this is an interface rather than a literal View, this provides cast-like access to the
@@ -62,11 +67,14 @@ interface NotificationScrollView {
     /** set the bottom-most y position in px, where we can draw HUNs in this view's coordinates */
     fun setHeadsUpBottom(headsUpBottom: Float)
 
-    /** set whether the view has been scrolled all the way to the top */
-    fun setScrolledToTop(scrolledToTop: Boolean)
+    /** Updates the current scroll state of the notification shade. */
+    fun setScrollState(scrollState: ShadeScrollState)
 
     /** Set a consumer for synthetic scroll events */
     fun setSyntheticScrollConsumer(consumer: Consumer<Float>?)
+
+    /** Set a consumer for accessibility actions to be handled by the placeholder. */
+    fun setAccessibilityScrollEventConsumer(consumer: Consumer<AccessibilityScrollEvent>?)
 
     /** Set a consumer for current gesture overscroll events */
     fun setCurrentGestureOverscrollConsumer(consumer: Consumer<Boolean>?)
@@ -76,9 +84,6 @@ interface NotificationScrollView {
 
     /** Set a consumer for current remote input notification row bottom bound events */
     fun setRemoteInputRowBottomBoundConsumer(consumer: Consumer<Float?>?)
-
-    /** Set a consumer for heads up height changed events */
-    fun setHeadsUpHeightConsumer(consumer: Consumer<Float>?)
 
     /** sets that scrolling is allowed */
     fun setScrollingEnabled(enabled: Boolean)

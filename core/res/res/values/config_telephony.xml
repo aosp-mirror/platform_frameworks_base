@@ -460,4 +460,25 @@
     <integer name="config_satellite_location_query_throttle_interval_minutes">10</integer>
     <java-symbol type="integer" name="config_satellite_location_query_throttle_interval_minutes" />
 
+    <!-- Boolean indicating whether to enable MT SMS polling for NB IOT NTN. -->
+    <bool name="config_enabled_mt_sms_polling">true</bool>
+    <java-symbol type="bool" name="config_enabled_mt_sms_polling" />
+
+    <!-- Text to be used for MT SMS polling in NB IOT NTN. -->
+    <string name="config_mt_sms_polling_text" translatable="false">DU\\\#MMYSM€S2BIG\\\#NORED\\\!</string>
+    <java-symbol type="string" name="config_mt_sms_polling_text" />
+
+    <!-- The time duration in millis after which Telephony can send another MT SMS polling for NB IOT NTN -->
+    <integer name="config_mt_sms_polling_throttle_millis">300000</integer>
+    <java-symbol type="integer" name="config_mt_sms_polling_throttle_millis" />
+
+    <!-- The receiver class of the intent that hidden menu sends to start satellite non-emergency mode -->
+    <string name="config_satellite_carrier_roaming_non_emergency_session_class" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_carrier_roaming_non_emergency_session_class" />
+
+    <!-- Whether to show the system notification to users whenever there is a change
+     in the satellite availability state at the current location. -->
+    <bool name="config_satellite_should_notify_availability">false</bool>
+    <java-symbol type="bool" name="config_satellite_should_notify_availability" />
+
 </resources>

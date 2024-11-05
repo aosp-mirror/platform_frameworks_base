@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -59,8 +57,6 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
@@ -118,11 +114,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     private final PowerInteractor mPowerInteractor =
             PowerInteractorFactory.create().getPowerInteractor();
-    private final ActiveNotificationListRepository mActiveNotificationListRepository =
-            new ActiveNotificationListRepository();
-    private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
-            new ActiveNotificationsInteractor(mActiveNotificationListRepository,
-                    StandardTestDispatcher(null, null));
     private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
@@ -137,7 +128,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mKeyguardRepository,
                 mHeadsUpManager,
                 mPowerInteractor,
-                mActiveNotificationsInteractor,
+                mKosmos.getActiveNotificationsInteractor(),
                 () -> mKosmos.getSceneInteractor());
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 

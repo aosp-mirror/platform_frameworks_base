@@ -24,13 +24,14 @@ import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
 import com.android.internal.widget.remotecompose.core.operations.utilities.ArrayAccess;
+import com.android.internal.widget.remotecompose.core.operations.utilities.DataMap;
 
 import java.util.HashMap;
 
 /**
  * An implementation of Context for Android.
- * <p>
- * This is used to play the RemoteCompose operations on Android.
+ *
+ * <p>This is used to play the RemoteCompose operations on Android.
  */
 class AndroidRemoteContext extends RemoteContext {
 
@@ -127,6 +128,16 @@ class AndroidRemoteContext extends RemoteContext {
     }
 
     @Override
+    public void putDataMap(int id, DataMap map) {
+        mRemoteComposeState.putDataMap(id, map);
+    }
+
+    @Override
+    public DataMap getDataMap(int id) {
+        return mRemoteComposeState.getDataMap(id);
+    }
+
+    @Override
     public void runAction(int id, String metadata) {
         mDocument.performClick(id);
     }
@@ -140,7 +151,7 @@ class AndroidRemoteContext extends RemoteContext {
     /**
      * Decode a byte array into an image and cache it using the given imageId
      *
-     * @param width  with of image to be loaded
+     * @param width with of image to be loaded
      * @param height height of image to be loaded
      * @param bitmap a byte array containing the image information
      * @oaram imageId the id of the image
@@ -223,8 +234,18 @@ class AndroidRemoteContext extends RemoteContext {
     }
 
     @Override
+    public void putObject(int id, Object value) {
+        mRemoteComposeState.updateObject(id, value);
+    }
+
+    @Override
+    public Object getObject(int id) {
+        return mRemoteComposeState.getObject(id);
+    }
+
+    @Override
     public int getInteger(int id) {
-        return  mRemoteComposeState.getInteger(id);
+        return mRemoteComposeState.getInteger(id);
     }
 
     @Override
@@ -252,17 +273,16 @@ class AndroidRemoteContext extends RemoteContext {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void addClickArea(int id,
-                             int contentDescriptionId,
-                             float left,
-                             float top,
-                             float right,
-                             float bottom,
-                             int metadataId) {
+    public void addClickArea(
+            int id,
+            int contentDescriptionId,
+            float left,
+            float top,
+            float right,
+            float bottom,
+            int metadataId) {
         String contentDescription = (String) mRemoteComposeState.getFromId(contentDescriptionId);
         String metadata = (String) mRemoteComposeState.getFromId(metadataId);
         mDocument.addClickArea(id, contentDescription, left, top, right, bottom, metadata);
     }
-
 }
-

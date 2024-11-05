@@ -349,7 +349,7 @@ class AnrTimerTracer {
         return nullptr;
     }
 
-    // Return the currently watched pids.  The lock must be held.
+    // Return the currently watched pids as a comma-separated list.  The lock must be held.
     std::string watchedPidsLocked() const {
         if (watched_.size() == 0) return "none";
         bool first = true;
@@ -357,6 +357,7 @@ class AnrTimerTracer {
         for (auto i = watched_.cbegin(); i != watched_.cend(); i++) {
             if (first) {
                 result += StringPrintf("%d", *i);
+                first = false;
             } else {
                 result += StringPrintf(",%d", *i);
             }

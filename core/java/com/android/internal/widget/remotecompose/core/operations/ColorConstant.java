@@ -15,20 +15,18 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Operation that defines a simple Color based on ID
- * Mainly for colors in theming.
- */
+/** Operation that defines a simple Color based on ID Mainly for colors in theming. */
 public class ColorConstant implements Operation {
     private static final int OP_CODE = Operations.COLOR_CONSTANT;
     private static final String CLASS_NAME = "ColorConstant";
@@ -78,14 +76,10 @@ public class ColorConstant implements Operation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Define a Color")
-                .field(INT, "id",
-                        "Id of the color")
-                .field(INT, "color",
-                        "32 bit ARGB color");
+                .field(DocumentedOperation.INT, "id", "Id of the color")
+                .field(INT, "color", "32 bit ARGB color");
     }
 
     @Override

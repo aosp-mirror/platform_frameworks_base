@@ -19,7 +19,7 @@ filegroup {
     ],
 }
 
-genrule {
+java_genrule {
     name: "wmtests.protologsrc",
     srcs: [
         ":protolog-impl",
@@ -71,6 +71,7 @@ android_test {
         "CtsSurfaceValidatorLib",
         "service-sdksandbox.impl",
         "com.android.window.flags.window-aconfig-java",
+        "android.view.inputmethod.flags-aconfig-java",
         "flag-junit",
     ],
 

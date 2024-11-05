@@ -74,7 +74,8 @@ public class ParsedServiceUtils {
                     R.styleable.AndroidManifestService_process,
                     R.styleable.AndroidManifestService_roundIcon,
                     R.styleable.AndroidManifestService_splitName,
-                    R.styleable.AndroidManifestService_attributionTags
+                    R.styleable.AndroidManifestService_attributionTags,
+                    R.styleable.AndroidManifestService_intentMatchingFlags
             );
 
             if (result.isError()) {
@@ -138,7 +139,7 @@ public class ParsedServiceUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
-            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
+            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(pkg, parser)) {
                 continue;
             }
 

@@ -41,10 +41,6 @@ final class SingleVibrationSession implements VibrationSession, IBinder.DeathRec
     @GuardedBy("mLock")
     private VibrationStepConductor mConductor;
 
-    @GuardedBy("mLock")
-    @Nullable
-    private Runnable mBinderDeathCallback;
-
     SingleVibrationSession(@NonNull IBinder callerToken, @NonNull CallerInfo callerInfo,
             @NonNull CombinedVibration vibration) {
         mCallerToken = callerToken;
@@ -100,20 +96,10 @@ final class SingleVibrationSession implements VibrationSession, IBinder.DeathRec
     public void binderDied() {
         Slog.d(TAG, "Binder died, cancelling vibration...");
         requestEnd(Status.CANCELLED_BINDER_DIED, /* endedBy= */ null, /* immediate= */ false);
-        Runnable callback;
-        synchronized (mLock) {
-            callback = mBinderDeathCallback;
-        }
-        if (callback != null) {
-            callback.run();
-        }
     }
 
     @Override
-    public boolean linkToDeath(@Nullable Runnable callback) {
-        synchronized (mLock) {
-            mBinderDeathCallback = callback;
-        }
+    public boolean linkToDeath() {
         try {
             mCallerToken.linkToDeath(this, 0);
         } catch (RemoteException e) {
@@ -129,9 +115,6 @@ final class SingleVibrationSession implements VibrationSession, IBinder.DeathRec
             mCallerToken.unlinkToDeath(this, 0);
         } catch (NoSuchElementException e) {
             Slog.wtf(TAG, "Failed to unlink vibration to token death", e);
-        }
-        synchronized (mLock) {
-            mBinderDeathCallback = null;
         }
     }
 
@@ -169,5 +152,13 @@ final class SingleVibrationSession implements VibrationSession, IBinder.DeathRec
                 mConductor.notifySyncedVibrationComplete();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "SingleVibrationSession{"
+                + "callerToken= " + mCallerToken
+                + ", vibration=" + mVibration
+                + '}';
     }
 }

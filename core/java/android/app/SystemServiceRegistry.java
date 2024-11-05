@@ -76,7 +76,6 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
-import android.compat.annotation.EnabledSince;
 import android.content.ClipboardManager;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -151,6 +150,8 @@ import android.media.midi.MidiManager;
 import android.media.musicrecognition.IMusicRecognitionManager;
 import android.media.musicrecognition.MusicRecognitionManager;
 import android.media.projection.MediaProjectionManager;
+import android.media.quality.IMediaQualityManager;
+import android.media.quality.MediaQualityManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
@@ -172,8 +173,7 @@ import android.net.NetworkWatchlistManager;
 import android.net.PacProxyManager;
 import android.net.TetheringManager;
 import android.net.VpnManager;
-import android.net.vcn.IVcnManagementService;
-import android.net.vcn.VcnManager;
+import android.net.vcn.VcnFrameworkInitializer;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
@@ -208,7 +208,6 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StatsFrameworkInitializer;
 import android.os.SystemConfigManager;
-import android.os.SystemProperties;
 import android.os.SystemUpdateManager;
 import android.os.SystemVibrator;
 import android.os.SystemVibratorManager;
@@ -235,8 +234,11 @@ import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
 import android.security.IFileIntegrityService;
+import android.security.advancedprotection.AdvancedProtectionManager;
+import android.security.advancedprotection.IAdvancedProtectionService;
 import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
+import android.security.keystore.KeyStoreManager;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
 import android.service.persistentdata.IPersistentDataBlockService;
@@ -300,18 +302,6 @@ public final class SystemServiceRegistry {
     public static boolean sEnableServiceNotFoundWtf = false;
 
     /**
-     * Starting with {@link VANILLA_ICE_CREAM}, Telephony feature flags
-     * (e.g. {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}) are being checked before
-     * returning managers that depend on them. If the feature is missing,
-     * {@link Context#getSystemService} will return null.
-     *
-     * This change is specific to VcnManager.
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    static final long ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN = 330902016;
-
-    /**
      * After {@link Build.VERSION_CODES.VANILLA_ICE_CREAM}, Wear devices will be allowed to publish
      * no {@link GameManager} instance. This is because the respective system service is no longer
      * started for Wear devices given that the applications of the service do not currently apply to
@@ -320,16 +310,6 @@ public final class SystemServiceRegistry {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     static final long NULL_GAME_MANAGER_IN_WEAR = 340929737;
-
-    /**
-     * The corresponding vendor API for Android V
-     *
-     * <p>Starting with Android V, the vendor API format has switched to YYYYMM.
-     *
-     * @see <a href="https://preview.source.android.com/docs/core/architecture/api-flags">Vendor API
-     *     level</a>
-     */
-    private static final int VENDOR_API_FOR_ANDROID_V = 202404;
 
     // Service registry information.
     // This information is never changed once static initialization has completed.
@@ -495,22 +475,6 @@ public final class SystemServiceRegistry {
                     return null;
                 }
                 return new VpnManager(ctx, service);
-            }});
-
-        registerService(Context.VCN_MANAGEMENT_SERVICE, VcnManager.class,
-                new CachedServiceFetcher<VcnManager>() {
-            @Override
-            public VcnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                final String telephonyFeatureToCheck = getVcnFeatureDependency();
-
-                if (telephonyFeatureToCheck != null
-                    && !ctx.getPackageManager().hasSystemFeature(telephonyFeatureToCheck)) {
-                    return null;
-                }
-
-                IBinder b = ServiceManager.getService(Context.VCN_MANAGEMENT_SERVICE);
-                IVcnManagementService service = IVcnManagementService.Stub.asInterface(b);
-                return new VcnManager(ctx, service);
             }});
 
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,
@@ -1744,6 +1708,17 @@ public final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.KEYSTORE_SERVICE, KeyStoreManager.class,
+                new StaticServiceFetcher<KeyStoreManager>() {
+                    @Override
+                    public KeyStoreManager createService()
+                            throws ServiceNotFoundException {
+                        if (!android.security.Flags.keystoreGrantApi()) {
+                            throw new ServiceNotFoundException("KeyStoreManager is not supported");
+                        }
+                        return KeyStoreManager.getInstance();
+                    }});
+
         registerService(Context.CONTACT_KEYS_SERVICE, E2eeContactKeysManager.class,
                 new CachedServiceFetcher<E2eeContactKeysManager>() {
                     @Override
@@ -1771,6 +1746,24 @@ public final class SystemServiceRegistry {
                         return new SupervisionManager(ctx, service);
                     }
                 });
+        if (android.security.Flags.aapmApi()) {
+            registerService(Context.ADVANCED_PROTECTION_SERVICE, AdvancedProtectionManager.class,
+                    new CachedServiceFetcher<>() {
+                        @Override
+                        public AdvancedProtectionManager createService(ContextImpl ctx)
+                                throws ServiceNotFoundException {
+                            IBinder iBinder = ServiceManager.getService(
+                                    Context.ADVANCED_PROTECTION_SERVICE);
+                            IAdvancedProtectionService service =
+                                    IAdvancedProtectionService.Stub.asInterface(iBinder);
+                            if (service == null) {
+                                return null;
+                            }
+                            return new AdvancedProtectionManager(service);
+                        }
+                    });
+        }
+
         // DO NOT do a flag check like this unless the flag is read-only.
         // (because this code is executed during preload in zygote.)
         // If the flag is mutable, the check should be inside CachedServiceFetcher.
@@ -1784,6 +1777,19 @@ public final class SystemServiceRegistry {
                         }
                     });
         }
+        registerService(Context.MEDIA_QUALITY_SERVICE, MediaQualityManager.class,
+                new CachedServiceFetcher<MediaQualityManager>() {
+                    @Override
+                    public MediaQualityManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder = ServiceManager
+                                .getServiceOrThrow(Context.MEDIA_QUALITY_SERVICE);
+                        IMediaQualityManager service = IMediaQualityManager
+                                .Stub.asInterface(iBinder);
+                        return new MediaQualityManager(ctx, service);
+                    }
+                });
+
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
@@ -1812,6 +1818,8 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
+            VcnFrameworkInitializer.registerServiceWrappers();
+
             if (com.android.server.telecom.flags.Flags.telecomMainlineBlockedNumbersManager()) {
                 ProviderFrameworkInitializer.registerServiceWrappers();
             }
@@ -1871,30 +1879,6 @@ public final class SystemServiceRegistry {
         PackageManager manager = ctx.getPackageManager();
         if (manager == null) return true;
         return manager.hasSystemFeature(featureName);
-    }
-
-    // Suppressing AndroidFrameworkCompatChange because we're querying vendor
-    // partition SDK level, not application's target SDK version (which BTW we
-    // also check through Compatibility framework a few lines below).
-    @SuppressWarnings("AndroidFrameworkCompatChange")
-    @Nullable
-    private static String getVcnFeatureDependency() {
-        // Check SDK version of the client app. Apps targeting pre-V SDK might
-        // have not checked for existence of these features.
-        if (!Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN)) {
-            return null;
-        }
-
-        // Check SDK version of the vendor partition. Pre-V devices might have
-        // incorrectly under-declared telephony features.
-        final int vendorApiLevel = SystemProperties.getInt(
-                "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
-        if (vendorApiLevel < VENDOR_API_FOR_ANDROID_V) {
-            return PackageManager.FEATURE_TELEPHONY;
-        } else {
-            return PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION;
-        }
-
     }
 
     /**

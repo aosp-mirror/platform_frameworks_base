@@ -157,6 +157,7 @@ import static com.android.server.wm.WindowStateProto.ANIMATING_EXIT;
 import static com.android.server.wm.WindowStateProto.ANIMATOR;
 import static com.android.server.wm.WindowStateProto.ATTRIBUTES;
 import static com.android.server.wm.WindowStateProto.DESTROYING;
+import static com.android.server.wm.WindowStateProto.DIM_BOUNDS;
 import static com.android.server.wm.WindowStateProto.DISPLAY_ID;
 import static com.android.server.wm.WindowStateProto.FORCE_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
@@ -181,7 +182,6 @@ import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_ARE
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
 import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.surfaceTrustedOverlay;
 
@@ -258,6 +258,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.RefreshRatePolicy.FrameRateVote;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.utils.RegionUtils;
 import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -2327,7 +2328,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (mStartingData != null && mStartingData.mAssociatedTask == null
                     && mTempConfiguration.windowConfiguration.getRotation()
                             == selfConfiguration.windowConfiguration.getRotation()
-                    && !mTempConfiguration.windowConfiguration.getBounds().equals(getBounds())) {
+                    && !RegionUtils.sizeEquals(
+                            mTempConfiguration.windowConfiguration.getBounds(), getBounds())) {
                 mStartingData.mResizedFromTransfer = true;
                 // Lock the starting window to task, so it won't resize from transfer anymore.
                 mActivityRecord.associateStartingWindowWithTaskIfNeeded();
@@ -2777,6 +2779,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (mTmpRect.isEmpty()) {
+            // TODO(b/371182877) If the app does not draw under cutout region, the touchable region
+            // should not include cutout regions (if scrolling from letterbox feature is not desired
+            // for this region).
             final Rect transformedBounds = mActivityRecord.getFixedRotationTransformDisplayBounds();
             if (transformedBounds != null) {
                 // Task is in the same orientation as display, so the rotated bounds should be
@@ -2859,12 +2864,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             if (allowTheaterMode && canTurnScreenOn
                     && (mWmService.mAtmService.isDreaming()
-                            || !mWmService.mPowerManager.isInteractive())) {
+                            || !mWmService.mPowerManager.isInteractive(getDisplayId()))) {
                 if (DEBUG_VISIBILITY || DEBUG_POWER) {
                     Slog.v(TAG, "Relayout window turning screen on: " + this);
                 }
                 mWmService.mPowerManager.wakeUp(SystemClock.uptimeMillis(),
-                        PowerManager.WAKE_REASON_APPLICATION, "android.server.wm:SCREEN_ON_FLAG");
+                        PowerManager.WAKE_REASON_APPLICATION, "android.server.wm:SCREEN_ON_FLAG",
+                        getDisplayId());
             }
 
             if (mActivityRecord != null) {
@@ -3300,6 +3306,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (android.os.Process.getUidForPid(mSession.mPid) == mSession.mUid) {
                 android.os.Process.killProcess(mSession.mPid);
             }
+        }
+
+        // Because the client is notified to be invisible, it should no longer be considered as
+        // drawn state. This prevent the app from showing incomplete content if the app is
+        // requested to be visible in a short time (e.g. before activity stopped).
+        if (Flags.resetDrawStateOnClientInvisible() && !clientVisible && mActivityRecord != null
+                && mWinAnimator.mDrawState == HAS_DRAWN) {
+            mWinAnimator.resetDrawState();
+            // Make sure the app can report drawn if it becomes visible again.
+            forceReportingResized();
         }
     }
 
@@ -4100,6 +4116,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mMergedLocalInsetsSources != null) {
             for (int i = 0; i < mMergedLocalInsetsSources.size(); ++i) {
                 mMergedLocalInsetsSources.valueAt(i).dumpDebug(proto, MERGED_LOCAL_INSETS_SOURCES);
+            }
+        }
+        if (getDimController() != null) {
+            final Rect dimBounds = getDimController().getDimBounds();
+            if (dimBounds != null) {
+                dimBounds.dumpDebug(proto, DIM_BOUNDS);
             }
         }
         proto.end(token);
@@ -5281,12 +5303,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (voteChanged) {
             getPendingTransaction()
                     .setFrameRate(mSurfaceControl, mFrameRateVote.mRefreshRate,
-                        mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS);
-            if (explicitRefreshRateHints()) {
-                getPendingTransaction().setFrameRateSelectionStrategy(mSurfaceControl,
-                        mFrameRateVote.mSelectionStrategy);
-            }
-
+                            mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS)
+                    .setFrameRateSelectionStrategy(mSurfaceControl,
+                            mFrameRateVote.mSelectionStrategy);
         }
     }
 

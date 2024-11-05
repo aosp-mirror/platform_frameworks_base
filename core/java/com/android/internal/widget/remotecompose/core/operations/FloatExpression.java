@@ -15,10 +15,10 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT_ARRAY;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.SHORT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -26,19 +26,17 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.AnimatedFloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.utilities.NanMap;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * Operation to deal with AnimatedFloats
- * This is designed to be an optimized calculation for things like
- * injecting the width of the component int draw rect
- * As well as supporting generalized animation floats.
- * The floats represent a RPN style calculator
+ * Operation to deal with AnimatedFloats This is designed to be an optimized calculation for things
+ * like injecting the width of the component int draw rect As well as supporting generalized
+ * animation floats. The floats represent a RPN style calculator
  */
 public class FloatExpression implements Operation, VariableSupport {
     private static final int OP_CODE = Operations.ANIMATED_FLOAT;
@@ -49,6 +47,7 @@ public class FloatExpression implements Operation, VariableSupport {
     public FloatAnimation mFloatAnimation;
     public float[] mPreCalcValue;
     private float mLastChange = Float.NaN;
+    private float mLastCalculatedValue = Float.NaN;
     AnimatedFloatExpression mExp = new AnimatedFloatExpression();
     public static final int MAX_EXPRESSION_SIZE = 32;
 
@@ -70,12 +69,12 @@ public class FloatExpression implements Operation, VariableSupport {
         boolean value_changed = false;
         for (int i = 0; i < mSrcValue.length; i++) {
             float v = mSrcValue[i];
-            if (Float.isNaN(v) && !AnimatedFloatExpression.isMathOperator(v)
+            if (Float.isNaN(v)
+                    && !AnimatedFloatExpression.isMathOperator(v)
                     && !NanMap.isDataVariable(v)) {
                 float newValue = context.getFloat(Utils.idFromNan(v));
                 if (mFloatAnimation != null) {
                     if (mPreCalcValue[i] != newValue) {
-                        mLastChange = context.getAnimationTime();
                         value_changed = true;
                         mPreCalcValue[i] = newValue;
                     }
@@ -86,8 +85,18 @@ public class FloatExpression implements Operation, VariableSupport {
                 mPreCalcValue[i] = mSrcValue[i];
             }
         }
+        float v = mLastCalculatedValue;
+        if (value_changed) { // inputs changed check if output changed
+            v = mExp.eval(mPreCalcValue, mPreCalcValue.length);
+            if (v != mLastCalculatedValue) {
+                mLastChange = context.getAnimationTime();
+                mLastCalculatedValue = v;
+            } else {
+                value_changed = false;
+            }
+        }
+
         if (value_changed && mFloatAnimation != null) {
-            float v = mExp.eval(Arrays.copyOf(mPreCalcValue, mPreCalcValue.length));
             if (Float.isNaN(mFloatAnimation.getTargetValue())) {
                 mFloatAnimation.setInitialValue(v);
             } else {
@@ -100,7 +109,8 @@ public class FloatExpression implements Operation, VariableSupport {
     @Override
     public void registerListening(RemoteContext context) {
         for (float v : mSrcValue) {
-            if (Float.isNaN(v) && !AnimatedFloatExpression.isMathOperator(v)
+            if (Float.isNaN(v)
+                    && !AnimatedFloatExpression.isMathOperator(v)
                     && !NanMap.isDataVariable(v)) {
                 context.listensTo(Utils.idFromNan(v), this);
             }
@@ -118,8 +128,9 @@ public class FloatExpression implements Operation, VariableSupport {
             float f = mFloatAnimation.get(t - mLastChange);
             context.loadFloat(mId, f);
         } else {
-            context.loadFloat(mId, mExp.eval(context.getCollectionsAccess(),
-                    Arrays.copyOf(mPreCalcValue, mPreCalcValue.length)));
+            context.loadFloat(
+                    mId,
+                    mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length));
         }
     }
 
@@ -137,11 +148,17 @@ public class FloatExpression implements Operation, VariableSupport {
             }
         }
         if (mPreCalcValue == null) {
-            return "FloatExpression[" + mId + "] = ("
-                    + AnimatedFloatExpression.toString(mSrcValue, labels) + ")";
+            return "FloatExpression["
+                    + mId
+                    + "] = ("
+                    + AnimatedFloatExpression.toString(mSrcValue, labels)
+                    + ")";
         }
-        return "FloatExpression[" + mId + "] = ("
-                + AnimatedFloatExpression.toString(mPreCalcValue, labels) + ")";
+        return "FloatExpression["
+                + mId
+                + "] = ("
+                + AnimatedFloatExpression.toString(mPreCalcValue, labels)
+                + ")";
     }
 
     public static String name() {
@@ -155,9 +172,9 @@ public class FloatExpression implements Operation, VariableSupport {
     /**
      * Writes out the operation to the buffer
      *
-     * @param buffer    The buffer to write to
-     * @param id        the id of the resulting float
-     * @param value     the float expression array
+     * @param buffer The buffer to write to
+     * @param id the id of the resulting float
+     * @param value the float expression array
      * @param animation the animation expression array
      */
     public static void apply(WireBuffer buffer, int id, float[] value, float[] animation) {
@@ -178,7 +195,6 @@ public class FloatExpression implements Operation, VariableSupport {
                 buffer.writeFloat(v);
             }
         }
-
     }
 
     public static void read(WireBuffer buffer, List<Operation> operations) {
@@ -207,16 +223,20 @@ public class FloatExpression implements Operation, VariableSupport {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A Float expression")
-                .field(INT, "id", "The id of the Color")
+                .field(DocumentedOperation.INT, "id", "The id of the Color")
                 .field(SHORT, "expression_length", "expression length")
                 .field(SHORT, "animation_length", "animation description length")
-                .field(FLOAT_ARRAY, "expression", "expression_length",
+                .field(
+                        FLOAT_ARRAY,
+                        "expression",
+                        "expression_length",
                         "Sequence of Floats representing and expression")
-                .field(FLOAT_ARRAY, "AnimationSpec", "animation_length",
+                .field(
+                        FLOAT_ARRAY,
+                        "AnimationSpec",
+                        "animation_length",
                         "Sequence of Floats representing animation curve")
                 .field(FLOAT, "duration", "> time in sec")
                 .field(INT, "bits", "> WRAP|INITALVALUE | TYPE ")
@@ -229,5 +249,4 @@ public class FloatExpression implements Operation, VariableSupport {
     public String deepToString(String indent) {
         return indent + toString();
     }
-
 }

@@ -9,3 +9,6 @@ per-file PowerManager*.java = file:/services/core/java/com/android/server/power/
 
 # PerformanceHintManager
 per-file PerformanceHintManagerTest.java = file:/ADPF_OWNERS
+
+# Caching
+per-file IpcDataCache* = file:/PERFORMANCE_OWNERS

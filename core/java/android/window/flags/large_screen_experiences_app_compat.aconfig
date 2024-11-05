@@ -37,6 +37,13 @@ flag {
 }
 
 flag {
+  name: "move_to_external_display_shortcut"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the move to external display shortcut in overview is available"
+  bug: "372872848"
+}
+
+flag {
   name: "app_compat_properties_api"
   is_exported: true
   namespace: "large_screen_experiences_app_compat"
@@ -135,4 +142,12 @@ flag {
   description: "Whether the declarative compat UI framework is enabled"
   bug: "270361630"
   is_fixed_read_only: true
+}
+
+flag {
+  name: "vdm_force_app_universal_resizable_api"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the API for forcing apps to be universal resizable on virtual display is available"
+  bug: "372848702"
+  is_exported: true
 }

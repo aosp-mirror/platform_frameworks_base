@@ -99,6 +99,14 @@ public final class ContactsQueryHelperTest {
     }
 
     @Test
+    public void testQueryOtherException_returnsFalse() {
+        contentProvider.setThrowOtherException(true);
+
+        Uri contactUri = Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, CONTACT_LOOKUP_KEY);
+        assertFalse(mHelper.query(contactUri.toString()));
+    }
+
+    @Test
     public void testQueryIllegalArgumentException_returnsFalse() {
         contentProvider.setThrowIllegalArgumentException(true);
 
@@ -152,6 +160,13 @@ public final class ContactsQueryHelperTest {
     }
 
     @Test
+    public void testQueryWithPhoneNumber_otherExceptionReturnsFalse() {
+        contentProvider.setThrowOtherException(true);
+        String contactUri = "tel:" + PHONE_NUMBER;
+        assertFalse(mHelper.query(contactUri));
+    }
+
+    @Test
     public void testQueryWithEmail() {
         mContactsLookupCursor.addRow(new Object[] {
                 /* id= */ 11, CONTACT_LOOKUP_KEY, /* starred= */ 1, /* hasPhoneNumber= */ 0 });
@@ -188,6 +203,7 @@ public final class ContactsQueryHelperTest {
         private Map<Uri, Cursor> mUriPrefixToCursorMap = new ArrayMap<>();
         private boolean mThrowSQLiteException = false;
         private boolean mThrowIllegalArgumentException = false;
+        private boolean mThrowOtherException = false;
 
         @Override
         public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
@@ -197,6 +213,9 @@ public final class ContactsQueryHelperTest {
             }
             if (mThrowIllegalArgumentException) {
                 throw new IllegalArgumentException();
+            }
+            if (mThrowOtherException) {
+                throw new ArrayIndexOutOfBoundsException();
             }
 
             for (Uri prefixUri : mUriPrefixToCursorMap.keySet()) {
@@ -213,6 +232,10 @@ public final class ContactsQueryHelperTest {
 
         public void setThrowIllegalArgumentException(boolean throwException) {
             this.mThrowIllegalArgumentException = throwException;
+        }
+
+        public void setThrowOtherException(boolean throwException) {
+            this.mThrowOtherException = throwException;
         }
 
         private void registerCursor(Uri uriPrefix, Cursor cursor) {

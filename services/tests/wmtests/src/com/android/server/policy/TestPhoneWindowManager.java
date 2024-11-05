@@ -197,7 +197,7 @@ class TestPhoneWindowManager {
         }
 
         @Override
-        boolean toggleTalkback(int currentUserId) {
+        boolean toggleTalkback(int currentUserId, ShortcutSource source) {
             mIsTalkBackEnabled = !mIsTalkBackEnabled;
             return mIsTalkBackEnabled;
         }
@@ -822,9 +822,9 @@ class TestPhoneWindowManager {
     void assertTakeBugreport(boolean wasCalled) throws RemoteException {
         mTestLooper.dispatchAll();
         if (wasCalled) {
-            verify(mActivityManagerService).requestInteractiveBugReport();
+            verify(mActivityManagerService).launchBugReportHandlerApp();
         } else {
-            verify(mActivityManagerService, never()).requestInteractiveBugReport();
+            verify(mActivityManagerService, never()).launchBugReportHandlerApp();
         }
 
     }

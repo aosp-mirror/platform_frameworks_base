@@ -63,7 +63,7 @@ the instructions below to turn it on.
 NOTE: in case these instructions become stale and don't actually enable the
 framework, please make sure `SceneContainerFlag.isEnabled` in the
 [`SceneContainerFlag.kt`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/src/com/android/systemui/scene/shared/flag/SceneContainerFlag.kt)
-file evalutes to `true`.
+file evaluates to `true`.
 
 1.  Set a collection of **aconfig flags** to `true` by running the following
     commands:
@@ -73,7 +73,6 @@ file evalutes to `true`.
     $ adb shell device_config override systemui com.android.systemui.migrate_clocks_to_blueprint true
     $ adb shell device_config override systemui com.android.systemui.notification_avalanche_throttle_hun true
     $ adb shell device_config override systemui com.android.systemui.predictive_back_sysui true
-    $ adb shell device_config override systemui com.android.systemui.device_entry_udfps_refactor true
     $ adb shell device_config override systemui com.android.systemui.scene_container true
     ```
 2.  **Restart** System UI by issuing the following command:

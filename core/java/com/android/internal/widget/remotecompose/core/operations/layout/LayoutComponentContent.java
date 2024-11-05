@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -24,13 +24,17 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
-/**
- * Represents the content of a LayoutComponent (i.e. the children components)
- */
+/** Represents the content of a LayoutComponent (i.e. the children components) */
 public class LayoutComponentContent extends Component implements ComponentStartOperation {
 
-    public LayoutComponentContent(int componentId, float x, float y,
-                                  float width, float height, Component parent, int animationId) {
+    public LayoutComponentContent(
+            int componentId,
+            float x,
+            float y,
+            float width,
+            float height,
+            Component parent,
+            int animationId) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
@@ -42,7 +46,8 @@ public class LayoutComponentContent extends Component implements ComponentStartO
         return Operations.LAYOUT_CONTENT;
     }
 
-    @Override protected String getSerializedName() {
+    @Override
+    protected String getSerializedName() {
         return "CONTENT";
     }
 
@@ -53,16 +58,16 @@ public class LayoutComponentContent extends Component implements ComponentStartO
 
     public static void read(WireBuffer buffer, List<Operation> operations) {
         int componentId = buffer.readInt();
-        operations.add(new LayoutComponentContent(
-                componentId, 0, 0, 0, 0, null, -1));
+        operations.add(new LayoutComponentContent(componentId, 0, 0, 0, 0, null, -1));
     }
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")
-                .description("Container for components. BoxLayout, RowLayout and ColumnLayout "
-                        + "expects a LayoutComponentContent as a child, encapsulating the "
-                        + "components that needs to be laid out.");
+                .description(
+                        "Container for components. BoxLayout, RowLayout and ColumnLayout "
+                                + "expects a LayoutComponentContent as a child, encapsulating the "
+                                + "components that needs to be laid out.");
     }
 
     @Override

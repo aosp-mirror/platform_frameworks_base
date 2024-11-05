@@ -23,6 +23,7 @@ import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.banner.BannerPageProvider
+import com.android.settingslib.spa.gallery.card.CardPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.DialogMainPageProvider
 import com.android.settingslib.spa.gallery.dialog.NavDialogProvider
@@ -39,6 +40,7 @@ import com.android.settingslib.spa.gallery.page.LoadingBarPageProvider
 import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
 import com.android.settingslib.spa.gallery.scaffold.NonScrollablePagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
+import com.android.settingslib.spa.gallery.preference.CheckBoxPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.IntroPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.ListPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePageProvider
@@ -46,6 +48,7 @@ import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TopIntroPreferencePageProvider
+import com.android.settingslib.spa.gallery.preference.TwoTargetButtonPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.ZeroStatePreferencePageProvider
 import com.android.settingslib.spa.gallery.scaffold.PagerMainPageProvider
@@ -105,6 +108,9 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 CopyablePageProvider,
                 IntroPreferencePageProvider,
                 TopIntroPreferencePageProvider,
+                CheckBoxPreferencePageProvider,
+                TwoTargetButtonPreferencePageProvider,
+                CardPageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),

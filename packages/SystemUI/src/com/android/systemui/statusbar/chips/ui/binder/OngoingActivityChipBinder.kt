@@ -21,13 +21,14 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.view.ViewGroup
+import android.widget.DateTimeView
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
@@ -42,6 +43,8 @@ object OngoingActivityChipBinder {
         val chipTimeView: ChipChronometer =
             chipView.requireViewById(R.id.ongoing_activity_chip_time)
         val chipTextView: TextView = chipView.requireViewById(R.id.ongoing_activity_chip_text)
+        val chipShortTimeDeltaView: DateTimeView =
+            chipView.requireViewById(R.id.ongoing_activity_chip_short_time_delta)
         val chipBackgroundView: ChipBackgroundContainer =
             chipView.requireViewById(R.id.ongoing_activity_chip_background)
 
@@ -49,13 +52,14 @@ object OngoingActivityChipBinder {
             is OngoingActivityChipModel.Shown -> {
                 // Data
                 setChipIcon(chipModel, chipBackgroundView, chipDefaultIconView)
-                setChipMainContent(chipModel, chipTextView, chipTimeView)
+                setChipMainContent(chipModel, chipTextView, chipTimeView, chipShortTimeDeltaView)
                 chipView.setOnClickListener(chipModel.onClickListener)
                 updateChipPadding(
                     chipModel,
                     chipBackgroundView,
                     chipTextView,
                     chipTimeView,
+                    chipShortTimeDeltaView,
                 )
 
                 // Accessibility
@@ -65,6 +69,7 @@ object OngoingActivityChipBinder {
                 val textColor = chipModel.colors.text(chipContext)
                 chipTimeView.setTextColor(textColor)
                 chipTextView.setTextColor(textColor)
+                chipShortTimeDeltaView.setTextColor(textColor)
                 (chipBackgroundView.background as GradientDrawable).color =
                     chipModel.colors.background(chipContext)
             }
@@ -97,7 +102,7 @@ object OngoingActivityChipBinder {
                 defaultIconView.tintView(iconTint)
             }
             is OngoingActivityChipModel.ChipIcon.FullColorAppIcon -> {
-                StatusBarRonChips.assertInNewMode()
+                StatusBarNotifChips.assertInNewMode()
                 IconViewBinder.bind(icon.impl, defaultIconView)
                 defaultIconView.visibility = View.VISIBLE
                 defaultIconView.untintView()
@@ -161,6 +166,7 @@ object OngoingActivityChipBinder {
         chipModel: OngoingActivityChipModel.Shown,
         chipTextView: TextView,
         chipTimeView: ChipChronometer,
+        chipShortTimeDeltaView: DateTimeView,
     ) {
         when (chipModel) {
             is OngoingActivityChipModel.Shown.Countdown -> {
@@ -168,21 +174,35 @@ object OngoingActivityChipBinder {
                 chipTextView.visibility = View.VISIBLE
 
                 chipTimeView.hide()
+                chipShortTimeDeltaView.visibility = View.GONE
             }
             is OngoingActivityChipModel.Shown.Text -> {
                 chipTextView.text = chipModel.text
                 chipTextView.visibility = View.VISIBLE
 
                 chipTimeView.hide()
+                chipShortTimeDeltaView.visibility = View.GONE
             }
             is OngoingActivityChipModel.Shown.Timer -> {
                 ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
                 chipTimeView.visibility = View.VISIBLE
 
                 chipTextView.visibility = View.GONE
+                chipShortTimeDeltaView.visibility = View.GONE
+            }
+            is OngoingActivityChipModel.Shown.ShortTimeDelta -> {
+                chipShortTimeDeltaView.setTime(chipModel.time)
+                // TODO(b/364653005): DateTimeView's relative time doesn't quite match the format we
+                //  want in the status bar chips.
+                chipShortTimeDeltaView.isShowRelativeTime = true
+                chipShortTimeDeltaView.visibility = View.VISIBLE
+
+                chipTextView.visibility = View.GONE
+                chipTimeView.hide()
             }
             is OngoingActivityChipModel.Shown.IconOnly -> {
                 chipTextView.visibility = View.GONE
+                chipShortTimeDeltaView.visibility = View.GONE
                 chipTimeView.hide()
             }
         }
@@ -200,6 +220,7 @@ object OngoingActivityChipBinder {
         backgroundView: View,
         chipTextView: TextView,
         chipTimeView: ChipChronometer,
+        chipShortTimeDeltaView: DateTimeView,
     ) {
         if (chipModel.icon != null) {
             if (chipModel.icon is OngoingActivityChipModel.ChipIcon.StatusBarView) {
@@ -209,15 +230,18 @@ object OngoingActivityChipBinder {
                 backgroundView.setBackgroundPaddingForEmbeddedPaddingIcon()
                 chipTextView.setTextPaddingForEmbeddedPaddingIcon()
                 chipTimeView.setTextPaddingForEmbeddedPaddingIcon()
+                chipShortTimeDeltaView.setTextPaddingForEmbeddedPaddingIcon()
             } else {
                 backgroundView.setBackgroundPaddingForNormalIcon()
                 chipTextView.setTextPaddingForNormalIcon()
                 chipTimeView.setTextPaddingForNormalIcon()
+                chipShortTimeDeltaView.setTextPaddingForNormalIcon()
             }
         } else {
             backgroundView.setBackgroundPaddingForNoIcon()
             chipTextView.setTextPaddingForNoIcon()
             chipTimeView.setTextPaddingForNoIcon()
+            chipShortTimeDeltaView.setTextPaddingForNoIcon()
         }
     }
 
@@ -258,23 +282,13 @@ object OngoingActivityChipBinder {
             context.resources.getDimensionPixelSize(
                 R.dimen.ongoing_activity_chip_side_padding_for_embedded_padding_icon
             )
-        setPaddingRelative(
-            sidePadding,
-            paddingTop,
-            sidePadding,
-            paddingBottom,
-        )
+        setPaddingRelative(sidePadding, paddingTop, sidePadding, paddingBottom)
     }
 
     private fun View.setBackgroundPaddingForNormalIcon() {
         val sidePadding =
             context.resources.getDimensionPixelSize(R.dimen.ongoing_activity_chip_side_padding)
-        setPaddingRelative(
-            sidePadding,
-            paddingTop,
-            sidePadding,
-            paddingBottom,
-        )
+        setPaddingRelative(sidePadding, paddingTop, sidePadding, paddingBottom)
     }
 
     private fun View.setBackgroundPaddingForNoIcon() {

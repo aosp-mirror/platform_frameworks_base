@@ -20,7 +20,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -48,7 +48,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton

@@ -255,4 +255,9 @@ public class SelectorWithWidgetPreference extends CheckBoxPreference {
             a.recycle();
         }
     }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public View getExtraWidget() {
+        return mExtraWidget;
+    }
 }

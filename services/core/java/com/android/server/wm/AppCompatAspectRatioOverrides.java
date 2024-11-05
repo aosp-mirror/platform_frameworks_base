@@ -37,8 +37,10 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
 import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
+import static com.android.server.wm.AppCompatUtils.isDisplayIgnoreActivitySizeRestrictions;
 
 import android.annotation.NonNull;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -62,8 +64,8 @@ class AppCompatAspectRatioOverrides {
     private final ActivityRecord mActivityRecord;
     @NonNull
     private final AppCompatConfiguration mAppCompatConfiguration;
-    @PackageManager.UserMinAspectRatio
-    final int mUserAspectRatioType;
+    @NonNull
+    private final UserAspectRatioState mUserAspectRatioState;
 
     @NonNull
     private final OptPropFactory.OptProp mAllowMinAspectRatioOverrideOptProp;
@@ -86,7 +88,7 @@ class AppCompatAspectRatioOverrides {
         mActivityRecord = activityRecord;
         mAppCompatConfiguration = appCompatConfiguration;
         mAppCompatDeviceStateQuery = appCompatDeviceStateQuery;
-        mUserAspectRatioType = getUserMinAspectRatioOverrideType();
+        mUserAspectRatioState = new UserAspectRatioState();
         mAppCompatReachabilityOverrides = appCompatReachabilityOverrides;
         mAllowMinAspectRatioOverrideOptProp = optPropBuilder.create(
                 PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
@@ -122,28 +124,43 @@ class AppCompatAspectRatioOverrides {
      * current app.
      */
     boolean shouldApplyUserMinAspectRatioOverride() {
-        return shouldEnableUserAspectRatioSettings()
-                && mUserAspectRatioType != USER_MIN_ASPECT_RATIO_UNSET
-                && mUserAspectRatioType != USER_MIN_ASPECT_RATIO_APP_DEFAULT
-                && mUserAspectRatioType != USER_MIN_ASPECT_RATIO_FULLSCREEN;
+        if (!shouldEnableUserAspectRatioSettings()) {
+            return false;
+        }
+
+        final int aspectRatio = getUserMinAspectRatioOverrideCode();
+
+        return aspectRatio != USER_MIN_ASPECT_RATIO_UNSET
+                && aspectRatio != USER_MIN_ASPECT_RATIO_APP_DEFAULT
+                && aspectRatio != USER_MIN_ASPECT_RATIO_FULLSCREEN;
     }
 
     boolean shouldApplyUserFullscreenOverride() {
-        return isUserFullscreenOverrideEnabled()
-                && mUserAspectRatioType == USER_MIN_ASPECT_RATIO_FULLSCREEN;
+        if (isUserFullscreenOverrideEnabled()) {
+            final int aspectRatio = getUserMinAspectRatioOverrideCode();
+
+            return aspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN;
+        }
+
+        return false;
     }
 
     boolean isUserFullscreenOverrideEnabled() {
-        return !mAllowUserAspectRatioOverrideOptProp.isFalse()
-                && !mAllowUserAspectRatioFullscreenOverrideOptProp.isFalse()
-                && mAppCompatConfiguration.isUserAppAspectRatioFullscreenEnabled();
+        if (mAllowUserAspectRatioOverrideOptProp.isFalse()
+                || mAllowUserAspectRatioFullscreenOverrideOptProp.isFalse()
+                || !mAppCompatConfiguration.isUserAppAspectRatioFullscreenEnabled()) {
+            return false;
+        }
+        return true;
     }
 
     boolean isSystemOverrideToFullscreenEnabled() {
+        final int aspectRatio = getUserMinAspectRatioOverrideCode();
+
         return isChangeEnabled(mActivityRecord, OVERRIDE_ANY_ORIENTATION_TO_USER)
                 && !mAllowOrientationOverrideOptProp.isFalse()
-                && (mUserAspectRatioType == USER_MIN_ASPECT_RATIO_UNSET
-                || mUserAspectRatioType == USER_MIN_ASPECT_RATIO_FULLSCREEN);
+                && (aspectRatio == USER_MIN_ASPECT_RATIO_UNSET
+                    || aspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
     }
 
     /**
@@ -159,12 +176,21 @@ class AppCompatAspectRatioOverrides {
                 && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
     }
 
+    /**
+     * Whether to ignore fixed orientation, aspect ratio and resizability of activity.
+     */
     boolean hasFullscreenOverride() {
-        return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled();
+        return shouldApplyUserFullscreenOverride() || isSystemOverrideToFullscreenEnabled()
+                || shouldIgnoreActivitySizeRestrictionsForDisplay();
+    }
+
+    boolean shouldIgnoreActivitySizeRestrictionsForDisplay() {
+        return isDisplayIgnoreActivitySizeRestrictions(mActivityRecord)
+                && !mAllowOrientationOverrideOptProp.isFalse();
     }
 
     float getUserMinAspectRatio() {
-        switch (mUserAspectRatioType) {
+        switch (getUserMinAspectRatioOverrideCode()) {
             case USER_MIN_ASPECT_RATIO_DISPLAY_SIZE:
                 return getDisplaySizeMinAspectRatio();
             case USER_MIN_ASPECT_RATIO_SPLIT_SCREEN:
@@ -177,7 +203,7 @@ class AppCompatAspectRatioOverrides {
                 return 3 / 2f;
             default:
                 throw new AssertionError("Unexpected user min aspect ratio override: "
-                        + mUserAspectRatioType);
+                        + mUserAspectRatioState.mUserAspectRatio);
         }
     }
 
@@ -254,15 +280,8 @@ class AppCompatAspectRatioOverrides {
         return !mAllowUserAspectRatioOverrideOptProp.isFalse();
     }
 
-    // TODO(b/359217664): make this private.
-    int getUserMinAspectRatioOverrideType() {
-        try {
-            return mActivityRecord.mAtmService.getPackageManager()
-                    .getUserMinAspectRatio(mActivityRecord.packageName, mActivityRecord.mUserId);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Exception thrown retrieving aspect ratio user override " + this, e);
-        }
-        return USER_MIN_ASPECT_RATIO_UNSET;
+    int getUserMinAspectRatioOverrideCode() {
+        return mUserAspectRatioState.getUserAspectRatio(mActivityRecord);
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
@@ -284,6 +303,33 @@ class AppCompatAspectRatioOverrides {
             return mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio();
         }
         return getDisplaySizeMinAspectRatio();
+    }
+
+    private static class UserAspectRatioState {
+        // The min aspect ratio override set by the user.
+        @PackageManager.UserMinAspectRatio
+        private int mUserAspectRatio = USER_MIN_ASPECT_RATIO_UNSET;
+        private boolean mHasBeenSet = false;
+
+        @PackageManager.UserMinAspectRatio
+        private int getUserAspectRatio(@NonNull ActivityRecord activityRecord) {
+            // Package manager can be null at construction time, so access should be on demand.
+            if (!mHasBeenSet) {
+                try {
+                    final IPackageManager pm = activityRecord.mAtmService.getPackageManager();
+                    if (pm != null) {
+                        mUserAspectRatio = pm.getUserMinAspectRatio(activityRecord.packageName,
+                                activityRecord.mUserId);
+                        mHasBeenSet = true;
+                    }
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Exception thrown retrieving aspect ratio user override "
+                            + this, e);
+                }
+            }
+
+            return mUserAspectRatio;
+        }
     }
 
     private Resources getResources() {

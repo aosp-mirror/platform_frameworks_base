@@ -15,8 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -36,8 +36,7 @@ public class PaintData extends PaintOperation implements VariableSupport {
     public PaintBundle mPaintData = new PaintBundle();
     public static final int MAX_STRING_SIZE = 4000;
 
-    public PaintData() {
-    }
+    public PaintData() {}
 
     @Override
     public void updateVariables(RemoteContext context) {
@@ -59,7 +58,6 @@ public class PaintData extends PaintOperation implements VariableSupport {
         return "PaintData " + "\"" + mPaintData + "\"";
     }
 
-
     public static String name() {
         return CLASS_NAME;
     }
@@ -80,13 +78,10 @@ public class PaintData extends PaintOperation implements VariableSupport {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a Paint ")
                 .field(INT, "length", "id string")
-                .field(INT_ARRAY, "paint", "length",
-                        "path encoded as floats");
+                .field(INT_ARRAY, "paint", "length", "path encoded as floats");
     }
 
     @Override

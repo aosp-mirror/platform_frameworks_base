@@ -25,7 +25,7 @@ import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.Manifest.permission.RESTRICT_DISPLAY_MODES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
-import static android.hardware.display.DisplayManager.EventsMask;
+import static android.hardware.display.DisplayManager.EventFlag;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
@@ -1390,16 +1390,16 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void registerCallbackInternal(IDisplayManagerCallback callback, int callingPid,
-            int callingUid, @EventsMask long eventsMask) {
+            int callingUid, @EventFlag long eventFlagsMask) {
         synchronized (mSyncRoot) {
             CallbackRecord record = mCallbacks.get(callingPid);
 
             if (record != null) {
-                record.updateEventsMask(eventsMask);
+                record.updateEventFlagsMask(eventFlagsMask);
                 return;
             }
 
-            record = new CallbackRecord(callingPid, callingUid, callback, eventsMask);
+            record = new CallbackRecord(callingPid, callingUid, callback, eventFlagsMask);
             try {
                 IBinder binder = callback.asBinder();
                 binder.linkToDeath(record, 0);
@@ -1769,10 +1769,11 @@ public final class DisplayManagerService extends SystemService {
             flags &= ~VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
         }
         // Put the display in the virtual device's display group only if it's not a mirror display,
-        // and if it doesn't need its own display group. So effectively, mirror displays go into the
-        // default display group.
+        // it is a trusted display, and it doesn't need its own display group. So effectively,
+        // mirror and untrusted displays go into the default display group.
         if ((flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) == 0
                 && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) == 0
+                && (flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == VIRTUAL_DISPLAY_FLAG_TRUSTED
                 && virtualDevice != null) {
             flags |= VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
         }
@@ -1848,9 +1849,7 @@ public final class DisplayManagerService extends SystemService {
 
         if (callingUid != Process.SYSTEM_UID
                 && (flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) != 0) {
-            // The virtualDevice instance has been validated above using isValidVirtualDevice
-            if (virtualDevice == null
-                    && !checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+            if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
                 throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                         + "create a virtual display which is not in the default DisplayGroup.");
             }
@@ -1890,6 +1889,7 @@ public final class DisplayManagerService extends SystemService {
             final String displayUniqueId = VirtualDisplayAdapter.generateDisplayUniqueId(
                     packageName, callingUid, virtualDisplayConfig);
 
+            boolean shouldClearDisplayWindowSettings = false;
             if (virtualDisplayConfig.isHomeSupported()) {
                 if ((flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == 0) {
                     Slog.w(TAG, "Display created with home support but lacks "
@@ -1901,6 +1901,18 @@ public final class DisplayManagerService extends SystemService {
                 } else {
                     mWindowManagerInternal.setHomeSupportedOnDisplay(displayUniqueId,
                             Display.TYPE_VIRTUAL, true);
+                    shouldClearDisplayWindowSettings = true;
+                }
+            }
+
+            if (virtualDisplayConfig.isIgnoreActivitySizeRestrictions()) {
+                if ((flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == 0) {
+                    Slog.w(TAG, "Display created to ignore activity size restrictions, "
+                            + "but lacks VIRTUAL_DISPLAY_FLAG_TRUSTED, ignoring the request.");
+                } else {
+                    mWindowManagerInternal.setIgnoreActivitySizeRestrictionsOnDisplay(
+                            displayUniqueId, Display.TYPE_VIRTUAL, true);
+                    shouldClearDisplayWindowSettings = true;
                 }
             }
 
@@ -1923,8 +1935,7 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
-            if (displayId == Display.INVALID_DISPLAY && virtualDisplayConfig.isHomeSupported()
-                    && (flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
+            if (displayId == Display.INVALID_DISPLAY && shouldClearDisplayWindowSettings) {
                 // Failed to create the virtual display, so we should clean up the WM settings
                 // because it won't receive the onDisplayRemoved callback.
                 mWindowManagerInternal.clearDisplaySettings(displayUniqueId, Display.TYPE_VIRTUAL);
@@ -1978,7 +1989,7 @@ public final class DisplayManagerService extends SystemService {
                         // handles stopping the projection.
                         Slog.w(TAG, "Content Recording: failed to start mirroring - "
                                 + "releasing virtual display " + displayId);
-                        releaseVirtualDisplayInternal(callback.asBinder());
+                        releaseVirtualDisplayInternal(callback.asBinder(), callingUid);
                         return Display.INVALID_DISPLAY;
                     } else if (projection != null) {
                         // Indicate that this projection has been used to record, and can't be used
@@ -2067,7 +2078,7 @@ public final class DisplayManagerService extends SystemService {
         // Something weird happened and the logical display was not created.
         Slog.w(TAG, "Rejecting request to create virtual display "
                 + "because the logical display was not created.");
-        mVirtualDisplayAdapter.releaseVirtualDisplayLocked(callback.asBinder());
+        mVirtualDisplayAdapter.releaseVirtualDisplayLocked(callback.asBinder(), callingUid);
         mDisplayDeviceRepo.onDisplayDeviceEvent(device,
                 DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
         return -1;
@@ -2094,14 +2105,14 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void releaseVirtualDisplayInternal(IBinder appToken) {
+    private void releaseVirtualDisplayInternal(IBinder appToken, int callingUid) {
         synchronized (mSyncRoot) {
             if (mVirtualDisplayAdapter == null) {
                 return;
             }
 
             DisplayDevice device =
-                    mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken);
+                    mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken, callingUid);
             Slog.d(TAG, "Virtual Display: Display Device released");
             if (device != null) {
                 // TODO: multi-display - handle virtual displays the same as other display adapters.
@@ -2302,6 +2313,14 @@ public final class DisplayManagerService extends SystemService {
         updateLogicalDisplayState(display);
 
         mExternalDisplayPolicy.handleLogicalDisplayAddedLocked(display);
+
+        if (mFlags.isApplyDisplayChangedDuringDisplayAddedEnabled()) {
+            applyDisplayChangedLocked(display);
+        }
+
+        if (mDisplayTopologyCoordinator != null) {
+            mDisplayTopologyCoordinator.onDisplayAdded(display.getDisplayInfoLocked());
+        }
     }
 
     private void handleLogicalDisplayChangedLocked(@NonNull LogicalDisplay display) {
@@ -2388,6 +2407,9 @@ public final class DisplayManagerService extends SystemService {
             }
         } else {
             releaseDisplayAndEmitEvent(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+        }
+        if (mDisplayTopologyCoordinator != null) {
+            mDisplayTopologyCoordinator.onDisplayRemoved(display.getDisplayIdLocked());
         }
 
         Slog.i(TAG, "Logical display removed: " + display.getDisplayIdLocked());
@@ -3987,7 +4009,7 @@ public final class DisplayManagerService extends SystemService {
         public final int mPid;
         public final int mUid;
         private final IDisplayManagerCallback mCallback;
-        private @EventsMask AtomicLong mEventsMask;
+        private @DisplayManager.EventFlag AtomicLong mEventFlagsMask;
         private final String mPackageName;
 
         public boolean mWifiDisplayScanRequested;
@@ -4008,11 +4030,11 @@ public final class DisplayManagerService extends SystemService {
         private boolean mFrozen;
 
         CallbackRecord(int pid, int uid, @NonNull IDisplayManagerCallback callback,
-                @EventsMask long eventsMask) {
+                @EventFlag long eventFlagsMask) {
             mPid = pid;
             mUid = uid;
             mCallback = callback;
-            mEventsMask = new AtomicLong(eventsMask);
+            mEventFlagsMask = new AtomicLong(eventFlagsMask);
             mCached = false;
             mFrozen = false;
 
@@ -4034,8 +4056,8 @@ public final class DisplayManagerService extends SystemService {
             mPackageName = packageNames == null ? null : packageNames[0];
         }
 
-        public void updateEventsMask(@EventsMask long eventsMask) {
-            mEventsMask.set(eventsMask);
+        public void updateEventFlagsMask(@EventFlag long eventFlag) {
+            mEventFlagsMask.set(eventFlag);
         }
 
         /**
@@ -4099,12 +4121,13 @@ public final class DisplayManagerService extends SystemService {
             if (!shouldSendEvent(event)) {
                 if (extraLogging(mPackageName)) {
                     Slog.i(TAG,
-                            "Not sending displayEvent: " + event + " due to mask:" + mEventsMask);
+                            "Not sending displayEvent: " + event + " due to flag:"
+                                    + mEventFlagsMask);
                 }
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
                     Trace.instant(Trace.TRACE_TAG_POWER,
-                            "notifyDisplayEventAsync#notSendingEvent=" + event + ",mEventsMask="
-                                    + mEventsMask);
+                            "notifyDisplayEventAsync#notSendingEvent=" + event + ",mEventsFlag="
+                                    + mEventFlagsMask);
                 }
                 // The client is not interested in this event, so do nothing.
                 return true;
@@ -4150,22 +4173,22 @@ public final class DisplayManagerService extends SystemService {
          * Return true if the client is interested in this event.
          */
         private boolean shouldSendEvent(@DisplayEvent int event) {
-            final long mask = mEventsMask.get();
+            final long flag = mEventFlagsMask.get();
             switch (event) {
                 case DisplayManagerGlobal.EVENT_DISPLAY_ADDED:
-                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0;
+                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_CHANGED:
-                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0;
+                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED:
-                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0;
+                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_REMOVED:
-                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0;
+                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:
-                    return (mask & DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED) != 0;
+                    return (flag & DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_CONNECTED:
                     // fallthrough
                 case DisplayManagerGlobal.EVENT_DISPLAY_DISCONNECTED:
-                    return (mask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0;
+                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0;
                 default:
                     // This should never happen.
                     Slog.e(TAG, "Unknown display event " + event);
@@ -4359,7 +4382,7 @@ public final class DisplayManagerService extends SystemService {
         @Override // Binder call
         @SuppressLint("AndroidFrameworkRequiresPermission") // Permission only required sometimes
         public void registerCallbackWithEventMask(IDisplayManagerCallback callback,
-                @EventsMask long eventsMask) {
+                @EventFlag long eventFlagsMask) {
             if (callback == null) {
                 throw new IllegalArgumentException("listener must not be null");
             }
@@ -4368,7 +4391,7 @@ public final class DisplayManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
 
             if (mFlags.isConnectedDisplayManagementEnabled()) {
-                if ((eventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                if ((eventFlagsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
                     mContext.enforceCallingOrSelfPermission(MANAGE_DISPLAYS,
                             "Permission required to get signals about connection events.");
                 }
@@ -4376,7 +4399,7 @@ public final class DisplayManagerService extends SystemService {
 
             final long token = Binder.clearCallingIdentity();
             try {
-                registerCallbackInternal(callback, callingPid, callingUid, eventsMask);
+                registerCallbackInternal(callback, callingPid, callingUid, eventFlagsMask);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -4614,9 +4637,10 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public void releaseVirtualDisplay(IVirtualDisplayCallback callback) {
+            final int callingUid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                releaseVirtualDisplayInternal(callback.asBinder());
+                releaseVirtualDisplayInternal(callback.asBinder(), callingUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -5659,6 +5683,11 @@ public final class DisplayManagerService extends SystemService {
                 // information from the input manager service
                 displayPowerController.stylusGestureStarted(eventTime);
             }
+        }
+
+        @Override
+        public boolean isDisplayReadyForMirroring(int displayId) {
+            return mExternalDisplayPolicy.isDisplayReadyForMirroring(displayId);
         }
     }
 

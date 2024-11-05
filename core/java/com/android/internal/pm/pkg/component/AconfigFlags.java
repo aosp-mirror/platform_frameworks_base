@@ -33,6 +33,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.modules.utils.TypedXmlPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -53,19 +54,18 @@ import java.util.Map;
  * @hide
  */
 public class AconfigFlags {
+    private static final boolean DEBUG = false;
     private static final String LOG_TAG = "AconfigFlags";
-
-    public enum Permission {
-        READ_WRITE,
-        READ_ONLY
-    }
+    private static final String OVERRIDE_PREFIX = "device_config_overrides/";
+    private static final String STAGED_PREFIX = "staged/";
 
     private final ArrayMap<String, Boolean> mFlagValues = new ArrayMap<>();
-    private final ArrayMap<String, Permission> mFlagPermissions = new ArrayMap<>();
 
     public AconfigFlags() {
         if (!Flags.manifestFlagging()) {
-            Slog.v(LOG_TAG, "Feature disabled, skipped all loading");
+            if (DEBUG) {
+                Slog.v(LOG_TAG, "Feature disabled, skipped all loading");
+            }
             return;
         }
         final var defaultFlagProtoFiles =
@@ -130,19 +130,17 @@ public class AconfigFlags {
                     if (!"false".equalsIgnoreCase(value) && !"true".equalsIgnoreCase(value)) {
                         continue;
                     }
-                    final var overridePrefix = "device_config_overrides/";
-                    final var stagedPrefix = "staged/";
                     String separator = "/";
                     String prefix = "default";
                     int priority = 0;
-                    if (name.startsWith(overridePrefix)) {
-                        prefix = overridePrefix;
-                        name = name.substring(overridePrefix.length());
+                    if (name.startsWith(OVERRIDE_PREFIX)) {
+                        prefix = OVERRIDE_PREFIX;
+                        name = name.substring(OVERRIDE_PREFIX.length());
                         separator = ":";
                         priority = 20;
-                    } else if (name.startsWith(stagedPrefix)) {
-                        prefix = stagedPrefix;
-                        name = name.substring(stagedPrefix.length());
+                    } else if (name.startsWith(STAGED_PREFIX)) {
+                        prefix = STAGED_PREFIX;
+                        name = name.substring(STAGED_PREFIX.length());
                         separator = "*";
                         priority = 10;
                     }
@@ -155,12 +153,19 @@ public class AconfigFlags {
                     if (!mFlagValues.containsKey(flagPackageAndName)) {
                         continue;
                     }
-                    Slog.d(LOG_TAG, "Found " + prefix
-                            + " Aconfig flag value for " + flagPackageAndName + " = " + value);
+                    if (DEBUG) {
+                        Slog.d(LOG_TAG, "Found " + prefix
+                                + " Aconfig flag value in settings for " + flagPackageAndName
+                                + " = " + value);
+                    }
                     final Integer currentPriority = flagPriority.get(flagPackageAndName);
                     if (currentPriority != null && currentPriority >= priority) {
-                        Slog.i(LOG_TAG, "Skipping " + prefix + " flag " + flagPackageAndName
-                                + " because of the existing one with priority " + currentPriority);
+                        if (DEBUG) {
+                            Slog.d(LOG_TAG, "Skipping " + prefix + " flag "
+                                    + flagPackageAndName
+                                    + " in settings because of existing one with priority "
+                                    + currentPriority);
+                        }
                         continue;
                     }
                     flagPriority.put(flagPackageAndName, priority);
@@ -185,15 +190,7 @@ public class AconfigFlags {
         for (parsed_flag flag : parsedFlags.parsedFlag) {
             String flagPackageAndName = flag.package_ + "." + flag.name;
             boolean flagValue = (flag.state == Aconfig.ENABLED);
-            Slog.v(LOG_TAG, "Read Aconfig default flag value "
-                    + flagPackageAndName + " = " + flagValue);
             mFlagValues.put(flagPackageAndName, flagValue);
-
-            Permission permission = flag.permission == Aconfig.READ_ONLY
-                    ? Permission.READ_ONLY
-                    : Permission.READ_WRITE;
-
-            mFlagPermissions.put(flagPackageAndName, permission);
         }
     }
 
@@ -205,27 +202,21 @@ public class AconfigFlags {
     @Nullable
     public Boolean getFlagValue(@NonNull String flagPackageAndName) {
         Boolean value = mFlagValues.get(flagPackageAndName);
-        Slog.d(LOG_TAG, "Aconfig flag value for " + flagPackageAndName + " = " + value);
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "Aconfig flag value for " + flagPackageAndName + " = " + value);
+        }
         return value;
     }
 
     /**
-     * Get the flag permission, or null if the flag doesn't exist.
-     * @param flagPackageAndName Full flag name formatted as 'package.flag'
-     * @return the current permission of the given Aconfig flag, or null if there is no such flag
-     */
-    @Nullable
-    public Permission getFlagPermission(@NonNull String flagPackageAndName) {
-        Permission permission = mFlagPermissions.get(flagPackageAndName);
-        return permission;
-    }
-
-    /**
      * Check if the element in {@code parser} should be skipped because of the feature flag.
+     * @param pkg The package being parsed
      * @param parser XML parser object currently parsing an element
      * @return true if the element is disabled because of its feature flag
      */
-    public boolean skipCurrentElement(@NonNull XmlResourceParser parser) {
+    public boolean skipCurrentElement(
+            @NonNull ParsingPackage pkg,
+            @NonNull XmlResourceParser parser) {
         if (!Flags.manifestFlagging()) {
             return false;
         }
@@ -240,18 +231,21 @@ public class AconfigFlags {
             featureFlag = featureFlag.substring(1).strip();
         }
         final Boolean flagValue = getFlagValue(featureFlag);
+        boolean shouldSkip = false;
         if (flagValue == null) {
             Slog.w(LOG_TAG, "Skipping element " + parser.getName()
                     + " due to unknown feature flag " + featureFlag);
-            return true;
-        }
-        // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
-        if (flagValue == negated) {
-            Slog.v(LOG_TAG, "Skipping element " + parser.getName()
+            shouldSkip = true;
+        } else if (flagValue == negated) {
+            // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
+            Slog.i(LOG_TAG, "Skipping element " + parser.getName()
                     + " behind feature flag " + featureFlag + " = " + flagValue);
-            return true;
+            shouldSkip = true;
         }
-        return false;
+        if (android.content.pm.Flags.includeFeatureFlagsInPackageCacher()) {
+            pkg.addFeatureFlag(featureFlag, flagValue);
+        }
+        return shouldSkip;
     }
 
     /**

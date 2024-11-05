@@ -17,6 +17,4 @@ package com.android.internal.widget.remotecompose.core;
 
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 
-public interface DocumentedCompanion extends CompanionOperation , DocumentedCompanionOperation {
-
-}
+public interface DocumentedCompanion extends CompanionOperation, DocumentedCompanionOperation {}

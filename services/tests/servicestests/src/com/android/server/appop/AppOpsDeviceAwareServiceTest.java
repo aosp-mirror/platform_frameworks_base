@@ -58,7 +58,6 @@ public class AppOpsDeviceAwareServiceTest {
             VirtualDeviceRule.withAdditionalPermissions(
                     Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
                     Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
-                    Manifest.permission.CREATE_VIRTUAL_DEVICE,
                     Manifest.permission.GET_APP_OPS_STATS);
 
     private static final String ATTRIBUTION_TAG_1 = "attributionTag1";

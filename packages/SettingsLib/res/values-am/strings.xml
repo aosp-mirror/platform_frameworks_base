@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"የተሻሻለ ተገናኝነት ባህሪውን ያነቃል።"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"አካባቢያዊ ተርሚናል"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"የአካባቢያዊ ሼል መዳረሻ የሚያቀርብ የተርሚናል መተግበሪያ አንቃ"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"የLinux ግንባታ አከባቢ"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android ላይ Linux ተርሚናል ያሂዱ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"የHDCP ምልከታ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"የHDCP መመልከቻ ጠባይ አዘጋጅ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ስህተት በማስወገድ ላይ"</string>
@@ -585,7 +587,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ይህ ኮምፒውተር (ውስጣዊ)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"ማይክሮፎን (ውስጣዊ)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"የመትከያ ድምፅ ማውጫ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"የውጭ መሣሪያ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"የተገናኘ መሣሪያ"</string>
@@ -687,10 +688,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ነቅቷል"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"የእርስዎን መሣሪያ ይህ ለው ለማመልከት እንደገና መነሣት አለበት። አሁን እንደገና ያስነሡ ወይም ይተዉት።"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"ባለገመድ የራስ ላይ ማዳመጫ"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"የጆሮ ማዳመጫ"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB ድምፅ ማውጫ"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"የማይክሮፎን መሰኪያ"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB ማይክሮፎን"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"ግራ የሚያጋባ ኦዶዮ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ኦዲዮ"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"ባለገመድ ማይክሮፎን"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB ማይክሮፎን"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"ብሉቱዝ ማይክሮፎን"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"አብራ"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"አጥፋ"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"የአገልግሎት አቅራቢ አውታረ መረብን በመቀየር ላይ"</string>

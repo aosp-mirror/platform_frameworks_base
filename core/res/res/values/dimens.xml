@@ -17,7 +17,7 @@
 ** limitations under the License.
 */
 -->
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- The width that is used when creating thumbnails of applications. -->
     <dimen name="thumbnail_width">192dp</dimen>
     <!-- The height that is used when creating thumbnails of applications. -->
@@ -303,6 +303,9 @@
 
     <!-- The top margin before the notification progress bar. -->
     <dimen name="notification_progress_margin_top">8dp</dimen>
+
+    <!-- The horizontal margin before and after the notification progress bar. -->
+    <dimen name="notification_progress_margin_horizontal">2dp</dimen>
 
     <!-- height of the notification header -->
     <dimen name="notification_header_height">56dp</dimen>
@@ -814,6 +817,22 @@
     <dimen name="notification_progress_tracker_width">40dp</dimen>
     <!-- The size of the progress tracker height -->
     <dimen name="notification_progress_tracker_height">20dp</dimen>
+    <!-- The gap between segments in the notification progress bar -->
+    <dimen name="notification_progress_segSeg_gap">2dp</dimen>
+    <!-- The gap between a segment and a point in the notification progress bar -->
+    <dimen name="notification_progress_segPoint_gap">8dp</dimen>
+    <!-- The dash gap of the notification progress bar segments -->
+    <dimen name="notification_progress_segments_dash_gap">8dp</dimen>
+    <!-- The dash width of the notification progress bar segments -->
+    <dimen name="notification_progress_segments_dash_width">3dp</dimen>
+    <!-- The height of the notification progress bar segments -->
+    <dimen name="notification_progress_segments_height">6dp</dimen>
+    <!-- The radius of the notification progress bar points -->
+    <dimen name="notification_progress_points_radius">6dp</dimen>
+    <!-- The corner radius of the notification progress bar points drawn as rects -->
+    <dimen name="notification_progress_points_corner_radius">2dp</dimen>
+    <!-- The inset of the notification progress bar points drawn as rects -->
+    <dimen name="notification_progress_points_inset">0dp</dimen>
 
     <!-- The maximum size of the small notification icon on low memory devices. -->
     <dimen name="notification_small_icon_size_low_ram">@dimen/notification_small_icon_size</dimen>
@@ -1018,9 +1037,12 @@
     <dimen name="controls_thumbnail_image_max_width">280dp</dimen>
 
     <!-- System-provided radius for the background view of app widgets. The resolved value of this resource may change at runtime. -->
-    <dimen name="system_app_widget_background_radius">28dp</dimen>
-    <!-- System-provided radius for inner views on app widgets. The resolved value of this resource may change at runtime. -->
-    <dimen name="system_app_widget_inner_radius">20dp</dimen>
+    <dimen name="system_app_widget_background_radius" android:featureFlag="!android.appwidget.flags.use_smaller_app_widget_radius">28dp</dimen>
+    <dimen name="system_app_widget_background_radius" android:featureFlag="android.appwidget.flags.use_smaller_app_widget_radius">24dp</dimen>
+    <!-- System-provided radius for inner views on app widgets that are positioned 8dp within the widget background view. The resolved value of this resource may change at runtime. -->
+    <dimen name="system_app_widget_inner_radius" android:featureFlag="!android.appwidget.flags.use_smaller_app_widget_radius">20dp</dimen>
+    <!-- System-provided radius for inner views on app widgets that are positioned 8dp within the widget background view. The resolved value of this resource may change at runtime. -->
+    <dimen name="system_app_widget_inner_radius" android:featureFlag="android.appwidget.flags.use_smaller_app_widget_radius">16dp</dimen>
     <!-- System-provided padding for inner views on app widgets. The resolved value of this resource may change at runtime. @removed -->
     <dimen name="__removed_system_app_widget_internal_padding">16dp</dimen>
 

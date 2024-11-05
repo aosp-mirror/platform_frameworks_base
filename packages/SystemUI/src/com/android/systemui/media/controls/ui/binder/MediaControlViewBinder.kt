@@ -64,7 +64,7 @@ import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig
 import com.android.systemui.surfaceeffects.ripple.RippleShader
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 private const val TAG = "MediaControlViewBinder"

@@ -43,7 +43,7 @@ import org.junit.runners.Parameterized
  *
  * More details on b/190352379
  *
- * To run this test: `atest FlickerTestsIme1:CloseImeShownOnAppStartToAppOnPressBackTest`
+ * To run this test: `atest FlickerTestsIme:CloseImeShownOnAppStartToAppOnPressBackTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

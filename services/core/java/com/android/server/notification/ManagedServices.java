@@ -21,6 +21,9 @@ import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.DEVICE_POLICY_SERVICE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_INSTANT;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService.META_DATA_DEFAULT_AUTOBIND;
@@ -106,7 +109,8 @@ abstract public class ManagedServices {
     protected final String TAG = getClass().getSimpleName().replace('$', '.');
     protected final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final int ON_BINDING_DIED_REBIND_DELAY_MS = 10000;
+    protected static final int ON_BINDING_DIED_REBIND_DELAY_MS = 10000;
+    protected static final int ON_BINDING_DIED_REBIND_MSG = 1234;
     protected static final String ENABLED_SERVICES_SEPARATOR = ":";
     private static final String DB_VERSION_1 = "1";
     private static final String DB_VERSION_2 = "2";
@@ -712,13 +716,21 @@ abstract public class ManagedServices {
                         }
                     }
                     readExtraAttributes(tag, parser, resolvedUserId);
-                    if (allowedManagedServicePackages == null || allowedManagedServicePackages.test(
-                            getPackageName(approved), resolvedUserId, getRequiredPermission())
-                            || approved.isEmpty()) {
-                        if (mUm.getUserInfo(resolvedUserId) != null) {
-                            addApprovedList(approved, resolvedUserId, isPrimary, userSetComponent);
-                        }
+                    if (isUserChanged != null && approved.isEmpty()) {
+                        // NAS
+                        denyPregrantedAppUserSet(resolvedUserId, isPrimary);
                         mUseXml = true;
+                    } else {
+                        if (allowedManagedServicePackages == null
+                                || allowedManagedServicePackages.test(
+                                getPackageName(approved), resolvedUserId, getRequiredPermission())
+                                || approved.isEmpty()) {
+                            if (mUm.getUserInfo(resolvedUserId) != null) {
+                                addApprovedList(approved, resolvedUserId, isPrimary,
+                                        userSetComponent);
+                            }
+                            mUseXml = true;
+                        }
                     }
                 } else {
                     readExtraTag(tag, parser);
@@ -826,6 +838,17 @@ abstract public class ManagedServices {
         }
     }
 
+    protected void denyPregrantedAppUserSet(int userId, boolean isPrimary) {
+        synchronized (mApproved) {
+            ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
+            if (approvedByType == null) {
+                approvedByType = new ArrayMap<>();
+                mApproved.put(userId, approvedByType);
+            }
+            approvedByType.put(isPrimary, new ArraySet<>());
+        }
+    }
+
     protected boolean isComponentEnabledForPackage(String pkg) {
         synchronized (mMutex) {
             return mEnabledServicesPackageNames.contains(pkg);
@@ -856,7 +879,21 @@ abstract public class ManagedServices {
             String approvedItem = getApprovedValue(pkgOrComponent);
 
             if (approvedItem != null) {
+                final ComponentName component = ComponentName.unflattenFromString(approvedItem);
                 if (enabled) {
+                    if (Flags.notificationNlsRebind()) {
+                        if (component != null && !isValidService(component, userId)) {
+                            // Only fail if package is available
+                            // If not, it will be validated again in onPackagesChanged
+                            final PackageManager pm = mContext.getPackageManager();
+                            if (pm.isPackageAvailable(component.getPackageName())) {
+                                Slog.w(TAG, "Skip allowing " + mConfig.caption
+                                        + " " + pkgOrComponent + " (userSet: " + userSet
+                                        + ") for invalid service");
+                                return;
+                            }
+                        }
+                    }
                     approved.add(approvedItem);
                 } else {
                     approved.remove(approvedItem);
@@ -954,7 +991,7 @@ abstract public class ManagedServices {
                 || isPackageOrComponentAllowed(component.getPackageName(), userId))) {
             return false;
         }
-        return componentHasBindPermission(component, userId);
+        return isValidService(component, userId);
     }
 
     private boolean componentHasBindPermission(ComponentName component, int userId) {
@@ -1201,12 +1238,21 @@ abstract public class ManagedServices {
         if (!TextUtils.isEmpty(packageName)) {
             queryIntent.setPackage(packageName);
         }
+
+        if (Flags.notificationNlsRebind()) {
+            // Expand the package query
+            extraFlags |= MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+            extraFlags |= MATCH_INSTANT;
+        }
+
         List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
                 queryIntent,
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA | extraFlags,
                 userId);
-        if (DEBUG)
-            Slog.v(TAG, mConfig.serviceInterface + " services: " + installedServices);
+        if (DEBUG) {
+            Slog.v(TAG, mConfig.serviceInterface + " pkg: " + packageName + " services: "
+                    + installedServices);
+        }
         if (installedServices != null) {
             for (int i = 0, count = installedServices.size(); i < count; i++) {
                 ResolveInfo resolveInfo = installedServices.get(i);
@@ -1306,11 +1352,12 @@ abstract public class ManagedServices {
                     if (TextUtils.equals(getPackageName(approvedPackageOrComponent), packageName)) {
                         final ComponentName component = ComponentName.unflattenFromString(
                                 approvedPackageOrComponent);
-                        if (component != null && !componentHasBindPermission(component, userId)) {
+                        if (component != null && !isValidService(component, userId)) {
                             approved.removeAt(j);
                             if (DEBUG) {
                                 Slog.v(TAG, "Removing " + approvedPackageOrComponent
-                                        + " from approved list; no bind permission found "
+                                        + " from approved list; no bind permission or "
+                                        + "service interface filter found "
                                         + mConfig.bindPermission);
                             }
                         }
@@ -1326,6 +1373,15 @@ abstract public class ManagedServices {
             return component.getPackageName();
         } else {
             return packageOrComponent;
+        }
+    }
+
+    protected boolean isValidService(ComponentName component, int userId) {
+        if (Flags.notificationNlsRebind()) {
+            return componentHasBindPermission(component, userId) && queryPackageForServices(
+                    component.getPackageName(), userId).contains(component);
+        } else {
+            return componentHasBindPermission(component, userId);
         }
     }
 
@@ -1486,23 +1542,27 @@ abstract public class ManagedServices {
      * Called when user switched to unbind all services from other users.
      */
     @VisibleForTesting
-    void unbindOtherUserServices(int currentUser) {
+    void unbindOtherUserServices(int switchedToUser) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
-        t.traceBegin("ManagedServices.unbindOtherUserServices_current" + currentUser);
-        unbindServicesImpl(currentUser, true /* allExceptUser */);
+        t.traceBegin("ManagedServices.unbindOtherUserServices_current" + switchedToUser);
+        unbindServicesImpl(switchedToUser, true /* allExceptUser */);
         t.traceEnd();
     }
 
-    void unbindUserServices(int user) {
+    void unbindUserServices(int removedUser) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
-        t.traceBegin("ManagedServices.unbindUserServices" + user);
-        unbindServicesImpl(user, false /* allExceptUser */);
+        t.traceBegin("ManagedServices.unbindUserServices" + removedUser);
+        unbindServicesImpl(removedUser, false /* allExceptUser */);
         t.traceEnd();
     }
 
     void unbindServicesImpl(int user, boolean allExceptUser) {
         final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
         synchronized (mMutex) {
+            if (Flags.notificationNlsRebind()) {
+                // Remove enqueued rebinds to avoid rebinding services for a switched user
+                mHandler.removeMessages(ON_BINDING_DIED_REBIND_MSG);
+            }
             final Set<ManagedServiceInfo> removableBoundServices = getRemovableConnectedServices();
             for (ManagedServiceInfo info : removableBoundServices) {
                 if ((allExceptUser && (info.userid != user))
@@ -1697,6 +1757,7 @@ abstract public class ManagedServices {
                             mServicesRebinding.add(servicesBindingTag);
                             mHandler.postDelayed(() ->
                                     reregisterService(name, userid),
+                                    ON_BINDING_DIED_REBIND_MSG,
                                     ON_BINDING_DIED_REBIND_DELAY_MS);
                         } else {
                             Slog.v(TAG, getCaption() + " not rebinding in user " + userid

@@ -30,6 +30,9 @@ object LockscreenOtpRedaction {
 
     @JvmStatic
     inline val isEnabled
-        get() =
-            redactSensitiveContentNotificationsOnLockscreen() && AsyncHybridViewInflation.isEnabled
+        get() = redactSensitiveContentNotificationsOnLockscreen()
+
+    @JvmStatic
+    inline val isSingleLineViewEnabled
+        get() = isEnabled && AsyncHybridViewInflation.isEnabled
 }

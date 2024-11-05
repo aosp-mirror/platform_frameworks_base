@@ -151,9 +151,11 @@ class ContactsQueryHelper {
                 found = true;
             }
         } catch (SQLiteException exception) {
-            Slog.w("SQLite exception when querying contacts.", exception);
+            Slog.w(TAG, "SQLite exception when querying contacts.", exception);
         } catch (IllegalArgumentException exception) {
-            Slog.w("Illegal Argument exception when querying contacts.", exception);
+            Slog.w(TAG, "Illegal Argument exception when querying contacts.", exception);
+        } catch (Exception exception) {
+            Slog.e(TAG, "Exception when querying contacts.", exception);
         }
         if (found && lookupKey != null && hasPhoneNumber) {
             return queryPhoneNumber(lookupKey);
@@ -181,6 +183,8 @@ class ContactsQueryHelper {
                     mPhoneNumber = cursor.getString(phoneNumIdx);
                 }
             }
+        } catch (Exception exception) {
+            Slog.e(TAG, "Exception when querying contact phone number.", exception);
         }
         return true;
     }

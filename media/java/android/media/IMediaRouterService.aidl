@@ -85,8 +85,7 @@ interface IMediaRouterService {
     void updateScanningState(IMediaRouter2Manager manager, @JavaPassthrough(annotation="@android.media.MediaRouter2.ScanningState") int scanningState);
 
     void requestCreateSessionWithManager(IMediaRouter2Manager manager, int requestId,
-            in RoutingSessionInfo oldSession, in @nullable MediaRoute2Info route,
-            in UserHandle transferInitiatorUserHandle, in String transferInitiatorPackageName);
+            in RoutingSessionInfo oldSession, in @nullable MediaRoute2Info route);
     void selectRouteWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, in MediaRoute2Info route);
     void deselectRouteWithManager(IMediaRouter2Manager manager, int requestId,

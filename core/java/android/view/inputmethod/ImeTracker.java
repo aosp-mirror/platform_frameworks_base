@@ -220,6 +220,8 @@ public interface ImeTracker {
             PHASE_WM_POSTING_CHANGED_IME_VISIBILITY,
             PHASE_WM_INVOKING_IME_REQUESTED_LISTENER,
             PHASE_CLIENT_ALREADY_HIDDEN,
+            PHASE_CLIENT_VIEW_HANDLER_AVAILABLE,
+            PHASE_SERVER_UPDATE_CLIENT_VISIBILITY,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
@@ -424,6 +426,16 @@ public interface ImeTracker {
             ImeProtoEnums.PHASE_WM_INVOKING_IME_REQUESTED_LISTENER;
     /** IME is requested to be hidden, but already hidden. Don't hide to avoid another animation. */
     int PHASE_CLIENT_ALREADY_HIDDEN = ImeProtoEnums.PHASE_CLIENT_ALREADY_HIDDEN;
+    /**
+     * The view's handler is needed to check if we're running on a different thread. We can't
+     * continue without.
+     */
+    int PHASE_CLIENT_VIEW_HANDLER_AVAILABLE = ImeProtoEnums.PHASE_CLIENT_VIEW_HANDLER_AVAILABLE;
+    /**
+     * ImeInsetsSourceProvider sets the reported visibility of the caller/client window (either the
+     * app or the RemoteInsetsControlTarget).
+     */
+    int PHASE_SERVER_UPDATE_CLIENT_VISIBILITY = ImeProtoEnums.PHASE_SERVER_UPDATE_CLIENT_VISIBILITY;
 
     /**
      * Called when an IME request is started.

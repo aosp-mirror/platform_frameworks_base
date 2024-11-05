@@ -314,16 +314,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isActiveDreamLockscreenHosted() =
-        testScope.runTest {
-            underTest.setIsActiveDreamLockscreenHosted(true)
-            assertThat(underTest.isActiveDreamLockscreenHosted.value).isEqualTo(true)
-
-            underTest.setIsActiveDreamLockscreenHosted(false)
-            assertThat(underTest.isActiveDreamLockscreenHosted.value).isEqualTo(false)
-        }
-
-    @Test
     fun isUdfpsSupported() =
         testScope.runTest {
             whenever(keyguardUpdateMonitor.isUdfpsSupported).thenReturn(true)
@@ -336,26 +326,14 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Test
     fun isKeyguardGoingAway() =
         testScope.runTest {
-            whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isKeyguardGoingAway.onEach { latest = it }.launchIn(this)
-            runCurrent()
-            assertThat(latest).isFalse()
+            val isGoingAway by collectLastValue(underTest.isKeyguardGoingAway)
+            assertThat(isGoingAway).isFalse()
 
-            val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
+            underTest.isKeyguardGoingAway.value = true
+            assertThat(isGoingAway).isTrue()
 
-            whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(true)
-            captor.value.onKeyguardGoingAwayChanged()
-            runCurrent()
-            assertThat(latest).isTrue()
-
-            whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
-            captor.value.onKeyguardGoingAwayChanged()
-            runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
+            underTest.isKeyguardGoingAway.value = false
+            assertThat(isGoingAway).isFalse()
         }
 
     @Test
@@ -423,17 +401,17 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             runCurrent()
             listener.onDozeTransition(
                 DozeMachine.State.DOZE_REQUEST_PULSE,
-                DozeMachine.State.DOZE_PULSING
+                DozeMachine.State.DOZE_PULSING,
             )
             runCurrent()
             listener.onDozeTransition(
                 DozeMachine.State.DOZE_SUSPEND_TRIGGERS,
-                DozeMachine.State.DOZE_PULSE_DONE
+                DozeMachine.State.DOZE_PULSE_DONE,
             )
             runCurrent()
             listener.onDozeTransition(
                 DozeMachine.State.DOZE_AOD_PAUSING,
-                DozeMachine.State.DOZE_AOD_PAUSED
+                DozeMachine.State.DOZE_AOD_PAUSED,
             )
             runCurrent()
 
@@ -443,22 +421,22 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                         // Initial value will be UNINITIALIZED
                         DozeTransitionModel(
                             DozeStateModel.UNINITIALIZED,
-                            DozeStateModel.UNINITIALIZED
+                            DozeStateModel.UNINITIALIZED,
                         ),
                         DozeTransitionModel(DozeStateModel.INITIALIZED, DozeStateModel.DOZE),
                         DozeTransitionModel(DozeStateModel.DOZE, DozeStateModel.DOZE_AOD),
                         DozeTransitionModel(DozeStateModel.DOZE_AOD_DOCKED, DozeStateModel.FINISH),
                         DozeTransitionModel(
                             DozeStateModel.DOZE_REQUEST_PULSE,
-                            DozeStateModel.DOZE_PULSING
+                            DozeStateModel.DOZE_PULSING,
                         ),
                         DozeTransitionModel(
                             DozeStateModel.DOZE_SUSPEND_TRIGGERS,
-                            DozeStateModel.DOZE_PULSE_DONE
+                            DozeStateModel.DOZE_PULSE_DONE,
                         ),
                         DozeTransitionModel(
                             DozeStateModel.DOZE_AOD_PAUSING,
-                            DozeStateModel.DOZE_AOD_PAUSED
+                            DozeStateModel.DOZE_AOD_PAUSED,
                         ),
                     )
                 )
@@ -510,12 +488,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             // consuming it should handle that properly.
             assertThat(values).isEqualTo(listOf(null))
 
-            listOf(
-                    Point(500, 500),
-                    Point(0, 0),
-                    null,
-                    Point(250, 250),
-                )
+            listOf(Point(500, 500), Point(0, 0), null, Point(250, 250))
                 .onEach {
                     facePropertyRepository.setSensorLocation(it)
                     runCurrent()
@@ -551,7 +524,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 .onEach { biometricSourceType ->
                     underTest.setBiometricUnlockState(
                         BiometricUnlockMode.NONE,
-                        BiometricUnlockSource.Companion.fromBiometricSourceType(biometricSourceType)
+                        BiometricUnlockSource.Companion.fromBiometricSourceType(biometricSourceType),
                     )
                     runCurrent()
                 }

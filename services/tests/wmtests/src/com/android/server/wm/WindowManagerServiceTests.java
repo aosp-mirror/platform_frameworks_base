@@ -94,6 +94,7 @@ import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
 import android.view.IWindow;
 import android.view.InputChannel;
+import android.view.InputDevice;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
@@ -1272,6 +1273,48 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.requestAppKeyboardShortcuts(receiver, 0);
         mWm.requestImeKeyboardShortcuts(receiver, 0);
         verify(window, times(2)).requestAppKeyboardShortcuts(receiver, 0);
+    }
+
+    @Test
+    public void testInputDeviceNotifyConfigurationChanged() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_FILTER_IRRELEVANT_INPUT_DEVICE_CHANGE);
+        spyOn(mDisplayContent);
+        doReturn(false).when(mDisplayContent).sendNewConfiguration();
+        final InputDevice deviceA = mock(InputDevice.class);
+        final InputDevice deviceB = mock(InputDevice.class);
+        doReturn("deviceA").when(deviceA).getDescriptor();
+        doReturn("deviceB").when(deviceB).getDescriptor();
+        final InputDevice[] devices1 = { deviceA };
+        final InputDevice[] devices2 = { deviceB, deviceA };
+        final Runnable verifySendNewConfiguration = () -> {
+            clearInvocations(mDisplayContent);
+            mWm.mInputManagerCallback.notifyConfigurationChanged();
+            verify(mDisplayContent).sendNewConfiguration();
+        };
+        doReturn(devices1).when(mWm.mInputManager).getInputDevices();
+        verifySendNewConfiguration.run();
+
+        doReturn(devices2).when(mWm.mInputManager).getInputDevices();
+        verifySendNewConfiguration.run();
+
+        doReturn(true).when(deviceB).isEnabled();
+        verifySendNewConfiguration.run();
+
+        doReturn(true).when(deviceA).isExternal();
+        verifySendNewConfiguration.run();
+
+        doReturn(1).when(deviceA).getSources();
+        verifySendNewConfiguration.run();
+
+        doReturn(1).when(deviceA).getAssociatedDisplayId();
+        verifySendNewConfiguration.run();
+
+        doReturn(1).when(deviceA).getKeyboardType();
+        verifySendNewConfiguration.run();
+
+        clearInvocations(mDisplayContent);
+        mWm.mInputManagerCallback.notifyConfigurationChanged();
+        verify(mDisplayContent, never()).sendNewConfiguration();
     }
 
     @Test

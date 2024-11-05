@@ -28,6 +28,8 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1106,6 +1108,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
         synchronized (this) {
             pw.println(prefix + "(MessageQueue is using Legacy implementation)");
@@ -1122,6 +1125,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
         synchronized (this) {

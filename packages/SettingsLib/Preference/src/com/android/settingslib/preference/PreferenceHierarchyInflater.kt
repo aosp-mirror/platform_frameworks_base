@@ -21,7 +21,6 @@ import androidx.preference.PreferenceGroup
 import com.android.settingslib.datastore.KeyValueStore
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceHierarchy
-import com.android.settingslib.metadata.PreferenceMetadata
 
 /** Inflates [PreferenceHierarchy] into given [PreferenceGroup] recursively. */
 fun PreferenceGroup.inflatePreferenceHierarchy(
@@ -29,12 +28,11 @@ fun PreferenceGroup.inflatePreferenceHierarchy(
     hierarchy: PreferenceHierarchy,
     storages: MutableMap<KeyValueStore, PreferenceDataStore> = mutableMapOf(),
 ) {
-    fun PreferenceMetadata.preferenceBinding() = preferenceBindingFactory.getPreferenceBinding(this)
-
-    hierarchy.metadata.let { it.preferenceBinding()?.bind(this, it) }
+    preferenceBindingFactory.bind(this, hierarchy)
     hierarchy.forEach {
         val metadata = it.metadata
-        val preferenceBinding = metadata.preferenceBinding() ?: return@forEach
+        val preferenceBinding =
+            preferenceBindingFactory.getPreferenceBinding(metadata) ?: return@forEach
         val widget = preferenceBinding.createWidget(context)
         if (it is PreferenceHierarchy) {
             val preferenceGroup = widget as PreferenceGroup
@@ -42,11 +40,11 @@ fun PreferenceGroup.inflatePreferenceHierarchy(
             addPreference(preferenceGroup)
             preferenceGroup.inflatePreferenceHierarchy(preferenceBindingFactory, it)
         } else {
-            preferenceBinding.bind(widget, metadata)
             (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
                 widget.preferenceDataStore =
                     storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
             }
+            preferenceBindingFactory.bind(widget, it, preferenceBinding)
             // MUST add preference after binding for persistent preference to get initial value
             // (preference key is set within bind method)
             addPreference(widget)

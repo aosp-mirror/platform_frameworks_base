@@ -17,7 +17,9 @@
 package com.android.settingslib.preference
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.XmlRes
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
@@ -40,9 +42,14 @@ open class PreferenceFragment :
         createPreferenceScreen(PreferenceScreenFactory(this))
 
     override fun createPreferenceScreen(factory: PreferenceScreenFactory): PreferenceScreen? {
+        preferenceScreenBindingHelper?.onDestroy()
+        preferenceScreenBindingHelper = null
+
         val context = factory.context
         fun createPreferenceScreenFromResource() =
-            factory.inflate(getPreferenceScreenResId(context))
+            factory.inflate(getPreferenceScreenResId(context))?.also {
+                Log.i(TAG, "Load screen " + it.key + " from resource")
+            }
 
         val screenCreator =
             getPreferenceScreenCreator(context) ?: return createPreferenceScreenFromResource()
@@ -50,17 +57,21 @@ open class PreferenceFragment :
         val preferenceHierarchy = screenCreator.getPreferenceHierarchy(context)
         val preferenceScreen =
             if (screenCreator.hasCompleteHierarchy()) {
+                Log.i(TAG, "Load screen " + screenCreator.key + " from hierarchy")
                 factory.getOrCreatePreferenceScreen().apply {
                     inflatePreferenceHierarchy(preferenceBindingFactory, preferenceHierarchy)
                 }
             } else {
+                Log.i(TAG, "Screen " + screenCreator.key + " is hybrid")
                 createPreferenceScreenFromResource()?.also {
                     bindRecursively(it, preferenceBindingFactory, preferenceHierarchy)
                 } ?: return null
             }
+
         preferenceScreenBindingHelper =
             PreferenceScreenBindingHelper(
                 context,
+                this,
                 preferenceBindingFactory,
                 preferenceScreen,
                 preferenceHierarchy,
@@ -79,8 +90,48 @@ open class PreferenceFragment :
     override fun getPreferenceScreenBindingKey(context: Context): String? =
         arguments?.getString(EXTRA_BINDING_SCREEN_KEY)
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        preferenceScreenBindingHelper?.onCreate()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        preferenceScreenBindingHelper?.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        preferenceScreenBindingHelper?.onResume()
+    }
+
+    override fun onPause() {
+        preferenceScreenBindingHelper?.onPause()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        preferenceScreenBindingHelper?.onStop()
+        super.onStop()
+    }
+
     override fun onDestroy() {
-        preferenceScreenBindingHelper?.close()
+        preferenceScreenBindingHelper?.onDestroy()
+        preferenceScreenBindingHelper = null
         super.onDestroy()
+    }
+
+    @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        preferenceScreenBindingHelper?.onActivityResult(requestCode, resultCode, data)
+    }
+
+    protected fun getPreferenceKeysInHierarchy(): Set<String> =
+        preferenceScreenBindingHelper?.getPreferences()?.map { it.metadata.key }?.toSet() ?: setOf()
+
+    companion object {
+        private const val TAG = "PreferenceFragment"
     }
 }

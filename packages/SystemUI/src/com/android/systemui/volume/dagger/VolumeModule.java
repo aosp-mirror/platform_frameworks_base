@@ -50,6 +50,8 @@ import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFact
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
@@ -121,6 +123,7 @@ public interface VolumeModule {
             DumpManager dumpManager,
             Lazy<SecureSettings> secureSettings,
             VibratorHelper vibratorHelper,
+            MSDLPlayer msdlPlayer,
             SystemClock systemClock,
             VolumeDialogInteractor interactor) {
         if (Flags.volumeRedesign()) {
@@ -144,6 +147,7 @@ public interface VolumeModule {
                     dumpManager,
                     secureSettings,
                     vibratorHelper,
+                    msdlPlayer,
                     systemClock,
                     interactor);
             impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);

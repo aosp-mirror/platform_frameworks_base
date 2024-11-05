@@ -8,7 +8,15 @@ package {
 
     // OWNER: g/ravenwood
     // Bug component: 25698
-    default_team: "trendy_team_framework_backstage_power",
+    default_team: "trendy_team_ravenwood",
+}
+
+filegroup {
+    name: "ravenwood-common-policies",
+    srcs: [
+        "texts/ravenwood-common-policies.txt",
+    ],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -16,7 +24,7 @@ filegroup {
     srcs: [
         "texts/ravenwood-services-policies.txt",
     ],
-    visibility: ["//visibility:public"],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -24,7 +32,7 @@ filegroup {
     srcs: [
         "texts/ravenwood-framework-policies.txt",
     ],
-    visibility: ["//visibility:public"],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -32,7 +40,7 @@ filegroup {
     srcs: [
         "texts/ravenwood-standard-options.txt",
     ],
-    visibility: ["//visibility:public"],
+    visibility: ["//visibility:private"],
 }
 
 filegroup {
@@ -40,7 +48,7 @@ filegroup {
     srcs: [
         "texts/ravenwood-annotation-allowed-classes.txt",
     ],
-    visibility: ["//visibility:public"],
+    visibility: ["//visibility:private"],
 }
 
 // This and the next module contain the same classes with different implementations.
@@ -92,6 +100,9 @@ java_library_host {
     srcs: [
         "runtime-helper-src/libcore-fake/**/*.java",
     ],
+    libs: [
+        "app-compat-annotations",
+    ],
     static_libs: [
         "ravenwood-runtime-common",
     ],
@@ -113,9 +124,11 @@ java_library {
     ],
     static_libs: [
         "ravenwood-runtime-common",
+        "androidx.annotation_annotation",
     ],
     libs: [
         "framework-minus-apex.ravenwood",
+        "framework-configinfrastructure.ravenwood",
         "ravenwood-helper-libcore-runtime",
     ],
     sdk_version: "core_current",
@@ -154,8 +167,10 @@ java_library {
         "framework-annotations-lib",
         "ravenwood-helper-framework-runtime",
         "ravenwood-helper-libcore-runtime",
+        "hoststubgen-helper-runtime.ravenwood",
+        "mockito-ravenwood-prebuilt",
     ],
-    visibility: ["//frameworks/base"],
+    visibility: [":__subpackages__"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
 }
 
@@ -295,7 +310,7 @@ sh_test_host {
     name: "ravenwood-stats-checker",
     src: "scripts/ravenwood-stats-checker.sh",
     test_suites: ["general-tests"],
-    data: [
+    device_common_data: [
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_stats.csv}",
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_apis.csv}",
         ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_keep_all.txt}",
@@ -304,6 +319,16 @@ sh_test_host {
         ":services.core.ravenwood-base{hoststubgen_services.core_apis.csv}",
         ":services.core.ravenwood-base{hoststubgen_services.core_keep_all.txt}",
         ":services.core.ravenwood-base{hoststubgen_services.core_dump.txt}",
+
+        ":framework-configinfrastructure.ravenwood-base{framework-configinfrastructure_stats.csv}",
+        ":framework-configinfrastructure.ravenwood-base{framework-configinfrastructure_apis.csv}",
+        ":framework-configinfrastructure.ravenwood-base{framework-configinfrastructure_keep_all.txt}",
+        ":framework-configinfrastructure.ravenwood-base{framework-configinfrastructure_dump.txt}",
+
+        ":framework-statsd.ravenwood-base{framework-statsd_stats.csv}",
+        ":framework-statsd.ravenwood-base{framework-statsd_apis.csv}",
+        ":framework-statsd.ravenwood-base{framework-statsd_keep_all.txt}",
+        ":framework-statsd.ravenwood-base{framework-statsd_dump.txt}",
     ],
 }
 
@@ -335,14 +360,267 @@ java_library {
     ],
 }
 
-android_ravenwood_libgroup {
-    name: "ravenwood-runtime",
-    data: [
+filegroup {
+    name: "ravenwood-data",
+    device_common_srcs: [
+        ":system-build.prop",
         ":framework-res",
         ":ravenwood-empty-res",
         ":framework-platform-compat-config",
         ":services-platform-compat-config",
     ],
+    device_first_srcs: [
+        ":apex_icu.dat",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+// Keep in sync with build/make/target/product/generic/Android.bp
+filegroup {
+    name: "ravenwood-fonts",
+    device_common_srcs: [
+        ":AndroidClock.ttf",
+        ":CarroisGothicSC-Regular.ttf",
+        ":ComingSoon.ttf",
+        ":CutiveMono.ttf",
+        ":DancingScript-Regular.ttf",
+        ":DroidSansMono.ttf",
+        ":NotoColorEmoji.ttf",
+        ":NotoColorEmojiFlags.ttf",
+        ":NotoNaskhArabic-Bold.ttf",
+        ":NotoNaskhArabic-Regular.ttf",
+        ":NotoNaskhArabicUI-Bold.ttf",
+        ":NotoNaskhArabicUI-Regular.ttf",
+        ":NotoSansAdlam-VF.ttf",
+        ":NotoSansAhom-Regular.otf",
+        ":NotoSansAnatolianHieroglyphs-Regular.otf",
+        ":NotoSansArmenian-VF.ttf",
+        ":NotoSansAvestan-Regular.ttf",
+        ":NotoSansBalinese-Regular.ttf",
+        ":NotoSansBamum-Regular.ttf",
+        ":NotoSansBassaVah-Regular.otf",
+        ":NotoSansBatak-Regular.ttf",
+        ":NotoSansBengali-VF.ttf",
+        ":NotoSansBengaliUI-VF.ttf",
+        ":NotoSansBhaiksuki-Regular.otf",
+        ":NotoSansBrahmi-Regular.ttf",
+        ":NotoSansBuginese-Regular.ttf",
+        ":NotoSansBuhid-Regular.ttf",
+        ":NotoSansCJK-Regular.ttc",
+        ":NotoSansCanadianAboriginal-Regular.ttf",
+        ":NotoSansCarian-Regular.ttf",
+        ":NotoSansChakma-Regular.otf",
+        ":NotoSansCham-Bold.ttf",
+        ":NotoSansCham-Regular.ttf",
+        ":NotoSansCherokee-Regular.ttf",
+        ":NotoSansCoptic-Regular.ttf",
+        ":NotoSansCuneiform-Regular.ttf",
+        ":NotoSansCypriot-Regular.ttf",
+        ":NotoSansDeseret-Regular.ttf",
+        ":NotoSansDevanagari-VF.ttf",
+        ":NotoSansDevanagariUI-VF.ttf",
+        ":NotoSansEgyptianHieroglyphs-Regular.ttf",
+        ":NotoSansElbasan-Regular.otf",
+        ":NotoSansEthiopic-VF.ttf",
+        ":NotoSansGeorgian-VF.ttf",
+        ":NotoSansGlagolitic-Regular.ttf",
+        ":NotoSansGothic-Regular.ttf",
+        ":NotoSansGrantha-Regular.ttf",
+        ":NotoSansGujarati-Bold.ttf",
+        ":NotoSansGujarati-Regular.ttf",
+        ":NotoSansGujaratiUI-Bold.ttf",
+        ":NotoSansGujaratiUI-Regular.ttf",
+        ":NotoSansGunjalaGondi-Regular.otf",
+        ":NotoSansGurmukhi-VF.ttf",
+        ":NotoSansGurmukhiUI-VF.ttf",
+        ":NotoSansHanifiRohingya-Regular.otf",
+        ":NotoSansHanunoo-Regular.ttf",
+        ":NotoSansHatran-Regular.otf",
+        ":NotoSansHebrew-Bold.ttf",
+        ":NotoSansHebrew-Regular.ttf",
+        ":NotoSansImperialAramaic-Regular.ttf",
+        ":NotoSansInscriptionalPahlavi-Regular.ttf",
+        ":NotoSansInscriptionalParthian-Regular.ttf",
+        ":NotoSansJavanese-Regular.otf",
+        ":NotoSansKaithi-Regular.ttf",
+        ":NotoSansKannada-VF.ttf",
+        ":NotoSansKannadaUI-VF.ttf",
+        ":NotoSansKayahLi-Regular.ttf",
+        ":NotoSansKharoshthi-Regular.ttf",
+        ":NotoSansKhmer-VF.ttf",
+        ":NotoSansKhmerUI-Bold.ttf",
+        ":NotoSansKhmerUI-Regular.ttf",
+        ":NotoSansKhojki-Regular.otf",
+        ":NotoSansLao-Bold.ttf",
+        ":NotoSansLao-Regular.ttf",
+        ":NotoSansLaoUI-Bold.ttf",
+        ":NotoSansLaoUI-Regular.ttf",
+        ":NotoSansLepcha-Regular.ttf",
+        ":NotoSansLimbu-Regular.ttf",
+        ":NotoSansLinearA-Regular.otf",
+        ":NotoSansLinearB-Regular.ttf",
+        ":NotoSansLisu-Regular.ttf",
+        ":NotoSansLycian-Regular.ttf",
+        ":NotoSansLydian-Regular.ttf",
+        ":NotoSansMalayalam-VF.ttf",
+        ":NotoSansMalayalamUI-VF.ttf",
+        ":NotoSansMandaic-Regular.ttf",
+        ":NotoSansManichaean-Regular.otf",
+        ":NotoSansMarchen-Regular.otf",
+        ":NotoSansMasaramGondi-Regular.otf",
+        ":NotoSansMedefaidrin-VF.ttf",
+        ":NotoSansMeeteiMayek-Regular.ttf",
+        ":NotoSansMeroitic-Regular.otf",
+        ":NotoSansMiao-Regular.otf",
+        ":NotoSansModi-Regular.ttf",
+        ":NotoSansMongolian-Regular.ttf",
+        ":NotoSansMro-Regular.otf",
+        ":NotoSansMultani-Regular.otf",
+        ":NotoSansMyanmar-Bold.otf",
+        ":NotoSansMyanmar-Medium.otf",
+        ":NotoSansMyanmar-Regular.otf",
+        ":NotoSansMyanmarUI-Bold.otf",
+        ":NotoSansMyanmarUI-Medium.otf",
+        ":NotoSansMyanmarUI-Regular.otf",
+        ":NotoSansNKo-Regular.ttf",
+        ":NotoSansNabataean-Regular.otf",
+        ":NotoSansNewTaiLue-Regular.ttf",
+        ":NotoSansNewa-Regular.otf",
+        ":NotoSansOgham-Regular.ttf",
+        ":NotoSansOlChiki-Regular.ttf",
+        ":NotoSansOldItalic-Regular.ttf",
+        ":NotoSansOldNorthArabian-Regular.otf",
+        ":NotoSansOldPermic-Regular.otf",
+        ":NotoSansOldPersian-Regular.ttf",
+        ":NotoSansOldSouthArabian-Regular.ttf",
+        ":NotoSansOldTurkic-Regular.ttf",
+        ":NotoSansOriya-Bold.ttf",
+        ":NotoSansOriya-Regular.ttf",
+        ":NotoSansOriyaUI-Bold.ttf",
+        ":NotoSansOriyaUI-Regular.ttf",
+        ":NotoSansOsage-Regular.ttf",
+        ":NotoSansOsmanya-Regular.ttf",
+        ":NotoSansPahawhHmong-Regular.otf",
+        ":NotoSansPalmyrene-Regular.otf",
+        ":NotoSansPauCinHau-Regular.otf",
+        ":NotoSansPhagsPa-Regular.ttf",
+        ":NotoSansPhoenician-Regular.ttf",
+        ":NotoSansRejang-Regular.ttf",
+        ":NotoSansRunic-Regular.ttf",
+        ":NotoSansSamaritan-Regular.ttf",
+        ":NotoSansSaurashtra-Regular.ttf",
+        ":NotoSansSharada-Regular.otf",
+        ":NotoSansShavian-Regular.ttf",
+        ":NotoSansSinhala-VF.ttf",
+        ":NotoSansSinhalaUI-VF.ttf",
+        ":NotoSansSoraSompeng-Regular.otf",
+        ":NotoSansSoyombo-VF.ttf",
+        ":NotoSansSundanese-Regular.ttf",
+        ":NotoSansSylotiNagri-Regular.ttf",
+        ":NotoSansSymbols-Regular-Subsetted.ttf",
+        ":NotoSansSymbols-Regular-Subsetted2.ttf",
+        ":NotoSansSyriacEastern-Regular.ttf",
+        ":NotoSansSyriacEstrangela-Regular.ttf",
+        ":NotoSansSyriacWestern-Regular.ttf",
+        ":NotoSansTagalog-Regular.ttf",
+        ":NotoSansTagbanwa-Regular.ttf",
+        ":NotoSansTaiLe-Regular.ttf",
+        ":NotoSansTaiTham-Regular.ttf",
+        ":NotoSansTaiViet-Regular.ttf",
+        ":NotoSansTakri-VF.ttf",
+        ":NotoSansTamil-VF.ttf",
+        ":NotoSansTamilUI-VF.ttf",
+        ":NotoSansTelugu-VF.ttf",
+        ":NotoSansTeluguUI-VF.ttf",
+        ":NotoSansThaana-Bold.ttf",
+        ":NotoSansThaana-Regular.ttf",
+        ":NotoSansThai-Bold.ttf",
+        ":NotoSansThai-Regular.ttf",
+        ":NotoSansThaiUI-Bold.ttf",
+        ":NotoSansThaiUI-Regular.ttf",
+        ":NotoSansTifinagh-Regular.otf",
+        ":NotoSansUgaritic-Regular.ttf",
+        ":NotoSansVai-Regular.ttf",
+        ":NotoSansWancho-Regular.otf",
+        ":NotoSansWarangCiti-Regular.otf",
+        ":NotoSansYi-Regular.ttf",
+        ":NotoSerif-Bold.ttf",
+        ":NotoSerif-BoldItalic.ttf",
+        ":NotoSerif-Italic.ttf",
+        ":NotoSerif-Regular.ttf",
+        ":NotoSerifArmenian-VF.ttf",
+        ":NotoSerifBengali-VF.ttf",
+        ":NotoSerifCJK-Regular.ttc",
+        ":NotoSerifDevanagari-VF.ttf",
+        ":NotoSerifDogra-Regular.ttf",
+        ":NotoSerifEthiopic-VF.ttf",
+        ":NotoSerifGeorgian-VF.ttf",
+        ":NotoSerifGujarati-VF.ttf",
+        ":NotoSerifGurmukhi-VF.ttf",
+        ":NotoSerifHebrew-Bold.ttf",
+        ":NotoSerifHebrew-Regular.ttf",
+        ":NotoSerifHentaigana.ttf",
+        ":NotoSerifKannada-VF.ttf",
+        ":NotoSerifKhmer-Bold.otf",
+        ":NotoSerifKhmer-Regular.otf",
+        ":NotoSerifLao-Bold.ttf",
+        ":NotoSerifLao-Regular.ttf",
+        ":NotoSerifMalayalam-VF.ttf",
+        ":NotoSerifMyanmar-Bold.otf",
+        ":NotoSerifMyanmar-Regular.otf",
+        ":NotoSerifNyiakengPuachueHmong-VF.ttf",
+        ":NotoSerifSinhala-VF.ttf",
+        ":NotoSerifTamil-VF.ttf",
+        ":NotoSerifTelugu-VF.ttf",
+        ":NotoSerifThai-Bold.ttf",
+        ":NotoSerifThai-Regular.ttf",
+        ":NotoSerifTibetan-VF.ttf",
+        ":NotoSerifYezidi-VF.ttf",
+        ":Roboto-Regular.ttf",
+        ":RobotoFlex-Regular.ttf",
+        ":RobotoStatic-Regular.ttf",
+        ":SourceSansPro-Bold.ttf",
+        ":SourceSansPro-BoldItalic.ttf",
+        ":SourceSansPro-Italic.ttf",
+        ":SourceSansPro-Regular.ttf",
+        ":SourceSansPro-SemiBold.ttf",
+        ":SourceSansPro-SemiBoldItalic.ttf",
+    ],
+    device_first_srcs: [
+        ":font_fallback.xml",
+        ":fonts.xml",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+// JARs in "ravenwood-runtime" are set to the classpath, sorted alphabetically.
+// Rename some of the dependencies to make sure they're included in the intended order.
+
+java_library {
+    name: "100-framework-minus-apex.ravenwood",
+    installable: false,
+    static_libs: ["framework-minus-apex.ravenwood"],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "200-kxml2-android",
+    installable: false,
+    static_libs: ["kxml2-android"],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "z00-all-updatable-modules-system-stubs",
+    installable: false,
+    static_libs: ["all-updatable-modules-system-stubs-for-host"],
+    visibility: ["//visibility:private"],
+}
+
+android_ravenwood_libgroup {
+    name: "ravenwood-runtime",
+    data: [":ravenwood-data"],
+    fonts: [":ravenwood-fonts"],
     libs: [
         "100-framework-minus-apex.ravenwood",
         "200-kxml2-android",
@@ -359,6 +637,12 @@ android_ravenwood_libgroup {
         "core-icu4j-for-host.ravenwood",
         "icu4j-icudata-jarjar",
         "icu4j-icutzdata-jarjar",
+
+        // DeviceConfig
+        "framework-configinfrastructure.ravenwood",
+
+        // StatsD
+        "framework-statsd.ravenwood",
 
         // Provide runtime versions of utils linked in below
         "junit",
@@ -393,3 +677,7 @@ android_ravenwood_libgroup {
         "inline-mockito-ravenwood-prebuilt",
     ],
 }
+
+build = [
+    "Framework.bp",
+]

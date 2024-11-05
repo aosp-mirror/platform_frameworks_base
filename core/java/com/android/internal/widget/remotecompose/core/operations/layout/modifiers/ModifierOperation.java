@@ -18,9 +18,7 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
-/**
- * Represents a modifier
- */
+/** Represents a modifier */
 public interface ModifierOperation extends Operation {
     void serializeToString(int indent, StringSerializer serializer);
 }

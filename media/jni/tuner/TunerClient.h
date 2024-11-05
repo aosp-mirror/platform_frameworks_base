@@ -65,7 +65,7 @@ public:
      * @param frontendHandle the handle of the frontend granted by TRM.
      * @return a newly created FrontendClient interface.
      */
-    sp<FrontendClient> openFrontend(int32_t frontendHandle);
+    sp<FrontendClient> openFrontend(int64_t frontendHandle);
 
     /**
      * Retrieve the granted frontend's information.
@@ -81,7 +81,7 @@ public:
      * @param demuxHandle the handle of the demux granted by TRM.
      * @return a newly created DemuxClient interface.
      */
-    sp<DemuxClient> openDemux(int32_t demuxHandle);
+    sp<DemuxClient> openDemux(int64_t demuxHandle);
 
     /**
      * Retrieve the DemuxInfo of a specific demux
@@ -89,7 +89,7 @@ public:
      * @param demuxHandle the handle of the demux to query demux info for
      * @return the demux info
      */
-    shared_ptr<DemuxInfo> getDemuxInfo(int32_t demuxHandle);
+    shared_ptr<DemuxInfo> getDemuxInfo(int64_t demuxHandle);
 
     /**
      * Retrieve a list of demux info
@@ -111,7 +111,7 @@ public:
      * @param descramblerHandle the handle of the descrambler granted by TRM.
      * @return a newly created DescramblerClient interface.
      */
-    sp<DescramblerClient> openDescrambler(int32_t descramblerHandle);
+    sp<DescramblerClient> openDescrambler(int64_t descramblerHandle);
 
     /**
      * Open a new interface of LnbClient given an lnbHandle.
@@ -119,7 +119,7 @@ public:
      * @param lnbHandle the handle of the LNB granted by TRM.
      * @return a newly created LnbClient interface.
      */
-    sp<LnbClient> openLnb(int32_t lnbHandle);
+    sp<LnbClient> openLnb(int64_t lnbHandle);
 
     /**
      * Open a new interface of LnbClient given a LNB name.

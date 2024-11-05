@@ -30,9 +30,6 @@ public final class VerificationStatusTracker {
     private final @CurrentTimeMillisLong long mMaxTimeoutTime;
     @NonNull
     private final VerifierController.Injector mInjector;
-    // Record the package name associated with the verification result
-    @NonNull
-    private final String mPackageName;
 
     /**
      * By default, the timeout time is the default timeout duration plus the current time (when
@@ -41,10 +38,8 @@ public final class VerificationStatusTracker {
      * can be extended via {@link #extendTimeRemaining} to the maximum allowed.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
-    public VerificationStatusTracker(@NonNull String packageName,
-            long defaultTimeoutMillis, long maxExtendedTimeoutMillis,
+    public VerificationStatusTracker(long defaultTimeoutMillis, long maxExtendedTimeoutMillis,
             @NonNull VerifierController.Injector injector) {
-        mPackageName = packageName;
         mStartTime = injector.getCurrentTimeMillis();
         mTimeoutTime = mStartTime + defaultTimeoutMillis;
         mMaxTimeoutTime = mStartTime + maxExtendedTimeoutMillis;
@@ -92,10 +87,5 @@ public final class VerificationStatusTracker {
      */
     public boolean isTimeout() {
         return mInjector.getCurrentTimeMillis() >= mTimeoutTime;
-    }
-
-    @NonNull
-    public String getPackageName() {
-        return mPackageName;
     }
 }

@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Active la fonctionnalité Connectivité améliorée."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activer l\'appli Terminal permettant l\'accès au shell local"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Environnement de développement Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Exécuter le terminal Linux sur Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Vérification HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Configurer vérification HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Débogage"</string>
@@ -393,7 +395,7 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Toujours utiliser le GPU pour la composition écran"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simuler espace colorimétrique"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Enable OpenGL traces"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Désact. routage audio USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Désactiver le routage audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Désactiver routage automatique appareils audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Afficher les contours"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afficher les limites, les marges de clip, etc."</string>
@@ -585,7 +587,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Cet ordinateur (interne)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Microphone (interne)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Haut-parleur du socle"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Appareil externe"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Appareil connecté"</string>
@@ -687,10 +688,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activé"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Votre appareil doit être redémarré pour que ce changement prenne effet. Redémarrez-le maintenant ou annulez la modification."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Écouteurs filaires"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Écouteurs"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"Haut-parleur à port USB"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Prise du microphone"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"Microphone USB"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Audio filaire"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Audio par USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Microphone filaire"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Microphone USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Microphone BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Activé"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Désactivé"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Changer de réseau de fournisseur de services"</string>

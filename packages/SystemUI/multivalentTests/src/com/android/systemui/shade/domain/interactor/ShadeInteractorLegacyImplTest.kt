@@ -26,9 +26,9 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
@@ -46,6 +46,7 @@ import org.junit.runner.RunWith
 class ShadeInteractorLegacyImplTest : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
+    val shadeTestUtil = kosmos.shadeTestUtil
     val configurationRepository = kosmos.fakeConfigurationRepository
     val keyguardRepository = kosmos.fakeKeyguardRepository
     val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
@@ -87,7 +88,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
             // WHEN split shade is enabled and QS is expanded
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            shadeTestUtil.setSplitShade(true)
             configurationRepository.onAnyConfigurationChange()
             shadeRepository.setQsExpansion(.5f)
             shadeRepository.setLegacyShadeExpansion(.7f)
@@ -104,7 +105,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
             // WHEN split shade is not enabled and QS is expanded
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             shadeRepository.setQsExpansion(.5f)
             shadeRepository.setLegacyShadeExpansion(1f)
             runCurrent()
@@ -120,7 +121,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
             // WHEN split shade is not enabled and QS is expanded
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             shadeRepository.setQsExpansion(1f)
             shadeRepository.setLegacyShadeExpansion(1f)
             runCurrent()
@@ -136,7 +137,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
             // WHEN split shade is not enabled and QS partly expanded
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             shadeRepository.setQsExpansion(.4f)
             shadeRepository.setLegacyShadeExpansion(1f)
             runCurrent()
@@ -152,7 +153,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
             // WHEN split shade is not enabled and QS collapsed
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             shadeRepository.setQsExpansion(0f)
             shadeRepository.setLegacyShadeExpansion(.6f)
             runCurrent()

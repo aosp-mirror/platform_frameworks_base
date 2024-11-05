@@ -596,10 +596,12 @@ public class AmbientState implements Dumpable {
     }
 
     public void setContentHeight(int contentHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mContentHeight = contentHeight;
     }
 
     public float getContentHeight() {
+        SceneContainerFlag.assertInLegacyMode();
         return mContentHeight;
     }
 

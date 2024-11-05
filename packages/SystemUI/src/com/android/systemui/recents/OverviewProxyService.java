@@ -87,7 +87,6 @@ import com.android.systemui.contextualeducation.GestureType;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -159,8 +158,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
     private final Provider<ShadeInteractor> mShadeInteractor;
-
-    private final KeyboardTouchpadEduStatsInteractor mKeyboardTouchpadEduStatsInteractor;
 
     private final Runnable mConnectionRunnable = () ->
             internalConnectToCurrentUser("runnable: startConnectionToCurrentUser");
@@ -660,8 +657,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             AssistUtils assistUtils,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
-            BroadcastDispatcher broadcastDispatcher,
-            KeyboardTouchpadEduStatsInteractor keyboardTouchpadEduStatsInteractor
+            BroadcastDispatcher broadcastDispatcher
     ) {
         // b/241601880: This component should only be running for primary users or
         // secondaryUsers when visibleBackgroundUsers are supported.
@@ -699,7 +695,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mDisplayTracker = displayTracker;
         mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
         mBroadcastDispatcher = broadcastDispatcher;
-        mKeyboardTouchpadEduStatsInteractor = keyboardTouchpadEduStatsInteractor;
 
         if (!KeyguardWmStateRefactor.isEnabled()) {
             mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
@@ -940,19 +935,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         return isEnabled() && !QuickStepContract.isLegacyMode(mNavBarMode);
     }
 
-    /**
-     * Updates contextual education stats when a gesture is triggered
-     * @param isTrackpadGesture indicates if the gesture is triggered by trackpad
-     * @param gestureType type of gesture triggered
-     */
-    public void updateContextualEduStats(boolean isTrackpadGesture, GestureType gestureType) {
-        if (isTrackpadGesture) {
-            mKeyboardTouchpadEduStatsInteractor.updateShortcutTriggerTime(gestureType);
-        } else {
-            mKeyboardTouchpadEduStatsInteractor.incrementSignalCount(gestureType);
-        }
-    }
-
     public boolean isEnabled() {
         return mIsEnabled;
     }
@@ -975,6 +957,17 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
             mOverviewProxy = null;
             notifyConnectionChanged();
+        }
+    }
+
+    /**
+     * Updates contextual education stats when a gesture is triggered
+     * @param isTrackpadGesture indicates if the gesture is triggered by trackpad
+     * @param gestureType type of gesture triggered
+     */
+    public void updateContextualEduStats(boolean isTrackpadGesture, GestureType gestureType) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).updateContextualEduStats(isTrackpadGesture, gestureType);
         }
     }
 
@@ -1207,6 +1200,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         /** Set override of home button long press duration, touch slop multiplier, and haptic. */
         default void setOverrideHomeButtonLongPress(
                 long override, float slopMultiplier, boolean haptic) {}
+        /** Updates contextual education stats when target gesture type is triggered. */
+        default void updateContextualEduStats(
+                boolean isTrackpadGesture, GestureType gestureType) {}
     }
 
     /**

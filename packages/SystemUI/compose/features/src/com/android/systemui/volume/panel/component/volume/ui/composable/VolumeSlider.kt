@@ -22,6 +22,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -49,6 +51,10 @@ import com.android.compose.PlatformSliderColors
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig
+import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig
+import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderState
 
 @Composable
@@ -59,8 +65,38 @@ fun VolumeSlider(
     onIconTapped: () -> Unit,
     modifier: Modifier = Modifier,
     sliderColors: PlatformSliderColors,
+    hapticsViewModelFactory: SliderHapticsViewModel.Factory?,
 ) {
     val value by valueState(state)
+    val interactionSource = remember { MutableInteractionSource() }
+    val sliderStepSize = 1f / (state.valueRange.endInclusive - state.valueRange.start)
+    val hapticsViewModel: SliderHapticsViewModel? =
+        hapticsViewModelFactory?.let {
+            rememberViewModel(traceName = "SliderHapticsViewModel") {
+                it.create(
+                    interactionSource,
+                    state.valueRange,
+                    Orientation.Horizontal,
+                    SliderHapticFeedbackConfig(
+                        lowerBookendScale = 0.2f,
+                        progressBasedDragMinScale = 0.2f,
+                        progressBasedDragMaxScale = 0.5f,
+                        deltaProgressForDragThreshold = 0f,
+                        additionalVelocityMaxBump = 0.2f,
+                        maxVelocityToScale = 0.1f, /* slider progress(from 0 to 1) per sec */
+                        sliderStepSize = sliderStepSize,
+                    ),
+                    SeekableSliderTrackerConfig(
+                        lowerBookendThreshold = 0f,
+                        upperBookendThreshold = 1f,
+                    ),
+                )
+            }
+        }
+
+    // Perform haptics due to UI composition
+    hapticsViewModel?.onValueChange(value)
+
     PlatformSlider(
         modifier =
             modifier.sysuiResTag(state.label).clearAndSetSemantics {
@@ -94,7 +130,7 @@ fun VolumeSlider(
                     val newValue =
                         (value + targetDirection * state.a11yStep).coerceIn(
                             state.valueRange.start,
-                            state.valueRange.endInclusive
+                            state.valueRange.endInclusive,
                         )
                     onValueChange(newValue)
                     true
@@ -102,16 +138,18 @@ fun VolumeSlider(
             },
         value = value,
         valueRange = state.valueRange,
-        onValueChange = onValueChange,
-        onValueChangeFinished = onValueChangeFinished,
+        onValueChange = { newValue ->
+            hapticsViewModel?.addVelocityDataPoint(newValue)
+            onValueChange(newValue)
+        },
+        onValueChangeFinished = {
+            hapticsViewModel?.onValueChangeEnded()
+            onValueChangeFinished?.invoke()
+        },
         enabled = state.isEnabled,
         icon = {
             state.icon?.let {
-                SliderIcon(
-                    icon = it,
-                    onIconTapped = onIconTapped,
-                    isTappable = state.isMutable,
-                )
+                SliderIcon(icon = it, onIconTapped = onIconTapped, isTappable = state.isMutable)
             }
         },
         colors = sliderColors,
@@ -128,7 +166,8 @@ fun VolumeSlider(
                     disabledMessage = state.disabledMessage,
                 )
             }
-        }
+        },
+        interactionSource = interactionSource,
     )
 }
 
@@ -150,14 +189,14 @@ private fun SliderIcon(
     icon: Icon,
     onIconTapped: () -> Unit,
     isTappable: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val boxModifier =
         if (isTappable) {
                 modifier.clickable(
                     onClick = onIconTapped,
                     interactionSource = null,
-                    indication = null
+                    indication = null,
                 )
             } else {
                 modifier

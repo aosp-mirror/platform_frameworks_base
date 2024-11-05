@@ -51,6 +51,7 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -699,7 +700,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 eq(tInfo), eq(st), eq(ft), eq(callback));
 
         mBackTransitionHandler.onAnimationFinished();
-        final TransitionInfo.Change openToClose = createAppChange(openTaskId, TRANSIT_CLOSE,
+        final TransitionInfo.Change openToClose = createAppChangeFromChange(open, TRANSIT_CLOSE,
                 FLAG_BACK_GESTURE_ANIMATED);
         tInfo2 = createTransitionInfo(TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION, openToClose);
         mBackTransitionHandler.mClosePrepareTransition = mock(IBinder.class);
@@ -776,6 +777,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
         verify(mergeCallback, never()).onTransitionFinished(any());
     }
 
+    @Test
+    public void testBackAnimationControllersRecoversFromBadState() throws RemoteException {
+        // put controller into bad state (initial state but mBackGestureStarted=true)
+        mController.mBackGestureStarted = true;
+        verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY,
+                mDefaultCrossActivityBackAnimation.getRunner());
+    }
+
     private RemoteAnimationTarget[] createAppAnimationTargets(int openTaskId, int closeTaskId) {
         final RemoteAnimationTarget openT = createSingleAnimationTarget(openTaskId,
                 RemoteAnimationTarget.MODE_OPENING);
@@ -804,7 +813,10 @@ public class BackAnimationControllerTest extends ShellTestCase {
         if (taskId != INVALID_TASK_ID) {
             final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
             taskInfo.taskId = taskId;
-            taskInfo.token = new WindowContainerToken(mock(IWindowContainerToken.class));
+            final IWindowContainerToken mockT = mock(IWindowContainerToken.class);
+            Binder binder = new Binder();
+            doReturn(binder).when(mockT).asBinder();
+            taskInfo.token = new WindowContainerToken(mockT);
             change = new TransitionInfo.Change(
                     taskInfo.token, b.build());
             change.setTaskInfo(taskInfo);
@@ -813,6 +825,16 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 null, b.build());
 
         }
+        change.setMode(mode);
+        change.setFlags(flags);
+        return change;
+    }
+
+    private TransitionInfo.Change createAppChangeFromChange(
+            TransitionInfo.Change originalChange, @TransitionInfo.TransitionMode int mode,
+            @TransitionInfo.ChangeFlags int flags) {
+        final TransitionInfo.Change change = new TransitionInfo.Change(
+                originalChange.getTaskInfo().token, originalChange.getLeash());
         change.setMode(mode);
         change.setFlags(flags);
         return change;
@@ -860,15 +882,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     private void doMotionEvent(int actionDown, int coordinate) {
-        doMotionEvent(actionDown, coordinate, 0);
-    }
-
-    private void doMotionEvent(int actionDown, int coordinate, float velocity) {
         mController.onMotionEvent(
                 /* touchX */ coordinate,
                 /* touchY */ coordinate,
-                /* velocityX = */ velocity,
-                /* velocityY = */ velocity,
                 /* keyAction */ actionDown,
                 /* swipeEdge */ BackEvent.EDGE_LEFT);
     }

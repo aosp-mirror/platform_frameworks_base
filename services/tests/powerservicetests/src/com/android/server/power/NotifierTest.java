@@ -54,6 +54,7 @@ import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.util.IntArray;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -381,6 +382,32 @@ public class NotifierTest {
         expectedDisplayInteractivities.put(displayId1, true);
         expectedDisplayInteractivities.put(displayId2, true);
         verify(mInputManagerInternal).setDisplayInteractivities(expectedDisplayInteractivities);
+    }
+
+    @Test
+    public void testOnGroupRemoved_perDisplayWakeByTouchEnabled() {
+        createNotifier();
+        // GIVEN per-display wake by touch is enabled and one display group has been defined
+        when(mPowerManagerFlags.isPerDisplayWakeByTouchEnabled()).thenReturn(true);
+        final int groupId = 313;
+        final int displayId1 = 3113;
+        final int displayId2 = 4114;
+        final int[] displays = new int[]{displayId1, displayId2};
+        when(mDisplayManagerInternal.getDisplayIds()).thenReturn(IntArray.wrap(displays));
+        when(mDisplayManagerInternal.getDisplayIdsForGroup(groupId)).thenReturn(displays);
+        mNotifier.onGroupWakefulnessChangeStarted(
+                groupId, WAKEFULNESS_AWAKE, PowerManager.WAKE_REASON_TAP, /* eventTime= */ 1000);
+        final SparseBooleanArray expectedDisplayInteractivities = new SparseBooleanArray();
+        expectedDisplayInteractivities.put(displayId1, true);
+        expectedDisplayInteractivities.put(displayId2, true);
+        verify(mInputManagerInternal).setDisplayInteractivities(expectedDisplayInteractivities);
+
+        // WHEN display group is removed
+        when(mDisplayManagerInternal.getDisplayIdsByGroupsIds()).thenReturn(new SparseArray<>());
+        mNotifier.onGroupRemoved(groupId);
+
+        // THEN native input manager is informed that displays in that group no longer exist
+        verify(mInputManagerInternal).setDisplayInteractivities(new SparseBooleanArray());
     }
 
     @Test

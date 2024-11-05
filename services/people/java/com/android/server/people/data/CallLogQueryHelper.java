@@ -96,6 +96,8 @@ class CallLogQueryHelper {
         } catch (SecurityException ex) {
             Slog.e(TAG, "Query call log failed: " + ex);
             return false;
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception when querying call log.", e);
         }
         return hasResults;
     }

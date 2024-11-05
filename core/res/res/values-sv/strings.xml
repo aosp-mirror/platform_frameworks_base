@@ -201,8 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jobbprofilen är inte längre tillgänglig på enheten"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"För många försök med lösenord"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratören tillåter inte längre privat bruk av enheten"</string>
-    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privat område har tagits bort"</string>
-    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Din organisation tillåter inte privata områden på den här hanterade enheten."</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privat utrymme har tagits bort"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Din organisation tillåter inte privata utrymmen på den här hanterade enheten."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Enheten hanteras"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisationen hanterar den här enheten och kan övervaka nätverkstrafiken. Tryck om du vill veta mer."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Appar har åtkomst till din plats"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Av"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Alla kalendrar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> stänger av vissa ljud"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Ett internt problem har uppstått i enheten, och det kan hända att problemet kvarstår tills du återställer standardinställningarna."</string>
@@ -2009,8 +2011,8 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Nödsituation"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ställ in ett skärmlås"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ställ in skärmlås"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ställ in ett skärmlås för enheten om du vill använda ditt privata område."</string>
-    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Ange ett skärmlås för enheten om du vill radera privat område"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ställ in ett skärmlås för enheten om du vill använda ditt privata utrymme."</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Ange ett skärmlås för enheten om du vill radera privat utrymme"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen är inte tillgänglig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> är inte tillgängligt just nu."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> är inte tillgänglig"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibrerar vid samtal och aviseringar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Ljudet stängs av för samtal och aviseringar"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systemändringar"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Stör ej"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nytt: Aviseringar döljs av Stör ej"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tryck här om du vill läsa mer och ändra inställningarna."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Stör ej har ändrats"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tryck om du vill se vad som blockeras."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Granska aviseringsinställningarna"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"I Android 13 behöver appar som du installerar behörighet att skicka aviseringar. Tryck om du vill ändra denna behörighet för befintliga appar."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn mig senare"</string>
@@ -2416,10 +2413,10 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Allmän"</string>
     <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Jobbprofil"</string>
-    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privat område"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privat utrymme"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klona"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Allmän"</string>
-    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privat område"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privat utrymme"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Känsligt aviseringsinnehåll dolt"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Av säkerhetsskäl döljs appinnehållet vid skärmdelning"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Skicka och ta emot meddelanden utan ett mobil- eller wifi-nätverk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Öppna Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Så fungerar det"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Väntar …"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfigurera fingeravtryckslås igen"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Det går inte längre att känna igen <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>

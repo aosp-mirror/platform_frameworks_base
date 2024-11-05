@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
-import com.android.app.tracing.coroutines.flow.map
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
@@ -33,6 +32,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 /**
  * Models the UI state for the user actions that the user can perform to navigate to other scenes.

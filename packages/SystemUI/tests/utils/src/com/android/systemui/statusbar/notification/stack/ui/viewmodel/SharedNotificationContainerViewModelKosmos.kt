@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import android.content.applicationContext
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -49,6 +51,8 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.largeScreenHeaderHelper
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
@@ -60,6 +64,8 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         interactor = sharedNotificationContainerInteractor,
         dumpManager = dumpManager,
         applicationScope = applicationCoroutineScope,
+        context = applicationContext,
+        configurationInteractor = configurationInteractor,
         keyguardInteractor = keyguardInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         shadeInteractor = shadeInteractor,
@@ -92,6 +98,8 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
             primaryBouncerToLockscreenTransitionViewModel,
         aodBurnInViewModel = aodBurnInViewModel,
         communalSceneInteractor = communalSceneInteractor,
+        headsUpNotificationInteractor = { headsUpNotificationInteractor },
+        largeScreenHeaderHelperLazy = { largeScreenHeaderHelper },
         unfoldTransitionInteractor = unfoldTransitionInteractor,
     )
 }

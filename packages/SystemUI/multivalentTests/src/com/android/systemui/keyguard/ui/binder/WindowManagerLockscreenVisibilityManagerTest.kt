@@ -25,14 +25,17 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransition
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.wm.shell.keyguard.KeyguardTransitions
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -46,6 +49,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     @Mock private lateinit var keyguardSurfaceBehindAnimator: KeyguardSurfaceBehindParamsApplier
     @Mock
     private lateinit var keyguardDismissTransitionInteractor: KeyguardDismissTransitionInteractor
+    @Mock private lateinit var keyguardTransitions: KeyguardTransitions
 
     @Before
     fun setUp() {
@@ -59,6 +63,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
                 keyguardStateController = keyguardStateController,
                 keyguardSurfaceBehindAnimator = keyguardSurfaceBehindAnimator,
                 keyguardDismissTransitionInteractor = keyguardDismissTransitionInteractor,
+                keyguardTransitions = keyguardTransitions,
             )
     }
 
@@ -108,5 +113,21 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
         underTest.setLockscreenShown(true)
         verify(activityTaskManagerService).setLockScreenShown(true, false)
         verifyNoMoreInteractions(activityTaskManagerService)
+    }
+
+    @Test
+    fun setSurfaceBehindVisibility_goesAwayFirst_andIgnoresSecondCall() {
+        underTest.setLockscreenShown(true)
+        underTest.setSurfaceBehindVisibility(true)
+        verify(activityTaskManagerService).keyguardGoingAway(0)
+
+        underTest.setSurfaceBehindVisibility(true)
+        verifyNoMoreInteractions(keyguardTransitions)
+    }
+
+    @Test
+    fun setSurfaceBehindVisibility_falseSetsLockscreenVisibility() {
+        underTest.setSurfaceBehindVisibility(false)
+        verify(activityTaskManagerService).setLockScreenShown(eq(true), any())
     }
 }

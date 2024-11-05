@@ -16,8 +16,6 @@
 
 package com.android.server.vibrator;
 
-import static android.os.vibrator.Flags.FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -28,6 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -89,17 +88,14 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
-import android.view.flags.Flags;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -168,9 +164,7 @@ public class VibratorManagerServiceTest {
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
-
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private VibratorManagerService.NativeWrapper mNativeWrapperMock;
@@ -800,7 +794,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_CANCEL_BY_APPOPS)
+    @EnableFlags(android.os.vibrator.Flags.FLAG_CANCEL_BY_APPOPS)
     public void vibrate_thenDeniedAppOps_getsCancelled() throws Throwable {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
@@ -894,7 +888,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_ADD_UI_FOR_SOUNDS_FROM_BACKGROUND_USERS)
+    @EnableFlags(android.multiuser.Flags.FLAG_ADD_UI_FOR_SOUNDS_FROM_BACKGROUND_USERS)
     public void vibrate_thenFgUserRequestsMute_getsCancelled() throws Throwable {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
@@ -1331,6 +1325,37 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_VIBRATION_PIPELINE_ENABLED)
+    public void vibrate_withPipelineFlagEnabledAndShortEffect_continuesOngoingEffect()
+            throws Exception {
+        assumeTrue(mVibrationConfig.getVibrationPipelineMaxDurationMs() > 0);
+
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        fakeVibrator.setSupportedPrimitives(
+                VibrationEffect.Composition.PRIMITIVE_CLICK,
+                VibrationEffect.Composition.PRIMITIVE_THUD);
+        fakeVibrator.setPrimitiveDuration(
+                mVibrationConfig.getVibrationPipelineMaxDurationMs() - 1);
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration firstVibration = vibrateWithUid(service, /* uid= */ 123,
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose(), HAPTIC_FEEDBACK_ATTRS);
+        HalVibration secondVibration = vibrateWithUid(service, /* uid= */ 456,
+                VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                        .compose(), HAPTIC_FEEDBACK_ATTRS);
+        secondVibration.waitForEnd();
+
+        assertThat(fakeVibrator.getAllEffectSegments()).hasSize(2);
+        assertThat(firstVibration.getStatus()).isEqualTo(Status.FINISHED);
+        assertThat(secondVibration.getStatus()).isEqualTo(Status.FINISHED);
+    }
+
+    @Test
     public void vibrate_withInputDevices_vibratesInputDevices() throws Exception {
         mockVibrators(1);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
@@ -1512,6 +1537,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @EnableFlags(android.view.flags.Flags.FLAG_SCROLL_FEEDBACK_API)
     public void performHapticFeedback_doesNotRequireVibrateOrBypassPermissions() throws Exception {
         // Deny permissions that would have been required for regular vibrations, and check that
         // the vibration proceed as expected to verify that haptic feedback does not need these
@@ -1520,8 +1546,6 @@ public class VibratorManagerServiceTest {
         denyPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
         denyPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
         denyPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
-        // Flag override to enable the scroll feedack constants to bypass interruption policies.
-        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
         mHapticFeedbackVibrationMap.put(
                 HapticFeedbackConstants.SCROLL_TICK,
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
@@ -1544,6 +1568,10 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @EnableFlags({
+            android.view.flags.Flags.FLAG_SCROLL_FEEDBACK_API,
+            android.os.vibrator.Flags.FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED,
+    })
     public void performHapticFeedbackForInputDevice_doesNotRequireVibrateOrBypassPermissions()
             throws Exception {
         // Deny permissions that would have been required for regular vibrations, and check that
@@ -1553,9 +1581,6 @@ public class VibratorManagerServiceTest {
         denyPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
         denyPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
         denyPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
-        // Flag override to enable the scroll feedback constants to bypass interruption policies.
-        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
-        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
         mHapticFeedbackVibrationMapSourceRotary.put(
                 HapticFeedbackConstants.SCROLL_TICK,
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
@@ -1628,12 +1653,14 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @EnableFlags({
+            android.view.flags.Flags.FLAG_SCROLL_FEEDBACK_API,
+            android.os.vibrator.Flags.FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED,
+    })
     public void performHapticFeedbackForInputDevice_restrictedConstantsWithoutPermission_doesNotVibrate()
             throws Exception {
         // Deny permission to vibrate with restricted constants
         denyPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS);
-        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
-        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
         // Public constant, no permission required
         mHapticFeedbackVibrationMapSourceRotary.put(
                 HapticFeedbackConstants.CONFIRM,
@@ -1697,9 +1724,9 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED)
     public void performHapticFeedbackForInputDevice_restrictedConstantsWithPermission_playsVibration()
             throws Exception {
-        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
         // Grant permission to vibrate with restricted constants
         grantPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS);
         // Public constant, no permission required
@@ -1732,9 +1759,11 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @EnableFlags({
+            android.view.flags.Flags.FLAG_SCROLL_FEEDBACK_API,
+            android.os.vibrator.Flags.FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED,
+    })
     public void performHapticFeedback_doesNotVibrateWhenVibratorInfoNotReady() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
-        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
         denyPermission(android.Manifest.permission.VIBRATE);
         mHapticFeedbackVibrationMap.put(
                 HapticFeedbackConstants.KEYBOARD_TAP,
@@ -1767,9 +1796,11 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @EnableFlags({
+            android.view.flags.Flags.FLAG_SCROLL_FEEDBACK_API,
+            android.os.vibrator.Flags.FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED,
+    })
     public void performHapticFeedback_doesNotVibrateForInvalidConstant() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
-        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
         denyPermission(android.Manifest.permission.VIBRATE);
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
@@ -1791,7 +1822,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    @EnableFlags(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
     public void vibrate_vendorEffectsWithoutPermission_doesNotVibrate() throws Exception {
         // Deny permission to vibrate with vendor effects
         denyPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS);
@@ -1816,7 +1847,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    @EnableFlags(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
     public void vibrate_vendorEffectsWithPermission_successful() throws Exception {
         // Grant permission to vibrate with vendor effects
         grantPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS);
@@ -1904,7 +1935,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    @EnableFlags(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void vibrate_withAdaptiveHaptics_appliesCorrectAdaptiveScales() throws Exception {
         // Keep user settings the same as device default so only adaptive scale is applied.
         setUserSetting(Settings.System.ALARM_VIBRATION_INTENSITY,
@@ -1947,7 +1978,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled({
+    @EnableFlags({
             android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED,
             android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS,
     })
@@ -2217,13 +2248,13 @@ public class VibratorManagerServiceTest {
         assertNotEquals(ExternalVibrationScale.ScaleLevel.SCALE_MUTE, secondScale.scaleLevel);
         verify(firstController).mute();
         verify(secondController, never()).mute();
-        // Set external control called only once.
-        assertEquals(Arrays.asList(false, true),
+        // Set external control called for each vibration independently.
+        assertEquals(Arrays.asList(false, true, false, true),
                 mVibratorProviders.get(1).getExternalControlStates());
 
         mExternalVibratorService.onExternalVibrationStop(secondVibration);
         mExternalVibratorService.onExternalVibrationStop(firstVibration);
-        assertEquals(Arrays.asList(false, true, false),
+        assertEquals(Arrays.asList(false, true, false, true, false),
                 mVibratorProviders.get(1).getExternalControlStates());
 
         verify(firstToken).linkToDeath(any(), eq(0));
@@ -2418,7 +2449,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    @EnableFlags(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void onExternalVibration_withAdaptiveHaptics_returnsCorrectAdaptiveScales() {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL,
@@ -2465,7 +2496,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    @DisableFlags(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void onExternalVibration_withAdaptiveHapticsFlagDisabled_alwaysReturnScaleNone() {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL,
@@ -2585,7 +2616,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_ADD_UI_FOR_SOUNDS_FROM_BACKGROUND_USERS)
+    @EnableFlags(android.multiuser.Flags.FLAG_ADD_UI_FOR_SOUNDS_FROM_BACKGROUND_USERS)
     public void onExternalVibration_thenFgUserRequestsMute_doNotCancelVibration() throws Throwable {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
@@ -3105,9 +3136,20 @@ public class VibratorManagerServiceTest {
         return vibrateWithDevice(service, Context.DEVICE_ID_DEFAULT, effect, attrs);
     }
 
+    private HalVibration vibrateWithUid(VibratorManagerService service, int uid,
+            VibrationEffect effect, VibrationAttributes attrs) {
+        return vibrateWithUidAndDevice(service, uid, Context.DEVICE_ID_DEFAULT,
+                CombinedVibration.createParallel(effect), attrs);
+    }
+
     private HalVibration vibrateWithDevice(VibratorManagerService service, int deviceId,
             CombinedVibration effect, VibrationAttributes attrs) {
-        HalVibration vib = service.vibrateWithPermissionCheck(UID, deviceId, PACKAGE_NAME, effect,
+        return vibrateWithUidAndDevice(service, UID, deviceId, effect, attrs);
+    }
+
+    private HalVibration vibrateWithUidAndDevice(VibratorManagerService service, int uid,
+            int deviceId, CombinedVibration effect, VibrationAttributes attrs) {
+        HalVibration vib = service.vibrateWithPermissionCheck(uid, deviceId, PACKAGE_NAME, effect,
                 attrs, "some reason", service);
         if (vib != null) {
             mPendingVibrations.add(vib);

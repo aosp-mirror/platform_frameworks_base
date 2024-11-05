@@ -38,9 +38,10 @@ import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutoria
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEYBOARD
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_TOUCHPAD
 import com.android.systemui.res.R
+import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** When the scheduler is due, show a notification to launch tutorial */
 @SysUISingleton
@@ -51,6 +52,7 @@ constructor(
     @Application private val context: Context,
     private val tutorialSchedulerInteractor: TutorialSchedulerInteractor,
     private val notificationManager: NotificationManager,
+    private val userTracker: UserTracker,
 ) {
     fun start() {
         backgroundScope.launch {
@@ -85,7 +87,7 @@ constructor(
                 .addExtras(extras)
                 .build()
 
-        notificationManager.notify(TAG, NOTIFICATION_ID, notification)
+        notificationManager.notifyAsUser(TAG, NOTIFICATION_ID, notification, userTracker.userHandle)
     }
 
     private fun createNotificationChannel() {

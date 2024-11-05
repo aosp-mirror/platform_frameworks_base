@@ -148,5 +148,10 @@
     {
       "name": "SystemUIGoogleRobo2RNGTests"
     }
+  ],
+  "imports": [
+    {
+      "path": "cts/tests/tests/multiuser"
+    }
   ]
 }

@@ -1,28 +1,12 @@
 # Ravenwood "policy" file for framework-minus-apex.
 
-# Keep all AIDL interfaces
-class :aidl keepclass
-
-# Keep all feature flag implementations
-class :feature_flags keepclass
-
-# Keep all sysprops generated code implementations
-class :sysprops keepclass
-
-# Keep all resource R classes
-class :r keepclass
-
 # To avoid VerifyError on nano proto files (b/324063814), we rename nano proto classes.
 # Note: The "rename" directive must use slashes (/) as a package name separator.
 rename com/.*/nano/   devicenano/
 rename android/.*/nano/   devicenano/
 
-# Support APIs not available in standard JRE
-class java.io.FileDescriptor keep
-    method getInt$ ()I @com.android.ravenwood.RavenwoodJdkPatch.getInt$
-    method setInt$ (I)V @com.android.ravenwood.RavenwoodJdkPatch.setInt$
-class java.util.LinkedHashMap keep
-    method eldest ()Ljava/util/Map$Entry; @com.android.ravenwood.RavenwoodJdkPatch.eldest
+# StatsD auto-generated
+class com.android.internal.util.FrameworkStatsLog keepclass
 
 # Exported to Mainline modules; cannot use annotations
 class com.android.internal.util.FastXmlSerializer keepclass

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone
 import android.content.applicationContext
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -43,5 +44,6 @@ var Kosmos.statusBarTouchableRegionManager by
             mock<UnlockedScreenOffAnimationController>(),
             primaryBouncerInteractor,
             alternateBouncerInteractor,
+            communalSceneInteractor,
         )
     }

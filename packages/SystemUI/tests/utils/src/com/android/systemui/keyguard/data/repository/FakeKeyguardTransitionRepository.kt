@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.annotation.FloatRange
+import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
@@ -48,13 +49,46 @@ import kotlinx.coroutines.test.runCurrent
  * with OFF -> GONE. Construct with initInLockscreen = false if your test requires this behavior.
  */
 @SysUISingleton
-class FakeKeyguardTransitionRepository(private val initInLockscreen: Boolean = true) :
-    KeyguardTransitionRepository {
+class FakeKeyguardTransitionRepository(
+    private val initInLockscreen: Boolean = true,
+
+    /**
+     * Initial value for [FakeKeyguardTransitionRepository.sendTransitionStepsOnStartTransition].
+     * This needs to be configurable in the constructor since some transitions are triggered on
+     * init, before a test has the chance to set sendTransitionStepsOnStartTransition to false.
+     */
+    private val initiallySendTransitionStepsOnStartTransition: Boolean = true,
+    private val testScope: TestScope,
+) : KeyguardTransitionRepository {
+
+    /**
+     * If true, calls to [startTransition] will automatically emit STARTED, RUNNING, and FINISHED
+     * transition steps from/to the given states.
+     *
+     * [startTransition] is what the From*TransitionInteractors call, so this more closely emulates
+     * the behavior of the real KeyguardTransitionRepository, and reduces the work needed to
+     * manually set up the repository state in each test. For example, setting dreaming=true will
+     * automatically cause FromDreamingTransitionInteractor to call startTransition(DREAMING), and
+     * then we'll send STARTED/RUNNING/FINISHED DREAMING TransitionSteps.
+     *
+     * If your test needs to make assertions at specific points between STARTED/FINISHED, or if it's
+     * difficult to set up all of the conditions to make the transition interactors actually call
+     * startTransition, set this value to false.
+     */
+    var sendTransitionStepsOnStartTransition = initiallySendTransitionStepsOnStartTransition
+
     private val _transitions =
         MutableSharedFlow<TransitionStep>(replay = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val transitions: SharedFlow<TransitionStep> = _transitions
 
-    @Inject constructor() : this(initInLockscreen = true)
+    @Inject
+    constructor(
+        testScope: TestScope
+    ) : this(
+        initInLockscreen = true,
+        initiallySendTransitionStepsOnStartTransition = true,
+        testScope
+    )
 
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
         MutableStateFlow(
@@ -66,6 +100,13 @@ class FakeKeyguardTransitionRepository(private val initInLockscreen: Boolean = t
             )
         )
     override var currentTransitionInfoInternal = _currentTransitionInfo.asStateFlow()
+    override var currentTransitionInfo =
+        TransitionInfo(
+            ownerName = "",
+            from = KeyguardState.OFF,
+            to = KeyguardState.LOCKSCREEN,
+            animator = null,
+        )
 
     init {
         // Seed with a FINISHED transition in OFF, same as the real repository.
@@ -146,6 +187,20 @@ class FakeKeyguardTransitionRepository(private val initInLockscreen: Boolean = t
         testScheduler: TestCoroutineScheduler,
         throughTransitionState: TransitionState = TransitionState.FINISHED,
     ) {
+        val lastStep = _transitions.replayCache.lastOrNull()
+        if (lastStep != null && lastStep.transitionState != TransitionState.FINISHED) {
+            sendTransitionStep(
+                step =
+                TransitionStep(
+                    transitionState = TransitionState.CANCELED,
+                    from = lastStep.from,
+                    to = lastStep.to,
+                    value = 0f,
+                )
+            )
+            testScheduler.runCurrent()
+        }
+
         sendTransitionStep(
             step =
                 TransitionStep(
@@ -239,8 +294,13 @@ class FakeKeyguardTransitionRepository(private val initInLockscreen: Boolean = t
         validateStep: Boolean = true,
     ) {
         if (step.transitionState == TransitionState.STARTED) {
-            _currentTransitionInfo.value =
-                TransitionInfo(from = step.from, to = step.to, animator = null, ownerName = "")
+            if (transitionRaceCondition()) {
+                currentTransitionInfo =
+                    TransitionInfo(from = step.from, to = step.to, animator = null, ownerName = "")
+            } else {
+                _currentTransitionInfo.value =
+                    TransitionInfo(from = step.from, to = step.to, animator = null, ownerName = "")
+            }
         }
 
         _transitions.replayCache.last().let { lastStep ->
@@ -286,7 +346,16 @@ class FakeKeyguardTransitionRepository(private val initInLockscreen: Boolean = t
     }
 
     override suspend fun startTransition(info: TransitionInfo): UUID? {
-        _currentTransitionInfo.value = info
+        if (transitionRaceCondition()) {
+            currentTransitionInfo = info
+        } else {
+            _currentTransitionInfo.value = info
+        }
+
+        if (sendTransitionStepsOnStartTransition) {
+            sendTransitionSteps(from = info.from, to = info.to, testScope = testScope)
+        }
+
         return if (info.animator == null) UUID.randomUUID() else null
     }
 

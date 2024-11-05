@@ -51,7 +51,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -1632,6 +1631,8 @@ public class TransitionTests extends WindowTestsBase {
         transition.collect(taskA);
         transition.setTransientLaunch(recent, taskA);
         taskRecent.moveToFront("move-recent-to-front");
+        recent.setVisibility(true);
+        recent.setState(ActivityRecord.State.RESUMED, "test");
 
         // During collecting and playing, the recent is on top so it is visible naturally.
         // While B needs isTransientVisible to keep visibility because it is occluded by recents.
@@ -1644,15 +1645,21 @@ public class TransitionTests extends WindowTestsBase {
 
         // Switch to another task. For example, use gesture navigation to switch tasks.
         taskB.moveToFront("move-b-to-front");
+        appB.setVisibility(true);
         // The previous app (taskA) should be paused first so it loses transient visible. Because
         // visually it is taskA -> taskB, the pause -> resume order should be the same.
         assertFalse(controller.isTransientVisible(taskA));
-        // Keep the recent visible so there won't be 2 activities pausing at the same time. It is
-        // to avoid the latency to resume the current top, i.e. appB.
-        assertTrue(controller.isTransientVisible(taskRecent));
-        // The recent is paused after the transient transition is finished.
-        controller.finishTransition(ActionChain.testFinish(transition));
+        // The recent is occluded by appB.
         assertFalse(controller.isTransientVisible(taskRecent));
+        // Active transient launch won't be paused if the transition is not finished. It is to
+        // avoid the latency to resume the current top (appB) by waiting for both recent and appA
+        // to complete pause.
+        assertEquals(recent, taskRecent.getResumedActivity());
+        assertFalse(taskRecent.startPausing(false /* uiSleeping */, appB /* resuming */, "test"));
+        // ActivityRecord#makeInvisible will add the invisible recent to the stopping list.
+        // So when the transition finished, the recent can still be notified to pause and stop.
+        mDisplayContent.ensureActivitiesVisible(null /* starting */, true /* notifyClients */);
+        assertTrue(mSupervisor.mStoppingActivities.contains(recent));
     }
 
     @Test
@@ -2354,6 +2361,11 @@ public class TransitionTests extends WindowTestsBase {
         // ChangeInfo#mCommonAncestor should be set after reparent.
         final Transition.ChangeInfo change = transition.mChanges.get(activity);
         assertEquals(newParent.getDisplayArea(), change.mCommonAncestor);
+
+        // WindowContainer#onDisplayChanged should collect the moved task.
+        final DisplayContent newDisplay = createNewDisplay();
+        newParent.reparent(newDisplay.getDefaultTaskDisplayArea(), true /* onTop */);
+        assertTrue(transition.mParticipants.contains(newParent));
     }
 
     @Test
@@ -2878,17 +2890,14 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testTransitionsTriggerPerformanceHints() {
-        final boolean explicitRefreshRateHints = explicitRefreshRateHints();
         final var session = new SystemPerformanceHinter.HighPerfSession[1];
-        if (explicitRefreshRateHints) {
-            final SystemPerformanceHinter perfHinter = mWm.mSystemPerformanceHinter;
-            spyOn(perfHinter);
-            doAnswer(invocation -> {
-                session[0] = (SystemPerformanceHinter.HighPerfSession) invocation.callRealMethod();
-                spyOn(session[0]);
-                return session[0];
-            }).when(perfHinter).createSession(anyInt(), anyInt(), anyString());
-        }
+        final SystemPerformanceHinter perfHinter = mWm.mSystemPerformanceHinter;
+        spyOn(perfHinter);
+        doAnswer(invocation -> {
+            session[0] = (SystemPerformanceHinter.HighPerfSession) invocation.callRealMethod();
+            spyOn(session[0]);
+            return session[0];
+        }).when(perfHinter).createSession(anyInt(), anyInt(), anyString());
         final TransitionController controller = mDisplayContent.mTransitionController;
         final TestTransitionPlayer player = registerTestTransitionPlayer();
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
@@ -2900,15 +2909,11 @@ public class TransitionTests extends WindowTestsBase {
         player.start();
 
         verify(mDisplayContent).enableHighPerfTransition(true);
-        if (explicitRefreshRateHints) {
-            verify(session[0]).start();
-        }
+        verify(session[0]).start();
 
         player.finish();
         verify(mDisplayContent).enableHighPerfTransition(false);
-        if (explicitRefreshRateHints) {
-            verify(session[0]).close();
-        }
+        verify(session[0]).close();
     }
 
     @Test
@@ -2933,6 +2938,11 @@ public class TransitionTests extends WindowTestsBase {
 
         controller.requestStartTransition(transit, task, null, null);
         player.start();
+        // always include config-at-end activity since it is considered "independent" due to
+        // changing at a different time.
+        assertTrue(player.mLastReady.getChanges().stream()
+                .anyMatch((change -> change.getActivityComponent() != null
+                        && (change.getFlags() & TransitionInfo.FLAG_CONFIG_AT_END) != 0)));
         assertTrue(activity.isConfigurationDispatchPaused());
         player.finish();
         assertFalse(activity.isConfigurationDispatchPaused());
@@ -2962,6 +2972,11 @@ public class TransitionTests extends WindowTestsBase {
 
         controller.requestStartTransition(transit, task, null, null);
         player.start();
+        // always include config-at-end activity since it is considered "independent" due to
+        // changing at a different time.
+        assertTrue(player.mLastReady.getChanges().stream()
+                .anyMatch((change -> change.getActivityComponent() != null
+                        && (change.getFlags() & TransitionInfo.FLAG_CONFIG_AT_END) != 0)));
         assertTrue(activity.isConfigurationDispatchPaused());
         player.finish();
         assertFalse(activity.isConfigurationDispatchPaused());

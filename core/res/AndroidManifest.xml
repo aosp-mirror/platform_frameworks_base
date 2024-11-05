@@ -155,6 +155,7 @@
 
     <protected-broadcast android:name="android.bluetooth.intent.DISCOVERABLE_TIMEOUT" />
     <protected-broadcast android:name="android.bluetooth.action.AUTO_ON_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.SCAN_MODE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
@@ -240,6 +241,8 @@
     <protected-broadcast
         android:name="android.bluetooth.avrcp-controller.profile.action.FOLDER_LIST" />
     <protected-broadcast
+        android:name="android.bluetooth.avrcp-controller.profile.action.PLAYER_SETTING" />
+    <protected-broadcast
         android:name="android.bluetooth.avrcp-controller.profile.action.TRACK_EVENT" />
     <protected-broadcast
         android:name="android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED" />
@@ -266,6 +269,7 @@
     <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.HAP_CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.HAP_DEVICE_AVAILABLE" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_ACTIVE_DEVICE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONF_CHANGED" />
@@ -845,6 +849,10 @@
     <protected-broadcast android:name="android.intent.action.MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED" />
     <protected-broadcast android:name="com.android.uwb.uwbcountrycode.GEOCODE_RETRY" />
     <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
+    <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_LOADED" />
+    <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_UNLOADED" />
+    <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_START_NON_EMERGENCY_SESSION" />
+
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -1487,8 +1495,8 @@
             android:description="@string/permdesc_readBasicPhoneState"
             android:protectionLevel="normal" />
 
-    <!-- Allows read access to the device's phone number(s). This is a subset of the capabilities
-         granted by {@link #READ_PHONE_STATE} but is exposed to instant applications.
+    <!-- Allows read access to the device's phone number(s),
+         which is exposed to instant applications.
          <p>Protection level: dangerous-->
     <permission android:name="android.permission.READ_PHONE_NUMBERS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -4098,6 +4106,24 @@
     <permission android:name="android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES"
                 android:protectionLevel="signature|installer" />
     <uses-permission android:name="android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES" />
+
+    <!-- Allows an application to toggle the device's advanced protection mode status.
+        @FlaggedApi("android.security.aapm_api")
+        @SystemApi
+        @hide -->
+    <permission android:name="android.permission.SET_ADVANCED_PROTECTION_MODE"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.security.aapm_api"/>
+    <uses-permission android:name="android.permission.SET_ADVANCED_PROTECTION_MODE"
+        android:featureFlag="android.security.aapm_api"/>
+
+    <!-- Allows an application to query the device's advanced protection mode status.
+        @FlaggedApi("android.security.aapm_api") -->
+    <permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"
+        android:protectionLevel="normal"
+        android:featureFlag="android.security.aapm_api"/>
+    <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"
+        android:featureFlag="android.security.aapm_api"/>
 
     <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
     <permission android:name="android.permission.PROVISION_DEMO_DEVICE"
@@ -6997,7 +7023,6 @@
     <!-- Allows an application to set the advanced features on BiometricDialog (SystemUI), including
          logo, logo description, and content view with more options button.
          <p>Not for use by third-party applications.
-         @FlaggedApi("android.hardware.biometrics.custom_biometric_prompt")
     -->
     <permission android:name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED"
                 android:protectionLevel="signature|privileged" />
@@ -8439,6 +8464,14 @@
     <permission android:name="android.permission.SETUP_FSVERITY"
                 android:protectionLevel="signature|privileged"/>
 
+    <!-- Allows app to enter trade-in-mode.
+        <p>Protection level: signature|privileged
+        @hide
+    -->
+    <permission android:name="android.permission.ENTER_TRADE_IN_MODE"
+                android:protectionLevel="signature|privileged"
+                android:featureFlag="com.android.tradeinmode.flags.enable_trade_in_mode" />
+
     <!--
         @TestApi
         Signature permission reserved for testing. This should never be used to
@@ -8450,6 +8483,27 @@
     <permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE"
                 android:protectionLevel="signature"/>
 
+    <!--
+        @SystemApi
+        @FlaggedApi("android.media.tv.flags.media_quality_fw")
+        Allows an application to access its picture profile from the media quality database.
+        <p> Protection level: signature|privileged|vendor privileged
+        @hide
+    -->
+    <permission android:name="android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE"
+                android:protectionLevel="signature|privileged|vendorPrivileged"
+                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
+
+    <!--
+        @SystemApi
+        @FlaggedApi("android.media.tv.flags.media_quality_fw")
+        Allows an application to access its sound profile from the media quality database.
+        <p> Protection level: signature|privileged|vendor privileged
+        @hide
+    -->
+    <permission android:name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE"
+                android:protectionLevel="signature|privileged|vendorPrivileged"
+                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
     <!-- @SystemApi
         @FlaggedApi("android.content.pm.verification_service")
         Allows app to be the verification agent to verify packages.
@@ -8472,6 +8526,34 @@
     <permission android:name="android.permission.BIND_VERIFICATION_AGENT"
         android:protectionLevel="internal"
         android:featureFlag="android.content.pm.verification_service" />
+
+    <!--
+        This permission allows the system to receive PACKAGE_CHANGED broadcasts when the component
+        state of a non-exported component has been changed.
+        <p>Not for use by third-party applications. </p>
+        <p>Protection level: internal
+        @hide
+    -->
+    <permission
+        android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
+        android:protectionLevel="internal"
+        android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
+
+    <uses-permission
+        android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
+        android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
+
+    <!-- @SystemApi
+        @FlaggedApi("android.media.tv.flags.kids_mode_tvdb_sharing")
+        This permission is required when accessing information related to
+        singleUser-ed TIS session.
+        <p>This should only be used by OEM.
+        <p>Protection level: signature|privileged|vendorPrivileged
+        @hide
+    -->
+    <permission android:name="android.permission.SINGLE_USER_TIS_ACCESS"
+        android:protectionLevel="signature|privileged|vendorPrivileged"
+        android:featureFlag="android.media.tv.flags.kids_mode_tvdb_sharing"/>
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

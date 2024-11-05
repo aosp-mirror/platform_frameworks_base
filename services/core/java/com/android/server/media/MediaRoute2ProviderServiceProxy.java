@@ -96,7 +96,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
             @NonNull ComponentName componentName,
             boolean isSelfScanOnlyProvider,
             int userId) {
-        super(componentName);
+        super(componentName, /* isSystemRouteProvider= */ false);
         mContext = Objects.requireNonNull(context, "Context must not be null.");
         mRequestIdToSessionCreationRequest = new LongSparseArray<>();
         mSessionOriginalIdToTransferRequest = new HashMap<>();

@@ -13,7 +13,6 @@
  */
 package com.android.systemui.plugins.clocks
 
-import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
@@ -29,6 +28,7 @@ import com.android.systemui.plugins.annotations.SimpleProperty
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
+import org.json.JSONArray
 import org.json.JSONObject
 
 /** Identifies a clock design */
@@ -62,7 +62,7 @@ interface ClockProvider {
 
     @ProtectedReturn("return new ClockPickerConfig(\"\", \"\", \"\", null);")
     /** Settings configuration parameters for the clock */
-    fun getClockPickerConfig(id: ClockId): ClockPickerConfig
+    fun getClockPickerConfig(settings: ClockSettings): ClockPickerConfig
 }
 
 /** Interface for controlling an active clock */
@@ -85,7 +85,7 @@ interface ClockController {
     val events: ClockEvents
 
     /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
-    fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float)
+    fun initialize(isDarkTheme: Boolean, dozeFraction: Float, foldFraction: Float)
 
     /** Optional method for dumping debug information */
     fun dump(pw: PrintWriter)
@@ -106,6 +106,10 @@ interface ClockFaceController {
     @get:SimpleProperty
     /** Determines the way the hosting app should behave when rendering this clock face */
     val config: ClockFaceConfig
+
+    @get:SimpleProperty
+    /** Current theme information the clock is using */
+    val theme: ThemeConfig
 
     @get:SimpleProperty
     /** Events specific to this clock face */
@@ -179,7 +183,7 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
 interface ClockEvents {
     @get:ProtectedReturn("return false;")
     /** Set to enable or disable swipe interaction */
-    var isReactiveTouchInteractionEnabled: Boolean
+    var isReactiveTouchInteractionEnabled: Boolean // TODO(b/364664388): Remove/Rename
 
     /** Call whenever timezone changes */
     fun onTimeZoneChanged(timeZone: TimeZone)
@@ -189,12 +193,6 @@ interface ClockEvents {
 
     /** Call whenever the locale changes */
     fun onLocaleChanged(locale: Locale)
-
-    /** Call whenever the color palette should update */
-    fun onColorPaletteChanged(resources: Resources)
-
-    /** Call if the seed color has changed and should be updated */
-    fun onSeedColorChanged(seedColor: Int?)
 
     /** Call whenever the weather data should update */
     fun onWeatherDataChanged(data: WeatherData)
@@ -206,17 +204,63 @@ interface ClockEvents {
     fun onZenDataChanged(data: ZenData)
 
     /** Update reactive axes for this clock */
-    fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>)
+    fun onFontAxesChanged(axes: List<ClockFontAxisSetting>)
 }
 
 /** Axis setting value for a clock */
-data class ClockReactiveSetting(
-    /** Axis key; matches ClockReactiveAxis.key */
+data class ClockFontAxisSetting(
+    /** Axis key; matches ClockFontAxis.key */
     val key: String,
 
     /** Value to set this axis to */
     val value: Float,
-)
+) {
+    companion object {
+        private val KEY_AXIS_KEY = "key"
+        private val KEY_AXIS_VALUE = "value"
+
+        fun toJson(setting: ClockFontAxisSetting): JSONObject {
+            return JSONObject().apply {
+                put(KEY_AXIS_KEY, setting.key)
+                put(KEY_AXIS_VALUE, setting.value)
+            }
+        }
+
+        fun toJson(settings: List<ClockFontAxisSetting>): JSONArray {
+            return JSONArray().apply {
+                for (axis in settings) {
+                    put(toJson(axis))
+                }
+            }
+        }
+
+        fun fromJson(jsonObj: JSONObject): ClockFontAxisSetting {
+            return ClockFontAxisSetting(
+                key = jsonObj.getString(KEY_AXIS_KEY),
+                value = jsonObj.getDouble(KEY_AXIS_VALUE).toFloat(),
+            )
+        }
+
+        fun fromJson(jsonArray: JSONArray): List<ClockFontAxisSetting> {
+            val result = mutableListOf<ClockFontAxisSetting>()
+            for (i in 0..jsonArray.length() - 1) {
+                val obj = jsonArray.getJSONObject(i)
+                if (obj == null) continue
+                result.add(fromJson(obj))
+            }
+            return result
+        }
+
+        fun toFVar(settings: List<ClockFontAxisSetting>): String {
+            val sb = StringBuilder()
+            for (axis in settings) {
+                if (sb.length > 0) sb.append(", ")
+                sb.append("'${axis.key}' ${axis.value.toInt()}")
+            }
+            return sb.toString()
+        }
+    }
+}
 
 /** Methods which trigger various clock animations */
 @ProtectedInterface
@@ -269,11 +313,13 @@ interface ClockFaceEvents {
     fun onTimeTick()
 
     /**
-     * Region Darkness specific to the clock face.
-     * - isRegionDark = dark theme -> clock should be light
-     * - !isRegionDark = light theme -> clock should be dark
+     * Call whenever the theme or seedColor is updated
+     *
+     * Theme can be specific to the clock face.
+     * - isDarkTheme -> clock should be light
+     * - !isDarkTheme -> clock should be dark
      */
-    fun onRegionDarknessChanged(isRegionDark: Boolean)
+    fun onThemeChanged(theme: ThemeConfig)
 
     /**
      * Call whenever font settings change. Pass in a target font size in pixels. The specific clock
@@ -293,6 +339,8 @@ interface ClockFaceEvents {
     /** Called to notify the clock about its display. */
     fun onSecondaryDisplayChanged(onSecondaryDisplay: Boolean)
 }
+
+data class ThemeConfig(val isDarkTheme: Boolean, val seedColor: Int?)
 
 /** Tick rates for clocks */
 enum class ClockTickRate(val value: Int) {
@@ -321,15 +369,12 @@ constructor(
     /** True if the clock will react to tone changes in the seed color */
     val isReactiveToTone: Boolean = true,
 
-    /** True if the clock is capable of changing style in reaction to touches */
-    val isReactiveToTouch: Boolean = false,
-
     /** Font axes that can be modified on this clock */
-    val axes: List<ClockReactiveAxis> = listOf(),
+    val axes: List<ClockFontAxis> = listOf(),
 )
 
 /** Represents an Axis that can be modified */
-data class ClockReactiveAxis(
+data class ClockFontAxis(
     /** Axis key, not user renderable */
     val key: String,
 
@@ -350,15 +395,32 @@ data class ClockReactiveAxis(
 
     /** Description of the axis */
     val description: String,
-)
+) {
+    fun toSetting() = ClockFontAxisSetting(key, currentValue)
+
+    companion object {
+        fun merge(
+            fontAxes: List<ClockFontAxis>,
+            axisSettings: List<ClockFontAxisSetting>,
+        ): List<ClockFontAxis> {
+            val result = mutableListOf<ClockFontAxis>()
+            for (axis in fontAxes) {
+                val setting = axisSettings.firstOrNull { axis.key == it.key }
+                val output = setting?.let { axis.copy(currentValue = it.value) } ?: axis
+                result.add(output)
+            }
+            return result
+        }
+    }
+}
 
 /** Axis user interaction modes */
 enum class AxisType {
-    /** Boolean toggle. Swaps between minValue & maxValue */
-    Toggle,
+    /** Continuous range between minValue & maxValue. */
+    Float,
 
-    /** Continuous slider between minValue & maxValue */
-    Slider,
+    /** Only minValue & maxValue are valid. No intermediate values between them are allowed. */
+    Boolean,
 }
 
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
@@ -406,7 +468,7 @@ data class ClockFaceConfig(
 data class ClockSettings(
     val clockId: ClockId? = null,
     val seedColor: Int? = null,
-    val axes: List<ClockReactiveSetting>? = null,
+    val axes: List<ClockFontAxisSetting> = listOf(),
 ) {
     // Exclude metadata from equality checks
     var metadata: JSONObject = JSONObject()
@@ -415,38 +477,24 @@ data class ClockSettings(
         private val KEY_CLOCK_ID = "clockId"
         private val KEY_SEED_COLOR = "seedColor"
         private val KEY_METADATA = "metadata"
+        private val KEY_AXIS_LIST = "axes"
 
-        fun serialize(setting: ClockSettings?): String {
-            if (setting == null) {
-                return ""
+        fun toJson(setting: ClockSettings): JSONObject {
+            return JSONObject().apply {
+                put(KEY_CLOCK_ID, setting.clockId)
+                put(KEY_SEED_COLOR, setting.seedColor)
+                put(KEY_METADATA, setting.metadata)
+                put(KEY_AXIS_LIST, ClockFontAxisSetting.toJson(setting.axes))
             }
-
-            // TODO(b/364673977): Serialize axes
-
-            return JSONObject()
-                .put(KEY_CLOCK_ID, setting.clockId)
-                .put(KEY_SEED_COLOR, setting.seedColor)
-                .put(KEY_METADATA, setting.metadata)
-                .toString()
         }
 
-        fun deserialize(jsonStr: String?): ClockSettings? {
-            if (jsonStr.isNullOrEmpty()) {
-                return null
+        fun fromJson(json: JSONObject): ClockSettings {
+            val clockId = if (!json.isNull(KEY_CLOCK_ID)) json.getString(KEY_CLOCK_ID) else null
+            val seedColor = if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null
+            val axisList = json.optJSONArray(KEY_AXIS_LIST)?.let(ClockFontAxisSetting::fromJson)
+            return ClockSettings(clockId, seedColor, axisList ?: listOf()).apply {
+                metadata = json.optJSONObject(KEY_METADATA) ?: JSONObject()
             }
-
-            // TODO(b/364673977): Deserialize axes
-
-            val json = JSONObject(jsonStr)
-            val result =
-                ClockSettings(
-                    if (!json.isNull(KEY_CLOCK_ID)) json.getString(KEY_CLOCK_ID) else null,
-                    if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null,
-                )
-            if (!json.isNull(KEY_METADATA)) {
-                result.metadata = json.getJSONObject(KEY_METADATA)
-            }
-            return result
         }
     }
 }

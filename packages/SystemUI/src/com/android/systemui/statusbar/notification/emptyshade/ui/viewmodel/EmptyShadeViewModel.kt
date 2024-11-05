@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel
 
 import android.content.Context
 import android.icu.text.MessageFormat
-import com.android.app.tracing.coroutines.flow.flowOn
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.modes.shared.ModesUi
@@ -40,6 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 /**

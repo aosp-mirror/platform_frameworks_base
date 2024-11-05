@@ -23,18 +23,16 @@ import android.view.Display
 import android.view.DisplayInfo
 import android.view.InputDevice
 import androidx.test.core.app.ApplicationProvider
-import org.junit.After
-import org.junit.Assert.assertNotNull
+import com.android.test.input.MockInputManagerRule
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoJUnitRunner
 
 /**
@@ -54,32 +52,20 @@ class InputManagerTest {
     }
 
     @get:Rule
-    val rule = MockitoJUnit.rule()!!
+    val inputManagerRule = MockInputManagerRule()
 
     private lateinit var devicesChangedListener: IInputDevicesChangedListener
     private val deviceGenerationMap = mutableMapOf<Int /*deviceId*/, Int /*generation*/>()
     private lateinit var context: Context
     private lateinit var inputManager: InputManager
 
-    @Mock
-    private lateinit var iInputManager: IInputManager
-    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
-
     @Before
     fun setUp() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         inputManager = InputManager(context)
         `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
-        `when`(iInputManager.inputDeviceIds).then {
+        `when`(inputManagerRule.mock.inputDeviceIds).then {
             deviceGenerationMap.keys.toIntArray()
-        }
-    }
-
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
         }
     }
 
@@ -92,7 +78,7 @@ class InputManagerTest {
             ?: throw IllegalArgumentException("Device $deviceId was never added!")
         deviceGenerationMap[deviceId] = generation
 
-        `when`(iInputManager.getInputDevice(deviceId))
+        `when`(inputManagerRule.mock.getInputDevice(deviceId))
             .thenReturn(createInputDevice(deviceId, associatedDisplayId, usiVersion, generation))
         val list = deviceGenerationMap.flatMap { listOf(it.key, it.value) }
         if (::devicesChangedListener.isInitialized) {
@@ -125,7 +111,7 @@ class InputManagerTest {
     fun testUsiVersionFallBackToDisplayConfig() {
         addInputDevice(DEVICE_ID, Display.DEFAULT_DISPLAY, null)
 
-        `when`(iInputManager.getHostUsiVersionFromDisplayConfig(eq(42)))
+        `when`(inputManagerRule.mock.getHostUsiVersionFromDisplayConfig(eq(42)))
             .thenReturn(HostUsiVersion(9, 8))
         val usiVersion = inputManager.getHostUsiVersion(createDisplay(42))
         assertEquals(HostUsiVersion(9, 8), usiVersion)

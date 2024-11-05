@@ -23,12 +23,8 @@
 #include <string>
 
 #include "android-base/stringprintf.h"
-#ifdef __linux__
 #include "binder/Parcel.h"
-#endif
 #include "utils/String8.h"
-
-#include "android-base/mapped_file.h"
 
 #define LOG_WINDOW(...)
 
@@ -84,11 +80,9 @@ public:
     ~CursorWindow();
 
     static status_t create(const String8& name, size_t size, CursorWindow** outCursorWindow);
-#ifdef __linux__
     static status_t createFromParcel(Parcel* parcel, CursorWindow** outCursorWindow);
 
     status_t writeToParcel(Parcel* parcel);
-#endif
 
     inline String8 name() { return mName; }
     inline size_t size() { return mSize; }
@@ -155,8 +149,6 @@ private:
     String8 mName;
     int mAshmemFd = -1;
     void* mData = nullptr;
-    std::unique_ptr<android::base::MappedFile> mMappedFile;
-
     /**
      * Pointer to the first FieldSlot, used to optimize the extremely
      * hot code path of getFieldSlot().

@@ -34,9 +34,9 @@ import android.graphics.drawable.Drawable;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.service.quicksettings.Tile;
-import android.testing.UiThreadTest;
 import android.widget.ImageView;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 

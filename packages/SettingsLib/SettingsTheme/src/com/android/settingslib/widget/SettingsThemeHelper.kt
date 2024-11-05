@@ -18,7 +18,6 @@ package com.android.settingslib.widget
 
 import android.content.Context
 import android.os.Build
-import android.os.SystemProperties
 
 object SettingsThemeHelper {
     private const val IS_EXPRESSIVE_DESIGN_ENABLED = "is_expressive_design_enabled"
@@ -50,8 +49,7 @@ object SettingsThemeHelper {
         expressiveThemeState =
             if (
                 (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) &&
-                    (SystemProperties.getBoolean(IS_EXPRESSIVE_DESIGN_ENABLED, false) ||
-                        getPropBoolean(context, IS_EXPRESSIVE_DESIGN_ENABLED, false))
+                        getPropBoolean(context, IS_EXPRESSIVE_DESIGN_ENABLED, false)
             ) {
                 ExpressiveThemeState.ENABLED
             } else {

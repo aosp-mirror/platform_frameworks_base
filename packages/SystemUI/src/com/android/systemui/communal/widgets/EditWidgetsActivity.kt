@@ -27,14 +27,12 @@ import android.view.IWindowManager
 import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags.communalEditWidgetsActivityFinishFix
@@ -51,9 +49,10 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** An Activity for editing the widgets that appear in hub mode. */
 class EditWidgetsActivity
@@ -64,12 +63,15 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val widgetConfiguratorFactory: WidgetConfigurationController.Factory,
     private val widgetSection: CommunalAppWidgetSection,
+    private val userTracker: UserTracker,
     @CommunalLog logBuffer: LogBuffer,
 ) : ComponentActivity() {
     companion object {
         private const val TAG = "EditWidgetsActivity"
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
         const val EXTRA_OPEN_WIDGET_PICKER_ON_START = "open_widget_picker_on_start"
+
+        private const val REQUEST_CODE_WIDGET_PICKER = 200
     }
 
     /**
@@ -110,7 +112,7 @@ constructor(
                 object : ActivityLifecycleCallbacks {
                     override fun onActivityCreated(
                         activity: Activity,
-                        savedInstanceState: Bundle?
+                        savedInstanceState: Bundle?,
                     ) {
                         waitingForResult =
                             savedInstanceState?.getBoolean(STATE_EXTRA_IS_WAITING_FOR_RESULT)
@@ -172,41 +174,6 @@ constructor(
         if (communalEditWidgetsActivityFinishFix()) ActivityControllerImpl(this)
         else NopActivityController()
 
-    private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
-        registerForActivityResult(StartActivityForResult()) { result ->
-            when (result.resultCode) {
-                RESULT_OK -> {
-                    uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_WIDGET_PICKER_SHOWN)
-
-                    result.data?.let { intent ->
-                        val isPendingWidgetDrag =
-                            intent.getBooleanExtra(EXTRA_IS_PENDING_WIDGET_DRAG, false)
-                        // Nothing to do when a widget is being dragged & dropped. The drop
-                        // target in the communal grid will receive the widget to be added (if
-                        // the user drops it over).
-                        if (!isPendingWidgetDrag) {
-                            val (componentName, user) = getWidgetExtraFromIntent(intent)
-                            if (componentName != null && user != null) {
-                                // Add widget at the end.
-                                communalViewModel.onAddWidget(
-                                    componentName,
-                                    user,
-                                    configurator = widgetConfigurator,
-                                )
-                            } else {
-                                run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
-                            }
-                        }
-                    } ?: run { Log.w(TAG, "No data in result.") }
-                }
-                else ->
-                    Log.w(
-                        TAG,
-                        "Failed to receive result from widget picker, code=${result.resultCode}"
-                    )
-            }
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -226,8 +193,7 @@ constructor(
             PlatformTheme {
                 Box(
                     modifier =
-                        Modifier.fillMaxSize()
-                            .background(LocalAndroidColorScheme.current.surfaceDim),
+                        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceDim)
                 ) {
                     CommunalHub(
                         viewModel = communalViewModel,
@@ -274,7 +240,13 @@ constructor(
 
     private fun onOpenWidgetPicker() {
         lifecycleScope.launch {
-            communalViewModel.onOpenWidgetPicker(resources, addWidgetActivityLauncher)
+            communalViewModel.onOpenWidgetPicker(resources) { intent: Intent ->
+                startActivityForResultAsUser(
+                    intent,
+                    REQUEST_CODE_WIDGET_PICKER,
+                    userTracker.userHandle,
+                )
+            }
         }
     }
 
@@ -285,7 +257,7 @@ constructor(
             communalViewModel.changeScene(
                 scene = CommunalScenes.Communal,
                 loggingReason = "edit mode closing",
-                transitionKey = CommunalTransitionKeys.FromEditMode
+                transitionKey = CommunalTransitionKeys.FromEditMode,
             )
 
             // Wait for the current scene to be idle on communal.
@@ -309,7 +281,7 @@ constructor(
         flagsMask: Int,
         flagsValues: Int,
         extraFlags: Int,
-        options: Bundle?
+        options: Bundle?,
     ) {
         activityController.onWaitingForResult(true)
         super.startIntentSenderForResult(
@@ -319,15 +291,46 @@ constructor(
             flagsMask,
             flagsValues,
             extraFlags,
-            options
+            options,
         )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         activityController.onWaitingForResult(false)
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == WidgetConfigurationController.REQUEST_CODE) {
-            widgetConfigurator.setConfigurationResult(resultCode)
+
+        when (requestCode) {
+            WidgetConfigurationController.REQUEST_CODE ->
+                widgetConfigurator.setConfigurationResult(resultCode)
+            REQUEST_CODE_WIDGET_PICKER -> {
+                if (resultCode != RESULT_OK) {
+                    Log.w(TAG, "Failed to receive result from widget picker, code=$resultCode")
+                    return
+                }
+
+                uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_WIDGET_PICKER_SHOWN)
+
+                data?.let { intent ->
+                    val isPendingWidgetDrag =
+                        intent.getBooleanExtra(EXTRA_IS_PENDING_WIDGET_DRAG, false)
+                    // Nothing to do when a widget is being dragged & dropped. The drop
+                    // target in the communal grid will receive the widget to be added (if
+                    // the user drops it over).
+                    if (!isPendingWidgetDrag) {
+                        val (componentName, user) = getWidgetExtraFromIntent(intent)
+                        if (componentName != null && user != null) {
+                            // Add widget at the end.
+                            communalViewModel.onAddWidget(
+                                componentName,
+                                user,
+                                configurator = widgetConfigurator,
+                            )
+                        } else {
+                            run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
+                        }
+                    }
+                } ?: run { Log.w(TAG, "No data in result.") }
+            }
         }
     }
 

@@ -122,6 +122,7 @@ class ClipboardModelTest : SysuiTestCase() {
 
     @Test
     @Throws(IOException::class)
+    @DisableFlags(FLAG_CLIPBOARD_USE_DESCRIPTION_MIMETYPE)
     fun test_imageClipData_loadFailure() {
         whenever(mMockContext.contentResolver).thenReturn(mMockContentResolver)
         whenever(mMockContext.resources).thenReturn(mContext.resources)

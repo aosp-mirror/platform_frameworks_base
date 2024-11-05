@@ -44,6 +44,7 @@ import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwlePoint;
 import android.os.vibrator.RampSegment;
 
 import androidx.test.InstrumentationRegistry;
@@ -268,6 +269,22 @@ public class VibratorControllerTest {
     }
 
     @Test
+    public void on_withComposedPwleV2_performsEffect() {
+        mockVibratorCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+        when(mNativeWrapperMock.composePwleV2(any(), anyLong())).thenReturn(15L);
+        VibratorController controller = createController();
+
+        PwlePoint[] primitives = new PwlePoint[]{
+                new PwlePoint(/*amplitude=*/ 0, /*frequencyHz=*/ 100, /*timeMillis=*/ 0),
+                new PwlePoint(/*amplitude=*/ 1, /*frequencyHz=*/ 200, /*timeMillis=*/ 10)
+        };
+        assertEquals(15L, controller.on(primitives, 12));
+        assertTrue(controller.isVibrating());
+
+        verify(mNativeWrapperMock).composePwleV2(eq(primitives), eq(12L));
+    }
+
+    @Test
     public void off_turnsOffVibrator() {
         when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
         VibratorController controller = createController();
@@ -334,13 +351,14 @@ public class VibratorControllerTest {
     }
 
     private void mockVibratorCapabilities(int capabilities) {
-        VibratorInfo.FrequencyProfile frequencyProfile = new VibratorInfo.FrequencyProfile(
+        VibratorInfo.FrequencyProfileLegacy
+                frequencyProfile = new VibratorInfo.FrequencyProfileLegacy(
                 Float.NaN, Float.NaN, Float.NaN, null);
         when(mNativeWrapperMock.getInfo(any(VibratorInfo.Builder.class)))
                 .then(invocation -> {
                     ((VibratorInfo.Builder) invocation.getArgument(0))
                             .setCapabilities(capabilities)
-                            .setFrequencyProfile(frequencyProfile);
+                            .setFrequencyProfileLegacy(frequencyProfile);
                     return true;
                 });
     }

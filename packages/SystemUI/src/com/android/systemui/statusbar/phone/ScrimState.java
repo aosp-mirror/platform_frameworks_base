@@ -209,11 +209,6 @@ public enum ScrimState {
         }
 
         @Override
-        public float getMaxLightRevealScrimAlpha() {
-            return mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
-        }
-
-        @Override
         public boolean isLowPowerState() {
             return true;
         }
@@ -236,11 +231,6 @@ public enum ScrimState {
             mBlankScreen = mDisplayRequiresBlanking;
             mAnimationDuration = mWakeLockScreenSensorActive
                     ? ScrimController.ANIMATION_DURATION_LONG : ScrimController.ANIMATION_DURATION;
-        }
-        @Override
-        public float getMaxLightRevealScrimAlpha() {
-            return mWakeLockScreenSensorActive ? ScrimController.WAKE_SENSOR_SCRIM_ALPHA
-                    : AOD.getMaxLightRevealScrimAlpha();
         }
     },
 
@@ -368,8 +358,6 @@ public enum ScrimState {
     DozeParameters mDozeParameters;
     DockManager mDockManager;
     boolean mDisplayRequiresBlanking;
-    boolean mWallpaperSupportsAmbientMode;
-    boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
     boolean mOccludeAnimationPlaying;
     boolean mWakeLockScreenSensorActive;
@@ -406,10 +394,6 @@ public enum ScrimState {
 
     public float getBehindAlpha() {
         return mBehindAlpha;
-    }
-
-    public float getMaxLightRevealScrimAlpha() {
-        return 1f;
     }
 
     public float getNotifAlpha() {
@@ -473,10 +457,6 @@ public enum ScrimState {
         mSurfaceColor = surfaceColor;
     }
 
-    public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
-        mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
-    }
-
     public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {
         mLaunchingAffordanceWithPreview = launchingAffordanceWithPreview;
     }
@@ -487,10 +467,6 @@ public enum ScrimState {
 
     public boolean isLowPowerState() {
         return false;
-    }
-
-    public void setHasBackdrop(boolean hasBackdrop) {
-        mHasBackdrop = hasBackdrop;
     }
 
     public void setWakeLockScreenSensorActive(boolean active) {

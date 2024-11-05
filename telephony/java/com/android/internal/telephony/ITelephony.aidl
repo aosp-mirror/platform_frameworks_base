@@ -71,6 +71,7 @@ import android.telephony.satellite.INtnSignalStrengthCallback;
 import android.telephony.satellite.ISatelliteCapabilitiesCallback;
 import android.telephony.satellite.ISatelliteCommunicationAllowedStateCallback;
 import android.telephony.satellite.ISatelliteDatagramCallback;
+import android.telephony.satellite.ISatelliteDisallowedReasonsCallback;
 import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
 import android.telephony.satellite.ISatelliteProvisionStateCallback;
 import android.telephony.satellite.ISatelliteSupportedStateCallback;
@@ -2955,6 +2956,37 @@ interface ITelephony {
             in boolean needFullScreenPointingUI, IIntegerConsumer callback);
 
     /**
+     * Returns integer array of disallowed reasons of satellite.
+     *
+     * @return Integer array of disallowed reasons of satellite.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int[] getSatelliteDisallowedReasons();
+
+    /**
+     * Registers for disallowed reasons change event from satellite service.
+     *
+     * @param callback The callback to handle disallowed reasons changed event.
+     *
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void registerForSatelliteDisallowedReasonsChanged(
+            ISatelliteDisallowedReasonsCallback callback);
+
+    /**
+     * Unregisters for disallowed reasons change event from satellite service.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback to handle disallowed reasons changed event.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void unregisterForSatelliteDisallowedReasonsChanged(
+            ISatelliteDisallowedReasonsCallback callback);
+
+    /**
      * Request to get whether satellite communication is allowed for the current location.
      *
      * @param subId The subId of the subscription to get whether satellite communication is allowed
@@ -2977,10 +3009,10 @@ interface ITelephony {
     void requestTimeForNextSatelliteVisibility(in ResultReceiver receiver);
 
     /**
-     * Inform whether the device is aligned with the satellite within in margin for demo mode.
+     * Inform whether the device is aligned with the satellite in both real and demo mode.
      *
-     * @param isAligned {@true} Device is aligned with the satellite for demo mode
-     *                  {@false} Device is not aligned with the satellite for demo mode
+     * @param isAligned {@true} Device is aligned with the satellite.
+     *                  {@false} Device is not aligned with the satellite.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")

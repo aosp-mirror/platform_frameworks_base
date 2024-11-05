@@ -49,7 +49,9 @@ fun CategoryTitle(title: String) {
         text = title,
         modifier =
             Modifier.padding(
-                start = SettingsDimension.itemPaddingStart,
+                start =
+                    if (isSpaExpressiveEnabled) SettingsDimension.paddingSmall
+                    else SettingsDimension.itemPaddingStart,
                 top = 20.dp,
                 end =
                     if (isSpaExpressiveEnabled) SettingsDimension.paddingSmall
@@ -67,16 +69,16 @@ fun CategoryTitle(title: String) {
  */
 @Composable
 fun Category(title: String? = null, content: @Composable ColumnScope.() -> Unit) {
+    var displayTitle by remember { mutableStateOf(false) }
     Column(
         modifier =
-            if (isSpaExpressiveEnabled)
+            if (isSpaExpressiveEnabled && displayTitle)
                 Modifier.padding(
                     horizontal = SettingsDimension.paddingLarge,
                     vertical = SettingsDimension.paddingSmall,
                 )
             else Modifier
     ) {
-        var displayTitle by remember { mutableStateOf(false) }
         if (title != null && displayTitle) CategoryTitle(title = title)
         Column(
             modifier =
@@ -85,7 +87,7 @@ fun Category(title: String? = null, content: @Composable ColumnScope.() -> Unit)
                     }
                     .then(
                         if (isSpaExpressiveEnabled)
-                            Modifier.fillMaxWidth().clip(SettingsShape.categoryCorner)
+                            Modifier.fillMaxWidth().clip(SettingsShape.CornerMedium2)
                         else Modifier
                     ),
             verticalArrangement =

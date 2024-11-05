@@ -122,7 +122,7 @@ public class InsetsSourceConsumer {
 
     /**
      * Updates the control delivered from the server.
-
+     *
      * @param showTypes An integer array with a single entry that determines which types a show
      *                  animation should be run after setting the control.
      * @param hideTypes An integer array with a single entry that determines which types a hide
@@ -130,7 +130,7 @@ public class InsetsSourceConsumer {
      * @return Whether the control has changed from the server
      */
     public boolean setControl(@Nullable InsetsSourceControl control,
-            @InsetsType int[] showTypes, @InsetsType int[] hideTypes) {
+            @InsetsType int[] showTypes, @InsetsType int[] hideTypes, int[] cancelTypes) {
         if (Objects.equals(mSourceControl, control)) {
             if (mSourceControl != null && mSourceControl != control) {
                 mSourceControl.release(SurfaceControl::release);
@@ -165,6 +165,12 @@ public class InsetsSourceConsumer {
             // Reset the applier to the default one which has the most lightweight implementation.
             setSurfaceParamsApplier(InsetsAnimationControlRunner.SurfaceParamsApplier.DEFAULT);
         } else {
+            if (lastControl != null && InsetsSource.getInsetSide(lastControl.getInsetsHint())
+                    != InsetsSource.getInsetSide(control.getInsetsHint())) {
+                // The source has been moved to a different side. The coordinates are stale.
+                // Canceling existing animation if there is any.
+                cancelTypes[0] |= mType;
+            }
             final boolean requestedVisible = isRequestedVisibleAwaitingControl();
             final SurfaceControl oldLeash = lastControl != null ? lastControl.getLeash() : null;
             final SurfaceControl newLeash = control.getLeash();

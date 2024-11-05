@@ -248,8 +248,6 @@ internal class LearnMoreSpan(
     val url: String = "",
     val clickListener: View.OnClickListener) : URLSpan(url) {
     override fun onClick(widget: View) {
-        if (clickListener != null) {
-            clickListener.onClick(widget)
-        }
+        clickListener.onClick(widget)
     }
 }

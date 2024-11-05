@@ -18,6 +18,8 @@ package android.media.projection;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.media.projection.flags.Flags.mediaProjectionConnectedDisplay;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
@@ -85,13 +87,23 @@ public final class MediaProjection {
     public MediaProjection(Context context, IMediaProjection impl, DisplayManager displayManager) {
         mContext = context;
         mImpl = impl;
+        mDisplayManager = displayManager;
+
         try {
             mImpl.start(new MediaProjectionCallback());
+
+            if (mediaProjectionConnectedDisplay()) {
+                int displayId = mImpl.getDisplayId();
+                if (displayId != DEFAULT_DISPLAY) {
+                    mDisplayId = displayId;
+                    Log.v(TAG, "Created MediaProjection for display " + mDisplayId);
+                    return;
+                }
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Content Recording: Failed to start media projection", e);
             throw new RuntimeException("Failed to start media projection", e);
         }
-        mDisplayManager = displayManager;
 
         final UserManager userManager = context.getSystemService(UserManager.class);
         mDisplayId = userManager.isVisibleBackgroundUsersSupported()

@@ -18,6 +18,7 @@ package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
@@ -28,7 +29,6 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
-import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
@@ -58,6 +58,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -392,8 +393,6 @@ public class Transitions implements RemoteCallable<Transitions>,
 
         mShellCommandHandler.addCommandCallback("transitions", this, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
-
-        registerObserver(mFocusTransitionObserver);
     }
 
     public boolean isRegistered() {
@@ -725,7 +724,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         info.setUnreleasedWarningCallSiteForAllSurfaces("Transitions.onTransitionReady");
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady (#%d) %s: %s",
-                info.getDebugId(), transitionToken, info);
+                info.getDebugId(), transitionToken, info.toString("    " /* prefix */));
         int activeIdx = findByToken(mPendingTransitions, transitionToken);
         if (activeIdx < 0) {
             final ActiveTransition existing = mKnownTransitions.get(transitionToken);
@@ -802,8 +801,17 @@ public class Transitions implements RemoteCallable<Transitions>,
         track.mReadyTransitions.add(active);
 
         for (int i = 0; i < mObservers.size(); ++i) {
+            final boolean useTrace = Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER);
+            if (useTrace) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                        mObservers.get(i).getClass().getSimpleName() + "#onTransitionReady: "
+                                + transitTypeToString(info.getType()));
+            }
             mObservers.get(i).onTransitionReady(
                     active.mToken, info, active.mStartT, active.mFinishT);
+            if (useTrace) {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
         }
 
         /*
@@ -933,7 +941,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                 onFinish(ready.mToken, null);
                 return;
             }
-            playTransition(ready);
+            playTransitionWithTracing(ready);
             // Attempt to merge any more queued-up transitions.
             processReadyQueue(track);
             return;
@@ -1005,6 +1013,18 @@ public class Transitions implements RemoteCallable<Transitions>,
         processReadyQueue(track);
     }
 
+    private void playTransitionWithTracing(@NonNull ActiveTransition active) {
+        final boolean useTrace = Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER);
+        if (useTrace) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                    "playTransition: " + transitTypeToString(active.mInfo.getType()));
+        }
+        playTransition(active);
+        if (useTrace) {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
     private void playTransition(@NonNull ActiveTransition active) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Playing animation for %s", active);
         final var token = active.mToken;
@@ -1024,6 +1044,12 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by firstHandler");
                 mTransitionTracer.logDispatched(active.mInfo.getDebugId(), active.mHandler);
+                if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                    Trace.instant(TRACE_TAG_WINDOW_MANAGER,
+                            active.mHandler.getClass().getSimpleName()
+                                    + "#startAnimation animated "
+                                    + transitTypeToString(active.mInfo.getType()));
+                }
                 return;
             }
         }
@@ -1054,11 +1080,37 @@ public class Transitions implements RemoteCallable<Transitions>,
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by %s",
                         mHandlers.get(i));
                 mTransitionTracer.logDispatched(info.getDebugId(), mHandlers.get(i));
+                if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                    Trace.instant(TRACE_TAG_WINDOW_MANAGER,
+                            mHandlers.get(i).getClass().getSimpleName()
+                                    + "#startAnimation animated "
+                                    + transitTypeToString(info.getType()));
+                }
                 return mHandlers.get(i);
             }
         }
         throw new IllegalStateException(
                 "This shouldn't happen, maybe the default handler is broken.");
+    }
+
+    private Pair<TransitionHandler, WindowContainerTransaction> dispatchRequestWithTracing(
+            @NonNull IBinder transition, @NonNull TransitionRequestInfo request,
+            @Nullable TransitionHandler skip) {
+        final boolean useTrace = Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER);
+        if (useTrace) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                    "dispatchRequest: " + transitTypeToString(request.getType()));
+        }
+        Pair<TransitionHandler, WindowContainerTransaction> result =
+                dispatchRequest(transition, request, skip);
+        if (useTrace) {
+            if (result != null) {
+                Trace.instant(TRACE_TAG_WINDOW_MANAGER, result.first.getClass().getSimpleName()
+                        + "#handleRequest handled " + transitTypeToString(request.getType()));
+            }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+        return result;
     }
 
     /**
@@ -1199,12 +1251,11 @@ public class Transitions implements RemoteCallable<Transitions>,
             mSleepHandler.handleRequest(transitionToken, request);
             active.mHandler = mSleepHandler;
         } else {
-            for (int i = mHandlers.size() - 1; i >= 0; --i) {
-                wct = mHandlers.get(i).handleRequest(transitionToken, request);
-                if (wct != null) {
-                    active.mHandler = mHandlers.get(i);
-                    break;
-                }
+            Pair<TransitionHandler, WindowContainerTransaction> requestResult =
+                    dispatchRequestWithTracing(transitionToken, request, /* skip= */ null);
+            if (requestResult != null) {
+                active.mHandler = requestResult.first;
+                wct = requestResult.second;
             }
             if (request.getDisplayChange() != null) {
                 TransitionRequestInfo.DisplayChange change = request.getDisplayChange();
@@ -1793,6 +1844,40 @@ public class Transitions implements RemoteCallable<Transitions>,
                 pw.println(transition.mHandler);
             }
         }
+    }
+
+    /**
+     * Like WindowManager#transitTypeToString(), but also covers known custom transition types as
+     * well.
+     */
+    public static String transitTypeToString(int transitType) {
+        if (transitType < TRANSIT_FIRST_CUSTOM) {
+            return WindowManager.transitTypeToString(transitType);
+        }
+
+        String typeStr = switch (transitType) {
+            case TRANSIT_EXIT_PIP -> "EXIT_PIP";
+            case TRANSIT_EXIT_PIP_TO_SPLIT -> "EXIT_PIP_TO_SPLIT";
+            case TRANSIT_REMOVE_PIP -> "REMOVE_PIP";
+            case TRANSIT_SPLIT_SCREEN_PAIR_OPEN -> "SPLIT_SCREEN_PAIR_OPEN";
+            case TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE -> "SPLIT_SCREEN_OPEN_TO_SIDE";
+            case TRANSIT_SPLIT_DISMISS_SNAP -> "SPLIT_DISMISS_SNAP";
+            case TRANSIT_SPLIT_DISMISS -> "SPLIT_DISMISS";
+            case TRANSIT_MAXIMIZE -> "MAXIMIZE";
+            case TRANSIT_RESTORE_FROM_MAXIMIZE -> "RESTORE_FROM_MAXIMIZE";
+            case TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP -> "DESKTOP_MODE_START_DRAG_TO_DESKTOP";
+            case TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP -> "DESKTOP_MODE_END_DRAG_TO_DESKTOP";
+            case TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP ->
+                    "DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP";
+            case TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE -> "DESKTOP_MODE_TOGGLE_RESIZE";
+            case TRANSIT_RESIZE_PIP -> "RESIZE_PIP";
+            case TRANSIT_TASK_FRAGMENT_DRAG_RESIZE -> "TASK_FRAGMENT_DRAG_RESIZE";
+            case TRANSIT_SPLIT_PASSTHROUGH -> "SPLIT_PASSTHROUGH";
+            case TRANSIT_CLEANUP_PIP_EXIT -> "CLEANUP_PIP_EXIT";
+            case TRANSIT_MINIMIZE -> "MINIMIZE";
+            default -> "";
+        };
+        return typeStr + "(FIRST_CUSTOM+" + (transitType - TRANSIT_FIRST_CUSTOM) + ")";
     }
 
     private static boolean getShellTransitEnabled() {

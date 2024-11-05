@@ -18,8 +18,6 @@ package com.android.keyguard;
 
 import static android.view.View.INVISIBLE;
 
-import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -156,8 +154,12 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mResources.getInteger(R.integer.keyguard_date_weather_view_invisibility))
                 .thenReturn(INVISIBLE);
 
-        when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
-        when(mView.findViewById(R.id.lockscreen_clock_view)).thenReturn(mSmallClockFrame);
+        when(mView
+                .findViewById(com.android.systemui.customization.R.id.lockscreen_clock_view_large))
+                .thenReturn(mLargeClockFrame);
+        when(mView
+                .findViewById(com.android.systemui.customization.R.id.lockscreen_clock_view))
+                .thenReturn(mSmallClockFrame);
         when(mSmallClockView.getContext()).thenReturn(getContext());
         when(mLargeClockView.getContext()).thenReturn(getContext());
 
@@ -167,7 +169,6 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mExecutor = new FakeExecutor(new FakeSystemClock());
         mFakeFeatureFlags = new FakeFeatureFlags();
-        mFakeFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mController = new KeyguardClockSwitchController(
                 mView,
                 mStatusBarStateController,
@@ -184,7 +185,6 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 mLogBuffer,
                 KeyguardInteractorFactory.create(mFakeFeatureFlags).getKeyguardInteractor(),
                 mKeyguardClockInteractor,
-                mFakeFeatureFlags,
                 mock(InWindowLauncherUnlockAnimationManager.class)
         );
 

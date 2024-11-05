@@ -15,8 +15,6 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.operations.Utils.floatToString;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -25,11 +23,8 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 
 import java.util.List;
 
-/**
- * Base class for draw commands the take 6 floats
- */
-public abstract class DrawBase6 extends PaintOperation
-        implements VariableSupport {
+/** Base class for draw commands the take 6 floats */
+public abstract class DrawBase6 extends PaintOperation implements VariableSupport {
     protected String mName = "DrawRectBase";
     float mV1;
     float mV2;
@@ -44,13 +39,7 @@ public abstract class DrawBase6 extends PaintOperation
     float mValue5;
     float mValue6;
 
-    public DrawBase6(
-            float v1,
-            float v2,
-            float v3,
-            float v4,
-            float v5,
-            float v6) {
+    public DrawBase6(float v1, float v2, float v3, float v4, float v5, float v6) {
         mValue1 = v1;
         mValue2 = v2;
         mValue3 = v3;
@@ -68,18 +57,12 @@ public abstract class DrawBase6 extends PaintOperation
 
     @Override
     public void updateVariables(RemoteContext context) {
-        mV1 = (Float.isNaN(mValue1))
-                ? context.getFloat(Utils.idFromNan(mValue1)) : mValue1;
-        mV2 = (Float.isNaN(mValue2))
-                ? context.getFloat(Utils.idFromNan(mValue2)) : mValue2;
-        mV3 = (Float.isNaN(mValue3))
-                ? context.getFloat(Utils.idFromNan(mValue3)) : mValue3;
-        mV4 = (Float.isNaN(mValue4))
-                ? context.getFloat(Utils.idFromNan(mValue4)) : mValue4;
-        mV5 = (Float.isNaN(mValue5))
-                ? context.getFloat(Utils.idFromNan(mValue5)) : mValue5;
-        mV6 = (Float.isNaN(mValue6))
-                ? context.getFloat(Utils.idFromNan(mValue6)) : mValue6;
+        mV1 = Float.isNaN(mValue1) ? context.getFloat(Utils.idFromNan(mValue1)) : mValue1;
+        mV2 = Float.isNaN(mValue2) ? context.getFloat(Utils.idFromNan(mValue2)) : mValue2;
+        mV3 = Float.isNaN(mValue3) ? context.getFloat(Utils.idFromNan(mValue3)) : mValue3;
+        mV4 = Float.isNaN(mValue4) ? context.getFloat(Utils.idFromNan(mValue4)) : mValue4;
+        mV5 = Float.isNaN(mValue5) ? context.getFloat(Utils.idFromNan(mValue5)) : mValue5;
+        mV6 = Float.isNaN(mValue6) ? context.getFloat(Utils.idFromNan(mValue6)) : mValue6;
     }
 
     @Override
@@ -109,27 +92,24 @@ public abstract class DrawBase6 extends PaintOperation
         write(buffer, mV1, mV2, mV3, mV4, mV5, mV6);
     }
 
-    protected abstract void write(WireBuffer buffer,
-                                  float v1,
-                                  float v2,
-                                  float v3,
-                                  float v4,
-                                  float v5,
-                                  float v6);
+    protected abstract void write(
+            WireBuffer buffer, float v1, float v2, float v3, float v4, float v5, float v6);
 
     @Override
     public String toString() {
-        return mName + " " + floatToString(mV1) + " " + floatToString(mV2)
-                + " " + floatToString(mV3) + " " + floatToString(mV4);
+        return mName
+                + " "
+                + Utils.floatToString(mV1)
+                + " "
+                + Utils.floatToString(mV2)
+                + " "
+                + Utils.floatToString(mV3)
+                + " "
+                + Utils.floatToString(mV4);
     }
 
     interface Maker {
-        DrawBase6 create(float v1,
-                         float v2,
-                         float v3,
-                         float v4,
-                         float v5,
-                         float v6);
+        DrawBase6 create(float v1, float v2, float v3, float v4, float v5, float v6);
     }
 
     public static void read(Maker build, WireBuffer buffer, List<Operation> operations) {
@@ -155,18 +135,11 @@ public abstract class DrawBase6 extends PaintOperation
      * @param v6
      * @return
      */
-    public Operation construct(float v1,
-                               float v2,
-                               float v3,
-                               float v4,
-                               float v5,
-                               float v6) {
+    public Operation construct(float v1, float v2, float v3, float v4, float v5, float v6) {
         return null;
     }
-
 
     public static String name() {
         return "DrawBase6";
     }
-
 }

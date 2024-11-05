@@ -177,26 +177,84 @@ object PipUtils {
     }
 
     /**
+     * Calculates the transform to apply on a UNTRANSFORMED (config-at-end) Activity surface in
+     * order for it's hint-rect to occupy the same task-relative position/dimensions as it would
+     * have at the end of the transition (post-configuration).
+     *
+     * This is intended to be used in tandem with [calcStartTransform] below applied to the parent
+     * task. Applying both transforms simultaneously should result in the appearance of nothing
+     * having happened yet.
+     *
+     * Only the task should be animated (into it's identity state) and then WMCore will reset the
+     * activity transform in sync with its new configuration upon finish.
+     *
+     * Usage example:
+     *     calcEndTransform(pipActivity, pipTask, scale, pos);
+     *     t.setScale(pipActivity.getLeash(), scale.x, scale.y);
+     *     t.setPosition(pipActivity.getLeash(), pos.x, pos.y);
+     *
+     * @see calcStartTransform
+     */
+    @JvmStatic
+    fun calcEndTransform(pipActivity: TransitionInfo.Change, pipTask: TransitionInfo.Change,
+        outScale: PointF, outPos: PointF) {
+        val actStartBounds = pipActivity.startAbsBounds
+        val actEndBounds = pipActivity.endAbsBounds
+        val taskEndBounds = pipTask.endAbsBounds
+
+        var hintRect = pipTask.taskInfo?.pictureInPictureParams?.sourceRectHint
+        if (hintRect == null) {
+            hintRect = Rect(actStartBounds)
+            hintRect.offsetTo(0, 0)
+        }
+
+        // FA = final activity bounds (absolute)
+        // FT = final task bounds (absolute)
+        // SA = start activity bounds (absolute)
+        // H = source hint (relative to start activity bounds)
+        // We want to transform the activity so that when the task is at FT, H overlaps with FA
+
+        // This scales the activity such that the hint rect has the same dimensions
+        // as the final activity bounds.
+        val hintToEndScaleX = (actEndBounds.width().toFloat()) / (hintRect.width().toFloat())
+        val hintToEndScaleY = (actEndBounds.height().toFloat()) / (hintRect.height().toFloat())
+        // top-left needs to be (FA.tl - FT.tl) - H.tl * hintToEnd . H is relative to the
+        // activity; so, for example, if shrinking H to FA (hintToEnd < 1), then the tl of the
+        // shrunk SA is closer to H than expected, so we need to reduce how much we offset SA
+        // to get H.tl to match.
+        val startActPosInTaskEndX =
+            (actEndBounds.left - taskEndBounds.left) - hintRect.left * hintToEndScaleX
+        val startActPosInTaskEndY =
+            (actEndBounds.top - taskEndBounds.top) - hintRect.top * hintToEndScaleY
+        outScale.set(hintToEndScaleX, hintToEndScaleY)
+        outPos.set(startActPosInTaskEndX, startActPosInTaskEndY)
+    }
+
+    /**
      * Calculates the transform and crop to apply on a Task surface in order for the config-at-end
      * activity inside it (original-size activity transformed to match it's hint rect to the final
      * Task bounds) to occupy the same world-space position/dimensions as it had before the
      * transition.
      *
+     * Intended to be used in tandem with [calcEndTransform].
+     *
      * Usage example:
-     *     calcStartTransform(pipChange, scale, pos, crop);
-     *     t.setScale(pipChange.getLeash(), scale.x, scale.y);
-     *     t.setPosition(pipChange.getLeash(), pos.x, pos.y);
-     *     t.setCrop(pipChange.getLeash(), crop);
+     *     calcStartTransform(pipTask, scale, pos, crop);
+     *     t.setScale(pipTask.getLeash(), scale.x, scale.y);
+     *     t.setPosition(pipTask.getLeash(), pos.x, pos.y);
+     *     t.setCrop(pipTask.getLeash(), crop);
+     *
+     * @see calcEndTransform
      */
     @JvmStatic
-    fun calcStartTransform(pipChange: TransitionInfo.Change, outScale: PointF,
+    fun calcStartTransform(pipTask: TransitionInfo.Change, outScale: PointF,
         outPos: PointF, outCrop: Rect) {
-        val startBounds = pipChange.startAbsBounds
-        val taskEndBounds = pipChange.endAbsBounds
+        val startBounds = pipTask.startAbsBounds
+        val taskEndBounds = pipTask.endAbsBounds
         // For now, pip activity bounds always matches task bounds. If this ever changes, we'll
         // need to get the activity offset.
         val endBounds = taskEndBounds
-        var hintRect = pipChange.taskInfo?.pictureInPictureParams?.sourceRectHint
+        var hintRect = pipTask.taskInfo?.pictureInPictureParams?.sourceRectHint
         if (hintRect == null) {
             hintRect = Rect(startBounds)
             hintRect.offsetTo(0, 0)
@@ -226,8 +284,8 @@ object PipUtils {
                 + startBounds.left + hintRect.left)
         val endTaskPosForStartY = (-(endBounds.top - taskEndBounds.top) * endToHintScaleY
                 + startBounds.top + hintRect.top)
-        outScale[endToHintScaleX] = endToHintScaleY
-        outPos[endTaskPosForStartX] = endTaskPosForStartY
+        outScale.set(endToHintScaleX, endToHintScaleY)
+        outPos.set(endTaskPosForStartX, endTaskPosForStartY)
 
         // now need to set crop to reveal the non-hint stuff. Again, hintrect is relative, so
         // we must apply outsets to reveal the *activity* content which is *inside* the task

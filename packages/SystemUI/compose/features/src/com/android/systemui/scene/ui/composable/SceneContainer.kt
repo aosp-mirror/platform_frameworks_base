@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,6 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.OverlayKey
@@ -39,9 +42,13 @@ import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import javax.inject.Provider
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -73,6 +80,7 @@ fun SceneContainer(
     overlayByKey: Map<OverlayKey, Overlay>,
     initialSceneKey: SceneKey,
     dataSourceDelegator: SceneDataSourceDelegator,
+    qsSceneAdapter: Provider<QSSceneAdapter>,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -81,7 +89,6 @@ fun SceneContainer(
             initialScene = initialSceneKey,
             canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
             transitions = SceneContainerTransitions,
-            enableInterruptions = false,
         )
     }
 
@@ -116,6 +123,24 @@ fun SceneContainer(
             }
         } finally {
             userActionsByContentKey[actionableContentKey] = emptyMap()
+        }
+    }
+
+    // Inflate qsView here so that shade has the correct qqs height in the first measure pass after
+    // rebooting
+    if (
+        viewModel.allContentKeys.contains(Scenes.QuickSettings) ||
+            viewModel.allContentKeys.contains(Scenes.Shade)
+    ) {
+        val qsAdapter = qsSceneAdapter.get()
+        QuickSettingsTheme {
+            val context = LocalContext.current
+            val qsView by qsAdapter.qsView.collectAsStateWithLifecycle()
+            LaunchedEffect(context) {
+                if (qsView == null) {
+                    qsAdapter.inflate(context)
+                }
+            }
         }
     }
 

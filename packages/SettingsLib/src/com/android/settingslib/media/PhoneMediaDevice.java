@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.media;
 
+import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
@@ -29,8 +30,6 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.Manifest;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -42,6 +41,8 @@ import android.media.RouteListingPreference;
 import android.os.SystemProperties;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
@@ -72,7 +73,7 @@ public class PhoneMediaDevice extends MediaDevice {
             return context.getString(R.string.media_transfer_this_device_name_tv);
         } else if (isTablet()) {
             return context.getString(R.string.media_transfer_this_device_name_tablet);
-        } else if (inputRoutingEnabledAndIsDesktop()) {
+        } else if (inputRoutingEnabledAndIsDesktop(context)) {
             return context.getString(R.string.media_transfer_this_device_name_desktop);
         } else {
             return context.getString(R.string.media_transfer_this_device_name);
@@ -88,7 +89,7 @@ public class PhoneMediaDevice extends MediaDevice {
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
                 name =
-                        inputRoutingEnabledAndIsDesktop()
+                        inputRoutingEnabledAndIsDesktop(context)
                                 ? context.getString(R.string.media_transfer_headphone_name)
                                 : context.getString(R.string.media_transfer_wired_headphone_name);
                 break;
@@ -96,8 +97,8 @@ public class PhoneMediaDevice extends MediaDevice {
             case TYPE_USB_HEADSET:
             case TYPE_USB_ACCESSORY:
                 name =
-                        inputRoutingEnabledAndIsDesktop()
-                                ? context.getString(R.string.media_transfer_usb_audio_name)
+                        inputRoutingEnabledAndIsDesktop(context)
+                                ? routeInfo.getName()
                                 : context.getString(R.string.media_transfer_wired_headphone_name);
                 break;
             case TYPE_DOCK:
@@ -149,14 +150,13 @@ public class PhoneMediaDevice extends MediaDevice {
                 .contains("tablet");
     }
 
-    static boolean isDesktop() {
-        return Arrays.asList(SystemProperties.get("ro.build.characteristics").split(","))
-                .contains("desktop");
+    public static boolean isDesktop(@NonNull Context context) {
+        return context.getPackageManager().hasSystemFeature(FEATURE_PC);
     }
 
-    static boolean inputRoutingEnabledAndIsDesktop() {
+    public static boolean inputRoutingEnabledAndIsDesktop(@NonNull Context context) {
         return com.android.media.flags.Flags.enableAudioInputDeviceRoutingAndVolumeControl()
-                && isDesktop();
+                && isDesktop(context);
     }
 
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.

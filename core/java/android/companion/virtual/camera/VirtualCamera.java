@@ -17,7 +17,6 @@
 package android.companion.virtual.camera;
 
 import android.annotation.FlaggedApi;
-import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -94,7 +93,6 @@ public final class VirtualCamera implements Closeable {
     }
 
     @Override
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void close() {
         try {
             mVirtualDevice.unregisterVirtualCamera(mConfig);

@@ -168,3 +168,13 @@ flag {
     description: "Enables flexibile split feature for split screen"
     bug: "349828130"
 }
+
+flag {
+    name: "enable_task_view_controller_cleanup"
+    namespace: "multitasking"
+    description: "Fix memory leak with task view controllers"
+    bug: "369995920"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

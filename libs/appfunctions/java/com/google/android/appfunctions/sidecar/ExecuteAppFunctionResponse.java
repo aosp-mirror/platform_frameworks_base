@@ -50,37 +50,102 @@ public final class ExecuteAppFunctionResponse {
      */
     public static final String PROPERTY_RETURN_VALUE = "returnValue";
 
-    /** The call was successful. */
+    /**
+     * The call was successful.
+     *
+     * <p>This result code does not belong in an error category.
+     */
     public static final int RESULT_OK = 0;
 
-    /** The caller does not have the permission to execute an app function. */
-    public static final int RESULT_DENIED = 1;
-
-    /** An unknown error occurred while processing the call in the AppFunctionService. */
-    public static final int RESULT_APP_UNKNOWN_ERROR = 2;
-
     /**
-     * An internal error occurred within AppFunctionManagerService.
+     * The caller does not have the permission to execute an app function.
      *
-     * <p>This error may be considered similar to {@link IllegalStateException}
+     * <p>This error is in the {@link #ERROR_CATEGORY_REQUEST_ERROR} category.
      */
-    public static final int RESULT_INTERNAL_ERROR = 3;
+    public static final int RESULT_DENIED = 1000;
 
     /**
-     * The caller supplied invalid arguments to the call.
+     * The caller supplied invalid arguments to the execution request.
      *
      * <p>This error may be considered similar to {@link IllegalArgumentException}.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_REQUEST_ERROR} category.
      */
-    public static final int RESULT_INVALID_ARGUMENT = 4;
+    public static final int RESULT_INVALID_ARGUMENT = 1001;
 
-    /** The caller tried to execute a disabled app function. */
-    public static final int RESULT_DISABLED = 5;
+    /**
+     * The caller tried to execute a disabled app function.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_REQUEST_ERROR} category.
+     */
+    public static final int RESULT_DISABLED = 1002;
+
+    /**
+     * The caller tried to execute a function that does not exist.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_REQUEST_ERROR} category.
+     */
+    public static final int RESULT_FUNCTION_NOT_FOUND = 1003;
+
+    /**
+     * An internal unexpected error coming from the system.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_SYSTEM} category.
+     */
+    public static final int RESULT_SYSTEM_ERROR = 2000;
 
     /**
      * The operation was cancelled. Use this error code to report that a cancellation is done after
      * receiving a cancellation signal.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_SYSTEM} category.
      */
-    public static final int RESULT_CANCELLED = 6;
+    public static final int RESULT_CANCELLED = 2001;
+
+    /**
+     * An unknown error occurred while processing the call in the AppFunctionService.
+     *
+     * <p>This error is thrown when the service is connected in the remote application but an
+     * unexpected error is thrown from the bound application.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_APP} category.
+     */
+    public static final int RESULT_APP_UNKNOWN_ERROR = 3000;
+
+    /**
+     * The error category is unknown.
+     *
+     * <p>This is the default value for {@link #getErrorCategory}.
+     */
+    public static final int ERROR_CATEGORY_UNKNOWN = 0;
+
+    /**
+     * The error is caused by the app requesting a function execution.
+     *
+     * <p>For example, the caller provided invalid parameters in the execution request e.g. an
+     * invalid function ID.
+     *
+     * <p>Errors in the category fall in the range 1000-1999 inclusive.
+     */
+    public static final int ERROR_CATEGORY_REQUEST_ERROR = 1;
+
+    /**
+     * The error is caused by an issue in the system.
+     *
+     * <p>For example, the AppFunctionService implementation is not found by the system.
+     *
+     * <p>Errors in the category fall in the range 2000-2999 inclusive.
+     */
+    public static final int ERROR_CATEGORY_SYSTEM = 2;
+
+    /**
+     * The error is caused by the app providing the function.
+     *
+     * <p>For example, the app crashed when the system is executing the request.
+     *
+     * <p>Errors in the category fall in the range 3000-3999 inclusive.
+     */
+    public static final int ERROR_CATEGORY_APP = 3;
 
     /** The result code of the app function execution. */
     @ResultCode private final int mResultCode;
@@ -170,6 +235,36 @@ public final class ExecuteAppFunctionResponse {
     }
 
     /**
+     * Returns the error category of the {@link ExecuteAppFunctionResponse}.
+     *
+     * <p>This method categorizes errors based on their underlying cause, allowing developers to
+     * implement targeted error handling and provide more informative error messages to users. It
+     * maps ranges of result codes to specific error categories.
+     *
+     * <p>When constructing a {@link #newFailure} response, use the appropriate result code value to
+     * ensure correct categorization of the failed response.
+     *
+     * <p>This method returns {@code ERROR_CATEGORY_UNKNOWN} if the result code does not belong to
+     * any error category, for example, in the case of a successful result with {@link #RESULT_OK}.
+     *
+     * <p>See {@link ErrorCategory} for a complete list of error categories and their corresponding
+     * result code ranges.
+     */
+    @ErrorCategory
+    public int getErrorCategory() {
+        if (mResultCode >= 1000 && mResultCode < 2000) {
+            return ERROR_CATEGORY_REQUEST_ERROR;
+        }
+        if (mResultCode >= 2000 && mResultCode < 3000) {
+            return ERROR_CATEGORY_SYSTEM;
+        }
+        if (mResultCode >= 3000 && mResultCode < 4000) {
+            return ERROR_CATEGORY_APP;
+        }
+        return ERROR_CATEGORY_UNKNOWN;
+    }
+
+    /**
      * Returns a generic document containing the return value of the executed function.
      *
      * <p>The {@link #PROPERTY_RETURN_VALUE} key can be used to obtain the return value.
@@ -234,13 +329,31 @@ public final class ExecuteAppFunctionResponse {
     @IntDef(
             prefix = {"RESULT_"},
             value = {
-                    RESULT_OK,
-                    RESULT_DENIED,
-                    RESULT_APP_UNKNOWN_ERROR,
-                    RESULT_INTERNAL_ERROR,
-                    RESULT_INVALID_ARGUMENT,
-                    RESULT_DISABLED
+                RESULT_OK,
+                RESULT_DENIED,
+                RESULT_APP_UNKNOWN_ERROR,
+                RESULT_SYSTEM_ERROR,
+                RESULT_FUNCTION_NOT_FOUND,
+                RESULT_INVALID_ARGUMENT,
+                RESULT_DISABLED,
+                RESULT_CANCELLED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
+
+    /**
+     * Error categories.
+     *
+     * @hide
+     */
+    @IntDef(
+            prefix = {"ERROR_CATEGORY_"},
+            value = {
+                ERROR_CATEGORY_UNKNOWN,
+                ERROR_CATEGORY_REQUEST_ERROR,
+                ERROR_CATEGORY_APP,
+                ERROR_CATEGORY_SYSTEM
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ErrorCategory {}
 }

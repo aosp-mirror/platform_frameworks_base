@@ -53,11 +53,16 @@ class AppCompatOrientationPolicy {
 
     @ActivityInfo.ScreenOrientation
     int overrideOrientationIfNeeded(@ActivityInfo.ScreenOrientation int candidate) {
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                mAppCompatOverrides.getAppCompatAspectRatioOverrides();
+        // Ignore all orientation requests of activities for eligible virtual displays.
+        if (aspectRatioOverrides.shouldIgnoreActivitySizeRestrictionsForDisplay()) {
+            return SCREEN_ORIENTATION_USER;
+        }
         final DisplayContent displayContent = mActivityRecord.mDisplayContent;
         final boolean isIgnoreOrientationRequestEnabled = displayContent != null
                 && displayContent.getIgnoreOrientationRequest();
-        final boolean hasFullscreenOverride = mAppCompatOverrides
-                .getAppCompatAspectRatioOverrides().hasFullscreenOverride();
+        final boolean hasFullscreenOverride = aspectRatioOverrides.hasFullscreenOverride();
         final boolean shouldCameraCompatControlOrientation =
                 AppCompatCameraPolicy.shouldCameraCompatControlOrientation(mActivityRecord);
         if (hasFullscreenOverride && isIgnoreOrientationRequestEnabled
@@ -69,16 +74,15 @@ class AppCompatOrientationPolicy {
                 && !shouldCameraCompatControlOrientation) {
             Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate)
                     + " for " + mActivityRecord + " is overridden to "
-                    + screenOrientationToString(SCREEN_ORIENTATION_USER)
-                    + " by user aspect ratio settings.");
+                    + screenOrientationToString(SCREEN_ORIENTATION_USER));
             return SCREEN_ORIENTATION_USER;
         }
 
         // In some cases (e.g. Kids app) we need to map the candidate orientation to some other
         // orientation.
         candidate = mActivityRecord.mWmService.mapOrientationRequest(candidate);
-        final boolean shouldApplyUserMinAspectRatioOverride = mAppCompatOverrides
-                .getAppCompatAspectRatioOverrides().shouldApplyUserMinAspectRatioOverride();
+        final boolean shouldApplyUserMinAspectRatioOverride = aspectRatioOverrides
+                .shouldApplyUserMinAspectRatioOverride();
         if (shouldApplyUserMinAspectRatioOverride && (!isFixedOrientation(candidate)
                 || candidate == SCREEN_ORIENTATION_LOCKED)) {
             Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate)

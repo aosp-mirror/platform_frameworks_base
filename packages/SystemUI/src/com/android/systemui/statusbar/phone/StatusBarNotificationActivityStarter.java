@@ -20,7 +20,6 @@ import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.getActivityOptions;
-import static com.android.systemui.util.kotlin.NullabilityKt.expectNotNull;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -231,8 +230,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
      * @param entry notification that bubble icon was clicked
      */
     @Override
-    public void onNotificationBubbleIconClicked(NotificationEntry entry) {
-        expectNotNull(TAG, "entry", entry);
+    public void onNotificationBubbleIconClicked(@NonNull NotificationEntry entry) {
         Runnable action = () -> {
             mBubblesManagerOptional.ifPresent(bubblesManager ->
                     bubblesManager.onUserChangedBubble(entry, !entry.isBubble()));
@@ -258,9 +256,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
      * @param row   row for that notification
      */
     @Override
-    public void onNotificationClicked(NotificationEntry entry, ExpandableNotificationRow row) {
-        expectNotNull(TAG, "entry", entry);
-        expectNotNull(TAG, "row", row);
+    public void onNotificationClicked(@NonNull NotificationEntry entry,
+            @NonNull ExpandableNotificationRow row) {
         mLogger.logStartingActivityFromClick(entry, row.isHeadsUpState(),
                 mKeyguardStateController.isVisible(),
                 mNotificationShadeWindowController.getPanelExpanded());
@@ -442,8 +439,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
      * @param entry notification entry that is dropped.
      */
     @Override
-    public void onDragSuccess(NotificationEntry entry) {
-        expectNotNull(TAG, "entry", entry);
+    public void onDragSuccess(@NonNull NotificationEntry entry) {
         // this method is not responsible for intent sending.
         // will focus follow operation only after drag-and-drop that notification.
         final NotificationVisibility nv = mVisibilityProvider.obtain(entry, true);
@@ -534,10 +530,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     }
 
     @Override
-    public void startNotificationGutsIntent(final Intent intent, final int appUid,
-            ExpandableNotificationRow row) {
-        expectNotNull(TAG, "intent", intent);
-        expectNotNull(TAG, "row", row);
+    public void startNotificationGutsIntent(@NonNull final Intent intent, final int appUid,
+            @NonNull ExpandableNotificationRow row) {
         boolean animate = mActivityStarter.shouldAnimateLaunch(true /* isActivityIntent */);
         ActivityStarter.OnDismissAction onDismissAction = new ActivityStarter.OnDismissAction() {
             @Override

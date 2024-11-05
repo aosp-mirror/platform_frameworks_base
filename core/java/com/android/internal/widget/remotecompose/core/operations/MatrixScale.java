@@ -15,13 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
@@ -42,28 +41,18 @@ public class MatrixScale extends DrawBase4 {
         return CLASS_NAME;
     }
 
-
-    protected void write(WireBuffer buffer,
-                         float v1,
-                         float v2,
-                         float v3,
-                         float v4) {
+    @Override
+    protected void write(WireBuffer buffer, float v1, float v2, float v3, float v4) {
         apply(buffer, v1, v2, v3, v4);
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Draw the specified Oval")
-                .field(FLOAT, "scaleX",
-                        "The amount to scale in X")
-                .field(FLOAT, "scaleY",
-                        "The amount to scale in Y")
-                .field(FLOAT, "pivotX",
-                        "The x-coordinate for the pivot point")
-                .field(FLOAT, "pivotY",
-                        "The y-coordinate for the pivot point");
+                .field(DocumentedOperation.FLOAT, "scaleX", "The amount to scale in X")
+                .field(DocumentedOperation.FLOAT, "scaleY", "The amount to scale in Y")
+                .field(DocumentedOperation.FLOAT, "pivotX", "The x-coordinate for the pivot point")
+                .field(DocumentedOperation.FLOAT, "pivotY", "The y-coordinate for the pivot point");
     }
 
     public MatrixScale(float scaleX, float scaleY, float centerX, float centerY) {
@@ -80,16 +69,12 @@ public class MatrixScale extends DrawBase4 {
      * Writes out the DrawOval to the buffer
      *
      * @param buffer buffer to write to
-     * @param x1     start x of DrawOval
-     * @param y1     start y of the DrawOval
-     * @param x2     end x of the DrawOval
-     * @param y2     end y of the DrawOval
+     * @param x1 start x of DrawOval
+     * @param y1 start y of the DrawOval
+     * @param x2 end x of the DrawOval
+     * @param y2 end y of the DrawOval
      */
-    public static void apply(WireBuffer buffer,
-                             float x1,
-                             float y1,
-                             float x2,
-                             float y2) {
+    public static void apply(WireBuffer buffer, float x1, float y1, float x2, float y2) {
         write(buffer, OP_CODE, x1, y1, x2, y2);
     }
 }

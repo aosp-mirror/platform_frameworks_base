@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.NetworkControllerImpl;
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
+import com.android.systemui.statusbar.phone.ConfigurationForwarder;
 import com.android.systemui.statusbar.policy.BatteryControllerLogger;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
@@ -184,6 +185,13 @@ public interface StatusBarPolicyModule {
     @Binds
     DevicePostureController provideDevicePostureController(
             DevicePostureControllerImpl devicePostureControllerImpl);
+
+    /** */
+    @Binds
+    @SysUISingleton
+    @GlobalConfig
+    ConfigurationForwarder provideGlobalConfigurationForwarder(
+            @GlobalConfig ConfigurationController configurationController);
 
     /** */
     @Provides

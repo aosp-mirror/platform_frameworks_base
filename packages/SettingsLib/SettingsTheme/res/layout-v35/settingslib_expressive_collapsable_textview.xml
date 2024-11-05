@@ -25,6 +25,7 @@
     android:orientation="vertical"
     android:animateLayoutChanges="true"
     android:background="?android:attr/selectableItemBackground"
+    android:filterTouchesWhenObscured="false"
     android:clipToPadding="false">
 
     <TextView

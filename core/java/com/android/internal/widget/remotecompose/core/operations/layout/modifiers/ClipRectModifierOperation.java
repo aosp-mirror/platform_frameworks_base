@@ -27,9 +27,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Support modifier clip with a rectangle
- */
+/** Support modifier clip with a rectangle */
 public class ClipRectModifierOperation extends DecoratorModifierOperation {
     public static final String CLASS_NAME = "ClipRectModifierOperation";
     private static final int OP_CODE = Operations.MODIFIER_CLIP_RECT;
@@ -48,15 +46,14 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void onClick(RemoteContext context, CoreDocument document,
-                        Component component, float x, float y) {
+    public void onClick(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
         // nothing
     }
 
     @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(
-                indent, "CLIP_RECT = [" + mWidth + ", " + mHeight + "]");
+        serializer.append(indent, "CLIP_RECT = [" + mWidth + ", " + mHeight + "]");
     }
 
     @Override
@@ -68,7 +65,6 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
         return CLASS_NAME;
     }
 
-
     public static int id() {
         return OP_CODE;
     }
@@ -77,16 +73,12 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
         buffer.start(OP_CODE);
     }
 
-
     public static void read(WireBuffer buffer, List<Operation> operations) {
         operations.add(new ClipRectModifierOperation());
     }
 
-
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Draw the specified round-rect");
     }
 }

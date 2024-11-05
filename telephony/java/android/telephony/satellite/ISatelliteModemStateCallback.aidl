@@ -42,4 +42,11 @@ oneway interface ISatelliteModemStateCallback {
      *                  For LTE (EMM), cause codes are TS 24.301 Sec 9.9.3.9
      */
     void onRegistrationFailure(in int causeCode);
+
+    /**
+     * Indicates that the background search for terrestrial network is finished with result
+     *
+     * @param isAvailable True means there's terrestrial network and false means there's not.
+     */
+    void onTerrestrialNetworkAvailableChanged(in boolean isAvailable);
 }

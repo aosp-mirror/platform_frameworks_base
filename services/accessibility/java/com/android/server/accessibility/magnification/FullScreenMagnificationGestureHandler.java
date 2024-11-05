@@ -345,7 +345,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @Override
     void handleMouseOrStylusEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (Flags.enableMagnificationFollowsMouse()) {
+        if (Flags.enableMagnificationFollowsMouseBugfix()) {
             if (mFullScreenMagnificationController.isActivated(mDisplayId)) {
                 // TODO(b/354696546): Allow mouse/stylus to activate whichever display they are
                 // over, rather than only interacting with the current display.
@@ -617,7 +617,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             }
 
             if (DEBUG_PANNING_SCALING) Slog.i(mLogTag, "Scaled content to: " + scale + "x");
-            mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
+            mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY,
+                    /* isScaleTransient= */ true, /* animate= */ false,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
 
             checkShouldDetectPassPersistedScale();
@@ -1206,7 +1207,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
         protected void cacheDelayedMotionEvent(MotionEvent event, MotionEvent rawEvent,
                 int policyFlags) {
-            if (Flags.enableMagnificationFollowsMouse()
+            if (Flags.enableMagnificationFollowsMouseBugfix()
                     && !event.isFromSource(SOURCE_TOUCHSCREEN)) {
                 // Only touch events need to be cached and sent later.
                 return;
@@ -1974,6 +1975,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                     /* scale= */ scale,
                     /* centerX= */ mPivotEdge.x,
                     /* centerY= */ mPivotEdge.y,
+                    /* isScaleTransient= */ true,
                     /* animate= */ true,
                     /* id= */ AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             if (scale == 1.0f) {

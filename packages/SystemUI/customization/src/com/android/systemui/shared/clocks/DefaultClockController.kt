@@ -33,10 +33,11 @@ import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockFaceEvents
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
-import com.android.systemui.plugins.clocks.ClockReactiveSetting
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.plugins.clocks.DefaultClockFaceLayout
+import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import java.io.PrintWriter
@@ -100,28 +101,33 @@ class DefaultClockController(
         events.onLocaleChanged(Locale.getDefault())
     }
 
-    override fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
+    override fun initialize(isDarkTheme: Boolean, dozeFraction: Float, foldFraction: Float) {
         largeClock.recomputePadding(null)
+
         largeClock.animations = LargeClockAnimations(largeClock.view, dozeFraction, foldFraction)
         smallClock.animations = DefaultClockAnimations(smallClock.view, dozeFraction, foldFraction)
-        events.onColorPaletteChanged(resources)
+
+        val theme = ThemeConfig(isDarkTheme, settings?.seedColor)
+        largeClock.events.onThemeChanged(theme)
+        smallClock.events.onThemeChanged(theme)
+
         events.onTimeZoneChanged(TimeZone.getDefault())
+
         smallClock.events.onTimeTick()
         largeClock.events.onTimeTick()
     }
 
     open inner class DefaultClockFaceController(
         override val view: AnimatableClockView,
-        var seedColor: Int?,
+        seedColor: Int?,
         messageBuffer: MessageBuffer?,
     ) : ClockFaceController {
-
         // MAGENTA is a placeholder, and will be assigned correctly in initialize
-        private var currentColor = Color.MAGENTA
-        private var isRegionDark = false
+        private var currentColor = seedColor ?: Color.MAGENTA
         protected var targetRegion: Rect? = null
 
         override val config = ClockFaceConfig()
+        override var theme = ThemeConfig(true, seedColor)
         override val layout =
             DefaultClockFaceLayout(view).apply {
                 views[0].id =
@@ -132,9 +138,6 @@ class DefaultClockController(
             internal set
 
         init {
-            if (seedColor != null) {
-                currentColor = seedColor!!
-            }
             view.setColors(DOZE_COLOR, currentColor)
             messageBuffer?.let { view.messageBuffer = it }
         }
@@ -143,9 +146,26 @@ class DefaultClockController(
             object : ClockFaceEvents {
                 override fun onTimeTick() = view.refreshTime()
 
-                override fun onRegionDarknessChanged(isRegionDark: Boolean) {
-                    this@DefaultClockFaceController.isRegionDark = isRegionDark
-                    updateColor()
+                override fun onThemeChanged(theme: ThemeConfig) {
+                    this@DefaultClockFaceController.theme = theme
+
+                    val color =
+                        when {
+                            theme.seedColor != null -> theme.seedColor!!
+                            theme.isDarkTheme ->
+                                resources.getColor(android.R.color.system_accent1_100)
+                            else -> resources.getColor(android.R.color.system_accent2_600)
+                        }
+
+                    if (currentColor == color) {
+                        return
+                    }
+
+                    currentColor = color
+                    view.setColors(DOZE_COLOR, color)
+                    if (!animations.dozeState.isActive) {
+                        view.animateColorChange()
+                    }
                 }
 
                 override fun onTargetRegionChanged(targetRegion: Rect?) {
@@ -165,27 +185,6 @@ class DefaultClockController(
             }
 
         open fun recomputePadding(targetRegion: Rect?) {}
-
-        fun updateColor() {
-            val color =
-                if (seedColor != null) {
-                    seedColor!!
-                } else if (isRegionDark) {
-                    resources.getColor(android.R.color.system_accent1_100)
-                } else {
-                    resources.getColor(android.R.color.system_accent2_600)
-                }
-
-            if (currentColor == color) {
-                return
-            }
-
-            currentColor = color
-            view.setColors(DOZE_COLOR, color)
-            if (!animations.dozeState.isActive) {
-                view.animateColorChange()
-            }
-        }
     }
 
     inner class LargeClockFaceController(
@@ -248,19 +247,6 @@ class DefaultClockController(
         override fun onTimeZoneChanged(timeZone: TimeZone) =
             clocks.forEach { it.onTimeZoneChanged(timeZone) }
 
-        override fun onColorPaletteChanged(resources: Resources) {
-            largeClock.updateColor()
-            smallClock.updateColor()
-        }
-
-        override fun onSeedColorChanged(seedColor: Int?) {
-            largeClock.seedColor = seedColor
-            smallClock.seedColor = seedColor
-
-            largeClock.updateColor()
-            smallClock.updateColor()
-        }
-
         override fun onLocaleChanged(locale: Locale) {
             val nf = NumberFormat.getInstance(locale)
             if (nf.format(FORMAT_NUMBER.toLong()) == burmeseNumerals) {
@@ -278,7 +264,7 @@ class DefaultClockController(
 
         override fun onZenDataChanged(data: ZenData) {}
 
-        override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}
+        override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {}
     }
 
     open inner class DefaultClockAnimations(

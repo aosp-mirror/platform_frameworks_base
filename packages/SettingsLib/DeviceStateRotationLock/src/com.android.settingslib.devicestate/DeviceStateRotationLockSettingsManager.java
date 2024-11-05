@@ -20,10 +20,13 @@ import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_IGNORE
 import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_LOCKED;
 import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_UNLOCKED;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.hardware.devicestate.DeviceStateManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -67,13 +70,22 @@ public final class DeviceStateRotationLockSettingsManager {
     @VisibleForTesting
     DeviceStateRotationLockSettingsManager(Context context, SecureSettings secureSettings) {
         mSecureSettings = secureSettings;
-        mPosturesHelper = new PosturesHelper(context);
+
+        mPosturesHelper = new PosturesHelper(context, getDeviceStateManager(context));
         mPostureRotationLockDefaults =
                 context.getResources()
                         .getStringArray(R.array.config_perDeviceStateRotationLockDefaults);
         loadDefaults();
         initializeInMemoryMap();
         listenForSettingsChange();
+    }
+
+    @Nullable
+    private DeviceStateManager getDeviceStateManager(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return context.getSystemService(DeviceStateManager.class);
+        }
+        return null;
     }
 
     /** Returns a singleton instance of this class */

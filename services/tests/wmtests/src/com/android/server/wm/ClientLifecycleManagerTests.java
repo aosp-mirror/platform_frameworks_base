@@ -123,7 +123,7 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
     }
 
     @Test
-    public void testScheduleTransactionItemUnlocked() throws RemoteException {
+    public void testScheduleTransactionItemNow() throws RemoteException {
         // Use non binder client to get non-recycled ClientTransaction.
         mLifecycleManager.scheduleTransactionItemNow(mNonBinderClient, mTransactionItem);
 
@@ -133,12 +133,12 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
     }
 
     @Test
-    public void testScheduleTransactionAndLifecycleItems() throws RemoteException {
+    public void testScheduleTransactionItems() throws RemoteException {
         spyOn(mWms.mWindowPlacerLocked);
         doReturn(true).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
 
         // Use non binder client to get non-recycled ClientTransaction.
-        mLifecycleManager.scheduleTransactionAndLifecycleItems(mNonBinderClient, mTransactionItem,
+        mLifecycleManager.scheduleTransactionItems(mNonBinderClient, mTransactionItem,
                 mLifecycleItem);
 
         assertEquals(1, mLifecycleManager.mPendingTransactions.size());
@@ -155,14 +155,15 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
     }
 
     @Test
-    public void testScheduleTransactionAndLifecycleItems_shouldDispatchImmediately()
+    public void testScheduleTransactionItems_shouldDispatchImmediately()
             throws RemoteException {
         spyOn(mWms.mWindowPlacerLocked);
         doReturn(true).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
 
         // Use non binder client to get non-recycled ClientTransaction.
-        mLifecycleManager.scheduleTransactionAndLifecycleItems(mNonBinderClient, mTransactionItem,
-                mLifecycleItem, true /* shouldDispatchImmediately */);
+        mLifecycleManager.scheduleTransactionItems(mNonBinderClient,
+                true /* shouldDispatchImmediately */,
+                mTransactionItem, mLifecycleItem);
 
         verify(mLifecycleManager).scheduleTransaction(any());
         assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());

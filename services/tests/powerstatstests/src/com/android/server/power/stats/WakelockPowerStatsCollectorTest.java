@@ -24,10 +24,13 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.os.Process;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.ravenwood.RavenwoodConfig;
 import android.platform.test.ravenwood.RavenwoodConfig.Config;
 
 import com.android.internal.os.PowerStats;
+import com.android.server.power.feature.flags.Flags;
 import com.android.server.power.stats.format.WakelockPowerStatsLayout;
 
 import org.junit.Before;
@@ -37,11 +40,19 @@ import org.junit.Test;
 public class WakelockPowerStatsCollectorTest {
 
     @Config
-    public static final RavenwoodConfig sConfig = new RavenwoodConfig.Builder()
-            .setProvideMainThread(true)
-            .build();
+    public static final RavenwoodConfig sConfig =
+            new RavenwoodConfig.Builder()
+                    .setProvideMainThread(true)
+                    .setSystemPropertyImmutable(
+                            "persist.sys.com.android.server.power.feature.flags."
+                                    + "framework_wakelock_info-override",
+                            null)
+                    .build();
 
-    @Rule
+    @Rule(order = 0)
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule();
 
     private static final int APP_UID1 = Process.FIRST_APPLICATION_UID + 42;
@@ -54,21 +65,21 @@ public class WakelockPowerStatsCollectorTest {
     private WakelockPowerStatsLayout mStatsLayout = new WakelockPowerStatsLayout();
 
     @Before
-    public void setup() {
-        mBatteryStats = new MockBatteryStatsImpl(mClock);
+    public void setup() throws Throwable {
+        mBatteryStats = mStatsRule.getBatteryStats();
         mBatteryStats.setPowerStatsCollectorEnabled(POWER_COMPONENT_WAKELOCK, true);
         mBatteryStats.getPowerStatsCollector(POWER_COMPONENT_WAKELOCK)
                 .addConsumer(ps -> mPowerStats = ps);
         mBatteryStats.onSystemReady(mock(Context.class));
+        // onSystemReady schedules the initial power stats collection. Wait for it to finish
+        mStatsRule.waitForBackgroundThread();
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
     public void collectStats() {
         PowerStatsCollector powerStatsCollector = mBatteryStats.getPowerStatsCollector(
                 POWER_COMPONENT_WAKELOCK);
-
-        // Establish a baseline
-        powerStatsCollector.collectAndDeliverStats();
 
         mBatteryStats.forceRecordAllHistory();
 

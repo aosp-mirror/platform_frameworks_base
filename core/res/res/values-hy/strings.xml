@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Անջատված է"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Ցանկացած օրացույց"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ն անջատում է որոշ ձայներ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Սարքում ներքին խնդիր է առաջացել և այն կարող է կրկնվել, մինչև չվերականգնեք գործարանային կարգավորումները:"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Զանգերի և ծանուցումների համար թրթռոցը միացված է"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Զանգերի և ծանուցումների համար ձայնն անջատված է"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Համակարգի փոփոխություններ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Չանհանգստացնել"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Այժմ «Չանհանգստացնել» ռեժիմում ծանուցումները թաքցվում են"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Հպեք՝ ավելին իմանալու և կարգավորումները փոխելու համար:"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«Չանհանգստացնել» ռեժիմի կարգավորումները փոխվել են"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Հպեք՝ տեսնելու, թե ինչ է արգելափակվել:"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Ստուգեք ծանուցումների կարգավորումները"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Հավելվածներին, որոնք տեղադրում եք Android 13 և ավելի նոր տարբերակներով սարքերում, անհրաժեշտ է տրամադրել ծանուցումներ ուղարկելու թույլտվություն։ Հպեք և փոխեք այս թույլտվությունն արդեն տեղադրված հավելվածների համար։"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Հիշեցնել ավելի ուշ"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Ուղարկեք և ստացեք հաղորդագրություններ առանց բջջային կամ Wi-Fi ցանցի"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ինչպես է դա աշխատում"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Առկախ է…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Նորից կարգավորեք մատնահետքով ապակողպումը"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> մատնահետքն այլևս չի կարող ճանաչվել։"</string>

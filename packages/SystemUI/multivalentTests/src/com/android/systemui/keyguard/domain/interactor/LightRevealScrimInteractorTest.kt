@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.fakeLightRevealScrimRepository
 import com.android.systemui.keyguard.data.repository.DEFAULT_REVEAL_DURATION
@@ -31,7 +32,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
-import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.LightRevealEffect
@@ -98,7 +98,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
             fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     to = KeyguardState.LOCKSCREEN,
-                    transitionState = TransitionState.RUNNING
+                    transitionState = TransitionState.RUNNING,
                 )
             )
             runCurrent()
@@ -110,7 +110,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
             fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     to = KeyguardState.LOCKSCREEN,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 )
             )
             runCurrent()
@@ -147,11 +147,21 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
 
             assertThat(fakeLightRevealScrimRepository.revealAnimatorRequests.last())
                 .isEqualTo(
-                    RevealAnimatorRequest(
-                        reveal = false,
-                        duration = DEFAULT_REVEAL_DURATION
-                    )
+                    RevealAnimatorRequest(reveal = false, duration = DEFAULT_REVEAL_DURATION)
                 )
+        }
+
+    @Test
+    fun supportsAmbientMode() =
+        kosmos.testScope.runTest {
+            val maxAlpha by collectLastValue(underTest.maxAlpha)
+            assertThat(maxAlpha).isEqualTo(1f)
+
+            underTest.setWallpaperSupportsAmbientMode(true)
+            assertThat(maxAlpha).isLessThan(1f)
+
+            underTest.setWallpaperSupportsAmbientMode(false)
+            assertThat(maxAlpha).isEqualTo(1f)
         }
 
     private fun updateWakefulness(goToSleepReason: WakeSleepReason) {
@@ -159,7 +169,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
             rawState = WakefulnessState.STARTING_TO_SLEEP,
             lastWakeReason = WakeSleepReason.POWER_BUTTON,
             lastSleepReason = goToSleepReason,
-            powerButtonLaunchGestureTriggered = false
+            powerButtonLaunchGestureTriggered = false,
         )
     }
 }

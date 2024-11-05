@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -39,7 +40,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -136,7 +136,6 @@ constructor(
     }
 
     private fun animateCollapseShadeInternal() {
-        // TODO(b/336581871): add sceneState?
         shadeInteractor.collapseEitherShade(
             loggingReason = "ShadeController.animateCollapseShade",
             transitionKey = SlightlyFasterShadeCollapse,

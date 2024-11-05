@@ -2109,7 +2109,7 @@ public class WindowManagerService extends IWindowManager.Stub
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Removing %s from %s", win, token);
         // Window will already be removed from token before this post clean-up method is called.
         if (token.isEmpty() && !token.mPersistOnEmpty) {
-            token.removeImmediately();
+            token.removeIfPossible();
         }
 
         if (win.mActivityRecord != null) {
@@ -3421,9 +3421,11 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
         synchronized (mGlobalLock) {
+            final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
             if (!dreamHandlesConfirmKeys()
-                    && getDefaultDisplayContentLocked().getDisplayPolicy().isShowingDreamLw()) {
-                mAtmService.mTaskSupervisor.wakeUp("leaveDream");
+                    && defaultDisplayContent.getDisplayPolicy().isShowingDreamLw()) {
+                mAtmService.mTaskSupervisor.wakeUp(
+                        defaultDisplayContent.getDisplayId(), "leaveDream");
             }
             mPolicy.dismissKeyguardLw(callback, message);
         }
@@ -8378,6 +8380,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     return false;
                 }
                 return displayContent.isHomeSupported();
+            }
+        }
+
+        @Override
+        public void setIgnoreActivitySizeRestrictionsOnDisplay(@NonNull String displayUniqueId,
+                int displayType, boolean enabled) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mGlobalLock) {
+                    mDisplayWindowSettings.setIgnoreActivitySizeRestrictionsOnDisplayLocked(
+                            displayUniqueId, displayType, enabled);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
         }
 

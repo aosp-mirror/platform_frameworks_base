@@ -35,13 +35,10 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.easin
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a click modifier + actions
- */
+/** Represents a click modifier + actions */
 public class ClickModifierOperation extends PaintOperation
         implements ModifierOperation, DecoratorComponent {
     private static final int OP_CODE = Operations.MODIFIER_CLICK;
-
 
     long mAnimateRippleStart = 0;
     float mAnimateRippleX = 0f;
@@ -60,6 +57,7 @@ public class ClickModifierOperation extends PaintOperation
         mAnimateRippleX = x;
         mAnimateRippleY = y;
     }
+
     public ArrayList<Operation> mList = new ArrayList<>();
 
     public ArrayList<Operation> getList() {
@@ -107,14 +105,14 @@ public class ClickModifierOperation extends PaintOperation
         context.savePaint();
         mPaint.reset();
 
-        FloatAnimation anim1 = new FloatAnimation(Easing.CUBIC_STANDARD, 1f,
-                null, Float.NaN, Float.NaN);
+        FloatAnimation anim1 =
+                new FloatAnimation(Easing.CUBIC_STANDARD, 1f, null, Float.NaN, Float.NaN);
         anim1.setInitialValue(0f);
         anim1.setTargetValue(1f);
         float tween = anim1.get(progress);
 
-        FloatAnimation anim2 = new FloatAnimation(Easing.CUBIC_STANDARD, 0.5f,
-                null, Float.NaN, Float.NaN);
+        FloatAnimation anim2 =
+                new FloatAnimation(Easing.CUBIC_STANDARD, 0.5f, null, Float.NaN, Float.NaN);
         anim2.setInitialValue(0f);
         anim2.setTargetValue(1f);
         float tweenRadius = anim2.get(progress);
@@ -149,8 +147,11 @@ public class ClickModifierOperation extends PaintOperation
     }
 
     @Override
-    public void onClick(RemoteContext context, CoreDocument document,
-                        Component component, float x, float y) {
+    public void onClick(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        if (!component.isVisible()) {
+            return;
+        }
         locationInWindow[0] = 0f;
         locationInWindow[1] = 0f;
         component.getLocationInWindow(locationInWindow);
@@ -176,7 +177,8 @@ public class ClickModifierOperation extends PaintOperation
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, name())
-                .description("Click modifier. This operation contains"
-                        + " a list of action executed on click");
+                .description(
+                        "Click modifier. This operation contains"
+                                + " a list of action executed on click");
     }
 }

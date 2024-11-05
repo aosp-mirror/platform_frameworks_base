@@ -22,7 +22,5 @@ import com.android.systemui.statusbar.notification.data.repository.notifications
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 
 val Kosmos.notificationsKeyguardInteractor by Fixture {
-    NotificationsKeyguardInteractor(
-        repository = notificationsKeyguardViewStateRepository,
-    )
+    NotificationsKeyguardInteractor(repository = notificationsKeyguardViewStateRepository)
 }

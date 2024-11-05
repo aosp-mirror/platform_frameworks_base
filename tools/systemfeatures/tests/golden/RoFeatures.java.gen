@@ -13,10 +13,9 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
+import android.util.ArrayMap;
 import com.android.aconfig.annotations.AssumeFalseForR8;
 import com.android.aconfig.annotations.AssumeTrueForR8;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @hide
@@ -94,8 +93,8 @@ public final class RoFeatures {
      * @hide
      */
     @NonNull
-    public static Map<String, FeatureInfo> getCompileTimeAvailableFeatures() {
-        Map<String, FeatureInfo> features = new HashMap<>(2);
+    public static ArrayMap<String, FeatureInfo> getReadOnlySystemEnabledFeatures() {
+        ArrayMap<String, FeatureInfo> features = new ArrayMap<>(2);
         FeatureInfo fi = new FeatureInfo();
         fi.name = PackageManager.FEATURE_WATCH;
         fi.version = 1;

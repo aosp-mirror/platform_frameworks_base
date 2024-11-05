@@ -137,8 +137,10 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
                                                 .TOKENIZER_TYPE_VERBATIM)
                                 .build())
                 .addProperty(
-                        new AppSearchSchema.BooleanPropertyConfig.Builder(PROPERTY_ENABLED)
+                        new AppSearchSchema.LongPropertyConfig.Builder(PROPERTY_ENABLED)
                                 .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                                .setIndexingType(
+                                        AppSearchSchema.LongPropertyConfig.INDEXING_TYPE_RANGE)
                                 .build())
                 .addProperty(
                         new AppSearchSchema.StringPropertyConfig.Builder(
@@ -212,19 +214,14 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
         }
 
         /**
-         * Sets an indicator specifying if the function is enabled or not. This would override the
-         * default enabled state in the static metadata ({@link
-         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}). Sets this to null
-         * to clear the override.
-         * TODO(369683073) Replace the tristate Boolean with IntDef EnabledState.
+         * Sets an indicator specifying the function enabled state.
          */
         @NonNull
         public Builder setEnabled(@EnabledState int enabledState) {
             if (enabledState != APP_FUNCTION_STATE_DEFAULT
                     && enabledState != APP_FUNCTION_STATE_ENABLED
                     && enabledState != APP_FUNCTION_STATE_DISABLED) {
-                throw new IllegalArgumentException(
-                        "Value of EnabledState is unsupported.");
+                throw new IllegalArgumentException("Value of EnabledState is unsupported.");
             }
             setPropertyLong(PROPERTY_ENABLED, enabledState);
             return this;

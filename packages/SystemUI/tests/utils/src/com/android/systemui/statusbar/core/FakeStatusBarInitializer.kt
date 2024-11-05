@@ -19,11 +19,18 @@ package com.android.systemui.statusbar.core
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewUpdatedListener
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
+import org.mockito.kotlin.mock
 
-class FakeStatusBarInitializer(
-    private val statusBarViewController: PhoneStatusBarViewController,
-    private val statusBarTransitions: PhoneStatusBarTransitions,
-) : StatusBarInitializer {
+class FakeStatusBarInitializer : StatusBarInitializer {
+
+    val statusBarViewController = mock<PhoneStatusBarViewController>()
+    val statusBarTransitions = mock<PhoneStatusBarTransitions>()
+
+    var startedByCoreStartable: Boolean = false
+        private set
+
+    var initializedByCentralSurfaces: Boolean = false
+        private set
 
     override var statusBarViewUpdatedListener: OnStatusBarViewUpdatedListener? = null
         set(value) {
@@ -31,5 +38,11 @@ class FakeStatusBarInitializer(
             value?.onStatusBarViewUpdated(statusBarViewController, statusBarTransitions)
         }
 
-    override fun initializeStatusBar() {}
+    override fun initializeStatusBar() {
+        initializedByCentralSurfaces = true
+    }
+
+    override fun start() {
+        startedByCoreStartable = true
+    }
 }

@@ -18,6 +18,7 @@ package com.android.server.display;
 
 
 import static com.android.internal.display.BrightnessSynchronizer.brightnessIntToFloat;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.config.SensorData.TEMPERATURE_TYPE_SKIN;
@@ -265,7 +266,7 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getPowerThrottlingConfigData();
         assertNotNull(powerThrottlingConfigData);
         assertEquals(0.1f, powerThrottlingConfigData.brightnessLowestCapAllowed, SMALL_DELTA);
-        assertEquals(15f, powerThrottlingConfigData.customAnimationRateSec, SMALL_DELTA);
+        assertEquals(15f, powerThrottlingConfigData.customAnimationRate, SMALL_DELTA);
         assertEquals(20000, powerThrottlingConfigData.pollingWindowMaxMillis);
         assertEquals(10000, powerThrottlingConfigData.pollingWindowMinMillis);
     }
@@ -885,6 +886,34 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
                         AUTO_BRIGHTNESS_MODE_DOZE,
                         Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_DIM), SMALL_DELTA);
+
+        // Wear Bedtime mode curve
+        assertArrayEquals(new float[]{0.0f, 10.0f},
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
+                        AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_DIM), ZERO_DELTA);
+        assertArrayEquals(new float[]{0.20f, 0.30f},
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
+                        AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_DIM), SMALL_DELTA);
+
+        assertArrayEquals(new float[]{0.0f, 20.0f},
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
+                        AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL), ZERO_DELTA);
+        assertArrayEquals(new float[]{0.30f, 0.65f},
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
+                        AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL), SMALL_DELTA);
+
+        assertArrayEquals(new float[]{0.0f, 30.0f},
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
+                        AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_BRIGHT), ZERO_DELTA);
+        assertArrayEquals(new float[]{0.65f, 0.95f},
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
+                        AUTO_BRIGHTNESS_MODE_BEDTIME_WEAR,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_BRIGHT), SMALL_DELTA);
     }
 
     @Test
@@ -1296,10 +1325,55 @@ public final class DisplayDeviceConfigTest {
                 +   "</screenBrightnessRampSlowIncreaseIdle>\n";
     }
 
+    private String getBedTimeModeWearCurveConfig() {
+        return  "<luxToBrightnessMapping>\n"
+                +           "<mode>bedtime_wear</mode>\n"
+                +           "<setting>dim</setting>\n"
+                +           "<map>\n"
+                +               "<point>\n"
+                +                   "<first>0</first>\n"
+                +                   "<second>0.2</second>\n"
+                +               "</point>\n"
+                +               "<point>\n"
+                +                   "<first>10</first>\n"
+                +                   "<second>0.3</second>\n"
+                +               "</point>\n"
+                +           "</map>\n"
+                +       "</luxToBrightnessMapping>\n"
+                +       "<luxToBrightnessMapping>\n"
+                +           "<mode>bedtime_wear</mode>\n"
+                +           "<setting>normal</setting>\n"
+                +           "<map>\n"
+                +               "<point>\n"
+                +                   "<first>0</first>\n"
+                +                   "<second>0.3</second>\n"
+                +               "</point>\n"
+                +               "<point>\n"
+                +                   "<first>20</first>\n"
+                +                   "<second>0.65</second>\n"
+                +               "</point>\n"
+                +           "</map>\n"
+                +       "</luxToBrightnessMapping>\n"
+                +       "<luxToBrightnessMapping>\n"
+                +           "<mode>bedtime_wear</mode>\n"
+                +           "<setting>bright</setting>\n"
+                +           "<map>\n"
+                +               "<point>\n"
+                +                   "<first>0</first>\n"
+                +                   "<second>0.65</second>\n"
+                +               "</point>\n"
+                +               "<point>\n"
+                +                   "<first>30</first>\n"
+                +                   "<second>0.95</second>\n"
+                +               "</point>\n"
+                +           "</map>\n"
+                +       "</luxToBrightnessMapping>\n";
+    }
+
     private String getPowerThrottlingConfig() {
         return  "<powerThrottlingConfig >\n"
                 +       "<brightnessLowestCapAllowed>0.1</brightnessLowestCapAllowed>\n"
-                +       "<customAnimationRateSec>15</customAnimationRateSec>\n"
+                +       "<customAnimationRate>15</customAnimationRate>\n"
                 +       "<pollingWindowMaxMillis>20000</pollingWindowMaxMillis>\n"
                 +       "<pollingWindowMinMillis>10000</pollingWindowMinMillis>\n"
                 +       "<powerThrottlingMap>\n"
@@ -1481,6 +1555,7 @@ public final class DisplayDeviceConfigTest {
                 +               "</point>\n"
                 +           "</map>\n"
                 +       "</luxToBrightnessMapping>\n"
+                +       getBedTimeModeWearCurveConfig()
                 +       "<idleStylusTimeoutMillis>1000</idleStylusTimeoutMillis>\n"
                 +   "</autoBrightness>\n"
                 +  getPowerThrottlingConfig()

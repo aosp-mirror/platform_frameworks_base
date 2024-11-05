@@ -127,6 +127,10 @@ interface NativeInputManagerService {
 
     void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
 
+    void setMouseReverseVerticalScrollingEnabled(boolean enabled);
+
+    void setMouseSwapPrimaryButtonEnabled(boolean enabled);
+
     void setTouchpadPointerSpeed(int speed);
 
     void setTouchpadNaturalScrollingEnabled(boolean enabled);
@@ -138,6 +142,8 @@ interface NativeInputManagerService {
     void setShouldNotifyTouchpadHardwareState(boolean enabled);
 
     void setTouchpadRightClickZoneEnabled(boolean enabled);
+
+    void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
 
     void setShowTouches(boolean enabled);
 
@@ -283,6 +289,17 @@ interface NativeInputManagerService {
      */
     int getLastUsedInputDeviceId();
 
+    /**
+     * Set whether the given input device can wake up the kernel from sleep
+     * when it generates input events. By default, usually only internal (built-in)
+     * input devices can wake the kernel from sleep. For an external input device
+     * that supports remote wakeup to be able to wake the kernel, this must be called
+     * after each time the device is connected/added.
+     *
+     * Returns true if setting power wakeup was successful.
+     */
+    boolean setKernelWakeEnabled(int deviceId, boolean enabled);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -388,6 +405,12 @@ interface NativeInputManagerService {
         public native void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
 
         @Override
+        public native void setMouseReverseVerticalScrollingEnabled(boolean enabled);
+
+        @Override
+        public native void setMouseSwapPrimaryButtonEnabled(boolean enabled);
+
+        @Override
         public native void setTouchpadPointerSpeed(int speed);
 
         @Override
@@ -404,6 +427,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadRightClickZoneEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
 
         @Override
         public native void setShowTouches(boolean enabled);
@@ -563,5 +589,8 @@ interface NativeInputManagerService {
 
         @Override
         public native int getLastUsedInputDeviceId();
+
+        @Override
+        public native boolean setKernelWakeEnabled(int deviceId, boolean enabled);
     }
 }

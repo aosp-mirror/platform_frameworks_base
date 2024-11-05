@@ -36,7 +36,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.Theme
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController
-import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.EducationViewConfig
+import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipEducationViewConfig
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipColorScheme
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
@@ -137,7 +137,7 @@ class AppHandleEducationController(
     // TODO: b/370546801 - Differentiate between user dismissing the tooltip vs following the cue.
     // Populate information important to inflate app handle education tooltip.
     val appHandleTooltipConfig =
-        EducationViewConfig(
+        TooltipEducationViewConfig(
             tooltipViewLayout = R.layout.desktop_windowing_education_top_arrow_tooltip,
             tooltipColorScheme = tooltipColorScheme,
             tooltipViewGlobalCoordinates = tooltipGlobalCoordinates,
@@ -196,7 +196,7 @@ class AppHandleEducationController(
                       windowingOptionPillHeight / 2)
           // Populate information important to inflate windowing image button education tooltip.
           val windowingImageButtonTooltipConfig =
-              EducationViewConfig(
+              TooltipEducationViewConfig(
                   tooltipViewLayout = R.layout.desktop_windowing_education_left_arrow_tooltip,
                   tooltipColorScheme = tooltipColorScheme,
                   tooltipViewGlobalCoordinates = tooltipGlobalCoordinates,
@@ -249,7 +249,7 @@ class AppHandleEducationController(
                   globalAppChipBounds.top + globalAppChipBounds.height() / 2)
           // Populate information important to inflate exit desktop mode education tooltip.
           val exitWindowingTooltipConfig =
-              EducationViewConfig(
+              TooltipEducationViewConfig(
                   tooltipViewLayout = R.layout.desktop_windowing_education_left_arrow_tooltip,
                   tooltipColorScheme = tooltipColorScheme,
                   tooltipViewGlobalCoordinates = tooltipGlobalCoordinates,
@@ -325,10 +325,15 @@ class AppHandleEducationController(
   /**
    * Listens to the changes to [WindowingEducationProto#hasEducationViewedTimestampMillis()] in
    * datastore proto object.
+   *
+   * If [SHOULD_OVERRIDE_EDUCATION_CONDITIONS] is true, this flow will always emit false. That means
+   * it will emit education has not been viewed yet always.
    */
   private fun isEducationViewedFlow(): Flow<Boolean> =
       appHandleEducationDatastoreRepository.dataStoreFlow
-          .map { preferences -> preferences.hasEducationViewedTimestampMillis() }
+          .map { preferences ->
+            preferences.hasEducationViewedTimestampMillis() && !SHOULD_OVERRIDE_EDUCATION_CONDITIONS
+          }
           .distinctUntilChanged()
 
   /**
@@ -352,5 +357,10 @@ class AppHandleEducationController(
 
     val APP_HANDLE_EDUCATION_TIMEOUT_MILLIS: Long
       get() = SystemProperties.getLong("persist.windowing_app_handle_education_timeout", 400L)
+
+    val SHOULD_OVERRIDE_EDUCATION_CONDITIONS: Boolean
+      get() =
+          SystemProperties.getBoolean(
+              "persist.desktop_windowing_app_handle_education_override_conditions", false)
   }
 }

@@ -198,15 +198,17 @@ private fun SceneScope.QuickSettingsScene(
     val shadeHorizontalPadding =
         dimensionResource(id = R.dimen.notification_panel_margin_horizontal)
 
-    BrightnessMirror(
-        viewModel = brightnessMirrorViewModel,
-        qsSceneAdapter = viewModel.qsSceneAdapter,
-        modifier =
-            Modifier.thenIf(cutoutLocation != CutoutLocation.CENTER) {
-                    Modifier.displayCutoutPadding()
-                }
-                .padding(horizontal = shadeHorizontalPadding),
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        BrightnessMirror(
+            viewModel = brightnessMirrorViewModel,
+            qsSceneAdapter = viewModel.qsSceneAdapter,
+            modifier =
+                Modifier.thenIf(cutoutLocation != CutoutLocation.CENTER) {
+                        Modifier.displayCutoutPadding()
+                    }
+                    .align(Alignment.TopCenter),
+        )
+    }
 
     val shouldPunchHoleBehindScrim =
         layoutState.isTransitioningBetween(Scenes.Gone, Scenes.QuickSettings) ||

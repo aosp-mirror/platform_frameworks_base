@@ -39,7 +39,7 @@ import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.keyguard.AuthInteractionProperties
@@ -52,8 +52,8 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.view.onApplyWindowInsets
 import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.common.ui.view.onTouchListener
+import com.android.systemui.customization.R as customR
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
@@ -95,7 +95,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Bind occludingAppDeviceEntryMessageViewModel to run whenever the keyguard view is attached. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -180,16 +180,12 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    if (
-                        KeyguardBottomAreaRefactor.isEnabled || DeviceEntryUdfpsRefactor.isEnabled
-                    ) {
-                        launch("$TAG#alpha") {
-                            viewModel.alpha(viewState).collect { alpha ->
-                                view.alpha = alpha
-                                if (KeyguardBottomAreaRefactor.isEnabled) {
-                                    childViews[statusViewId]?.alpha = alpha
-                                    childViews[burnInLayerId]?.alpha = alpha
-                                }
+                    launch("$TAG#alpha") {
+                        viewModel.alpha(viewState).collect { alpha ->
+                            view.alpha = alpha
+                            if (KeyguardBottomAreaRefactor.isEnabled) {
+                                childViews[statusViewId]?.alpha = alpha
+                                childViews[burnInLayerId]?.alpha = alpha
                             }
                         }
                     }
@@ -223,7 +219,6 @@ object KeyguardRootViewBinder {
                                                 indicationArea,
                                                 startButton,
                                                 endButton,
-                                                lockIcon,
                                                 deviceEntryIcon -> {
                                                     // Do not move these views
                                                 }
@@ -622,12 +617,11 @@ object KeyguardRootViewBinder {
     private val statusViewId = R.id.keyguard_status_view
     private val burnInLayerId = R.id.burn_in_layer
     private val aodNotificationIconContainerId = R.id.aod_notification_icon_container
-    private val largeClockId = R.id.lockscreen_clock_view_large
-    private val smallClockId = R.id.lockscreen_clock_view
+    private val largeClockId = customR.id.lockscreen_clock_view_large
+    private val smallClockId = customR.id.lockscreen_clock_view
     private val indicationArea = R.id.keyguard_indication_area
     private val startButton = R.id.start_button
     private val endButton = R.id.end_button
-    private val lockIcon = R.id.lock_icon_view
     private val deviceEntryIcon = R.id.device_entry_icon_view
     private val nsslPlaceholderId = R.id.nssl_placeholder
     private val authInteractionProperties = AuthInteractionProperties()

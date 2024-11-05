@@ -14,7 +14,7 @@ import com.android.systemui.flags.Flags
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Serves as an intermediary between QuickAccessWalletService and ContextualCardManager (in PCC).
@@ -44,7 +44,7 @@ constructor(
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
         if (registerNewWalletCardInBackground()) {
-            scope.launch(backgroundDispatcher) {
+            scope.launch(context = backgroundDispatcher) {
                 controller.allWalletCards.collect { cards ->
                     val cardsSize = cards.size
                     Log.i(TAG, "Number of cards registered $cardsSize")

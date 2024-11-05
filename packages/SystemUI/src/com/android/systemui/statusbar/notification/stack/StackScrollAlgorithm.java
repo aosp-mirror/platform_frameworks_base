@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
+import com.android.systemui.Flags;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
@@ -467,10 +468,20 @@ public class StackScrollAlgorithm {
                     if (v instanceof EmptyShadeView) {
                         emptyShadeVisible = true;
                     }
-                    if (v instanceof FooterView) {
+                    if (v instanceof FooterView footerView) {
                         if (emptyShadeVisible || notGoneIndex == 0) {
                             // if the empty shade is visible or the footer is the first visible
                             // view, we're in a transitory state so let's leave the footer alone.
+                            if (Flags.notificationsFooterVisibilityFix()
+                                    && !SceneContainerFlag.isEnabled()) {
+                                // ...except for the hidden state, to prevent it from flashing on
+                                // the screen (this piece is copied from updateChild, and is not
+                                // necessary in flexiglass).
+                                if (footerView.shouldBeHidden()
+                                        || !ambientState.isShadeExpanded()) {
+                                    footerView.getViewState().hidden = true;
+                                }
+                            }
                             continue;
                         }
                     }

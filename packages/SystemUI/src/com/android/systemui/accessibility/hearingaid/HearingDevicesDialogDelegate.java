@@ -42,6 +42,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +53,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.HapClientProfile;
@@ -428,10 +430,16 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         } catch (Resources.NotFoundException e) {
             Log.i(TAG, "No hearing devices related tool config resource");
         }
-        final int listSize = toolItemList.size();
-        for (int i = 0; i < listSize; i++) {
+        for (int i = 0; i < toolItemList.size(); i++) {
             View view = createHearingToolView(context, toolItemList.get(i));
             mRelatedToolsContainer.addView(view);
+            if (i != toolItemList.size() - 1) {
+                final int spaceSize = context.getResources().getDimensionPixelSize(
+                        R.dimen.hearing_devices_layout_margin);
+                Space space = new Space(context);
+                space.setLayoutParams(new LinearLayout.LayoutParams(spaceSize, 0));
+                mRelatedToolsContainer.addView(space);
+            }
         }
     }
 
@@ -492,6 +500,10 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         TextView text = view.requireViewById(R.id.tool_name);
         view.setContentDescription(item.getToolName());
         icon.setImageDrawable(item.getToolIcon());
+        if (item.isCustomIcon()) {
+            icon.getDrawable().mutate().setTint(Utils.getColorAttr(context,
+                    com.android.internal.R.attr.materialColorOnPrimaryContainer).getDefaultColor());
+        }
         text.setText(item.getToolName());
         Intent intent = item.getToolIntent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -517,7 +529,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             return new ToolItem(
                     context.getString(R.string.quick_settings_hearing_devices_live_caption_title),
                     context.getDrawable(R.drawable.ic_volume_odi_captions),
-                    LIVE_CAPTION_INTENT);
+                    LIVE_CAPTION_INTENT,
+                    /* isCustomIcon= */ true);
         }
 
         return null;

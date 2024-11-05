@@ -36,7 +36,8 @@ import java.util.List;
  * This component is used as the main switch of the page
  * to enable or disable the prefereces on the page.
  */
-public class MainSwitchPreference extends TwoStatePreference implements OnCheckedChangeListener {
+public class MainSwitchPreference extends TwoStatePreference
+        implements OnCheckedChangeListener, GroupSectionDividerMixin {
 
     private final List<OnCheckedChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
@@ -80,7 +81,11 @@ public class MainSwitchPreference extends TwoStatePreference implements OnChecke
     }
 
     private void init(Context context, AttributeSet attrs) {
-        setLayoutResource(R.layout.settingslib_main_switch_layout);
+        boolean isExpressive = SettingsThemeHelper.isExpressiveTheme(context);
+        int resId = isExpressive
+                ? R.layout.settingslib_expressive_main_switch_layout
+                : R.layout.settingslib_main_switch_layout;
+        setLayoutResource(resId);
         mSwitchChangeListeners.add(this);
         if (attrs != null) {
             final TypedArray a = context.obtainStyledAttributes(attrs,

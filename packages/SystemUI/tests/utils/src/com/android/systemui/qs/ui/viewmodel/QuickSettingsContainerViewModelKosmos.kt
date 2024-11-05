@@ -16,18 +16,25 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import com.android.systemui.brightness.ui.viewmodel.brightnessSliderViewModel
+import com.android.systemui.brightness.ui.viewmodel.brightnessSliderViewModelFactory
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.quickQuickSettingsViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.quickQuickSettingsViewModelFactory
 import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
 
-val Kosmos.quickSettingsContainerViewModel by
+val Kosmos.quickSettingsContainerViewModelFactory by
     Kosmos.Fixture {
-        QuickSettingsContainerViewModel(
-            brightnessSliderViewModel,
-            tileGridViewModel,
-            editModeViewModel,
-            quickQuickSettingsViewModel,
-        )
+        object : QuickSettingsContainerViewModel.Factory {
+            override fun create(
+                supportsBrightnessMirroring: Boolean
+            ): QuickSettingsContainerViewModel {
+                return QuickSettingsContainerViewModel(
+                    brightnessSliderViewModelFactory,
+                    quickQuickSettingsViewModelFactory,
+                    supportsBrightnessMirroring,
+                    tileGridViewModel,
+                    editModeViewModel,
+                )
+            }
+        }
     }

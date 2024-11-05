@@ -50,7 +50,7 @@ java_library_static {
     ],
 }
 
-genrule {
+java_genrule {
     name: "services.core.protologsrc",
     srcs: [
         ":protolog-impl",
@@ -70,7 +70,7 @@ genrule {
     out: ["services.core.protolog.srcjar"],
 }
 
-genrule {
+java_genrule {
     name: "generate-protolog.json",
     srcs: [
         ":protolog-groups",
@@ -87,7 +87,7 @@ genrule {
     out: ["services.core.protolog.json"],
 }
 
-genrule {
+java_genrule {
     name: "gen-core.protolog.pb",
     srcs: [
         ":protolog-groups",
@@ -126,6 +126,7 @@ java_library_static {
         "platform_service_defaults",
         "android.hardware.power-java_shared",
         "latest_android_hardware_broadcastradio_java_static",
+        "services_crashrecovery_stubs_conditionally",
     ],
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
@@ -284,7 +285,7 @@ prebuilt_etc {
     src: "java/com/android/server/location/gnss/gps_debug.conf",
 }
 
-genrule {
+java_genrule {
     name: "services.core.json.gz",
     srcs: [":generate-protolog.json"],
     out: ["services.core.protolog.json.gz"],

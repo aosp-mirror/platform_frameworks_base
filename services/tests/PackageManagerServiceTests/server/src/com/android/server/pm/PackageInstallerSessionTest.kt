@@ -21,6 +21,8 @@ import android.content.pm.PackageInstaller.SessionParams
 import android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DEFAULT
 import android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DENIED
 import android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
+import android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_CLOSED
+import android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_OPEN
 import android.content.pm.PackageManager
 import android.content.pm.verify.domain.DomainSet
 import android.os.Parcel
@@ -33,6 +35,11 @@ import com.android.internal.os.BackgroundThread
 import com.android.server.pm.verify.pkg.VerifierController
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 import libcore.io.IoUtils
 import org.junit.Before
 import org.junit.Rule
@@ -46,11 +53,6 @@ import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
 
 @Presubmit
 class PackageInstallerSessionTest {
@@ -197,7 +199,9 @@ class PackageInstallerSessionTest {
             /* stagedSessionErrorCode */ PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
             /* stagedSessionErrorMessage */ "some error",
             /* preVerifiedDomains */ DomainSet(setOf("com.foo", "com.bar")),
-            /* VerifierController */ mock(VerifierController::class.java)
+            /* VerifierController */ mock(VerifierController::class.java),
+            /* initialVerificationPolicy */ VERIFICATION_POLICY_BLOCK_FAIL_OPEN,
+            /* currentVerificationPolicy */ VERIFICATION_POLICY_BLOCK_FAIL_CLOSED
         )
     }
 
@@ -289,6 +293,7 @@ class PackageInstallerSessionTest {
         assertThat(expected.installerPackageName).isEqualTo(actual.installerPackageName)
         assertThat(expected.isMultiPackage).isEqualTo(actual.isMultiPackage)
         assertThat(expected.isStaged).isEqualTo(actual.isStaged)
+        assertThat(expected.forceVerification).isEqualTo(actual.forceVerification)
     }
 
     private fun assertEquals(
@@ -339,6 +344,8 @@ class PackageInstallerSessionTest {
         assertThat(expected.childSessionIds).asList()
             .containsExactlyElementsIn(actual.childSessionIds.toList())
         assertThat(expected.preVerifiedDomains).isEqualTo(actual.preVerifiedDomains)
+        assertThat(expected.initialVerificationPolicy).isEqualTo(actual.initialVerificationPolicy)
+        assertThat(expected.currentVerificationPolicy).isEqualTo(actual.currentVerificationPolicy)
     }
 
     private fun assertInstallSourcesEquivalent(expected: InstallSource, actual: InstallSource) {

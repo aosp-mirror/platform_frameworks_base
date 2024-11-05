@@ -21,6 +21,7 @@ import static android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY;
 import static android.window.OnBackInvokedDispatcher.PRIORITY_SYSTEM_NAVIGATION_OBSERVER;
 
 import static com.android.window.flags.Flags.FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER;
+import static com.android.window.flags.Flags.FLAG_PREDICTIVE_BACK_TIMESTAMP_API;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -486,6 +487,7 @@ public class WindowOnBackInvokedDispatcherTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_PREDICTIVE_BACK_TIMESTAMP_API)
     public void onBackInvoked_notCalledAfterCallbackUnregistration()
             throws RemoteException, InterruptedException {
         // Setup a callback that unregisters itself after the gesture is finished but before the
@@ -586,13 +588,13 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test(expected = IllegalArgumentException.class)
     @RequiresFlagsDisabled(FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
-    public void testNoUiCallback_registrationFailsWithoutFlaggedApiEnabled() {
+    public void testObserverCallback_registrationFailsWithoutFlaggedApiEnabled() {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_SYSTEM_NAVIGATION_OBSERVER, mCallback2);
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
-    public void testNoUiCallback_invokedWithSystemCallback() throws RemoteException {
+    public void testObserverCallback_invokedWithSystemCallback() throws RemoteException {
         mDispatcher.registerSystemOnBackInvokedCallback(mCallback1);
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_SYSTEM_NAVIGATION_OBSERVER, mCallback2);
 
@@ -607,7 +609,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
         callbackInfo.getCallback().onBackProgressed(mBackEvent);
         waitForIdle();
-        verify(mCallback1).onBackProgressed(any());
+        verify(mCallback1, atLeast(1)).onBackProgressed(any());
         verify(mCallback2, never()).onBackProgressed(any());
 
         callbackInfo.getCallback().onBackCancelled();
@@ -625,7 +627,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
-    public void testNoUiCallback_notInvokedWithNonSystemCallback() throws RemoteException {
+    public void testObserverCallback_notInvokedWithNonSystemCallback() throws RemoteException {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_SYSTEM_NAVIGATION_OBSERVER, mCallback2);
 
@@ -640,7 +642,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
         callbackInfo.getCallback().onBackProgressed(mBackEvent);
         waitForIdle();
-        verify(mCallback1).onBackProgressed(any());
+        verify(mCallback1, atLeast(1)).onBackProgressed(any());
         verify(mCallback2, never()).onBackProgressed(any());
 
         callbackInfo.getCallback().onBackCancelled();
@@ -658,7 +660,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
-    public void testNoUiCallback_reregistrations() {
+    public void testObserverCallback_reregistrations() {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_SYSTEM_NAVIGATION_OBSERVER, mCallback1);
         assertCallbacksSize(/* default */ 0, /* overlay */ 0, /* observer */ 1);
         assertEquals(mCallback1, mDispatcher.mSystemNavigationObserverCallback);
@@ -684,9 +686,8 @@ public class WindowOnBackInvokedDispatcherTest {
         return new BackMotionEvent(
                 /* touchX = */ 0,
                 /* touchY = */ 0,
+                /* frameTimeMillis = */ 0,
                 /* progress = */ progress,
-                /* velocityX = */ 0,
-                /* velocityY = */ 0,
                 /* triggerBack = */ false,
                 /* swipeEdge = */ BackEvent.EDGE_LEFT,
                 /* departingAnimationTarget = */ null);

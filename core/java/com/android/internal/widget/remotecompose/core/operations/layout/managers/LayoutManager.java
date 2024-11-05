@@ -24,53 +24,58 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
 
-/**
- * Base class for layout managers -- resizable components.
- */
+/** Base class for layout managers -- resizable components. */
 public abstract class LayoutManager extends LayoutComponent implements Measurable {
 
     Size mCachedWrapSize = new Size(0f, 0f);
 
-    public LayoutManager(Component parent, int componentId, int animationId,
-                         float x, float y, float width, float height) {
+    public LayoutManager(
+            Component parent,
+            int componentId,
+            int animationId,
+            float x,
+            float y,
+            float width,
+            float height) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
-    /**
-     * Implemented by subclasses to provide a layout/measure pass
-     */
-    public void internalLayoutMeasure(PaintContext context,
-                                      MeasurePass measure) {
+    /** Implemented by subclasses to provide a layout/measure pass */
+    public void internalLayoutMeasure(PaintContext context, MeasurePass measure) {
         // nothing here
     }
 
-    /**
-     * Subclasses can implement this to provide wrap sizing
-     */
-    public void computeWrapSize(PaintContext context, float maxWidth, float maxHeight,
-                                MeasurePass measure, Size size) {
+    /** Subclasses can implement this to provide wrap sizing */
+    public void computeWrapSize(
+            PaintContext context, float maxWidth, float maxHeight, MeasurePass measure, Size size) {
         // nothing here
     }
 
-    /**
-     * Subclasses can implement this when not in wrap sizing
-     */
-    public void computeSize(PaintContext context, float minWidth, float maxWidth,
-                            float minHeight, float maxHeight, MeasurePass measure) {
+    /** Subclasses can implement this when not in wrap sizing */
+    public void computeSize(
+            PaintContext context,
+            float minWidth,
+            float maxWidth,
+            float minHeight,
+            float maxHeight,
+            MeasurePass measure) {
         // nothing here
     }
 
-    /**
-     * Base implementation of the measure resolution
-     */
+    /** Base implementation of the measure resolution */
     @Override
-    public void measure(PaintContext context, float minWidth, float maxWidth,
-                        float minHeight, float maxHeight, MeasurePass measure) {
+    public void measure(
+            PaintContext context,
+            float minWidth,
+            float maxWidth,
+            float minHeight,
+            float maxHeight,
+            MeasurePass measure) {
         boolean hasWrap = true;
-        float measuredWidth = Math.min(maxWidth,
-                computeModifierDefinedWidth() - mMarginLeft - mMarginRight);
-        float measuredHeight = Math.min(maxHeight,
-                computeModifierDefinedHeight() - mMarginTop - mMarginBottom);
+        float measuredWidth =
+                Math.min(maxWidth, computeModifierDefinedWidth() - mMarginLeft - mMarginRight);
+        float measuredHeight =
+                Math.min(maxHeight, computeModifierDefinedHeight() - mMarginTop - mMarginBottom);
         float insetMaxWidth = maxWidth - mMarginLeft - mMarginRight;
         float insetMaxHeight = maxHeight - mMarginTop - mMarginBottom;
         if (mWidthModifier.isWrap() || mHeightModifier.isWrap()) {
@@ -129,9 +134,7 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         internalLayoutMeasure(context, measure);
     }
 
-    /**
-     * basic layout of internal components
-     */
+    /** basic layout of internal components */
     @Override
     public void layout(RemoteContext context, MeasurePass measure) {
         super.layout(context, measure);
@@ -141,6 +144,20 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         for (Component c : mChildrenComponents) {
             c.layout(context, measure);
         }
+        this.mNeedsMeasure = false;
+    }
+
+    /**
+     * Only layout self, not children
+     *
+     * @param context
+     * @param measure
+     */
+    public void selfLayout(RemoteContext context, MeasurePass measure) {
+        super.layout(context, measure);
+        ComponentMeasure self = measure.get(this);
+
+        mComponentModifiers.layout(context, self.getW(), self.getH());
         this.mNeedsMeasure = false;
     }
 }

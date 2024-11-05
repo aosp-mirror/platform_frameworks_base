@@ -109,8 +109,8 @@ sealed class DragToDesktopTransitionHandler(
      * after one of the "end" or "cancel" transitions is merged into this transition.
      */
     fun startDragToDesktopTransition(
-        taskInfo: RunningTaskInfo,
-        dragToDesktopAnimator: MoveToDesktopAnimator
+        taskId: Int,
+        dragToDesktopAnimator: MoveToDesktopAnimator,
     ) {
         if (inProgress) {
             ProtoLog.v(
@@ -137,26 +137,23 @@ sealed class DragToDesktopTransitionHandler(
             )
         val wct = WindowContainerTransaction()
         wct.sendPendingIntent(pendingIntent, launchHomeIntent, Bundle())
-        // The home launch done above will result in an attempt to move the task to pip if
-        // applicable, resulting in a broken state. Prevent that here.
-        wct.setDoNotPip(taskInfo.token)
         val startTransitionToken =
             transitions.startTransition(TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP, wct, this)
 
         transitionState =
-            if (isSplitTask(taskInfo.taskId)) {
+            if (isSplitTask(taskId)) {
                 val otherTask =
-                    getOtherSplitTask(taskInfo.taskId)
+                    getOtherSplitTask(taskId)
                         ?: throw IllegalStateException("Expected split task to have a counterpart.")
                 TransitionState.FromSplit(
-                    draggedTaskId = taskInfo.taskId,
+                    draggedTaskId = taskId,
                     dragAnimator = dragToDesktopAnimator,
                     startTransitionToken = startTransitionToken,
                     otherSplitTask = otherTask
                 )
             } else {
                 TransitionState.FromFullscreen(
-                    draggedTaskId = taskInfo.taskId,
+                    draggedTaskId = taskId,
                     dragAnimator = dragToDesktopAnimator,
                     startTransitionToken = startTransitionToken
                 )
@@ -648,7 +645,13 @@ sealed class DragToDesktopTransitionHandler(
             state.startAborted = true
             // The start-transition (DRAG_HOLD) is aborted, cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
-        } else if (state.cancelTransitionToken != transition) {
+        } else if (state.cancelTransitionToken == transition) {
+            state.draggedTaskChange?.leash?.let {
+                state.startTransitionFinishTransaction?.show(it)
+            }
+            state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
+            clearState()
+        } else {
             // This transition being aborted is neither the start, nor the cancel transition, so
             // it must be the finish transition (DRAG_RELEASE); cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
@@ -863,7 +866,8 @@ sealed class DragToDesktopTransitionHandler(
 
     companion object {
         /** The duration of the animation to commit or cancel the drag-to-desktop gesture. */
-        internal const val DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS = 336L
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        const val DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS = 336L
     }
 }
 

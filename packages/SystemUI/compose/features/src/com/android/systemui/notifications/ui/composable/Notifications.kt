@@ -25,6 +25,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollBy
@@ -50,9 +51,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -60,6 +63,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -95,13 +99,17 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.ui.composable.ShadeHeader
+import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -315,6 +323,12 @@ fun SceneScope.NotificationScrollingStack(
      */
     val stackHeight = remember { mutableIntStateOf(0) }
 
+    /**
+     * Space available for the notification stack on the screen. These bounds don't scroll off the
+     * screen, and respect the scrim paddings, scrim clipping.
+     */
+    val stackBoundsOnScreen = remember { mutableStateOf(Rect.Zero) }
+
     val scrimRounding =
         viewModel.shadeScrimRounding.collectAsStateWithLifecycle(ShadeScrimRounding())
 
@@ -348,16 +362,27 @@ fun SceneScope.NotificationScrollingStack(
     // The top y bound of the IME.
     val imeTop = remember { mutableFloatStateOf(0f) }
 
-    // we are not scrolled to the top unless the scrim is at its maximum offset.
-    LaunchedEffect(viewModel, scrimOffset) {
-        snapshotFlow { scrimOffset.value >= 0f }
-            .collect { isScrolledToTop -> viewModel.setScrolledToTop(isScrolledToTop) }
+    val shadeScrollState by remember {
+        derivedStateOf {
+            ShadeScrollState(
+                // we are not scrolled to the top unless the scrim is at its maximum offset.
+                isScrolledToTop = scrimOffset.value >= 0f,
+                scrollPosition = scrollState.value,
+                maxScrollPosition = scrollState.maxValue,
+            )
+        }
     }
 
+    LaunchedEffect(shadeScrollState) { viewModel.setScrollState(shadeScrollState) }
+
     // if contentHeight drops below minimum visible scrim height while scrim is
-    // expanded, reset scrim offset.
-    LaunchedEffect(stackHeight, scrimOffset) {
-        snapshotFlow { stackHeight.intValue < minVisibleScrimHeight() && scrimOffset.value < 0f }
+    // expanded and IME is not showing, reset scrim offset.
+    LaunchedEffect(stackHeight, scrimOffset, imeTop) {
+        snapshotFlow {
+                stackHeight.intValue < minVisibleScrimHeight() &&
+                    scrimOffset.value < 0f &&
+                    imeTop.floatValue <= 0f
+            }
             .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.animateTo(0f, tween()) }
     }
 
@@ -395,12 +420,46 @@ fun SceneScope.NotificationScrollingStack(
             }
     }
 
+    // TalkBack sends a scroll event, when it wants to navigate to an item that is not displayed in
+    // the current viewport.
+    LaunchedEffect(viewModel) {
+        viewModel.setAccessibilityScrollEventConsumer { event ->
+            // scroll up, or down by the height of the visible portion of the notification stack
+            val direction =
+                when (event) {
+                    AccessibilityScrollEvent.SCROLL_UP -> -1
+                    AccessibilityScrollEvent.SCROLL_DOWN -> 1
+                }
+            val viewPortHeight = stackBoundsOnScreen.value.height
+            val scrollStep = max(0f, viewPortHeight - stackScrollView.stackBottomInset)
+            val scrollPosition = scrollState.value.toFloat()
+            val scrollRange = scrollState.maxValue.toFloat()
+            val targetScroll = (scrollPosition + direction * scrollStep).coerceIn(0f, scrollRange)
+            coroutineScope.launch {
+                scrollNotificationStack(
+                    delta = targetScroll - scrollPosition,
+                    animate = false,
+                    scrimOffset = scrimOffset,
+                    minScrimOffset = minScrimOffset,
+                    scrollState = scrollState,
+                )
+            }
+        }
+        try {
+            awaitCancellation()
+        } finally {
+            viewModel.setAccessibilityScrollEventConsumer(null)
+        }
+    }
+
+    val flingBehavior = ScrollableDefaults.flingBehavior()
     val scrimNestedScrollConnection =
         shadeSession.rememberSession(
             scrimOffset,
             maxScrimTop,
             minScrimTop,
             isCurrentGestureOverscroll,
+            flingBehavior,
         ) {
             NotificationScrimNestedScrollConnection(
                 scrimOffset = { scrimOffset.value },
@@ -413,6 +472,7 @@ fun SceneScope.NotificationScrollingStack(
                 contentHeight = { stackHeight.intValue.toFloat() },
                 minVisibleScrimHeight = minVisibleScrimHeight,
                 isCurrentGestureOverscroll = { isCurrentGestureOverscroll.value },
+                flingBehavior = flingBehavior,
             )
         }
 
@@ -520,6 +580,9 @@ fun SceneScope.NotificationScrollingStack(
                         .verticalScroll(scrollState)
                         .padding(top = topPadding)
                         .fillMaxWidth()
+                        .onGloballyPositioned { coordinates ->
+                            stackBoundsOnScreen.value = coordinates.boundsInWindow()
+                        }
             ) {
                 NotificationPlaceholder(
                     stackScrollView = stackScrollView,

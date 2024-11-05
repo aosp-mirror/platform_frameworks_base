@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -29,9 +29,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Apply a value change on an integer variable.
- */
+/** Apply a value change on an integer variable. */
 public class ValueIntegerChangeActionOperation implements ActionOperation {
     private static final int OP_CODE = Operations.VALUE_INTEGER_CHANGE_ACTION;
 
@@ -54,28 +52,23 @@ public class ValueIntegerChangeActionOperation implements ActionOperation {
 
     @Override
     public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, serializedName()
-                + " = " + mTargetValueId + " -> " + mValue);
+        serializer.append(indent, serializedName() + " = " + mTargetValueId + " -> " + mValue);
     }
 
     @Override
-    public void apply(RemoteContext context) {
-    }
+    public void apply(RemoteContext context) {}
 
     @Override
     public String deepToString(String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
+    @Override
+    public void write(WireBuffer buffer) {}
 
     @Override
-    public void write(WireBuffer buffer) {
-
-    }
-
-    @Override
-    public void runAction(RemoteContext context, CoreDocument document,
-                          Component component, float x, float y) {
+    public void runAction(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
         context.overrideInteger(mTargetValueId, mValue);
     }
 
@@ -93,11 +86,10 @@ public class ValueIntegerChangeActionOperation implements ActionOperation {
 
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ValueIntegerChangeActionOperation")
-                .description("ValueIntegerChange action. "
-                        + " This operation represents a value change for the given id")
+                .description(
+                        "ValueIntegerChange action. "
+                                + " This operation represents a value change for the given id")
                 .field(INT, "TARGET_VALUE_ID", "Value ID")
-                .field(INT, "VALUE", "integer value to be assigned to the target")
-        ;
+                .field(INT, "VALUE", "integer value to be assigned to the target");
     }
-
 }

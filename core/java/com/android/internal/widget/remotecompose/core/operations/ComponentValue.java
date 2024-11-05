@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -23,6 +23,7 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.SerializableToString;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
@@ -82,15 +83,16 @@ public class ComponentValue implements Operation, SerializableToString {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a component-related value (eg its width, height etc.)")
-                .field(INT, "TYPE",
+                .field(
+                        DocumentedOperation.INT,
+                        "TYPE",
                         "The type of value, either WIDTH(0) or HEIGHT(1)")
-                .field(INT, "COMPONENT_ID",
-                        "The component id to reference")
-                .field(INT, "VALUE_ID",
+                .field(INT, "COMPONENT_ID", "The component id to reference")
+                .field(
+                        INT,
+                        "VALUE_ID",
                         "The id of the RemoteFloat representing the described"
                                 + " component value, which can be used in expressions");
     }
@@ -105,14 +107,11 @@ public class ComponentValue implements Operation, SerializableToString {
      * Writes out the ComponentValue to the buffer
      *
      * @param buffer buffer to write to
-     * @param type   type of value (WIDTH or HEIGHT)
-     * @param componentId     component id to reference
-     * @param valueId  remote float used to represent the component value
+     * @param type type of value (WIDTH or HEIGHT)
+     * @param componentId component id to reference
+     * @param valueId remote float used to represent the component value
      */
-    public static void apply(WireBuffer buffer,
-                             int type,
-                             int componentId,
-                             int valueId) {
+    public static void apply(WireBuffer buffer, int type, int componentId, int valueId) {
         buffer.start(OP_CODE);
         buffer.writeInt(type);
         buffer.writeInt(componentId);
@@ -124,13 +123,20 @@ public class ComponentValue implements Operation, SerializableToString {
         return null;
     }
 
+    @Override
     public void serializeToString(int indent, StringSerializer serializer) {
         String type = "WIDTH";
         if (mType == HEIGHT) {
             type = "HEIGHT";
         }
-        serializer.append(indent, CLASS_NAME
-                + " value " + mValueId + " set to "
-                + type + " of Component " + mComponentID);
+        serializer.append(
+                indent,
+                CLASS_NAME
+                        + " value "
+                        + mValueId
+                        + " set to "
+                        + type
+                        + " of Component "
+                        + mComponentID);
     }
 }

@@ -19,6 +19,7 @@ package com.android.systemui.qs.dagger;
 import com.android.systemui.media.dagger.MediaModule;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.ReduceBrightColorsControllerImpl;
+import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule;
 import com.android.systemui.qs.external.QSExternalModule;
 import com.android.systemui.qs.panels.dagger.PanelsModule;
 import com.android.systemui.qs.pipeline.dagger.QSPipelineModule;
@@ -40,6 +41,7 @@ import dagger.multibindings.Multibinds;
         includes = {
                 MediaModule.class,
                 PanelsModule.class,
+                QSFragmentComposeModule.class,
                 QSExternalModule.class,
                 QSFlagsModule.class,
                 QSHostModule.class,

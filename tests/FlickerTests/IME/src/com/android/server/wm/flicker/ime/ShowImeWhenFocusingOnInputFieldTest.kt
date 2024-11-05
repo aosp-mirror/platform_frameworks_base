@@ -33,7 +33,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window opening transitions.
- * To run this test: `atest FlickerTestsIme2:ShowImeWhenFocusingOnInputFieldTest`
+ * To run this test: `atest FlickerTestsIme:ShowImeWhenFocusingOnInputFieldTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

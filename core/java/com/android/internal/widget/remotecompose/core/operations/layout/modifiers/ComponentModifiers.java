@@ -29,9 +29,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.ArrayList;
 
-/**
- * Maintain a list of modifiers
- */
+/** Maintain a list of modifiers */
 public class ComponentModifiers extends PaintOperation implements DecoratorComponent {
     ArrayList<ModifierOperation> mList = new ArrayList<>();
 
@@ -49,7 +47,7 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
 
     @Override
     public String toString() {
-        String str =  "ComponentModifiers \n";
+        String str = "ComponentModifiers \n";
         for (ModifierOperation modifierOperation : mList) {
             str += "    " + modifierOperation.toString() + "\n";
         }
@@ -125,8 +123,9 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
         mList.addAll(operations);
     }
 
-    public void onClick(RemoteContext context, CoreDocument document,
-                        Component component, float x, float y) {
+    @Override
+    public void onClick(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
         for (ModifierOperation op : mList) {
             if (op instanceof DecoratorComponent) {
                 ((DecoratorComponent) op).onClick(context, document, component, x, y);

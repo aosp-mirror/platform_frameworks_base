@@ -22,6 +22,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.graphics.drawable.Icon;
 import android.net.MacAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -86,6 +87,11 @@ public final class AssociationInfo implements Parcelable {
     private final int mSystemDataSyncFlags;
 
     /**
+     * A device icon displayed on a selfManaged association dialog.
+     */
+    private final Icon mDeviceIcon;
+
+    /**
      * Creates a new Association.
      *
      * @hide
@@ -95,7 +101,7 @@ public final class AssociationInfo implements Parcelable {
             @Nullable CharSequence displayName, @Nullable String deviceProfile,
             @Nullable AssociatedDevice associatedDevice, boolean selfManaged,
             boolean notifyOnDeviceNearby, boolean revoked, boolean pending, long timeApprovedMs,
-            long lastTimeConnectedMs, int systemDataSyncFlags) {
+            long lastTimeConnectedMs, int systemDataSyncFlags, @Nullable Icon deviceIcon) {
         if (id <= 0) {
             throw new IllegalArgumentException("Association ID should be greater than 0");
         }
@@ -119,6 +125,7 @@ public final class AssociationInfo implements Parcelable {
         mTimeApprovedMs = timeApprovedMs;
         mLastTimeConnectedMs = lastTimeConnectedMs;
         mSystemDataSyncFlags = systemDataSyncFlags;
+        mDeviceIcon = deviceIcon;
     }
 
     /**
@@ -278,6 +285,20 @@ public final class AssociationInfo implements Parcelable {
     }
 
     /**
+     * Get the device icon of the associated device. The device icon represents the device type.
+     *
+     * @return the device icon, or {@code null} if no device icon has been set for the
+     * associated device.
+     *
+     * @see AssociationRequest.Builder#setDeviceIcon(Icon)
+     */
+    @FlaggedApi(Flags.FLAG_ASSOCIATION_DEVICE_ICON)
+    @Nullable
+    public Icon getDeviceIcon() {
+        return mDeviceIcon;
+    }
+
+    /**
      * Utility method for checking if the association represents a device with the given MAC
      * address.
      *
@@ -370,14 +391,16 @@ public final class AssociationInfo implements Parcelable {
                 && Objects.equals(mDisplayName, that.mDisplayName)
                 && Objects.equals(mDeviceProfile, that.mDeviceProfile)
                 && Objects.equals(mAssociatedDevice, that.mAssociatedDevice)
-                && mSystemDataSyncFlags == that.mSystemDataSyncFlags;
+                && mSystemDataSyncFlags == that.mSystemDataSyncFlags
+                && (mDeviceIcon == null ? that.mDeviceIcon == null
+                : mDeviceIcon.sameAs(that.mDeviceIcon));
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mUserId, mPackageName, mTag, mDeviceMacAddress, mDisplayName,
                 mDeviceProfile, mAssociatedDevice, mSelfManaged, mNotifyOnDeviceNearby, mRevoked,
-                mPending, mTimeApprovedMs, mLastTimeConnectedMs, mSystemDataSyncFlags);
+                mPending, mTimeApprovedMs, mLastTimeConnectedMs, mSystemDataSyncFlags, mDeviceIcon);
     }
 
     @Override
@@ -402,6 +425,12 @@ public final class AssociationInfo implements Parcelable {
         dest.writeLong(mTimeApprovedMs);
         dest.writeLong(mLastTimeConnectedMs);
         dest.writeInt(mSystemDataSyncFlags);
+        if (mDeviceIcon != null) {
+            dest.writeInt(1);
+            mDeviceIcon.writeToParcel(dest, flags);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     private AssociationInfo(@NonNull Parcel in) {
@@ -420,6 +449,11 @@ public final class AssociationInfo implements Parcelable {
         mTimeApprovedMs = in.readLong();
         mLastTimeConnectedMs = in.readLong();
         mSystemDataSyncFlags = in.readInt();
+        if (in.readInt() == 1) {
+            mDeviceIcon = Icon.CREATOR.createFromParcel(in);
+        } else {
+            mDeviceIcon = null;
+        }
     }
 
     @NonNull
@@ -459,6 +493,7 @@ public final class AssociationInfo implements Parcelable {
         private long mTimeApprovedMs;
         private long mLastTimeConnectedMs;
         private int mSystemDataSyncFlags;
+        private Icon mDeviceIcon;
 
         /** @hide */
         @TestApi
@@ -486,6 +521,7 @@ public final class AssociationInfo implements Parcelable {
             mTimeApprovedMs = info.mTimeApprovedMs;
             mLastTimeConnectedMs = info.mLastTimeConnectedMs;
             mSystemDataSyncFlags = info.mSystemDataSyncFlags;
+            mDeviceIcon = info.mDeviceIcon;
         }
 
         /**
@@ -510,6 +546,7 @@ public final class AssociationInfo implements Parcelable {
             mTimeApprovedMs = info.mTimeApprovedMs;
             mLastTimeConnectedMs = info.mLastTimeConnectedMs;
             mSystemDataSyncFlags = info.mSystemDataSyncFlags;
+            mDeviceIcon = info.mDeviceIcon;
         }
 
         /** @hide */
@@ -625,6 +662,16 @@ public final class AssociationInfo implements Parcelable {
         /** @hide */
         @TestApi
         @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @FlaggedApi(Flags.FLAG_ASSOCIATION_DEVICE_ICON)
+        public Builder setDeviceIcon(@Nullable Icon deviceIcon) {
+            mDeviceIcon = deviceIcon;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
         public AssociationInfo build() {
             if (mId <= 0) {
                 throw new IllegalArgumentException("Association ID should be greater than 0");
@@ -648,7 +695,8 @@ public final class AssociationInfo implements Parcelable {
                     mPending,
                     mTimeApprovedMs,
                     mLastTimeConnectedMs,
-                    mSystemDataSyncFlags
+                    mSystemDataSyncFlags,
+                    mDeviceIcon
             );
         }
     }

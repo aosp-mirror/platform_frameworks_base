@@ -20,6 +20,8 @@ import static com.android.media.audio.Flags.FLAG_ABS_VOLUME_INDEX_FIX;
 import static com.android.media.audio.Flags.FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME;
 import static com.android.media.audio.Flags.absVolumeIndexFix;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -109,12 +111,13 @@ public class AudioDeviceVolumeManagerTest {
         mAudioService.setDeviceVolume(volMin, usbDevice, mPackageName);
         mTestLooper.dispatchAll();
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                        AudioManager.STREAM_MUSIC, minIndex, AudioSystem.DEVICE_OUT_USB_DEVICE);
+                eq(AudioManager.STREAM_MUSIC), eq(minIndex), anyBoolean(),
+                eq(AudioSystem.DEVICE_OUT_USB_DEVICE));
 
         mAudioService.setDeviceVolume(volMid, usbDevice, mPackageName);
         mTestLooper.dispatchAll();
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                AudioManager.STREAM_MUSIC, midIndex, AudioSystem.DEVICE_OUT_USB_DEVICE);
+                AudioManager.STREAM_MUSIC, midIndex, false, AudioSystem.DEVICE_OUT_USB_DEVICE);
     }
 
     @Test
@@ -151,7 +154,7 @@ public class AudioDeviceVolumeManagerTest {
 
             // Stream volume changes
             verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                            AudioManager.STREAM_MUSIC, targetIndex,
+                            AudioManager.STREAM_MUSIC, targetIndex, false,
                             AudioSystem.DEVICE_OUT_BLE_HEADSET);
         }
 
@@ -162,7 +165,7 @@ public class AudioDeviceVolumeManagerTest {
         mTestLooper.dispatchAll();
 
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                        AudioManager.STREAM_MUSIC, maxIndex,
+                        AudioManager.STREAM_MUSIC, maxIndex, false,
                         AudioSystem.DEVICE_OUT_BLE_HEADSET);
     }
 
@@ -193,8 +196,8 @@ public class AudioDeviceVolumeManagerTest {
             }
             // Stream volume changes
             verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                            AudioManager.STREAM_MUSIC, passedIndex,
-                            AudioSystem.DEVICE_OUT_BLE_HEADSET);
+                    AudioManager.STREAM_MUSIC, passedIndex, false,
+                    AudioSystem.DEVICE_OUT_BLE_HEADSET);
         }
 
         // Adjust stream volume with FLAG_ABSOLUTE_VOLUME set (index:4)
@@ -207,7 +210,7 @@ public class AudioDeviceVolumeManagerTest {
             passedIndex = 4;
         }
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                        AudioManager.STREAM_MUSIC, passedIndex,
-                        AudioSystem.DEVICE_OUT_BLE_HEADSET);
+                AudioManager.STREAM_MUSIC, passedIndex, false,
+                AudioSystem.DEVICE_OUT_BLE_HEADSET);
     }
 }

@@ -1580,12 +1580,12 @@ public class BiometricServiceTest {
         setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
 
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
-                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS));
+                invokeCanAuthenticate(mBiometricService, Authenticators.IDENTITY_CHECK));
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(true);
 
-        assertEquals(BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE,
-                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS));
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE,
+                invokeCanAuthenticate(mBiometricService, Authenticators.IDENTITY_CHECK));
     }
 
     @Test
@@ -1603,13 +1603,13 @@ public class BiometricServiceTest {
         setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
 
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
-                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS
+                invokeCanAuthenticate(mBiometricService, Authenticators.IDENTITY_CHECK
                         | Authenticators.BIOMETRIC_STRONG));
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(true);
 
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
-                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS
+                invokeCanAuthenticate(mBiometricService, Authenticators.IDENTITY_CHECK
                         | Authenticators.BIOMETRIC_STRONG));
     }
 
@@ -1628,12 +1628,12 @@ public class BiometricServiceTest {
         setupAuthForOnly(TYPE_CREDENTIAL, Authenticators.DEVICE_CREDENTIAL);
 
         assertEquals(BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,
-                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS));
+                invokeCanAuthenticate(mBiometricService, Authenticators.IDENTITY_CHECK));
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(true);
 
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
-                invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS
+                invokeCanAuthenticate(mBiometricService, Authenticators.IDENTITY_CHECK
                         | Authenticators.DEVICE_CREDENTIAL));
     }
 

@@ -146,6 +146,7 @@ public abstract class PackageManager {
      * This exception is thrown when a given package, application, or component
      * name cannot be found.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static class NameNotFoundException extends AndroidException {
         public NameNotFoundException() {
         }
@@ -4862,6 +4863,64 @@ public abstract class PackageManager {
   @SdkConstant(SdkConstantType.FEATURE)
   public static final String FEATURE_CONTEXTUAL_SEARCH_HELPER =
       "android.software.contextualsearch";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports XR input from XR controllers.
+     */
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_INPUT_CONTROLLER =
+        "android.hardware.xr.input.controller";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports XR input from the user's hands.
+     */
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_INPUT_HAND_TRACKING =
+        "android.hardware.xr.input.hand_tracking";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports XR input from the user's eye gaze.
+     */
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_INPUT_EYE_TRACKING =
+        "android.hardware.xr.input.eye_tracking";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports <a href="https://www.khronos.org/openxr/">OpenXR</a>. The feature version indicates
+     * the highest version of OpenXR supported by the device using the following encoding:
+     * <ul>
+     * <li> Major version in bits 31-16</li>
+     * <li> Minor version in bits 15-0</li>
+     * </ul>
+     * This is the same encoding as the top 32 bits of an {@code XrVersion}.
+     * <p>
+     * Example: OpenXR 1.1 support is encoded as 0x00010001.
+     */
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_API_OPENXR =
+        "android.software.xr.api.openxr";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: This device
+     * supports the Android XR Spatial APIs. The feature version indicates the highest version of
+     * the Android XR Spatial APIs supported by the device.
+     *
+     * <p>Also see <a href="https://developer.android.com/xr">Getting started with Spatializing
+     * your app</a>.
+     */
+    // TODO(b/374330735): update public documentation once link content is finalized
+    @FlaggedApi(android.xr.Flags.FLAG_XR_MANIFEST_ENTRIES)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_XR_API_SPATIAL =
+        "android.software.xr.api.spatial";
 
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;

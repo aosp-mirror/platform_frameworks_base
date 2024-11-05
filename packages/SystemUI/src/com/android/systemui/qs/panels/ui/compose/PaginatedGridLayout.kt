@@ -19,7 +19,7 @@ package com.android.systemui.qs.panels.ui.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -40,9 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.panels.dagger.PaginatedBaseLayoutType
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.FooterHeight
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.InterPageSpacing
@@ -54,7 +54,7 @@ import javax.inject.Inject
 class PaginatedGridLayout
 @Inject
 constructor(
-    private val viewModel: PaginatedGridViewModel,
+    private val viewModelFactory: PaginatedGridViewModel.Factory,
     @PaginatedBaseLayoutType private val delegateGridLayout: PaginatableGridLayout,
 ) : GridLayout by delegateGridLayout {
     @Composable
@@ -63,13 +63,18 @@ constructor(
         modifier: Modifier,
         editModeStart: () -> Unit,
     ) {
+        val viewModel =
+            rememberViewModel(traceName = "PaginatedGridLayout-TileGrid") {
+                viewModelFactory.create()
+            }
+
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val columns by viewModel.columns.collectAsStateWithLifecycle()
-        val rows by viewModel.rows.collectAsStateWithLifecycle()
+        val columns by viewModel.columns
+        val rows = viewModel.rows
 
         val pages =
             remember(tiles, columns, rows) {
@@ -97,7 +102,9 @@ constructor(
                     TileGrid(tiles = page, modifier = Modifier, editModeStart = {})
                 }
             }
-            Box(modifier = Modifier.height(FooterHeight).fillMaxWidth()) {
+            // Use requiredHeight so it won't be squished if the view doesn't quite fit. As this is
+            // expected to be inside a scrollable container, this should not be an issue.
+            Box(modifier = Modifier.requiredHeight(FooterHeight).fillMaxWidth()) {
                 PagerDots(
                     pagerState = pagerState,
                     activeColor = MaterialTheme.colorScheme.primary,

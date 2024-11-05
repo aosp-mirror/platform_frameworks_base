@@ -90,8 +90,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private volatile SessionCreationOrTransferRequest mPendingTransferRequest;
 
     SystemMediaRoute2Provider(Context context, UserHandle user, Looper looper) {
-        super(COMPONENT_NAME);
-        mIsSystemRouteProvider = true;
+        super(COMPONENT_NAME, /* isSystemRouteProvider= */ true);
         mContext = context;
         mUser = user;
         mHandler = new Handler(looper);

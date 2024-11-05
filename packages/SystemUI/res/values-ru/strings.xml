@@ -112,6 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Начать запись экрана?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Записывать одно приложение"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Записывать весь экран"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Во время записи всего экрана все данные и действия, которые на нем показываются, попадают на видео. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Во время записи приложения все данные и действия, которые показываются в его окне, попадают на видео. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Запись экрана"</string>
@@ -136,11 +138,17 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Вы записываете экран приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Остановить запись"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Демонстрация экрана"</string>
+    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
+    <skip />
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Прекратить показ экрана?"</string>
+    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
+    <skip />
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Вы демонстрируете свой экран в приложении \"<xliff:g id="HOST_APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Вы демонстрируете свой экран в приложении."</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Вы демонстрируете экран приложения \"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>\"."</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Вы демонстрируете экран приложения."</string>
+    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
+    <skip />
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Прекратить показ"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Трансляция экрана"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Прекратить трансляцию?"</string>
@@ -312,6 +320,10 @@
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Отправить аудио"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Отправка аудио"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"перейти в настройки передачи аудио"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message" msgid="4251807313264307426">"Музыка и звук видео на этом устройстве будут воспроизводиться через обе пары наушников."</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title" msgid="4406818346036286793">"Передача аудио"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle" msgid="3014906864710059236">"<xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g> и <xliff:g id="ACTIVE_DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button" msgid="7546825655978203773">"Переключиться на <xliff:g id="AVAILABLE_DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудиоустройство"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -440,7 +452,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Включено"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Вкл. • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Отключено"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Настроить"</string>
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Не задано"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Открыть настройки"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Включено 0 режимов}=1{Включен режим \"{mode}\"}one{Включен # режим}few{Включено # режима}many{Включено # режимов}other{Включено # режима}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника, напоминаний, уведомлений о мероприятиях и звонков от помеченных контактов. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
@@ -511,6 +523,10 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Виджеты на заблокированном экране"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Они видны всем, даже если планшет заблокирован."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"отменить выбор виджета"</string>
+    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
+    <skip />
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Виджеты на заблокированном экране"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Чтобы открыть приложение, используя виджет, вам нужно будет подтвердить свою личность. Обратите внимание, что виджеты видны всем, даже если планшет заблокирован. Некоторые виджеты не предназначены для использования на заблокированном экране. Добавлять их туда может быть небезопасно."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ОК"</string>
@@ -567,14 +583,15 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Очистить все"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Настроить"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"История"</string>
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"Настройки уведомлений"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"История уведомлений"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Новое"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Без звука"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Уведомления"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговоры"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Отклонить все беззвучные уведомления"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"В режиме \"Не беспокоить\" уведомления заблокированы"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Уведомлений нет}=1{Режим \"{mode}\" приостанавливает уведомления}=2{Режим \"{mode}\" и ещё один режим приостанавливают уведомления}one{Режим \"{mode}\" и ещё # режим приостанавливают уведомления}few{Режим \"{mode}\" и ещё # режима приостанавливают уведомления}many{Режим \"{mode}\" и ещё # режимов приостанавливают уведомления}other{Режим \"{mode}\" и ещё # режима приостанавливают уведомления}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Начать"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Нет уведомлений."</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Новых уведомлений нет"</string>
@@ -673,6 +690,8 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недоступно в беззвучном режиме"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Недоступно при включенном режиме \"Не беспокоить\"."</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Недоступно при включенном режиме \"Не беспокоить\"."</string>
+    <string name="stream_unavailable_by_modes" msgid="3674139029490353683">"Недоступно, так как включен режим \"<xliff:g id="MODE">%s</xliff:g>\""</string>
+    <string name="stream_unavailable_by_unknown" msgid="6908434629318171588">"Недоступно"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Нажмите, чтобы включить звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Нажмите, чтобы включить вибрацию. Специальные возможности могут прекратить работу."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Нажмите, чтобы выключить звук. Специальные возможности могут прекратить работу."</string>
@@ -706,6 +725,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Перейти в демонстрационный режим"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Будильник"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g>: включено"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Кошелек"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Расплачивайтесь через телефон быстро и безопасно."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показать все"</string>
@@ -765,7 +785,7 @@
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Уведомления о звонках нельзя изменить."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Эту группу уведомлений нельзя настроить здесь."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Уведомление отправлено через прокси-сервер."</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Показывать все уведомления приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g>: все уведомления"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Ещё"</string>
     <string name="feedback_alerted" msgid="5192459808484271208">"Уровень важности этого уведомления был автоматически &lt;b&gt;повышен до \"По умолчанию\"&lt;/b&gt;."</string>
     <string name="feedback_silenced" msgid="9116540317466126457">"Уровень важности этого уведомления был автоматически &lt;/b&gt;понижен до \"Без звука\"&lt;/b&gt;."</string>
@@ -1393,38 +1413,45 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Это приложение"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Специальные возможности"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Быстрые клавиши"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Найти быстрые клавиши"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ничего не найдено"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок \"Свернуть\""</string>
+    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
+    <skip />
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок \"Развернуть\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Маркер перемещения"</string>
+    <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Настройки клавиатуры"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навигация с помощью клавиатуры"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Узнайте о сочетаниях клавиш."</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навигация с помощью сенсорной панели"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Узнайте о жестах на сенсорной панели."</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Навигация с помощью клавиатуры и сенсорной панели"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Узнайте о жестах на сенсорной панели, сочетаниях клавиш и многом другом."</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Жест \"назад\""</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Жест \"на главный экран\""</string>
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Назад"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"На главную"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Жест \"Просмотр недавних приложений\""</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Чтобы вернуться назад, проведите по сенсорной панели тремя пальцами влево или вправо.\n\nВы также можете нажать клавишу действия + Esc."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Отлично!"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Проведите тремя пальцами влево или вправо по сенсорной панели."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Отлично!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Вы выполнили жест для перехода назад."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"На главный экран"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Чтобы перейти на главный экран, проведите снизу вверх тремя пальцами."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Неплохо!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Вы выполнили жест для перехода на главный экран."</string>
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Проведите тремя пальцами вверх по сенсорной панели."</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Отличная работа!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Вы выполнили жест для перехода на главный экран."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Просмотр недавних приложений"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Проведите вверх по сенсорной панели тремя пальцами и удерживайте."</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Проведите вверх по сенсорной панели тремя пальцами и удерживайте."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Отлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Вы выполнили жест для просмотра недавних приложений."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Клавиша действия"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Чтобы перейти к приложениям, нажмите клавишу действия на клавиатуре."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Готово!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Вы выполнили жест с клавишей действия.\n\nЧтобы посмотреть доступные сочетания, нажмите клавишу действия и \"/\"."</string>
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Все приложения"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Нажмите клавишу действия на клавиатуре."</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Блестяще!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Вы выполнили жест для просмотра всех приложений."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Подсветка клавиатуры"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Уровень %1$d из %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Управление домом"</string>
@@ -1436,8 +1463,9 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Чтобы открыть список всех своих приложений, нажмите клавишу действия."</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Скрыто"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Разблокируйте экран, чтобы посмотреть."</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Контекстные подсказки"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Используйте сенсорную панель, чтобы возвращаться назад"</string>
-    <string name="back_edu_notification_content" msgid="2497557451540954068">"Для этого проведите тремя пальцами влево или вправо. Нажмите, чтобы посмотреть другие жесты."</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Для этого проведите тремя пальцами влево или вправо. Чтобы посмотреть другие жесты, нажмите здесь."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Используйте сенсорную панель, чтобы переходить на главный экран"</string>
     <string name="home_edu_notification_content" msgid="6631697734535766588">"Для этого проведите тремя пальцами вверх. Нажмите, чтобы посмотреть другие жесты."</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"Используйте сенсорную панель, чтобы смотреть список недавних приложений"</string>
@@ -1455,4 +1483,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Приложения"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Экран"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Неизвестно"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Сброс параметров"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Сбросить порядок и размер параметров?"</string>
 </resources>

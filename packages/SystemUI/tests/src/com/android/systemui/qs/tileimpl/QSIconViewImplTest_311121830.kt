@@ -20,10 +20,10 @@ import android.animation.AnimatorTestRule
 import android.content.Context
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
-import android.testing.UiThreadTest
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.ImageView
+import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile

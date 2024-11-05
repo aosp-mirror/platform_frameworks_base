@@ -13,20 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.communal.ui.viewmodel
 
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.snapTo
 import androidx.compose.runtime.snapshotFlow
-import com.android.app.tracing.coroutines.coroutineScope
+import com.android.app.tracing.coroutines.coroutineScopeTraced as coroutineScope
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.sign
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.dropWhile
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -45,17 +48,105 @@ data class ResizeInfo(
     val spans: Int,
     /** The drag handle which was used to resize the element. */
     val fromHandle: DragHandle,
-)
+) {
+    /** Whether we are expanding. If false, then we are shrinking. */
+    val isExpanding = spans > 0
+}
 
 class ResizeableItemFrameViewModel : ExclusiveActivatable() {
-    private data class GridLayoutInfo(
-        val minSpan: Int,
-        val maxSpan: Int,
-        val heightPerSpanPx: Float,
-        val verticalItemSpacingPx: Float,
+    data class GridLayoutInfo(
         val currentRow: Int,
         val currentSpan: Int,
-    )
+        val maxHeightPx: Int,
+        val minHeightPx: Int,
+        val resizeMultiple: Int,
+        val totalSpans: Int,
+        private val heightPerSpanPx: Float,
+        private val verticalItemSpacingPx: Float,
+    ) {
+        fun getPxOffsetForResize(spans: Int): Int =
+            (spans * (heightPerSpanPx + verticalItemSpacingPx)).toInt()
+
+        private fun getSpansForPx(height: Int): Int =
+            ceil((height + verticalItemSpacingPx) / (heightPerSpanPx + verticalItemSpacingPx))
+                .toInt()
+                .coerceIn(resizeMultiple, totalSpans)
+
+        private fun roundDownToMultiple(spans: Int): Int =
+            floor(spans.toDouble() / resizeMultiple).toInt() * resizeMultiple
+
+        val maxSpans: Int
+            get() = roundDownToMultiple(getSpansForPx(maxHeightPx)).coerceAtLeast(currentSpan)
+
+        val minSpans: Int
+            get() = roundDownToMultiple(getSpansForPx(minHeightPx)).coerceAtMost(currentSpan)
+    }
+
+    /** Check if widget can expanded based on current drag states */
+    fun canExpand(): Boolean {
+        return getNextAnchor(bottomDragState, moveUp = false) != null ||
+            getNextAnchor(topDragState, moveUp = true) != null
+    }
+
+    /** Check if widget can shrink based on current drag states */
+    fun canShrink(): Boolean {
+        return getNextAnchor(bottomDragState, moveUp = true) != null ||
+            getNextAnchor(topDragState, moveUp = false) != null
+    }
+
+    /** Get the next anchor value in the specified direction */
+    private fun getNextAnchor(state: AnchoredDraggableState<Int>, moveUp: Boolean): Int? {
+        var nextAnchor: Int? = null
+        var nextAnchorDiff = Int.MAX_VALUE
+        val currentValue = state.currentValue
+
+        for (i in 0 until state.anchors.size) {
+            val anchor = state.anchors.anchorAt(i) ?: continue
+            if (anchor == currentValue) continue
+
+            val diff =
+                if (moveUp) {
+                    currentValue - anchor
+                } else {
+                    anchor - currentValue
+                }
+
+            if (diff in 1..<nextAnchorDiff) {
+                nextAnchor = anchor
+                nextAnchorDiff = diff
+            }
+        }
+
+        return nextAnchor
+    }
+
+    /** Handle expansion to the next anchor */
+    suspend fun expandToNextAnchor() {
+        if (!canExpand()) return
+        val bottomAnchor = getNextAnchor(state = bottomDragState, moveUp = false)
+        if (bottomAnchor != null) {
+            bottomDragState.snapTo(bottomAnchor)
+            return
+        }
+        val topAnchor =
+            getNextAnchor(
+                state = topDragState,
+                moveUp = true, // Moving up to expand
+            )
+        topAnchor?.let { topDragState.snapTo(it) }
+    }
+
+    /** Handle shrinking to the next anchor */
+    suspend fun shrinkToNextAnchor() {
+        if (!canShrink()) return
+        val topAnchor = getNextAnchor(state = topDragState, moveUp = false)
+        if (topAnchor != null) {
+            topDragState.snapTo(topAnchor)
+            return
+        }
+        val bottomAnchor = getNextAnchor(state = bottomDragState, moveUp = true)
+        bottomAnchor?.let { bottomDragState.snapTo(it) }
+    }
 
     /**
      * The layout information necessary in order to calculate the pixel offsets of the drag anchor
@@ -73,7 +164,7 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
                 snapshotFlow { bottomDragState.settledValue }
                     .map { ResizeInfo(it, DragHandle.BOTTOM) },
             )
-            .dropWhile { it.spans == 0 }
+            .filter { it.spans != 0 }
             .distinctUntilChanged()
 
     /**
@@ -82,85 +173,92 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
      */
     fun setGridLayoutInfo(
         verticalItemSpacingPx: Float,
-        verticalContentPaddingPx: Float,
-        viewportHeightPx: Int,
-        maxItemSpan: Int,
-        minItemSpan: Int,
-        currentRow: Int,
+        currentRow: Int?,
+        maxHeightPx: Int,
+        minHeightPx: Int,
         currentSpan: Int,
+        resizeMultiple: Int,
+        totalSpans: Int,
+        viewportHeightPx: Int,
+        verticalContentPaddingPx: Float,
     ) {
-        require(maxItemSpan >= minItemSpan) {
-            "Maximum item span of $maxItemSpan cannot be less than the minimum span of $minItemSpan"
+        if (currentRow == null) {
+            gridLayoutInfo.value = null
+            return
         }
-        require(minItemSpan in 1..maxItemSpan) {
-            "Minimum span must be between 1 and $maxItemSpan, but was $minItemSpan"
+        require(maxHeightPx >= minHeightPx) {
+            "Maximum item span of $maxHeightPx cannot be less than the minimum span of $minHeightPx"
         }
-        require(currentSpan % minItemSpan == 0) {
-            "Current span of $currentSpan is not a multiple of the minimum span of $minItemSpan"
+
+        require(currentSpan <= totalSpans) {
+            "Current span ($currentSpan) cannot exceed the total number of spans ($totalSpans)"
+        }
+
+        require(resizeMultiple > 0) {
+            "Resize multiple ($resizeMultiple) must be a positive integer"
         }
         val availableHeight = viewportHeightPx - verticalContentPaddingPx
-        val totalSpacing = verticalItemSpacingPx * ((maxItemSpan / minItemSpan) - 1)
-        val heightPerSpanPx = (availableHeight - totalSpacing) / maxItemSpan
+        val heightPerSpanPx =
+            (availableHeight - (totalSpans - 1) * verticalItemSpacingPx) / totalSpans
+
         gridLayoutInfo.value =
             GridLayoutInfo(
-                minSpan = minItemSpan,
-                maxSpan = maxItemSpan,
                 heightPerSpanPx = heightPerSpanPx,
                 verticalItemSpacingPx = verticalItemSpacingPx,
                 currentRow = currentRow,
                 currentSpan = currentSpan,
+                maxHeightPx = maxHeightPx.coerceAtMost(availableHeight.toInt()),
+                minHeightPx = minHeightPx,
+                resizeMultiple = resizeMultiple,
+                totalSpans = totalSpans,
             )
     }
 
     private fun calculateAnchorsForHandle(
         handle: DragHandle,
-        layoutInfo: GridLayoutInfo,
+        layoutInfo: GridLayoutInfo?,
     ): DraggableAnchors<Int> {
 
-        if (!isDragAllowed(handle, layoutInfo)) {
+        if (layoutInfo == null || (!isDragAllowed(handle, layoutInfo))) {
             return DraggableAnchors { 0 at 0f }
         }
-
-        val (
-            minItemSpan,
-            maxItemSpan,
-            heightPerSpanPx,
-            verticalSpacingPx,
-            currentRow,
-            currentSpan,
-        ) = layoutInfo
+        val currentRow = layoutInfo.currentRow
+        val currentSpan = layoutInfo.currentSpan
+        val minItemSpan = layoutInfo.minSpans
+        val maxItemSpan = layoutInfo.maxSpans
+        val totalSpans = layoutInfo.totalSpans
 
         // The maximum row this handle can be dragged to.
         val maxRow =
             if (handle == DragHandle.TOP) {
                 (currentRow + currentSpan - minItemSpan).coerceAtLeast(0)
             } else {
-                maxItemSpan
+                (currentRow + maxItemSpan).coerceAtMost(totalSpans)
             }
 
         // The minimum row this handle can be dragged to.
         val minRow =
             if (handle == DragHandle.TOP) {
-                0
+                (currentRow + currentSpan - maxItemSpan).coerceAtLeast(0)
             } else {
-                (currentRow + minItemSpan).coerceAtMost(maxItemSpan)
+                (currentRow + minItemSpan).coerceAtMost(totalSpans)
             }
 
         // The current row position of this handle
         val currentPosition = if (handle == DragHandle.TOP) currentRow else currentRow + currentSpan
 
         return DraggableAnchors {
-            for (targetRow in minRow..maxRow step minItemSpan) {
+            for (targetRow in minRow..maxRow step layoutInfo.resizeMultiple) {
                 val diff = targetRow - currentPosition
-                val spacing = diff / minItemSpan * verticalSpacingPx
-                diff at diff * heightPerSpanPx + spacing
+                val pixelOffset = (layoutInfo.getPxOffsetForResize(abs(diff)) * diff.sign).toFloat()
+                diff at pixelOffset
             }
         }
     }
 
     private fun isDragAllowed(handle: DragHandle, layoutInfo: GridLayoutInfo): Boolean {
-        val minItemSpan = layoutInfo.minSpan
-        val maxItemSpan = layoutInfo.maxSpan
+        val minItemSpan = layoutInfo.minSpans
+        val maxItemSpan = layoutInfo.maxSpans
         val currentRow = layoutInfo.currentRow
         val currentSpan = layoutInfo.currentSpan
         val atMinSize = currentSpan == minItemSpan
@@ -188,7 +286,6 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
     override suspend fun onActivated(): Nothing {
         coroutineScope("ResizeableItemFrameViewModel.onActivated") {
             gridLayoutInfo
-                .filterNotNull()
                 .onEach { layoutInfo ->
                     topDragState.updateAnchors(
                         calculateAnchorsForHandle(DragHandle.TOP, layoutInfo)

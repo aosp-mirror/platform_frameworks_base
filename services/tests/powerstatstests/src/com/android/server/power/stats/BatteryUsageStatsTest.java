@@ -76,22 +76,25 @@ public class BatteryUsageStatsTest {
     private static final int APP_UID2 = 314;
 
     @Test
-    public void testBuilder() {
+    public void testBuilder() throws Exception {
         BatteryUsageStats batteryUsageStats = buildBatteryUsageStats1(true).build();
         assertBatteryUsageStats1(batteryUsageStats, true);
+        batteryUsageStats.close();
     }
 
     @Test
-    public void testBuilder_noProcessStateData() {
+    public void testBuilder_noProcessStateData() throws Exception {
         BatteryUsageStats batteryUsageStats = buildBatteryUsageStats1(false).build();
         assertBatteryUsageStats1(batteryUsageStats, false);
+        batteryUsageStats.close();
     }
 
     @Test
-    public void testParcelability_smallNumberOfUids() {
+    public void testParcelability_smallNumberOfUids() throws Exception {
         final BatteryUsageStats outBatteryUsageStats = buildBatteryUsageStats1(true).build();
         final Parcel parcel = Parcel.obtain();
         parcel.writeParcelable(outBatteryUsageStats, 0);
+        outBatteryUsageStats.close();
 
         assertThat(parcel.dataSize()).isLessThan(100000);
 
@@ -101,10 +104,11 @@ public class BatteryUsageStatsTest {
                 parcel.readParcelable(getClass().getClassLoader());
         assertThat(inBatteryUsageStats).isNotNull();
         assertBatteryUsageStats1(inBatteryUsageStats, true);
+        inBatteryUsageStats.close();
     }
 
     @Test
-    public void testParcelability_largeNumberOfUids() {
+    public void testParcelability_largeNumberOfUids() throws Exception {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[0]);
 
@@ -141,22 +145,27 @@ public class BatteryUsageStatsTest {
             assertThat(uidBatteryConsumer).isNotNull();
             assertThat(uidBatteryConsumer.getConsumedPower()).isEqualTo(i * 100);
         }
+        inBatteryUsageStats.close();
+        outBatteryUsageStats.close();
     }
 
     @Test
-    public void testDefaultSessionDuration() {
+    public void testDefaultSessionDuration() throws Exception {
         final BatteryUsageStats stats =
                 buildBatteryUsageStats1(true).setStatsDuration(10000).build();
         assertThat(stats.getStatsDuration()).isEqualTo(10000);
+        stats.close();
     }
 
     @Test
-    public void testDump() {
+    public void testDump() throws Exception {
         final BatteryUsageStats stats = buildBatteryUsageStats1(true).build();
         final StringWriter out = new StringWriter();
         try (PrintWriter pw = new PrintWriter(out)) {
             stats.dump(pw, "  ");
         }
+        stats.close();
+
         final String dump = out.toString();
 
         assertThat(dump).contains("Capacity: 4000");
@@ -187,12 +196,14 @@ public class BatteryUsageStatsTest {
     }
 
     @Test
-    public void testDumpNoScreenOrPowerState() {
+    public void testDumpNoScreenOrPowerState() throws Exception {
         final BatteryUsageStats stats = buildBatteryUsageStats1(true, false, false).build();
         final StringWriter out = new StringWriter();
         try (PrintWriter pw = new PrintWriter(out)) {
             stats.dump(pw, "  ");
         }
+        stats.close();
+
         final String dump = out.toString();
 
         assertThat(dump).contains("Capacity: 4000");
@@ -222,7 +233,7 @@ public class BatteryUsageStatsTest {
     }
 
     @Test
-    public void testAdd() {
+    public void testAdd() throws Exception {
         final BatteryUsageStats stats1 = buildBatteryUsageStats1(false).build();
         final BatteryUsageStats stats2 = buildBatteryUsageStats2(new String[]{"FOO"}, true).build();
         final BatteryUsageStats sum =
@@ -261,24 +272,31 @@ public class BatteryUsageStatsTest {
         assertAggregateBatteryConsumer(sum,
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE,
                 40211, 40422, 40633, 40844);
+        stats1.close();
+        stats2.close();
+        sum.close();
     }
 
     @Test
-    public void testAdd_customComponentMismatch() {
+    public void testAdd_customComponentMismatch() throws Exception {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true, true, true, 0);
         final BatteryUsageStats stats = buildBatteryUsageStats2(new String[]{"BAR"}, false).build();
 
         assertThrows(IllegalArgumentException.class, () -> builder.add(stats));
+        stats.close();
+        builder.discard();
     }
 
     @Test
-    public void testAdd_processStateDataMismatch() {
+    public void testAdd_processStateDataMismatch() throws Exception {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true, true, true, 0);
         final BatteryUsageStats stats = buildBatteryUsageStats2(new String[]{"FOO"}, false).build();
 
         assertThrows(IllegalArgumentException.class, () -> builder.add(stats));
+        stats.close();
+        builder.discard();
     }
 
     @Test
@@ -290,12 +308,14 @@ public class BatteryUsageStatsTest {
         final BatteryUsageStats stats = buildBatteryUsageStats1(true).build();
         stats.writeXml(serializer);
         serializer.endDocument();
+        stats.close();
 
         ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         TypedXmlPullParser parser = Xml.newBinaryPullParser();
         parser.setInput(in, StandardCharsets.UTF_8.name());
         final BatteryUsageStats fromXml = BatteryUsageStats.createFromXml(parser);
         assertBatteryUsageStats1(fromXml, true);
+        fromXml.close();
     }
 
     private BatteryUsageStats.Builder buildBatteryUsageStats1(boolean includeUserBatteryConsumer) {

@@ -20,11 +20,9 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color
-import android.hardware.input.IInputManager
 import android.hardware.input.IKeyboardBacklightListener
 import android.hardware.input.IKeyboardBacklightState
 import android.hardware.input.InputManager
-import android.hardware.input.InputManagerGlobal
 import android.hardware.lights.Light
 import android.os.UEventObserver
 import android.os.test.TestLooper
@@ -35,7 +33,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.android.server.input.KeyboardBacklightController.DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL
 import com.android.server.input.KeyboardBacklightController.MAX_BRIGHTNESS_CHANGE_STEPS
 import com.android.server.input.KeyboardBacklightController.USER_INACTIVITY_THRESHOLD_MILLIS
-import org.junit.After
+import com.android.test.input.MockInputManagerRule
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
@@ -52,10 +54,6 @@ import org.mockito.Mockito.eq
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
 
 private fun createKeyboard(deviceId: Int): InputDevice =
     InputDevice.Builder()
@@ -100,9 +98,9 @@ class KeyboardBacklightControllerTests {
 
     @get:Rule
     val rule = MockitoJUnit.rule()!!
+    @get:Rule
+    val inputManagerRule = MockInputManagerRule()
 
-    @Mock
-    private lateinit var iInputManager: IInputManager
     @Mock
     private lateinit var native: NativeInputManagerService
     @Mock
@@ -111,7 +109,6 @@ class KeyboardBacklightControllerTests {
     private lateinit var context: Context
     private lateinit var dataStore: PersistentDataStore
     private lateinit var testLooper: TestLooper
-    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
     private var lightColorMap: HashMap<Int, Int> = HashMap()
     private var lastBacklightState: KeyboardBacklightState? = null
     private var sysfsNodeChanges = 0
@@ -134,10 +131,9 @@ class KeyboardBacklightControllerTests {
         testLooper = TestLooper()
         keyboardBacklightController = KeyboardBacklightController(context, native, dataStore,
                 testLooper.looper, FakeAnimatorFactory(), uEventManager)
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         val inputManager = InputManager(context)
         `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
-        `when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
+        `when`(inputManagerRule.mock.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
         `when`(native.setLightColor(anyInt(), anyInt(), anyInt())).then {
             val args = it.arguments
             lightColorMap.put(args[1] as Int, args[2] as Int)
@@ -152,13 +148,6 @@ class KeyboardBacklightControllerTests {
         }
     }
 
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
-    }
-
     @Test
     fun testKeyboardBacklightIncrementDecrement() {
         KeyboardBacklightFlags(
@@ -168,8 +157,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
             assertIncrementDecrementForLevels(keyboardWithBacklight, keyboardBacklight,
@@ -186,8 +176,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithoutBacklight = createKeyboard(DEVICE_ID)
             val keyboardInputLight = createLight(LIGHT_ID, Light.LIGHT_TYPE_INPUT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithoutBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardInputLight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithoutBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardInputLight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
             incrementKeyboardBacklight(DEVICE_ID)
@@ -205,8 +196,9 @@ class KeyboardBacklightControllerTests {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             val keyboardInputLight = createLight(SECOND_LIGHT_ID, Light.LIGHT_TYPE_INPUT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(
                 listOf(
                     keyboardBacklight,
                     keyboardInputLight
@@ -230,8 +222,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
 
             for (level in 1 until DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL.size) {
                 dataStore.setKeyboardBacklightBrightness(
@@ -263,7 +256,8 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
             dataStore.setKeyboardBacklightBrightness(
                 keyboardWithBacklight.descriptor,
                 LIGHT_ID,
@@ -278,7 +272,7 @@ class KeyboardBacklightControllerTests {
                 lightColorMap.isEmpty()
             )
 
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceChanged(DEVICE_ID)
             keyboardBacklightController.notifyUserActivity()
             testLooper.dispatchNext()
@@ -300,8 +294,9 @@ class KeyboardBacklightControllerTests {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
             val maxLevel = DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL.size - 1
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
             // Register backlight listener
@@ -352,8 +347,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             dataStore.setKeyboardBacklightBrightness(
                 keyboardWithBacklight.descriptor,
                 LIGHT_ID,
@@ -388,8 +384,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             dataStore.setKeyboardBacklightBrightness(
                 keyboardWithBacklight.descriptor,
                 LIGHT_ID,
@@ -482,8 +479,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
             incrementKeyboardBacklight(DEVICE_ID)
@@ -511,8 +509,9 @@ class KeyboardBacklightControllerTests {
             val suggestedLevels = intArrayOf(0, 22, 63, 135, 196, 255)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT,
                     suggestedLevels)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
             assertIncrementDecrementForLevels(keyboardWithBacklight, keyboardBacklight,
@@ -531,8 +530,9 @@ class KeyboardBacklightControllerTests {
             val suggestedLevels = IntArray(MAX_BRIGHTNESS_CHANGE_STEPS + 1) { 10 * (it + 1) }
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT,
                     suggestedLevels)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
             assertIncrementDecrementForLevels(keyboardWithBacklight, keyboardBacklight,
@@ -551,8 +551,9 @@ class KeyboardBacklightControllerTests {
             val suggestedLevels = intArrayOf(22, 63, 135, 196)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT,
                     suggestedLevels)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
             // Framework will add the lowest and maximum levels if not provided via config
@@ -572,8 +573,10 @@ class KeyboardBacklightControllerTests {
             val suggestedLevels = intArrayOf(22, 63, 135, 400, 196, 1000)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT,
                     suggestedLevels)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID))
+                .thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
             // Framework will drop out of bound levels in the config
@@ -591,8 +594,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
 
             dataStore.setKeyboardBacklightBrightness(
                 keyboardWithBacklight.descriptor,
@@ -619,8 +623,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
 
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
             incrementKeyboardBacklight(DEVICE_ID)
@@ -642,8 +647,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
             sendAmbientBacklightValue(1)
             assertEquals(
@@ -671,8 +677,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
             sendAmbientBacklightValue(254)
             assertEquals(
@@ -701,8 +708,9 @@ class KeyboardBacklightControllerTests {
         ).use {
             val keyboardWithBacklight = createKeyboard(DEVICE_ID)
             val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-            `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-            `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+            `when`(inputManagerRule.mock.getInputDevice(DEVICE_ID))
+                .thenReturn(keyboardWithBacklight)
+            `when`(inputManagerRule.mock.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
             keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
             incrementKeyboardBacklight(DEVICE_ID)
             assertEquals(

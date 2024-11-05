@@ -19,14 +19,11 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_EMPTY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
-import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UI_VISIBILITY;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_ACTIVITY;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BROADCAST_RECEIVER;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_STARTED_SERVICE;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ProcessList.CACHED_APP_MIN_ADJ;
-import static com.android.server.am.ProcessRecord.TAG;
 import static com.android.server.wm.WindowProcessController.ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED;
 import static com.android.server.wm.WindowProcessController.ACTIVITY_STATE_FLAG_IS_STOPPING;
 import static com.android.server.wm.WindowProcessController.ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING;
@@ -38,7 +35,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.util.Slog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.CompositeRWLock;
@@ -790,15 +786,7 @@ final class ProcessStateRecord {
 
     @GuardedBy("mService")
     void setRunningRemoteAnimation(boolean runningRemoteAnimation) {
-        if (mRunningRemoteAnimation == runningRemoteAnimation) {
-            return;
-        }
         mRunningRemoteAnimation = runningRemoteAnimation;
-        if (DEBUG_OOM_ADJ) {
-            Slog.i(TAG, "Setting runningRemoteAnimation=" + runningRemoteAnimation
-                    + " for pid=" + mApp.getPid());
-        }
-        mService.updateOomAdjLocked(mApp, OOM_ADJ_REASON_UI_VISIBILITY);
     }
 
     @GuardedBy({"mService", "mProcLock"})

@@ -15,19 +15,18 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Operation to deal with Text data
- */
+/** Operation to deal with Text data */
 public class TextMerge implements Operation {
     private static final int OP_CODE = Operations.TEXT_MERGE;
     private static final String CLASS_NAME = "TextMerge";
@@ -50,7 +49,6 @@ public class TextMerge implements Operation {
     public String toString() {
         return "TextMerge[" + mTextId + "] = [" + mSrcId1 + " ] + [ " + mSrcId2 + "]";
     }
-
 
     public static String name() {
         return CLASS_NAME;
@@ -84,16 +82,11 @@ public class TextMerge implements Operation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Merge two string into one")
-                .field(INT, "textId",
-                        "id of the text")
-                .field(INT, "srcTextId1",
-                        "id of the path")
-                .field(INT, "srcTextId1",
-                        "x Shift of the text");
+                .field(DocumentedOperation.INT, "textId", "id of the text")
+                .field(INT, "srcTextId1", "id of the path")
+                .field(INT, "srcTextId1", "x Shift of the text");
     }
 
     @Override

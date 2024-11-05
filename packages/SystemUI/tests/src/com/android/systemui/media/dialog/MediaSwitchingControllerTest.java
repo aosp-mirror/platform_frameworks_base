@@ -125,6 +125,8 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
     private static final boolean VOLUME_FIXED_TRUE = true;
     private static final int LATCH_COUNT_DOWN_TIME_IN_SECOND = 5;
     private static final int LATCH_TIME_OUT_TIME_IN_SECOND = 10;
+    private static final String PRODUCT_NAME_BUILTIN_MIC = "Built-in Mic";
+    private static final String PRODUCT_NAME_WIRED_HEADSET = "My Wired Headset";
 
     @Mock
     private DialogTransitionAnimator mDialogTransitionAnimator;
@@ -568,7 +570,8 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
                         AudioDeviceInfo.TYPE_BUILTIN_MIC,
                         MAX_VOLUME,
                         CURRENT_VOLUME,
-                        VOLUME_FIXED_TRUE);
+                        VOLUME_FIXED_TRUE,
+                        PRODUCT_NAME_BUILTIN_MIC);
         final MediaDevice mediaDevice4 =
                 InputMediaDevice.create(
                         mContext,
@@ -576,7 +579,8 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
                         AudioDeviceInfo.TYPE_WIRED_HEADSET,
                         MAX_VOLUME,
                         CURRENT_VOLUME,
-                        VOLUME_FIXED_TRUE);
+                        VOLUME_FIXED_TRUE,
+                        PRODUCT_NAME_WIRED_HEADSET);
         final List<MediaDevice> inputDevices = new ArrayList<>();
         inputDevices.add(mediaDevice3);
         inputDevices.add(mediaDevice4);
@@ -1355,7 +1359,8 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
                         AudioDeviceInfo.TYPE_BUILTIN_MIC,
                         MAX_VOLUME,
                         CURRENT_VOLUME,
-                        VOLUME_FIXED_TRUE);
+                        VOLUME_FIXED_TRUE,
+                        PRODUCT_NAME_BUILTIN_MIC);
         mMediaSwitchingController.connectDevice(inputMediaDevice);
 
         CountDownLatch latch = new CountDownLatch(LATCH_COUNT_DOWN_TIME_IN_SECOND);

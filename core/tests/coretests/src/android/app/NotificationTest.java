@@ -2397,10 +2397,25 @@ public class NotificationTest {
     public void progressStyle_getProgressMax_returnsSumOfSegmentLength() {
         final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
         progressStyle
+                .setProgressSegments(List.of(new Notification.ProgressStyle.Segment(15),
+                        new Notification.ProgressStyle.Segment(25)))
                 .addProgressSegment(new Notification.ProgressStyle.Segment(10))
                 .addProgressSegment(new Notification.ProgressStyle.Segment(20));
 
-        assertThat(progressStyle.getProgressMax()).isEqualTo(30);
+        assertThat(progressStyle.getProgressMax()).isEqualTo(70);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_getProgressMax_onSetProgressSegments_resets() {
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        progressStyle
+                .addProgressSegment(new Notification.ProgressStyle.Segment(10))
+                .addProgressSegment(new Notification.ProgressStyle.Segment(20))
+                .setProgressSegments(List.of(new Notification.ProgressStyle.Segment(15),
+                        new Notification.ProgressStyle.Segment(25)));
+
+        assertThat(progressStyle.getProgressMax()).isEqualTo(40);
     }
 
     @Test

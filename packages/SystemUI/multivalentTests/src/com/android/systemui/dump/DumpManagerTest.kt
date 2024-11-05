@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.table.TableLogBuffer
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -129,6 +130,21 @@ class DumpManagerTest : SysuiTestCase() {
         // THEN no exception is thrown when trying to re-register a new dumpable under the same key
         dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
         dumpManager.registerBuffer("buffer1", buffer1)
+
+        // No exception thrown
+    }
+
+    @Test
+    fun registerDumpable_supportsAnonymousDumpables() {
+        val anonDumpable =
+            object : Dumpable {
+                override fun dump(pw: PrintWriter, args: Array<out String>) {
+                    pw.println("AnonDumpable")
+                }
+            }
+
+        // THEN registration with implicit names should succeed
+        dumpManager.registerCriticalDumpable(anonDumpable)
 
         // No exception thrown
     }

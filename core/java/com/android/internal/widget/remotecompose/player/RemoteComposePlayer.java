@@ -29,9 +29,7 @@ import android.widget.ScrollView;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.player.platform.RemoteComposeCanvas;
 
-/**
- * A view to to display and play RemoteCompose documents
- */
+/** A view to to display and play RemoteCompose documents */
 public class RemoteComposePlayer extends FrameLayout {
     private RemoteComposeCanvas mInner;
 
@@ -73,10 +71,7 @@ public class RemoteComposePlayer extends FrameLayout {
     public void setDocument(RemoteComposeDocument value) {
         if (value != null) {
             if (value.canBeDisplayed(
-                    MAX_SUPPORTED_MAJOR_VERSION,
-                    MAX_SUPPORTED_MINOR_VERSION, 0L
-            )
-            ) {
+                    MAX_SUPPORTED_MAJOR_VERSION, MAX_SUPPORTED_MINOR_VERSION, 0L)) {
                 mInner.setDocument(value);
                 int contentBehavior = value.getDocument().getContentScroll();
                 applyContentBehavior(contentBehavior);
@@ -90,65 +85,58 @@ public class RemoteComposePlayer extends FrameLayout {
     }
 
     /**
-     * Apply the content behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL) to the player,
-     * adding or removing scrollviews as needed.
+     * Apply the content behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL) to the player, adding or
+     * removing scrollviews as needed.
      *
      * @param contentBehavior document content behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
      */
     private void applyContentBehavior(int contentBehavior) {
         switch (contentBehavior) {
-            case RootContentBehavior.SCROLL_HORIZONTAL: {
+            case RootContentBehavior.SCROLL_HORIZONTAL:
                 if (!(mInner.getParent() instanceof HorizontalScrollView)) {
                     ((ViewGroup) mInner.getParent()).removeView(mInner);
                     removeAllViews();
-                    LayoutParams layoutParamsInner = new LayoutParams(
-                            LayoutParams.WRAP_CONTENT,
-                            LayoutParams.MATCH_PARENT);
+                    LayoutParams layoutParamsInner =
+                            new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
                     HorizontalScrollView horizontalScrollView =
                             new HorizontalScrollView(getContext());
                     horizontalScrollView.setBackgroundColor(Color.TRANSPARENT);
                     horizontalScrollView.setFillViewport(true);
                     horizontalScrollView.addView(mInner, layoutParamsInner);
-                    LayoutParams layoutParams = new LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.MATCH_PARENT);
+                    LayoutParams layoutParams =
+                            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                     addView(horizontalScrollView, layoutParams);
                 }
-            }
-            break;
-            case RootContentBehavior.SCROLL_VERTICAL: {
+                break;
+            case RootContentBehavior.SCROLL_VERTICAL:
                 if (!(mInner.getParent() instanceof ScrollView)) {
                     ((ViewGroup) mInner.getParent()).removeView(mInner);
                     removeAllViews();
-                    LayoutParams layoutParamsInner = new LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.WRAP_CONTENT);
+                    LayoutParams layoutParamsInner =
+                            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
                     ScrollView scrollView = new ScrollView(getContext());
                     scrollView.setBackgroundColor(Color.TRANSPARENT);
                     scrollView.setFillViewport(true);
                     scrollView.addView(mInner, layoutParamsInner);
-                    LayoutParams layoutParams = new LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.MATCH_PARENT);
+                    LayoutParams layoutParams =
+                            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                     addView(scrollView, layoutParams);
                 }
-            }
-            break;
+                break;
             default:
                 if (mInner.getParent() != this) {
                     ((ViewGroup) mInner.getParent()).removeView(mInner);
                     removeAllViews();
-                    LayoutParams layoutParams = new LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.MATCH_PARENT);
+                    LayoutParams layoutParams =
+                            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                     addView(mInner, layoutParams);
                 }
         }
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT);
+        LayoutParams layoutParams =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         setBackgroundColor(Color.TRANSPARENT);
         mInner = new RemoteComposeCanvas(context, attrs, defStyleAttr);
         mInner.setBackgroundColor(Color.TRANSPARENT);
@@ -241,24 +229,25 @@ public class RemoteComposePlayer extends FrameLayout {
      * Add a callback for handling click events on the document
      *
      * @param callback the callback lambda that will be used when a click is detected
-     *                 <p>
-     *                 The parameter of the callback are:
-     *                 id : the id of the clicked area
-     *                 metadata: a client provided unstructured string associated with that area
+     *     <p>The parameter of the callback are:
+     *     <ul>
+     *       <li>id : the id of the clicked area
+     *       <li>metadata: a client provided unstructured string associated with that area
+     *     </ul>
      */
     public void addClickListener(ClickCallbacks callback) {
         mInner.addClickListener((id, metadata) -> callback.click(id, metadata));
     }
 
     /**
-     * Set the playback theme for the document. This allows to filter operations in order
-     * to have the document adapt to the given theme. This method is intended to be used
-     * to support night/light themes (system or app level), not custom themes.
+     * Set the playback theme for the document. This allows to filter operations in order to have
+     * the document adapt to the given theme. This method is intended to be used to support
+     * night/light themes (system or app level), not custom themes.
      *
-     * @param theme the theme used for playing the document. Possible values for theme are:
-     *              - Theme.UNSPECIFIED -- all instructions in the document will be executed
-     *              - Theme.DARK -- only executed NON Light theme instructions
-     *              - Theme.LIGHT -- only executed NON Dark theme instructions
+     * @param theme the theme used for playing the document. Possible values for theme are: -
+     *     Theme.UNSPECIFIED -- all instructions in the document will be executed - Theme.DARK --
+     *     only executed NON Light theme instructions - Theme.LIGHT -- only executed NON Dark theme
+     *     instructions
      */
     public void setTheme(int theme) {
         if (mInner.getTheme() != theme) {
@@ -277,8 +266,7 @@ public class RemoteComposePlayer extends FrameLayout {
     }
 
     /**
-     * This sets a color based on its name. Overriding the color set in
-     * the document.
+     * This sets a color based on its name. Overriding the color set in the document.
      *
      * @param colorName Name of the color
      * @param colorValue The new color value
@@ -364,7 +352,7 @@ public class RemoteComposePlayer extends FrameLayout {
                 case "colorFocusedHighlight":
                     setRColor(s, android.R.attr.colorFocusedHighlight);
                     break;
-                case "colorForeground":   // General foreground color for views.
+                case "colorForeground": // General foreground color for views.
                     setRColor(s, android.R.attr.colorForeground);
                     break;
                 // Foreground color for inverse backgrounds.
@@ -483,15 +471,14 @@ public class RemoteComposePlayer extends FrameLayout {
     }
 
     private int getColorFromResource(int id) {
+
         TypedValue typedValue = new TypedValue();
-        try (TypedArray arr = getContext()
-                .getApplicationContext()
-                .obtainStyledAttributes(typedValue.data, new int[]{id})) {
+        try (TypedArray arr =
+                getContext()
+                        .getApplicationContext()
+                        .obtainStyledAttributes(typedValue.data, new int[] {id})) {
             int color = arr.getColor(0, -1);
             return color;
         }
     }
-
-
 }
-

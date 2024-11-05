@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.os.CombinedVibration;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.SparseArray;
@@ -122,12 +124,18 @@ final class HalVibration extends Vibration {
      * @param deviceAdapter A {@link CombinedVibration.VibratorAdapter} that transforms vibration
      *                      effects to device vibrators based on its capabilities.
      */
-    public void adaptToDevice(CombinedVibration.VibratorAdapter deviceAdapter) {
-        CombinedVibration newEffect = mEffectToPlay.adapt(deviceAdapter);
-        if (!Objects.equals(mEffectToPlay, newEffect)) {
-            mEffectToPlay = newEffect;
+    public boolean adaptToDevice(CombinedVibration.VibratorAdapter deviceAdapter) {
+        CombinedVibration adaptedEffect = mEffectToPlay.adapt(deviceAdapter);
+        if (adaptedEffect == null) {
+            return false;
+        }
+
+        if (!mEffectToPlay.equals(adaptedEffect)) {
+            mEffectToPlay = adaptedEffect;
         }
         // No need to update fallback effects, they are already configured per device.
+
+        return true;
     }
 
     /** Return the effect that should be played by this vibration. */
@@ -145,19 +153,30 @@ final class HalVibration extends Vibration {
                 originalEffect, mScaleLevel, mAdaptiveScale);
     }
 
-    /**
-     * Returns true if this vibration can pipeline with the specified one.
-     *
-     * <p>Note that currently, repeating vibrations can't pipeline with following vibrations,
-     * because the cancel() call to stop the repetition will cancel a pending vibration too. This
-     * can be changed if we have a use-case to reason around behavior for. It may also be nice to
-     * pipeline very short vibrations together, regardless of the flag.
-     */
-    public boolean canPipelineWith(HalVibration vib) {
-        return callerInfo.uid == vib.callerInfo.uid && callerInfo.attrs.isFlagSet(
-                VibrationAttributes.FLAG_PIPELINED_EFFECT)
-                && vib.callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT)
-                && (mOriginalEffect.getDuration() != Long.MAX_VALUE);
+    /** Returns true if this vibration can pipeline with the specified one. */
+    public boolean canPipelineWith(HalVibration vib,
+            @Nullable SparseArray<VibratorInfo> vibratorInfos, int durationThresholdMs) {
+        long effectDuration = Flags.vibrationPipelineEnabled() && (vibratorInfos != null)
+                ? mEffectToPlay.getDuration(vibratorInfos)
+                : mEffectToPlay.getDuration();
+        if (effectDuration == Long.MAX_VALUE) {
+            // Repeating vibrations can't pipeline with following vibrations, because the cancel()
+            // call to stop the repetition will cancel a pending vibration too. This can be changed
+            // if we have a use-case, requiring changes to how pipelined vibrations are cancelled.
+            return false;
+        }
+        if (Flags.vibrationPipelineEnabled()
+                && (effectDuration > 0) && (effectDuration < durationThresholdMs)) {
+            // Duration is known and it's less than the pipeline threshold, so allow it.
+            // No need to check UID, as we want to avoid cancelling any short effect and let the
+            // vibrator hardware gracefully finish the vibration.
+            return true;
+        }
+        // Check the same app is requesting multiple vibrations with the pipeline flag,
+        // independently of the effect durations.
+        return callerInfo.uid == vib.callerInfo.uid
+                && callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT)
+                && vib.callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT);
     }
 
     private void fillFallbacksForEffect(CombinedVibration effect,

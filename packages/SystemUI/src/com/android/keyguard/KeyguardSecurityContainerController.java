@@ -897,6 +897,18 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     break;
             }
         }
+        // A check to dismiss was made without any authentication. Verify there are no remaining SIM
+        // screens, which may happen on an unlocked lockscreen
+        if (!authenticated) {
+            SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
+            if (Arrays.asList(SimPin, SimPuk).contains(securityMode)) {
+                Log.v(TAG, "Dismiss called but SIM/PUK unlock screen still required");
+                eventSubtype = -1;
+                showSecurityScreen(securityMode);
+                finish = false;
+            }
+        }
+
         // Check for device admin specified additional security measures.
         if (finish && !bypassSecondaryLockScreen) {
             Intent secondaryLockscreenIntent =
@@ -1102,8 +1114,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
 
         mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController,
-                () -> showMessage(getContext().getString(R.string.keyguard_unlock_to_continue),
-                        /* colorState= */ null, /* animated= */ true), mFalsingA11yDelegate);
+                () -> {
+                        String msg = getContext().getString(R.string.keyguard_unlock_to_continue);
+                        showMessage(msg, /* colorState= */ null, /* animated= */ true);
+                        mBouncerMessageInteractor.setUnlockToContinueMessage(msg);
+                }, mFalsingA11yDelegate);
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {

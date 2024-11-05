@@ -37,36 +37,42 @@ class FakeVolumeDialogController(private val audioManager: AudioManager) : Volum
     var hasUserActivity: Boolean = false
         private set
 
-    private var hasVibrator: Boolean = true
-
-    private val state = VolumeDialogController.State()
     private val callbacks = CopyOnWriteArraySet<VolumeDialogController.Callbacks>()
 
-    override fun setActiveStream(stream: Int) {
-        // ensure streamState existence for the active stream
-        state.states.getOrElse(stream) {
-            VolumeDialogController.StreamState().also { streamState ->
-                state.states.put(stream, streamState)
-            }
-        }
-        state.activeStream = stream
-    }
+    private var hasVibrator: Boolean = true
+    private var state = VolumeDialogController.State()
 
-    override fun setStreamVolume(stream: Int, userLevel: Int) {
-        val streamState =
-            state.states.getOrElse(stream) {
+    override fun setActiveStream(stream: Int) {
+        updateState {
+            // ensure streamState existence for the active stream`
+            states.getOrElse(stream) {
                 VolumeDialogController.StreamState().also { streamState ->
                     state.states.put(stream, streamState)
                 }
             }
-        streamState.level = userLevel.coerceIn(streamState.levelMin, streamState.levelMax)
+            activeStream = stream
+        }
+    }
+
+    override fun setStreamVolume(stream: Int, userLevel: Int) {
+        updateState {
+            val streamState =
+                states.getOrElse(stream) {
+                    VolumeDialogController.StreamState().also { streamState ->
+                        states.put(stream, streamState)
+                    }
+                }
+            streamState.level = userLevel.coerceIn(streamState.levelMin, streamState.levelMax)
+        }
     }
 
     override fun setRingerMode(ringerModeNormal: Int, external: Boolean) {
-        if (external) {
-            state.ringerModeExternal = ringerModeNormal
-        } else {
-            state.ringerModeInternal = ringerModeNormal
+        updateState {
+            if (external) {
+                ringerModeExternal = ringerModeNormal
+            } else {
+                ringerModeInternal = ringerModeNormal
+            }
         }
     }
 
@@ -108,6 +114,11 @@ class FakeVolumeDialogController(private val audioManager: AudioManager) : Volum
 
     fun resetUserActivity() {
         hasUserActivity = false
+    }
+
+    fun updateState(update: VolumeDialogController.State.() -> Unit) {
+        state = state.copy().apply(update)
+        getState()
     }
 
     override fun getState() {

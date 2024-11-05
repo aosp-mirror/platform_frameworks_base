@@ -139,7 +139,6 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.ui.viewmodel.DreamViewModel;
 import com.android.systemui.dump.DumpManager;
@@ -178,6 +177,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import dagger.Lazy;
@@ -236,6 +236,9 @@ import java.util.function.Consumer;
  */
 public class KeyguardViewMediator implements CoreStartable, Dumpable,
         StatusBarStateController.StateListener {
+
+    private static final boolean ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS =
+            Flags.ensureKeyguardDoesTransitionStarting();
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
 
@@ -2456,6 +2459,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             android.util.Log.i(TAG, "Ignoring request to dismiss (user switch in progress?)");
             return;
         }
+
+        if (mKeyguardStateController.isKeyguardGoingAway()) {
+            Log.i(TAG, "Ignoring dismiss because we're already going away.");
+            return;
+        }
+
         mHandler.obtainMessage(DISMISS, new DismissMessage(callback, message)).sendToTarget();
     }
 
@@ -2865,9 +2874,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 return;
             }
 
-            try {
-                mActivityTaskManagerService.setLockScreenShown(showing, aodShowing);
-            } catch (RemoteException ignored) {
+            if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+                mKeyguardTransitions.startKeyguardTransition(showing, aodShowing);
+            } else {
+                try {
+
+                    mActivityTaskManagerService.setLockScreenShown(showing, aodShowing);
+                } catch (RemoteException ignored) {
+                }
             }
         });
     }
@@ -2961,7 +2975,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         @Override
         public void run() {
             Trace.beginSection("KeyguardViewMediator.mKeyGuardGoingAwayRunnable");
-            if (DEBUG) Log.d(TAG, "keyguardGoingAway");
+            Log.d(TAG, "keyguardGoingAwayRunnable");
             mKeyguardViewControllerLazy.get().keyguardGoingAway();
 
             int flags = 0;
@@ -2998,18 +3012,23 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
             // Handled in WmLockscreenVisibilityManager if flag is enabled.
             if (!KeyguardWmStateRefactor.isEnabled()) {
-                    // Don't actually hide the Keyguard at the moment, wait for window manager 
-                    // until it tells us it's safe to do so with startKeyguardExitAnimation.
-		    // Posting to mUiOffloadThread to ensure that calls to ActivityTaskManager 
-		    // will be in order.
-		    final int keyguardFlag = flags;
-		    mUiBgExecutor.execute(() -> {
-		        try {
-		            mActivityTaskManagerService.keyguardGoingAway(keyguardFlag);
-		        } catch (RemoteException e) {
-		            Log.e(TAG, "Error while calling WindowManager", e);
-		        }
-		    });
+                // Don't actually hide the Keyguard at the moment, wait for window manager
+                // until it tells us it's safe to do so with startKeyguardExitAnimation.
+                // Posting to mUiOffloadThread to ensure that calls to ActivityTaskManager
+                // will be in order.
+                final int keyguardFlag = flags;
+                mUiBgExecutor.execute(() -> {
+                    if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+                        mKeyguardTransitions.startKeyguardTransition(
+                                false /* keyguardShowing */, false /* aodShowing */);
+                        return;
+                    }
+                    try {
+                        mActivityTaskManagerService.keyguardGoingAway(keyguardFlag);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error while calling WindowManager", e);
+                    }
+                });
             }
 
             Trace.endSection();
@@ -3414,6 +3433,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             return;
         }
 
+        if (mIsKeyguardExitAnimationCanceled) {
+            Log.d(TAG, "Ignoring exitKeyguardAndFinishSurfaceBehindRemoteAnimation. "
+                    + "mIsKeyguardExitAnimationCanceled==true");
+            return;
+        }
+
         // Block the panel from expanding, in case we were doing a swipe to dismiss gesture.
         mKeyguardViewControllerLazy.get().blockPanelExpansionFromCurrentTouch();
         final boolean wasShowing = mShowing;
@@ -3463,6 +3488,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      */
     public void showSurfaceBehindKeyguard() {
         mSurfaceBehindRemoteAnimationRequested = true;
+
+        if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            mKeyguardTransitions.startKeyguardTransition(
+                    false /* keyguardShowing */, false /* aodShowing */);
+            return;
+        }
 
         try {
             int flags = KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS
@@ -3537,9 +3568,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         // Ensure that keyguard becomes visible if the going away animation is canceled
-        if (showKeyguard && !KeyguardWmStateRefactor.isEnabled()
-                && (MigrateClocksToBlueprint.isEnabled()
-                    || DeviceEntryUdfpsRefactor.isEnabled())) {
+        if (showKeyguard && !KeyguardWmStateRefactor.isEnabled()) {
             mKeyguardInteractor.showKeyguard();
         }
     }

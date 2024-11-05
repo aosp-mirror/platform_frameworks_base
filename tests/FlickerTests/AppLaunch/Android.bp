@@ -24,69 +24,13 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Begin to cleanup after CL merges
-
-filegroup {
-    name: "FlickerTestsAppLaunchCommon-src",
-    srcs: ["src/**/common/*"],
-}
-
-filegroup {
-    name: "FlickerTestsAppLaunch1-src",
-    srcs: ["src/**/OpenAppFrom*"],
-}
-
-java_library {
-    name: "FlickerTestsAppLaunchCommon",
-    defaults: ["FlickerTestsDefault"],
-    srcs: [":FlickerTestsAppLaunchCommon-src"],
-    static_libs: ["FlickerTestsBase"],
-}
-
-android_test {
-    name: "FlickerTestsAppLaunch1",
-    defaults: ["FlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [":FlickerTestsAppLaunch1-src"],
-    static_libs: [
-        "FlickerTestsBase",
-        "FlickerTestsAppLaunchCommon",
-    ],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "FlickerTestsAppLaunch2",
-    defaults: ["FlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: ["src/**/*"],
-    exclude_srcs: [
-        ":FlickerTestsAppLaunchCommon-src",
-        ":FlickerTestsAppLaunch1-src",
-    ],
-    static_libs: [
-        "FlickerTestsBase",
-        "FlickerTestsAppLaunchCommon",
-    ],
-    data: ["trace_config/*"],
-}
-
-// End to cleanup after CL merges
-////////////////////////////////////////////////////////////////////////////////
-
 android_test {
     name: "FlickerTestsAppLaunch",
     defaults: ["FlickerTestsDefault"],
     manifest: "AndroidManifest.xml",
     test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*"],
-    static_libs: [
-        "FlickerTestsBase",
-        "FlickerTestsAppLaunchCommon",
-    ],
+    static_libs: ["FlickerTestsBase"],
     data: ["trace_config/*"],
 }
 

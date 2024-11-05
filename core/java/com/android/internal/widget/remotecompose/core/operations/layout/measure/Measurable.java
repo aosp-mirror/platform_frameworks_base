@@ -13,33 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.internal.widget.remotecompose.core.operations.layout.measure;
 
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 
-/**
- * Interface describing the measure/layout contract for components
- */
+/** Interface describing the measure/layout contract for components */
 public interface Measurable {
 
     /**
-     * Measure a component and store the result of the measure in the provided MeasurePass.
-     * This does not apply the measure to the component.
+     * Measure a component and store the result of the measure in the provided MeasurePass. This
+     * does not apply the measure to the component.
      */
-    void measure(PaintContext context, float minWidth, float maxWidth,
-                 float minHeight, float maxHeight, MeasurePass measure);
+    void measure(
+            PaintContext context,
+            float minWidth,
+            float maxWidth,
+            float minHeight,
+            float maxHeight,
+            MeasurePass measure);
 
-    /**
-     * Apply a given measure to the component
-     */
+    /** Apply a given measure to the component */
     void layout(RemoteContext context, MeasurePass measure);
 
     /**
      * Return true if the component needs to be remeasured
+     *
      * @return true if need to remeasured, false otherwise
      */
     boolean needsMeasure();
-
 }

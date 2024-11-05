@@ -15,12 +15,20 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+/**
+ * interface to allow expressions to access collections Todo define a convention for when access is
+ * unavailable
+ */
 public interface CollectionsAccess {
     float getFloatValue(int id, int index);
-    float[] getFloats(int id);
-    int getFloatsLength(int id);
 
-    default int getIntValue(int id, int index) {
-        return (int) getFloatValue(id, index);
+    float[] getFloats(int id);
+
+    int getListLength(int id);
+
+    int getId(int listId, int index);
+
+    default int getIntValue(int listId, int index) {
+        return (int) getFloatValue(listId, index);
     }
 }

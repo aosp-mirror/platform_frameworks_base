@@ -43,6 +43,7 @@ import java.util.function.Supplier;
 /**
  * A session object that holds origin transition states for starting an activity from an on-screen
  * UI component and smoothly transitioning back from the activity to the same UI component.
+ * @hide
  */
 public class OriginTransitionSession {
     private static final String TAG = "OriginTransitionSession";
@@ -179,7 +180,10 @@ public class OriginTransitionSession {
         }
     }
 
-    /** A builder to build a {@link OriginTransitionSession}. */
+    /**
+     * A builder to build a {@link OriginTransitionSession}.
+     * @hide
+     */
     public static class Builder {
         private final Context mContext;
         @Nullable private final IOriginTransitions mOriginTransitions;

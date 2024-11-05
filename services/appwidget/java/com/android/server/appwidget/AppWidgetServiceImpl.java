@@ -17,6 +17,7 @@
 package com.android.server.appwidget;
 
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
+import static android.appwidget.flags.Flags.remoteViewsProto;
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
 import static android.appwidget.flags.Flags.securityPolicyInteractAcrossUsers;
 import static android.appwidget.flags.Flags.supportResumeRestoreAfterReboot;
@@ -31,6 +32,7 @@ import static com.android.server.appwidget.AppWidgetXmlUtil.serializeWidgetSizes
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionName;
@@ -104,6 +106,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.service.appwidget.AppWidgetServiceDumpProto;
+import android.service.appwidget.GeneratedPreviewsProto;
 import android.service.appwidget.WidgetProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -122,7 +125,9 @@ import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 import android.view.Display;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -134,6 +139,7 @@ import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
@@ -221,6 +227,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // XML attribute for widget ids that are pending deletion.
     // See {@link Provider#pendingDeletedWidgetIds}.
     private static final String PENDING_DELETED_IDS_ATTR = "pending_deleted_ids";
+    // Name of service directory in /data/system_ce/<user>/
+    private static final String APPWIDGET_CE_DATA_DIRNAME = "appwidget";
+    // Name of previews directory in /data/system_ce/<user>/appwidget/
+    private static final String WIDGET_PREVIEWS_DIRNAME = "previews";
 
     // Hard limit of number of hosts an app can create, note that the app that hosts the widgets
     // can have multiple instances of {@link AppWidgetHost}, typically in respect to different
@@ -237,6 +247,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
             if (DEBUG) {
@@ -316,6 +330,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     // Handler to the background thread that saves states to disk.
     private Handler mSaveStateHandler;
+    // Handler to the background thread that saves generated previews to disk. All operations that
+    // modify saved previews must be run on this Handler.
+    private Handler mSavePreviewsHandler;
     // Handler to the foreground thread that handles broadcasts related to user
     // and package events, as well as various internal events within
     // AppWidgetService.
@@ -359,6 +376,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         } else {
             mSaveStateHandler = BackgroundThread.getHandler();
         }
+        mSavePreviewsHandler = new Handler(BackgroundThread.get().getLooper());
         final ServiceThread serviceThread = new ServiceThread(TAG,
                 android.os.Process.THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
         serviceThread.start();
@@ -378,7 +396,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_PROVIDERS,
                 DEFAULT_GENERATED_PREVIEW_MAX_PROVIDERS);
         mGeneratedPreviewsApiCounter = new ApiCounter(generatedPreviewResetInterval,
-                generatedPreviewMaxCallsPerInterval, generatedPreviewsMaxProviders);
+                generatedPreviewMaxCallsPerInterval,
+                // Set a limit on the number of providers if storing them in memory.
+                remoteViewsProto() ? Integer.MAX_VALUE : generatedPreviewsMaxProviders);
         DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI,
                 new HandlerExecutor(mCallbackHandler), this::handleSystemUiDeviceConfigChange);
 
@@ -644,7 +664,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         for (int i = 0; i < providerCount; i++) {
             Provider provider = mProviders.get(i);
             if (provider.id.uid == clearedUid) {
-                changed |= provider.clearGeneratedPreviewsLocked();
+                if (remoteViewsProto()) {
+                    changed |= clearGeneratedPreviewsAsync(provider);
+                } else {
+                    changed |= provider.clearGeneratedPreviewsLocked();
+                }
+                if (DEBUG) {
+                    Slog.e(TAG, "clearPreviewsForUidLocked " + provider + " changed " + changed);
+                }
             }
         }
         return changed;
@@ -894,18 +921,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             for (int j = 0; j < widgetCount; j++) {
                 Widget widget = provider.widgets.get(j);
                 if (targetWidget != null && targetWidget != widget) continue;
+                // Identify the user in the host process since the intent will be invoked by
+                // the host app.
+                final Host host = widget.host;
+                final UserHandle hostUser;
+                if (host != null && host.id != null) {
+                    hostUser = UserHandle.getUserHandleForUid(host.id.uid);
+                } else {
+                    // Fallback to the parent profile if the host is null.
+                    Slog.w(TAG, "Host is null when masking widget: " + widget.appWidgetId);
+                    hostUser = mUserManager.getProfileParent(appUserId).getUserHandle();
+                }
                 if (provider.maskedByStoppedPackage) {
                     Intent intent = createUpdateIntentLocked(provider,
                             new int[] { widget.appWidgetId });
                     views.setOnClickPendingIntent(android.R.id.background,
-                            PendingIntent.getBroadcast(mContext, widget.appWidgetId,
+                            PendingIntent.getBroadcastAsUser(mContext, widget.appWidgetId,
                                     intent, PendingIntent.FLAG_UPDATE_CURRENT
-                                            | PendingIntent.FLAG_IMMUTABLE));
+                                            | PendingIntent.FLAG_IMMUTABLE, hostUser));
                 } else if (onClickIntent != null) {
                     views.setOnClickPendingIntent(android.R.id.background,
-                            PendingIntent.getActivity(mContext, widget.appWidgetId, onClickIntent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT
-                                       | PendingIntent.FLAG_IMMUTABLE));
+                            PendingIntent.getActivityAsUser(mContext, widget.appWidgetId,
+                            onClickIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                                    | PendingIntent.FLAG_IMMUTABLE, null /* options */,
+                            hostUser));
                 }
                 if (widget.replaceWithMaskedViewsLocked(views)) {
                     scheduleNotifyUpdateAppWidgetLocked(widget, widget.getEffectiveViewsLocked());
@@ -1465,9 +1504,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         // Check that if a cross-profile binding is attempted, it is allowed.
-        // Cross-profile binding is also allowed if the caller has interact across users permission.
-        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)
-                && !mSecurityPolicy.hasCallerInteractAcrossUsersPermission()) {
+        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)) {
             return false;
         }
 
@@ -2436,10 +2473,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.i(TAG, "getInstalledProvidersForProfiles() " + userId);
         }
 
-        // Ensure the profile is in the group and enabled, or that the caller has permission to
-        // interact across users.
-        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)
-                && !mSecurityPolicy.hasCallerInteractAcrossUsersPermission()) {
+        // Ensure the profile is in the group and enabled.
+        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)) {
             return null;
         }
 
@@ -3246,6 +3281,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         deleteWidgetsLocked(provider, UserHandle.USER_ALL);
         mProviders.remove(provider);
         mGeneratedPreviewsApiCounter.remove(provider.id);
+        if (remoteViewsProto()) {
+            clearGeneratedPreviewsAsync(provider);
+        }
 
         // no need to send the DISABLE broadcast, since the receiver is gone anyway
         cancelBroadcastsLocked(provider);
@@ -3823,6 +3861,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 version = readProfileStateFromFileLocked(stream, profileId, loadedWidgets);
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to read state: " + e);
+            }
+
+            if (remoteViewsProto()) {
+                try {
+                    loadGeneratedPreviewCategoriesLocked(profileId);
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to read preview categories: " + e);
+                }
             }
         }
 
@@ -4593,6 +4639,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         keep.add(providerId);
                         // Use the new AppWidgetProviderInfo.
                         provider.setPartialInfoLocked(info);
+                        // Clear old previews
+                        if (remoteViewsProto()) {
+                            clearGeneratedPreviewsAsync(provider);
+                        } else {
+                            provider.clearGeneratedPreviewsLocked();
+                        }
                         // If it's enabled
                         final int M = provider.widgets.size();
                         if (M > 0) {
@@ -4884,6 +4936,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
         ensureWidgetCategoryCombinationIsValid(widgetCategory);
 
+        AndroidFuture<RemoteViews> result = null;
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(profileId);
             final int providerCount = mProviders.size();
@@ -4917,8 +4970,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 callingPackage);
                 if (providerIsInCallerProfile && !shouldFilterAppAccess
                         && (providerIsInCallerPackage || hasBindAppWidgetPermission)) {
-                    return provider.getGeneratedPreviewLocked(widgetCategory);
+                    if (remoteViewsProto()) {
+                        result = getGeneratedPreviewsAsync(provider, widgetCategory);
+                    } else {
+                        return provider.getGeneratedPreviewLocked(widgetCategory);
+                    }
                 }
+            }
+        }
+
+        if (result != null) {
+            try {
+                return result.get();
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to get generated previews Future result", e);
+                return null;
             }
         }
         // Either the provider does not exist or the caller does not have permission to access its
@@ -4950,8 +5016,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         providerComponent + " is not a valid AppWidget provider");
             }
             if (mGeneratedPreviewsApiCounter.tryApiCall(providerId)) {
-                provider.setGeneratedPreviewLocked(widgetCategories, preview);
-                scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+                if (remoteViewsProto()) {
+                    setGeneratedPreviewsAsync(provider, widgetCategories, preview);
+                } else {
+                    provider.setGeneratedPreviewLocked(widgetCategories, preview);
+                    scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+                }
                 return true;
             }
             return false;
@@ -4979,9 +5049,359 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 throw new IllegalArgumentException(
                         providerComponent + " is not a valid AppWidget provider");
             }
-            final boolean changed = provider.removeGeneratedPreviewLocked(widgetCategories);
-            if (changed) scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+
+            if (remoteViewsProto()) {
+                removeGeneratedPreviewsAsync(provider, widgetCategories);
+            } else {
+                final boolean changed = provider.removeGeneratedPreviewLocked(widgetCategories);
+                if (changed) scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+            }
         }
+    }
+
+    /**
+     * Return previews for the specified provider from a background thread. The result of the future
+     * is nullable.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @NonNull
+    private AndroidFuture<RemoteViews> getGeneratedPreviewsAsync(
+            @NonNull Provider provider, @AppWidgetProviderInfo.CategoryFlags int widgetCategory) {
+        AndroidFuture<RemoteViews> result = new AndroidFuture<>();
+        mSavePreviewsHandler.post(() -> {
+            SparseArray<RemoteViews> previews = loadGeneratedPreviews(provider);
+            for (int i = 0; i < previews.size(); i++) {
+                if ((widgetCategory & previews.keyAt(i)) != 0) {
+                    result.complete(previews.valueAt(i));
+                    return;
+                }
+            }
+            result.complete(null);
+        });
+        return result;
+    }
+
+    /**
+     * Set previews for the specified provider on a background thread.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private void setGeneratedPreviewsAsync(@NonNull Provider provider, int widgetCategories,
+            @NonNull RemoteViews preview) {
+        mSavePreviewsHandler.post(() -> {
+            SparseArray<RemoteViews> previews = loadGeneratedPreviews(provider);
+            for (int flag : Provider.WIDGET_CATEGORY_FLAGS) {
+                if ((widgetCategories & flag) != 0) {
+                    previews.put(flag, preview);
+                }
+            }
+            saveGeneratedPreviews(provider, previews, /* notify= */ true);
+        });
+    }
+
+    /**
+     * Remove previews for the specified provider on a background thread.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private void removeGeneratedPreviewsAsync(@NonNull Provider provider, int widgetCategories) {
+        mSavePreviewsHandler.post(() -> {
+            SparseArray<RemoteViews> previews = loadGeneratedPreviews(provider);
+            boolean changed = false;
+            for (int flag : Provider.WIDGET_CATEGORY_FLAGS) {
+                if ((widgetCategories & flag) != 0) {
+                    changed |= previews.removeReturnOld(flag) != null;
+                }
+            }
+            if (changed) {
+                saveGeneratedPreviews(provider, previews, /* notify= */ true);
+            }
+        });
+    }
+
+    /**
+     * Clear previews for the specified provider on a background thread. Returns true if changed
+     * (i.e. there are previews to clear). If returns true, the caller should schedule a providers
+     * changed notification.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private boolean clearGeneratedPreviewsAsync(@NonNull Provider provider) {
+        mSavePreviewsHandler.post(() -> {
+            saveGeneratedPreviews(provider, /* previews= */ null, /* notify= */ false);
+        });
+        return provider.info.generatedPreviewCategories != 0;
+    }
+
+    private void checkSavePreviewsThread() {
+        if (DEBUG && !mSavePreviewsHandler.getLooper().isCurrentThread()) {
+            throw new IllegalStateException("Only modify previews on the background thread");
+        }
+    }
+
+    /**
+     * Load previews from file for the given provider. If there are no previews, returns an empty
+     * SparseArray. Else, returns a SparseArray of the previews mapped by widget category.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @NonNull
+    private SparseArray<RemoteViews> loadGeneratedPreviews(@NonNull Provider provider) {
+        checkSavePreviewsThread();
+        try {
+            AtomicFile previewsFile = getWidgetPreviewsFile(provider);
+            if (!previewsFile.exists()) {
+                return new SparseArray<>();
+            }
+            ProtoInputStream input = new ProtoInputStream(previewsFile.readFully());
+            SparseArray<RemoteViews> entries = readGeneratedPreviewsFromProto(input);
+            SparseArray<RemoteViews> singleCategoryKeyedEntries = new SparseArray<>();
+            for (int i = 0; i < entries.size(); i++) {
+                int widgetCategories = entries.keyAt(i);
+                RemoteViews preview = entries.valueAt(i);
+                for (int flag : Provider.WIDGET_CATEGORY_FLAGS) {
+                    if ((widgetCategories & flag) != 0) {
+                        singleCategoryKeyedEntries.put(flag, preview);
+                    }
+                }
+            }
+            return singleCategoryKeyedEntries;
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to load generated previews for " + provider, e);
+            return new SparseArray<>();
+        }
+    }
+
+    /**
+     * This is called when loading profile/group state to populate
+     * AppWidgetProviderInfo.generatedPreviewCategories based on what previews are saved.
+     *
+     * This is the only time previews are read while not on mSavePreviewsHandler. It happens once
+     * per profile during initialization, before any calls to get/set/removeWidgetPreviewAsync
+     * happen for that profile.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @GuardedBy("mLock")
+    private void loadGeneratedPreviewCategoriesLocked(int profileId) throws IOException {
+        for (Provider provider : mProviders) {
+            if (provider.id.getProfile().getIdentifier() != profileId) {
+                continue;
+            }
+            AtomicFile previewsFile = getWidgetPreviewsFile(provider);
+            if (!previewsFile.exists()) {
+                continue;
+            }
+            ProtoInputStream input = new ProtoInputStream(previewsFile.readFully());
+            provider.info.generatedPreviewCategories = readGeneratedPreviewCategoriesFromProto(
+                    input);
+            if (DEBUG) {
+                Slog.i(TAG, TextUtils.formatSimple(
+                        "loadGeneratedPreviewCategoriesLocked %d %s categories %d", profileId,
+                        provider, provider.info.generatedPreviewCategories));
+            }
+        }
+    }
+
+    /**
+     * Save the given previews into storage.
+     *
+     * @param provider Provider for which to save previews
+     * @param previews Previews to save. If null or empty, clears any saved previews for this
+     *                 provider.
+     * @param notify If true, then this function will notify hosts of updated provider info.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private void saveGeneratedPreviews(@NonNull Provider provider,
+            @Nullable SparseArray<RemoteViews> previews, boolean notify) {
+        checkSavePreviewsThread();
+        AtomicFile file = null;
+        FileOutputStream stream = null;
+        try {
+            file = getWidgetPreviewsFile(provider);
+            if (previews == null || previews.size() == 0) {
+                if (file.exists()) {
+                    if (DEBUG) {
+                        Slog.i(TAG, "Deleting widget preview file " + file);
+                    }
+                    file.delete();
+                }
+            } else {
+                if (DEBUG) {
+                    Slog.i(TAG, "Writing widget preview file " + file);
+                }
+                ProtoOutputStream out = new ProtoOutputStream();
+                writePreviewsToProto(out, previews);
+                stream = file.startWrite();
+                stream.write(out.getBytes());
+                file.finishWrite(stream);
+            }
+
+            synchronized (mLock) {
+                provider.updateGeneratedPreviewCategoriesLocked(previews);
+                if (notify) {
+                    scheduleNotifyGroupHostsForProvidersChangedLocked(provider.getUserId());
+                }
+            }
+        } catch (IOException e) {
+            if (file != null && stream != null) {
+                file.failWrite(stream);
+            }
+            Slog.w(TAG, "Failed to save widget previews for provider " + provider.id.componentName);
+        }
+    }
+
+
+    /**
+     * Write the given previews as a GeneratedPreviewsProto to the output stream.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private void writePreviewsToProto(@NonNull ProtoOutputStream out,
+            @NonNull SparseArray<RemoteViews> generatedPreviews) {
+        // Collect RemoteViews mapped by hashCode in order to avoid writing duplicates.
+        SparseArray<Pair<Integer, RemoteViews>> previewsToWrite = new SparseArray<>();
+        for (int i = 0; i < generatedPreviews.size(); i++) {
+            int widgetCategory = generatedPreviews.keyAt(i);
+            RemoteViews views = generatedPreviews.valueAt(i);
+            if (!previewsToWrite.contains(views.hashCode())) {
+                previewsToWrite.put(views.hashCode(), new Pair<>(widgetCategory, views));
+            } else {
+                Pair<Integer, RemoteViews> entry = previewsToWrite.get(views.hashCode());
+                previewsToWrite.put(views.hashCode(),
+                        Pair.create(entry.first | widgetCategory, views));
+            }
+        }
+
+        for (int i = 0; i < previewsToWrite.size(); i++) {
+            final long token = out.start(GeneratedPreviewsProto.PREVIEWS);
+            Pair<Integer, RemoteViews> entry = previewsToWrite.valueAt(i);
+            out.write(GeneratedPreviewsProto.Preview.WIDGET_CATEGORIES, entry.first);
+            final long viewsToken = out.start(GeneratedPreviewsProto.Preview.VIEWS);
+            entry.second.writePreviewToProto(mContext, out);
+            out.end(viewsToken);
+            out.end(token);
+        }
+    }
+
+    /**
+     * Read a GeneratedPreviewsProto message from the input stream.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @NonNull
+    private SparseArray<RemoteViews> readGeneratedPreviewsFromProto(@NonNull ProtoInputStream input)
+            throws IOException {
+        SparseArray<RemoteViews> entries = new SparseArray<>();
+        while (input.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (input.getFieldNumber()) {
+                case (int) GeneratedPreviewsProto.PREVIEWS:
+                    final long token = input.start(GeneratedPreviewsProto.PREVIEWS);
+                    Pair<Integer, RemoteViews> entry = readSinglePreviewFromProto(input,
+                            /* skipViews= */ false);
+                    entries.put(entry.first, entry.second);
+                    input.end(token);
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown field while reading GeneratedPreviewsProto! "
+                            + ProtoUtils.currentFieldToString(input));
+            }
+        }
+        return entries;
+    }
+
+    /**
+     * Read the widget categories from GeneratedPreviewsProto and return an int representing the
+     * combined widget categories of all the previews.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @AppWidgetProviderInfo.CategoryFlags
+    private int readGeneratedPreviewCategoriesFromProto(@NonNull ProtoInputStream input)
+            throws IOException {
+        int widgetCategories = 0;
+        while (input.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (input.getFieldNumber()) {
+                case (int) GeneratedPreviewsProto.PREVIEWS:
+                    final long token = input.start(GeneratedPreviewsProto.PREVIEWS);
+                    Pair<Integer, RemoteViews> entry = readSinglePreviewFromProto(input,
+                            /* skipViews= */ true);
+                    widgetCategories |= entry.first;
+                    input.end(token);
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown field while reading GeneratedPreviewsProto! "
+                            + ProtoUtils.currentFieldToString(input));
+            }
+        }
+        return widgetCategories;
+    }
+
+    /**
+     * Read a single GeneratedPreviewsProto.Preview message from the input stream, and returns a
+     * pair of widget category and corresponding RemoteViews. If skipViews is true, this function
+     * will only read widget categories and the returned RemoteViews will be null.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @NonNull
+    private Pair<Integer, RemoteViews> readSinglePreviewFromProto(@NonNull ProtoInputStream input,
+            boolean skipViews) throws IOException {
+        int widgetCategories = 0;
+        RemoteViews views = null;
+        while (input.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (input.getFieldNumber()) {
+                case (int) GeneratedPreviewsProto.Preview.VIEWS:
+                    if (skipViews)  {
+                        // ProtoInputStream will skip over the nested message when nextField() is
+                        // called.
+                        continue;
+                    }
+                    final long token = input.start(GeneratedPreviewsProto.Preview.VIEWS);
+                    try {
+                        views = RemoteViews.createPreviewFromProto(mContext, input);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Unable to deserialize RemoteViews", e);
+                    }
+                    input.end(token);
+                    break;
+                case (int) GeneratedPreviewsProto.Preview.WIDGET_CATEGORIES:
+                    widgetCategories = input.readInt(
+                            GeneratedPreviewsProto.Preview.WIDGET_CATEGORIES);
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown field while reading GeneratedPreviewsProto! "
+                            + ProtoUtils.currentFieldToString(input));
+            }
+        }
+        return Pair.create(widgetCategories, views);
+    }
+
+    /**
+     * Returns the file in which all generated previews for this provider are stored. This will be
+     * a path of the form:
+     *  {@literal /data/system_ce/<userId>/appwidget/previews/<package>-<class>-<uid>.binpb}
+     *
+     * This function will not create the file if it does not already exist.
+     */
+    @NonNull
+    private static AtomicFile getWidgetPreviewsFile(@NonNull Provider provider) throws IOException {
+        int userId = provider.getUserId();
+        File previewsDirectory = getWidgetPreviewsDirectory(userId);
+        File providerPreviews = Environment.buildPath(previewsDirectory,
+                TextUtils.formatSimple("%s-%s-%d.binpb", provider.id.componentName.getPackageName(),
+                        provider.id.componentName.getClassName(), provider.id.uid));
+        return new AtomicFile(providerPreviews);
+    }
+
+    /**
+     * Returns the widget previews directory for the given user, creating it if it does not exist.
+     * This will be a path of the form:
+     *  {@literal /data/system_ce/<userId>/appwidget/previews}
+     */
+    @NonNull
+    private static File getWidgetPreviewsDirectory(int userId) throws IOException {
+        File dataSystemCeDirectory = Environment.getDataSystemCeDirectory(userId);
+        File previewsDirectory = Environment.buildPath(dataSystemCeDirectory,
+                APPWIDGET_CE_DATA_DIRNAME, WIDGET_PREVIEWS_DIRNAME);
+        if (!previewsDirectory.exists()) {
+            if (!previewsDirectory.mkdirs()) {
+                throw new IOException("Unable to create widget preview directory "
+                        + previewsDirectory.getPath());
+            }
+        }
+        return previewsDirectory;
     }
 
     private static void ensureWidgetCategoryCombinationIsValid(int widgetCategories) {
@@ -5231,11 +5651,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 return true;
             }
             final int userId = UserHandle.getUserId(uid);
-            if ((widget.host.getUserId() == userId || (widget.provider != null
-                    && widget.provider.getUserId() == userId))
+            if ((widget.host.getUserId() == userId
+                    || (widget.provider != null && widget.provider.getUserId() == userId)
+                    || hasCallerInteractAcrossUsersPermission())
                     && callerHasPermission(android.Manifest.permission.BIND_APPWIDGET)) {
-                // Apps that run in the same user as either the host or the provider and
-                // have the bind widget permission have access to the widget.
+                // Access to the widget requires the app to:
+                // - Run in the same user as the host or provider, or have permission to interact
+                //   across users
+                // - Have bind widget permission
                 return true;
             }
             if (DEBUG) {
@@ -5256,14 +5679,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
          * The provider is accessible by the caller if any of the following is true:
          * - The provider belongs to the caller
          * - The provider belongs to a profile of the caller and is allowlisted
-         * - The caller has permission to interact across users
          */
         public boolean canAccessProvider(String packageName, int profileId) {
             final int callerId = UserHandle.getCallingUserId();
             if (profileId == callerId) {
-                return true;
-            }
-            if (hasCallerInteractAcrossUsersPermission()) {
                 return true;
             }
             final int parentId = getProfileParent(profileId);
@@ -5415,11 +5834,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 AppWidgetManager.META_DATA_APPWIDGET_PROVIDER);
                     }
                     if (newInfo != null) {
+                        newInfo.generatedPreviewCategories = info.generatedPreviewCategories;
                         info = newInfo;
                         if (DEBUG) {
                             Objects.requireNonNull(info);
                         }
-                        updateGeneratedPreviewCategoriesLocked();
                     }
                 }
                 mInfoParsed = true;
@@ -5476,7 +5895,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     generatedPreviews.put(flag, preview);
                 }
             }
-            updateGeneratedPreviewCategoriesLocked();
+            updateGeneratedPreviewCategoriesLocked(generatedPreviews);
         }
 
         @GuardedBy("this.mLock")
@@ -5488,7 +5907,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
             if (changed) {
-                updateGeneratedPreviewCategoriesLocked();
+                updateGeneratedPreviewCategoriesLocked(generatedPreviews);
             }
             return changed;
         }
@@ -5497,17 +5916,19 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         public boolean clearGeneratedPreviewsLocked() {
             if (generatedPreviews.size() > 0) {
                 generatedPreviews.clear();
-                updateGeneratedPreviewCategoriesLocked();
+                updateGeneratedPreviewCategoriesLocked(generatedPreviews);
                 return true;
             }
             return false;
         }
-
         @GuardedBy("this.mLock")
-        private void updateGeneratedPreviewCategoriesLocked() {
+        private void updateGeneratedPreviewCategoriesLocked(
+                @Nullable SparseArray<RemoteViews> previews) {
             info.generatedPreviewCategories = 0;
-            for (int i = 0; i < generatedPreviews.size(); i++) {
-                info.generatedPreviewCategories |= generatedPreviews.keyAt(i);
+            if (previews != null) {
+                for (int i = 0; i < previews.size(); i++) {
+                    info.generatedPreviewCategories |= previews.keyAt(i);
+                }
             }
         }
 

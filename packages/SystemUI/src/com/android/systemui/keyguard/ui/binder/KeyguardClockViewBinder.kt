@@ -44,7 +44,7 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 object KeyguardClockViewBinder {
     private val TAG = KeyguardClockViewBinder::class.simpleName!!

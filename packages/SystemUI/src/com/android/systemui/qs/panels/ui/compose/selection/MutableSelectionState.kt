@@ -89,8 +89,11 @@ class MutableSelectionState(
  * Listens for click events to select/unselect the given [TileSpec]. Use this on current tiles as
  * they can be selected.
  */
-@Composable
-fun Modifier.selectableTile(tileSpec: TileSpec, selectionState: MutableSelectionState): Modifier {
+fun Modifier.selectableTile(
+    tileSpec: TileSpec,
+    selectionState: MutableSelectionState,
+    onClick: () -> Unit = {},
+): Modifier {
     return pointerInput(Unit) {
         detectTapGestures(
             onTap = {
@@ -99,6 +102,7 @@ fun Modifier.selectableTile(tileSpec: TileSpec, selectionState: MutableSelection
                 } else {
                     selectionState.select(tileSpec, manual = true)
                 }
+                onClick()
             }
         )
     }

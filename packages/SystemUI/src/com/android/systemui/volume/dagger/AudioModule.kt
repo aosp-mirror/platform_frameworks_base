@@ -27,6 +27,8 @@ import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
 import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.data.repository.AudioSharingRepositoryEmptyImpl
 import com.android.settingslib.volume.data.repository.AudioSharingRepositoryImpl
+import com.android.settingslib.volume.data.repository.AudioSystemRepository
+import com.android.settingslib.volume.data.repository.AudioSystemRepositoryImpl
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
@@ -106,5 +108,11 @@ interface AudioModule {
             notificationsSoundPolicyInteractor: NotificationsSoundPolicyInteractor,
         ): AudioVolumeInteractor =
             AudioVolumeInteractor(audioRepository, notificationsSoundPolicyInteractor)
+
+        @Provides
+        @SysUISingleton
+        fun provideAudioSystemRepository(
+            @Application context: Context,
+        ): AudioSystemRepository = AudioSystemRepositoryImpl(context)
     }
 }

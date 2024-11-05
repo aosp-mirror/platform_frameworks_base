@@ -15,9 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
-/**
- * Provide a bouncing Easing function
- */
+/** Provide a bouncing Easing function */
 public class ElasticOutCurve extends Easing {
     private static final float F_PI = (float) Math.PI;
     private static final float C4 = 2 * F_PI / 3;
@@ -31,9 +29,7 @@ public class ElasticOutCurve extends Easing {
         }
         if (x >= 1) {
             return 1.0f;
-        } else
-            return (float) (Math.pow(2.0f, -10 * x)
-                    * Math.sin((x * 10 - 0.75f) * C4) + 1);
+        } else return (float) (Math.pow(2.0f, -10 * x) * Math.sin((x * 10 - 0.75f) * C4) + 1);
     }
 
     @Override
@@ -41,9 +37,11 @@ public class ElasticOutCurve extends Easing {
         if (x < 0 || x > 1) {
             return 0.0f;
         } else
-            return (float) ((5 * Math.pow(2.0f, (1 - 10 * x))
-                    * (LOG_8 * Math.cos(TWENTY_PI * x / 3) + 2
-                    * F_PI * Math.sin(TWENTY_PI * x / 3))
-                    / 3));
+            return (float)
+                    (5
+                            * Math.pow(2.0f, 1 - 10 * x)
+                            * (LOG_8 * Math.cos(TWENTY_PI * x / 3)
+                                    + 2 * F_PI * Math.sin(TWENTY_PI * x / 3))
+                            / 3);
     }
 }

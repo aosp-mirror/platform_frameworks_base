@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.graphics.Bitmap
 import android.graphics.Insets
 import android.graphics.Rect
-import android.os.Process
 import android.os.UserHandle
 import android.view.Display
 import android.view.WindowManager
@@ -21,18 +20,14 @@ data class ScreenshotData(
     val userHandle: UserHandle,
     /** ComponentName of the top-most app in the screenshot. */
     val topComponent: ComponentName?,
-    var screenBounds: Rect?,
     val taskId: Int,
-    var insets: Insets,
+    val originalScreenBounds: Rect?,
+    val originalInsets: Insets,
     var bitmap: Bitmap?,
     val displayId: Int,
 ) {
     val packageNameString
         get() = topComponent?.packageName ?: ""
-
-    fun getUserOrDefault(): UserHandle {
-        return userHandle ?: Process.myUserHandle()
-    }
 
     companion object {
         @JvmStatic
@@ -42,9 +37,9 @@ data class ScreenshotData(
                 source = request.source,
                 userHandle = UserHandle.of(request.userId),
                 topComponent = request.topComponent,
-                screenBounds = request.boundsInScreen,
+                originalScreenBounds = request.boundsInScreen,
                 taskId = request.taskId,
-                insets = request.insets,
+                originalInsets = request.insets,
                 bitmap = request.bitmap,
                 displayId = displayId,
             )
@@ -61,9 +56,9 @@ data class ScreenshotData(
                 source = source,
                 userHandle = userHandle,
                 topComponent = topComponent,
-                screenBounds = null,
+                originalScreenBounds = null,
                 taskId = 0,
-                insets = Insets.NONE,
+                originalInsets = Insets.NONE,
                 bitmap = bitmap,
                 displayId = Display.DEFAULT_DISPLAY,
             )

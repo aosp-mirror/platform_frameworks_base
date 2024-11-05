@@ -139,7 +139,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
                 TransitionStep(
                     KeyguardState.OFF,
                     KeyguardState.LOCKSCREEN,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 )
             )
 
@@ -181,7 +181,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
                 TransitionStep(
                     KeyguardState.AOD,
                     KeyguardState.LOCKSCREEN,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 )
             )
 
@@ -206,7 +206,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
                 TransitionStep(
                     KeyguardState.DOZING,
                     KeyguardState.LOCKSCREEN,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 )
             )
 
@@ -229,7 +229,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
                 TransitionStep(
                     KeyguardState.DOZING,
                     KeyguardState.LOCKSCREEN,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 )
             )
 
@@ -244,12 +244,14 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
     fun faceAuthLockedOutStateIsUpdatedAfterUserSwitch() =
         testScope.runTest {
             underTest.start()
+            runCurrent()
+            fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
 
             // User switching has started
             fakeUserRepository.setSelectedUserInfo(primaryUser, SelectionStatus.SELECTION_COMPLETE)
             fakeUserRepository.setSelectedUserInfo(
                 primaryUser,
-                SelectionStatus.SELECTION_IN_PROGRESS
+                SelectionStatus.SELECTION_IN_PROGRESS,
             )
             runCurrent()
 
@@ -258,7 +260,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
             facePropertyRepository.setLockoutMode(secondaryUser.id, LockoutMode.NONE)
             fakeUserRepository.setSelectedUserInfo(
                 secondaryUser,
-                SelectionStatus.SELECTION_COMPLETE
+                SelectionStatus.SELECTION_COMPLETE,
             )
             runCurrent()
 
@@ -316,7 +318,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
                 .isEqualTo(
                     Pair(
                         FaceAuthUiEvent.FACE_AUTH_TRIGGERED_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN,
-                        false
+                        false,
                     )
                 )
         }
@@ -600,7 +602,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
 
             faceAuthRepository.requestAuthenticate(
                 FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED,
-                true
+                true,
             )
             facePropertyRepository.setCameraIno(CameraInfo("0", "1", null))
 

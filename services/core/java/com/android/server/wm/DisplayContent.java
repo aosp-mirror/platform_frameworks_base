@@ -159,7 +159,6 @@ import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELD
 import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -3426,14 +3425,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!mWmService.mSupportsHighPerfTransitions) {
             return;
         }
-        if (!explicitRefreshRateHints()) {
-            if (enable) {
-                getPendingTransaction().setEarlyWakeupStart();
-            } else {
-                getPendingTransaction().setEarlyWakeupEnd();
-            }
-            return;
-        }
         if (enable) {
             if (mTransitionPrefSession == null) {
                 mTransitionPrefSession = mWmService.mSystemPerformanceHinter.createSession(
@@ -3446,10 +3437,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void enableHighFrameRate(boolean enable) {
-        if (!explicitRefreshRateHints()) {
-            // Done by RefreshRatePolicy.
-            return;
-        }
         if (enable) {
             if (mHighFrameRateSession == null) {
                 mHighFrameRateSession = mWmService.mSystemPerformanceHinter.createSession(
@@ -5789,6 +5776,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
+     * Checks if this display is allowed to ignore fixed orientation, aspect ratio,
+     * and resizability of apps.
+     *
+     * <p>This can be set via
+     * {@link VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions}.</p>
+     */
+    boolean isDisplayIgnoreActivitySizeRestrictions() {
+        return mWmService.mDisplayWindowSettings.isIgnoreActivitySizeRestrictionsLocked(this);
+    }
+
+    /**
      * The direct child layer of the display to put all non-overlay windows. This is also used for
      * screen rotation animation so that there is a parent layer to put the animation leash.
      */
@@ -6923,27 +6921,25 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return;
             }
             if (mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
+                if (!r.isVisible()) {
+                    // Let the opening activity update orientation.
+                    return;
+                }
                 if (mFixedRotationLaunchingApp.hasAnimatingFixedRotationTransition()) {
                     // Waiting until all of the associated activities have done animation, or the
                     // orientation would be updated too early and cause flickering.
                     return;
                 }
             } else {
-                // Handle a corner case that the task of {@link #mFixedRotationLaunchingApp} is no
-                // longer animating but the corresponding transition finished event won't notify.
-                // E.g. activity A transferred starting window to B, only A will receive transition
-                // finished event. A doesn't have fixed rotation but B is the rotated launching app.
-                final Task task = r.getTask();
-                if (task != mFixedRotationLaunchingApp.getTask()
+                // Check to skip updating display orientation by a non-top activity.
+                if ((!r.isVisible() || !mFixedRotationLaunchingApp.fillsParent())
                         // When closing a translucent task A (r.fillsParent() is false) to a
                         // visible task B, because only A has visibility change, there is only A's
                         // transition callback. Then it still needs to update orientation for B.
-                        && (!mWmService.mFlags.mRespectNonTopVisibleFixedOrientation
-                                || r.fillsParent())) {
-                    // Different tasks won't be in one activity transition animation.
+                        && r.fillsParent()) {
                     return;
                 }
-                if (task.getActivity(ActivityRecord::isInTransition) != null) {
+                if (r.inTransition()) {
                     return;
                     // Continue to update orientation because the transition of the top rotated
                     // launching activity is done.
@@ -7063,7 +7059,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         @Override
         public void setImeInputTargetRequestedVisibility(boolean visible) {
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
-                // TODO(b/329229469) we won't have the statsToken in all cases, but should still log
+                // TODO(b/353463205) we won't have the statsToken in all cases, but should still log
                 try {
                     mRemoteInsetsController.setImeInputTargetRequestedVisibility(visible);
                 } catch (RemoteException e) {

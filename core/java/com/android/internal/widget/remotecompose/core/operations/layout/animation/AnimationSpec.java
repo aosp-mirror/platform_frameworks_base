@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.animation;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -26,9 +26,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.easin
 
 import java.util.List;
 
-/**
- * Basic component animation spec
- */
+/** Basic component animation spec */
 public class AnimationSpec implements Operation {
     int mAnimationId = -1;
     int mMotionDuration = 300;
@@ -38,9 +36,14 @@ public class AnimationSpec implements Operation {
     ANIMATION mEnterAnimation = ANIMATION.FADE_IN;
     ANIMATION mExitAnimation = ANIMATION.FADE_OUT;
 
-    public AnimationSpec(int animationId, int motionDuration, int motionEasingType,
-                         int visibilityDuration, int visibilityEasingType,
-                         ANIMATION enterAnimation, ANIMATION exitAnimation) {
+    public AnimationSpec(
+            int animationId,
+            int motionDuration,
+            int motionEasingType,
+            int visibilityDuration,
+            int visibilityEasingType,
+            ANIMATION enterAnimation,
+            ANIMATION exitAnimation) {
         this.mAnimationId = animationId;
         this.mMotionDuration = motionDuration;
         this.mMotionEasingType = motionEasingType;
@@ -51,9 +54,14 @@ public class AnimationSpec implements Operation {
     }
 
     public AnimationSpec() {
-        this(-1, 300, GeneralEasing.CUBIC_STANDARD,
-                300, GeneralEasing.CUBIC_STANDARD,
-                ANIMATION.FADE_IN, ANIMATION.FADE_OUT);
+        this(
+                -1,
+                600,
+                GeneralEasing.CUBIC_STANDARD,
+                500,
+                GeneralEasing.CUBIC_STANDARD,
+                ANIMATION.FADE_IN,
+                ANIMATION.FADE_OUT);
     }
 
     public int getAnimationId() {
@@ -102,8 +110,15 @@ public class AnimationSpec implements Operation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mAnimationId, mMotionDuration, mMotionEasingType,
-                mVisibilityDuration, mVisibilityEasingType, mEnterAnimation, mExitAnimation);
+        apply(
+                buffer,
+                mAnimationId,
+                mMotionDuration,
+                mMotionEasingType,
+                mVisibilityDuration,
+                mVisibilityEasingType,
+                mEnterAnimation,
+                mExitAnimation);
     }
 
     @Override
@@ -151,10 +166,15 @@ public class AnimationSpec implements Operation {
         }
     }
 
-    public static void apply(WireBuffer buffer, int animationId, int motionDuration,
-                             int motionEasingType, int visibilityDuration,
-                             int visibilityEasingType, ANIMATION enterAnimation,
-                             ANIMATION exitAnimation) {
+    public static void apply(
+            WireBuffer buffer,
+            int animationId,
+            int motionDuration,
+            int motionEasingType,
+            int visibilityDuration,
+            int visibilityEasingType,
+            ANIMATION enterAnimation,
+            ANIMATION exitAnimation) {
         buffer.start(Operations.ANIMATION_SPEC);
         buffer.writeInt(animationId);
         buffer.writeInt(motionDuration);
@@ -173,20 +193,25 @@ public class AnimationSpec implements Operation {
         int visibilityEasingType = buffer.readInt();
         ANIMATION enterAnimation = intToAnimation(buffer.readInt());
         ANIMATION exitAnimation = intToAnimation(buffer.readInt());
-        AnimationSpec op = new AnimationSpec(animationId, motionDuration, motionEasingType,
-                visibilityDuration, visibilityEasingType, enterAnimation, exitAnimation);
+        AnimationSpec op =
+                new AnimationSpec(
+                        animationId,
+                        motionDuration,
+                        motionEasingType,
+                        visibilityDuration,
+                        visibilityEasingType,
+                        enterAnimation,
+                        exitAnimation);
         operations.add(op);
     }
+
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Layout Operations",
-                        id(),
-                        name())
+        doc.operation("Layout Operations", id(), name())
                 .description("define the animation")
                 .field(INT, "animationId", "")
                 .field(INT, "motionDuration", "")
                 .field(INT, "motionEasingType", "")
                 .field(INT, "visibilityDuration", "")
                 .field(INT, "visibilityEasingType", "");
-
     }
 }

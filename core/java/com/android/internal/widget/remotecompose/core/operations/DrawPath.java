@@ -15,14 +15,13 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
@@ -54,11 +53,9 @@ public class DrawPath extends PaintOperation {
         operations.add(op);
     }
 
-
     public static String name() {
         return CLASS_NAME;
     }
-
 
     public static int id() {
         return Operations.DRAW_PATH;
@@ -70,13 +67,10 @@ public class DrawPath extends PaintOperation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Draw Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap using integer coordinates")
-                .field(INT, "id", "id of path");
+                .field(DocumentedOperation.INT, "id", "id of path");
     }
-
 
     @Override
     public void paint(PaintContext context) {

@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Aktivuje funkci Lepší připojování."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Místní terminál"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivovat terminálovou aplikaci pro místní přístup k prostředí shell"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Vývojové prostředí Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Spustit na Androidu terminál Linux"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrola HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Nastavit chování kontroly HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Ladění"</string>
@@ -585,7 +587,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Tento počítač (interní)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Mikrofon (interní)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Reproduktor doku"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Externí zařízení"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Připojené zařízení"</string>
@@ -687,10 +688,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Zapnuto"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Aby se tato změna projevila, je třeba zařízení restartovat. Restartujte zařízení nebo zrušte akci."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Kabelová sluchátka"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Sluchátka"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB reproduktor"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Konektor mikrofonu"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB mikrofon"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Zvuk přes kabel"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Zvuk USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Kabelový mikrofon"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Mikrofon USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Mikrofon Bluetooth"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Zapnout"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Vypnout"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Probíhá změna sítě operátora"</string>

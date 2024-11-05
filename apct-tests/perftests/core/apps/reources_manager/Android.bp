@@ -27,7 +27,7 @@ android_test_helper_app {
     static_libs: ["androidx.appcompat_appcompat"],
 }
 
-genrule {
+java_genrule {
     name: "LargeResourcesUncompressed",
     srcs: [":LargeResourcesCompressed"],
     out: ["LargeResourcesUncompressed.apk"],

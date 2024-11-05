@@ -42,6 +42,9 @@ import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
+import com.android.server.LocalServices;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
+import com.android.server.power.feature.PowerManagerFlags;
 
 /**
  * Used to store power related requests to every display in a
@@ -55,6 +58,11 @@ public class PowerGroup {
     private static final String TAG = PowerGroup.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    /**
+     * Indicates that the default dim/sleep timeouts should be used.
+     */
+    private static final long INVALID_TIMEOUT = -1;
+
     @VisibleForTesting
     final DisplayPowerRequest mDisplayPowerRequest = new DisplayPowerRequest();
     private final PowerGroupListener mWakefulnessListener;
@@ -62,6 +70,8 @@ public class PowerGroup {
     private final DisplayManagerInternal mDisplayManagerInternal;
     private final boolean mSupportsSandman;
     private final int mGroupId;
+    private final PowerManagerFlags mFeatureFlags;
+
     /** True if DisplayManagerService has applied all the latest display states that were requested
      *  for this group. */
     private boolean mReady;
@@ -82,10 +92,18 @@ public class PowerGroup {
     private long mLastWakeTime;
     /** Timestamp (milliseconds since boot) of the last time the power group was put to sleep. */
     private long mLastSleepTime;
+    /** The last reason that woke the power group. */
+    private @PowerManager.WakeReason int mLastWakeReason = PowerManager.WAKE_REASON_UNKNOWN;
+    /** The last reason that put the power group to sleep. */
+    private @PowerManager.GoToSleepReason int mLastSleepReason =
+            PowerManager.GO_TO_SLEEP_REASON_UNKNOWN;
+
+    private final long mDimDuration;
+    private final long mScreenOffTimeout;
 
     PowerGroup(int groupId, PowerGroupListener wakefulnessListener, Notifier notifier,
             DisplayManagerInternal displayManagerInternal, int wakefulness, boolean ready,
-            boolean supportsSandman, long eventTime) {
+            boolean supportsSandman, long eventTime, PowerManagerFlags featureFlags) {
         mGroupId = groupId;
         mWakefulnessListener = wakefulnessListener;
         mNotifier = notifier;
@@ -95,10 +113,36 @@ public class PowerGroup {
         mSupportsSandman = supportsSandman;
         mLastWakeTime = eventTime;
         mLastSleepTime = eventTime;
+        mFeatureFlags = featureFlags;
+
+        long dimDuration = INVALID_TIMEOUT;
+        long screenOffTimeout = INVALID_TIMEOUT;
+        if (android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()
+                && mGroupId != Display.DEFAULT_DISPLAY_GROUP) {
+            VirtualDeviceManagerInternal vdm =
+                    LocalServices.getService(VirtualDeviceManagerInternal.class);
+            if (vdm != null) {
+                int[] displayIds = mDisplayManagerInternal.getDisplayIdsForGroup(mGroupId);
+                if (displayIds != null && displayIds.length > 0) {
+                    int deviceId = vdm.getDeviceIdForDisplayId(displayIds[0]);
+                    if (vdm.isValidVirtualDeviceId(deviceId)) {
+                        dimDuration = vdm.getDimDurationMillisForDeviceId(deviceId);
+                        screenOffTimeout = vdm.getScreenOffTimeoutMillisForDeviceId(deviceId);
+                        if (dimDuration > 0 && dimDuration > screenOffTimeout) {
+                            // If the dim duration is set, cap it to the screen off timeout.
+                            dimDuration = screenOffTimeout;
+                        }
+                    }
+                }
+            }
+        }
+        mDimDuration = dimDuration;
+        mScreenOffTimeout = screenOffTimeout;
     }
 
     PowerGroup(int wakefulness, PowerGroupListener wakefulnessListener, Notifier notifier,
-            DisplayManagerInternal displayManagerInternal, long eventTime) {
+            DisplayManagerInternal displayManagerInternal, long eventTime,
+            PowerManagerFlags featureFlags) {
         mGroupId = Display.DEFAULT_DISPLAY_GROUP;
         mWakefulnessListener = wakefulnessListener;
         mNotifier = notifier;
@@ -108,6 +152,17 @@ public class PowerGroup {
         mSupportsSandman = true;
         mLastWakeTime = eventTime;
         mLastSleepTime = eventTime;
+        mFeatureFlags = featureFlags;
+        mDimDuration = INVALID_TIMEOUT;
+        mScreenOffTimeout = INVALID_TIMEOUT;
+    }
+
+    long getScreenOffTimeoutOverrideLocked(long defaultScreenOffTimeout) {
+        return mScreenOffTimeout == INVALID_TIMEOUT ? defaultScreenOffTimeout : mScreenOffTimeout;
+    }
+
+    long getScreenDimDurationOverrideLocked(long defaultScreenDimDuration) {
+        return mDimDuration == INVALID_TIMEOUT ? defaultScreenDimDuration : mDimDuration;
     }
 
     long getLastWakeTimeLocked() {
@@ -138,8 +193,14 @@ public class PowerGroup {
                 setLastPowerOnTimeLocked(eventTime);
                 setIsPoweringOnLocked(true);
                 mLastWakeTime = eventTime;
+                if (mFeatureFlags.isPolicyReasonInDisplayPowerRequestEnabled()) {
+                    mLastWakeReason = reason;
+                }
             } else if (isInteractive(mWakefulness) && !isInteractive(newWakefulness)) {
                 mLastSleepTime = eventTime;
+                if (mFeatureFlags.isPolicyReasonInDisplayPowerRequestEnabled()) {
+                    mLastSleepReason = reason;
+                }
             }
             mWakefulness = newWakefulness;
             mWakefulnessListener.onWakefulnessChangedLocked(mGroupId, mWakefulness, eventTime,
@@ -393,37 +454,51 @@ public class PowerGroup {
         return false;
     }
 
-    @VisibleForTesting
-    int getDesiredScreenPolicyLocked(boolean quiescent, boolean dozeAfterScreenOff,
+    // TODO: create and use more specific policy reasons, beyond the ones that correlate to
+    // interactivity state
+    private void updateScreenPolicyLocked(boolean quiescent, boolean dozeAfterScreenOff,
             boolean bootCompleted, boolean screenBrightnessBoostInProgress,
             boolean brightWhenDozing) {
         final int wakefulness = getWakefulnessLocked();
         final int wakeLockSummary = getWakeLockSummaryLocked();
-        if (wakefulness == WAKEFULNESS_ASLEEP || quiescent) {
-            return DisplayPowerRequest.POLICY_OFF;
+        int policyReason = Display.STATE_REASON_DEFAULT_POLICY;
+        int policy = Integer.MAX_VALUE; // do not set to real policy to start with.
+        if (quiescent) {
+            policy = DisplayPowerRequest.POLICY_OFF;
+        } else if (wakefulness == WAKEFULNESS_ASLEEP) {
+            policy = DisplayPowerRequest.POLICY_OFF;
+            policyReason = sleepReasonToDisplayStateReason(mLastSleepReason);
         } else if (wakefulness == WAKEFULNESS_DOZING) {
             if ((wakeLockSummary & WAKE_LOCK_DOZE) != 0) {
-                return DisplayPowerRequest.POLICY_DOZE;
-            }
-            if (dozeAfterScreenOff) {
-                return DisplayPowerRequest.POLICY_OFF;
-            }
-            if (brightWhenDozing) {
-                return DisplayPowerRequest.POLICY_BRIGHT;
+                policy = DisplayPowerRequest.POLICY_DOZE;
+            } else if (dozeAfterScreenOff) {
+                policy = DisplayPowerRequest.POLICY_OFF;
+            } else if (brightWhenDozing) {
+                policy = DisplayPowerRequest.POLICY_BRIGHT;
             }
             // Fall through and preserve the current screen policy if not configured to
             // bright when dozing or doze after screen off.  This causes the screen off transition
             // to be skipped.
         }
 
-        if ((wakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
-                || !bootCompleted
-                || (getUserActivitySummaryLocked() & USER_ACTIVITY_SCREEN_BRIGHT) != 0
-                || screenBrightnessBoostInProgress) {
-            return DisplayPowerRequest.POLICY_BRIGHT;
+        if (policy == Integer.MAX_VALUE) { // policy is not set yet.
+            if (isInteractive(wakefulness)) {
+                policyReason = wakeReasonToDisplayStateReason(mLastWakeReason);
+            }
+            if ((wakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
+                    || !bootCompleted
+                    || (getUserActivitySummaryLocked() & USER_ACTIVITY_SCREEN_BRIGHT) != 0
+                    || screenBrightnessBoostInProgress) {
+                policy = DisplayPowerRequest.POLICY_BRIGHT;
+            } else {
+                policy = DisplayPowerRequest.POLICY_DIM;
+            }
         }
 
-        return DisplayPowerRequest.POLICY_DIM;
+        if (mFeatureFlags.isPolicyReasonInDisplayPowerRequestEnabled()) {
+            mDisplayPowerRequest.policyReason = policyReason;
+        }
+        mDisplayPowerRequest.policy = policy;
     }
 
     int getPolicyLocked() {
@@ -439,7 +514,7 @@ public class PowerGroup {
             boolean dozeAfterScreenOff, boolean bootCompleted,
             boolean screenBrightnessBoostInProgress, boolean waitForNegativeProximity,
             boolean brightWhenDozing) {
-        mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked(quiescent, dozeAfterScreenOff,
+        updateScreenPolicyLocked(quiescent, dozeAfterScreenOff,
                 bootCompleted, screenBrightnessBoostInProgress, brightWhenDozing);
         mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
         mDisplayPowerRequest.screenBrightnessOverrideTag = overrideTag;
@@ -476,6 +551,33 @@ public class PowerGroup {
                 waitForNegativeProximity);
         mNotifier.onScreenPolicyUpdate(mGroupId, mDisplayPowerRequest.policy);
         return ready;
+    }
+
+    /** Determines the respective display state reason for a given PowerManager WakeReason. */
+    private static int wakeReasonToDisplayStateReason(@PowerManager.WakeReason int wakeReason) {
+        switch (wakeReason) {
+            case PowerManager.WAKE_REASON_POWER_BUTTON:
+            case PowerManager.WAKE_REASON_WAKE_KEY:
+                return Display.STATE_REASON_KEY;
+            case PowerManager.WAKE_REASON_WAKE_MOTION:
+                return Display.STATE_REASON_MOTION;
+            case PowerManager.WAKE_REASON_TILT:
+                return Display.STATE_REASON_TILT;
+            default:
+                return Display.STATE_REASON_DEFAULT_POLICY;
+        }
+    }
+
+    /** Determines the respective display state reason for a given PowerManager GoToSleepReason. */
+    private static int sleepReasonToDisplayStateReason(
+            @PowerManager.GoToSleepReason int sleepReason) {
+        switch (sleepReason) {
+            case PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON:
+            case PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON:
+                return Display.STATE_REASON_KEY;
+            default:
+                return Display.STATE_REASON_DEFAULT_POLICY;
+        }
     }
 
     protected interface PowerGroupListener {

@@ -72,7 +72,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/device_function_barrier"
-        app:layout_constraintBottom_toTopOf="@id/related_tools_scroll"
         android:drawableStart="@drawable/ic_add"
         android:drawablePadding="20dp"
         android:drawableTint="?android:attr/textColorPrimary"
@@ -92,24 +91,16 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="device_function_barrier, pair_new_device_button" />
 
-    <HorizontalScrollView
-        android:id="@+id/related_tools_scroll"
+    <LinearLayout
+        android:id="@+id/related_tools_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/bluetooth_dialog_layout_margin"
         android:layout_marginEnd="@dimen/bluetooth_dialog_layout_margin"
         android:layout_marginTop="@dimen/hearing_devices_layout_margin"
-        android:scrollbars="none"
-        android:fillViewport="true"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/preset_spinner">
-        <LinearLayout
-            android:id="@+id/related_tools_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-        </LinearLayout>
-    </HorizontalScrollView>
+        app:layout_constraintTop_toBottomOf="@id/device_barrier" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

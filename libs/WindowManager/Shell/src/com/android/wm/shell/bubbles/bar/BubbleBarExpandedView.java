@@ -39,6 +39,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleExpandedViewManager;
+import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflowContainerView;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleTaskView;
@@ -90,6 +91,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private Bubble mBubble;
     private BubbleExpandedViewManager mManager;
     private BubblePositioner mPositioner;
+    private BubbleLogger mBubbleLogger;
     private boolean mIsOverflow;
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
     private BubbleBarMenuViewController mMenuViewController;
@@ -178,6 +180,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     /** Initializes the view, must be called before doing anything else. */
     public void initialize(BubbleExpandedViewManager expandedViewManager,
             BubblePositioner positioner,
+            BubbleLogger bubbleLogger,
             boolean isOverflow,
             @Nullable BubbleTaskView bubbleTaskView,
             @Nullable Executor mainExecutor,
@@ -185,6 +188,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             @Nullable RegionSamplingProvider regionSamplingProvider) {
         mManager = expandedViewManager;
         mPositioner = positioner;
+        mBubbleLogger = bubbleLogger;
         mIsOverflow = isOverflow;
         mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
@@ -248,6 +252,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             @Override
             public void onDismissBubble(Bubble bubble) {
                 mManager.dismissBubble(bubble, Bubbles.DISMISS_USER_GESTURE);
+                mBubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU);
             }
 
             @Override

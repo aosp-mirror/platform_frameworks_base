@@ -129,6 +129,16 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
      * @hide
      */
     public static final String MODEL_UNLOADED_BUNDLE_KEY = "model_unloaded";
+    /**
+     * @hide
+     */
+    public static final String MODEL_LOADED_BROADCAST_INTENT =
+        "android.service.ondeviceintelligence.MODEL_LOADED";
+    /**
+     * @hide
+     */
+    public static final String MODEL_UNLOADED_BROADCAST_INTENT =
+        "android.service.ondeviceintelligence.MODEL_UNLOADED";
 
     /**
      * @hide

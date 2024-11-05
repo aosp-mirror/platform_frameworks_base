@@ -1394,7 +1394,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Nenhuma permissão necessária"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"isso pode lhe custar dinheiro"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Carregar dispositivo via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Dispositivo carregando via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Carregando dispositivo conectado via USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transferência de arquivo via USB ativada"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB ativado"</string>
@@ -1402,7 +1402,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB ativado"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo conectado como Webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Acessório USB conectado"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para mais opções."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para mais opções"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Carregando dispositivo conectado. Toque para ver mais opções."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Acessório de áudio analógico detectado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo anexo não é compatível com esse smartphone. Toque para saber mais."</string>
@@ -1944,6 +1944,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desativada"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualquer agenda"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está silenciando alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Há um problema interno com seu dispositivo. Ele pode ficar instável até que você faça a redefinição para configuração original."</string>
@@ -2130,11 +2132,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Chamadas e notificações farão o dispositivo vibrar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Chamadas e notificações ficarão silenciadas"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Alterações do sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Não perturbe"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novo: o modo Não perturbe está ocultando as notificações"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toque para saber mais e fazer alterações."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"O modo \"Não perturbe\" foi alterado"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toque para verificar o que está bloqueado."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Revise as configurações de notificação"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"No Android 13 ou em versões mais recentes, os apps que você instala precisam de permissão para enviar notificações. Toque para mudar essa permissão para os apps já instalados."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Lembrar mais tarde"</string>
@@ -2430,6 +2427,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Enviar e receber mensagens sem uma rede móvel ou Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir o app Mensagens"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Como funciona"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurar o Desbloqueio por impressão digital de novo"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"A impressão digital <xliff:g id="FINGERPRINT">%s</xliff:g> não é mais reconhecida."</string>

@@ -471,6 +471,16 @@ class TransitionController {
         return false;
     }
 
+    /** Returns {@code true} if the `wc` is a target of a playing transition. */
+    boolean isPlayingTarget(@NonNull WindowContainer<?> wc) {
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (Transition.containsChangeFor(wc, mPlayingTransitions.get(i).mTargets)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Returns {@code true} if the finishing transition contains `wc`. */
     boolean inFinishingTransition(WindowContainer<?> wc) {
         return mFinishingTransition != null && mFinishingTransition.isInTransition(wc);

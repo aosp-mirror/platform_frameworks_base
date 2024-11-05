@@ -17,6 +17,7 @@
 package com.android.systemui.shared.clocks.view
 
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.shared.clocks.AssetLoader
 import com.android.systemui.shared.clocks.TextStyle
 
@@ -32,7 +33,9 @@ interface SimpleDigitalClockView {
 
     fun applyTextSize(targetFontSizePx: Float?, constrainedByHeight: Boolean = false)
 
-    fun updateColors(assets: AssetLoader, isRegionDark: Boolean)
+    fun updateColor(color: Int)
+
+    fun updateAxes(axes: List<ClockFontAxisSetting>)
 
     fun refreshTime()
 

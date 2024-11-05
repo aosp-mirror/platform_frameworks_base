@@ -41,6 +41,10 @@ java_sdk_library {
         "framework-permission-s.stubs.module_lib",
         "framework-permission.stubs.module_lib",
     ],
+    stub_only_libs: [
+        // Needed for javadoc references.
+        "framework-permission-s.stubs.module_lib",
+    ],
     static_libs: [
         "android.nfc.flags-aconfig-java",
         "android.permission.flags-aconfig-java",

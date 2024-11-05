@@ -22,7 +22,7 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.Notificati
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted.Companion.Lazily
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Binds a [NotificationStackScrollLayoutController] to its [view model][NotificationListViewModel].

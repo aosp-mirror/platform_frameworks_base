@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.platform.test.annotations.NoRavenizer;
 import android.platform.test.ravenwood.RavenwoodAwareTestRunner;
+import android.platform.test.ravenwood.RavenwoodConfigPrivate;
 import android.util.Log;
 
 import junitparams.JUnitParamsRunner;
@@ -137,15 +138,14 @@ public abstract class RavenwoodRunnerTestBase {
         // Set a listener to critical errors. This will also prevent
         // {@link RavenwoodAwareTestRunner} from calling System.exit() when there's
         // a critical error.
-        RavenwoodAwareTestRunner.private$ravenwood().setCriticalErrorHandler(
-                listener.sCriticalErrorListener);
+        RavenwoodConfigPrivate.setCriticalErrorHandler(listener.sCriticalErrorListener);
 
         try {
             // Run the test class.
             junitCore.run(testClazz);
         } finally {
             // Clear the critical error listener.
-            RavenwoodAwareTestRunner.private$ravenwood().setCriticalErrorHandler(null);
+            RavenwoodConfigPrivate.setCriticalErrorHandler(null);
         }
 
         // Check the result.

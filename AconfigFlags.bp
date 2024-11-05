@@ -21,9 +21,11 @@ aconfig_declarations_group {
     java_aconfig_libraries: [
         // !!! KEEP THIS LIST ALPHABETICAL !!!
         "aconfig_mediacodec_flags_java_lib",
+        "aconfig_trade_in_mode_flags_java_lib",
         "android-sdk-flags-java",
         "android.adaptiveauth.flags-aconfig-java",
         "android.app.appfunctions.flags-aconfig-java",
+        "android.app.assist.flags-aconfig-java",
         "android.app.contextualsearch.flags-aconfig-java",
         "android.app.flags-aconfig-java",
         "android.app.jank.flags-aconfig-java",
@@ -64,6 +66,7 @@ aconfig_declarations_group {
         "android.server.app.flags-aconfig-java",
         "android.service.autofill.flags-aconfig-java",
         "android.service.chooser.flags-aconfig-java",
+        "android.service.compat.flags-aconfig-java",
         "android.service.controls.flags-aconfig-java",
         "android.service.dreams.flags-aconfig-java",
         "android.service.notification.flags-aconfig-java",
@@ -79,6 +82,7 @@ aconfig_declarations_group {
         "android.view.inputmethod.flags-aconfig-java",
         "android.webkit.flags-aconfig-java",
         "android.widget.flags-aconfig-java",
+        "android.xr.flags-aconfig-java",
         "art_exported_aconfig_flags_lib",
         "backstage_power_flags_lib",
         "backup_flags_lib",
@@ -107,6 +111,7 @@ aconfig_declarations_group {
         "hwui_flags_java_lib",
         "interaction_jank_monitor_flags_lib",
         "libcore_exported_aconfig_flags_lib",
+        "libcore_readonly_aconfig_flags_lib",
         "libgui_flags_java_lib",
         "power_flags_lib",
         "sdk_sandbox_flags_lib",
@@ -119,7 +124,7 @@ aconfig_declarations_group {
 
 filegroup {
     name: "framework-minus-apex-aconfig-srcjars",
-    srcs: [
+    device_common_srcs: [
         ":framework-minus-apex-aconfig-declarations{.srcjars}",
     ],
 }
@@ -163,6 +168,26 @@ java_aconfig_library {
     name: "libcore_exported_aconfig_flags_lib",
     aconfig_declarations: "libcore-aconfig-flags",
     mode: "exported",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// See b/368409430 - This is for libcore flags to be generated with
+// force-read-only mode, so access to the flags does not involve I/O,
+// which could break Isolated Processes with I/O permission disabled.
+// The issue will be addressed once new Aconfig storage API is landed
+// and the readonly version will be removed.
+aconfig_declarations {
+    name: "libcore-readonly-aconfig-flags",
+    package: "com.android.libcore.readonly",
+    container: "system",
+    srcs: ["libcore-readonly.aconfig"],
+}
+
+// Core Libraries / libcore
+java_aconfig_library {
+    name: "libcore_readonly_aconfig_flags_lib",
+    aconfig_declarations: "libcore-readonly-aconfig-flags",
+    mode: "force-read-only",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -789,6 +814,12 @@ java_aconfig_library {
     ],
 }
 
+cc_aconfig_library {
+    name: "android.permission.flags-aconfig-cc",
+    aconfig_declarations: "android.permission.flags-aconfig",
+    host_supported: true,
+}
+
 // SQLite
 aconfig_declarations {
     name: "android.database.sqlite-aconfig",
@@ -862,6 +893,21 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+aconfig_declarations {
+    name: "android.service.compat.flags-aconfig",
+    package: "com.android.server.compat",
+    container: "system",
+    srcs: [
+        "services/core/java/com/android/server/compat/*.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "android.service.compat.flags-aconfig-java",
+    aconfig_declarations: "android.service.compat.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Multi user
 aconfig_declarations {
     name: "android.multiuser.flags-aconfig",
@@ -873,6 +919,20 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.multiuser.flags-aconfig-java",
     aconfig_declarations: "android.multiuser.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// XR
+aconfig_declarations {
+    name: "android.xr.flags-aconfig",
+    package: "android.xr",
+    container: "system",
+    srcs: ["core/java/android/content/pm/xr.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.xr.flags-aconfig-java",
+    aconfig_declarations: "android.xr.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -1230,6 +1290,20 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+// Assist
+aconfig_declarations {
+    name: "android.app.assist.flags-aconfig",
+    package: "android.app.assist.flags",
+    container: "system",
+    srcs: ["core/java/android/app/assist/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.assist.flags-aconfig-java",
+    aconfig_declarations: "android.app.assist.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Smartspace
 aconfig_declarations {
     name: "android.app.smartspace.flags-aconfig",
@@ -1486,6 +1560,11 @@ java_aconfig_library {
     name: "android.crashrecovery.flags-aconfig-java",
     aconfig_declarations: "android.crashrecovery.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    min_sdk_version: "35",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.crashrecovery",
+    ],
 }
 
 java_aconfig_library {

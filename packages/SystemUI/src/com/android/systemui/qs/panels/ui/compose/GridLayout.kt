@@ -41,6 +41,7 @@ interface GridLayout {
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit,
         onSetTiles: (List<TileSpec>) -> Unit,
+        onStopEditing: () -> Unit,
     )
 }
 

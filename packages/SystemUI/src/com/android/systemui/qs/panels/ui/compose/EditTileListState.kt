@@ -116,9 +116,9 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
             regenerateGrid()
             _tiles.add(insertionIndex.coerceIn(0, _tiles.size), cell)
         } else {
-            // Add the tile with a temporary row which will get reassigned when
+            // Add the tile with a temporary row/col which will get reassigned when
             // regenerating spacers
-            _tiles.add(insertionIndex.coerceIn(0, _tiles.size), TileGridCell(draggedTile, 0))
+            _tiles.add(insertionIndex.coerceIn(0, _tiles.size), TileGridCell(draggedTile, 0, 0))
         }
 
         regenerateGrid()

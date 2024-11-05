@@ -195,6 +195,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -1101,21 +1102,12 @@ public class UserManagerService extends IUserManager.Stub {
         if (android.multiuser.Flags.cachesNotInvalidatedAtStartReadOnly()) {
             UserManager.invalidateIsUserUnlockedCache();
             UserManager.invalidateQuietModeEnabledCache();
-            UserManager.invalidateUserSerialNumberCache();
+            if (android.multiuser.Flags.cacheUserPropertiesCorrectlyReadOnly()) {
+                UserManager.invalidateStaticUserProperties();
+                UserManager.invalidateUserPropertiesCache();
+            }
+            UserManager.invalidateCacheOnUserListChange();
         }
-    }
-
-    private boolean doesDeviceHardwareSupportPrivateSpace() {
-        return !mPm.hasSystemFeature(FEATURE_EMBEDDED, 0)
-                && !mPm.hasSystemFeature(FEATURE_WATCH, 0)
-                && !mPm.hasSystemFeature(FEATURE_LEANBACK, 0)
-                && !mPm.hasSystemFeature(FEATURE_AUTOMOTIVE, 0);
-    }
-
-    private static boolean isAutoLockForPrivateSpaceEnabled() {
-        return android.os.Flags.allowPrivateProfile()
-                && Flags.supportAutolockForPrivateSpace()
-                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     void systemReady() {
@@ -1160,6 +1152,19 @@ public class UserManagerService extends IUserManager.Stub {
         if (Flags.addUiForSoundsFromBackgroundUsers()) {
             new BackgroundUserSoundNotifier(mContext);
         }
+    }
+
+    private boolean doesDeviceHardwareSupportPrivateSpace() {
+        return !mPm.hasSystemFeature(FEATURE_EMBEDDED, 0)
+                && !mPm.hasSystemFeature(FEATURE_WATCH, 0)
+                && !mPm.hasSystemFeature(FEATURE_LEANBACK, 0)
+                && !mPm.hasSystemFeature(FEATURE_AUTOMOTIVE, 0);
+    }
+
+    private static boolean isAutoLockForPrivateSpaceEnabled() {
+        return android.os.Flags.allowPrivateProfile()
+                && Flags.supportAutolockForPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {
@@ -1217,7 +1222,7 @@ public class UserManagerService extends IUserManager.Stub {
         // Mark the user for removal.
         addRemovingUserIdLocked(ui.id);
         ui.partial = true;
-        ui.flags |= UserInfo.FLAG_DISABLED;
+        addUserInfoFlags(ui, UserInfo.FLAG_DISABLED);
     }
 
     /* Prunes out any partially created or partially removed users. */
@@ -1259,7 +1264,7 @@ public class UserManagerService extends IUserManager.Stub {
                 if (ui.preCreated) {
                     preCreatedUsers.add(ui);
                     addRemovingUserIdLocked(ui.id);
-                    ui.flags |= UserInfo.FLAG_DISABLED;
+                    addUserInfoFlags(ui, UserInfo.FLAG_DISABLED);
                     ui.partial = true;
                 }
             }
@@ -2115,13 +2120,43 @@ public class UserManagerService extends IUserManager.Stub {
                 info = getUserInfoLU(userId);
                 if (info != null && !info.isEnabled()) {
                     wasUserDisabled = true;
-                    info.flags ^= UserInfo.FLAG_DISABLED;
+                    removeUserInfoFlags(info, UserInfo.FLAG_DISABLED);
                     writeUserLP(getUserDataLU(info.id));
                 }
             }
         }
         if (wasUserDisabled && info != null && info.isProfile()) {
             sendProfileAddedBroadcast(info.profileGroupId, info.id);
+        }
+    }
+
+    /**
+     * This method is for monitoring flag changes on users flags and invalidate cache relevant to
+     * the change. The method add flags and invalidateOnUserInfoFlagChange for the flags which
+     * has changed.
+     * @param userInfo of existing user in mUsers list
+     * @param flags to be added to userInfo
+     */
+    private void addUserInfoFlags(UserInfo userInfo, @UserInfoFlag int flags) {
+        int diff = ~userInfo.flags & flags;
+        if (diff > 0) {
+            userInfo.flags |= diff;
+            UserManager.invalidateOnUserInfoFlagChange(diff);
+        }
+    }
+
+    /**
+     * This method is for monitoring flag changes on users flags and invalidate cache relevant to
+     * the change. The method remove flags and invalidateOnUserInfoFlagChange for the flags which
+     * has changed.
+     * @param userInfo of existing user in mUsers list
+     * @param flags to be removed from userInfo
+     */
+    private void removeUserInfoFlags(UserInfo userInfo, @UserInfoFlag int flags) {
+        int diff = userInfo.flags & flags;
+        if (diff > 0) {
+            userInfo.flags ^= diff;
+            UserManager.invalidateOnUserInfoFlagChange(diff);
         }
     }
 
@@ -4448,7 +4483,7 @@ public class UserManagerService extends IUserManager.Stub {
 
                             if (userData != null) {
                                 synchronized (mUsersLock) {
-                                    mUsers.put(userData.info.id, userData);
+                                    addUserDataLU(userData);
                                     if (mNextSerialNumber < 0
                                             || mNextSerialNumber <= userData.info.id) {
                                         mNextSerialNumber = userData.info.id + 1;
@@ -5724,7 +5759,7 @@ public class UserManagerService extends IUserManager.Stub {
                     userData.info = userInfo;
                     userData.userProperties = new UserProperties(
                             userTypeDetails.getDefaultUserPropertiesReference());
-                    mUsers.put(userId, userData);
+                    addUserDataLU(userData);
                 }
                 writeUserLP(userData);
                 writeUserListLP();
@@ -5785,6 +5820,9 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             userInfo.partial = false;
+            if (android.multiuser.Flags.invalidateCacheOnUsersChangedReadOnly()) {
+                UserManager.invalidateCacheOnUserListChange();
+            }
             synchronized (mPackagesLock) {
                 writeUserLP(userData);
             }
@@ -6138,7 +6176,7 @@ public class UserManagerService extends IUserManager.Stub {
         final UserData userData = new UserData();
         userData.info = userInfo;
         synchronized (mUsersLock) {
-            mUsers.put(userInfo.id, userData);
+            addUserDataLU(userData);
         }
         updateUserIds();
         return userData;
@@ -6148,8 +6186,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     void removeUserInfo(@UserIdInt int userId) {
         synchronized (mUsersLock) {
-            UserManager.invalidateUserSerialNumberCache();
-            mUsers.remove(userId);
+            removeUserDataLU(userId);
         }
     }
 
@@ -6238,7 +6275,7 @@ public class UserManagerService extends IUserManager.Stub {
                 userData.info.guestToRemove = true;
                 // Mark it as disabled, so that it isn't returned any more when
                 // profiles are queried.
-                userData.info.flags |= UserInfo.FLAG_DISABLED;
+                addUserInfoFlags(userData.info, UserInfo.FLAG_DISABLED);
                 writeUserLP(userData);
             }
         } finally {
@@ -6258,14 +6295,16 @@ public class UserManagerService extends IUserManager.Stub {
         Slog.i(LOG_TAG, "removeUser u" + userId);
         checkCreateUsersPermission("Only the system can remove users");
 
-        final String restriction = getUserRemovalRestriction(userId);
-        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
-            Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
+        final Optional<String> restrictionOptional = getUserRemovalRestrictionOptional(userId);
+        if (!restrictionOptional.isEmpty()
+                && getUserRestrictions(UserHandle.getCallingUserId())
+                        .getBoolean(restrictionOptional.get(), false)) {
+            Slog.w(LOG_TAG, "Cannot remove user. " + restrictionOptional.get() + " is enabled.");
             return false;
         }
         if (mCurrentBootPhase < SystemService.PHASE_ACTIVITY_MANAGER_READY) {
             Slog.w(LOG_TAG, "Cannot remove user, removeUser is called too early during boot. "
-                + "ActivityManager is not ready yet.");
+                            + "ActivityManager is not ready yet.");
             return false;
         }
         return removeUserWithProfilesUnchecked(userId);
@@ -6332,18 +6371,30 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Returns the string name of the restriction to check for user removal. The restriction name
-     * varies depending on whether the user is a managed profile.
+     * Returns an optional string name of the restriction to check for user removal. The restriction
+     * name varies depending on whether the user is a managed profile.
+     *
+     * <p>If the flag android.multiuser.ignore_restrictions_when_deleting_private_profile is enabled
+     * and the user is a private profile (i.e. has no removal restrictions) the method will return
+     * {@code Optional.empty()}.
      */
-    private String getUserRemovalRestriction(@UserIdInt int userId) {
+    private Optional<String> getUserRemovalRestrictionOptional(@UserIdInt int userId) {
+        final boolean isPrivateProfile;
         final boolean isManagedProfile;
         final UserInfo userInfo;
         synchronized (mUsersLock) {
             userInfo = getUserInfoLU(userId);
         }
+        isPrivateProfile = userInfo != null && userInfo.isPrivateProfile();
         isManagedProfile = userInfo != null && userInfo.isManagedProfile();
-        return isManagedProfile
-                ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE : UserManager.DISALLOW_REMOVE_USER;
+        if (android.multiuser.Flags.ignoreRestrictionsWhenDeletingPrivateProfile()
+                && isPrivateProfile) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                isManagedProfile
+                        ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE
+                        : UserManager.DISALLOW_REMOVE_USER);
     }
 
     private boolean removeUserUnchecked(@UserIdInt int userId) {
@@ -6364,9 +6415,12 @@ public class UserManagerService extends IUserManager.Stub {
                 // on next startup, in case the runtime stops now before stopping and
                 // removing the user completely.
                 userData.info.partial = true;
+                if (android.multiuser.Flags.invalidateCacheOnUsersChangedReadOnly()) {
+                    UserManager.invalidateCacheOnUserListChange();
+                }
                 // Mark it as disabled, so that it isn't returned any more when
                 // profiles are queried.
-                userData.info.flags |= UserInfo.FLAG_DISABLED;
+                addUserInfoFlags(userData.info, UserInfo.FLAG_DISABLED);
                 writeUserLP(userData);
             }
 
@@ -6452,9 +6506,13 @@ public class UserManagerService extends IUserManager.Stub {
         checkCreateUsersPermission("Only the system can remove users");
 
         if (!overrideDevicePolicy) {
-            final String restriction = getUserRemovalRestriction(userId);
-            if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
-                Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
+            final Optional<String> restrictionOptional = getUserRemovalRestrictionOptional(userId);
+            if (!restrictionOptional.isEmpty()
+                    && getUserRestrictions(UserHandle.getCallingUserId())
+                            .getBoolean(restrictionOptional.get(), false)) {
+                Slog.w(
+                        LOG_TAG,
+                        "Cannot remove user. " + restrictionOptional.get() + " is enabled.");
                 return UserManager.REMOVE_RESULT_ERROR_USER_RESTRICTION;
             }
         }
@@ -6579,8 +6637,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Remove this user from the list
         synchronized (mUsersLock) {
-            UserManager.invalidateUserSerialNumberCache();
-            mUsers.remove(userId);
+            removeUserDataLU(userId);
             mIsUserManaged.delete(userId);
         }
         synchronized (mUserStates) {
@@ -6966,6 +7023,26 @@ public class UserManagerService extends IUserManager.Stub {
                     + "profile associated with this user");
         }
         return userInfo.creationTime;
+    }
+
+    /**
+     * Adding user data to mUsers list in one place to invalidate related caches.
+     */
+    @GuardedBy("mUsersLock")
+    private void addUserDataLU(UserData userData) {
+        if (android.multiuser.Flags.invalidateCacheOnUsersChangedReadOnly()) {
+            UserManager.invalidateCacheOnUserListChange();
+        }
+        mUsers.put(userData.info.id, userData);
+    }
+
+    /**
+     * Removing user data to mUsers list in one place to invalidate related caches.
+     */
+    @GuardedBy("mUsersLock")
+    private void removeUserDataLU(@UserIdInt int userId) {
+        UserManager.invalidateCacheOnUserListChange();
+        mUsers.remove(userId);
     }
 
     /**
@@ -7742,7 +7819,7 @@ public class UserManagerService extends IUserManager.Stub {
                if (userInfo != null && userInfo.isEphemeral()) {
                     // Do not allow switching back to the ephemeral user again as the user is going
                     // to be deleted.
-                    userInfo.flags |= UserInfo.FLAG_DISABLED;
+                    addUserInfoFlags(userInfo, UserInfo.FLAG_DISABLED);
                     if (userInfo.isGuest()) {
                         // Indicate that the guest will be deleted after it stops.
                         userInfo.guestToRemove = true;

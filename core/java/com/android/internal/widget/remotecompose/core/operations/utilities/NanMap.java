@@ -18,17 +18,12 @@ package com.android.internal.widget.remotecompose.core.operations.utilities;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 
 /**
- * This defines the major id maps and ranges used by remote compose
- * Generally ids ranging from 1 ... 7FFFFF (4095) are for ids
- * The data range is divided int to bits
- * 0xxxxx are allocated for Predefined Global System Variables
- * 1xxxxx are allocated to normal variables
- * 2xxxxx are allocated to List&MAPS (Arrays of stuff)
- * 3xxxxx are allocated to path & float operations
- * 4xxxxx,5xxxxx,7xxxxx are reserved for future use
- * 0x1000-0x1100 are used for path operations in PathData
- * 0x1100-0x1200 are used for math operations in Animated float
- * 0x
+ * This defines the major id maps and ranges used by remote compose Generally ids ranging from 1 ...
+ * 7FFFFF (4095) are for ids The data range is divided int to bits 0xxxxx are allocated for
+ * Predefined Global System Variables 1xxxxx are allocated to normal variables 2xxxxx are allocated
+ * to List&MAPS (Arrays of stuff) 3xxxxx are allocated to path & float operations
+ * 4xxxxx,5xxxxx,7xxxxx are reserved for future use 0x1000-0x1100 are used for path operations in
+ * PathData 0x1100-0x1200 are used for math operations in Animated float 0x
  */
 public class NanMap {
     public static final int MOVE = 0x300_000;
@@ -70,7 +65,6 @@ public class NanMap {
     public static final int TYPE_OPERATION = 3;
     public static final int ID_REGION_MASK = 0x700000;
     public static final int ID_REGION_ARRAY = 0x200000;
-
 
     /**
      * Get ID from Nan float

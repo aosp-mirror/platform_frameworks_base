@@ -1920,180 +1920,190 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
-            boolean needStart = false;
-            boolean updateUmState = false;
-            UserState uss;
-
-            // If the user we are switching to is not currently started, then
-            // we need to start it now.
-            t.traceBegin("updateStartedUserArrayStarting");
-            synchronized (mLock) {
-                uss = mStartedUsers.get(userId);
-                if (uss == null) {
-                    uss = new UserState(UserHandle.of(userId));
-                    uss.mUnlockProgress.addListener(new UserProgressListener());
-                    mStartedUsers.put(userId, uss);
-                    updateStartedUserArrayLU();
-                    needStart = true;
-                    updateUmState = true;
-                } else if (uss.state == UserState.STATE_SHUTDOWN
-                        || mDoNotAbortShutdownUserIds.contains(userId)) {
-                    Slogf.i(TAG, "User #" + userId
-                            + " is shutting down - will start after full shutdown");
-                    mPendingUserStarts.add(new PendingUserStart(userId, userStartMode,
-                            unlockListener));
-                    t.traceEnd(); // updateStartedUserArrayStarting
-                    return true;
-                }
-            }
-
-            // No matter what, the fact that we're requested to start the user (even if it is
-            // already running) puts it towards the end of the mUserLru list.
-            addUserToUserLru(userId);
-            if (android.multiuser.Flags.scheduleStopOfBackgroundUser()) {
-                mHandler.removeEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG,
-                        Integer.valueOf(userId));
-            }
-
-            if (unlockListener != null) {
-                uss.mUnlockProgress.addListener(unlockListener);
-            }
-            t.traceEnd(); // updateStartedUserArrayStarting
-
-            if (updateUmState) {
-                t.traceBegin("setUserState");
-                mInjector.getUserManagerInternal().setUserState(userId, uss.state);
-                t.traceEnd();
-            }
-            t.traceBegin("updateConfigurationAndProfileIds");
-            if (foreground) {
-                // Make sure the old user is no longer considering the display to be on.
-                mInjector.reportGlobalUsageEvent(UsageEvents.Event.SCREEN_NON_INTERACTIVE);
-                boolean userSwitchUiEnabled;
-                synchronized (mLock) {
-                    mCurrentUserId = userId;
-                    ActivityManager.invalidateGetCurrentUserIdCache();
-                    userSwitchUiEnabled = mUserSwitchUiEnabled;
-                }
-                mInjector.updateUserConfiguration();
-                // NOTE: updateProfileRelatedCaches() is called on both if and else parts, ideally
-                // it should be moved outside, but for now it's not as there are many calls to
-                // external components here afterwards
-                updateProfileRelatedCaches();
-                dispatchOnBeforeUserSwitching(userId);
-                mInjector.getWindowManager().setCurrentUser(userId);
-                mInjector.reportCurWakefulnessUsageEvent();
-                // Once the internal notion of the active user has switched, we lock the device
-                // with the option to show the user switcher on the keyguard.
-                if (userSwitchUiEnabled) {
-                    mInjector.getWindowManager().setSwitchingUser(true);
-                    // Only lock if the user has a secure keyguard PIN/Pattern/Pwd
-                    if (mInjector.getKeyguardManager().isDeviceSecure(userId)) {
-                        // Make sure the device is locked before moving on with the user switch
-                        mInjector.lockDeviceNowAndWaitForKeyguardShown();
-                    }
-                }
-
-            } else {
-                updateProfileRelatedCaches();
-                // We are starting a non-foreground user. They have already been added to the end
-                // of mUserLru, so we need to ensure that the foreground user isn't displaced.
-                addUserToUserLru(mCurrentUserId);
-            }
-            if (userStartMode == USER_START_MODE_BACKGROUND && !userInfo.isProfile()) {
-                scheduleStopOfBackgroundUser(userId);
-            }
-            t.traceEnd();
-
-            // Make sure user is in the started state.  If it is currently
-            // stopping, we need to knock that off.
-            if (uss.state == UserState.STATE_STOPPING) {
-                t.traceBegin("updateStateStopping");
-                // If we are stopping, we haven't sent ACTION_SHUTDOWN,
-                // so we can just fairly silently bring the user back from
-                // the almost-dead.
-                uss.setState(uss.lastState);
-                mInjector.getUserManagerInternal().setUserState(userId, uss.state);
-                synchronized (mLock) {
-                    updateStartedUserArrayLU();
-                }
-                needStart = true;
-                t.traceEnd();
-            } else if (uss.state == UserState.STATE_SHUTDOWN) {
-                t.traceBegin("updateStateShutdown");
-                // This means ACTION_SHUTDOWN has been sent, so we will
-                // need to treat this as a new boot of the user.
-                uss.setState(UserState.STATE_BOOTING);
-                mInjector.getUserManagerInternal().setUserState(userId, uss.state);
-                synchronized (mLock) {
-                    updateStartedUserArrayLU();
-                }
-                needStart = true;
-                t.traceEnd();
-            }
-
-            if (uss.state == UserState.STATE_BOOTING) {
-                t.traceBegin("updateStateBooting");
-                // Give user manager a chance to propagate user restrictions
-                // to other services and prepare app storage
-                mInjector.getUserManager().onBeforeStartUser(userId);
-
-                // Booting up a new user, need to tell system services about it.
-                // Note that this is on the same handler as scheduling of broadcasts,
-                // which is important because it needs to go first.
-                mHandler.sendMessage(mHandler.obtainMessage(USER_START_MSG, userId, NO_ARG2));
-                t.traceEnd();
-            }
-
-            t.traceBegin("sendMessages");
-            if (foreground) {
-                mHandler.sendMessage(mHandler.obtainMessage(USER_CURRENT_MSG, userId, oldUserId));
-                mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
-                mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
-                mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
-                        oldUserId, userId, uss));
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
-                        oldUserId, userId, uss), getUserSwitchTimeoutMs());
-            }
-
-            if (userInfo.preCreated) {
-                needStart = false;
-            }
-
-            // In most cases, broadcast for the system user starting/started is sent by
-            // ActivityManagerService#systemReady(). However on some HSUM devices (e.g. tablets)
-            // the user switches from the system user to a secondary user while running
-            // ActivityManagerService#systemReady(), thus broadcast is not sent for the system user.
-            // Therefore we send the broadcast for the system user here as well in HSUM.
-            // TODO(b/266158156): Improve/refactor the way broadcasts are sent for the system user
-            // in HSUM. Ideally it'd be best to have one single place that sends this notification.
-            final boolean isSystemUserInHeadlessMode = (userId == UserHandle.USER_SYSTEM)
-                    && mInjector.isHeadlessSystemUserMode();
-            if (needStart || isSystemUserInHeadlessMode) {
-                sendUserStartedBroadcast(userId, callingUid, callingPid);
-            }
-            t.traceEnd();
-
-            if (foreground) {
-                t.traceBegin("moveUserToForeground");
-                moveUserToForeground(uss, userId);
-                t.traceEnd();
-            } else {
-                t.traceBegin("finishUserBoot");
-                finishUserBoot(uss);
-                t.traceEnd();
-            }
-
-            if (needStart || isSystemUserInHeadlessMode) {
-                t.traceBegin("sendRestartBroadcast");
-                sendUserStartingBroadcast(userId, callingUid, callingPid);
-                t.traceEnd();
-            }
+            mHandler.post(() -> startUserInternalOnHandler(userId, oldUserId, userStartMode,
+                    unlockListener, callingUid, callingPid));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
 
         return true;
+    }
+
+    private void startUserInternalOnHandler(int userId, int oldUserId, int userStartMode,
+            IProgressListener unlockListener, int callingUid, int callingPid) {
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        final boolean foreground = userStartMode == USER_START_MODE_FOREGROUND;
+        final UserInfo userInfo = getUserInfo(userId);
+
+        boolean needStart = false;
+        boolean updateUmState = false;
+        UserState uss;
+
+        // If the user we are switching to is not currently started, then
+        // we need to start it now.
+        t.traceBegin("updateStartedUserArrayStarting");
+        synchronized (mLock) {
+            uss = mStartedUsers.get(userId);
+            if (uss == null) {
+                uss = new UserState(UserHandle.of(userId));
+                uss.mUnlockProgress.addListener(new UserProgressListener());
+                mStartedUsers.put(userId, uss);
+                updateStartedUserArrayLU();
+                needStart = true;
+                updateUmState = true;
+            } else if (uss.state == UserState.STATE_SHUTDOWN
+                    || mDoNotAbortShutdownUserIds.contains(userId)) {
+                Slogf.i(TAG, "User #" + userId
+                        + " is shutting down - will start after full shutdown");
+                mPendingUserStarts.add(new PendingUserStart(userId, userStartMode,
+                        unlockListener));
+                t.traceEnd(); // updateStartedUserArrayStarting
+                return;
+            }
+        }
+
+        // No matter what, the fact that we're requested to start the user (even if it is
+        // already running) puts it towards the end of the mUserLru list.
+        addUserToUserLru(userId);
+        if (android.multiuser.Flags.scheduleStopOfBackgroundUser()) {
+            mHandler.removeEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG,
+                    Integer.valueOf(userId));
+        }
+
+        if (unlockListener != null) {
+            uss.mUnlockProgress.addListener(unlockListener);
+        }
+        t.traceEnd(); // updateStartedUserArrayStarting
+
+        if (updateUmState) {
+            t.traceBegin("setUserState");
+            mInjector.getUserManagerInternal().setUserState(userId, uss.state);
+            t.traceEnd();
+        }
+        t.traceBegin("updateConfigurationAndProfileIds");
+        if (foreground) {
+            // Make sure the old user is no longer considering the display to be on.
+            mInjector.reportGlobalUsageEvent(UsageEvents.Event.SCREEN_NON_INTERACTIVE);
+            boolean userSwitchUiEnabled;
+            synchronized (mLock) {
+                mCurrentUserId = userId;
+                ActivityManager.invalidateGetCurrentUserIdCache();
+                userSwitchUiEnabled = mUserSwitchUiEnabled;
+            }
+            mInjector.updateUserConfiguration();
+            // NOTE: updateProfileRelatedCaches() is called on both if and else parts, ideally
+            // it should be moved outside, but for now it's not as there are many calls to
+            // external components here afterwards
+            updateProfileRelatedCaches();
+            dispatchOnBeforeUserSwitching(userId);
+            mInjector.getWindowManager().setCurrentUser(userId);
+            mInjector.reportCurWakefulnessUsageEvent();
+            // Once the internal notion of the active user has switched, we lock the device
+            // with the option to show the user switcher on the keyguard.
+            if (userSwitchUiEnabled) {
+                mInjector.getWindowManager().setSwitchingUser(true);
+                // Only lock if the user has a secure keyguard PIN/Pattern/Pwd
+                if (mInjector.getKeyguardManager().isDeviceSecure(userId)) {
+                    // Make sure the device is locked before moving on with the user switch
+                    mInjector.lockDeviceNowAndWaitForKeyguardShown();
+                }
+            }
+
+        } else {
+            updateProfileRelatedCaches();
+            // We are starting a non-foreground user. They have already been added to the end
+            // of mUserLru, so we need to ensure that the foreground user isn't displaced.
+            addUserToUserLru(mCurrentUserId);
+        }
+        if (userStartMode == USER_START_MODE_BACKGROUND && !userInfo.isProfile()) {
+            scheduleStopOfBackgroundUser(userId);
+        }
+        t.traceEnd();
+
+        // Make sure user is in the started state.  If it is currently
+        // stopping, we need to knock that off.
+        if (uss.state == UserState.STATE_STOPPING) {
+            t.traceBegin("updateStateStopping");
+            // If we are stopping, we haven't sent ACTION_SHUTDOWN,
+            // so we can just fairly silently bring the user back from
+            // the almost-dead.
+            uss.setState(uss.lastState);
+            mInjector.getUserManagerInternal().setUserState(userId, uss.state);
+            synchronized (mLock) {
+                updateStartedUserArrayLU();
+            }
+            needStart = true;
+            t.traceEnd();
+        } else if (uss.state == UserState.STATE_SHUTDOWN) {
+            t.traceBegin("updateStateShutdown");
+            // This means ACTION_SHUTDOWN has been sent, so we will
+            // need to treat this as a new boot of the user.
+            uss.setState(UserState.STATE_BOOTING);
+            mInjector.getUserManagerInternal().setUserState(userId, uss.state);
+            synchronized (mLock) {
+                updateStartedUserArrayLU();
+            }
+            needStart = true;
+            t.traceEnd();
+        }
+
+        if (uss.state == UserState.STATE_BOOTING) {
+            t.traceBegin("updateStateBooting");
+            // Give user manager a chance to propagate user restrictions
+            // to other services and prepare app storage
+            mInjector.getUserManager().onBeforeStartUser(userId);
+
+            // Booting up a new user, need to tell system services about it.
+            // Note that this is on the same handler as scheduling of broadcasts,
+            // which is important because it needs to go first.
+            mHandler.sendMessage(mHandler.obtainMessage(USER_START_MSG, userId, NO_ARG2));
+            t.traceEnd();
+        }
+
+        t.traceBegin("sendMessages");
+        if (foreground) {
+            mHandler.sendMessage(mHandler.obtainMessage(USER_CURRENT_MSG, userId, oldUserId));
+            mHandler.removeMessages(REPORT_USER_SWITCH_MSG);
+            mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
+            mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_MSG,
+                    oldUserId, userId, uss));
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(USER_SWITCH_TIMEOUT_MSG,
+                    oldUserId, userId, uss), getUserSwitchTimeoutMs());
+        }
+
+        if (userInfo.preCreated) {
+            needStart = false;
+        }
+
+        // In most cases, broadcast for the system user starting/started is sent by
+        // ActivityManagerService#systemReady(). However on some HSUM devices (e.g. tablets)
+        // the user switches from the system user to a secondary user while running
+        // ActivityManagerService#systemReady(), thus broadcast is not sent for the system user.
+        // Therefore we send the broadcast for the system user here as well in HSUM.
+        // TODO(b/266158156): Improve/refactor the way broadcasts are sent for the system user
+        // in HSUM. Ideally it'd be best to have one single place that sends this notification.
+        final boolean isSystemUserInHeadlessMode = (userId == UserHandle.USER_SYSTEM)
+                && mInjector.isHeadlessSystemUserMode();
+        if (needStart || isSystemUserInHeadlessMode) {
+            sendUserStartedBroadcast(userId, callingUid, callingPid);
+        }
+        t.traceEnd();
+
+        if (foreground) {
+            t.traceBegin("moveUserToForeground");
+            moveUserToForeground(uss, userId);
+            t.traceEnd();
+        } else {
+            t.traceBegin("finishUserBoot");
+            finishUserBoot(uss);
+            t.traceEnd();
+        }
+
+        if (needStart || isSystemUserInHeadlessMode) {
+            t.traceBegin("sendRestartBroadcast");
+            sendUserStartingBroadcast(userId, callingUid, callingPid);
+            t.traceEnd();
+        }
     }
 
     /**
@@ -2373,7 +2383,7 @@ class UserController implements Handler.Callback {
             // If running in background is disabled or mStopUserOnSwitch mode, stop the user.
             if (hasRestriction || isStopUserOnSwitchEnabled()) {
                 Slogf.i(TAG, "Stopping user %d and its profiles on user switch", oldUserId);
-                stopUsersLU(oldUserId, /* allowDelayedLocking= */ false, null, null);
+                stopUsersLU(oldUserId, /* allowDelayedLocking= */ !hasRestriction, null, null);
                 return;
             }
         }

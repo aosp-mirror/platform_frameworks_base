@@ -20,7 +20,10 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.defaultDeviceState
+import com.android.systemui.deviceStateManager
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -28,7 +31,6 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
-import com.android.systemui.util.mockito.whenever
 import java.util.function.Predicate
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
@@ -47,6 +49,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
@@ -65,6 +68,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var powerManager: PowerManager
     @Mock private lateinit var wallpaperManager: WallpaperManager
+    private val kosmos = Kosmos()
+    private val deviceStateManager = kosmos.deviceStateManager
 
     @Mock
     private lateinit var launcherUnlockAnimationController: ILauncherUnlockAnimationController.Stub
@@ -173,7 +178,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
                     statusBarStateController,
                     notificationShadeWindowController,
                     powerManager,
-                    wallpaperManager
+                    wallpaperManager,
+                    deviceStateManager
                 ) {
                 override fun shouldPerformSmartspaceTransition(): Boolean =
                     shouldPerformSmartspaceTransition
@@ -185,6 +191,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         whenever(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
         whenever(powerManager.isInteractive).thenReturn(true)
+        whenever(deviceStateManager.supportedDeviceStates)
+            .thenReturn(listOf(kosmos.defaultDeviceState))
 
         // All of these fields are final, so we can't mock them, but are needed so that the surface
         // appear amount setter doesn't short circuit.

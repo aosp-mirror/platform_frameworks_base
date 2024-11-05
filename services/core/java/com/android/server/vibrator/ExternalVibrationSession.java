@@ -24,8 +24,8 @@ import android.os.ExternalVibrationScale;
 import android.os.IBinder;
 import android.os.VibrationAttributes;
 import android.os.vibrator.Flags;
+import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 
 /**
@@ -33,22 +33,31 @@ import com.android.internal.util.FrameworkStatsLog;
  */
 final class ExternalVibrationSession extends Vibration
         implements VibrationSession, IBinder.DeathRecipient {
+    private static final String TAG = "ExternalVibrationSession";
 
-    private final Object mLock = new Object();
+    /** Calls into VibratorManager functionality needed for playing an {@link ExternalVibration}. */
+    interface VibratorManagerHooks {
+
+        /**
+         * Tells the manager that the external vibration is finished and the vibrators can now be
+         * used for another vibration.
+         */
+        void onExternalVibrationReleased(long vibrationId);
+    }
+
     private final ExternalVibration mExternalVibration;
     private final ExternalVibrationScale mScale = new ExternalVibrationScale();
+    private final VibratorManagerHooks mManagerHooks;
 
-    @GuardedBy("mLock")
-    @Nullable
-    private Runnable mBinderDeathCallback;
-
-    ExternalVibrationSession(ExternalVibration externalVibration) {
+    ExternalVibrationSession(ExternalVibration externalVibration,
+            VibratorManagerHooks managerHooks) {
         super(new CallerInfo(
                 externalVibration.getVibrationAttributes(), externalVibration.getUid(),
                 // TODO(b/249785241): Find a way to link ExternalVibration to a VirtualDevice
                 // instead of using DEVICE_ID_INVALID here and relying on the UID checks.
                 Context.DEVICE_ID_INVALID, externalVibration.getPackage(), null));
         mExternalVibration = externalVibration;
+        mManagerHooks = managerHooks;
     }
 
     public ExternalVibrationScale getScale() {
@@ -94,10 +103,7 @@ final class ExternalVibrationSession extends Vibration
     }
 
     @Override
-    public boolean linkToDeath(Runnable callback) {
-        synchronized (mLock) {
-            mBinderDeathCallback = callback;
-        }
+    public boolean linkToDeath() {
         mExternalVibration.linkToDeath(this);
         return true;
     }
@@ -105,39 +111,33 @@ final class ExternalVibrationSession extends Vibration
     @Override
     public void unlinkToDeath() {
         mExternalVibration.unlinkToDeath(this);
-        synchronized (mLock) {
-            mBinderDeathCallback = null;
-        }
     }
 
     @Override
     public void binderDied() {
-        Runnable callback;
-        synchronized (mLock) {
-            callback = mBinderDeathCallback;
-        }
-        if (callback != null) {
-            callback.run();
-        }
+        Slog.d(TAG, "Binder died, cancelling external vibration...");
+        requestEnd(Status.CANCELLED_BINDER_DIED);
     }
 
     @Override
     void end(EndInfo endInfo) {
         super.end(endInfo);
         if (stats.hasStarted()) {
+            // Notify external client that this vibration should stop sending data to the vibrator.
+            mExternalVibration.mute();
             // External vibration doesn't have feedback from total time the vibrator was playing
             // with non-zero amplitude, so we use the duration between start and end times of
             // the vibration as the time the vibrator was ON, since the haptic channels are
             // open for this duration and can receive vibration waveform data.
             stats.reportVibratorOn(stats.getEndUptimeMillis() - stats.getStartUptimeMillis());
+            // Notify the manager that external client has released the vibrator control.
+            mManagerHooks.onExternalVibrationReleased(id);
         }
     }
 
     @Override
     public void requestEnd(@NonNull Status status, @Nullable CallerInfo endedBy,
             boolean immediate) {
-        // Notify external client that this vibration should stop sending data to the vibrator.
-        mExternalVibration.mute();
         end(new EndInfo(status, endedBy));
     }
 
@@ -169,5 +169,15 @@ final class ExternalVibrationSession extends Vibration
         }
         mScale.adaptiveHapticsScale = scaler.getAdaptiveHapticsScale(usage);
         stats.reportAdaptiveScale(mScale.adaptiveHapticsScale);
+    }
+
+    @Override
+    public String toString() {
+        return "ExternalVibrationSession{"
+                + "id=" + id
+                + ", callerInfo=" + callerInfo
+                + ", externalVibration=" + mExternalVibration
+                + ", scale=" + mScale
+                + '}';
     }
 }

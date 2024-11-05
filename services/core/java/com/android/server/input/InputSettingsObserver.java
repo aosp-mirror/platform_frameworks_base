@@ -63,6 +63,12 @@ class InputSettingsObserver extends ContentObserver {
         mObservers = Map.ofEntries(
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SPEED),
                         (reason) -> updateMousePointerSpeed()),
+                Map.entry(Settings.System.getUriFor(
+                        Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING),
+                        (reason) -> updateMouseReverseVerticalScrolling()),
+                Map.entry(Settings.System.getUriFor(
+                                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON),
+                        (reason) -> updateMouseSwapPrimaryButton()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED),
                         (reason) -> updateTouchpadPointerSpeed()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING),
@@ -137,6 +143,10 @@ class InputSettingsObserver extends ContentObserver {
             observer.accept("just booted");
         }
 
+        // TODO(b/365063048): add an entry to mObservers that calls this instead, once we have a
+        //   setting that can be observed.
+        updateTouchpadThreeFingerTapShortcutEnabled();
+
         configureUserActivityPokeInterval();
     }
 
@@ -163,6 +173,16 @@ class InputSettingsObserver extends ContentObserver {
         mNative.setPointerSpeed(constrainPointerSpeedValue(speed));
     }
 
+    private void updateMouseReverseVerticalScrolling() {
+        mNative.setMouseReverseVerticalScrollingEnabled(
+                InputSettings.isMouseReverseVerticalScrollingEnabled(mContext));
+    }
+
+    private void updateMouseSwapPrimaryButton() {
+        mNative.setMouseSwapPrimaryButtonEnabled(
+                InputSettings.isMouseSwapPrimaryButtonEnabled(mContext));
+    }
+
     private void updateTouchpadPointerSpeed() {
         mNative.setTouchpadPointerSpeed(
                 constrainPointerSpeedValue(InputSettings.getTouchpadPointerSpeed(mContext)));
@@ -187,6 +207,11 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateTouchpadRightClickZoneEnabled() {
         mNative.setTouchpadRightClickZoneEnabled(InputSettings.useTouchpadRightClickZone(mContext));
+    }
+
+    private void updateTouchpadThreeFingerTapShortcutEnabled() {
+        mNative.setTouchpadThreeFingerTapShortcutEnabled(
+                InputSettings.useTouchpadThreeFingerTapShortcut(mContext));
     }
 
     private void updateShowTouches() {

@@ -715,7 +715,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 if (embeddedWindow != null) {
                     // If there is no WindowState for the IWindow, it could be still an
                     // EmbeddedWindow. Therefore, check the EmbeddedWindowController as well
-                    // TODO(b/329229469) Use different phase here
+                    // TODO(b/353463205) Use different phase here
                     ImeTracker.forLogging().onProgress(imeStatsToken,
                             ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
                     embeddedWindow.setRequestedVisibleTypes(

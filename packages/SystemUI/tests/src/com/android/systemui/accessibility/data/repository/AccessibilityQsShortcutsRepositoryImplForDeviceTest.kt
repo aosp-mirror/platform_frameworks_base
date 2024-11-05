@@ -34,6 +34,7 @@ import com.android.systemui.qs.tiles.OneHandedModeTile
 import com.android.systemui.qs.tiles.ReduceBrightColorsTile
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.utils.FieldSetter
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -46,7 +47,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.internal.util.reflection.FieldSetter
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 

@@ -25,6 +25,7 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
+import com.android.systemui.media.controls.ui.controller.MediaCarouselControllerLogger
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager
 import com.android.systemui.media.controls.ui.controller.MediaLocation
@@ -41,6 +42,7 @@ class MediaHost(
     private val mediaDataManager: MediaDataManager,
     private val mediaHostStatesManager: MediaHostStatesManager,
     private val mediaCarouselController: MediaCarouselController,
+    private val debugLogger: MediaCarouselControllerLogger,
 ) : MediaHostState by state {
     lateinit var hostView: UniqueObjectHostView
     var location: Int = -1
@@ -217,6 +219,7 @@ class MediaHost(
         val newVisibility = if (visible) View.VISIBLE else View.GONE
         if (newVisibility != hostView.visibility) {
             hostView.visibility = newVisibility
+            debugLogger.logMediaHostVisibility(location, visible)
             visibleChangedListeners.forEach { it.invoke(visible) }
         }
     }

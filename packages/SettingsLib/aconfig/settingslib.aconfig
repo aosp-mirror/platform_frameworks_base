@@ -149,3 +149,20 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "audio_sharing_developer_option"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable audio sharing developer option"
+    bug: "368401233"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "hearing_devices_ambient_volume_control"
+    namespace: "accessibility"
+    description: "Enable the ambient volume control in device details and hearing devices dialog."
+    bug: "357878944"
+}

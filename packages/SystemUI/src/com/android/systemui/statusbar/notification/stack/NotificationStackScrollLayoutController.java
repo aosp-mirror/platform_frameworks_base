@@ -24,6 +24,7 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Flags.confineNotificationTouchToViewWidth;
+import static com.android.systemui.Flags.ignoreTouchesNextToNotificationShelf;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnEmptySpaceClickListener;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnOverscrollTopChangedListener;
@@ -42,7 +43,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Property;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -104,6 +104,7 @@ import com.android.systemui.statusbar.notification.HeadsUpTouchHelper.HeadsUpNot
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.collection.EntryWithDismissStats;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -145,6 +146,7 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.wallpapers.domain.interactor.WallpaperInteractor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -225,6 +227,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final ActivityStarter mActivityStarter;
     private final SensitiveNotificationProtectionController
             mSensitiveNotificationProtectionController;
+
+    private final WallpaperInteractor mWallpaperInteractor;
 
     private View mLongPressedView;
 
@@ -604,6 +608,16 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                             true /* requireMinHeight */,
                             false /* ignoreDecors */,
                             !confineNotificationTouchToViewWidth() /* ignoreWidth */);
+
+                    // Verify the MotionEvent x,y are actually inside the touch area of the shelf,
+                    // since the shelf may be animated down to a collapsed size on keyguard.
+                    if (ignoreTouchesNextToNotificationShelf()) {
+                        if (child instanceof NotificationShelf shelf) {
+                            if (!NotificationSwipeHelper.isTouchInView(ev, shelf)) {
+                                return null;
+                            }
+                        }
+                    }
                     if (child instanceof ExpandableNotificationRow row) {
                         ExpandableNotificationRow parent = row.getNotificationParent();
                         if (parent != null && parent.areChildrenExpanded()
@@ -756,7 +770,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             NotificationDismissibilityProvider dismissibilityProvider,
             ActivityStarter activityStarter,
             SplitShadeStateController splitShadeStateController,
-            SensitiveNotificationProtectionController sensitiveNotificationProtectionController) {
+            SensitiveNotificationProtectionController sensitiveNotificationProtectionController,
+            WallpaperInteractor wallpaperInteractor) {
         mView = view;
         mKeyguardTransitionRepo = keyguardTransitionRepo;
         mViewBinder = viewBinder;
@@ -812,6 +827,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mDismissibilityProvider = dismissibilityProvider;
         mActivityStarter = activityStarter;
         mSensitiveNotificationProtectionController = sensitiveNotificationProtectionController;
+        mWallpaperInteractor = wallpaperInteractor;
         mView.passSplitShadeStateController(splitShadeStateController);
         if (SceneContainerFlag.isEnabled()) {
             mWakeUpCoordinator.setStackScroller(this);
@@ -948,6 +964,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),
                     this::onKeyguardTransitionChanged);
         }
+
+        mView.setWallpaperInteractor(mWallpaperInteractor);
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
@@ -1170,7 +1188,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public int getIntrinsicContentHeight() {
         SceneContainerFlag.assertInLegacyMode();
-        return mView.getIntrinsicContentHeight();
+        return (int) mView.getIntrinsicContentHeight();
     }
 
     /**
@@ -1759,12 +1777,12 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             mNotifCollection.dismissAllNotifications(
                     mLockscreenUserManager.getCurrentUserId());
         } else {
-            final List<Pair<NotificationEntry, DismissedByUserStats>>
+            final List<EntryWithDismissStats>
                     entriesWithRowsDismissedFromShade = new ArrayList<>();
             for (ExpandableNotificationRow row : viewsToRemove) {
                 final NotificationEntry entry = row.getEntry();
                 entriesWithRowsDismissedFromShade.add(
-                        new Pair<>(entry, getDismissedByUserStats(entry)));
+                        new EntryWithDismissStats(entry, getDismissedByUserStats(entry)));
             }
             mNotifCollection.dismissNotifications(entriesWithRowsDismissedFromShade);
         }
@@ -2115,9 +2133,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             boolean hunWantsIt = false;
             if (shouldHeadsUpHandleTouch()) {
                 hunWantsIt = mHeadsUpTouchHelper.onInterceptTouchEvent(ev);
-                if (hunWantsIt) {
-                    mView.startDraggingOnHun();
-                }
             }
             boolean swipeWantsIt = false;
             if (mLongPressedView == null && !mView.isBeingDragged()
@@ -2203,6 +2218,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             boolean hunWantsIt = false;
             if (shouldHeadsUpHandleTouch()) {
                 hunWantsIt = mHeadsUpTouchHelper.onTouchEvent(ev);
+                if (hunWantsIt) {
+                    mView.startDraggingOnHun();
+                }
             }
 
             // Check if we need to clear any snooze leavebehinds

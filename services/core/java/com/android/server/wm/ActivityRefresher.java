@@ -89,7 +89,7 @@ class ActivityRefresher {
         final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                 activity.token, /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         try {
-            activity.mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
+            activity.mAtmService.getLifecycleManager().scheduleTransactionItems(
                     activity.app.getThread(), refreshCallbackItem, resumeActivityItem);
             mHandler.postDelayed(() -> {
                 synchronized (mWmService.mGlobalLock) {

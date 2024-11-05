@@ -38,7 +38,7 @@ import kotlin.math.abs
 /**
  * Test entering pip from an app via auto-enter property when navigating to home.
  *
- * To run this test: `atest WMShellFlickerTestsPip1:AutoEnterPipOnGoToHomeTest`
+ * To run this test: `atest WMShellFlickerTestsPip:AutoEnterPipOnGoToHomeTest`
  *
  * Actions:
  * ```

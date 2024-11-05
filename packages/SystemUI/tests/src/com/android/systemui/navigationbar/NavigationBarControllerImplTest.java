@@ -40,6 +40,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.hardware.devicestate.DeviceStateManager;
 import android.util.SparseArray;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -94,6 +95,8 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
     private NavigationBarComponent.Factory mNavigationBarFactory;
     @Mock
     TaskbarDelegate mTaskbarDelegate;
+    @Mock
+    private DeviceStateManager mDeviceStateManager;
 
     @Before
     public void setUp() {
@@ -116,7 +119,8 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
                         Optional.of(mock(Pip.class)),
                         Optional.of(mock(BackAnimation.class)),
                         mock(SecureSettings.class),
-                        mDisplayTracker));
+                        mDisplayTracker,
+                        mDeviceStateManager));
         initializeNavigationBars();
         mMockitoSession = mockitoSession().mockStatic(Utilities.class).startMocking();
     }

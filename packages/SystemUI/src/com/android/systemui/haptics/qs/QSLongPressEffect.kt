@@ -178,7 +178,11 @@ constructor(
             State.RUNNING_BACKWARDS_FROM_UP -> {
                 callback?.onEffectFinishedReversing()
                 setState(getStateForClick())
-                logEvent(qsTile?.tileSpec, state, "click action triggered")
+                logEvent(
+                    qsTile?.tileSpec,
+                    state,
+                    "click action triggered from handleAnimationComplete",
+                )
                 qsTile?.click(expandable)
             }
             State.RUNNING_BACKWARDS_FROM_CANCEL -> {
@@ -206,7 +210,7 @@ constructor(
         if (keyguardStateController.isPrimaryBouncerShowing || !isStateClickable) return false
 
         setState(getStateForClick())
-        logEvent(qsTile?.tileSpec, state, "click action triggered")
+        logEvent(qsTile?.tileSpec, state, "click action triggered from onTileClick")
         qsTile?.click(expandable)
         return true
     }

@@ -19,7 +19,7 @@ package com.android.systemui.scene.ui.viewmodel
 import android.view.MotionEvent
 import android.view.View
 import androidx.compose.runtime.getValue
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -39,6 +39,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Overlay
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -48,7 +49,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 /** Models UI state for the scene container. */
 class SceneContainerViewModel
@@ -58,6 +58,7 @@ constructor(
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
     shadeInteractor: ShadeInteractor,
+    private val remoteInputInteractor: RemoteInputInteractor,
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
     hapticsViewModelFactory: SceneContainerHapticsViewModel.Factory,
@@ -72,6 +73,8 @@ constructor(
 
     /** Whether the container is visible. */
     val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
+
+    val allContentKeys: List<ContentKey> = sceneInteractor.allContentKeys
 
     private val hapticsViewModel = hapticsViewModelFactory.create(view)
 
@@ -97,6 +100,10 @@ constructor(
                 object : MotionEventHandler {
                     override fun onMotionEvent(motionEvent: MotionEvent) {
                         this@SceneContainerViewModel.onMotionEvent(motionEvent)
+                    }
+
+                    override fun onEmptySpaceMotionEvent(motionEvent: MotionEvent) {
+                        this@SceneContainerViewModel.onEmptySpaceMotionEvent(motionEvent)
                     }
 
                     override fun onMotionEventComplete() {
@@ -141,6 +148,23 @@ constructor(
                 event.actionMasked == MotionEvent.ACTION_CANCEL
         ) {
             sceneInteractor.onUserInputFinished()
+        }
+    }
+
+    /**
+     * Notifies that a [MotionEvent] has propagated through the entire [SharedNotificationContainer]
+     * and Composable scene container hierarchy without being handled.
+     *
+     * Call this after the [MotionEvent] has finished propagating through the UI hierarchy.
+     */
+    fun onEmptySpaceMotionEvent(event: MotionEvent) {
+        // check if the touch is outside the window and if remote input is active.
+        // If true, close any active remote inputs.
+        if (
+            event.action == MotionEvent.ACTION_OUTSIDE &&
+                (remoteInputInteractor.isRemoteInputActive as StateFlow).value
+        ) {
+            remoteInputInteractor.closeRemoteInputs()
         }
     }
 
@@ -260,6 +284,9 @@ constructor(
     interface MotionEventHandler {
         /** Notifies that a [MotionEvent] has occurred. */
         fun onMotionEvent(motionEvent: MotionEvent)
+
+        /** Notifies that a [MotionEvent] has occurred outside the root window. */
+        fun onEmptySpaceMotionEvent(motionEvent: MotionEvent)
 
         /**
          * Notifies that the previous [MotionEvent] reported by [onMotionEvent] has finished

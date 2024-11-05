@@ -120,7 +120,7 @@ public class ActivityOptions extends ComponentOptions {
     /**
      * Grants the {@link PendingIntent} background activity start privileges.
      *
-     * This behaves the same as {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOWED_ALWAYS}, except it
+     * This behaves the same as {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS}, except it
      * does not grant background activity launch permissions based on the privileged permission
      * <code>START_ACTIVITIES_FROM_BACKGROUND</code>.
      *
@@ -136,7 +136,6 @@ public class ActivityOptions extends ComponentOptions {
     /**
      * Denies the {@link PendingIntent} any background activity start privileges.
      */
-    @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
     /**
      * Grants the {@link PendingIntent} all background activity start privileges, including
@@ -146,12 +145,12 @@ public class ActivityOptions extends ComponentOptions {
      * <p><b>Caution:</b> This mode should be used sparingly. Most apps should use
      * {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE} instead, relying on notifications
      * or foreground services for background interactions to minimize user disruption. However,
-     * this mode  is necessary for specific use cases, such as companion apps responding to
+     * this mode is necessary for specific use cases, such as companion apps responding to
      * prompts from a connected device.
      *
      * <p>For more information on background activity start restrictions, see:
      * <a href="https://developer.android.com/guide/components/activities/background-starts">
-     * Restrictions on starting activities from  the background</a>
+     * Restrictions on starting activities from the background</a>
      */
     @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS = 3;

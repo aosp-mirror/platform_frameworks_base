@@ -3658,6 +3658,27 @@ public abstract class Context {
     public abstract void unregisterReceiver(BroadcastReceiver receiver);
 
     /**
+     * Returns the list of {@link IntentFilter} objects that have been registered for the given
+     * {@link BroadcastReceiver}.
+     *
+     * @param receiver The {@link BroadcastReceiver} whose registered intent filters
+     *                 should be retrieved.
+     *
+     * @return A list of registered intent filters, or an empty list if the given receiver is not
+     *         registered.
+     *
+     * @throws NullPointerException if the {@code receiver} is {@code null}.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // TestApi
+    @TestApi
+    @NonNull
+    public List<IntentFilter> getRegisteredIntentFilters(@NonNull BroadcastReceiver receiver) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Request that a given application service be started.  The Intent
      * should either contain the complete class name of a specific service
      * implementation to start, or a specific package name to target.  If the
@@ -4325,6 +4346,8 @@ public abstract class Context {
            //@hide: ECM_ENHANCED_CONFIRMATION_SERVICE,
             CONTACT_KEYS_SERVICE,
             RANGING_SERVICE,
+            MEDIA_QUALITY_SERVICE,
+            ADVANCED_PROTECTION_SERVICE,
 
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -4769,6 +4792,18 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.security.keystore.KeyStoreManager} for accessing
+     * <a href="/privacy-and-security/keystore">Android Keystore</a>
+     * functions.
+     *
+     * @see #getSystemService(String)
+     * @see android.security.keystore.KeyStoreManager
+     */
+    @FlaggedApi(android.security.Flags.FLAG_KEYSTORE_GRANT_API)
+    public static final String KEYSTORE_SERVICE = "keystore";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.os.storage.StorageManager} for accessing system storage
      * functions.
      *
@@ -4859,6 +4894,8 @@ public abstract class Context {
      * @see android.net.vcn.VcnManager
      * @hide
      */
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
 
     /**
@@ -5658,6 +5695,14 @@ public abstract class Context {
     public static final String BINARY_TRANSPARENCY_SERVICE = "transparency";
 
     /**
+     * System service name for ForensicService.
+     * The service manages the forensic info on device.
+     * @hide
+     */
+    @FlaggedApi(android.security.Flags.FLAG_AFL_API)
+    public static final String FORENSIC_SERVICE = "forensic";
+
+    /**
      * System service name for the DeviceIdleManager.
      * @see #getSystemService(String)
      * @hide
@@ -6368,6 +6413,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.security.advancedprotection.AdvancedProtectionManager}
+     * @see #getSystemService(String)
+     * @see android.security.advancedprotection.AdvancedProtectionManager
+     */
+    @FlaggedApi(android.security.Flags.FLAG_AAPM_API)
+    public static final String ADVANCED_PROTECTION_SERVICE = "advanced_protection";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.security.FileIntegrityManager}.
      * @see #getSystemService(String)
      * @see android.security.FileIntegrityManager
@@ -6623,8 +6677,8 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.telephony.satellite.SatelliteManager
-     * @hide
      */
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_SATELLITE_STATE_CHANGE_LISTENER)
     public static final String SATELLITE_SERVICE = "satellite";
 
     /**
@@ -6735,6 +6789,17 @@ public abstract class Context {
      * @hide
      */
     public static final String SUPERVISION_SERVICE = "supervision";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.quality.MediaQuality} for standardize picture and audio
+     * API parameters.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.quality.MediaQuality
+     */
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+    public static final String MEDIA_QUALITY_SERVICE = "media_quality";
 
     /**
      * Determine whether the given permission is allowed for a particular

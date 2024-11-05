@@ -25,7 +25,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.BackgroundActivityStartControllerTests.setViaReflection;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -144,6 +143,10 @@ class AppCompatActivityRobot {
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
     }
 
+    void setDisplayIgnoreActivitySizeRestrictions(boolean enabled) {
+        doReturn(enabled).when(mDisplayContent).isDisplayIgnoreActivitySizeRestrictions();
+    }
+
     void configureTaskBounds(@NonNull Rect taskBounds) {
         doReturn(taskBounds).when(mTaskStack.top()).getBounds();
     }
@@ -228,13 +231,7 @@ class AppCompatActivityRobot {
 
     void setGetUserMinAspectRatioOverrideCode(@UserMinAspectRatio int overrideCode) {
         doReturn(overrideCode).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideType();
-    }
-
-    void setUserAspectRatioType(@UserMinAspectRatio int aspectRatio) {
-        final AppCompatAspectRatioOverrides aspectRatioOverrides = mActivityStack.top()
-                .mAppCompatController.getAppCompatAspectRatioOverrides();
-        setViaReflection(aspectRatioOverrides, "mUserAspectRatioType", aspectRatio);
+                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
     }
 
     void setGetUserMinAspectRatioOverrideValue(float overrideValue) {
@@ -250,12 +247,20 @@ class AppCompatActivityRobot {
         doReturn(mTaskStack.top()).when(mActivityStack.top()).getOrganizedTask();
     }
 
+    void setIsInLetterboxAnimation(boolean inAnimation) {
+        doReturn(inAnimation).when(mActivityStack.top()).isInLetterboxAnimation();
+    }
+
     void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
         doReturn(inMultiWindowMode).when(mTaskStack.top()).inMultiWindowMode();
     }
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityHasLetterboxedBounds(boolean letterboxed) {
+        doReturn(letterboxed).when(mActivityStack.top()).areBoundsLetterboxed();
     }
 
     void setTopActivityVisible(boolean isVisible) {
@@ -291,6 +296,10 @@ class AppCompatActivityRobot {
         }
     }
 
+    void setFixedRotationTransformDisplayBounds(@Nullable Rect bounds) {
+        doReturn(bounds).when(mActivityStack.top()).getFixedRotationTransformDisplayBounds();
+    }
+
     void destroyTopActivity() {
         mActivityStack.top().removeImmediately();
     }
@@ -314,6 +323,8 @@ class AppCompatActivityRobot {
     void createNewTaskWithBaseActivity() {
         final Task newTask = new WindowTestsBase.TaskBuilder(mSupervisor)
                 .setCreateActivity(true)
+                // Respect "@ChangeId" according to test package's target sdk.
+                .setPackage(mAtm.mContext.getPackageName())
                 .setDisplay(mDisplayContent).build();
         mTaskStack.push(newTask);
         pushActivity(newTask.getTopNonFinishingActivity());

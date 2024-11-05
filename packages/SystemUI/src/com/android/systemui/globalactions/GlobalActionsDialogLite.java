@@ -135,6 +135,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.EmergencyDialerConstants;
@@ -248,7 +249,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final IStatusBarService mStatusBarService;
     protected final LightBarController mLightBarController;
     protected final NotificationShadeWindowController mNotificationShadeWindowController;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowControllerStore mStatusBarWindowControllerStore;
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
     private final RingerModeTracker mRingerModeTracker;
@@ -364,7 +365,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             IStatusBarService statusBarService,
             LightBarController lightBarController,
             NotificationShadeWindowController notificationShadeWindowController,
-            StatusBarWindowController statusBarWindowController,
+            StatusBarWindowControllerStore statusBarWindowControllerStore,
             IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             UiEventLogger uiEventLogger,
@@ -400,7 +401,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mStatusBarService = statusBarService;
         mLightBarController = lightBarController;
         mNotificationShadeWindowController = notificationShadeWindowController;
-        mStatusBarWindowController = statusBarWindowController;
+        mStatusBarWindowControllerStore = statusBarWindowControllerStore;
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
         mRingerModeTracker = ringerModeTracker;
@@ -708,7 +709,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mLightBarController,
                 mKeyguardStateController,
                 mNotificationShadeWindowController,
-                mStatusBarWindowController,
+                mStatusBarWindowControllerStore.getDefaultDisplay(),
                 this::onRefresh,
                 mKeyguardShowing,
                 mPowerAdapter,

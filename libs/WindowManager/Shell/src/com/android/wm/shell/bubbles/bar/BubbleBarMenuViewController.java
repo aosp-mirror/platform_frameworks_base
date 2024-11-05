@@ -212,6 +212,7 @@ class BubbleBarMenuViewController {
                 Icon.createWithResource(resources, R.drawable.ic_remove_no_shadow),
                 resources.getString(R.string.bubble_dismiss_text),
                 tintColor,
+                BubbleBarMenuView.DISMISS_ACTION_TAG,
                 view -> {
                     hideMenu(true /* animated */);
                     if (mListener != null) {

@@ -78,6 +78,7 @@ import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.WeaklyReferencedCallback;
 import com.android.internal.util.DumpUtils;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -1795,6 +1796,7 @@ public final class ColorDisplayService extends SystemService {
     /**
      * Interface for applying transforms to a given AppWindow.
      */
+    @WeaklyReferencedCallback
     public interface ColorTransformController {
 
         /**

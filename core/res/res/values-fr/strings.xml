@@ -1407,7 +1407,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Accessoire audio analogique détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Appuyez ici pour en savoir plus."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Débogage USB activé"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Appuyez pour désactiver le débogage USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Appuyez pour le désactiver"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Sélectionnez cette option pour désactiver le débogage USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Débogage sans fil connecté"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Appuyez pour désactiver le débogage sans fil"</string>
@@ -1944,6 +1944,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Désactivé"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Tous les agendas"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> coupe certains sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Un problème interne lié à votre appareil est survenu. Ce dernier risque d\'être instable jusqu\'à ce que vous rétablissiez la configuration d\'usine."</string>
@@ -2130,11 +2132,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Les appels et les notifications vibreront"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Les appels et les notifications seront silencieux"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifications du système"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne pas déranger"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nouveau : Le mode Ne pas déranger masque les notifications"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Appuyez pour en savoir plus et pour modifier les paramètres."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Le mode Ne pas déranger a été modifié"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Appuyez pour vérifier les contenus bloqués."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Vérifiez les paramètres de notification"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"À partir d\'Android 13, les applications que vous installez ont besoin de votre autorisation pour envoyer des notifications. Appuyez pour modifier cette autorisation pour les applications déjà installées."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Plus tard"</string>
@@ -2430,6 +2427,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envoyer et recevoir des messages sans réseau mobile ou Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ouvrir Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Fonctionnement"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"En attente…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Reconfigurer le déverrouillage par empreinte digitale"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne peut plus être reconnue."</string>

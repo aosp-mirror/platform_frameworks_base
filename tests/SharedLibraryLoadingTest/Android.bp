@@ -28,7 +28,7 @@ java_test_host {
         "junit",
     ],
     test_suites: ["general-tests"],
-    data: [
+    device_common_data: [
         ":SharedLibraryLoadingTests_StandardSharedLibrary",
         ":SharedLibraryLoadingTests_SharedLibraryLoadedAfter",
         ":SharedLibraryLoadingTests_SharedLibraryClientTests",

@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"वर्धित कनेक्टिव्हिटी वैशिष्‍ट्य सुरू करा."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानिक टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"स्थानिक शेल प्रवेश देणारा टर्मिनल अ‍ॅप सुरू करा"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux विकास पर्यावरण"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android वर Linux टर्मिनल रन करा"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP तपासणी"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP तपासणी वर्तन सेट करा"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"डीबग करणे"</string>
@@ -585,7 +587,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"हा काँप्युटर (अंतर्गत)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"मायक्रोफोन (अंतर्गत)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"डॉक स्पीकर"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"बाह्य डिव्हाइस"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"कनेक्ट केलेले डिव्हाइस"</string>
@@ -687,10 +688,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"सुरू केले आहे"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"हा बदल लागू करण्यासाठी तुमचे डिव्हाइस रीबूट करणे आवश्यक आहे. आता रीबूट करा किंवा रद्द करा."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"वायर्ड हेडफोन"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"हेडफोन"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB स्पीकर"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"माइक जॅक"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB माइक"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"वायर्ड ऑडिओ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ऑडिओ"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"वायर्ड मायक्रोफोन"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB मायक्रोफोन"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT मायक्रोफोन"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"सुरू करा"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"बंद करा"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"वाहक नेटवर्क बदलत आहे"</string>

@@ -18,7 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
-import static android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_EDGE_DRAG_RESIZE;
+import static android.window.DesktopModeFlags.ENABLE_WINDOWING_EDGE_DRAG_RESIZE;
 
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
@@ -42,7 +42,7 @@ import java.util.Objects;
 /**
  * Geometry for a drag resize region for a particular window.
  */
-final class DragResizeWindowGeometry {
+public final class DragResizeWindowGeometry {
     private final int mTaskCornerRadius;
     private final Size mTaskSize;
     // The size of the handle outside the task window applied to the edges of the window, for the
@@ -58,19 +58,24 @@ final class DragResizeWindowGeometry {
     // The bounds for each edge drag region, which can resize the task in one direction.
     final @NonNull TaskEdges mTaskEdges;
 
+    private final DisabledEdge mDisabledEdge;
+
     DragResizeWindowGeometry(int taskCornerRadius, @NonNull Size taskSize,
             int resizeHandleEdgeOutset, int resizeHandleEdgeInset, int fineCornerSize,
-            int largeCornerSize) {
+            int largeCornerSize, DisabledEdge disabledEdge) {
         mTaskCornerRadius = taskCornerRadius;
         mTaskSize = taskSize;
         mResizeHandleEdgeOutset = resizeHandleEdgeOutset;
         mResizeHandleEdgeInset = resizeHandleEdgeInset;
 
-        mLargeTaskCorners = new TaskCorners(mTaskSize, largeCornerSize);
-        mFineTaskCorners = new TaskCorners(mTaskSize, fineCornerSize);
+        mDisabledEdge = disabledEdge;
+
+        mLargeTaskCorners = new TaskCorners(mTaskSize, largeCornerSize, disabledEdge);
+        mFineTaskCorners = new TaskCorners(mTaskSize, fineCornerSize, disabledEdge);
 
         // Save touch areas for each edge.
-        mTaskEdges = new TaskEdges(mTaskSize, mResizeHandleEdgeOutset, mResizeHandleEdgeInset);
+        mTaskEdges = new TaskEdges(mTaskSize, mResizeHandleEdgeOutset, mResizeHandleEdgeInset,
+                mDisabledEdge);
     }
 
     /**
@@ -170,7 +175,7 @@ final class DragResizeWindowGeometry {
                     || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE
                     // Touchpad input
                     || (e.isFromSource(SOURCE_MOUSE)
-                        && e.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER);
+                    && e.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER);
         } else {
             return e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
         }
@@ -181,14 +186,15 @@ final class DragResizeWindowGeometry {
     }
 
     private boolean isInEdgeResizeBounds(float x, float y) {
-        return calculateEdgeResizeCtrlType(x, y) != 0;
+        return calculateEdgeResizeCtrlType(x, y) != CTRL_TYPE_UNDEFINED;
     }
 
     /**
      * Returns the control type for the drag-resize, based on the touch regions and this
      * MotionEvent's coordinates.
+     *
      * @param isTouchscreen Controls the size of the corner resize regions; touchscreen events
-     *                      (finger & stylus) are eligible for a larger area than cursor events
+     *                      (finger & stylus) are eligible for a larger area than cursor events.
      * @param isEdgeResizePermitted Indicates if the event is eligible for falling into an edge
      *                              resize region.
      */
@@ -252,6 +258,10 @@ final class DragResizeWindowGeometry {
     @DragPositioningCallback.CtrlType
     private int checkDistanceFromCenter(@DragPositioningCallback.CtrlType int ctrlType, float x,
             float y) {
+        if ((mDisabledEdge == DisabledEdge.RIGHT && (ctrlType & CTRL_TYPE_RIGHT) != 0)
+                || mDisabledEdge == DisabledEdge.LEFT && ((ctrlType & CTRL_TYPE_LEFT) != 0)) {
+            return CTRL_TYPE_UNDEFINED;
+        }
         final Point cornerRadiusCenter = calculateCenterForCornerRadius(ctrlType);
         double distanceFromCenter = Math.hypot(x - cornerRadiusCenter.x, y - cornerRadiusCenter.y);
 
@@ -337,29 +347,31 @@ final class DragResizeWindowGeometry {
         private final @NonNull Rect mRightTopCornerBounds;
         private final @NonNull Rect mLeftBottomCornerBounds;
         private final @NonNull Rect mRightBottomCornerBounds;
+        private final @NonNull DisabledEdge mDisabledEdge;
 
-        TaskCorners(@NonNull Size taskSize, int cornerSize) {
+        TaskCorners(@NonNull Size taskSize, int cornerSize, DisabledEdge disabledEdge) {
             mCornerSize = cornerSize;
+            mDisabledEdge = disabledEdge;
             final int cornerRadius = cornerSize / 2;
-            mLeftTopCornerBounds = new Rect(
+            mLeftTopCornerBounds = (disabledEdge == DisabledEdge.LEFT) ? new Rect() : new Rect(
                     -cornerRadius,
                     -cornerRadius,
                     cornerRadius,
                     cornerRadius);
 
-            mRightTopCornerBounds = new Rect(
+            mRightTopCornerBounds = (disabledEdge == DisabledEdge.RIGHT) ? new Rect() : new Rect(
                     taskSize.getWidth() - cornerRadius,
                     -cornerRadius,
                     taskSize.getWidth() + cornerRadius,
                     cornerRadius);
 
-            mLeftBottomCornerBounds = new Rect(
+            mLeftBottomCornerBounds = (disabledEdge == DisabledEdge.LEFT) ? new Rect() : new Rect(
                     -cornerRadius,
                     taskSize.getHeight() - cornerRadius,
                     cornerRadius,
                     taskSize.getHeight() + cornerRadius);
 
-            mRightBottomCornerBounds = new Rect(
+            mRightBottomCornerBounds = (disabledEdge == DisabledEdge.RIGHT) ? new Rect() : new Rect(
                     taskSize.getWidth() - cornerRadius,
                     taskSize.getHeight() - cornerRadius,
                     taskSize.getWidth() + cornerRadius,
@@ -370,10 +382,14 @@ final class DragResizeWindowGeometry {
          * Updates the region to include all four corners.
          */
         void union(Region region) {
-            region.union(mLeftTopCornerBounds);
-            region.union(mRightTopCornerBounds);
-            region.union(mLeftBottomCornerBounds);
-            region.union(mRightBottomCornerBounds);
+            if (mDisabledEdge != DisabledEdge.RIGHT) {
+                region.union(mRightTopCornerBounds);
+                region.union(mRightBottomCornerBounds);
+            }
+            if (mDisabledEdge != DisabledEdge.LEFT) {
+                region.union(mLeftTopCornerBounds);
+                region.union(mLeftBottomCornerBounds);
+            }
         }
 
         /**
@@ -440,9 +456,12 @@ final class DragResizeWindowGeometry {
         private final @NonNull Rect mRightEdgeBounds;
         private final @NonNull Rect mBottomEdgeBounds;
         private final @NonNull Region mRegion;
+        private final @NonNull DisabledEdge mDisabledEdge;
 
         private TaskEdges(@NonNull Size taskSize, int resizeHandleThickness,
-                int resizeHandleEdgeInset) {
+                int resizeHandleEdgeInset, DisabledEdge disabledEdge) {
+            // Save touch areas for each edge.
+            mDisabledEdge = disabledEdge;
             // Save touch areas for each edge.
             mTopEdgeBounds = new Rect(
                     -resizeHandleThickness,
@@ -466,10 +485,7 @@ final class DragResizeWindowGeometry {
                     taskSize.getHeight() + resizeHandleThickness);
 
             mRegion = new Region();
-            mRegion.union(mTopEdgeBounds);
-            mRegion.union(mLeftEdgeBounds);
-            mRegion.union(mRightEdgeBounds);
-            mRegion.union(mBottomEdgeBounds);
+            union(mRegion);
         }
 
         /**
@@ -483,9 +499,13 @@ final class DragResizeWindowGeometry {
          * Updates the region to include all four corners.
          */
         private void union(Region region) {
+            if (mDisabledEdge != DisabledEdge.RIGHT) {
+                region.union(mRightEdgeBounds);
+            }
+            if (mDisabledEdge != DisabledEdge.LEFT) {
+                region.union(mLeftEdgeBounds);
+            }
             region.union(mTopEdgeBounds);
-            region.union(mLeftEdgeBounds);
-            region.union(mRightEdgeBounds);
             region.union(mBottomEdgeBounds);
         }
 
@@ -518,5 +538,11 @@ final class DragResizeWindowGeometry {
                     mRightEdgeBounds,
                     mBottomEdgeBounds);
         }
+    }
+
+    public enum DisabledEdge {
+        LEFT,
+        RIGHT,
+        NONE
     }
 }

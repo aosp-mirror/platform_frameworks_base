@@ -16,12 +16,12 @@
 
 package com.android.systemui.statusbar.core
 
+import android.view.Display
 import android.view.View
 import com.android.systemui.CoreStartable
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.demomode.DemoModeController
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.PluginDependencyProvider
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -31,25 +31,27 @@ import com.android.systemui.shade.ShadeSurface
 import com.android.systemui.statusbar.AutoHideUiElement
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.data.model.StatusBarMode
-import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
+import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository
 import com.android.systemui.statusbar.phone.AutoHideController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
-import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore
+import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStatePerDisplayRepository
 import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.util.Optional
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Class responsible for managing the lifecycle and state of the status bar.
@@ -57,26 +59,34 @@ import kotlinx.coroutines.launch
  * It is a temporary class, created to pull status bar related logic out of CentralSurfacesImpl. The
  * plan is break it out into individual classes.
  */
-@SysUISingleton
 class StatusBarOrchestrator
-@Inject
+@AssistedInject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
-    private val statusBarInitializer: StatusBarInitializer,
-    private val statusBarWindowController: StatusBarWindowController,
-    private val statusBarModeRepository: StatusBarModeRepositoryStore,
+    @Assisted private val displayId: Int,
+    @Assisted private val coroutineScope: CoroutineScope,
+    @Assisted private val statusBarWindowStateRepository: StatusBarWindowStatePerDisplayRepository,
+    @Assisted private val statusBarModeRepository: StatusBarModePerDisplayRepository,
+    @Assisted private val statusBarInitializer: StatusBarInitializer,
+    @Assisted private val statusBarWindowController: StatusBarWindowController,
     private val demoModeController: DemoModeController,
     private val pluginDependencyProvider: PluginDependencyProvider,
     private val autoHideController: AutoHideController,
     private val remoteInputManager: NotificationRemoteInputManager,
     private val notificationShadeWindowViewControllerLazy:
-    Lazy<NotificationShadeWindowViewController>,
+        Lazy<NotificationShadeWindowViewController>,
     private val shadeSurface: ShadeSurface,
     private val bubblesOptional: Optional<Bubbles>,
-    private val statusBarWindowStateRepositoryStore: StatusBarWindowStateRepositoryStore,
+    private val dumpManager: DumpManager,
     powerInteractor: PowerInteractor,
     primaryBouncerInteractor: PrimaryBouncerInteractor,
 ) : CoreStartable {
+
+    private val dumpableName: String =
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            javaClass.simpleName
+        } else {
+            "${javaClass.simpleName}$displayId"
+        }
 
     private val phoneStatusBarViewController =
         MutableStateFlow<PhoneStatusBarViewController?>(value = null)
@@ -86,9 +96,9 @@ constructor(
 
     private val shouldAnimateNextBarModeChange =
         combine(
-            statusBarModeRepository.defaultDisplay.isTransientShown,
+            statusBarModeRepository.isTransientShown,
             powerInteractor.isAwake,
-            statusBarWindowStateRepositoryStore.defaultDisplay.windowState,
+            statusBarWindowStateRepository.windowState,
         ) { isTransientShown, isDeviceAwake, statusBarWindowState ->
             !isTransientShown &&
                 isDeviceAwake &&
@@ -107,8 +117,8 @@ constructor(
 
     private val statusBarVisible =
         combine(
-            statusBarModeRepository.defaultDisplay.statusBarMode,
-            statusBarWindowStateRepositoryStore.defaultDisplay.windowState,
+            statusBarModeRepository.statusBarMode,
+            statusBarWindowStateRepository.windowState,
         ) { mode, statusBarWindowState ->
             mode != StatusBarMode.LIGHTS_OUT &&
                 mode != StatusBarMode.LIGHTS_OUT_TRANSPARENT &&
@@ -119,7 +129,7 @@ constructor(
         combine(
                 shouldAnimateNextBarModeChange,
                 phoneStatusBarTransitions.filterNotNull(),
-                statusBarModeRepository.defaultDisplay.statusBarMode,
+                statusBarModeRepository.statusBarMode,
                 ::Triple,
             )
             .distinctUntilChangedBy { (_, barTransitions, statusBarMode) ->
@@ -129,38 +139,41 @@ constructor(
             }
 
     override fun start() {
-        StatusBarSimpleFragment.assertInNewMode()
-        applicationScope.launch {
-            launch {
-                controllerAndBouncerShowing.collect { (controller, bouncerShowing) ->
-                    setBouncerShowingForStatusBarComponents(controller, bouncerShowing)
+        StatusBarConnectedDisplays.assertInNewMode()
+        coroutineScope
+            .launch {
+                dumpManager.registerCriticalDumpable(dumpableName, this@StatusBarOrchestrator)
+                launch {
+                    controllerAndBouncerShowing.collect { (controller, bouncerShowing) ->
+                        setBouncerShowingForStatusBarComponents(controller, bouncerShowing)
+                    }
                 }
-            }
-            launch {
-                barTransitionsAndDeviceAsleep.collect { (barTransitions, deviceAsleep) ->
-                    if (deviceAsleep) {
-                        barTransitions.finishAnimations()
+                launch {
+                    barTransitionsAndDeviceAsleep.collect { (barTransitions, deviceAsleep) ->
+                        if (deviceAsleep) {
+                            barTransitions.finishAnimations()
+                        }
+                    }
+                }
+                launch { statusBarVisible.collect { updateBubblesVisibility(it) } }
+                launch {
+                    barModeUpdate.collect { (animate, barTransitions, statusBarMode) ->
+                        updateBarMode(animate, barTransitions, statusBarMode)
                     }
                 }
             }
-            launch { statusBarVisible.collect { updateBubblesVisibility(it) } }
-            launch {
-                barModeUpdate.collect { (animate, barTransitions, statusBarMode) ->
-                    updateBarMode(animate, barTransitions, statusBarMode)
-                }
-            }
-        }
+            .invokeOnCompletion { dumpManager.unregisterDumpable(dumpableName) }
         createAndAddWindow()
         setupPluginDependencies()
         setUpAutoHide()
     }
 
     private fun createAndAddWindow() {
-        initializeStatusBarFragment()
+        initializeStatusBarRootView()
         statusBarWindowController.attach()
     }
 
-    private fun initializeStatusBarFragment() {
+    private fun initializeStatusBarRootView() {
         statusBarInitializer.statusBarViewUpdatedListener =
             object : StatusBarInitializer.OnStatusBarViewUpdatedListener {
                 override fun onStatusBarViewUpdated(
@@ -170,6 +183,10 @@ constructor(
                     phoneStatusBarViewController.value = statusBarViewController
                     phoneStatusBarTransitions.value = statusBarTransitions
 
+                    if (displayId != Display.DEFAULT_DISPLAY) {
+                        return
+                    }
+                    // TODO(b/373310629): shade should be display id aware
                     notificationShadeWindowViewControllerLazy
                         .get()
                         .setStatusBarViewController(statusBarViewController)
@@ -189,6 +206,10 @@ constructor(
     }
 
     private fun setUpAutoHide() {
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            return
+        }
+        // TODO(b/373309973): per display implementation of auto hide controller
         autoHideController.setStatusBar(
             object : AutoHideUiElement {
                 override fun synchronizeState() {}
@@ -198,13 +219,14 @@ constructor(
                 }
 
                 override fun isVisible(): Boolean {
-                    return statusBarModeRepository.defaultDisplay.isTransientShown.value
+                    return statusBarModeRepository.isTransientShown.value
                 }
 
                 override fun hide() {
-                    statusBarModeRepository.defaultDisplay.clearTransient()
+                    statusBarModeRepository.clearTransient()
                 }
-            })
+            }
+        )
     }
 
     private fun updateBarMode(
@@ -215,11 +237,18 @@ constructor(
         if (!demoModeController.isInDemoMode) {
             barTransitions.transitionTo(barMode.toTransitionModeInt(), animate)
         }
-        autoHideController.touchAutoHide()
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            // TODO(b/373309973): per display implementation of auto hide controller
+            autoHideController.touchAutoHide()
+        }
     }
 
     private fun updateBubblesVisibility(statusBarVisible: Boolean) {
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            return
+        }
         bubblesOptional.ifPresent { bubbles: Bubbles ->
+            // TODO(b/373311537): per display implementation of Bubbles
             bubbles.onStatusBarVisibilityChanged(statusBarVisible)
         }
     }
@@ -238,11 +267,23 @@ constructor(
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println(statusBarWindowStateRepositoryStore.defaultDisplay.windowState.value)
+        pw.println(statusBarWindowStateRepository.windowState.value)
         CentralSurfaces.dumpBarTransitions(
             pw,
             "PhoneStatusBarTransitions",
             phoneStatusBarTransitions.value,
         )
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            displayId: Int,
+            displayScope: CoroutineScope,
+            statusBarWindowStateRepository: StatusBarWindowStatePerDisplayRepository,
+            statusBarModeRepository: StatusBarModePerDisplayRepository,
+            statusBarInitializer: StatusBarInitializer,
+            statusBarWindowController: StatusBarWindowController,
+        ): StatusBarOrchestrator
     }
 }

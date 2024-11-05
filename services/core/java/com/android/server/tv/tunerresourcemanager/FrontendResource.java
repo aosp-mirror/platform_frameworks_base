@@ -42,7 +42,7 @@ public final class FrontendResource extends TunerResourceBasic {
     /**
      * An array to save all the FE handles under the same exclisive group.
      */
-    private Set<Integer> mExclusiveGroupMemberHandles = new HashSet<>();
+    private Set<Long> mExclusiveGroupMemberHandles = new HashSet<>();
 
     private FrontendResource(Builder builder) {
         super(builder);
@@ -58,7 +58,7 @@ public final class FrontendResource extends TunerResourceBasic {
         return mExclusiveGroupId;
     }
 
-    public Set<Integer> getExclusiveGroupMemberFeHandles() {
+    public Set<Long> getExclusiveGroupMemberFeHandles() {
         return mExclusiveGroupMemberHandles;
     }
 
@@ -67,7 +67,7 @@ public final class FrontendResource extends TunerResourceBasic {
      *
      * @param handle the handle to be added.
      */
-    public void addExclusiveGroupMemberFeHandle(int handle) {
+    public void addExclusiveGroupMemberFeHandle(long handle) {
         mExclusiveGroupMemberHandles.add(handle);
     }
 
@@ -76,7 +76,7 @@ public final class FrontendResource extends TunerResourceBasic {
      *
      * @param handles the handle collection to be added.
      */
-    public void addExclusiveGroupMemberFeHandles(Collection<Integer> handles) {
+    public void addExclusiveGroupMemberFeHandles(Collection<Long> handles) {
         mExclusiveGroupMemberHandles.addAll(handles);
     }
 
@@ -85,7 +85,7 @@ public final class FrontendResource extends TunerResourceBasic {
      *
      * @param id the id to be removed.
      */
-    public void removeExclusiveGroupMemberFeId(int handle) {
+    public void removeExclusiveGroupMemberFeId(long handle) {
         mExclusiveGroupMemberHandles.remove(handle);
     }
 
@@ -104,7 +104,7 @@ public final class FrontendResource extends TunerResourceBasic {
         @Type private int mType;
         private int mExclusiveGroupId;
 
-        Builder(int handle) {
+        Builder(long handle) {
             super(handle);
         }
 

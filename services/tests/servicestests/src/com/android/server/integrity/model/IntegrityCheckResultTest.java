@@ -22,8 +22,6 @@ import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
 import android.content.integrity.Rule;
 
-import com.android.internal.util.FrameworkStatsLog;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -40,8 +38,6 @@ public class IntegrityCheckResultTest {
 
         assertThat(allowResult.getEffect()).isEqualTo(IntegrityCheckResult.Effect.ALLOW);
         assertThat(allowResult.getMatchedRules()).isEmpty();
-        assertThat(allowResult.getLoggingResponse())
-                .isEqualTo(FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED);
     }
 
     @Test
@@ -58,9 +54,6 @@ public class IntegrityCheckResultTest {
 
         assertThat(allowResult.getEffect()).isEqualTo(IntegrityCheckResult.Effect.ALLOW);
         assertThat(allowResult.getMatchedRules()).containsExactly(forceAllowRule);
-        assertThat(allowResult.getLoggingResponse())
-                .isEqualTo(
-                        FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED);
     }
 
     @Test
@@ -77,8 +70,6 @@ public class IntegrityCheckResultTest {
 
         assertThat(denyResult.getEffect()).isEqualTo(IntegrityCheckResult.Effect.DENY);
         assertThat(denyResult.getMatchedRules()).containsExactly(failedRule);
-        assertThat(denyResult.getLoggingResponse())
-                .isEqualTo(FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED);
     }
 
     @Test

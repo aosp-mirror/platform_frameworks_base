@@ -19,14 +19,12 @@
 package com.android.settingslib.graph
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceActivity
 import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
@@ -51,6 +49,7 @@ import com.android.settingslib.metadata.PreferenceScreenMetadata
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.android.settingslib.metadata.PreferenceSummaryProvider
 import com.android.settingslib.metadata.PreferenceTitleProvider
+import com.android.settingslib.metadata.RangeValue
 import com.android.settingslib.preference.PreferenceScreenFactory
 import com.android.settingslib.preference.PreferenceScreenProvider
 import java.util.Locale
@@ -59,12 +58,7 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "PreferenceGraphBuilder"
 
-/**
- * Builder of preference graph.
- *
- * Only activity in current application is supported. To create preference graph across
- * applications, use [crawlPreferenceGraph].
- */
+/** Builder of preference graph. */
 class PreferenceGraphBuilder
 private constructor(private val context: Context, private val request: GetPreferenceGraphRequest) {
     private val preferenceScreenFactory by lazy {
@@ -73,18 +67,15 @@ private constructor(private val context: Context, private val request: GetPrefer
     private val builder by lazy { PreferenceGraphProto.newBuilder() }
     private val visitedScreens = mutableSetOf<String>().apply { addAll(request.visitedScreens) }
     private val includeValue = request.includeValue
+    private val includeValueDescriptor = request.includeValueDescriptor
 
     private suspend fun init() {
-        for (activityClass in request.activityClasses) {
-            add(activityClass)
+        for (key in request.screenKeys) {
+            addPreferenceScreenFromRegistry(key)
         }
     }
 
     fun build() = builder.build()
-
-    /** Adds an activity to the graph. */
-    suspend fun <T> add(activityClass: Class<T>) where T : Activity, T : PreferenceScreenProvider =
-        addPreferenceScreenProvider(activityClass)
 
     /**
      * Adds an activity to the graph.
@@ -96,8 +87,10 @@ private constructor(private val context: Context, private val request: GetPrefer
         try {
             val intent = Intent()
             intent.setClassName(context, activityClassName)
-            if (context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) ==
-                null) {
+            if (
+                context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) ==
+                    null
+            ) {
                 Log.e(TAG, "$activityClassName is not activity")
                 return
             }
@@ -118,7 +111,7 @@ private constructor(private val context: Context, private val request: GetPrefer
             return false
         }
         val key = getPreferenceScreenKey { activityClass.newInstance() } ?: return false
-        if (addPreferenceScreenFromRegistry(key, activityClass)) {
+        if (addPreferenceScreenFromRegistry(key)) {
             builder.addRoots(key)
             return true
         }
@@ -140,23 +133,16 @@ private constructor(private val context: Context, private val request: GetPrefer
             null
         }
 
-    private suspend fun addPreferenceScreenFromRegistry(
-        key: String,
-        activityClass: Class<*>,
-    ): Boolean {
+    private suspend fun addPreferenceScreenFromRegistry(key: String): Boolean {
         val metadata = PreferenceScreenRegistry[key] ?: return false
-        if (!metadata.hasCompleteHierarchy()) return false
-        return addPreferenceScreenMetadata(metadata, activityClass)
+        return addPreferenceScreenMetadata(metadata)
     }
 
-    private suspend fun addPreferenceScreenMetadata(
-        metadata: PreferenceScreenMetadata,
-        activityClass: Class<*>,
-    ): Boolean =
-        addPreferenceScreen(metadata.key, activityClass) {
+    private suspend fun addPreferenceScreenMetadata(metadata: PreferenceScreenMetadata): Boolean =
+        addPreferenceScreen(metadata.key) {
             preferenceScreenProto {
-                completeHierarchy = true
-                root = metadata.getPreferenceHierarchy(context).toProto(activityClass, true)
+                completeHierarchy = metadata.hasCompleteHierarchy()
+                root = metadata.getPreferenceHierarchy(context).toProto(metadata, true)
             }
         }
 
@@ -164,7 +150,7 @@ private constructor(private val context: Context, private val request: GetPrefer
         Log.d(TAG, "add $activityClass")
         createPreferenceScreen { activityClass.newInstance() }
             ?.let {
-                addPreferenceScreen(Intent(context, activityClass), activityClass, it)
+                addPreferenceScreen(Intent(context, activityClass), it)
                 builder.addRoots(it.key)
             }
     }
@@ -191,104 +177,89 @@ private constructor(private val context: Context, private val request: GetPrefer
             return@withContext null
         }
 
-    private suspend fun addPreferenceScreen(
-        intent: Intent,
-        activityClass: Class<*>,
-        preferenceScreen: PreferenceScreen?,
-    ) {
+    private suspend fun addPreferenceScreen(intent: Intent, preferenceScreen: PreferenceScreen?) {
         val key = preferenceScreen?.key
         if (key.isNullOrEmpty()) {
-            Log.e(TAG, "$activityClass \"$preferenceScreen\" has no key")
+            Log.e(TAG, "\"$preferenceScreen\" has no key")
             return
         }
-        @Suppress("CheckReturnValue")
-        addPreferenceScreen(key, activityClass) { preferenceScreen.toProto(intent, activityClass) }
+        @Suppress("CheckReturnValue") addPreferenceScreen(key) { preferenceScreen.toProto(intent) }
     }
 
     private suspend fun addPreferenceScreen(
         key: String,
-        activityClass: Class<*>,
         preferenceScreenProvider: suspend () -> PreferenceScreenProto,
-    ): Boolean {
-        if (!visitedScreens.add(key)) {
-            Log.w(TAG, "$activityClass $key visited")
-            return false
+    ): Boolean =
+        if (visitedScreens.add(key)) {
+            builder.putScreens(key, preferenceScreenProvider())
+            true
+        } else {
+            Log.w(TAG, "$key visited")
+            false
         }
-        val activityClassName = activityClass.name
-        val associatedKey = builder.getActivityScreensOrDefault(activityClassName, null)
-        if (associatedKey == null) {
-            builder.putActivityScreens(activityClassName, key)
-        } else if (associatedKey != key) {
-            Log.w(TAG, "Dup $activityClassName association, old: $associatedKey, new: $key")
+
+    private suspend fun PreferenceScreen.toProto(intent: Intent?): PreferenceScreenProto =
+        preferenceScreenProto {
+            intent?.let { this.intent = it.toProto() }
+            root = (this@toProto as PreferenceGroup).toProto()
         }
-        builder.putScreens(key, preferenceScreenProvider())
-        return true
+
+    private suspend fun PreferenceGroup.toProto(): PreferenceGroupProto = preferenceGroupProto {
+        preference = (this@toProto as Preference).toProto()
+        for (index in 0 until preferenceCount) {
+            val child = getPreference(index)
+            addPreferences(
+                preferenceOrGroupProto {
+                    if (child is PreferenceGroup) {
+                        group = child.toProto()
+                    } else {
+                        preference = child.toProto()
+                    }
+                }
+            )
+        }
     }
 
-    private suspend fun PreferenceScreen.toProto(
-        intent: Intent,
-        activityClass: Class<*>,
-    ): PreferenceScreenProto = preferenceScreenProto {
-        this.intent = intent.toProto()
-        root = (this@toProto as PreferenceGroup).toProto(activityClass)
+    private suspend fun Preference.toProto(): PreferenceProto = preferenceProto {
+        this@toProto.key?.let { key = it }
+        this@toProto.title?.let { title = textProto { string = it.toString() } }
+        this@toProto.summary?.let { summary = textProto { string = it.toString() } }
+        val preferenceExtras = peekExtras()
+        preferenceExtras?.let { extras = it.toProto() }
+        enabled = isEnabled
+        available = isVisible
+        persistent = isPersistent
+        if (includeValue && isPersistent && this@toProto is TwoStatePreference) {
+            value = preferenceValueProto { booleanValue = this@toProto.isChecked }
+        }
+        this@toProto.fragment.toActionTarget(preferenceExtras)?.let {
+            actionTarget = it
+            return@preferenceProto
+        }
+        this@toProto.intent?.let { actionTarget = it.toActionTarget() }
     }
-
-    private suspend fun PreferenceGroup.toProto(activityClass: Class<*>): PreferenceGroupProto =
-        preferenceGroupProto {
-            preference = (this@toProto as Preference).toProto(activityClass)
-            for (index in 0 until preferenceCount) {
-                val child = getPreference(index)
-                addPreferences(
-                    preferenceOrGroupProto {
-                        if (child is PreferenceGroup) {
-                            group = child.toProto(activityClass)
-                        } else {
-                            preference = child.toProto(activityClass)
-                        }
-                    })
-            }
-        }
-
-    private suspend fun Preference.toProto(activityClass: Class<*>): PreferenceProto =
-        preferenceProto {
-            this@toProto.key?.let { key = it }
-            this@toProto.title?.let { title = textProto { string = it.toString() } }
-            this@toProto.summary?.let { summary = textProto { string = it.toString() } }
-            val preferenceExtras = peekExtras()
-            preferenceExtras?.let { extras = it.toProto() }
-            enabled = isEnabled
-            available = isVisible
-            persistent = isPersistent
-            if (includeValue && isPersistent && this@toProto is TwoStatePreference) {
-                value = preferenceValueProto { booleanValue = this@toProto.isChecked }
-            }
-            this@toProto.fragment.toActionTarget(activityClass, preferenceExtras)?.let {
-                actionTarget = it
-                return@preferenceProto
-            }
-            this@toProto.intent?.let { actionTarget = it.toActionTarget() }
-        }
 
     private suspend fun PreferenceHierarchy.toProto(
-        activityClass: Class<*>,
+        screenMetadata: PreferenceScreenMetadata,
         isRoot: Boolean,
     ): PreferenceGroupProto = preferenceGroupProto {
-        preference = toProto(this@toProto, activityClass, isRoot)
+        preference = toProto(screenMetadata, this@toProto, isRoot)
         forEachAsync {
             addPreferences(
                 preferenceOrGroupProto {
                     if (it is PreferenceHierarchy) {
-                        group = it.toProto(activityClass, false)
+                        group = it.toProto(screenMetadata, false)
                     } else {
-                        preference = toProto(it, activityClass, false)
+                        preference = toProto(screenMetadata, it, false)
                     }
-                })
+                }
+            )
         }
     }
 
     private suspend fun toProto(
+        screenMetadata: PreferenceScreenMetadata,
         node: PreferenceHierarchyNode,
-        activityClass: Class<*>,
         isRoot: Boolean,
     ) = preferenceProto {
         val metadata = node.metadata
@@ -301,7 +272,8 @@ private constructor(private val context: Context, private val request: GetPrefer
                 summary = textProto { string = it.toString() }
             }
         }
-        if (metadata.icon != 0) icon = metadata.icon
+        val metadataIcon = metadata.getPreferenceIcon(context)
+        if (metadataIcon != 0) icon = metadataIcon
         if (metadata.keywords != 0) keywords = metadata.keywords
         val preferenceExtras = metadata.extras(context)
         preferenceExtras?.let { extras = it.toProto() }
@@ -314,24 +286,44 @@ private constructor(private val context: Context, private val request: GetPrefer
             restricted = metadata.isRestricted(context)
         }
         persistent = metadata.isPersistent(context)
-        if (includeValue &&
-            persistent &&
-            metadata is BooleanValue &&
-            metadata is PersistentPreference<*>) {
-            metadata.storage(context).getValue(metadata.key, Boolean::class.javaObjectType)?.let {
-                value = preferenceValueProto { booleanValue = it }
+        if (persistent) {
+            if (includeValue && metadata is PersistentPreference<*>) {
+                value = preferenceValueProto {
+                    when (metadata) {
+                        is BooleanValue ->
+                            metadata
+                                .storage(context)
+                                .getValue(metadata.key, Boolean::class.javaObjectType)
+                                ?.let { booleanValue = it }
+                        is RangeValue -> {
+                            metadata
+                                .storage(context)
+                                .getValue(metadata.key, Int::class.javaObjectType)
+                                ?.let { intValue = it }
+                        }
+                        else -> {}
+                    }
+                }
             }
-        }
-        if (metadata is PreferenceScreenMetadata) {
-            if (metadata.hasCompleteHierarchy()) {
-                @Suppress("CheckReturnValue") addPreferenceScreenMetadata(metadata, activityClass)
-            } else {
-                metadata.fragmentClass()?.toActionTarget(activityClass, preferenceExtras)?.let {
-                    actionTarget = it
+            if (includeValueDescriptor) {
+                valueDescriptor = preferenceValueDescriptorProto {
+                    when (metadata) {
+                        is BooleanValue -> booleanType = true
+                        is RangeValue -> rangeValue = rangeValueProto {
+                                min = metadata.getMinValue(context)
+                                max = metadata.getMaxValue(context)
+                                step = metadata.getIncrementStep(context)
+                            }
+                        else -> {}
+                    }
                 }
             }
         }
+        if (metadata is PreferenceScreenMetadata) {
+            @Suppress("CheckReturnValue") addPreferenceScreenMetadata(metadata)
+        }
         metadata.intent(context)?.let { actionTarget = it.toActionTarget() }
+        screenMetadata.getLaunchIntent(context, metadata)?.let { launchIntent = it.toProto() }
     }
 
     private fun PreferenceMetadata.getTitleTextProto(isRoot: Boolean): TextProto? {
@@ -355,16 +347,13 @@ private constructor(private val context: Context, private val request: GetPrefer
         }
     }
 
-    private suspend fun String?.toActionTarget(
-        activityClass: Class<*>,
-        extras: Bundle?,
-    ): ActionTarget? {
+    private suspend fun String?.toActionTarget(extras: Bundle?): ActionTarget? {
         if (this.isNullOrEmpty()) return null
         try {
             val fragmentClass = context.classLoader.loadClass(this)
             if (Fragment::class.java.isAssignableFrom(fragmentClass)) {
                 @Suppress("UNCHECKED_CAST")
-                return (fragmentClass as Class<out Fragment>).toActionTarget(activityClass, extras)
+                return (fragmentClass as Class<out Fragment>).toActionTarget(extras)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Cannot loadClass $this", e)
@@ -372,16 +361,12 @@ private constructor(private val context: Context, private val request: GetPrefer
         return null
     }
 
-    private suspend fun Class<out Fragment>.toActionTarget(
-        activityClass: Class<*>,
-        extras: Bundle?,
-    ): ActionTarget {
-        val startIntent = Intent(context, activityClass)
-        startIntent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, name)
-        extras?.let { startIntent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS, it) }
-        if (!PreferenceScreenProvider::class.java.isAssignableFrom(this) &&
-            !PreferenceScreenBindingKeyProvider::class.java.isAssignableFrom(this)) {
-            return actionTargetProto { intent = startIntent.toProto() }
+    private suspend fun Class<out Fragment>.toActionTarget(extras: Bundle?): ActionTarget? {
+        if (
+            !PreferenceScreenProvider::class.java.isAssignableFrom(this) &&
+                !PreferenceScreenBindingKeyProvider::class.java.isAssignableFrom(this)
+        ) {
+            return null
         }
         val fragment =
             withContext(Dispatchers.Main) {
@@ -394,18 +379,24 @@ private constructor(private val context: Context, private val request: GetPrefer
             }
         if (fragment is PreferenceScreenBindingKeyProvider) {
             val screenKey = fragment.getPreferenceScreenBindingKey(context)
-            if (screenKey != null && addPreferenceScreenFromRegistry(screenKey, activityClass)) {
+            if (screenKey != null && addPreferenceScreenFromRegistry(screenKey)) {
                 return actionTargetProto { key = screenKey }
             }
         }
         if (fragment is PreferenceScreenProvider) {
-            val screen = fragment.createPreferenceScreen(preferenceScreenFactory)
-            if (screen != null) {
-                addPreferenceScreen(startIntent, activityClass, screen)
-                return actionTargetProto { key = screen.key }
+            try {
+                val screen = fragment.createPreferenceScreen(preferenceScreenFactory)
+                val screenKey = screen?.key
+                if (!screenKey.isNullOrEmpty()) {
+                    @Suppress("CheckReturnValue")
+                    addPreferenceScreen(screenKey) { screen.toProto(null) }
+                    return actionTargetProto { key = screenKey }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Fail to createPreferenceScreen for $fragment", e)
             }
         }
-        return actionTargetProto { intent = startIntent.toProto() }
+        return null
     }
 
     private suspend fun Intent.toActionTarget(): ActionTarget {

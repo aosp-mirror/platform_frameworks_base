@@ -289,7 +289,8 @@
     <!-- Screen recording permission option for recording just a single app [CHAR LIMIT=50] -->
     <string name="screenrecord_permission_dialog_option_text_single_app">Record one app</string>
     <!-- Screen recording permission option for recording the whole screen [CHAR LIMIT=50] -->
-    <string name="screenrecord_permission_dialog_option_text_entire_screen">Record entire screen</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" >Record entire screen</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display">Record entire screen: %s</string>
     <!-- Message reminding the user that sensitive information may be captured during a full screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
     <string name="screenrecord_permission_dialog_warning_entire_screen">When you’re recording your entire screen, anything shown on your screen is recorded. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- Message reminding the user that sensitive information may be captured during a single app screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
@@ -342,8 +343,12 @@
 
     <!-- Content description for the status bar chip shown to the user when they're sharing their screen to another app on the device [CHAR LIMIT=NONE] -->
     <string name="share_to_app_chip_accessibility_label">Sharing screen</string>
+    <!-- Content description for the status bar chip shown to the user when they're sharing their screen or audio to another app on the device [CHAR LIMIT=NONE] -->
+    <string name="share_to_app_chip_accessibility_label_generic">Sharing content</string>
     <!-- Title for a dialog shown to the user that will let them stop sharing their screen to another app on the device [CHAR LIMIT=50] -->
     <string name="share_to_app_stop_dialog_title">Stop sharing screen?</string>
+    <!-- Title for a dialog shown to the user that will let them stop sharing their screen or audio to another app on the device [CHAR LIMIT=50] -->
+    <string name="share_to_app_stop_dialog_title_generic">Stop sharing?</string>
     <!-- Text telling a user that they're currently sharing their entire screen to [host_app_name] (i.e. [host_app_name] can currently see all screen content) [CHAR LIMIT=150] -->
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app">You\'re currently sharing your entire screen with <xliff:g id="host_app_name" example="Screen Recorder App">%1$s</xliff:g></string>
     <!-- Text telling a user that they're currently sharing their entire screen to an app (but we don't know what app) [CHAR LIMIT=150] -->
@@ -352,6 +357,8 @@
     <string name="share_to_app_stop_dialog_message_single_app_specific">You\'re currently sharing <xliff:g id="app_being_shared_name" example="Photos App">%1$s</xliff:g></string>
     <!-- Text telling a user that they're currently sharing their screen [CHAR LIMIT=150] -->
     <string name="share_to_app_stop_dialog_message_single_app_generic">You\'re currently sharing an app</string>
+    <!-- Text telling a user that they're currently sharing something to an app [CHAR LIMIT=100] -->
+    <string name="share_to_app_stop_dialog_message_generic">You\'re currently sharing with an app</string>
     <!-- Button to stop screen sharing [CHAR LIMIT=35] -->
     <string name="share_to_app_stop_dialog_button">Stop sharing</string>
 
@@ -765,6 +772,14 @@
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing audio</string>
     <!-- QuickSettings: Bluetooth dialog audio sharing button text accessibility label. Used as part of the string "Double tap to enter audio sharing settings". [CHAR LIMIT=50]-->
     <string name="quick_settings_bluetooth_audio_sharing_button_accessibility">enter audio sharing settings</string>
+    <!-- QuickSettings: Bluetooth audio sharing dialog message. [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_message">This device\'s music and videos will play on both pairs of headphones</string>
+    <!-- QuickSettings: Bluetooth audio sharing dialog title. [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_title">Share your audio</string>
+    <!-- QuickSettings: Bluetooth audio sharing dialog subtitle. [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_subtitle"><xliff:g id="available_device_name" example="device 1">%1$s</xliff:g> and <xliff:g id="active_device_name" example="device 2">%2$s</xliff:g></string>
+    <!-- QuickSettings: Bluetooth audio sharing dialog button text. [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_audio_sharing_dialog_switch_to_button">Switch to <xliff:g id="available_device_name" example="device 1">%1$s</xliff:g></string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
@@ -1303,6 +1318,10 @@
     <string name="communal_widget_picker_description">Anyone can view widgets on your lock screen, even if your tablet\'s locked.</string>
     <!-- Label for accessibility action to unselect a widget in edit mode. [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_label_unselect_widget">unselect widget</string>
+    <!-- Label for accessibility action to shrink a widget in edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_shrink_widget">Decrease height</string>
+    <!-- Label for accessibility action to expand a widget in edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_expand_widget">Increase height</string>
     <!-- Title shown above information regarding lock screen widgets. [CHAR LIMIT=50] -->
     <string name="communal_widgets_disclaimer_title">Lock screen widgets</string>
     <!-- Information about lock screen widgets presented to the user. [CHAR LIMIT=NONE] -->
@@ -1454,6 +1473,12 @@
 
     <!-- The text for the notification history link. [CHAR LIMIT=40] -->
     <string name="manage_notifications_history_text">History</string>
+
+    <!-- The accessibility description for the notification settings button in the notification shade. -->
+    <string name="notification_settings_button_description">Notification settings</string>
+
+    <!-- The accessibility description for the notification history button in the notification shade. -->
+    <string name="notification_history_button_description">Notification history</string>
 
     <!-- Section title for notifications that have recently appeared. [CHAR LIMIT=40] -->
     <string name="notification_section_header_incoming">New</string>
@@ -1746,6 +1771,11 @@
     <!-- A message shown when the media volume changing is disabled because of the don't disturb mode [CHAR_LIMIT=50]-->
     <string name="stream_media_unavailable">Unavailable because Do Not Disturb is on</string>
 
+    <!-- A message shown when a specific volume (e.g. Alarms, Media, etc) is disabled because an active mode is muting that audio stream altogether [CHAR_LIMIT=50]-->
+    <string name="stream_unavailable_by_modes">Unavailable because <xliff:g id="mode" example="Bedtime">%s</xliff:g> is on</string>
+    <!-- A message shown when a specific volume (e.g. Alarms, Media, etc) is disabled but we don't know which mode (or anything else) is responsible. [CHAR_LIMIT=50]-->
+    <string name="stream_unavailable_by_unknown">Unavailable</string>
+
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on vibrate. [CHAR_LIMIT=NONE] -->
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on silent (muted). [CHAR_LIMIT=NONE] -->
 
@@ -1767,6 +1797,7 @@
     <string name="volume_panel_spatial_audio_tracking">Head Tracking</string>
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
+    <string name="volume_ringer_mode">ringer mode</string>
 
     <!-- Hint for accessibility. For example: double tap to mute [CHAR_LIMIT=NONE] -->
     <string name="volume_ringer_hint_mute">mute</string>
@@ -3703,6 +3734,10 @@
     <!-- Title at the top of the keyboard shortcut helper UI. The helper is a component
          that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_title">Keyboard shortcuts</string>
+    <!-- Title at the top of the keyboard shortcut helper UI when in customize mode. The helper
+         is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_mode_title">Customize keyboard shortcuts</string>
     <!-- Placeholder text shown in the search box of the keyboard shortcut helper, when the user
          hasn't typed in anything in the search box yet. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
@@ -3714,6 +3749,14 @@
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_collapse_icon">Collapse icon</string>
+    <!-- Description text of the button that allows user to customize shortcuts in keyboard
+         shortcut helper The helper is a  component that shows the  user which keyboard shortcuts
+         they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_button_text">Customize</string>
+    <!-- Description text of the button that allows user to exit shortcut customization mode in
+         keyboard shortcut helper The helper is a  component that shows the  user which keyboard
+         shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_done_button_text">Done</string>
     <!-- Content description of the icon that allows to expand a keyboard shortcut helper category
          panel. The helper is a  component that shows the  user which keyboard shortcuts they can
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
@@ -3732,6 +3775,10 @@
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_drag_handle">Drag handle</string>
+    <!-- Label on the keyboard settings button in keyboard shortcut helper, that allows user to
+         open keyboard settings while in shortcut helper. The helper is a  component that shows the
+         user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_keyboard_settings_buttons_label">Keyboard Settings</string>
 
 
     <!-- Keyboard touchpad tutorial scheduler-->
@@ -3881,5 +3928,13 @@
     <!-- Label for category in QS Edit mode list of tiles, for tiles with an unknown category. [CHAR LIMIT=NONE] -->
     <string name="qs_edit_mode_category_unknown">
         Unknown
+    </string>
+    <!-- Title for the Reset Tiles dialog in QS Edit mode. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_reset_dialog_title">
+        Reset all tiles?
+    </string>
+    <!-- Content of the Reset Tiles dialog in QS Edit mode. [CHAR LIMIT=NONE] -->
+    <string name="qs_edit_mode_reset_dialog_content">
+        All Quick Settings tiles will reset to the device’s original settings
     </string>
 </resources>

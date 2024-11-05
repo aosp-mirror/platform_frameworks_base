@@ -50,6 +50,8 @@ import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
@@ -58,6 +60,7 @@ import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore;
 import com.android.systemui.statusbar.disableflags.DisableStateTracker;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
@@ -80,6 +83,8 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import kotlin.Unit;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -107,6 +112,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             R.id.keyguard_hun_animator_end_tag,
             R.id.keyguard_hun_animator_start_tag);
 
+    private final CoroutineDispatcher mCoroutineDispatcher;
     private final CarrierTextController mCarrierTextController;
     private final ConfigurationController mConfigurationController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
@@ -132,6 +138,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final Object mLock = new Object();
     private final KeyguardLogger mLogger;
     private final CommunalSceneInteractor mCommunalSceneInteractor;
+    private final GlanceableHubToLockscreenTransitionViewModel mHubToLockscreenTransitionViewModel;
+    private final LockscreenToGlanceableHubTransitionViewModel mLockscreenToHubTransitionViewModel;
 
     private View mSystemIconsContainer;
     private final StatusOverlayHoverListenerFactory mStatusOverlayHoverListenerFactory;
@@ -248,9 +256,20 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private boolean mCommunalShowing;
 
     private final Consumer<Boolean> mCommunalConsumer = (communalShowing) -> {
-        mCommunalShowing = communalShowing;
-        updateViewState();
+        updateCommunalShowing(communalShowing);
     };
+
+    @VisibleForTesting
+    void updateCommunalShowing(boolean communalShowing) {
+        mCommunalShowing = communalShowing;
+
+        // When communal is hidden (either by transition or state change), set alpha to fully
+        // visible.
+        if (!mCommunalShowing) {
+            setAlpha(-1f);
+        }
+        updateViewState();
+    }
 
     private final DisableStateTracker mDisableStateTracker;
 
@@ -276,6 +295,15 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private boolean mShowingKeyguardHeadsUp;
     private StatusBarSystemEventDefaultAnimator mSystemEventAnimator;
     private float mSystemEventAnimatorAlpha = 1;
+    private final Consumer<Float> mToGlanceableHubStatusBarAlphaConsumer = (alpha) ->
+            updateCommunalAlphaTransition(alpha);
+
+    private final Consumer<Float> mFromGlanceableHubStatusBarAlphaConsumer = (alpha) ->
+            updateCommunalAlphaTransition(alpha);
+
+    @VisibleForTesting  void updateCommunalAlphaTransition(float alpha) {
+        setAlpha(!mCommunalShowing || alpha == 0 ? -1 : alpha);
+    }
 
     /**
      * The alpha value to be set on the View. If -1, this value is to be ignored.
@@ -284,6 +312,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     @Inject
     public KeyguardStatusBarViewController(
+            @Main CoroutineDispatcher dispatcher,
             KeyguardStatusBarView view,
             CarrierTextController carrierTextController,
             ConfigurationController configurationController,
@@ -300,7 +329,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             KeyguardStatusBarViewModel keyguardStatusBarViewModel,
             BiometricUnlockController biometricUnlockController,
             SysuiStatusBarStateController statusBarStateController,
-            StatusBarContentInsetsProvider statusBarContentInsetsProvider,
+            StatusBarContentInsetsProviderStore statusBarContentInsetsProviderStore,
             UserManager userManager,
             StatusBarUserChipViewModel userChipViewModel,
             SecureSettings secureSettings,
@@ -309,9 +338,14 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             @Background Executor backgroundExecutor,
             KeyguardLogger logger,
             StatusOverlayHoverListenerFactory statusOverlayHoverListenerFactory,
-            CommunalSceneInteractor communalSceneInteractor
+            CommunalSceneInteractor communalSceneInteractor,
+            GlanceableHubToLockscreenTransitionViewModel
+                    glanceableHubToLockscreenTransitionViewModel,
+            LockscreenToGlanceableHubTransitionViewModel
+                    lockscreenToGlanceableHubTransitionViewModel
     ) {
         super(view);
+        mCoroutineDispatcher = dispatcher;
         mCarrierTextController = carrierTextController;
         mConfigurationController = configurationController;
         mAnimationScheduler = animationScheduler;
@@ -327,7 +361,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mKeyguardStatusBarViewModel = keyguardStatusBarViewModel;
         mBiometricUnlockController = biometricUnlockController;
         mStatusBarStateController = statusBarStateController;
-        mInsetsProvider = statusBarContentInsetsProvider;
+        mInsetsProvider = statusBarContentInsetsProviderStore.getDefaultDisplay();
         mUserManager = userManager;
         mStatusBarUserChipViewModel = userChipViewModel;
         mSecureSettings = secureSettings;
@@ -336,6 +370,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mBackgroundExecutor = backgroundExecutor;
         mLogger = logger;
         mCommunalSceneInteractor = communalSceneInteractor;
+        mHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel;
+        mLockscreenToHubTransitionViewModel = lockscreenToGlanceableHubTransitionViewModel;
 
         mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
         mKeyguardStateController.addCallback(
@@ -417,7 +453,12 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 UserHandle.USER_ALL);
         updateUserSwitcher();
         onThemeChanged();
-        collectFlow(mView, mCommunalSceneInteractor.isCommunalVisible(), mCommunalConsumer);
+        collectFlow(mView, mCommunalSceneInteractor.isCommunalVisible(), mCommunalConsumer,
+                mCoroutineDispatcher);
+        collectFlow(mView, mLockscreenToHubTransitionViewModel.getStatusBarAlpha(),
+                mToGlanceableHubStatusBarAlphaConsumer, mCoroutineDispatcher);
+        collectFlow(mView, mHubToLockscreenTransitionViewModel.getStatusBarAlpha(),
+                mFromGlanceableHubStatusBarAlphaConsumer, mCoroutineDispatcher);
     }
 
     @Override
@@ -572,7 +613,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                         && !mDozing
                         && !hideForBypass
                         && !mDisableStateTracker.isDisabled()
-                        && !mCommunalShowing
+                        && (!mCommunalShowing || mExplicitAlpha != -1)
                         ? View.VISIBLE : View.INVISIBLE;
 
         updateViewState(newAlpha, newVisibility);

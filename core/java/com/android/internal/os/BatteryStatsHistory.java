@@ -83,7 +83,7 @@ public class BatteryStatsHistory {
     private static final String TAG = "BatteryStatsHistory";
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    private static final int VERSION = 210;
+    private static final int VERSION = 211;
 
     private static final String HISTORY_DIR = "battery-history";
     private static final String FILE_SUFFIX = ".bh";
@@ -210,6 +210,8 @@ public class BatteryStatsHistory {
     private final MonotonicClock mMonotonicClock;
     // Monotonic time when we started writing to the history buffer
     private long mHistoryBufferStartTime;
+    // Monotonically increasing size of written history
+    private long mMonotonicHistorySize;
     private final ArraySet<PowerStats.Descriptor> mWrittenPowerStatsDescriptors = new ArraySet<>();
     private byte mLastHistoryStepLevel = 0;
     private boolean mMutable = true;
@@ -909,6 +911,8 @@ public class BatteryStatsHistory {
                 }
                 // skip monotonic time field.
                 p.readLong();
+                // skip monotonic size field
+                p.readLong();
 
                 final int bufSize = p.readInt();
                 final int curPos = p.dataPosition();
@@ -964,6 +968,8 @@ public class BatteryStatsHistory {
         }
         // skip monotonic time field.
         out.readLong();
+        // skip monotonic size field
+        out.readLong();
         return true;
     }
 
@@ -987,6 +993,7 @@ public class BatteryStatsHistory {
         p.setDataPosition(0);
         p.readInt();        // Skip the version field
         long monotonicTime = p.readLong();
+        p.readLong();       // Skip monotonic size field
         p.setDataPosition(pos);
         return monotonicTime;
     }
@@ -1763,6 +1770,10 @@ public class BatteryStatsHistory {
 
     @GuardedBy("this")
     private void writeHistoryItem(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
+        if (cur.eventCode != HistoryItem.EVENT_NONE && cur.eventTag.string == null) {
+            Slog.wtfStack(TAG, "Event " + Integer.toHexString(cur.eventCode) + " without a name");
+        }
+
         if (mTracer != null && mTracer.tracingEnabled()) {
             recordTraceEvents(cur.eventCode, cur.eventTag);
             recordTraceCounters(mTraceLastState, cur.states, STATE1_TRACE_MASK,
@@ -1819,6 +1830,7 @@ public class BatteryStatsHistory {
             // as long as no bit has changed both between now and the last entry, as
             // well as the last entry and the one before it (so we capture any toggles).
             if (DEBUG) Slog.i(TAG, "ADD: rewinding back to " + mHistoryBufferLastPos);
+            mMonotonicHistorySize -= (mHistoryBuffer.dataSize() - mHistoryBufferLastPos);
             mHistoryBuffer.setDataSize(mHistoryBufferLastPos);
             mHistoryBuffer.setDataPosition(mHistoryBufferLastPos);
             mHistoryBufferLastPos = -1;
@@ -1934,6 +1946,7 @@ public class BatteryStatsHistory {
         }
         mHistoryLastWritten.tagsFirstOccurrence = hasTags;
         writeHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
+        mMonotonicHistorySize += (mHistoryBuffer.dataSize() - mHistoryBufferLastPos);
         cur.wakelockTag = null;
         cur.wakeReasonTag = null;
         cur.eventCode = HistoryItem.EVENT_NONE;
@@ -2257,6 +2270,7 @@ public class BatteryStatsHistory {
     private int writeHistoryTag(HistoryTag tag) {
         if (tag.string == null) {
             Slog.wtfStack(TAG, "writeHistoryTag called with null name");
+            tag.string = "";
         }
 
         final int stringLength = tag.string.length();
@@ -2344,6 +2358,8 @@ public class BatteryStatsHistory {
             }
 
             mHistoryBufferStartTime = in.readLong();
+            mMonotonicHistorySize = in.readLong();
+
             mHistoryBuffer.setDataSize(0);
             mHistoryBuffer.setDataPosition(0);
 
@@ -2370,6 +2386,7 @@ public class BatteryStatsHistory {
     private void writeHistoryBuffer(Parcel out) {
         out.writeInt(BatteryStatsHistory.VERSION);
         out.writeLong(mHistoryBufferStartTime);
+        out.writeLong(mMonotonicHistorySize);
         out.writeInt(mHistoryBuffer.dataSize());
         if (DEBUG) {
             Slog.i(TAG, "***************** WRITING HISTORY: "
@@ -2454,6 +2471,14 @@ public class BatteryStatsHistory {
             mHistoryTags.put(entry.getValue() & ~BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG,
                     entry.getKey());
         }
+    }
+
+    /**
+     * Returns the monotonically increasing size of written history, including the buffers
+     * that have already been discarded.
+     */
+    public long getMonotonicHistorySize() {
+        return mMonotonicHistorySize;
     }
 
     /**

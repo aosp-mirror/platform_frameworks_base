@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
-import android.content.testableContext
+import android.content.applicationContext
 import com.android.settingslib.notification.modes.zenIconLoader
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 
 val Kosmos.zenModeInteractor by Fixture {
     ZenModeInteractor(
-        context = testableContext,
+        context = applicationContext,
         zenModeRepository = zenModeRepository,
         notificationSettingsRepository = notificationSettingsRepository,
         bgDispatcher = testDispatcher,

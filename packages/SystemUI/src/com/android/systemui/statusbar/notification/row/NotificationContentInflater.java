@@ -223,7 +223,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     );
         }
 
-        if (LockscreenOtpRedaction.isEnabled()) {
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
             result.mPublicInflatedSingleLineViewModel =
                     SingleLineViewInflater.inflateRedactedSingleLineViewModel(row.getContext(),
                             isConversation);
@@ -309,7 +309,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 });
                 break;
             case FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE:
-                if (LockscreenOtpRedaction.isEnabled()) {
+                if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
                     row.getPublicLayout()
                             .performWhenContentInactive(VISIBLE_TYPE_SINGLELINE, () -> {
                                 row.getPublicLayout().setSingleLineView(null);
@@ -342,7 +342,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
      * Cancel any pending content view frees from {@link #freeNotificationView} for the provided
      * content views.
      *
-     * @param row top level notification row containing the content views
+     * @param row          top level notification row containing the content views
      * @param contentViews content views to cancel pending frees on
      */
     private void cancelContentViewFrees(
@@ -360,11 +360,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         if ((contentViews & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
             row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED);
         }
-        if (AsyncHybridViewInflation.isEnabled()
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()
                 && (contentViews & FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE) != 0) {
             row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
         }
-        if (LockscreenOtpRedaction.isEnabled()
+        if (AsyncHybridViewInflation.isEnabled()
                 && (contentViews & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
             row.getPrivateLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
         }
@@ -478,6 +478,13 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_HEADS_UP));
         setRemoteViewsInflaterFactory(result.newPublicView,
                 notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_PUBLIC));
+        if (android.app.Flags.notificationsRedesignAppIcons()) {
+            setRemoteViewsInflaterFactory(result.mNewGroupHeaderView,
+                    notifLayoutInflaterFactoryProvider.provide(row, FLAG_GROUP_SUMMARY_HEADER));
+            setRemoteViewsInflaterFactory(result.mNewMinimizedGroupHeaderView,
+                    notifLayoutInflaterFactoryProvider.provide(row,
+                            FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER));
+        }
     }
 
     private static void setRemoteViewsInflaterFactory(RemoteViews remoteViews,
@@ -516,6 +523,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     logger.logAsyncTaskProgress(entry, "contracted view applied");
                     result.inflatedContentView = v;
                 }
+
                 @Override
                 public RemoteViews getRemoteView() {
                     return result.newContentView;
@@ -974,7 +982,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             }
         }
 
-        if (LockscreenOtpRedaction.isEnabled()
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()
                 && (reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE) != 0) {
             HybridNotificationView view = result.mPublicInflatedSingleLineView;
             SingleLineViewModel viewModel = result.mPublicInflatedSingleLineViewModel;
@@ -1254,7 +1262,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         );
             }
 
-            if (LockscreenOtpRedaction.isEnabled()) {
+            if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
                 result.mPublicInflatedSingleLineViewModel =
                         SingleLineViewInflater.inflateRedactedSingleLineViewModel(mContext,
                                 isConversation);
@@ -1406,6 +1414,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     @VisibleForTesting
     abstract static class ApplyCallback {
         public abstract void setResultView(View v);
+
         public abstract RemoteViews getRemoteView();
     }
 

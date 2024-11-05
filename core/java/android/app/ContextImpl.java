@@ -1962,6 +1962,24 @@ class ContextImpl extends Context {
         }
     }
 
+    @Override
+    @NonNull
+    public List<IntentFilter> getRegisteredIntentFilters(@NonNull BroadcastReceiver receiver) {
+        if (mPackageInfo != null) {
+            IIntentReceiver rd = mPackageInfo.findRegisteredReceiverDispatcher(
+                    receiver, getOuterContext());
+            try {
+                final List<IntentFilter> filters = ActivityManager.getService()
+                        .getRegisteredIntentFilters(rd);
+                return filters == null ? new ArrayList<>() : filters;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            throw new RuntimeException("Not supported in system context");
+        }
+    }
+
     private void validateServiceIntent(Intent service) {
         if (service.getComponent() == null && service.getPackage() == null) {
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {

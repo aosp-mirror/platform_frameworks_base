@@ -44,6 +44,7 @@ import java.util.List;
 /**
  * An implementation of {@link IRemoteTransition} that accepts a {@link UIComponent} as the origin
  * and automatically attaches it to the transition leash before the transition starts.
+ * @hide
  */
 public class OriginRemoteTransition extends IRemoteTransition.Stub {
     private static final String TAG = "OriginRemoteTransition";
@@ -328,7 +329,9 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
                 /* baseBounds= */ maxBounds);
     }
 
-    /** An interface that represents an origin transitions. */
+    /** An interface that represents an origin transitions.
+     * @hide
+     */
     public interface TransitionPlayer {
 
         /**

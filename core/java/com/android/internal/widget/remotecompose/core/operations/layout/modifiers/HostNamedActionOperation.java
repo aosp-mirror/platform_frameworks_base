@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -29,9 +29,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Capture a host action information. This can be triggered on eg. a click.
- */
+/** Capture a host action information. This can be triggered on eg. a click. */
 public class HostNamedActionOperation implements ActionOperation {
     private static final int OP_CODE = Operations.HOST_NAMED_ACTION;
 
@@ -56,23 +54,19 @@ public class HostNamedActionOperation implements ActionOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
-    }
+    public void apply(RemoteContext context) {}
 
     @Override
     public String deepToString(String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
+    @Override
+    public void write(WireBuffer buffer) {}
 
     @Override
-    public void write(WireBuffer buffer) {
-
-    }
-
-    @Override
-    public void runAction(RemoteContext context, CoreDocument document,
-                          Component component, float x, float y) {
+    public void runAction(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
         context.runNamedAction(mTextId);
     }
 
@@ -91,5 +85,4 @@ public class HostNamedActionOperation implements ActionOperation {
                 .description("Host Named action. This operation represents a host action")
                 .field(INT, "TEXT_ID", "Named Host Action Text ID");
     }
-
 }

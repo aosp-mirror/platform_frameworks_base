@@ -90,6 +90,9 @@ class WindowToken extends WindowContainer<WindowState> {
     // Is key dispatching paused for this token?
     boolean paused = false;
 
+    /** Whether this container should be removed when it no longer animates. */
+    boolean mIsExiting;
+
     /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
     final boolean mOwnerCanManageAppTokens;
 
@@ -274,6 +277,28 @@ class WindowToken extends WindowContainer<WindowState> {
             mWmService.mWindowPlacerLocked.performSurfacePlacement();
             mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
         }
+    }
+
+    @Override
+    void removeIfPossible() {
+        if (mTransitionController.isPlayingTarget(this)) {
+            // Defer removing this container until the transition is finished. So the removal can
+            // execute after the finish transaction (see Transition#buildFinishTransaction) which
+            // may reparent it to original parent.
+            mIsExiting = true;
+            return;
+        }
+        mIsExiting = false;
+        removeAllWindowsIfPossible();
+        removeImmediately();
+    }
+
+    @Override
+    boolean handleCompleteDeferredRemoval() {
+        if (mIsExiting) {
+            removeIfPossible();
+        }
+        return super.handleCompleteDeferredRemoval();
     }
 
     /**
@@ -724,6 +749,9 @@ class WindowToken extends WindowContainer<WindowState> {
             pw.print(prefix);
             pw.print("fixedRotationConfig=");
             pw.println(mFixedRotationTransformState.mRotatedOverrideConfiguration);
+        }
+        if (mIsExiting) {
+            pw.print(prefix); pw.println("isExiting=true");
         }
     }
 

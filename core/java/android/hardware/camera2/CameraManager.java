@@ -19,6 +19,7 @@ package android.hardware.camera2;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.content.Context.DEVICE_ID_INVALID;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -36,6 +37,7 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
+import android.content.AttributionSource;
 import android.content.AttributionSourceState;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -676,8 +678,8 @@ public final class CameraManager {
         }
         try {
             for (String physicalCameraId : physicalCameraIds) {
-                AttributionSourceState clientAttribution = getClientAttribution();
-                clientAttribution.deviceId = DEVICE_ID_DEFAULT;
+                AttributionSourceState clientAttribution = getClientAttribution(DEVICE_ID_DEFAULT,
+                        /* useContextAttributionSource= */ false);
                 CameraMetadataNative physicalCameraInfo =
                         cameraService.getCameraCharacteristics(
                                 physicalCameraId,
@@ -974,27 +976,58 @@ public final class CameraManager {
     }
 
     /**
-     * Constructs an AttributionSourceState with only the uid, pid, and deviceId fields set
+     * Retrieves the AttributionSourceState to pass to the CameraService.
      *
-     * <p>This method is a temporary stopgap in the transition to using AttributionSource. Currently
-     * AttributionSourceState is only used as a vehicle for passing deviceId, uid, and pid
-     * arguments.</p>
+     * @param deviceIdOverride An override of the AttributionSource's deviceId, if not equal to
+     *   DEVICE_ID_INVALID
+     * @param useContextAttributionSource Whether to return the full attribution source provided by
+     *   the Context.
+     *
+     * @hide
+     */
+    public AttributionSourceState getClientAttribution(int deviceIdOverride,
+            boolean useContextAttributionSource) {
+        AttributionSource contextAttributionSource = mContext.getAttributionSource();
+        if (deviceIdOverride != DEVICE_ID_INVALID) {
+            contextAttributionSource = contextAttributionSource.withDeviceId(deviceIdOverride);
+        }
+        AttributionSourceState contextAttributionSourceState =
+                contextAttributionSource.asState();
+
+        if (Flags.useContextAttributionSource() && useContextAttributionSource) {
+            return contextAttributionSourceState;
+        } else {
+            AttributionSourceState clientAttribution =
+                    new AttributionSourceState();
+            clientAttribution.uid = USE_CALLING_UID;
+            clientAttribution.pid = USE_CALLING_PID;
+            clientAttribution.deviceId = contextAttributionSourceState.deviceId;
+            clientAttribution.packageName = mContext.getOpPackageName();
+            clientAttribution.attributionTag = mContext.getAttributionTag();
+            clientAttribution.next = new AttributionSourceState[0];
+            return clientAttribution;
+        }
+    }
+
+    /**
+     * Retrieves the AttributionSourceState to pass to the CameraService.
+     *
+     * @param useContextAttributionSource Whether to return the full attribution source provided by
+     *   the Context.
+     *
+     * @hide
+     */
+    public AttributionSourceState getClientAttribution(boolean useContextAttributionSource) {
+        return getClientAttribution(DEVICE_ID_INVALID, useContextAttributionSource);
+    }
+
+    /**
+     * Retrieves the AttributionSourceState to pass to the CameraService.
      *
      * @hide
      */
     public AttributionSourceState getClientAttribution() {
-        // TODO: Send the full contextAttribution over aidl, remove USE_CALLING_*
-        AttributionSourceState contextAttribution =
-                mContext.getAttributionSource().asState();
-        AttributionSourceState clientAttribution =
-                new AttributionSourceState();
-        clientAttribution.uid = USE_CALLING_UID;
-        clientAttribution.pid = USE_CALLING_PID;
-        clientAttribution.deviceId = contextAttribution.deviceId;
-        clientAttribution.packageName = mContext.getOpPackageName();
-        clientAttribution.attributionTag = mContext.getAttributionTag();
-        clientAttribution.next = new AttributionSourceState[0];
-        return clientAttribution;
+        return getClientAttribution(DEVICE_ID_INVALID, /* useContextAttributionSource= */ false);
     }
 
     /**
@@ -1049,7 +1082,7 @@ public final class CameraManager {
                 }
 
                 AttributionSourceState clientAttribution =
-                        getClientAttribution();
+                        getClientAttribution(/* useContextAttributionSource= */ true);
                 cameraUser =
                         cameraService.connectDevice(
                                 callbacks,

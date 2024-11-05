@@ -80,7 +80,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
@@ -140,7 +140,7 @@ constructor(
         val clockStr = clock.toString()
         loggers.forEach { it.d({ "New Clock: $str1" }) { str1 = clockStr } }
 
-        clock.initialize(resources, dozeAmount, 0f)
+        clock.initialize(isDarkTheme(), dozeAmount, 0f)
 
         if (!regionSamplingEnabled) {
             updateColors()
@@ -244,30 +244,30 @@ constructor(
     private val regionSamplingEnabled = featureFlags.isEnabled(REGION_SAMPLING)
     private var largeClockOnSecondaryDisplay = false
 
-    private fun updateColors() {
-        if (regionSamplingEnabled) {
-            clock?.let { clock ->
-                smallRegionSampler?.let {
-                    val isRegionDark = it.currentRegionDarkness().isDark
-                    clock.smallClock.events.onRegionDarknessChanged(isRegionDark)
-                }
+    private fun isDarkTheme(): Boolean {
+        val isLightTheme = TypedValue()
+        context.theme.resolveAttribute(android.R.attr.isLightTheme, isLightTheme, true)
+        return isLightTheme.data == 0
+    }
 
-                largeRegionSampler?.let {
-                    val isRegionDark = it.currentRegionDarkness().isDark
-                    clock.largeClock.events.onRegionDarknessChanged(isRegionDark)
-                }
+    private fun updateColors() {
+        val isDarkTheme = isDarkTheme()
+        if (regionSamplingEnabled) {
+            clock?.smallClock?.run {
+                val isDark = smallRegionSampler?.currentRegionDarkness()?.isDark ?: isDarkTheme
+                events.onThemeChanged(theme.copy(isDarkTheme = isDark))
+            }
+            clock?.largeClock?.run {
+                val isDark = largeRegionSampler?.currentRegionDarkness()?.isDark ?: isDarkTheme
+                events.onThemeChanged(theme.copy(isDarkTheme = isDark))
             }
             return
         }
 
-        val isLightTheme = TypedValue()
-        context.theme.resolveAttribute(android.R.attr.isLightTheme, isLightTheme, true)
-        val isRegionDark = isLightTheme.data == 0
-
         clock?.run {
-            Log.i(TAG, "Region isDark: $isRegionDark")
-            smallClock.events.onRegionDarknessChanged(isRegionDark)
-            largeClock.events.onRegionDarknessChanged(isRegionDark)
+            Log.i(TAG, "isThemeDark: $isDarkTheme")
+            smallClock.events.onThemeChanged(smallClock.theme.copy(isDarkTheme = isDarkTheme))
+            largeClock.events.onThemeChanged(largeClock.theme.copy(isDarkTheme = isDarkTheme))
         }
     }
 
@@ -308,7 +308,6 @@ constructor(
     private val configListener =
         object : ConfigurationController.ConfigurationListener {
             override fun onThemeChanged() {
-                clock?.run { events.onColorPaletteChanged(resources) }
                 updateColors()
             }
 
@@ -505,7 +504,7 @@ constructor(
         largeRegionSampler?.stopRegionSampler()
         smallTimeListener?.stop()
         largeTimeListener?.stop()
-        clock?.apply {
+        clock?.run {
             smallClock.view.removeOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
             largeClock.view.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
         }

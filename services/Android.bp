@@ -188,6 +188,28 @@ art_profile_java_defaults {
     },
 }
 
+// Conditionally add crashrecovery stubs library
+soong_config_module_type {
+    name: "crashrecovery_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_crashrecovery_module",
+    ],
+    properties: [
+        "libs",
+    ],
+}
+
+crashrecovery_java_defaults {
+    name: "services_crashrecovery_stubs_conditionally",
+    soong_config_variables: {
+        release_crashrecovery_module: {
+            libs: ["service-crashrecovery.stubs.system_server"],
+        },
+    },
+}
+
 // merge all required services into one jar
 // ============================================================
 soong_config_module_type {
@@ -195,7 +217,17 @@ soong_config_module_type {
     module_type: "java_library",
     config_namespace: "system_services",
     bool_variables: ["without_vibrator"],
-    properties: ["vintf_fragments"],
+    properties: ["vintf_fragment_modules"],
+}
+
+vintf_fragment {
+    name: "manifest_services.xml",
+    src: "manifest_services.xml",
+}
+
+vintf_fragment {
+    name: "manifest_services_android.frameworks.vibrator.xml",
+    src: "manifest_services_android.frameworks.vibrator.xml",
 }
 
 system_java_library {
@@ -203,6 +235,7 @@ system_java_library {
     defaults: [
         "services_java_defaults",
         "art_profile_java_defaults",
+        "services_crashrecovery_stubs_conditionally",
     ],
     installable: true,
 
@@ -264,11 +297,11 @@ system_java_library {
 
     soong_config_variables: {
         without_vibrator: {
-            vintf_fragments: [
+            vintf_fragment_modules: [
                 "manifest_services.xml",
             ],
             conditions_default: {
-                vintf_fragments: [
+                vintf_fragment_modules: [
                     "manifest_services.xml",
                     "manifest_services_android.frameworks.vibrator.xml",
                 ],

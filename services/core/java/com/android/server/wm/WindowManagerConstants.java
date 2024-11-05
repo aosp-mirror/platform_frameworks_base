@@ -22,10 +22,12 @@ import static android.provider.AndroidDeviceConfig.KEY_SYSTEM_GESTURE_EXCLUSION_
 import android.provider.AndroidDeviceConfig;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -37,6 +39,10 @@ final class WindowManagerConstants {
     /** The orientation of activity will be always "unspecified" except for game apps. */
     private static final String KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST =
             "ignore_activity_orientation_request";
+
+    /** The packages that ignore {@link #KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST}. */
+    private static final String KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST =
+            "opt_out_ignore_activity_orientation_request_list";
 
     /**
      * The minimum duration between gesture exclusion logging for a given window in
@@ -64,6 +70,9 @@ final class WindowManagerConstants {
 
     /** @see #KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST */
     boolean mIgnoreActivityOrientationRequest;
+
+    /** @see #KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST */
+    private ArraySet<String> mOptOutIgnoreActivityOrientationRequestPackages;
 
     private final WindowManagerGlobalLock mGlobalLock;
     private final Runnable mUpdateSystemGestureExclusionCallback;
@@ -97,6 +106,7 @@ final class WindowManagerConstants {
         updateSystemGestureExclusionLimitDp();
         updateSystemGestureExcludedByPreQStickyImmersive();
         updateIgnoreActivityOrientationRequest();
+        updateOptOutIgnoreActivityOrientationRequestList();
     }
 
     private void onAndroidPropertiesChanged(DeviceConfig.Properties properties) {
@@ -138,6 +148,9 @@ final class WindowManagerConstants {
                     case KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST:
                         updateIgnoreActivityOrientationRequest();
                         break;
+                    case KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST:
+                        updateOptOutIgnoreActivityOrientationRequestList();
+                        break;
                     default:
                         break;
                 }
@@ -169,6 +182,25 @@ final class WindowManagerConstants {
                 KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST, false);
     }
 
+    private void updateOptOutIgnoreActivityOrientationRequestList() {
+        final String packageList = mDeviceConfig.getString(
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST, "");
+        if (packageList.isEmpty()) {
+            mOptOutIgnoreActivityOrientationRequestPackages = null;
+            return;
+        }
+        mOptOutIgnoreActivityOrientationRequestPackages = new ArraySet<>();
+        mOptOutIgnoreActivityOrientationRequestPackages.addAll(
+                Arrays.asList(packageList.split(",")));
+    }
+
+    boolean isPackageOptOutIgnoreActivityOrientationRequest(String packageName) {
+        return mIgnoreActivityOrientationRequest
+                && mOptOutIgnoreActivityOrientationRequestPackages != null
+                && mOptOutIgnoreActivityOrientationRequestPackages.contains(packageName);
+    }
+
     void dump(PrintWriter pw) {
         pw.println("WINDOW MANAGER CONSTANTS (dumpsys window constants):");
 
@@ -180,6 +212,10 @@ final class WindowManagerConstants {
         pw.print("="); pw.println(mSystemGestureExcludedByPreQStickyImmersive);
         pw.print("  "); pw.print(KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST);
         pw.print("="); pw.println(mIgnoreActivityOrientationRequest);
+        if (mOptOutIgnoreActivityOrientationRequestPackages != null) {
+            pw.print("  "); pw.print(KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST);
+            pw.print("="); pw.println(mOptOutIgnoreActivityOrientationRequestPackages);
+        }
         pw.println();
     }
 }

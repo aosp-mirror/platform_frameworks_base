@@ -41,7 +41,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromDozingTransitionInteractor
@@ -131,12 +131,13 @@ constructor(
                 .collect { (_, isCommunalAvailable, isIdleOnCommunal) ->
                     val isKeyguardOccludedLegacy = keyguardInteractor.isKeyguardOccluded.value
                     val primaryBouncerShowing = keyguardInteractor.primaryBouncerShowing.value
+                    val isKeyguardGoingAway = keyguardInteractor.isKeyguardGoingAway.value
 
                     if (!deviceEntryInteractor.isLockscreenEnabled()) {
                         if (!SceneContainerFlag.isEnabled) {
                             startTransitionTo(KeyguardState.GONE)
                         }
-                    } else if (canDismissLockscreen()) {
+                    } else if (canDismissLockscreen() || isKeyguardGoingAway) {
                         if (!SceneContainerFlag.isEnabled) {
                             startTransitionTo(KeyguardState.GONE)
                         }

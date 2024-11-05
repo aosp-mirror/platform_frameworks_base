@@ -228,7 +228,7 @@ flag {
     name: "enable_desktop_windowing_app_handle_education"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing app handle education"
-    bug: "348208342"
+    bug: "316006079"
 }
 
 flag {
@@ -236,6 +236,13 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing transition & motion polish changes"
     bug: "356570693"
+}
+
+flag {
+    name: "enable_desktop_windowing_enter_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables enter desktop windowing transition & motion polish changes"
+    bug: "369763947"
 }
 
 flag {
@@ -301,6 +308,13 @@ flag {
 }
 
 flag {
+    name: "enable_restore_to_previous_size_from_desktop_immersive"
+    namespace: "lse_desktop_experience"
+    description: "Restores the window bounds to their previous size when exiting desktop immersive"
+    bug: "372318163"
+}
+
+flag {
     name: "enable_display_focus_in_shell_transitions"
     namespace: "lse_desktop_experience"
     description: "Creates a shell transition when display focus switches."
@@ -319,4 +333,53 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables custom transitions for alt-tab app launches in Desktop Mode."
     bug: "370735595"
+}
+
+flag {
+    name: "enable_desktop_app_launch_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for app launches in Desktop Mode."
+    bug: "375992828"
+}
+
+flag {
+    name: "enable_move_to_next_display_shortcut"
+    namespace: "lse_desktop_experience"
+    description: "Add new keyboard shortcut of moving a task into next display"
+    bug: "364154795"
+}
+
+flag {
+    name: "enable_drag_to_maximize"
+    namespace: "lse_desktop_experience"
+    description: "Enables a switch to change the concequence of dragging a window to the top edge."
+    bug: "372614715"
+}
+
+flag {
+    name: "enable_task_resizing_keyboard_shortcuts"
+    namespace: "lse_desktop_experience"
+    description: "Enables keyboard shortcuts for resizing tasks in desktop mode."
+    bug: "335819608"
+}
+
+flag {
+    name: "enable_display_windowing_mode_switching"
+    namespace: "lse_desktop_experience"
+    description: "Change the default display's windowing mode to freeform when display connected in extended mode."
+    bug: "374849026"
+}
+
+flag {
+    name: "enable_desktop_windowing_pip"
+    namespace: "lse_desktop_experience"
+    description: "Enables PiP features in desktop mode."
+    bug: "350475854"
+}
+
+flag {
+    name: "enable_desktop_windowing_hsum"
+    namespace: "lse_desktop_experience"
+    description: "Enables HSUM on desktop mode."
+    bug: "366397912"
 }

@@ -75,7 +75,6 @@ cc_library {
         "BigBufferStream.cpp",
         "ChunkIterator.cpp",
         "ConfigDescription.cpp",
-        "CursorWindow.cpp",
         "FileStream.cpp",
         "Idmap.cpp",
         "LoadedArsc.cpp",
@@ -114,6 +113,7 @@ cc_library {
             srcs: [
                 "BackupData.cpp",
                 "BackupHelpers.cpp",
+                "CursorWindow.cpp",
             ],
             shared_libs: [
                 "libbase",
@@ -145,6 +145,11 @@ cc_library {
             ],
             shared_libs: [
                 "libz",
+            ],
+        },
+        host_linux: {
+            srcs: [
+                "CursorWindow.cpp",
             ],
         },
         windows: {
@@ -257,6 +262,8 @@ cc_test {
         "tests/data/**/*.apk",
         "tests/data/**/*.arsc",
         "tests/data/**/*.idmap",
+    ],
+    device_common_data: [
         ":FrameworkResourcesSparseTestApp",
         ":FrameworkResourcesNotSparseTestApp",
     ],

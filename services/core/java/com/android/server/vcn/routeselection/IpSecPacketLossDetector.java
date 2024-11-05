@@ -29,7 +29,6 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.IpSecTransformState;
 import android.net.Network;
-import android.net.vcn.Flags;
 import android.net.vcn.VcnManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -149,12 +148,6 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
 
         Objects.requireNonNull(deps, "Missing deps");
 
-        if (!vcnContext.isFlagIpSecTransformStateEnabled()) {
-            // Caller error
-            logWtf("ipsecTransformState flag disabled");
-            throw new IllegalAccessException("ipsecTransformState flag disabled");
-        }
-
         mHandler = new Handler(getVcnContext().getLooper());
 
         mPowerManager = getVcnContext().getContext().getSystemService(PowerManager.class);
@@ -233,7 +226,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static int getMaxSeqNumIncreasePerSecond(@Nullable PersistableBundleWrapper carrierConfig) {
         int maxSeqNumIncrease = MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED;
-        if (Flags.handleSeqNumLeap() && carrierConfig != null) {
+        if (carrierConfig != null) {
             maxSeqNumIncrease =
                     carrierConfig.getInt(
                             VcnManager.VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY,
@@ -287,10 +280,8 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         // with the new interval
         mPollIpSecStateIntervalMs = getPollIpSecStateIntervalMs(carrierConfig);
 
-        if (Flags.handleSeqNumLeap()) {
-            mPacketLossRatePercentThreshold = getPacketLossRatePercentThreshold(carrierConfig);
-            mMaxSeqNumIncreasePerSecond = getMaxSeqNumIncreasePerSecond(carrierConfig);
-        }
+        mPacketLossRatePercentThreshold = getPacketLossRatePercentThreshold(carrierConfig);
+        mMaxSeqNumIncreasePerSecond = getMaxSeqNumIncreasePerSecond(carrierConfig);
 
         if (canStart() != isStarted()) {
             if (canStart()) {
@@ -438,13 +429,10 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
                 onValidationResultReceivedInternal(true /* isFailed */);
             }
 
-            // In both "valid" or "unusual_seq_num_leap" cases, trigger network validation
-            if (Flags.validateNetworkOnIpsecLoss()) {
-                // Trigger re-validation of the underlying network; if it fails, the VCN will
-                // attempt to migrate away.
-                mConnectivityManager.reportNetworkConnectivity(
-                        getNetwork(), false /* hasConnectivity */);
-            }
+            // In both "invalid" and "unusual_seq_num_leap" cases, trigger network validation. If
+            // validation fails, the VCN will attempt to migrate away.
+            mConnectivityManager.reportNetworkConnectivity(
+                    getNetwork(), false /* hasConnectivity */);
         }
     }
 
@@ -474,8 +462,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
             boolean isUnusualSeqNumLeap = false;
 
             // Handle sequence number leap
-            if (Flags.handleSeqNumLeap()
-                    && maxSeqNumIncreasePerSecond != MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED) {
+            if (maxSeqNumIncreasePerSecond != MAX_SEQ_NUM_INCREASE_DEFAULT_DISABLED) {
                 final long timeDiffMillis =
                         newState.getTimestampMillis() - oldState.getTimestampMillis();
                 final long maxSeqNumIncrease = timeDiffMillis * maxSeqNumIncreasePerSecond / 1000;
@@ -506,7 +493,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
                             + " actualPktCntDiff: "
                             + actualPktCntDiff);
 
-            if (Flags.handleSeqNumLeap() && expectedPktCntDiff < MIN_VALID_EXPECTED_RX_PACKET_NUM) {
+            if (expectedPktCntDiff < MIN_VALID_EXPECTED_RX_PACKET_NUM) {
                 // The sample size is too small to ensure a reliable detection result
                 return PacketLossCalculationResult.invalid();
             }

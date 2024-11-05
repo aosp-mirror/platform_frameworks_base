@@ -24,6 +24,8 @@ import android.util.Range;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.MonotonicClock;
@@ -43,7 +45,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Contains a snapshot of battery attribution data, on a per-subsystem and per-UID basis.
@@ -126,6 +130,12 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     // Max window size. CursorWindow uses only as much memory as needed.
     private static final long BATTERY_CONSUMER_CURSOR_WINDOW_SIZE = 20_000_000; // bytes
 
+    /**
+     * Used by tests to ensure all BatteryUsageStats instances are closed.
+     */
+    @VisibleForTesting
+    public static boolean DEBUG_INSTANCE_COUNT;
+
     private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
 
     private static final int[] UID_USAGE_TIME_PROCESS_STATES = {
@@ -153,7 +163,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     private final List<UserBatteryConsumer> mUserBatteryConsumers;
     private final AggregateBatteryConsumer[] mAggregateBatteryConsumers;
     private final BatteryStatsHistory mBatteryStatsHistory;
-    private BatteryConsumer.BatteryConsumerDataLayout mBatteryConsumerDataLayout;
+    private final BatteryConsumer.BatteryConsumerDataLayout mBatteryConsumerDataLayout;
     private CursorWindow mBatteryConsumersCursorWindow;
 
     private BatteryUsageStats(@NonNull Builder builder) {
@@ -873,6 +883,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
 
     @Override
     public void close() throws IOException {
+        onCursorWindowReleased(mBatteryConsumersCursorWindow);
         mBatteryConsumersCursorWindow.close();
         mBatteryConsumersCursorWindow = null;
     }
@@ -880,6 +891,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     @Override
     protected void finalize() throws Throwable {
         if (mBatteryConsumersCursorWindow != null) {
+            // Do not decrement sOpenCusorWindowCount. All instances should be closed explicitly
             mBatteryConsumersCursorWindow.close();
         }
         super.finalize();
@@ -934,6 +946,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 boolean includesPowerStateData, double minConsumedPowerThreshold) {
             mBatteryConsumersCursorWindow =
                     new CursorWindow(null, BATTERY_CONSUMER_CURSOR_WINDOW_SIZE);
+            onCursorWindowAllocated(mBatteryConsumersCursorWindow);
             mBatteryConsumerDataLayout = BatteryConsumer.createBatteryConsumerDataLayout(
                     customPowerComponentNames, includePowerModels, includeProcessStateData,
                     includeScreenStateData, includesPowerStateData);
@@ -996,6 +1009,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
          */
         public void discard() {
             mBatteryConsumersCursorWindow.close();
+            onCursorWindowReleased(mBatteryConsumersCursorWindow);
         }
 
         /**
@@ -1031,7 +1045,10 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             return this;
         }
 
-        private long getStatsDuration() {
+        /**
+         * Returns the duration of the battery session reflected by these stats.
+         */
+        public long getStatsDuration() {
             if (mStatsDurationMs != -1) {
                 return mStatsDurationMs;
             } else {
@@ -1258,6 +1275,52 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 }
                 sb.setLength(sb.length() - 2);
                 writer.println(sb);
+            }
+        }
+    }
+
+    @GuardedBy("BatteryUsageStats.class")
+    private static Map<CursorWindow, Exception> sInstances;
+
+    private static void onCursorWindowAllocated(CursorWindow window) {
+        if (!DEBUG_INSTANCE_COUNT) {
+            return;
+        }
+
+        synchronized (BatteryUsageStats.class) {
+            if (sInstances == null) {
+                sInstances = new HashMap<>();
+            }
+            sInstances.put(window, new Exception());
+        }
+    }
+
+    private static void onCursorWindowReleased(CursorWindow window) {
+        if (!DEBUG_INSTANCE_COUNT) {
+            return;
+        }
+
+        synchronized (BatteryUsageStats.class) {
+            sInstances.remove(window);
+        }
+    }
+
+    /**
+     * Used by tests to ensure all BatteryUsageStats instances are closed.
+     */
+    @VisibleForTesting
+    public static void assertAllInstancesClosed() {
+        if (!DEBUG_INSTANCE_COUNT) {
+            throw new IllegalStateException("DEBUG_INSTANCE_COUNT is false");
+        }
+
+        synchronized (BatteryUsageStats.class) {
+            if (sInstances != null && !sInstances.isEmpty()) {
+                Exception callSite = sInstances.entrySet().iterator().next().getValue();
+                int count = sInstances.size();
+                sInstances.clear();
+                throw new IllegalStateException(
+                        "Instances of BatteryUsageStats not closed: " + count, callSite);
             }
         }
     }

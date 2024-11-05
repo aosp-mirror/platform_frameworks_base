@@ -121,9 +121,6 @@ public final class PinnerService extends SystemService {
     private static boolean PROP_PIN_PINLIST =
             SystemProperties.getBoolean("pinner.use_pinlist", true);
 
-    private static final int MAX_CAMERA_PIN_SIZE = 80 * (1 << 20); // 80MB max for camera app.
-    private static final int MAX_ASSISTANT_PIN_SIZE = 60 * (1 << 20); // 60MB max for assistant app.
-
     public static final String ANON_REGION_STAT_NAME = "[anon]";
 
     private static final String SYSTEM_GROUP_NAME = "system";
@@ -179,8 +176,10 @@ public final class PinnerService extends SystemService {
 
     // Resource-configured pinner flags;
     private final boolean mConfiguredToPinCamera;
+    private final int mConfiguredCameraPinBytes;
     private final int mConfiguredHomePinBytes;
     private final boolean mConfiguredToPinAssistant;
+    private final int mConfiguredAssistantPinBytes;
     private final int mConfiguredWebviewPinBytes;
 
     // This is the percentage of total device memory that will be used to set the global quota.
@@ -250,6 +249,10 @@ public final class PinnerService extends SystemService {
         mDeviceConfigInterface = mInjector.getDeviceConfigInterface();
         mConfiguredToPinCamera = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerCameraApp);
+        mConfiguredCameraPinBytes = context.getResources().getInteger(
+                com.android.internal.R.integer.config_pinnerCameraPinBytes);
+        mConfiguredAssistantPinBytes = context.getResources().getInteger(
+                com.android.internal.R.integer.config_pinnerAssistantPinBytes);
         mConfiguredHomePinBytes = context.getResources().getInteger(
                 com.android.internal.R.integer.config_pinnerHomePinBytes);
         mConfiguredToPinAssistant = context.getResources().getBoolean(
@@ -812,11 +815,11 @@ public final class PinnerService extends SystemService {
     private int getSizeLimitForKey(@AppKey int key) {
         switch (key) {
             case KEY_CAMERA:
-                return MAX_CAMERA_PIN_SIZE;
+                return mConfiguredCameraPinBytes;
             case KEY_HOME:
                 return mConfiguredHomePinBytes;
             case KEY_ASSISTANT:
-                return MAX_ASSISTANT_PIN_SIZE;
+                return mConfiguredAssistantPinBytes;
             default:
                 return 0;
         }
@@ -1303,6 +1306,10 @@ public final class PinnerService extends SystemService {
             pw.format("   Maximum Pinner quota: %d bytes (%.2f MB)\n", mConfiguredMaxPinnedMemory,
                     mConfiguredMaxPinnedMemory / bytesPerMB);
             pw.format("   Max Home App Pin Bytes (without deps): %d\n", mConfiguredHomePinBytes);
+            pw.format("   Max Assistant App Pin Bytes (without deps): %d\n",
+                    mConfiguredAssistantPinBytes);
+            pw.format(
+                    "   Max Camera App Pin Bytes (without deps): %d\n", mConfiguredCameraPinBytes);
             pw.format("\nPinned Files:\n");
             synchronized (PinnerService.this) {
                 long totalSize = 0;

@@ -79,7 +79,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     @Mock
     private lateinit var mockDesktopWindowDecoration: DesktopModeWindowDecoration
     @Mock
-    private lateinit var mockDragStartListener: DragPositioningCallbackUtility.DragStartListener
+    private lateinit var mockDragEventListener: DragPositioningCallbackUtility.DragEventListener
 
     @Mock
     private lateinit var taskToken: WindowContainerToken
@@ -156,7 +156,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                         mockShellTaskOrganizer,
                         mockDesktopWindowDecoration,
                         mockDisplayController,
-                        mockDragStartListener,
+                        mockDragEventListener,
                         mockTransactionFactory,
                         mockTransitions,
                         mockInteractionJankMonitor,
@@ -323,7 +323,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskReorderedToTopWhenNotFocused() = runOnUiThread {
-        mockDesktopWindowDecoration.mTaskInfo.isFocused = false
+        mockDesktopWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
                 STARTING_BOUNDS.left.toFloat(),
@@ -339,7 +339,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskNotReorderedToTopWhenFocused() = runOnUiThread {
-        mockDesktopWindowDecoration.mTaskInfo.isFocused = true
+        mockDesktopWindowDecoration.mHasGlobalFocus = true
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
                 STARTING_BOUNDS.left.toFloat(),
@@ -355,7 +355,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_drag_draggedTaskNotReorderedToTop() = runOnUiThread {
-        mockDesktopWindowDecoration.mTaskInfo.isFocused = false
+        mockDesktopWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_UNDEFINED, // drag
                 STARTING_BOUNDS.left.toFloat(),
@@ -433,6 +433,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
         // isResizingOrAnimating should be set to true after move during a resize
         Assert.assertTrue(taskPositioner.isResizingOrAnimating)
+        verify(mockDragEventListener, times(1)).onDragMove(eq(TASK_ID))
 
         taskPositioner.onDragPositioningEnd(
                 STARTING_BOUNDS.left.toFloat(),

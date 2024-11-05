@@ -21,7 +21,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Flags.communalWidgetTrampolineFix
 import com.android.systemui.animation.ActivityTransitionAnimator

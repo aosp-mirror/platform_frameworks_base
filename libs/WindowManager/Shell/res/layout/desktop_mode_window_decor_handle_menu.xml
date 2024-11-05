@@ -157,6 +157,14 @@
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_manage_windows"
             android:drawableTint="?androidprv:attr/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton" />
+
+        <Button
+            android:id="@+id/change_aspect_ratio_button"
+            android:contentDescription="@string/change_aspect_ratio_text"
+            android:text="@string/change_aspect_ratio_text"
+            android:drawableStart="@drawable/desktop_mode_ic_handle_menu_change_aspect_ratio"
+            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            style="@style/DesktopModeHandleMenuActionButton" />
     </LinearLayout>
 
     <LinearLayout
@@ -184,6 +192,7 @@
             android:layout_height="20dp"
             android:layout_gravity="end|center_vertical"
             android:layout_marginEnd="16dp"
+            android:layout_marginStart="10dp"
             android:contentDescription="@string/open_by_default_settings_text"
             android:src="@drawable/desktop_mode_ic_handle_menu_open_by_default_settings"
             android:tint="?androidprv:attr/materialColorOnSurface"/>

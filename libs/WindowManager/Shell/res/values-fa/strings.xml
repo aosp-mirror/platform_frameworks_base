@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"دوربین مشکل دارد؟\nبرای تنظیم مجدد اندازه تک‌ضرب بزنید"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"مشکل برطرف نشد؟\nبرای برگرداندن تک‌ضرب بزنید"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"دوربین مشکلی ندارد؟ برای بستن تک‌ضرب بزنید."</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"منو برنامه را می‌توانید اینجا ببینید"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"برای باز کردن هم‌زمان چند برنامه، وارد نمای ویژه رایانه شوید"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"هروقت خواستید از منو برنامه به حالت تمام‌صفحه برگردید"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"از چندین برنامه به‌طور هم‌زمان استفاده کنید"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"برای حالت صفحهٔ دونیمه، در برنامه‌ای دیگر بکشید"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"برای جابه‌جا کردن برنامه، بیرون از آن دو تک‌ضرب بزنید"</string>
@@ -126,15 +129,21 @@
     <string name="manage_windows_text" msgid="5567366688493093920">"مدیریت کردن پنجره‌ها"</string>
     <string name="close_text" msgid="4986518933445178928">"بستن"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"بستن منو"</string>
-    <!-- no translation found for desktop_mode_app_header_chip_text (6366422614991687237) -->
-    <skip />
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"باز کردن منو"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"بزرگ کردن صفحه"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"بزرگ کردن صفحه"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"اندازه این برنامه را نمی‌توان تغییر داد"</string>
-    <!-- no translation found for desktop_mode_maximize_menu_maximize_button_text (3090199175564175845) -->
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"برنامه را نمی‌توان به اینجا منتقل کرد"</string>
+    <!-- no translation found for desktop_mode_maximize_menu_immersive_button_text (559492223133829481) -->
     <skip />
-    <!-- no translation found for desktop_mode_maximize_menu_snap_left_button_text (8077452201179893424) -->
+    <!-- no translation found for desktop_mode_maximize_menu_immersive_restore_button_text (4900114367354709257) -->
     <skip />
-    <!-- no translation found for desktop_mode_maximize_menu_snap_right_button_text (7117751068945657304) -->
-    <skip />
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"بزرگ کردن"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"بازیابی کردن"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"کشیدن به‌چپ"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"کشیدن به‌راست"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"تنظیمات باز کردن به‌طور پیش‌فرض"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"انتخاب روش باز کردن پیوندهای وب مربوط به این برنامه"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"در برنامه"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"در مرورگر"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"تأیید"</string>
 </resources>

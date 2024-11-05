@@ -24,7 +24,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.Network;
-import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.SntpClient;
 import android.os.Build;
 import android.os.SystemClock;
@@ -687,16 +687,8 @@ public abstract class NtpTrustedTime implements TrustedTime {
             if (connectivityManager == null) {
                 return false;
             }
-            final NetworkCapabilities networkCapabilities =
-                    connectivityManager.getNetworkCapabilities(network);
-            if (networkCapabilities == null) {
-                if (LOGD) Log.d(TAG, "getNetwork: failed to get network capabilities");
-                return false;
-            }
-            final boolean isConnectedToInternet = networkCapabilities.hasCapability(
-                    NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    && networkCapabilities.hasCapability(
-                    NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+            final NetworkInfo ni = connectivityManager.getNetworkInfo(network);
+
             // This connectivity check is to avoid performing a DNS lookup for the time server on a
             // unconnected network. There are races to obtain time in Android when connectivity
             // changes, which means that forceRefresh() can be called by various components before
@@ -706,8 +698,8 @@ public abstract class NtpTrustedTime implements TrustedTime {
             // A side effect of check is that tests that run a fake NTP server on the device itself
             // will only be able to use it if the active network is connected, even though loopback
             // addresses are actually reachable.
-            if (!isConnectedToInternet) {
-                if (LOGD) Log.d(TAG, "getNetwork: no internet connectivity");
+            if (ni == null || !ni.isConnected()) {
+                if (LOGD) Log.d(TAG, "getNetwork: no connectivity");
                 return false;
             }
             return true;

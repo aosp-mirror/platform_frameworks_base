@@ -22,7 +22,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.BaseBlueprintTransition
@@ -32,7 +33,6 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.util.kotlin.pairwise
 
@@ -128,7 +128,7 @@ object KeyguardBlueprintViewBinder {
     ) {
         val currentClock = viewModel.currentClock.value
         if (!DEBUG || currentClock == null) return
-        val smallClockViewId = R.id.lockscreen_clock_view
+        val smallClockViewId = customR.id.lockscreen_clock_view
         val largeClockViewId = currentClock.largeClock.layout.views[0].id
         val smartspaceDateId = sharedR.id.date_smartspace_view
         Log.i(

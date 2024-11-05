@@ -24,7 +24,6 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
@@ -45,7 +44,6 @@ class ShadeInteractorLegacyImpl
 constructor(
     @Application val scope: CoroutineScope,
     keyguardRepository: KeyguardRepository,
-    sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) : BaseShadeInteractor {
     init {
@@ -62,17 +60,17 @@ constructor(
                 keyguardRepository.statusBarState,
                 repository.legacyShadeExpansion,
                 repository.qsExpansion,
-                sharedNotificationContainerInteractor.isSplitShadeEnabled,
+                repository.isShadeLayoutWide,
             ) {
                 lockscreenShadeExpansion,
                 statusBarState,
                 legacyShadeExpansion,
                 qsExpansion,
-                splitShadeEnabled ->
+                isShadeLayoutWide ->
                 when (statusBarState) {
                     // legacyShadeExpansion is 1 instead of 0 when QS is expanded
                     StatusBarState.SHADE ->
-                        if (!splitShadeEnabled && qsExpansion > 0f) 1f - qsExpansion
+                        if (!isShadeLayoutWide && qsExpansion > 0f) 1f - qsExpansion
                         else legacyShadeExpansion
                     StatusBarState.KEYGUARD -> lockscreenShadeExpansion
                     // dragDownAmount, which drives lockscreenShadeExpansion resets to 0f when

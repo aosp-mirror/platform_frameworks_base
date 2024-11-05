@@ -15,9 +15,6 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
-import static com.android.internal.widget.remotecompose.core.operations.utilities.NanMap.ID_REGION_ARRAY;
-import static com.android.internal.widget.remotecompose.core.operations.utilities.NanMap.ID_REGION_MASK;
-
 /**
  * high performance floating point expression evaluator used in animation
  */
@@ -59,7 +56,6 @@ public class AnimatedFloatExpression {
     public static final float RAD = asNan(OFFSET + 30);
     public static final float CEIL = asNan(OFFSET + 31);
 
-
     // Array ops
     public static final float A_DEREF = asNan(OFFSET + 32);
     public static final float A_MAX = asNan(OFFSET + 33);
@@ -69,14 +65,13 @@ public class AnimatedFloatExpression {
     public static final float A_LEN = asNan(OFFSET + 37);
     public static final int LAST_OP = OFFSET + 37;
 
-
     public static final float VAR1 = asNan(OFFSET + 38);
     public static final float VAR2 = asNan(OFFSET + 39);
 
     // TODO CLAMP, CBRT, DEG, RAD, EXPM1, CEIL, FLOOR
-    private static final float FP_PI = (float) Math.PI;
-    private static final float FP_TO_RAD = 57.29577951f; // 180/PI
-    private static final float FP_TO_DEG = 0.01745329252f; // 180/PI
+    //    private static final float FP_PI = (float) Math.PI;
+    private static final float FP_TO_RAD = 57.29578f; // 180/PI
+    private static final float FP_TO_DEG = 0.017453292f; // 180/PI
 
     float[] mStack;
     float[] mLocalStack = new float[128];
@@ -106,20 +101,13 @@ public class AnimatedFloatExpression {
         int eval(int sp);
     }
 
-
     /**
-     * Evaluate a float expression
-     * This system works by processing an Array of float (float[])
-     * in reverse polish notation (rpn)
-     * Within that array some floats are commands
-     * they are encoded within an NaN.
-     * After processing the array the last item on the array is returned.
-     * The system supports variables allowing expressions like.
-     * sin(sqrt(x*x+y*y))/sqrt(x*x+y*y)
-     * Where x & y are passe as parameters
-     * Examples:
-     * (1+2)  (1, 2, ADD) adds two numbers returns 3
-     * eval(new float[]{ Var1, Var * }
+     * Evaluate a float expression This system works by processing an Array of float (float[]) in
+     * reverse polish notation (rpn) Within that array some floats are commands they are encoded
+     * within an NaN. After processing the array the last item on the array is returned. The system
+     * supports variables allowing expressions like. sin(sqrt(x*x+y*y))/sqrt(x*x+y*y) Where x & y
+     * are passe as parameters Examples: (1+2) (1, 2, ADD) adds two numbers returns 3 eval(new
+     * float[]{ Var1, Var * }
      *
      * @param exp
      * @param var
@@ -140,7 +128,6 @@ public class AnimatedFloatExpression {
         return mStack[sp];
     }
 
-
     /**
      * Evaluate a float expression
      *
@@ -149,8 +136,9 @@ public class AnimatedFloatExpression {
      * @param var
      * @return
      */
-    public float eval(CollectionsAccess ca, float[] exp, float... var) {
-        mStack = exp;
+    public float eval(CollectionsAccess ca, float[] exp, int len, float... var) {
+        System.arraycopy(exp, 0, mLocalStack, 0, len);
+        mStack = mLocalStack;
         mVar = var;
         mCollectionsAccess = ca;
         int sp = -1;
@@ -159,7 +147,7 @@ public class AnimatedFloatExpression {
             float v = mStack[i];
             if (Float.isNaN(v)) {
                 int id = fromNaN(v);
-                if ((id & ID_REGION_MASK) != ID_REGION_ARRAY) {
+                if ((id & NanMap.ID_REGION_MASK) != NanMap.ID_REGION_ARRAY) {
                     sp = mOps[id - OFFSET].eval(sp);
                 } else {
                     mStack[++sp] = v;
@@ -171,6 +159,34 @@ public class AnimatedFloatExpression {
         return mStack[sp];
     }
 
+    /**
+     * Evaluate a float expression
+     *
+     * @param ca
+     * @param exp
+     * @return
+     */
+    public float eval(CollectionsAccess ca, float[] exp, int len) {
+        System.arraycopy(exp, 0, mLocalStack, 0, len);
+        mStack = mLocalStack;
+        mCollectionsAccess = ca;
+        int sp = -1;
+
+        for (int i = 0; i < len; i++) {
+            float v = mStack[i];
+            if (Float.isNaN(v)) {
+                int id = fromNaN(v);
+                if ((id & NanMap.ID_REGION_MASK) != NanMap.ID_REGION_ARRAY) {
+                    sp = mOps[id - OFFSET].eval(sp);
+                } else {
+                    mStack[++sp] = v;
+                }
+            } else {
+                mStack[++sp] = v;
+            }
+        }
+        return mStack[sp];
+    }
 
     private int dereference(CollectionsAccess ca, int id, int sp) {
         mStack[sp] = ca.getFloatValue(id, (int) (mStack[sp]));
@@ -238,11 +254,11 @@ public class AnimatedFloatExpression {
                 mStack[sp - 1] = mStack[sp - 1] * mStack[sp];
                 return sp - 1;
             },
-            (sp) -> {  // DIV
+            (sp) -> { // DIV
                 mStack[sp - 1] = mStack[sp - 1] / mStack[sp];
                 return sp - 1;
             },
-            (sp) -> {  // MOD
+            (sp) -> { // MOD
                 mStack[sp - 1] = mStack[sp - 1] % mStack[sp];
                 return sp - 1;
             },
@@ -327,13 +343,11 @@ public class AnimatedFloatExpression {
                 return sp - 2;
             },
             (sp) -> { // Ternary conditional
-                mStack[sp - 2] = (mStack[sp] > 0)
-                        ? mStack[sp - 1] : mStack[sp - 2];
+                mStack[sp - 2] = (mStack[sp] > 0) ? mStack[sp - 1] : mStack[sp - 2];
                 return sp - 2;
             },
             (sp) -> { // CLAMP(min,max, val)
-                mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]),
-                        mStack[sp - 1]);
+                mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
                 return sp - 2;
             },
             (sp) -> { // CBRT cuberoot
@@ -354,7 +368,7 @@ public class AnimatedFloatExpression {
             },
             (sp) -> { // A_DEREF
                 int id = fromNaN(mStack[sp]);
-                mStack[sp] = mCollectionsAccess.getFloatValue(id, (int) (mStack[sp - 1]));
+                mStack[sp] = mCollectionsAccess.getFloatValue(id, (int) mStack[sp - 1]);
                 return sp - 1;
             },
             (sp) -> { // A_MAX
@@ -399,11 +413,9 @@ public class AnimatedFloatExpression {
             },
             (sp) -> { // A_LEN
                 int id = fromNaN(mStack[sp]);
-                mStack[sp] = mCollectionsAccess.getFloatsLength(id);
+                mStack[sp] = mCollectionsAccess.getListLength(id);
                 return sp;
             },
-
-
             (sp) -> { // first var =
                 mStack[sp] = mVar[0];
                 return sp;
@@ -492,7 +504,8 @@ public class AnimatedFloatExpression {
                     s.append(toMathName(v));
                 } else {
                     int id = fromNaN(v);
-                    String idString = (id > ID_REGION_ARRAY) ? ("A_" + (id & 0xFFFFF)) : "" + id;
+                    String idString =
+                            (id > NanMap.ID_REGION_ARRAY) ? ("A_" + (id & 0xFFFFF)) : "" + id;
                     s.append("[");
                     s.append(idString);
                     s.append("]");
@@ -513,7 +526,7 @@ public class AnimatedFloatExpression {
     }
 
     static String toString(float[] exp, int sp) {
-        String[] str = new String[exp.length];
+        //        String[] str = new String[exp.length];
         if (Float.isNaN(exp[sp])) {
             int id = fromNaN(exp[sp]) - OFFSET;
             switch (NO_OF_OPS[id]) {
@@ -523,24 +536,38 @@ public class AnimatedFloatExpression {
                     return sNames.get(id) + "(" + toString(exp, sp + 1) + ") ";
                 case 2:
                     if (infix(id)) {
-                        return "(" + toString(exp, sp + 1)
-                                + sNames.get(id) + " "
-                                + toString(exp, sp + 2) + ") ";
+                        return "("
+                                + toString(exp, sp + 1)
+                                + sNames.get(id)
+                                + " "
+                                + toString(exp, sp + 2)
+                                + ") ";
                     } else {
-                        return sNames.get(id) + "("
-                                + toString(exp, sp + 1) + ", "
-                                + toString(exp, sp + 2) + ")";
+                        return sNames.get(id)
+                                + "("
+                                + toString(exp, sp + 1)
+                                + ", "
+                                + toString(exp, sp + 2)
+                                + ")";
                     }
                 case 3:
                     if (infix(id)) {
-                        return "((" + toString(exp, sp + 1) + ") ? "
-                                + toString(exp, sp + 2) + ":"
-                                + toString(exp, sp + 3) + ")";
+                        return "(("
+                                + toString(exp, sp + 1)
+                                + ") ? "
+                                + toString(exp, sp + 2)
+                                + ":"
+                                + toString(exp, sp + 3)
+                                + ")";
                     } else {
                         return sNames.get(id)
-                                + "(" + toString(exp, sp + 1)
-                                + ", " + toString(exp, sp + 2)
-                                + ", " + toString(exp, sp + 3) + ")";
+                                + "("
+                                + toString(exp, sp + 1)
+                                + ", "
+                                + toString(exp, sp + 2)
+                                + ", "
+                                + toString(exp, sp + 3)
+                                + ")";
                     }
             }
         }
@@ -549,12 +576,40 @@ public class AnimatedFloatExpression {
 
     static final int[] NO_OF_OPS = {
             -1, // no op
-            2, 2, 2, 2, 2, // + - * / %
-            2, 2, 2,  // min max, power
-            1, 1, 1, 1, 1, 1, 1, 1,  //sqrt,abs,CopySign,exp,floor,log,ln
-            1, 1, 1, 1, 1, 1, 1, 2,  // round,sin,cos,tan,asin,acos,atan,atan2
-            3, 3, 3, 1, 1, 1, 1,
-            0, 0, 0 // mad, ?:,
+            2,
+            2,
+            2,
+            2,
+            2, // + - * / %
+            2,
+            2,
+            2, // min max, power
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1, // sqrt,abs,CopySign,exp,floor,log,ln
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            2, // round,sin,cos,tan,asin,acos,atan,atan2
+            3,
+            3,
+            3,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0 // mad, ?:,
             // a[0],a[1],a[2]
     };
 

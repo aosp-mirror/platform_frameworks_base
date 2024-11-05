@@ -70,7 +70,6 @@ import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.hardware.power.Boost;
 import android.hardware.power.Mode;
 import android.os.BatteryManager;
@@ -86,6 +85,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -103,6 +103,7 @@ import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.lights.LightsManager;
 import com.android.server.policy.WindowManagerPolicy;
@@ -168,6 +169,7 @@ public class PowerManagerServiceTest {
     @Mock private BatteryManagerInternal mBatteryManagerInternalMock;
     @Mock private ActivityManagerInternal mActivityManagerInternalMock;
     @Mock private AttentionManagerInternal mAttentionManagerInternalMock;
+    @Mock private VirtualDeviceManagerInternal mVirtualDeviceManagerInternalMock;
     @Mock private DreamManagerInternal mDreamManagerInternalMock;
     @Mock private PowerManagerService.NativeWrapper mNativeWrapperMock;
     @Mock private FoldGracePeriodProvider mFoldGracePeriodProvider;
@@ -247,6 +249,7 @@ public class PowerManagerServiceTest {
         addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
         addLocalServiceMock(AttentionManagerInternal.class, mAttentionManagerInternalMock);
         addLocalServiceMock(DreamManagerInternal.class, mDreamManagerInternalMock);
+        addLocalServiceMock(VirtualDeviceManagerInternal.class, mVirtualDeviceManagerInternalMock);
 
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mResourcesSpy = spy(mContextSpy.getResources());
@@ -1201,6 +1204,59 @@ public class PowerManagerServiceTest {
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
     }
 
+    @EnableFlags(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testNonDefaultDisplayGroupWithCustomTimeout_afterTimeout_goesToDozing() {
+        final int nonDefaultDisplayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+        final int nonDefaultDisplayId = Display.DEFAULT_DISPLAY + 2;
+        final int virtualDeviceId = Context.DEVICE_ID_DEFAULT + 3;
+        final AtomicReference<DisplayManagerInternal.DisplayGroupListener> listener =
+                new AtomicReference<>();
+        doAnswer((Answer<Void>) invocation -> {
+            listener.set(invocation.getArgument(0));
+            return null;
+        }).when(mDisplayManagerInternalMock).registerDisplayGroupListener(any());
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = nonDefaultDisplayGroupId;
+        when(mDisplayManagerInternalMock.getDisplayInfo(nonDefaultDisplayId)).thenReturn(info);
+        when(mDisplayManagerInternalMock.getDisplayIdsForGroup(nonDefaultDisplayGroupId))
+                .thenReturn(new int[] {nonDefaultDisplayId});
+        when(mVirtualDeviceManagerInternalMock.getDeviceIdForDisplayId(nonDefaultDisplayId))
+                .thenReturn(virtualDeviceId);
+        when(mVirtualDeviceManagerInternalMock.isValidVirtualDeviceId(virtualDeviceId))
+                .thenReturn(true);
+        when(mVirtualDeviceManagerInternalMock
+                .getScreenOffTimeoutMillisForDeviceId(virtualDeviceId))
+                .thenReturn(20000L);
+
+        setMinimumScreenOffTimeoutConfig(10000);
+        createService();
+        startSystem();
+        listener.get().onDisplayGroupAdded(nonDefaultDisplayGroupId);
+
+        assertThat(mService.getWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP))
+                .isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getWakefulnessLocked(nonDefaultDisplayGroupId))
+                .isEqualTo(WAKEFULNESS_AWAKE);
+
+        // The default timeout is 10s, the custom group timeout is 20s.
+
+        advanceTime(15000);
+
+        assertThat(mService.getWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP))
+                .isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked(nonDefaultDisplayGroupId))
+                .isEqualTo(WAKEFULNESS_AWAKE);
+
+        advanceTime(10000);
+
+        assertThat(mService.getWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP))
+                .isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getWakefulnessLocked(nonDefaultDisplayGroupId))
+                .isEqualTo(WAKEFULNESS_DOZING);
+    }
+
     @SuppressWarnings("GuardedBy")
     @Test
     public void testAmbientSuppression_disablesDreamingAndWakesDevice() {
@@ -1894,15 +1950,6 @@ public class PowerManagerServiceTest {
     }
 
     @Test
-    public void testBoot_DesiredScreenPolicyShouldBeBright() {
-        createService();
-        startSystem();
-
-        assertThat(mService.getDesiredScreenPolicyLocked(Display.DEFAULT_DISPLAY)).isEqualTo(
-                DisplayPowerRequest.POLICY_BRIGHT);
-    }
-
-    @Test
     public void testQuiescentBoot_ShouldBeAsleep() {
         when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
         createService();
@@ -1911,40 +1958,6 @@ public class PowerManagerServiceTest {
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         verify(mNotifierMock).onGlobalWakefulnessChangeStarted(eq(WAKEFULNESS_ASLEEP), anyInt(),
                 anyLong());
-    }
-
-    @Test
-    public void testQuiescentBoot_DesiredScreenPolicyShouldBeOff() {
-        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
-        createService();
-        startSystem();
-        assertThat(mService.getDesiredScreenPolicyLocked(Display.DEFAULT_DISPLAY)).isEqualTo(
-                DisplayPowerRequest.POLICY_OFF);
-    }
-
-    @Test
-    public void testQuiescentBoot_WakeUp_DesiredScreenPolicyShouldBeBright() {
-        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
-        createService();
-        startSystem();
-        forceAwake();
-        assertThat(mService.getDesiredScreenPolicyLocked(Display.DEFAULT_DISPLAY)).isEqualTo(
-                DisplayPowerRequest.POLICY_BRIGHT);
-    }
-
-    @Test
-    public void testQuiescentBoot_WakeKeyBeforeBootCompleted_AwakeAfterBootCompleted() {
-        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
-        createService();
-        startSystem();
-
-        mService.getBinderServiceInstance().wakeUp(mClock.now(),
-                PowerManager.WAKE_REASON_UNKNOWN, "testing IPowerManager.wakeUp()", "pkg.name");
-
-        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
-        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
-        assertThat(mService.getDesiredScreenPolicyLocked(Display.DEFAULT_DISPLAY_GROUP)).isEqualTo(
-                DisplayPowerRequest.POLICY_BRIGHT);
     }
 
     @Test
@@ -3392,7 +3405,8 @@ public class PowerManagerServiceTest {
                         null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
                         null /* callback */);
             }
-            assertThat(mService.getScreenOffTimeoutOverrideLocked(screenTimeout, screenDimTimeout))
+            assertThat(mService.getDefaultGroupScreenOffTimeoutOverrideLocked(screenTimeout,
+                           screenDimTimeout))
                     .isEqualTo(expect[2]);
             if (acquireWakeLock) {
                 mService.getBinderServiceInstance().releaseWakeLock(token, 0);

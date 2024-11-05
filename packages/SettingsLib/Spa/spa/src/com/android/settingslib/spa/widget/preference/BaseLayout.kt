@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,6 +36,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsOpacity.alphaForEnabled
 import com.android.settingslib.spa.framework.theme.SettingsShape
@@ -62,7 +64,8 @@ internal fun BaseLayout(
                 .semantics(mergeDescendants = true) {}
                 .then(
                     if (isSpaExpressiveEnabled)
-                        Modifier.clip(SettingsShape.CornerExtraSmall)
+                        Modifier.heightIn(min = SettingsDimension.preferenceMinHeight)
+                            .clip(SettingsShape.CornerExtraSmall)
                             .background(MaterialTheme.colorScheme.surfaceBright)
                     else Modifier
                 )

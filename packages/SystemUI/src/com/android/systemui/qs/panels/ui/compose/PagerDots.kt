@@ -45,7 +45,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
+import platform.test.motion.compose.values.MotionTestValueKey
+import platform.test.motion.compose.values.motionTestValues
 
 @Composable
 fun PagerDots(
@@ -93,13 +95,22 @@ fun PagerDots(
     }
 
     Row(
-        modifier = modifier.wrapContentWidth().pagerDotsSemantics(pagerState, coroutineScope),
+        modifier =
+            modifier
+                .motionTestValues { activeMarkerWidth exportAs PagerDotsMotionKeys.indicatorWidth }
+                .wrapContentWidth()
+                .pagerDotsSemantics(pagerState, coroutineScope),
         horizontalArrangement = spacedBy(spaceSize),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // This means that the active rounded rect has to be drawn between the current page
         // and the previous one (as we are animating back), or the current one if not transitioning
-        val withPrevious = pagerState.currentPageOffsetFraction <= 0 || pagerState.isOverscrolling()
+        val withPrevious by
+            remember(pagerState) {
+                derivedStateOf {
+                    pagerState.currentPageOffsetFraction <= 0 || pagerState.isOverscrolling()
+                }
+            }
         repeat(pagerState.pageCount) { page ->
             Canvas(Modifier.size(dotSize)) {
                 val rtl = layoutDirection == LayoutDirection.Rtl
@@ -125,6 +136,10 @@ fun PagerDots(
             }
         }
     }
+}
+
+object PagerDotsMotionKeys {
+    val indicatorWidth = MotionTestValueKey<Dp>("indicatorWidth")
 }
 
 private fun Modifier.pagerDotsSemantics(

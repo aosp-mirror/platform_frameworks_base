@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.row;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.notification.row.icon.AppIconProviderModule;
+import com.android.systemui.statusbar.notification.row.icon.NotificationIconStyleProviderModule;
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 
 import dagger.Binds;
@@ -28,7 +30,7 @@ import javax.inject.Provider;
 /**
  * Dagger Module containing notification row and view inflation implementations.
  */
-@Module
+@Module(includes = {AppIconProviderModule.class, NotificationIconStyleProviderModule.class})
 public abstract class NotificationRowModule {
 
     /**

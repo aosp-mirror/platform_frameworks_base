@@ -105,7 +105,7 @@ abstract class BaseCommunalViewModel(
         scene: SceneKey,
         loggingReason: String,
         transitionKey: TransitionKey? = null,
-        keyguardState: KeyguardState? = null
+        keyguardState: KeyguardState? = null,
     ) {
         communalSceneInteractor.changeScene(scene, loggingReason, transitionKey, keyguardState)
     }
@@ -155,17 +155,10 @@ abstract class BaseCommunalViewModel(
     ) {}
 
     /** Called as the UI requests deleting a widget. */
-    open fun onDeleteWidget(
-        id: Int,
-        componentName: ComponentName,
-        rank: Int,
-    ) {}
+    open fun onDeleteWidget(id: Int, componentName: ComponentName, rank: Int) {}
 
     /** Called as the UI detects a tap event on the widget. */
-    open fun onTapWidget(
-        componentName: ComponentName,
-        rank: Int,
-    ) {}
+    open fun onTapWidget(componentName: ComponentName, rank: Int) {}
 
     /**
      * Called as the UI requests reordering widgets.
@@ -176,10 +169,19 @@ abstract class BaseCommunalViewModel(
      */
     open fun onReorderWidgets(widgetIdToRankMap: Map<Int, Int>) {}
 
+    /**
+     * Called as the UI requests resizing a widget.
+     *
+     * @param appWidgetId The id of the widget being resized.
+     * @param spanY The new size of the widget, in grid spans.
+     * @param widgetIdToRankMap Mapping of the widget ids to its rank. Allows re-ordering widgets
+     *   alongside the resize, in case resizing also requires re-ordering. This ensures the
+     *   re-ordering is done in the same database transaction as the resize.
+     */
+    open fun onResizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {}
+
     /** Called as the UI requests opening the widget editor with an optional preselected widget. */
-    open fun onOpenWidgetEditor(
-        shouldOpenWidgetPickerOnStart: Boolean = false,
-    ) {}
+    open fun onOpenWidgetEditor(shouldOpenWidgetPickerOnStart: Boolean = false) {}
 
     /** Called as the UI requests to dismiss the CTA tile. */
     open fun onDismissCtaTile() {}

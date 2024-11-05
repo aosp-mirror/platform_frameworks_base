@@ -544,10 +544,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                             .findFirst()
                             .get();
             final RemoteAnimationTarget openingTarget = TransitionUtil.newSyntheticTarget(
-                    homeTask, mShellTaskOrganizer.getHomeTaskOverlayContainer(), TRANSIT_OPEN,
+                    homeTask, mShellTaskOrganizer.getHomeTaskSurface(), TRANSIT_OPEN,
                     0, true /* isTranslucent */);
             final RemoteAnimationTarget closingTarget = TransitionUtil.newSyntheticTarget(
-                    homeTask, mShellTaskOrganizer.getHomeTaskOverlayContainer(), TRANSIT_CLOSE,
+                    homeTask, mShellTaskOrganizer.getHomeTaskSurface(), TRANSIT_CLOSE,
                     0, true /* isTranslucent */);
             final ArrayList<RemoteAnimationTarget> apps = new ArrayList<>();
             apps.add(openingTarget);
@@ -585,7 +585,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
             }
 
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                    "[%d] RecentsController.cancelSyntheticTransition reason=%s",
+                    "[%d] RecentsController.cancelSyntheticTransition: reason=%s",
                     mInstanceId, reason);
             try {
                 // TODO(b/366021931): Notify the correct tasks once we build actual targets, and
@@ -602,13 +602,24 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
          * Called when a synthetic transition is finished.
          * @return
          */
-        boolean finishSyntheticTransition() {
+        boolean finishSyntheticTransition(IResultReceiver runnerFinishCb, String reason) {
             if (!isSyntheticTransition()) {
                 return false;
             }
 
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                    "[%d] RecentsController.finishSyntheticTransition", mInstanceId);
+                    "[%d] RecentsController.finishSyntheticTransition: reason=%s", mInstanceId,
+                    reason);
+            if (runnerFinishCb != null) {
+                try {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                            "[%d] RecentsController.finishInner: calling finish callback",
+                            mInstanceId);
+                    runnerFinishCb.send(0, null);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to report transition finished", e);
+                }
+            }
             // TODO(b/366021931): Clean up leashes accordingly
             cleanUp();
             return true;
@@ -1230,7 +1241,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
 
         private void finishInner(boolean toHome, boolean sendUserLeaveHint,
                 IResultReceiver runnerFinishCb, String reason) {
-            if (finishSyntheticTransition()) {
+            if (finishSyntheticTransition(runnerFinishCb, reason)) {
                 return;
             }
 

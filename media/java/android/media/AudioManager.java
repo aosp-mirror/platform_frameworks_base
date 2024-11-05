@@ -21,6 +21,7 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.FLAG_DEPRECATE_STREAM_BT_SCO;
 import static android.media.audio.Flags.FLAG_FOCUS_EXCLUSIVE_WITH_RECORDING;
 import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
 import static android.media.audio.Flags.FLAG_SUPPORTED_DEVICE_TYPES_API;
@@ -51,6 +52,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -405,8 +407,10 @@ public class AudioManager {
     /** Used to identify the volume of audio streams for notifications */
     public static final int STREAM_NOTIFICATION = AudioSystem.STREAM_NOTIFICATION;
     /** @hide Used to identify the volume of audio streams for phone calls when connected
-     *        to bluetooth */
+     *        to bluetooth
+     *  @deprecated use {@link #STREAM_VOICE_CALL} instead */
     @SystemApi
+    @FlaggedApi(FLAG_DEPRECATE_STREAM_BT_SCO)
     public static final int STREAM_BLUETOOTH_SCO = AudioSystem.STREAM_BLUETOOTH_SCO;
     /** @hide Used to identify the volume of audio streams for enforced system sounds
      *        in certain countries (e.g camera in Japan) */
@@ -895,6 +899,30 @@ public class AudioManager {
      */
     public static final int USE_DEFAULT_STREAM_TYPE = Integer.MIN_VALUE;
 
+    /** @hide */
+    @IntDef(flag = false, prefix = "DEVICE_STATE", value = {
+            DEVICE_CONNECTION_STATE_DISCONNECTED,
+            DEVICE_CONNECTION_STATE_CONNECTED}
+            )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeviceConnectionState {}
+
+    /**
+     * @hide The device connection state for disconnected devices.
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int DEVICE_CONNECTION_STATE_DISCONNECTED = 0;
+
+    /**
+     * @hide The device connection state for connected devices.
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int DEVICE_CONNECTION_STATE_CONNECTED = 1;
+
     private static IAudioService sService;
 
     /**
@@ -1136,7 +1164,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setMasterMute(mute, flags, getContext().getOpPackageName(),
-                    UserHandle.getCallingUserId(), getContext().getAttributionTag());
+                    getContext().getUserId(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1918,10 +1946,16 @@ public class AudioManager {
     @Deprecated public void setSpeakerphoneOn(boolean on) {
         final IAudioService service = getService();
         try {
-            service.setSpeakerphoneOn(mICallBack, on);
+            service.setSpeakerphoneOn(mICallBack, on, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private AttributionSource getAttributionSource() {
+        Context context = getContext();
+        return (context != null)
+                     ? context.getAttributionSource() : AttributionSource.myAttributionSource();
     }
 
     /**
@@ -3089,7 +3123,8 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.startBluetoothSco(mICallBack,
-                    getContext().getApplicationInfo().targetSdkVersion);
+                    getContext().getApplicationInfo().targetSdkVersion,
+                    getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3114,7 +3149,7 @@ public class AudioManager {
     public void startBluetoothScoVirtualCall() {
         final IAudioService service = getService();
         try {
-            service.startBluetoothScoVirtualCall(mICallBack);
+            service.startBluetoothScoVirtualCall(mICallBack, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3134,7 +3169,7 @@ public class AudioManager {
     @Deprecated public void stopBluetoothSco() {
         final IAudioService service = getService();
         try {
-            service.stopBluetoothSco(mICallBack);
+            service.stopBluetoothSco(mICallBack,  getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3246,7 +3281,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setMicrophoneMute(on, getContext().getOpPackageName(),
-                    UserHandle.getCallingUserId(), getContext().getAttributionTag());
+                    getContext().getUserId(), getContext().getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6124,6 +6159,11 @@ public class AudioManager {
      */
     public static final int DEVICE_OUT_BLE_BROADCAST = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
     /** @hide
+     * The audio output device code for a wireless speaker group supporting multichannel content.
+     */
+    public static final int DEVICE_OUT_MULTICHANNEL_GROUP =
+            AudioSystem.DEVICE_OUT_MULTICHANNEL_GROUP;
+    /** @hide
      * This is not used as a returned value from {@link #getDevicesForStream}, but could be
      *  used in the future in a set method to select whatever default device is chosen by the
      *  platform-specific implementation.
@@ -6718,14 +6758,16 @@ public class AudioManager {
     }
 
     /**
+     * @hide
      * Indicate wired accessory connection state change and attributes.
-     * @param state      new connection state: 1 connected, 0 disconnected
      * @param attributes attributes of the connected device
-     * {@hide}
+     * @param state      new connection state
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/373465238
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setWiredDeviceConnectionState(AudioDeviceAttributes attributes, int state) {
+    public void setWiredDeviceConnectionState(@NonNull AudioDeviceAttributes attributes,
+            @DeviceConnectionState int state) {
         final IAudioService service = getService();
         try {
             service.setWiredDeviceConnectionState(attributes, state,
@@ -9023,7 +9065,8 @@ public class AudioManager {
                 Log.w(TAG, "setCommunicationDevice: device not found: " + device);
                 return false;
             }
-            return getService().setCommunicationDevice(mICallBack, device.getId());
+            return getService().setCommunicationDevice(mICallBack, device.getId(),
+                    getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9035,7 +9078,7 @@ public class AudioManager {
      */
     public void clearCommunicationDevice() {
         try {
-            getService().setCommunicationDevice(mICallBack, 0);
+            getService().setCommunicationDevice(mICallBack, 0, getAttributionSource());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

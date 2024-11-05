@@ -17,6 +17,7 @@
 package com.android.systemui.volume.dialog.domain.model
 
 import android.media.AudioManager
+import com.android.systemui.plugins.VolumeDialogController
 
 /**
  * Models VolumeDialogController callback events.
@@ -33,7 +34,7 @@ sealed interface VolumeDialogEventModel {
 
     data class DismissRequested(val reason: Int) : VolumeDialogEventModel
 
-    data class StateChanged(val state: VolumeDialogStateModel) : VolumeDialogEventModel
+    data class StateChanged(val state: VolumeDialogController.State) : VolumeDialogEventModel
 
     data class LayoutDirectionChanged(val layoutDirection: Int) : VolumeDialogEventModel
 

@@ -54,4 +54,12 @@ public interface SatelliteModemStateCallback {
      * @hide
      */
     default void onRegistrationFailure(int causeCode) {};
+
+    /**
+     * Indicates that the background search for terrestrial network is finished with result
+     *
+     * @param isAvailable True means there's terrestrial network and false means there's not.
+     * @hide
+     */
+    default void onTerrestrialNetworkAvailableChanged(boolean isAvailable) {};
 }

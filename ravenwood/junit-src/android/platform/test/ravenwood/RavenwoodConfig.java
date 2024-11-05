@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Instrumentation;
 import android.content.Context;
+import android.os.Build;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -67,6 +68,7 @@ public final class RavenwoodConfig {
     String mTargetPackageName;
 
     int mMinSdkLevel;
+    int mTargetSdkLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     boolean mProvideMainThread = false;
 
@@ -150,9 +152,20 @@ public final class RavenwoodConfig {
         }
 
         /**
+         * Configure the target SDK level of the test.
+         */
+        public Builder setTargetSdkLevel(int sdkLevel) {
+            mConfig.mTargetSdkLevel = sdkLevel;
+            return this;
+        }
+
+        /**
          * Configure a "main" thread to be available for the duration of the test, as defined
          * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
+         *
+         * @deprecated
          */
+        @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
             mConfig.mProvideMainThread = provideMainThread;
             return this;

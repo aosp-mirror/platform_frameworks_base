@@ -19,23 +19,31 @@ package com.android.systemui.qs.composefragment.viewmodel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
+import com.android.systemui.media.controls.domain.pipeline.legacyMediaDataManagerImpl
+import com.android.systemui.media.controls.domain.pipeline.mediaDataManager
+import com.android.systemui.qs.composefragment.dagger.usingMediaInComposeFragment
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class AbstractQSFragmentComposeViewModelTest : SysuiTestCase() {
-    protected val kosmos = testKosmos()
+    protected val kosmos = testKosmos().apply { mediaDataManager = legacyMediaDataManagerImpl }
 
     protected val lifecycleOwner =
         TestLifecycleOwner(
@@ -58,11 +66,15 @@ abstract class AbstractQSFragmentComposeViewModelTest : SysuiTestCase() {
     }
 
     protected inline fun TestScope.testWithinLifecycle(
-        crossinline block: suspend TestScope.() -> TestResult
+        usingMedia: Boolean = true,
+        crossinline block: suspend TestScope.() -> TestResult,
     ): TestResult {
         return runTest {
+            kosmos.usingMediaInComposeFragment = usingMedia
+
             lifecycleOwner.setCurrentState(Lifecycle.State.RESUMED)
-            lifecycleOwner.lifecycleScope.launch { underTest.activate() }
+            underTest.activateIn(kosmos.testScope)
+            runCurrent()
             block().also { lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED) }
         }
     }

@@ -15,20 +15,18 @@
  */
 package com.android.internal.widget.remotecompose.core.types;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Represents a single integer typically used for states
- * or named for input into the system
- */
+/** Represents a single integer typically used for states or named for input into the system */
 public class IntegerConstant implements Operation {
     private int mValue = 0;
     private int mId;
@@ -87,13 +85,9 @@ public class IntegerConstant implements Operation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        id(),
-                        "IntegerConstant")
+        doc.operation("Expressions Operations", id(), "IntegerConstant")
                 .description("A integer and its associated id")
-                .field(INT, "id", "id of Int")
-                .field(INT, "value",
-                        "32-bit int value");
-
+                .field(DocumentedOperation.INT, "id", "id of Int")
+                .field(INT, "value", "32-bit int value");
     }
 }

@@ -82,7 +82,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"ଅତି ଦ୍ରୁତ"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"ମିଆଦ ଶେଷ ହୋଇଯାଇଛି"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"ବିଛିନ୍ନ ହେଲା"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"ଡିସକନେକ୍ଟ ହୋଇଛି"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"ବିଚ୍ଛିନ୍ନ କରୁଛି…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"କନେକ୍ଟ ହେଉଛି…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"ସଂଯୁକ୍ତ ହେଲା<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ଏନହାନ୍ସଡ୍ କନେକ୍ଟିଭିଟି ଫିଚର୍ ସକ୍ଷମ କରିଥାଏ।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ସ୍ଥାନୀୟ ଟର୍ମିନାଲ୍‌"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ସ୍ଥାନୀୟ ଶେଲ୍‌କୁ ଆକ‌ସେସ୍‌ ଦେଉଥିବା ଟର୍ମିନଲ୍‌ ଆପ୍‌କୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ଡେଭେଲପମେଣ୍ଟର ପରିବେଶ"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidରେ Linux ଟର୍ମିନାଲ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ଯାଞ୍ଚ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCPର ଯାଞ୍ଚ ଗତିବିଧି ସେଟ୍‍ କରନ୍ତୁ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ଡିବଗ୍‌ କରୁଛି"</string>
@@ -585,7 +587,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ଏହି କମ୍ପ୍ୟୁଟର (ଇଣ୍ଟର୍ନଲ)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"ମାଇକ୍ରୋଫୋନ (ଇଣ୍ଟର୍ନଲ)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ଡକ ସ୍ପିକର"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ଏକ୍ସଟର୍ନଲ ଡିଭାଇସ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"କନେକ୍ଟ କରାଯାଇଥିବା ଡିଭାଇସ"</string>
@@ -687,10 +688,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ସକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ଏହି ପରିବର୍ତ୍ତନ ଲାଗୁ କରିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସକୁ ନିଶ୍ଚିତ ରୂପେ ରିବୁଟ୍ କରାଯିବା ଆବଶ୍ୟକ। ବର୍ତ୍ତମାନ ରିବୁଟ୍ କରନ୍ତୁ କିମ୍ବା ବାତିଲ କରନ୍ତୁ।"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"ତାରଯୁକ୍ତ ହେଡଫୋନ"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"ହେଡଫୋନ"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB ସ୍ପିକର"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ମାଇକ ଜେକ"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB ମାଇକ"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"ୱାୟାର୍ଡ ଅଡିଓ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ଅଡିଓ"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"ୱାୟାର୍ଡ ମାଇକ୍ରୋଫୋନ"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB ମାଇକ୍ରୋଫୋନ"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT ମାଇକ୍ରୋଫୋନ"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ଚାଲୁ ଅଛି"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ବନ୍ଦ ଅଛି"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"କେରିଅର୍‍ ନେଟ୍‌ୱର୍କ ବଦଳୁଛି"</string>

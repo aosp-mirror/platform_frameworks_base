@@ -64,3 +64,19 @@ flag {
     description: "Media Quality V1.0 APIs for Android W"
     bug: "348412562"
 }
+
+flag {
+    name: "tif_extension_standardization"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Standardize AIDL Extension Interface of TIS"
+    bug: "330366987"
+}
+
+flag {
+    name: "set_resource_holder_retain"
+    is_exported: true
+    namespace: "media_tv"
+    description : "Feature flag to add setResourceHolderRetain api to MediaCas and Tuner JAVA."
+    bug: "372973197"
+}

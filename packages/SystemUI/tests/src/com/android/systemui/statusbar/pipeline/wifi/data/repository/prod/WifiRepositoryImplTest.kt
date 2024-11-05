@@ -26,19 +26,20 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.time.fakeSystemClock
 import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.HotspotNetworkEntry.DeviceType
 import com.android.wifitrackerlib.MergedCarrierEntry
@@ -67,6 +68,7 @@ import org.mockito.Mockito.verify
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class WifiRepositoryImplTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     // Using lazy means that the class will only be constructed once it's fetched. Because the
     // repository internally sets some values on construction, we need to set up some test
@@ -84,9 +86,9 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         )
     }
 
-    private val executor = FakeExecutor(FakeSystemClock())
+    private val executor = FakeExecutor(kosmos.fakeSystemClock)
     private val logger = LogBuffer("name", maxSize = 100, logcatEchoTracker = mock())
-    private val tableLogger = mock<TableLogBuffer>()
+    private val tableLogger = logcatTableLogBuffer(kosmos, "WifiRepositoryImplTest")
     private val wifiManager =
         mock<WifiManager>().apply { whenever(this.maxSignalLevel).thenReturn(10) }
     private val wifiPickerTrackerFactory = mock<WifiPickerTrackerFactory>()

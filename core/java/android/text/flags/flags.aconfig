@@ -188,3 +188,17 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "tts_span_duration"
+  namespace: "text"
+  description: "Feature flag for adding a TYPE_DURATION to TtsSpan"
+  bug: "337103893"
+}
+
+flag {
+  name: "deprecate_elegant_text_height_api"
+  namespace: "text"
+  description: "Deprecate the Paint#elegantTextHeight API and stick it to true"
+  bug: "349519475"
+}

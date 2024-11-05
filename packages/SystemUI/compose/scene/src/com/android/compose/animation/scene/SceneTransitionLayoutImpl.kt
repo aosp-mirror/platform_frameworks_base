@@ -129,6 +129,7 @@ internal class SceneTransitionLayoutImpl(
     private val verticalDraggableHandler: DraggableHandlerImpl
 
     internal val elementStateScope = ElementStateScopeImpl(this)
+    internal val propertyTransformationScope = PropertyTransformationScopeImpl(this)
     private var _userActionDistanceScope: UserActionDistanceScope? = null
     internal val userActionDistanceScope: UserActionDistanceScope
         get() =
@@ -172,7 +173,12 @@ internal class SceneTransitionLayoutImpl(
         return scenes[key] ?: error("Scene $key is not configured")
     }
 
-    internal fun sceneOrNull(key: SceneKey): Scene? = scenes[key]
+    internal fun contentOrNull(key: ContentKey): Content? {
+        return when (key) {
+            is SceneKey -> scenes[key]
+            is OverlayKey -> overlays[key]
+        }
+    }
 
     internal fun overlay(key: OverlayKey): Overlay {
         return overlays[key] ?: error("Overlay $key is not configured")

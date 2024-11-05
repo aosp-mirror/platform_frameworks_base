@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"OFF"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"、 "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>～<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"すべてのカレンダー"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> により一部の音はミュートに設定"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"デバイスで内部的な問題が発生しました。データが初期化されるまで不安定になる可能性があります。"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"着信や通知をバイブレーションで知らせます"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"着信音と通知音が鳴りません"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"システムの変更"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"サイレント モード"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新機能: サイレント モードでは通知が非表示になります"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"タップすると、詳細を確認して設定を変更できます。"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"サイレント モードが変わりました"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"タップしてブロック対象をご確認ください。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"通知設定の確認"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 以降では、インストールするアプリに、通知を送信する権限を付与する必要があります。既存のアプリのこの権限を変更するには、タップしてください。"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"後で"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"モバイル ネットワークや Wi-Fi ネットワークがなくてもメッセージを送受信できます"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"メッセージ アプリを開く"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"仕組み"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"保留中..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"指紋認証をもう一度設定してください"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>を認識できなくなりました。"</string>

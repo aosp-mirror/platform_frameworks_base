@@ -288,10 +288,11 @@ flag {
 }
 
 flag {
-    name: "get_packages_from_launcher_apps"
+    name: "audio_playback_capture_allowance"
+    is_exported: true
     namespace: "package_manager_service"
-    description: "Feature flag to provide the new methods within launcher apps class to get packages."
-    bug: "363324203"
+    description: "Feature flag to enable the feature to retrieve info about audio playback capture allowance at manifest level."
+    bug: "362425551"
     is_fixed_read_only: true
 }
 
@@ -315,5 +316,36 @@ flag {
     namespace: "package_manager_service"
     description: "Feature flag to enable the new verification service."
     bug: "360129103"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "sdk_dependency_installer"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable installation of missing sdk dependency of app"
+    bug: "370822870"
+}
+
+flag {
+    name: "include_feature_flags_in_package_cacher"
+    namespace: "package_manager_service"
+    description: "Include feature flag status when determining hits or misses in PackageCacher."
+    bug: "364771256"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "reduce_broadcasts_for_component_state_changes"
+    namespace: "package_manager_service"
+    description: "Feature flag to limit sending of the PACKAGE_CHANGED broadcast to only the system and the application itself during component state changes."
+    bug: "292261144"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "change_launcher_badging"
+    namespace: "package_manager_service"
+    description: "Feature flag to introduce a new way to change the launcher badging."
+    bug: "364760703"
     is_fixed_read_only: true
 }

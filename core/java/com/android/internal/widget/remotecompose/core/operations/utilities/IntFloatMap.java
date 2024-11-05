@@ -32,9 +32,7 @@ public class IntFloatMap {
         mValues = new float[DEFAULT_CAPACITY];
     }
 
-    /**
-     * clear the map
-     */
+    /** clear the map */
     public void clear() {
         Arrays.fill(mKeys, NOT_PRESENT);
         Arrays.fill(mValues, Float.NaN); // not strictly necessary but defensive
@@ -78,8 +76,7 @@ public class IntFloatMap {
         int index = findKey(key);
         if (index == -1) {
             return 0;
-        } else
-            return mValues[index];
+        } else return mValues[index];
     }
 
     /**

@@ -100,6 +100,9 @@ public class TestWithLooperRule implements MethodRule {
                     case "ExpectException":
                         next = this.getNextStatement(next, "next");
                         break;
+                    case "UiThreadStatement":
+                        next = this.getNextStatement(next, "base");
+                        break;
                     default:
                         throw new Exception(
                                 String.format("Unexpected Statement received: [%s]",

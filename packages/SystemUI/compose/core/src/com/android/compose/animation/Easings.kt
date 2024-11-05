@@ -16,6 +16,7 @@
 
 package com.android.compose.animation
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.core.animation.Interpolator
 import com.android.app.animation.InterpolatorsAndroidX
@@ -58,6 +59,17 @@ object Easings {
 
     /** The linear interpolator. */
     val Linear = fromInterpolator(InterpolatorsAndroidX.LINEAR)
+
+    /**
+     * Use this easing for animating progress values coming from the back callback to get the
+     * predictive-back-typical decelerate motion.
+     *
+     * This easing is similar to [StandardDecelerate] but has a slight acceleration phase at the
+     * start.
+     *
+     * See also [InterpolatorsAndroidX.BACK_GESTURE].
+     */
+    val PredictiveBack = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
 
     /** The default legacy interpolator as defined in Material 1. Also known as FAST_OUT_SLOW_IN. */
     val Legacy = fromInterpolator(InterpolatorsAndroidX.LEGACY)

@@ -30,7 +30,6 @@ filegroup {
 
 java_library {
     name: "wm-shell-flicker-utils",
-    platform_apis: true,
     optimize: {
         enabled: false,
     },

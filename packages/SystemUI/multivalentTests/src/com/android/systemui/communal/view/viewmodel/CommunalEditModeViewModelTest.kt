@@ -19,7 +19,6 @@ package com.android.systemui.communal.view.viewmodel
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.UserInfo
 import android.provider.Settings
@@ -27,7 +26,6 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.accessibilityManager
 import android.widget.RemoteViews
-import androidx.activity.result.ActivityResultLauncher
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
@@ -88,7 +86,6 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var packageManager: PackageManager
-    @Mock private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     @Mock private lateinit var metricsLogger: CommunalMetricsLogger
 
     private val kosmos = testKosmos()
@@ -117,10 +114,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         communalSceneInteractor = kosmos.communalSceneInteractor
         communalInteractor = spy(kosmos.communalInteractor)
         kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
-        kosmos.fakeUserTracker.set(
-            userInfos = listOf(MAIN_USER_INFO),
-            selectedUserIndex = 0,
-        )
+        kosmos.fakeUserTracker.set(userInfos = listOf(MAIN_USER_INFO), selectedUserIndex = 0)
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         accessibilityManager = kosmos.accessibilityManager
 
@@ -257,10 +251,13 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Test
     fun onOpenWidgetPicker_launchesWidgetPickerActivity() {
         testScope.runTest {
+            var activityStarted = false
             val success =
-                underTest.onOpenWidgetPicker(testableResources.resources, activityResultLauncher)
+                underTest.onOpenWidgetPicker(testableResources.resources) { _ ->
+                    run { activityStarted = true }
+                }
 
-            verify(activityResultLauncher).launch(any())
+            assertTrue(activityStarted)
             assertTrue(success)
         }
     }
@@ -268,14 +265,10 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Test
     fun onOpenWidgetPicker_activityLaunchThrowsException_failure() {
         testScope.runTest {
-            whenever(activityResultLauncher.launch(any()))
-                .thenThrow(ActivityNotFoundException::class.java)
-
             val success =
-                underTest.onOpenWidgetPicker(
-                    testableResources.resources,
-                    activityResultLauncher,
-                )
+                underTest.onOpenWidgetPicker(testableResources.resources) { _ ->
+                    run { throw ActivityNotFoundException() }
+                }
 
             assertFalse(success)
         }

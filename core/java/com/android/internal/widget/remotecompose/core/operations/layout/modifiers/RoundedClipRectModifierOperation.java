@@ -15,7 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -31,9 +31,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Support clip with a rounded rectangle
- */
+/** Support clip with a rounded rectangle */
 public class RoundedClipRectModifierOperation extends DrawBase4
         implements ModifierOperation, DecoratorComponent {
     public static final int OP_CODE = Operations.MODIFIER_ROUNDED_CLIP_RECT;
@@ -52,44 +50,41 @@ public class RoundedClipRectModifierOperation extends DrawBase4
         return CLASS_NAME;
     }
 
-
-    protected void write(WireBuffer buffer,
-                         float v1,
-                         float v2,
-                         float v3,
-                         float v4) {
+    @Override
+    protected void write(WireBuffer buffer, float v1, float v2, float v3, float v4) {
         apply(buffer, v1, v2, v3, v4);
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Modifier Operations",
-                        id(),
-                        "RoundedClipRectModifierOperation")
+        doc.operation("Modifier Operations", id(), "RoundedClipRectModifierOperation")
                 .description("clip with rectangle")
-                .field(FLOAT, "topStart",
+                .field(
+                        FLOAT,
+                        "topStart",
                         "The topStart radius of the rectangle to "
                                 + "intersect with the current clip")
-                .field(FLOAT, "topEnd",
+                .field(
+                        FLOAT,
+                        "topEnd",
                         "The topEnd radius of the rectangle to "
                                 + "intersect with the current clip")
-                .field(FLOAT, "bottomStart",
+                .field(
+                        FLOAT,
+                        "bottomStart",
                         "The bottomStart radius of the rectangle to "
                                 + "intersect with the current clip")
-                .field(FLOAT, "bottomEnd",
+                .field(
+                        FLOAT,
+                        "bottomEnd",
                         "The bottomEnd radius of the rectangle to "
                                 + "intersect with the current clip");
     }
 
-
     float mWidth;
     float mHeight;
 
-
     public RoundedClipRectModifierOperation(
-            float topStart,
-            float topEnd,
-            float bottomStart,
-            float bottomEnd) {
+            float topStart, float topEnd, float bottomStart, float bottomEnd) {
         super(topStart, topEnd, bottomStart, bottomEnd);
         mName = CLASS_NAME;
     }
@@ -106,33 +101,41 @@ public class RoundedClipRectModifierOperation extends DrawBase4
     }
 
     @Override
-    public void onClick(RemoteContext context, CoreDocument document,
-                        Component component, float x, float y) {
+    public void onClick(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
         // nothing
     }
 
     @Override
     public void serializeToString(int indent, StringSerializer serializer) {
         serializer.append(
-                indent, "ROUNDED_CLIP_RECT = [" + mWidth + ", " + mHeight
-                        + ", " + mX1 + ", " + mY1
-                        + ", " + mX2 + ", " + mY2 + "]");
+                indent,
+                "ROUNDED_CLIP_RECT = ["
+                        + mWidth
+                        + ", "
+                        + mHeight
+                        + ", "
+                        + mX1
+                        + ", "
+                        + mY1
+                        + ", "
+                        + mX2
+                        + ", "
+                        + mY2
+                        + "]");
     }
 
     /**
      * Writes out the rounded rect clip to the buffer
      *
-     * @param buffer        buffer to write to
-     * @param topStart      topStart radius
-     * @param topEnd        topEnd radius
-     * @param bottomStart   bottomStart radius
-     * @param bottomEnd     bottomEnd radius
+     * @param buffer buffer to write to
+     * @param topStart topStart radius
+     * @param topEnd topEnd radius
+     * @param bottomStart bottomStart radius
+     * @param bottomEnd bottomEnd radius
      */
-    public static void apply(WireBuffer buffer,
-                             float topStart,
-                             float topEnd,
-                             float bottomStart,
-                             float bottomEnd) {
+    public static void apply(
+            WireBuffer buffer, float topStart, float topEnd, float bottomStart, float bottomEnd) {
         write(buffer, OP_CODE, topStart, topEnd, bottomStart, bottomEnd);
     }
 }

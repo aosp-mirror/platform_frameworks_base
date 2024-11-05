@@ -167,6 +167,12 @@ public abstract class VirtualDeviceManagerInternal {
      */
     public abstract int getDeviceIdForDisplayId(int displayId);
 
+    /** Returns the dim duration for the displays of the device with the given ID. */
+    public abstract long getDimDurationMillisForDeviceId(int deviceId);
+
+    /** Returns the screen off timeout of the displays of the device with the given ID. */
+    public abstract long getScreenOffTimeoutMillisForDeviceId(int deviceId);
+
     /**
      * Gets the persistent ID for the VirtualDevice with the given device ID.
      *

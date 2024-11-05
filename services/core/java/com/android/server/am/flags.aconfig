@@ -218,3 +218,36 @@ flag {
     description: "Set reset_on_fork flag."
     bug: "370988407"
 }
+
+flag {
+    name: "push_global_state_to_oomadjuster"
+    namespace: "backstage_power"
+    description: "Migrate OomAdjuster pulled device state to a push model"
+    bug: "302575389"
+}
+
+flag {
+    name: "oomadjuster_cached_app_tiers"
+    namespace: "system_performance"
+    is_fixed_read_only: true
+    description: "Assign cached oom_score_adj in tiers."
+    bug: "369893532"
+}
+
+flag {
+    name: "unfreeze_bind_policy_fix"
+    namespace: "backstage_power"
+    description: "Make sure shouldNotFreeze state change correctly triggers updates."
+    bug: "375691778"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "oomadjuster_prev_laddering"
+    namespace: "system_performance"
+    is_fixed_read_only: true
+    description: "Add +X to the prev scores according to their positions in the process LRU list"
+    bug: "359912586"
+}

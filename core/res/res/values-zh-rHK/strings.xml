@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"已關閉"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"、 "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"任何日曆"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>正將某些音效設為靜音"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"你裝置的系統發生問題，回復原廠設定後即可解決該問題。"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"有來電和通知時會震動"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"有來電和通知時會靜音"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"系統變更"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"請勿騷擾"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新通知：「請勿騷擾」模式目前隱藏通知"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"輕按即可瞭解詳情和作出變更。"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"請勿騷擾已變更"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"輕按即可查看封鎖內容。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"查看通知設定"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"由 Android 13 開始，你安裝的應用程式須獲得授權才能傳送通知。輕按即可變更現有應用程式的這項權限。"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"稍後提醒我"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"在沒有流動網絡或 Wi-Fi 網絡的情況下收發短訊"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待處理…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"重新設定「指紋解鎖」功能"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"無法再辨識<xliff:g id="FINGERPRINT">%s</xliff:g>。"</string>

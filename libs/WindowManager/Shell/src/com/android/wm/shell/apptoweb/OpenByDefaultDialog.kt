@@ -19,6 +19,7 @@ package com.android.wm.shell.apptoweb
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.TaskInfo
 import android.content.Context
+import android.content.pm.verify.domain.DomainVerificationManager
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.view.LayoutInflater
@@ -30,6 +31,7 @@ import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL
 import android.view.WindowlessWindowManager
 import android.widget.ImageView
+import android.widget.RadioButton
 import android.widget.TextView
 import android.window.TaskConstants
 import com.android.wm.shell.R
@@ -58,8 +60,17 @@ internal class OpenByDefaultDialog(
     private lateinit var appIconView: ImageView
     private lateinit var appNameView: TextView
 
+    private lateinit var openInAppButton: RadioButton
+    private lateinit var openInBrowserButton: RadioButton
+
+    private val domainVerificationManager =
+        context.getSystemService(DomainVerificationManager::class.java)!!
+    private val packageName = taskInfo.baseActivity?.packageName!!
+
+
     init {
         createDialog()
+        initializeRadioButtons()
         bindAppInfo(appIconBitmap, appName)
     }
 
@@ -111,7 +122,28 @@ internal class OpenByDefaultDialog(
             closeMenu()
         }
 
+        dialog.setConfirmButtonClickListener {
+            setDefaultLinkHandlingSetting()
+            closeMenu()
+        }
+
         listener.onDialogCreated()
+    }
+
+    private fun initializeRadioButtons() {
+        openInAppButton = dialog.requireViewById(R.id.open_in_app_button)
+        openInBrowserButton = dialog.requireViewById(R.id.open_in_browser_button)
+
+        val userState =
+            getDomainVerificationUserState(domainVerificationManager, packageName) ?: return
+        val openInApp = userState.isLinkHandlingAllowed
+        openInAppButton.isChecked = openInApp
+        openInBrowserButton.isChecked = !openInApp
+    }
+
+    private fun setDefaultLinkHandlingSetting() {
+        domainVerificationManager.setDomainVerificationLinkHandlingAllowed(
+            packageName, openInAppButton.isChecked)
     }
 
     private fun closeMenu() {

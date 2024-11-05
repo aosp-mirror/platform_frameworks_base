@@ -59,13 +59,17 @@ import android.os.test.TestLooper;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwlePoint;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.SparseArray;
 
@@ -112,6 +116,8 @@ public class VibrationThreadTest {
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
@@ -780,6 +786,7 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_singleVibratorComposedEffects_runsDifferentVibrations() {
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
@@ -870,6 +877,77 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void vibrate_singleVibratorPwle_runsComposePwleV2() {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+        fakeVibrator.setResonantFrequency(150);
+        fakeVibrator.setFrequenciesHz(new float[]{30f, 50f, 100f, 120f, 150f});
+        fakeVibrator.setOutputAccelerationsGs(new float[]{0.3f, 0.5f, 1.0f, 0.8f, 0.6f});
+        fakeVibrator.setMaxEnvelopeEffectSize(10);
+        fakeVibrator.setMinEnvelopeEffectControlPointDurationMillis(20);
+
+        VibrationEffect effect = VibrationEffect.startWaveformEnvelope()
+                .addControlPoint(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*timeMillis=*/ 30)
+                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 30)
+                .build();
+        HalVibration vibration = startThreadAndDispatcher(effect);
+        waitForCompletion();
+
+        verify(mManagerHooks).noteVibratorOn(eq(UID), eq(100L));
+        verify(mManagerHooks).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibration.id));
+        verifyCallbacksTriggered(vibration, Status.FINISHED);
+        assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(
+                expectedPwle(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 0),
+                expectedPwle(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 20),
+                expectedPwle(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*timeMillis=*/ 30),
+                expectedPwle(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 20),
+                expectedPwle(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 30)
+        ), fakeVibrator.getEffectPwlePoints(vibration.id));
+
+    }
+
+    @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void vibrate_singleVibratorPwle_withInitialFrequency_runsComposePwleV2() {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+        fakeVibrator.setResonantFrequency(150);
+        fakeVibrator.setFrequenciesHz(new float[]{30f, 50f, 100f, 120f, 150f});
+        fakeVibrator.setOutputAccelerationsGs(new float[]{0.3f, 0.5f, 1.0f, 0.8f, 0.6f});
+        fakeVibrator.setMaxEnvelopeEffectSize(10);
+        fakeVibrator.setMinEnvelopeEffectControlPointDurationMillis(20);
+
+        VibrationEffect effect = VibrationEffect.startWaveformEnvelope(/*initialFrequency=*/ 30)
+                .addControlPoint(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*timeMillis=*/ 30)
+                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 30)
+                .build();
+        HalVibration vibration = startThreadAndDispatcher(effect);
+        waitForCompletion();
+
+        verify(mManagerHooks).noteVibratorOn(eq(UID), eq(100L));
+        verify(mManagerHooks).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibration.id));
+        verifyCallbacksTriggered(vibration, Status.FINISHED);
+        assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(
+                expectedPwle(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 30f, /*timeMillis=*/ 0),
+                expectedPwle(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 20),
+                expectedPwle(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*timeMillis=*/ 30),
+                expectedPwle(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 20),
+                expectedPwle(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 30)
+        ), fakeVibrator.getEffectPwlePoints(vibration.id));
+
+    }
+
+    @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_singleVibratorPwle_runsComposePwle() {
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
@@ -1724,6 +1802,7 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_pwleWithRampDown_doesNotAddRampDown() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
@@ -1959,6 +2038,10 @@ public class VibrationThreadTest {
             float startFrequencyHz, float endFrequencyHz, int duration) {
         return new RampSegment(startAmplitude, endAmplitude, startFrequencyHz, endFrequencyHz,
                 duration);
+    }
+
+    private PwlePoint expectedPwle(float amplitude, float frequencyHz, int timeMillis) {
+        return new PwlePoint(amplitude, frequencyHz, timeMillis);
     }
 
     private List<Float> expectedAmplitudes(int... amplitudes) {

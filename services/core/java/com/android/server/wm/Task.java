@@ -432,6 +432,9 @@ class Task extends TaskFragment {
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
     int mLayerRank = LAYER_RANK_INVISIBLE;
 
+    /** A 0~100 ratio to indicate the percentage of visible area on screen of a freeform task. */
+    int mNonOccludedFreeformAreaRatio;
+
     /* Unique identifier for this task. */
     final int mTaskId;
     /* User for which this task was created. */
@@ -501,6 +504,11 @@ class Task extends TaskFragment {
      * default.
      */
     boolean mIsTrimmableFromRecents;
+
+    /**
+     * Sets whether the launch-adjacent flag is respected or not for this task or its child tasks.
+     */
+    private boolean mLaunchAdjacentDisabled;
 
     /**
      * Bounds offset should be applied when calculating compatible configuration for apps targeting
@@ -1199,6 +1207,28 @@ class Task extends TaskFragment {
 
         // Ensure all animations are finished at same time in split-screen mode.
         forAllActivities(ActivityRecord::updateAnimatingActivityRegistry);
+    }
+
+    @Override
+    void onResize() {
+        super.onResize();
+        updateTaskLayerForFreeform();
+    }
+
+    @Override
+    void onMovedByResize() {
+        super.onMovedByResize();
+        updateTaskLayerForFreeform();
+    }
+
+    private void updateTaskLayerForFreeform() {
+        if (!com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()) {
+            return;
+        }
+        if (!isVisibleRequested() || !inFreeformWindowingMode()) {
+            return;
+        }
+        mRootWindowContainer.invalidateTaskLayersAndUpdateOomAdjIfNeeded();
     }
 
     @Override
@@ -3267,22 +3297,25 @@ class Task extends TaskFragment {
         mDimmer.resetDimStates();
         super.prepareSurfaces();
 
-        final Rect dimBounds = mDimmer.getDimBounds();
-        if (dimBounds != null) {
-            getDimBounds(dimBounds);
+        Rect dimBounds = null;
+        if (!Flags.useTasksDimOnly()) {
+            dimBounds = mDimmer.getDimBounds();
+            if (dimBounds != null) {
+                getDimBounds(dimBounds);
 
-            // Bounds need to be relative, as the dim layer is a child.
-            if (inFreeformWindowingMode()) {
-                getBounds(mTmpRect);
-                dimBounds.offsetTo(dimBounds.left - mTmpRect.left, dimBounds.top - mTmpRect.top);
-            } else {
-                dimBounds.offsetTo(0, 0);
+                // Bounds need to be relative, as the dim layer is a child.
+                if (inFreeformWindowingMode()) {
+                    getBounds(mTmpRect);
+                    dimBounds.offset(-mTmpRect.left, -mTmpRect.top);
+                } else {
+                    dimBounds.offsetTo(0, 0);
+                }
             }
         }
 
         final SurfaceControl.Transaction t = getSyncTransaction();
 
-        if (dimBounds != null && mDimmer.updateDims(t)) {
+        if (mDimmer.hasDimState() && mDimmer.updateDims(t)) {
             scheduleAnimation();
         }
 
@@ -3390,6 +3423,8 @@ class Task extends TaskFragment {
                 ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
         info.shouldDockBigOverlays = top != null && top.shouldDockBigOverlays;
         info.mTopActivityLocusId = top != null ? top.getLocusId() : null;
+        info.isTopActivityLimitSystemEducationDialogs = top != null
+              ? top.mShouldLimitSystemEducationDialogs : false;
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
                 ? parentTask.mTaskId
@@ -3397,14 +3432,45 @@ class Task extends TaskFragment {
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
         info.isVisibleRequested = isVisibleRequested();
+        info.isTopActivityNoDisplay = top != null && top.isNoDisplay();
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
-        info.isTopActivityStyleFloating = top != null && top.isStyleFloating();
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
         final WindowState windowState = top != null ? top.findMainWindow() : null;
         info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
                 ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
+        info.topActivityMainWindowFrame = calculateTopActivityMainWindowFrameForTaskInfo(top);
+    }
+
+    /**
+     * Returns the top activity's main window frame if it doesn't match
+     * {@link ActivityRecord#getBounds() the top activity bounds}, or {@code null}, otherwise.
+     *
+     * @param top The top running activity of the task
+     */
+    @Nullable
+    private static Rect calculateTopActivityMainWindowFrameForTaskInfo(
+            @Nullable ActivityRecord top) {
+        if (!Flags.betterSupportNonMatchParentActivity()) {
+            return null;
+        }
+        if (top == null) {
+            return null;
+        }
+        final WindowState mainWindow = top.findMainWindow();
+        if (mainWindow == null) {
+            return null;
+        }
+        if (!mainWindow.mHaveFrame) {
+            return null;
+        }
+        final Rect windowFrame = mainWindow.getFrame();
+        final Rect parentFrame = mainWindow.getParentFrame();
+        if (parentFrame.equals(windowFrame)) {
+            return null;
+        }
+        return windowFrame;
     }
 
     /**
@@ -3802,6 +3868,9 @@ class Task extends TaskFragment {
         pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
         pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
         pw.print(prefix); pw.println(" isTrimmable=" + mIsTrimmableFromRecents);
+        if (mLaunchAdjacentDisabled) {
+            pw.println(prefix + "mLaunchAdjacentDisabled=true");
+        }
     }
 
     @Override
@@ -3849,9 +3918,13 @@ class Task extends TaskFragment {
             sb.append(" aI=");
             sb.append(affinityIntent.getComponent().flattenToShortString());
         }
-        sb.append(" isResizeable=").append(isResizeable());
-        sb.append(" minWidth=").append(mMinWidth);
-        sb.append(" minHeight=").append(mMinHeight);
+        if (!isResizeable()) {
+            sb.append(" nonResizable");
+        }
+        if (mMinWidth != INVALID_MIN_SIZE || mMinHeight != INVALID_MIN_SIZE) {
+            sb.append(" minWidth=").append(mMinWidth);
+            sb.append(" minHeight=").append(mMinHeight);
+        }
         sb.append('}');
         return stringName = sb.toString();
     }
@@ -4651,7 +4724,7 @@ class Task extends TaskFragment {
             }
         }
         if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
-                && topActivity != null && !topActivity.noDisplay
+                && topActivity != null && !topActivity.isNoDisplay()
                 && topActivity.canForceResizeNonResizable(likelyResolvedMode)) {
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
@@ -5734,6 +5807,12 @@ class Task extends TaskFragment {
     }
 
     private boolean canMoveTaskToBack(Task task) {
+        // Checks whether a task is a child of this task because it can be reparented when
+        // transition is deferred.
+        if (task != this && !task.isDescendantOf(this)) {
+            return false;
+        }
+
         // In LockTask mode, moving a locked task to the back of the root task may expose unlocked
         // ones. Therefore we need to check if this operation is allowed.
         if (!mAtmService.getLockTaskController().canMoveTaskToBack(task)) {
@@ -5803,7 +5882,7 @@ class Task extends TaskFragment {
                     (deferred) -> {
                         // Need to check again if deferred since the system might
                         // be in a different state.
-                        if (!isAttached() || (deferred && !canMoveTaskToBack(tr))) {
+                        if (!tr.isAttached() || (deferred && !canMoveTaskToBack(tr))) {
                             Slog.e(TAG, "Failed to move task to back after saying we could: "
                                     + tr.mTaskId);
                             transition.abort();
@@ -5904,6 +5983,10 @@ class Task extends TaskFragment {
         if (mLastNonFullscreenBounds != null) {
             pw.print(prefix); pw.print("  mLastNonFullscreenBounds=");
             pw.println(mLastNonFullscreenBounds);
+        }
+        if (mNonOccludedFreeformAreaRatio != 0) {
+            pw.print(prefix); pw.print("  mNonOccludedFreeformAreaRatio=");
+            pw.println(mNonOccludedFreeformAreaRatio);
         }
         if (isLeafTask()) {
             pw.println(prefix + "  isSleeping=" + shouldSleepActivities());
@@ -6265,6 +6348,28 @@ class Task extends TaskFragment {
 
     void setTrimmableFromRecents(boolean isTrimmable) {
         mIsTrimmableFromRecents = isTrimmable;
+    }
+
+    /**
+     * Sets this task and its children to disable respecting launch-adjacent.
+     */
+    void setLaunchAdjacentDisabled(boolean disabled) {
+        mLaunchAdjacentDisabled = disabled;
+    }
+
+    /**
+     * Returns whether this task or any of its ancestors have disabled respecting the
+     * launch-adjacent flag.
+     */
+    boolean isLaunchAdjacentDisabled() {
+        Task t = this;
+        while (t != null) {
+            if (t.mLaunchAdjacentDisabled) {
+                return true;
+            }
+            t = t.getParent().asTask();
+        }
+        return false;
     }
 
     /**

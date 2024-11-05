@@ -90,11 +90,11 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
@@ -1912,9 +1912,7 @@ public class VcnGatewayConnection extends StateMachine {
                 // Transforms do not need to be persisted; the IkeSession will keep them alive
                 mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
 
-                if (direction == IpSecManager.DIRECTION_IN
-                        && mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                        && mVcnContext.isFlagIpSecTransformStateEnabled()) {
+                if (direction == IpSecManager.DIRECTION_IN) {
                     mUnderlyingNetworkController.updateInboundTransform(mUnderlying, transform);
                 }
 

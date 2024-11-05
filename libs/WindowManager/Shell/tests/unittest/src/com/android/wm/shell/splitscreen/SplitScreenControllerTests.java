@@ -297,6 +297,28 @@ public class SplitScreenControllerTests extends ShellTestCase {
     }
 
     @Test
+    public void startIntent_forceLaunchNewTaskTrue_skipsBackgroundTasks() {
+        Intent startIntent = createStartIntent("startActivity");
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
+        mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
+                SPLIT_POSITION_TOP_OR_LEFT, null /* options */, null /* hideTaskToken */,
+                true /* forceLaunchNewTask */);
+        verify(mRecentTasks, never()).findTaskInBackground(any(), anyInt(), any());
+    }
+
+    @Test
+    public void startIntent_forceLaunchNewTaskFalse_checksBackgroundTasks() {
+        Intent startIntent = createStartIntent("startActivity");
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
+        mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
+                SPLIT_POSITION_TOP_OR_LEFT, null /* options */, null /* hideTaskToken */,
+                false /* forceLaunchNewTask */);
+        verify(mRecentTasks).findTaskInBackground(any(), anyInt(), any());
+    }
+
+    @Test
     public void testSwitchSplitPosition_checksIsSplitScreenVisible() {
         final String reason = "test";
         when(mSplitScreenController.isSplitScreenVisible()).thenReturn(true, false);

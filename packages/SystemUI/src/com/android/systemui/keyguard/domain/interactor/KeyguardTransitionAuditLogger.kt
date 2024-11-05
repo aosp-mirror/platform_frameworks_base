@@ -29,7 +29,7 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNoti
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 private val TAG = KeyguardTransitionAuditLogger::class.simpleName!!
 

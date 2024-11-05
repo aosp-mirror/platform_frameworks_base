@@ -16,7 +16,7 @@ data class EdgePanelParams(private var resources: Resources) {
         val heightSpring: SpringForce? = null,
         val lengthSpring: SpringForce? = null,
         var alphaSpring: Step<SpringForce>? = null,
-        var alphaInterpolator: Step<Float>? = null
+        var alphaInterpolator: Step<Float>? = null,
     )
 
     data class BackgroundDimens(
@@ -178,14 +178,14 @@ data class EdgePanelParams(private var resources: Resources) {
                 threshold = commonArrowDimensAlphaThreshold,
                 factor = commonArrowDimensAlphaFactor,
                 postThreshold = createSpring(180f, 0.9f),
-                preThreshold = createSpring(2000f, 0.6f)
+                preThreshold = createSpring(2000f, 0.6f),
             )
         val commonArrowDimensAlphaSpringInterpolator =
             Step(
                 threshold = commonArrowDimensAlphaThreshold,
                 factor = commonArrowDimensAlphaFactor,
                 postThreshold = 1f,
-                preThreshold = 0f
+                preThreshold = 0f,
             )
 
         entryIndicator =
@@ -204,7 +204,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         lengthSpring = createSpring(600f, 0.4f),
                         heightSpring = createSpring(600f, 0.4f),
                         alphaSpring = commonArrowDimensAlphaSpring,
-                        alphaInterpolator = commonArrowDimensAlphaSpringInterpolator
+                        alphaInterpolator = commonArrowDimensAlphaSpringInterpolator,
                     ),
                 backgroundDimens =
                     BackgroundDimens(
@@ -217,7 +217,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = createSpring(1500f, 0.45f),
                         farCornerRadiusSpring = createSpring(300f, 0.5f),
                         edgeCornerRadiusSpring = createSpring(150f, 0.5f),
-                    )
+                    ),
             )
 
         activeIndicator =
@@ -235,7 +235,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         lengthSpring = activeCommittedArrowLengthSpring,
                         heightSpring = activeCommittedArrowHeightSpring,
                         alphaSpring = commonArrowDimensAlphaSpring,
-                        alphaInterpolator = commonArrowDimensAlphaSpringInterpolator
+                        alphaInterpolator = commonArrowDimensAlphaSpringInterpolator,
                     ),
                 backgroundDimens =
                     BackgroundDimens(
@@ -248,7 +248,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = createSpring(10000f, 1f),
                         edgeCornerRadiusSpring = createSpring(2600f, 0.855f),
                         farCornerRadiusSpring = createSpring(1200f, 0.30f),
-                    )
+                    ),
             )
 
         preThresholdIndicator =
@@ -266,7 +266,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         lengthSpring = createSpring(100f, 0.6f),
                         heightSpring = createSpring(100f, 0.6f),
                         alphaSpring = commonArrowDimensAlphaSpring,
-                        alphaInterpolator = commonArrowDimensAlphaSpringInterpolator
+                        alphaInterpolator = commonArrowDimensAlphaSpringInterpolator,
                     ),
                 backgroundDimens =
                     BackgroundDimens(
@@ -281,7 +281,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = createSpring(1500f, 0.45f),
                         farCornerRadiusSpring = createSpring(300f, 1f),
                         edgeCornerRadiusSpring = createSpring(250f, 0.5f),
-                    )
+                    ),
             )
 
         committedIndicator =
@@ -317,7 +317,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         lengthSpring = createSpring(850f, 0.46f),
                         heightSpring = createSpring(850f, 0.46f),
                         length = activeIndicator.arrowDimens.length,
-                        height = activeIndicator.arrowDimens.height
+                        height = activeIndicator.arrowDimens.height,
                     ),
                 backgroundDimens =
                     committedIndicator.backgroundDimens.copy(
@@ -325,7 +325,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = flungCommittedHeightSpring,
                         edgeCornerRadiusSpring = flungCommittedEdgeCornerSpring,
                         farCornerRadiusSpring = flungCommittedFarCornerSpring,
-                    )
+                    ),
             )
 
         cancelledIndicator =
@@ -334,7 +334,7 @@ data class EdgePanelParams(private var resources: Resources) {
                     entryIndicator.backgroundDimens.copy(
                         width = 0f,
                         alpha = 0f,
-                        alphaSpring = createSpring(450f, 1f)
+                        alphaSpring = createSpring(450f, 1f),
                     )
             )
 
@@ -366,7 +366,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = null,
                         edgeCornerRadiusSpring = null,
                         farCornerRadiusSpring = null,
-                    )
+                    ),
             )
     }
 }

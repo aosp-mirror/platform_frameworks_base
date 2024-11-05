@@ -19,6 +19,7 @@ package dalvik.system;
 // The original is here:
 // $ANDROID_BUILD_TOP/libcore/libart/src/main/java/dalvik/system/VMRuntime.java
 
+import com.android.ravenwood.RavenwoodRuntimeState;
 import com.android.ravenwood.common.JvmWorkaround;
 
 import java.lang.reflect.Array;
@@ -51,5 +52,9 @@ public class VMRuntime {
 
     public long addressOf(Object obj) {
         return JvmWorkaround.getInstance().addressOf(obj);
+    }
+
+    public int getTargetSdkVersion() {
+        return RavenwoodRuntimeState.sTargetSdkLevel;
     }
 }

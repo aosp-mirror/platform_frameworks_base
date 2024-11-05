@@ -110,6 +110,7 @@ static struct {
     jmethodID notifyInputDevicesChanged;
     jmethodID notifyTouchpadHardwareState;
     jmethodID notifyTouchpadGestureInfo;
+    jmethodID notifyTouchpadThreeFingerTap;
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyNoFocusedWindowAnr;
@@ -337,12 +338,15 @@ public:
     int32_t getMousePointerSpeed();
     void setPointerSpeed(int32_t speed);
     void setMousePointerAccelerationEnabled(ui::LogicalDisplayId displayId, bool enabled);
+    void setMouseReverseVerticalScrollingEnabled(bool enabled);
+    void setMouseSwapPrimaryButtonEnabled(bool enabled);
     void setTouchpadPointerSpeed(int32_t speed);
     void setTouchpadNaturalScrollingEnabled(bool enabled);
     void setTouchpadTapToClickEnabled(bool enabled);
     void setTouchpadTapDraggingEnabled(bool enabled);
     void setShouldNotifyTouchpadHardwareState(bool enabled);
     void setTouchpadRightClickZoneEnabled(bool enabled);
+    void setTouchpadThreeFingerTapShortcutEnabled(bool enabled);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
     void setNonInteractiveDisplays(const std::set<ui::LogicalDisplayId>& displayIds);
@@ -368,6 +372,7 @@ public:
     void notifyTouchpadHardwareState(const SelfContainedHardwareState& schs,
                                      int32_t deviceId) override;
     void notifyTouchpadGestureInfo(enum GestureType type, int32_t deviceId) override;
+    void notifyTouchpadThreeFingerTap() override;
     std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
             const InputDeviceIdentifier& identifier,
             const std::optional<KeyboardLayoutInfo> keyboardLayoutInfo) override;
@@ -482,6 +487,12 @@ private:
         // True if stylus button reporting through motion events is enabled.
         bool stylusButtonMotionEventsEnabled{true};
 
+        // True if mouse vertical scrolling is reversed.
+        bool mouseReverseVerticalScrollingEnabled{false};
+
+        // True if the mouse primary button is swapped (left/right buttons).
+        bool mouseSwapPrimaryButtonEnabled{false};
+
         // The touchpad pointer speed, as a number from -7 (slowest) to 7 (fastest).
         int32_t touchpadPointerSpeed{0};
 
@@ -501,6 +512,10 @@ private:
         // True to enable a zone on the right-hand side of touchpads where clicks will be turned
         // into context (a.k.a. "right") clicks.
         bool touchpadRightClickZoneEnabled{false};
+
+        // True to use three-finger tap as a customizable shortcut; false to use it as a
+        // middle-click.
+        bool touchpadThreeFingerTapShortcutEnabled{false};
 
         // True if a pointer icon should be shown for stylus pointers.
         bool stylusPointerIconEnabled{false};
@@ -762,12 +777,18 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->defaultPointerDisplayId = mLocked.pointerDisplayId;
 
+        outConfig->mouseReverseVerticalScrollingEnabled =
+                mLocked.mouseReverseVerticalScrollingEnabled;
+        outConfig->mouseSwapPrimaryButtonEnabled = mLocked.mouseSwapPrimaryButtonEnabled;
+
         outConfig->touchpadPointerSpeed = mLocked.touchpadPointerSpeed;
         outConfig->touchpadNaturalScrollingEnabled = mLocked.touchpadNaturalScrollingEnabled;
         outConfig->touchpadTapToClickEnabled = mLocked.touchpadTapToClickEnabled;
         outConfig->touchpadTapDraggingEnabled = mLocked.touchpadTapDraggingEnabled;
         outConfig->shouldNotifyTouchpadHardwareState = mLocked.shouldNotifyTouchpadHardwareState;
         outConfig->touchpadRightClickZoneEnabled = mLocked.touchpadRightClickZoneEnabled;
+        outConfig->touchpadThreeFingerTapShortcutEnabled =
+                mLocked.touchpadThreeFingerTapShortcutEnabled;
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
 
@@ -1020,6 +1041,13 @@ void NativeInputManager::notifyTouchpadGestureInfo(enum GestureType type, int32_
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyTouchpadGestureInfo, type, deviceId);
 
     checkAndClearExceptionFromCallback(env, "notifyTouchpadGestureInfo");
+}
+
+void NativeInputManager::notifyTouchpadThreeFingerTap() {
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyTouchpadThreeFingerTap);
+    checkAndClearExceptionFromCallback(env, "notifyTouchpadThreeFingerTap");
 }
 
 std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
@@ -1317,6 +1345,36 @@ int32_t NativeInputManager::getMousePointerSpeed() {
     return mLocked.pointerSpeed;
 }
 
+void NativeInputManager::setMouseReverseVerticalScrollingEnabled(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.mouseReverseVerticalScrollingEnabled == enabled) {
+            return;
+        }
+
+        mLocked.mouseReverseVerticalScrollingEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::MOUSE_SETTINGS);
+}
+
+void NativeInputManager::setMouseSwapPrimaryButtonEnabled(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.mouseSwapPrimaryButtonEnabled == enabled) {
+            return;
+        }
+
+        mLocked.mouseSwapPrimaryButtonEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::MOUSE_SETTINGS);
+}
+
 void NativeInputManager::setPointerSpeed(int32_t speed) {
     { // acquire lock
         std::scoped_lock _l(mLock);
@@ -1447,6 +1505,22 @@ void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
 
         ALOGI("Setting touchpad right click zone to %s.", toString(enabled));
         mLocked.touchpadRightClickZoneEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
+}
+
+void NativeInputManager::setTouchpadThreeFingerTapShortcutEnabled(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.touchpadThreeFingerTapShortcutEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting touchpad three finger tap shortcut to %s.", toString(enabled));
+        mLocked.touchpadThreeFingerTapShortcutEnabled = enabled;
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -2395,6 +2469,11 @@ static void nativeSetTouchpadRightClickZoneEnabled(JNIEnv* env, jobject nativeIm
     im->setTouchpadRightClickZoneEnabled(enabled);
 }
 
+static void nativeSetTouchpadThreeFingerTapShortcutEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                           jboolean enabled) {
+    getNativeInputManager(env, nativeImplObj)->setTouchpadThreeFingerTapShortcutEnabled(enabled);
+}
+
 static void nativeSetShowTouches(JNIEnv* env, jobject nativeImplObj, jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -3002,6 +3081,24 @@ static jint nativeGetLastUsedInputDeviceId(JNIEnv* env, jobject nativeImplObj) {
     return static_cast<jint>(im->getInputManager()->getReader().getLastUsedInputDeviceId());
 }
 
+static void nativeSetMouseReverseVerticalScrollingEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                          bool enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setMouseReverseVerticalScrollingEnabled(enabled);
+}
+
+static void nativeSetMouseSwapPrimaryButtonEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                   bool enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setMouseSwapPrimaryButtonEnabled(enabled);
+}
+
+static jboolean nativeSetKernelWakeEnabled(JNIEnv* env, jobject nativeImplObj, jint deviceId,
+                                      jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    return im->getInputManager()->getReader().setKernelWakeEnabled(deviceId, enabled);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -3048,6 +3145,9 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setPointerSpeed", "(I)V", (void*)nativeSetPointerSpeed},
         {"setMousePointerAccelerationEnabled", "(IZ)V",
          (void*)nativeSetMousePointerAccelerationEnabled},
+        {"setMouseReverseVerticalScrollingEnabled", "(Z)V",
+         (void*)nativeSetMouseReverseVerticalScrollingEnabled},
+        {"setMouseSwapPrimaryButtonEnabled", "(Z)V", (void*)nativeSetMouseSwapPrimaryButtonEnabled},
         {"setTouchpadPointerSpeed", "(I)V", (void*)nativeSetTouchpadPointerSpeed},
         {"setTouchpadNaturalScrollingEnabled", "(Z)V",
          (void*)nativeSetTouchpadNaturalScrollingEnabled},
@@ -3056,6 +3156,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setShouldNotifyTouchpadHardwareState", "(Z)V",
          (void*)nativeSetShouldNotifyTouchpadHardwareState},
         {"setTouchpadRightClickZoneEnabled", "(Z)V", (void*)nativeSetTouchpadRightClickZoneEnabled},
+        {"setTouchpadThreeFingerTapShortcutEnabled", "(Z)V",
+         (void*)nativeSetTouchpadThreeFingerTapShortcutEnabled},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
         {"setNonInteractiveDisplays", "([I)V", (void*)nativeSetNonInteractiveDisplays},
         {"reloadCalibration", "()V", (void*)nativeReloadCalibration},
@@ -3115,6 +3217,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetAccessibilityStickyKeysEnabled},
         {"setInputMethodConnectionIsActive", "(Z)V", (void*)nativeSetInputMethodConnectionIsActive},
         {"getLastUsedInputDeviceId", "()I", (void*)nativeGetLastUsedInputDeviceId},
+        {"setKernelWakeEnabled", "(IZ)Z", (void*)nativeSetKernelWakeEnabled},
 };
 
 #define FIND_CLASS(var, className) \
@@ -3165,6 +3268,8 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifyTouchpadGestureInfo, clazz, "notifyTouchpadGestureInfo",
                   "(II)V")
 
+    GET_METHOD_ID(gServiceClassInfo.notifyTouchpadThreeFingerTap, clazz,
+                  "notifyTouchpadThreeFingerTap", "()V")
     GET_METHOD_ID(gServiceClassInfo.notifySwitch, clazz,
             "notifySwitch", "(JII)V");
 

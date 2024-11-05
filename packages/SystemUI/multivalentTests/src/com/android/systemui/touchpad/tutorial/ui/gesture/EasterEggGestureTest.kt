@@ -36,10 +36,7 @@ class EasterEggGestureTest : SysuiTestCase() {
     private var triggered = false
     private val handler =
         TouchpadGestureHandler(
-            BackGestureMonitor(
-                gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
-                gestureStateChangedCallback = {},
-            ),
+            BackGestureRecognizer(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt()),
             EasterEggGestureMonitor(callback = { triggered = true }),
         )
 
@@ -107,7 +104,8 @@ class EasterEggGestureTest : SysuiTestCase() {
     }
 
     private fun assertStateAfterTwoFingerGesture(gesturePath: List<Point>, wasTriggered: Boolean) {
-        val events = TwoFingerGesture.createEvents { gesturePath.forEach { (x, y) -> move(x, y) } }
+        val events =
+            TwoFingerGesture.eventsForFullGesture { gesturePath.forEach { (x, y) -> move(x, y) } }
         assertStateAfterEvents(events = events, wasTriggered = wasTriggered)
     }
 

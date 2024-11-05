@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromPrimaryBouncerTransitionInteractor
@@ -78,7 +78,6 @@ constructor(
         listenForPrimaryBouncerToGone()
         listenForPrimaryBouncerToAsleep()
         listenForPrimaryBouncerNotShowing()
-        listenForPrimaryBouncerToDreamingLockscreenHosted()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
@@ -108,23 +107,19 @@ constructor(
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
                 keyguardInteractor.primaryBouncerShowing
-                    .sample(
-                        powerInteractor.isAwake,
-                        keyguardInteractor.isActiveDreamLockscreenHosted,
-                        communalSceneInteractor.isIdleOnCommunal,
-                    )
-                    .filterRelevantKeyguardStateAnd { (isBouncerShowing, _, _, _) ->
+                    .sample(powerInteractor.isAwake, communalSceneInteractor.isIdleOnCommunal)
+                    .filterRelevantKeyguardStateAnd { (isBouncerShowing, _, _) ->
                         // TODO(b/307976454) - See if we need to listen for SHOW_WHEN_LOCKED
                         // activities showing up over the bouncer. Camera launch can't show up over
                         // bouncer since the first power press hides bouncer. Do occluding
                         // activities auto hide bouncer? Not sure.
                         !isBouncerShowing
                     }
-                    .collect { (_, isAwake, isActiveDreamLockscreenHosted, isIdleOnCommunal) ->
+                    .collect { (_, isAwake, isIdleOnCommunal) ->
                         if (
                             !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
                                 startTransitionTo(state, ownerReason = reason)
-                            } && isAwake && !isActiveDreamLockscreenHosted
+                            } && isAwake
                         ) {
                             val toState =
                                 if (isIdleOnCommunal) {
@@ -193,19 +188,6 @@ constructor(
     private fun listenForPrimaryBouncerToAsleep() {
         if (SceneContainerFlag.isEnabled) return
         scope.launch { listenForSleepTransition() }
-    }
-
-    private fun listenForPrimaryBouncerToDreamingLockscreenHosted() {
-        if (SceneContainerFlag.isEnabled) return
-        scope.launch {
-            keyguardInteractor.primaryBouncerShowing
-                .sample(keyguardInteractor.isActiveDreamLockscreenHosted, ::Pair)
-                .filterRelevantKeyguardStateAnd { (isBouncerShowing, isActiveDreamLockscreenHosted)
-                    ->
-                    !isBouncerShowing && isActiveDreamLockscreenHosted
-                }
-                .collect { startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED) }
-        }
     }
 
     private fun listenForPrimaryBouncerToGone() {

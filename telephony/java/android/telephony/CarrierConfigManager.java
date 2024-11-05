@@ -253,7 +253,6 @@ public class CarrierConfigManager {
      *
      * The default value is true.
      */
-    @FlaggedApi(Flags.FLAG_SHOW_CALL_ID_AND_CALL_WAITING_IN_ADDITIONAL_SETTINGS_MENU)
     public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL =
             "additional_settings_caller_id_visibility_bool";
 
@@ -263,7 +262,6 @@ public class CarrierConfigManager {
      *
      * The default value is true.
      */
-    @FlaggedApi(Flags.FLAG_SHOW_CALL_ID_AND_CALL_WAITING_IN_ADDITIONAL_SETTINGS_MENU)
     public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL =
             "additional_settings_call_waiting_visibility_bool";
 
@@ -9858,6 +9856,16 @@ public class CarrierConfigManager {
     public static final String KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL =
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
+    /**
+     * This value is used to set the max datagram size, if the value is not available then the
+     * default one will be used.
+     * If key is {@code true}, retrieve the max datagram value and use this value always,
+     * {@code false} the default value from the modem will be used.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE =
+            "satellite_sos_max_datagram_size";
 
     /** @hide */
     @IntDef({
@@ -10143,6 +10151,15 @@ public class CarrierConfigManager {
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public static final String KEY_SATELLITE_ROAMING_ESOS_INACTIVITY_TIMEOUT_SEC_INT =
             "satellite_roaming_esos_inactivity_timeout_sec_int";
+
+    /**
+     * A string array containing the list of messaging package names that support satellite.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_SUPPORTED_MSG_APPS_STRING_ARRAY =
+            "satellite_supported_msg_apps_string_array";
 
     /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
@@ -10558,7 +10575,6 @@ public class CarrierConfigManager {
      * @see SubscriptionInfo#getServiceCapabilities()
      * @see SubscriptionManager.OnSubscriptionsChangedListener
      */
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public static final String KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY =
             "cellular_service_capabilities_int_array";
    /**
@@ -11110,7 +11126,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
         sDefaults.putInt(KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT, 0);
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
-        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL, true);
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL, false);
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_PLMN_CHANGE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
@@ -11408,6 +11424,7 @@ public class CarrierConfigManager {
         sDefaults.putIntArray(KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY, new int[]{1, 2, 3});
         sDefaults.putInt(KEY_WEAR_CONNECTIVITY_BT_TO_CELL_DELAY_MS_INT, -1);
         sDefaults.putInt(KEY_WEAR_CONNECTIVITY_EXTEND_BT_TO_CELL_DELAY_ON_WIFI_MS_INT, -1);
+        sDefaults.putInt(KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE, 255);
     }
 
     /**

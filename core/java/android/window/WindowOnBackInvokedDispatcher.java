@@ -16,7 +16,11 @@
 
 package android.window;
 
+import static android.window.SystemOverrideOnBackInvokedCallback.OVERRIDE_UNDEFINED;
+
+import static com.android.window.flags.Flags.predictiveBackSystemOverrideCallback;
 import static com.android.window.flags.Flags.predictiveBackPrioritySystemNavigationObserver;
+import static com.android.window.flags.Flags.predictiveBackTimestampApi;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -124,7 +128,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         if (!isBackGestureInProgress() || ev == null || ev.getAction() != MotionEvent.ACTION_MOVE) {
             return;
         }
-        mTouchTracker.update(ev.getX(), ev.getY(), Float.NaN, Float.NaN);
+        mTouchTracker.update(ev.getX(), ev.getY());
         if (mTouchTracker.shouldUpdateStartLocation()) {
             // Reset the start location on the first event after starting back, so that
             // the beginning of the animation feels smooth.
@@ -199,6 +203,15 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             if (mImeDispatcher != null) {
                 mImeDispatcher.registerOnBackInvokedCallback(priority, callback);
                 return;
+            }
+            if (predictiveBackPrioritySystemNavigationObserver()
+                    && predictiveBackSystemOverrideCallback()) {
+                if (priority == PRIORITY_SYSTEM_NAVIGATION_OBSERVER
+                        && callback instanceof SystemOverrideOnBackInvokedCallback) {
+                    Log.e(TAG, "System override callbacks cannot be registered to "
+                            + "NAVIGATION_OBSERVER");
+                    return;
+                }
             }
             if (predictiveBackPrioritySystemNavigationObserver()) {
                 if (priority == PRIORITY_SYSTEM_NAVIGATION_OBSERVER) {
@@ -364,7 +377,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void tryInvokeSystemNavigationObserverCallback() {
         OnBackInvokedCallback topCallback = getTopCallback();
         Integer callbackPriority = mAllCallbacks.getOrDefault(topCallback, null);
-        if (callbackPriority != null && callbackPriority == PRIORITY_SYSTEM) {
+        final boolean isSystemOverride = topCallback instanceof SystemOverrideOnBackInvokedCallback;
+        if ((callbackPriority != null && callbackPriority == PRIORITY_SYSTEM) || isSystemOverride) {
             invokeSystemNavigationObserverCallback();
         }
     }
@@ -383,14 +397,22 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             OnBackInvokedCallbackInfo callbackInfo = null;
             if (callback != null) {
                 int priority = mAllCallbacks.get(callback);
+                int overrideAnimation = OVERRIDE_UNDEFINED;
+                if (callback instanceof SystemOverrideOnBackInvokedCallback) {
+                    overrideAnimation = ((SystemOverrideOnBackInvokedCallback) callback)
+                            .overrideBehavior();
+                }
+                final boolean isSystemCallback = priority == PRIORITY_SYSTEM
+                        || overrideAnimation != OVERRIDE_UNDEFINED;
                 final IOnBackInvokedCallback iCallback = new OnBackInvokedCallbackWrapper(callback,
                         mTouchTracker, mProgressAnimator, mHandler, this::callOnKeyPreIme,
                         this::invokeSystemNavigationObserverCallback,
-                        /*isSystemCallback*/ priority == PRIORITY_SYSTEM);
+                        isSystemCallback /*isSystemCallback*/);
                 callbackInfo = new OnBackInvokedCallbackInfo(
                         iCallback,
                         priority,
-                        callback instanceof OnBackAnimationCallback);
+                        callback instanceof OnBackAnimationCallback,
+                        overrideAnimation);
             }
             mWindowSession.setOnBackInvokedCallbackInfo(mWindow, callbackInfo);
         } catch (RemoteException e) {
@@ -563,7 +585,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 }
                 OnBackAnimationCallback animationCallback = getBackAnimationCallback();
                 if (animationCallback != null
-                        && !(callback instanceof ImeBackAnimationController)) {
+                        && !(callback instanceof ImeBackAnimationController)
+                        && !predictiveBackTimestampApi()) {
                     mProgressAnimator.onBackInvoked(() -> {
                         if (mIsSystemCallback) {
                             mSystemNavigationObserverCallbackRunnable.run();

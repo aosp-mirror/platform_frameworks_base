@@ -16,8 +16,6 @@
 
 package android.webkit;
 
-import static android.webkit.Flags.updateServiceV2;
-
 import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.ChildZygoteProcess;
@@ -52,13 +50,6 @@ public class WebViewZygote {
     @GuardedBy("sLock")
     private static PackageInfo sPackage;
 
-    /**
-     * Flag for whether multi-process WebView is enabled. If this is {@code false}, the zygote will
-     * not be started. Should be removed entirely after we remove the updateServiceV2 flag.
-     */
-    @GuardedBy("sLock")
-    private static boolean sMultiprocessEnabled = false;
-
     public static ZygoteProcess getProcess() {
         synchronized (sLock) {
             if (sZygote != null) return sZygote;
@@ -76,40 +67,13 @@ public class WebViewZygote {
 
     public static boolean isMultiprocessEnabled() {
         synchronized (sLock) {
-            if (updateServiceV2()) {
-                return sPackage != null;
-            } else {
-                return sMultiprocessEnabled && sPackage != null;
-            }
-        }
-    }
-
-    public static void setMultiprocessEnabled(boolean enabled) {
-        if (updateServiceV2()) {
-            throw new IllegalStateException(
-                    "setMultiprocessEnabled shouldn't be called if update_service_v2 flag is set.");
-        }
-        synchronized (sLock) {
-            sMultiprocessEnabled = enabled;
-
-            // When multi-process is disabled, kill the zygote. When it is enabled,
-            // the zygote will be started when it is first needed in getProcess().
-            if (!enabled) {
-                stopZygoteLocked();
-            }
+            return sPackage != null;
         }
     }
 
     static void onWebViewProviderChanged(PackageInfo packageInfo) {
         synchronized (sLock) {
             sPackage = packageInfo;
-
-            // If multi-process is not enabled, then do not start the zygote service.
-            // Only check sMultiprocessEnabled if updateServiceV2 is not enabled.
-            if (!updateServiceV2() && !sMultiprocessEnabled) {
-                return;
-            }
-
             stopZygoteLocked();
         }
     }

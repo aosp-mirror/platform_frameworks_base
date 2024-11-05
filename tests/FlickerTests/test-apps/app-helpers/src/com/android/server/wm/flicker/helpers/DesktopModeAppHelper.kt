@@ -59,6 +59,11 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         BOTTOM
     }
 
+    enum class AppProperty {
+        STANDARD,
+        NON_RESIZABLE
+    }
+
     /** Wait for an app moved to desktop to finish its transition. */
     private fun waitForAppToMoveToDesktop(wmHelper: WindowManagerStateHelper) {
         wmHelper
@@ -104,11 +109,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         if (motionEventHelper.inputMethod == TOUCH
             && Flags.enableHoldToDragAppHandle()) {
             // Touch requires hold-to-drag.
-            val downTime = SystemClock.uptimeMillis()
-            motionEventHelper.actionDown(startX, startY, time = downTime)
-            SystemClock.sleep(100L) // hold for 100ns before starting the move.
-            motionEventHelper.actionMove(startX, startY, startX, endY, 100, downTime = downTime)
-            motionEventHelper.actionUp(startX, endY, downTime = downTime)
+            motionEventHelper.holdToDrag(startX, startY, startX, endY, steps = 100)
         } else {
             device.drag(startX, startY, startX, endY, 100)
         }
@@ -129,6 +130,24 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         val maximizeButton = getMaximizeButtonForTheApp(caption)
         maximizeButton.click()
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
+    }
+
+    private fun getMinimizeButtonForTheApp(caption: UiObject2?): UiObject2 {
+        return caption
+            ?.children
+            ?.find { it.resourceName.endsWith(MINIMIZE_BUTTON_VIEW) }
+            ?: error("Unable to find resource $MINIMIZE_BUTTON_VIEW\n")
+    }
+
+    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+        val caption = getCaptionForTheApp(wmHelper, device)
+        val minimizeButton = getMinimizeButtonForTheApp(caption)
+        minimizeButton.click()
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withWindowSurfaceDisappeared(innerHelper)
+            .waitForAndVerify()
     }
 
     /** Open maximize menu and click snap resize button on the app header for the given app. */
@@ -280,7 +299,11 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
         val displayRect = getDisplayRect(wmHelper)
 
-        val endX = if (isLeft) displayRect.left else displayRect.right
+        val endX = if (isLeft) {
+            displayRect.left + SNAP_RESIZE_DRAG_INSET
+        } else {
+            displayRect.right - SNAP_RESIZE_DRAG_INSET
+        }
         val endY = displayRect.centerY() / 2
 
         // drag the window to snap resize
@@ -386,6 +409,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
     private companion object {
         val TIMEOUT: Duration = Duration.ofSeconds(3)
+        const val SNAP_RESIZE_DRAG_INSET: Int = 5 // inset to avoid dragging to display edge
         const val CAPTION: String = "desktop_mode_caption"
         const val MAXIMIZE_BUTTON_VIEW: String = "maximize_button_view"
         const val MAXIMIZE_MENU: String = "maximize_menu"
@@ -394,6 +418,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         const val DESKTOP_MODE_BUTTON: String = "desktop_button"
         const val SNAP_LEFT_BUTTON: String = "maximize_menu_snap_left_button"
         const val SNAP_RIGHT_BUTTON: String = "maximize_menu_snap_right_button"
+        const val MINIMIZE_BUTTON_VIEW: String = "minimize_window"
         val caption: BySelector
             get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
     }

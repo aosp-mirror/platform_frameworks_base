@@ -1872,6 +1872,60 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    public void testPeakRefreshRate_notAppliedToExternalDisplays() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(true);
+        mInjector.mDisplayInfo.type = Display.TYPE_EXTERNAL;
+        DisplayModeDirector director =
+                new DisplayModeDirector(mContext, mHandler, mInjector,
+                        mDisplayManagerFlags, mDisplayDeviceConfigProvider);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+        director.getDisplayObserver().onDisplayAdded(DISPLAY_ID);
+        director.getDisplayObserver().onDisplayAdded(DISPLAY_ID_2);
+
+        Display.Mode[] modes1 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 130),
+        };
+        Display.Mode[] modes2 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 140),
+        };
+        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
+        supportedModesByDisplay.put(DISPLAY_ID, modes1);
+        supportedModesByDisplay.put(DISPLAY_ID_2, modes2);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+        director.injectSupportedModesByDisplay(supportedModesByDisplay);
+
+        // Disable Smooth Display
+        setPeakRefreshRate(RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+
+        Vote vote1 = director.getVote(DISPLAY_ID,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        Vote vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertThat(vote1).isNull();
+        assertThat(vote2).isNull();
+
+        // Enable Smooth Display
+        setPeakRefreshRate(Float.POSITIVE_INFINITY);
+
+        vote1 = director.getVote(DISPLAY_ID,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertThat(vote1).isNull();
+        assertThat(vote2).isNull();
+    }
+
+    @Test
     public void testPeakRefreshRate_DisplayChanged() {
         when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
                 .thenReturn(true);
@@ -1968,8 +2022,9 @@ public class DisplayModeDirectorTest {
     @Test
     @Parameters({
         "true, true, 60",
-        "false, true, 50",
-        "true, false, 50"
+        "false, true, 60",
+        "true, false, 50",
+        "false, false, 50"
     })
     public void testExternalDisplayMaxRefreshRate(boolean isRefreshRateSynchronizationEnabled,
             boolean isExternalDisplay, float expectedMaxRenderFrameRate) {
@@ -3810,6 +3865,7 @@ public class DisplayModeDirectorTest {
                 SensorManagerInternal sensorManagerInternal) {
             mDeviceConfig = new FakeDeviceConfig();
             mDisplayInfo = new DisplayInfo();
+            mDisplayInfo.type = Display.TYPE_INTERNAL;
             mDisplayInfo.defaultModeId = MODE_ID;
             mDisplayInfo.supportedModes = new Display.Mode[] {new Display.Mode(MODE_ID,
                     800, 600, /* refreshRate= */ 60)};
@@ -3856,6 +3912,7 @@ public class DisplayModeDirectorTest {
         @Override
         public boolean getDisplayInfo(int displayId, DisplayInfo displayInfo) {
             displayInfo.copyFrom(mDisplayInfo);
+            displayInfo.displayId = displayId;
             return mDisplayInfoValid;
         }
 

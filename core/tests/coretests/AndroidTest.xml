@@ -29,6 +29,20 @@
         <option name="test-file-name" value="AppThatCallsBinderMethods.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="cleanup" value="true"/>
+        <option name="push-file" key="HelloWorldUsingSdk1And2.apk"
+            value="/data/local/tmp/tests/coretests/pm/HelloWorldUsingSdk1And2.apk"/>
+        <option name="push-file" key="HelloWorldUsingSdk1AndSdk1.apk"
+            value="/data/local/tmp/tests/coretests/pm/HelloWorldUsingSdk1AndSdk1.apk"/>
+        <option name="push-file" key="HelloWorldUsingSdkMalformedNegativeVersion.apk"
+            value="/data/local/tmp/tests/coretests/pm/HelloWorldUsingSdkMalformedNegativeVersion.apk"/>
+        <option name="push-file" key="HelloWorldSdk1.apk"
+            value="/data/local/tmp/tests/coretests/pm/HelloWorldSdk1.apk"/>
+        <option name="push-file" key="CtsStaticSharedLibConsumerApp1.apk"
+            value="/data/local/tmp/tests/coretests/pm/CtsStaticSharedLibConsumerApp1.apk"/>
+    </target_preparer>
+
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <!-- TODO(b/254155965): Design a mechanism to finally remove this command. -->
         <option name="run-command" value="settings put global device_config_sync_disabled 0" />

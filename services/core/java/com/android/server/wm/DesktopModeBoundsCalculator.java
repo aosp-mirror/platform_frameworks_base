@@ -30,14 +30,13 @@ import static com.android.server.wm.LaunchParamsUtil.calculateLayoutBounds;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
-import android.app.TaskInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.ActivityInfo.WindowLayout;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.Size;
 import android.view.Gravity;
-import android.window.flags.DesktopModeFlags;
+import android.window.DesktopModeFlags;
 
 import java.util.function.Consumer;
 
@@ -98,7 +97,6 @@ public final class DesktopModeBoundsCalculator {
     private static Rect calculateInitialBounds(@NonNull Task task,
             @NonNull ActivityRecord activity, @NonNull Rect stableBounds
     ) {
-        final TaskInfo taskInfo = task.getTaskInfo();
         // Display bounds not taking into account insets.
         final TaskDisplayArea displayArea = task.getDisplayArea();
         final Rect screenBounds = displayArea.getBounds();
@@ -118,14 +116,15 @@ public final class DesktopModeBoundsCalculator {
         float appAspectRatio = desktopAppCompatAspectRatioPolicy.calculateAspectRatio(task);
         final float tdaWidth = stableBounds.width();
         final float tdaHeight = stableBounds.height();
+        final int taskConfigOrientation = task.getConfiguration().orientation;
         final int activityOrientation = getActivityOrientation(activity, task);
-        final Size initialSize = switch (taskInfo.configuration.orientation) {
+        final Size initialSize = switch (taskConfigOrientation) {
             case ORIENTATION_LANDSCAPE -> {
                 // Device in landscape orientation.
                 if (appAspectRatio == 0) {
                     appAspectRatio = 1;
                 }
-                if (canChangeAspectRatio(desktopAppCompatAspectRatioPolicy, taskInfo, task)) {
+                if (canChangeAspectRatio(desktopAppCompatAspectRatioPolicy, task)) {
                     if (isFixedOrientationPortrait(activityOrientation)) {
                         // For portrait resizeable activities, respect apps fullscreen width but
                         // apply ideal size height.
@@ -143,7 +142,7 @@ public final class DesktopModeBoundsCalculator {
                 // Device in portrait orientation.
                 final int customPortraitWidthForLandscapeApp = screenBounds.width()
                         - (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2);
-                if (canChangeAspectRatio(desktopAppCompatAspectRatioPolicy, taskInfo, task)) {
+                if (canChangeAspectRatio(desktopAppCompatAspectRatioPolicy, task)) {
                     if (isFixedOrientationLandscape(activityOrientation)) {
                         if (appAspectRatio == 0) {
                             appAspectRatio = tdaWidth / (tdaWidth - 1);
@@ -182,8 +181,8 @@ public final class DesktopModeBoundsCalculator {
      */
     private static boolean canChangeAspectRatio(
             @NonNull DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy,
-            @NonNull TaskInfo taskInfo, @NonNull Task task) {
-        return taskInfo.isResizeable
+            @NonNull Task task) {
+        return task.isResizeable()
                 && !desktopAppCompatAspectRatioPolicy.hasMinAspectRatioOverride(task);
     }
 

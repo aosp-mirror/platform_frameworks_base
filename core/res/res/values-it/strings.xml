@@ -1402,7 +1402,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Modalità MIDI tramite USB attivata"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo connesso come webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accessorio USB collegato"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Tocca per altre opzioni."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Tocca per altre opzioni"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Dispositivo collegato in carica. Tocca per altre opzioni."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Accessorio audio analogico rilevato"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Il dispositivo collegato non è compatibile con questo telefono. Tocca per avere ulteriori informazioni."</string>
@@ -1944,6 +1944,7 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Off"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"Da <xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualsiasi calendario"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> sta disattivando alcuni suoni"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Si è verificato un problema interno con il dispositivo, che potrebbe essere instabile fino al ripristino dei dati di fabbrica."</string>
@@ -2130,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"La vibrazione sarà attiva per chiamate e notifiche"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"L\'audio di chiamate e notifiche sarà disattivato"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modifiche al sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Non disturbare"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novità: la modalità Non disturbare nasconde le notifiche"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tocca per avere ulteriori informazioni e modificare."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"L\'impostazione Non disturbare è cambiata"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tocca per controllare le notifiche bloccate."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Controlla le impostazioni di notifica"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"A partire da Android 13, le app che installi devono avere la tua autorizzazione per poter inviare notifiche. Tocca per cambiare questa autorizzazione per le app esistenti."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ricordamelo dopo"</string>
@@ -2430,6 +2426,10 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Invia e ricevi messaggi senza una rete mobile o Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Apri Messaggi"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Come funziona"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Attiva \"Seleziona rete automaticamente\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Attiva \"Seleziona rete automaticamente\" nelle Impostazioni in modo che lo smartphone possa trovare una rete compatibile con il satellite"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Attiva"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Indietro"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"In attesa…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Riconfigura lo Sblocco con l\'Impronta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> non può più essere riconosciuto."</string>

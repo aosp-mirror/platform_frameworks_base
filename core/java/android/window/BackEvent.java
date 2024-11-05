@@ -16,6 +16,11 @@
 
 package android.window;
 
+import static com.android.window.flags.Flags.FLAG_PREDICTIVE_BACK_SWIPE_EDGE_NONE_API;
+import static com.android.window.flags.Flags.FLAG_PREDICTIVE_BACK_TIMESTAMP_API;
+import static com.android.window.flags.Flags.predictiveBackTimestampApi;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 
@@ -32,11 +37,19 @@ public final class BackEvent {
     public static final int EDGE_LEFT = 0;
     /** Indicates that the edge swipe starts from the right edge of the screen */
     public static final int EDGE_RIGHT = 1;
+    /**
+     * Indicates that the back event was not triggered by an edge swipe back gesture. This applies
+     * to cases like using the back button in 3-button navigation or pressing a hardware back
+     * button.
+     */
+    @FlaggedApi(FLAG_PREDICTIVE_BACK_SWIPE_EDGE_NONE_API)
+    public static final int EDGE_NONE = 2;
 
     /** @hide */
     @IntDef({
             EDGE_LEFT,
             EDGE_RIGHT,
+            EDGE_NONE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SwipeEdge{}
@@ -44,18 +57,25 @@ public final class BackEvent {
     private final float mTouchX;
     private final float mTouchY;
     private final float mProgress;
+    private final long mFrameTimeMillis;
 
     @SwipeEdge
     private final int mSwipeEdge;
 
     /** @hide */
     public static BackEvent fromBackMotionEvent(BackMotionEvent backMotionEvent) {
-        return new BackEvent(backMotionEvent.getTouchX(), backMotionEvent.getTouchY(),
-                backMotionEvent.getProgress(), backMotionEvent.getSwipeEdge());
+        if (predictiveBackTimestampApi()) {
+            return new BackEvent(backMotionEvent.getTouchX(), backMotionEvent.getTouchY(),
+                    backMotionEvent.getProgress(), backMotionEvent.getSwipeEdge(),
+                    backMotionEvent.getFrameTimeMillis());
+        } else {
+            return new BackEvent(backMotionEvent.getTouchX(), backMotionEvent.getTouchY(),
+                    backMotionEvent.getProgress(), backMotionEvent.getSwipeEdge());
+        }
     }
 
     /**
-     * Creates a new {@link BackEvent} instance.
+     * Creates a new {@link BackEvent} instance with a frame time of 0.
      *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.
@@ -67,6 +87,26 @@ public final class BackEvent {
         mTouchY = touchY;
         mProgress = progress;
         mSwipeEdge = swipeEdge;
+        mFrameTimeMillis = 0;
+    }
+
+    /**
+     * Creates a new {@link BackEvent} instance.
+     *
+     * @param touchX Absolute X location of the touch point of this event.
+     * @param touchY Absolute Y location of the touch point of this event.
+     * @param progress Value between 0 and 1 on how far along the back gesture is.
+     * @param swipeEdge Indicates which edge the swipe starts from.
+     * @param frameTimeMillis frame time of the back event.
+     */
+    @FlaggedApi(FLAG_PREDICTIVE_BACK_TIMESTAMP_API)
+    public BackEvent(float touchX, float touchY, float progress, @SwipeEdge int swipeEdge,
+            long frameTimeMillis) {
+        mTouchX = touchX;
+        mTouchY = touchY;
+        mProgress = progress;
+        mSwipeEdge = swipeEdge;
+        mFrameTimeMillis = frameTimeMillis;
     }
 
     /**
@@ -115,13 +155,38 @@ public final class BackEvent {
         return mSwipeEdge;
     }
 
+    /**
+     * Returns the frameTime of the BackEvent in milliseconds. Useful for calculating velocity.
+     */
+    @FlaggedApi(FLAG_PREDICTIVE_BACK_TIMESTAMP_API)
+    public long getFrameTimeMillis() {
+        return mFrameTimeMillis;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof BackEvent)) {
+            return false;
+        }
+        final BackEvent that = (BackEvent) other;
+        return mTouchX == that.mTouchX
+                && mTouchY == that.mTouchY
+                && mProgress == that.mProgress
+                && mSwipeEdge == that.mSwipeEdge
+                && mFrameTimeMillis == that.mFrameTimeMillis;
+    }
+
     @Override
     public String toString() {
         return "BackEvent{"
                 + "mTouchX=" + mTouchX
                 + ", mTouchY=" + mTouchY
                 + ", mProgress=" + mProgress
-                + ", mSwipeEdge" + mSwipeEdge
+                + ", mSwipeEdge=" + mSwipeEdge
+                + ", mFrameTimeMillis=" + mFrameTimeMillis
                 + "}";
     }
 }

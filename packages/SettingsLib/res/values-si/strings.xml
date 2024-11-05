@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"වැඩිදියුණු කළ සබැඳුම් හැකියා විශේෂාංගය සබල කරයි."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"අභ්‍යන්තර අන්තය"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"දේශීය ෂෙල් ප්‍රවේශනය පිරිනමන ටර්මිනල් යෙදුම සබල කරන්න"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux සංවර්ධන පරිසරය"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android මත Linux ටර්මිනලය ධාවනය කරන්න"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP පරික්ෂාව"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP පරික්ෂා හැසිරීම සකසන්න"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"නිදොස්කරණය"</string>
@@ -585,7 +587,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"මෙම පරිගණකය (අභ්‍යන්තර)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"මයික්‍රෆෝනය (අභ්‍යන්තර)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ඩොක් ස්පීකරය"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"බාහිර උපාංගය"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"සම්බන්ධ කළ උපාංගය"</string>
@@ -687,10 +688,11 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"සබලයි"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"මෙම වෙනස යෙදීමට ඔබේ උපාංගය නැවත පණ ගැන්විය යුතුය. දැන් නැවත පණ ගන්වන්න හෝ අවලංගු කරන්න."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"රැහැන්ගත හෙඩ්ෆෝන්"</string>
-    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"හෙඩ්ෆෝන්"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB ස්පීකරය"</string>
-    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"මයික් ජැක්කුව"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB මයික්"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"රැහැන්ගත ශ්‍රව්‍ය"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ශ්‍රව්‍ය"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"රැහැන්ගත මයික්‍රෆෝනය"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB මයික්‍රෆෝනය"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT මයික්‍රෆෝනය"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ක්‍රියාත්මකයි"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ක්‍රියාවිරහිතයි"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"වාහක ජාලය වෙනස් වෙමින්"</string>

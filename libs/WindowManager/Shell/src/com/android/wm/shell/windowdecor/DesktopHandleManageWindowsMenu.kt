@@ -53,11 +53,8 @@ class DesktopHandleManageWindowsMenu(
     private var menuViewContainer: AdditionalViewContainer? = null
 
     init {
-        show(snapshotList, onIconClickListener, onOutsideClickListener)
-    }
-
-    override fun close() {
-        menuViewContainer?.releaseView()
+        createMenu(snapshotList, onIconClickListener, onOutsideClickListener)
+        animateOpen()
     }
 
     private fun calculateMenuPosition(): Point {
@@ -95,15 +92,19 @@ class DesktopHandleManageWindowsMenu(
     override fun addToContainer(menuView: ManageWindowsView) {
         val menuPosition = calculateMenuPosition()
         menuViewContainer = AdditionalSystemViewContainer(
-            windowManagerWrapper,
-            callerTaskInfo.taskId,
-            menuPosition.x,
-            menuPosition.y,
-            menuView.menuWidth,
-            menuView.menuHeight,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            windowManagerWrapper = windowManagerWrapper,
+            taskId = callerTaskInfo.taskId,
+            x = menuPosition.x,
+            y = menuPosition.y,
+            width = menuView.menuWidth,
+            height = menuView.menuHeight,
+            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-            menuView.rootView
+            view = menuView.rootView,
         )
+    }
+
+    override fun removeFromContainer() {
+        menuViewContainer?.releaseView()
     }
 }

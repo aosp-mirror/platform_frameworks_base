@@ -36,7 +36,7 @@ import static android.view.WindowInsets.Type.InsetsType;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
-import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
+import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS;
@@ -1117,6 +1117,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null && mDisplayContent != dc) {
+            if (asWindowState() == null) {
+                mTransitionController.collect(this);
+            }
             // Cancel any change transition queued-up for this container on the old display when
             // this container is moved from the old display.
             mDisplayContent.mClosingChangingContainers.remove(this);
@@ -2118,7 +2121,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * For all tasks at or below this container call the callback.
+     * Calls the given {@param callback} for all tasks in depth-first top-down z-order at or below
+     * this container.
      *
      * @param callback Calls the {@link ToBooleanFunction#apply} method for each task found and
      *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.

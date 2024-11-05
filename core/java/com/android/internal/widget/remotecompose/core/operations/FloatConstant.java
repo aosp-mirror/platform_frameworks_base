@@ -15,21 +15,19 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Operation to deal with Text data
- */
-public class FloatConstant implements Operation {
+/** Operation to deal with Text data */
+public class FloatConstant implements com.android.internal.widget.remotecompose.core.Operation {
     private static final int OP_CODE = Operations.DATA_FLOAT;
     private static final String CLASS_NAME = "FloatConstant";
     public int mTextId;
@@ -54,7 +52,6 @@ public class FloatConstant implements Operation {
         return CLASS_NAME;
     }
 
-
     public static int id() {
         return OP_CODE;
     }
@@ -63,8 +60,8 @@ public class FloatConstant implements Operation {
      * Writes out the operation to the buffer
      *
      * @param buffer write command to this buffer
-     * @param id     the id
-     * @param value  the value of the float
+     * @param id the id
+     * @param value the value of the float
      */
     public static void apply(WireBuffer buffer, int id, float value) {
         buffer.start(OP_CODE);
@@ -80,14 +77,10 @@ public class FloatConstant implements Operation {
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+        doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A float and its associated id")
-                .field(INT, "id", "id of float")
-                .field(FLOAT, "value",
-                        "32-bit float value");
-
+                .field(DocumentedOperation.INT, "id", "id of float")
+                .field(FLOAT, "value", "32-bit float value");
     }
 
     @Override

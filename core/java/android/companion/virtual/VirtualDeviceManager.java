@@ -634,7 +634,6 @@ public final class VirtualDeviceManager {
          * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void goToSleep() {
             mVirtualDeviceInternal.goToSleep();
         }
@@ -653,7 +652,6 @@ public final class VirtualDeviceManager {
          * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void wakeUp() {
             mVirtualDeviceInternal.wakeUp();
         }
@@ -766,7 +764,6 @@ public final class VirtualDeviceManager {
          * Closes the virtual device, stopping and tearing down any virtual displays, associated
          * virtual audio device, and event injection that's currently in progress.
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void close() {
             mVirtualDeviceInternal.close();
         }
@@ -785,7 +782,6 @@ public final class VirtualDeviceManager {
          * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
          */
         @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
                 @VirtualDeviceParams.DevicePolicy int devicePolicy) {
             mVirtualDeviceInternal.setDevicePolicy(policyType, devicePolicy);
@@ -808,7 +804,6 @@ public final class VirtualDeviceManager {
          * @see #setDevicePolicy
          */
         @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void addActivityPolicyExemption(@NonNull ComponentName componentName) {
             addActivityPolicyExemption(new ActivityPolicyExemption.Builder()
                     .setComponentName(componentName)
@@ -832,7 +827,6 @@ public final class VirtualDeviceManager {
          * @see #setDevicePolicy
          */
         @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
             removeActivityPolicyExemption(new ActivityPolicyExemption.Builder()
                     .setComponentName(componentName)
@@ -857,7 +851,6 @@ public final class VirtualDeviceManager {
          * @see #setDevicePolicy
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void addActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
             mVirtualDeviceInternal.addActivityPolicyExemption(Objects.requireNonNull(exemption));
         }
@@ -873,7 +866,6 @@ public final class VirtualDeviceManager {
          * @see #setDevicePolicy
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void removeActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
             mVirtualDeviceInternal.removeActivityPolicyExemption(Objects.requireNonNull(exemption));
         }
@@ -896,7 +888,6 @@ public final class VirtualDeviceManager {
          * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void setDevicePolicy(
                 @VirtualDeviceParams.DynamicDisplayPolicyType int policyType,
                 @VirtualDeviceParams.DevicePolicy int devicePolicy,
@@ -909,7 +900,6 @@ public final class VirtualDeviceManager {
          *
          * @param config the configurations of the virtual dpad.
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualDpad createVirtualDpad(@NonNull VirtualDpadConfig config) {
             Objects.requireNonNull(config, "config must not be null");
@@ -921,7 +911,6 @@ public final class VirtualDeviceManager {
          *
          * @param config the configurations of the virtual keyboard.
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualKeyboard createVirtualKeyboard(@NonNull VirtualKeyboardConfig config) {
             Objects.requireNonNull(config, "config must not be null");
@@ -939,7 +928,6 @@ public final class VirtualDeviceManager {
          * @deprecated Use {@link #createVirtualKeyboard(VirtualKeyboardConfig config)} instead
          */
         @Deprecated
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualKeyboard createVirtualKeyboard(@NonNull VirtualDisplay display,
                 @NonNull String inputDeviceName, int vendorId, int productId) {
@@ -958,7 +946,6 @@ public final class VirtualDeviceManager {
          *
          * @param config the configurations of the virtual mouse.
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualMouse createVirtualMouse(@NonNull VirtualMouseConfig config) {
             Objects.requireNonNull(config, "config must not be null");
@@ -976,7 +963,6 @@ public final class VirtualDeviceManager {
          * @deprecated Use {@link #createVirtualMouse(VirtualMouseConfig config)} instead
          */
         @Deprecated
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualMouse createVirtualMouse(@NonNull VirtualDisplay display,
                 @NonNull String inputDeviceName, int vendorId, int productId) {
@@ -995,7 +981,6 @@ public final class VirtualDeviceManager {
          *
          * @param config the configurations of the virtual touchscreen.
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualTouchscreen createVirtualTouchscreen(
                 @NonNull VirtualTouchscreenConfig config) {
@@ -1015,7 +1000,6 @@ public final class VirtualDeviceManager {
          * instead
          */
         @Deprecated
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualTouchscreen createVirtualTouchscreen(@NonNull VirtualDisplay display,
                 @NonNull String inputDeviceName, int vendorId, int productId) {
@@ -1042,7 +1026,6 @@ public final class VirtualDeviceManager {
          * @param config the configurations of the virtual navigation touchpad.
          * @see android.view.InputDevice#SOURCE_TOUCH_NAVIGATION
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualNavigationTouchpad createVirtualNavigationTouchpad(
                 @NonNull VirtualNavigationTouchpadConfig config) {
@@ -1054,7 +1037,6 @@ public final class VirtualDeviceManager {
          *
          * @param config the touchscreen configurations for the virtual stylus.
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         @FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
         public VirtualStylus createVirtualStylus(
@@ -1068,7 +1050,6 @@ public final class VirtualDeviceManager {
          * @param config the configuration for the virtual rotary encoder.
          * @see android.view.InputDevice#SOURCE_ROTARY_ENCODER
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_VIRTUAL_ROTARY)
         public VirtualRotaryEncoder createVirtualRotaryEncoder(
@@ -1096,7 +1077,6 @@ public final class VirtualDeviceManager {
          *   applications running on virtual display is changed.
          * @return A {@link VirtualAudioDevice} instance.
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualAudioDevice createVirtualAudioDevice(
                 @NonNull VirtualDisplay display,
@@ -1117,7 +1097,6 @@ public final class VirtualDeviceManager {
          * @throws UnsupportedOperationException if virtual camera isn't supported on this device.
          * @see VirtualDeviceParams#POLICY_TYPE_CAMERA
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
         public VirtualCamera createVirtualCamera(@NonNull VirtualCameraConfig config) {
@@ -1131,10 +1110,12 @@ public final class VirtualDeviceManager {
         /**
          * Sets the visibility of the pointer icon for this VirtualDevice's associated displays.
          *
+         * <p>Only applicable to trusted displays.</p>
+         *
          * @param showPointerIcon True if the pointer should be shown; false otherwise. The default
          *   visibility is true.
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void setShowPointerIcon(boolean showPointerIcon) {
             mVirtualDeviceInternal.setShowPointerIcon(showPointerIcon);
         }
@@ -1149,7 +1130,6 @@ public final class VirtualDeviceManager {
          * @throws SecurityException if the display is not owned by this device or is not
          *                           {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED trusted}
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @FlaggedApi(Flags.FLAG_VDM_CUSTOM_IME)
         public void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
             if (Flags.vdmCustomIme()) {
@@ -1213,7 +1193,6 @@ public final class VirtualDeviceManager {
          * is intercepted.
          * @see #unregisterIntentInterceptor(IntentInterceptorCallback)
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void registerIntentInterceptor(
                 @NonNull IntentFilter interceptorFilter,
                 @CallbackExecutor @NonNull Executor executor,
@@ -1226,7 +1205,6 @@ public final class VirtualDeviceManager {
          * Unregisters the intent interceptor previously registered with
          * {@link #registerIntentInterceptor}.
          */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void unregisterIntentInterceptor(
                     @NonNull IntentInterceptorCallback interceptorCallback) {
             mVirtualDeviceInternal.unregisterIntentInterceptor(interceptorCallback);

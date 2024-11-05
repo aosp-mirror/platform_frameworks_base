@@ -51,6 +51,7 @@ import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
+import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
 import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
@@ -128,6 +129,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -175,6 +177,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
+    private static final int MSG_CURRENT_USER_CHANGED = 4;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -184,6 +187,8 @@ public class InputManagerService extends IInputManager.Stub
 
     private final Context mContext;
     private final InputManagerHandler mHandler;
+    @UserIdInt
+    private int mCurrentUserId = UserHandle.USER_SYSTEM;
     private DisplayManagerInternal mDisplayManagerInternal;
 
     private WindowManagerInternal mWindowManagerInternal;
@@ -2308,6 +2313,12 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
+    private void notifyTouchpadThreeFingerTap() {
+        mKeyGestureController.handleTouchpadThreeFingerTap();
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
     private void notifySwitch(long whenNanos, int switchValues, int switchMask) {
         if (DEBUG) {
             Slog.d(TAG, "notifySwitch: values=" + Integer.toHexString(switchValues)
@@ -2982,6 +2993,49 @@ public class InputManagerService extends IInputManager.Stub
         mKeyGestureController.unregisterKeyGestureHandler(handler, Binder.getCallingPid());
     }
 
+    @Override
+    @PermissionManuallyEnforced
+    public int addCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+        enforceManageKeyGesturePermission();
+
+        Objects.requireNonNull(inputGestureData);
+        return mKeyGestureController.addCustomInputGesture(UserHandle.getCallingUserId(),
+                inputGestureData);
+    }
+
+    @Override
+    @PermissionManuallyEnforced
+    public int removeCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+        enforceManageKeyGesturePermission();
+
+        Objects.requireNonNull(inputGestureData);
+        return mKeyGestureController.removeCustomInputGesture(UserHandle.getCallingUserId(),
+                inputGestureData);
+    }
+
+    @Override
+    @PermissionManuallyEnforced
+    public void removeAllCustomInputGestures() {
+        enforceManageKeyGesturePermission();
+
+        mKeyGestureController.removeAllCustomInputGestures(UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public AidlInputGestureData[] getCustomInputGestures() {
+        return mKeyGestureController.getCustomInputGestures(UserHandle.getCallingUserId());
+    }
+
+    @Override
+    public AidlInputGestureData[] getAppLaunchBookmarks() {
+        return mKeyGestureController.getAppLaunchBookmarks();
+    }
+
+    private void handleCurrentUserChanged(@UserIdInt int userId) {
+        mCurrentUserId = userId;
+        mKeyGestureController.setCurrentUserId(userId);
+    }
+
     /**
      * Callback interface implemented by the Window Manager.
      */
@@ -3149,6 +3203,9 @@ public class InputManagerService extends IInputManager.Stub
                     long whenNanos = (args.argi1 & 0xFFFFFFFFL) | ((long) args.argi2 << 32);
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
+                    break;
+                case MSG_CURRENT_USER_CHANGED:
+                    handleCurrentUserChanged((int) msg.obj);
                     break;
             }
         }
@@ -3506,6 +3563,27 @@ public class InputManagerService extends IInputManager.Stub
                 int modifierState, @KeyGestureEvent.KeyGestureType int gestureType) {
             mKeyGestureController.handleKeyGesture(deviceId, keycodes, modifierState, gestureType);
         }
+
+        @Override
+        public void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor) {
+            InputManagerService.this.setAccessibilityPointerIconScaleFactor(displayId, scaleFactor);
+        }
+
+        @Override
+        public void setCurrentUser(@UserIdInt int newUserId) {
+            mHandler.obtainMessage(MSG_CURRENT_USER_CHANGED, newUserId).sendToTarget();
+        }
+
+        @Override
+        public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
+                throws RemoteException {
+            mKeyGestureController.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
+        }
+
+        @Override
+        public boolean setKernelWakeEnabled(int deviceId, boolean enabled) {
+            return mNative.setKernelWakeEnabled(deviceId, enabled);
+        }
     }
 
     @Override
@@ -3686,6 +3764,10 @@ public class InputManagerService extends IInputManager.Stub
 
     void setPointerScale(float scale) {
         mPointerIconCache.setPointerScale(scale);
+    }
+
+    void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor) {
+        mPointerIconCache.setAccessibilityScaleFactor(displayId, scaleFactor);
     }
 
     interface KeyboardBacklightControllerInterface {

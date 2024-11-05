@@ -7,6 +7,18 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+aconfig_declarations {
+    name: "bootanimation_flags",
+    package: "com.android.graphics.bootanimation.flags",
+    container: "system",
+    srcs: ["bootanimation_flags.aconfig"],
+}
+
+cc_aconfig_library {
+    name: "libbootanimationflags",
+    aconfig_declarations: "bootanimation_flags",
+}
+
 cc_defaults {
     name: "bootanimation_defaults",
 
@@ -27,6 +39,10 @@ cc_defaults {
         "libcutils",
         "liblog",
         "libutils",
+    ],
+
+    static_libs: [
+        "libbootanimationflags",
     ],
 }
 

@@ -40,7 +40,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from an app via auto-enter property when navigating to home from split screen.
  *
- * To run this test: `atest WMShellFlickerTestsPip1:FromSplitScreenEnterPipOnUserLeaveHintTest`
+ * To run this test: `atest WMShellFlickerTestsPip:FromSplitScreenEnterPipOnUserLeaveHintTest`
  *
  * Actions:
  * ```

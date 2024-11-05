@@ -461,6 +461,16 @@ public abstract class DisplayManagerInternal {
     public abstract void stylusGestureStarted(long eventTime);
 
     /**
+     * Called by {@link com.android.server.wm.ContentRecorder} to verify whether
+     * the display is allowed to mirror primary display's content.
+     * @param displayId the id of the display where we mirror to.
+     * @return true if the mirroring dialog is confirmed (display is enabled), or
+     * {@link com.android.server.display.ExternalDisplayPolicy#ENABLE_ON_CONNECT}
+     * system property is enabled.
+     */
+    public abstract boolean isDisplayReadyForMirroring(int displayId);
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the
@@ -481,9 +491,15 @@ public abstract class DisplayManagerInternal {
         public static final int POLICY_DIM = 2;
         // Policy: Make the screen bright as usual.
         public static final int POLICY_BRIGHT = 3;
+        // The maximum policy constant. Useful for iterating through all constants in tests.
+        public static final int POLICY_MAX = POLICY_BRIGHT;
 
         // The basic overall policy to apply: off, doze, dim or bright.
         public int policy;
+
+        // The reason behind the current policy.
+        @Display.StateReason
+        public int policyReason;
 
         // If true, the proximity sensor overrides the screen state when an object is
         // nearby, turning it off temporarily until the object is moved away.
@@ -531,6 +547,7 @@ public abstract class DisplayManagerInternal {
 
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
+            policyReason = Display.STATE_REASON_DEFAULT_POLICY;
             useProximitySensor = false;
             screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             screenAutoBrightnessAdjustmentOverride = Float.NaN;
@@ -551,6 +568,7 @@ public abstract class DisplayManagerInternal {
 
         public void copyFrom(DisplayPowerRequest other) {
             policy = other.policy;
+            policyReason = other.policyReason;
             useProximitySensor = other.useProximitySensor;
             screenBrightnessOverride = other.screenBrightnessOverride;
             screenBrightnessOverrideTag = other.screenBrightnessOverrideTag;

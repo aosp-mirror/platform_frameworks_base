@@ -29,9 +29,9 @@ import android.net.NetworkCapabilities;
 import android.net.vcn.VcnUnderlyingNetworkTemplate.MatchCriteria;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.util.ArrayList;

@@ -1945,6 +1945,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Выключана"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Любы каляндар"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> выключае некаторыя гукі"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"На вашай прыладзе ўзнікла ўнутраная праблема, і яна можа працаваць нестабільна, пакуль вы не зробіце скід да заводскіх налад."</string>
@@ -2131,11 +2133,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Для выклікаў і апавяшчэнняў уключаны вібрасігнал"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Для выклікаў і апавяшчэнняў гук выключаны"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Сістэмныя змены"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не турбаваць"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Новае: у рэжыме \"Не турбаваць\" апавяшчэнні не паказваюцца"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Дакраніцеся, каб даведацца больш і змяніць."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Зменены налады рэжыму \"Не турбаваць\""</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Націсніце, каб паглядзець заблакіраванае."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Праверце налады апавяшчэнняў"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Пачынаючы з версіі Android 13 усталяваным вамі праграмам неабходна даваць дазвол на адпраўку апавяшчэнняў. Націсніце, каб змяніць дазвол для існуючых праграм."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Нагадаць пазней"</string>
@@ -2431,6 +2428,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Вы можаце адпраўляць і атрымліваць паведамленні, калі падключэнне да мабільнай сеткі або сеткі Wi-Fi адсутнічае"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Адкрыць Паведамленні"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Як гэта працуе"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"У чаканні..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Наладзіць разблакіроўку адбіткам пальца паўторна"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Адбітак пальца \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" больш не можа быць распазнаны."</string>

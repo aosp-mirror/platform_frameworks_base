@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode.education
 
+import android.os.SystemProperties
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -50,6 +51,7 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -70,7 +72,10 @@ class AppHandleEducationControllerTest : ShellTestCase() {
   @JvmField
   @Rule
   val extendedMockitoRule =
-      ExtendedMockitoRule.Builder(this).mockStatic(DesktopModeStatus::class.java).build()!!
+      ExtendedMockitoRule.Builder(this)
+          .mockStatic(DesktopModeStatus::class.java)
+          .mockStatic(SystemProperties::class.java)
+          .build()!!
   @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
   private lateinit var educationController: AppHandleEducationController
@@ -79,7 +84,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
   private val testDataStoreFlow = MutableStateFlow(createWindowingEducationProto())
   private val testCaptionStateFlow = MutableStateFlow<CaptionState>(CaptionState.NoCaption)
   private val educationConfigCaptor =
-      argumentCaptor<DesktopWindowingEducationTooltipController.EducationViewConfig>()
+      argumentCaptor<DesktopWindowingEducationTooltipController.TooltipEducationViewConfig>()
   @Mock private lateinit var mockEducationFilter: AppHandleEducationFilter
   @Mock private lateinit var mockDataStoreRepository: AppHandleEducationDatastoreRepository
   @Mock private lateinit var mockCaptionHandleRepository: WindowDecorCaptionHandleRepository
@@ -185,6 +190,29 @@ class AppHandleEducationControllerTest : ShellTestCase() {
         waitForBufferDelay()
 
         verify(mockTooltipController, never()).showEducationTooltip(any(), any())
+      }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  fun overridePrerequisite_educationViewedAlready_shouldCallShowEducationTooltip() =
+      testScope.runTest {
+        // App handle is visible but education has been viewed before. But as we are overriding
+        // prerequisite conditions, we should show education tooltip.
+        // Mark education viewed.
+        testDataStoreFlow.value =
+            createWindowingEducationProto(educationViewedTimestampMillis = 123L)
+        val systemPropertiesKey =
+            "persist.desktop_windowing_app_handle_education_override_conditions"
+        whenever(SystemProperties.getBoolean(eq(systemPropertiesKey), anyBoolean()))
+            .thenReturn(true)
+        setShouldShowAppHandleEducation(true)
+
+        // Simulate app handle visible.
+        testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = false)
+        // Wait for first tooltip to showup.
+        waitForBufferDelay()
+
+        verify(mockTooltipController, times(1)).showEducationTooltip(any(), any())
       }
 
   @Test
@@ -454,7 +482,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
           .thenReturn(shouldShowAppHandleEducation)
 
   /**
-   * Class under test waits for some seconds before showing education, simulate advance time before
+   * Class under test waits for some time before showing education, simulate advance time before
    * verifying or moving forward
    */
   private fun TestScope.waitForBufferDelay() {

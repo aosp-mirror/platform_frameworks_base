@@ -27,6 +27,7 @@ import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.banner.BannerPageProvider
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
+import com.android.settingslib.spa.gallery.card.CardPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.DialogMainPageProvider
 import com.android.settingslib.spa.gallery.editor.EditorMainPageProvider
@@ -80,6 +81,7 @@ object HomePageProvider : SettingsPageProvider {
                 DialogMainPageProvider.Entry()
                 EditorMainPageProvider.Entry()
                 BannerPageProvider.Entry()
+                CardPageProvider.Entry()
                 CopyablePageProvider.Entry()
             }
         }

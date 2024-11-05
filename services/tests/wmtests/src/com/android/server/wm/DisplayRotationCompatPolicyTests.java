@@ -51,6 +51,7 @@ import static org.mockito.Mockito.times;
 import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -592,6 +593,11 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 .setTask(mTask)
                 .build();
 
+        spyOn(mActivity.info.applicationInfo);
+        // Disable for camera compat.
+        doReturn(false).when(mActivity.info.applicationInfo).isChangeEnabled(
+                ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT);
+
         spyOn(mActivity.mAtmService.getLifecycleManager());
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
 
@@ -614,7 +620,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
-                .scheduleTransactionAndLifecycleItems(mActivity.app.getThread(),
+                .scheduleTransactionItems(mActivity.app.getThread(),
                         refreshCallbackItem, resumeActivityItem);
     }
 

@@ -500,7 +500,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 checkNanoappPermsAsync();
             }
 
-            if (!Flags.reliableMessageImplementation() || transactionCallback == null) {
+            if (transactionCallback == null) {
                 try {
                     result = mContextHubProxy.sendMessageToContextHub(mHostEndPointId,
                             mAttachedContextHubInfo.getId(), message);
@@ -671,10 +671,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                         .putExtra(ContextHubManager.EXTRA_MESSAGE, message);
         Consumer<Byte> onFinishedCallback = (Byte error) ->
                 sendMessageDeliveryStatusToContextHub(message.getMessageSequenceNumber(), error);
-        return sendPendingIntent(supplier, nanoAppId,
-                Flags.reliableMessageImplementation() && message.isReliable()
-                        ? onFinishedCallback
-                        : null);
+        return sendPendingIntent(
+                supplier, nanoAppId, message.isReliable() ? onFinishedCallback : null);
     }
 
     /**
@@ -1284,10 +1282,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     private void sendMessageDeliveryStatusToContextHub(int messageSequenceNumber, byte errorCode) {
-        if (!Flags.reliableMessageImplementation()) {
-            return;
-        }
-
         MessageDeliveryStatus status = new MessageDeliveryStatus();
         status.messageSequenceNumber = messageSequenceNumber;
         status.errorCode = errorCode;

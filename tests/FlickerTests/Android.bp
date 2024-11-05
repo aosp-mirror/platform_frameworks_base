@@ -47,7 +47,6 @@ java_defaults {
 
 java_library {
     name: "wm-flicker-common-assertions",
-    platform_apis: true,
     optimize: {
         enabled: false,
     },

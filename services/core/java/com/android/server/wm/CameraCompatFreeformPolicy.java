@@ -21,6 +21,8 @@ import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_DISPLAY_ROTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -35,6 +37,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.CameraCompatTaskInfo;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.view.DisplayInfo;
@@ -63,8 +66,6 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     private final ActivityRefresher mActivityRefresher;
     @NonNull
     private final CameraStateMonitor mCameraStateMonitor;
-
-    private boolean mIsCameraCompatTreatmentPending = false;
 
     @Nullable
     private Task mCameraTask;
@@ -100,13 +101,27 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         return mIsRunning;
     }
 
-    // Refreshing only when configuration changes after rotation or camera split screen aspect ratio
-    // treatment is enabled.
+    // Refreshing only when configuration changes after applying camera compat treatment.
     @Override
     public boolean shouldRefreshActivity(@NonNull ActivityRecord activity,
             @NonNull Configuration newConfig,
             @NonNull Configuration lastReportedConfig) {
-        return isTreatmentEnabledForActivity(activity) && mIsCameraCompatTreatmentPending;
+        return isTreatmentEnabledForActivity(activity, /* shouldCheckOrientation= */ true)
+                && haveCameraCompatAttributesChanged(newConfig, lastReportedConfig);
+    }
+
+    private boolean haveCameraCompatAttributesChanged(@NonNull Configuration newConfig,
+            @NonNull Configuration lastReportedConfig) {
+        // Camera compat treatment changes the following:
+        // - Letterboxes app bounds to camera compat aspect ratio in app's requested orientation,
+        // - Changes display rotation so it matches what the app expects in its chosen orientation,
+        // - Rotate-and-crop camera feed to match that orientation (this changes iff the display
+        //     rotation changes, so no need to check).
+        final long diff = newConfig.windowConfiguration.diff(lastReportedConfig.windowConfiguration,
+                /* compareUndefined= */ true);
+        final boolean appBoundsChanged = (diff & WINDOW_CONFIG_APP_BOUNDS) != 0;
+        final boolean displayRotationChanged = (diff & WINDOW_CONFIG_DISPLAY_ROTATION) != 0;
+        return appBoundsChanged || displayRotationChanged;
     }
 
     /**
@@ -132,22 +147,26 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     @Override
     public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
             @NonNull String cameraId) {
-        if (!isTreatmentEnabledForActivity(cameraActivity)) {
+        // Do not check orientation outside of the config recompute, as the app's orientation intent
+        // might be obscured by a fullscreen override. Especially for apps which have a camera
+        // functionality which is not the main focus of the app: while most of the app might work
+        // well in fullscreen, often the camera setup still assumes it will run on a portrait device
+        // in its natural orientation and comes out stretched or sideways.
+        // Config recalculation will later check the original orientation to avoid applying
+        // treatment to apps optimized for large screens.
+        if (!isTreatmentEnabledForActivity(cameraActivity, /* shouldCheckOrientation= */ false)) {
             return;
         }
-        final int existingCameraCompatMode = cameraActivity.mAppCompatController
-                .getAppCompatCameraOverrides()
-                        .getFreeformCameraCompatMode();
-        final int newCameraCompatMode = getCameraCompatMode(cameraActivity);
-        if (newCameraCompatMode != existingCameraCompatMode) {
-            mIsCameraCompatTreatmentPending = true;
-            mCameraTask = cameraActivity.getTask();
-            cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
-                    .setFreeformCameraCompatMode(newCameraCompatMode);
-            forceUpdateActivityAndTask(cameraActivity);
-        } else {
-            mIsCameraCompatTreatmentPending = false;
-        }
+
+        cameraActivity.recomputeConfiguration();
+        updateCameraCompatMode(cameraActivity);
+        cameraActivity.getTask().dispatchTaskInfoChangedIfNeeded(/* force= */ true);
+        cameraActivity.ensureActivityConfiguration(/* ignoreVisibility= */ false);
+    }
+
+    private void updateCameraCompatMode(@NonNull ActivityRecord cameraActivity) {
+        cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
+                .setFreeformCameraCompatMode(getCameraCompatMode(cameraActivity));
     }
 
     @Override
@@ -167,7 +186,6 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
             }
         }
         mCameraTask = null;
-        mIsCameraCompatTreatmentPending = false;
         return true;
     }
 
@@ -184,13 +202,12 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         // Camera compat should direct aspect ratio when in camera compat mode, unless an app has a
         // different camera compat aspect ratio set: this allows per-app camera compat override
         // aspect ratio to be smaller than the default.
-        return isInCameraCompatMode(activity) && !activity.mAppCompatController
+        return isInFreeformCameraCompatMode(activity) && !activity.mAppCompatController
                 .getAppCompatCameraOverrides().isOverrideMinAspectRatioForCameraEnabled();
     }
 
-    private boolean isInCameraCompatMode(@NonNull ActivityRecord activity) {
-        return activity.mAppCompatController.getAppCompatCameraOverrides()
-                .getFreeformCameraCompatMode() != CAMERA_COMPAT_FREEFORM_NONE;
+    boolean isInFreeformCameraCompatMode(@NonNull ActivityRecord activity) {
+        return getCameraCompatMode(activity) != CAMERA_COMPAT_FREEFORM_NONE;
     }
 
     float getCameraCompatAspectRatio(@NonNull ActivityRecord activityRecord) {
@@ -201,16 +218,11 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         return MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
     }
 
-    private void forceUpdateActivityAndTask(ActivityRecord cameraActivity) {
-        cameraActivity.recomputeConfiguration();
-        cameraActivity.updateReportedConfigurationAndSend();
-        Task cameraTask = cameraActivity.getTask();
-        if (cameraTask != null) {
-            cameraTask.dispatchTaskInfoChangedIfNeeded(/* force= */ true);
+    @CameraCompatTaskInfo.FreeformCameraCompatMode
+    int getCameraCompatMode(@NonNull ActivityRecord topActivity) {
+        if (!isTreatmentEnabledForActivity(topActivity, /* shouldCheckOrientation= */ true)) {
+            return CAMERA_COMPAT_FREEFORM_NONE;
         }
-    }
-
-    private static int getCameraCompatMode(@NonNull ActivityRecord topActivity) {
         final int appOrientation = topActivity.getRequestedConfigurationOrientation();
         // It is very important to check the original (actual) display rotation, and not the
         // sandboxed rotation that camera compat treatment sets.
@@ -250,15 +262,24 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
      * <ul>
      *     <li>Treatment is enabled.
      *     <li>Camera is active for the package.
-     *     <li>The app has a fixed orientation.
+     *     <li>The app has a fixed orientation if {@code checkOrientation} is true.
      *     <li>The app is in freeform windowing mode.
      * </ul>
+     *
+     * @param checkOrientation Whether to take apps orientation into account for this check. Only
+     *                         fixed-orientation apps should be targeted, but this might be
+     *                         obscured by OEMs via fullscreen override and the app's original
+     *                         intent inaccessible when the camera opens. Thus, policy would pass
+     *                         {@code false} here when considering whether to trigger config
+     *                         recalculation, and later pass {@code true} during recalculation.
      */
-    private boolean isTreatmentEnabledForActivity(@NonNull ActivityRecord activity) {
+    @VisibleForTesting
+    boolean isTreatmentEnabledForActivity(@NonNull ActivityRecord activity,
+            boolean checkOrientation) {
         int orientation = activity.getRequestedConfigurationOrientation();
         return isCameraCompatForFreeformEnabledForActivity(activity)
                 && mCameraStateMonitor.isCameraRunningForActivity(activity)
-                && orientation != ORIENTATION_UNDEFINED
+                && (!checkOrientation || orientation != ORIENTATION_UNDEFINED)
                 && activity.inFreeformWindowingMode()
                 // "locked" and "nosensor" values are often used by camera apps that can't
                 // handle dynamic changes so we shouldn't force-letterbox them.
@@ -270,7 +291,7 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
 
     private boolean isActivityForCameraIdRefreshing(@NonNull ActivityRecord topActivity,
             @NonNull String cameraId) {
-        if (!isTreatmentEnabledForActivity(topActivity)
+        if (!isTreatmentEnabledForActivity(topActivity, /* checkOrientation= */ true)
                 || mCameraStateMonitor.isCameraWithIdRunningForActivity(topActivity, cameraId)) {
             return false;
         }

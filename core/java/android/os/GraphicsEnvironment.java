@@ -32,6 +32,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.internal.R;
+
 import dalvik.system.VMRuntime;
 
 import java.io.BufferedReader;
@@ -172,19 +174,6 @@ public class GraphicsEnvironment {
      */
     public void toggleAngleAsSystemDriver(boolean enabled) {
         nativeToggleAngleAsSystemDriver(enabled);
-    }
-
-    /**
-     * Query to determine the ANGLE driver choice.
-     */
-    private String queryAngleChoice(Context context, Bundle coreSettings,
-                                               String packageName) {
-        if (TextUtils.isEmpty(packageName)) {
-            Log.v(TAG, "No package name specified; use the system driver");
-            return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
-        }
-
-        return queryAngleChoiceInternal(context, coreSettings, packageName);
     }
 
     private int getVulkanVersion(PackageManager pm) {
@@ -403,11 +392,13 @@ public class GraphicsEnvironment {
      *    Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES; which corresponds to the
      *    “angle_gl_driver_selection_pkgs” and “angle_gl_driver_selection_values” settings); if it
      *    forces a choice.
+     * 3) The per-application ANGLE allowlist contained in the platform. This is an array of
+     *    strings containing package names that should use ANGLE.
      */
-    private String queryAngleChoiceInternal(Context context, Bundle bundle,
-                                                       String packageName) {
+    private String queryAngleChoice(Context context, Bundle bundle, String packageName) {
         // Make sure we have a good package name
         if (TextUtils.isEmpty(packageName)) {
+            Log.v(TAG, "No package name specified; use the system driver");
             return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
         }
 
@@ -436,8 +427,8 @@ public class GraphicsEnvironment {
         Log.v(TAG, "  angle_gl_driver_selection_pkgs=" + optInPackages);
         Log.v(TAG, "  angle_gl_driver_selection_values=" + optInValues);
 
-        // Make sure we have good settings to use
-        if (optInPackages.size() == 0 || optInPackages.size() != optInValues.size()) {
+        // Make sure we have valid settings, if any provided
+        if (optInPackages.size() != optInValues.size()) {
             Log.v(TAG,
                     "Global.Settings values are invalid: "
                         + "number of packages: "
@@ -449,24 +440,53 @@ public class GraphicsEnvironment {
 
         // See if this application is listed in the per-application settings list
         final int pkgIndex = getPackageIndex(packageName, optInPackages);
+        if (pkgIndex >= 0) {
+            mAngleOptInIndex = pkgIndex;
 
-        if (pkgIndex < 0) {
-            Log.v(TAG, packageName + " is not listed in per-application setting");
-            return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
+            // The application IS listed in the per-application settings list; and so use the
+            // setting--choosing the current system driver if the setting is "default"
+            String optInValue = optInValues.get(pkgIndex);
+            Log.v(
+                    TAG,
+                    "ANGLE Developer option for '"
+                            + packageName
+                            + "' "
+                            + "set to: '"
+                            + optInValue
+                            + "'");
+            if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_ANGLE)) {
+                return ANGLE_GL_DRIVER_CHOICE_ANGLE;
+            } else if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE)) {
+                return ANGLE_GL_DRIVER_CHOICE_NATIVE;
+            }
         }
-        mAngleOptInIndex = pkgIndex;
 
-        // The application IS listed in the per-application settings list; and so use the
-        // setting--choosing the current system driver if the setting is "default"
-        String optInValue = optInValues.get(pkgIndex);
-        Log.v(TAG,
-                "ANGLE Developer option for '" + packageName + "' "
-                        + "set to: '" + optInValue + "'");
-        if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_ANGLE)) {
-            return ANGLE_GL_DRIVER_CHOICE_ANGLE;
-        } else if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE)) {
-            return ANGLE_GL_DRIVER_CHOICE_NATIVE;
+        Log.v(TAG, packageName + " is not listed in per-application setting");
+
+        // Check the per-device allowlist shipped in the platform
+        if (android.os.Flags.enableAngleAllowList()) {
+            String[] angleAllowListPackages =
+                    context.getResources().getStringArray(R.array.config_angleAllowList);
+
+            String allowListPackageList = String.join(" ", angleAllowListPackages);
+            Log.v(TAG, "ANGLE allowlist from config: " + allowListPackageList);
+
+            for (String allowedPackage : angleAllowListPackages) {
+                if (allowedPackage.equals(packageName)) {
+                    Log.v(
+                            TAG,
+                            "Package name "
+                                    + packageName
+                                    + " is listed in config_angleAllowList, enabling ANGLE");
+                    return ANGLE_GL_DRIVER_CHOICE_ANGLE;
+                }
+            }
+            Log.v(
+                    TAG,
+                    packageName
+                            + " is not listed in ANGLE allowlist or settings, returning default");
         }
+
         // The user either chose default or an invalid value; go with the default driver.
         return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
     }

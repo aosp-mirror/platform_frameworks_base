@@ -150,7 +150,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <screenBrightnessDefault>0.65</screenBrightnessDefault>
  *      <powerThrottlingConfig>
  *        <brightnessLowestCapAllowed>0.1</brightnessLowestCapAllowed>
- *        <customAnimationRateSec>0.004</customAnimationRateSec>
+ *        <customAnimationRate>0.004</customAnimationRate>
  *        <pollingWindowMaxMillis>30000</pollingWindowMaxMillis>
  *        <pollingWindowMinMillis>10000</pollingWindowMinMillis>
  *          <powerThrottlingMap>
@@ -2193,11 +2193,11 @@ public class DisplayDeviceConfig {
             return;
         }
         float lowestBrightnessCap = powerThrottlingCfg.getBrightnessLowestCapAllowed().floatValue();
-        float customAnimationRateSec = powerThrottlingCfg.getCustomAnimationRateSec().floatValue();
+        float customAnimationRate = powerThrottlingCfg.getCustomAnimationRate().floatValue();
         int pollingWindowMaxMillis = powerThrottlingCfg.getPollingWindowMaxMillis().intValue();
         int pollingWindowMinMillis = powerThrottlingCfg.getPollingWindowMinMillis().intValue();
         mPowerThrottlingConfigData = new PowerThrottlingConfigData(lowestBrightnessCap,
-                                                                   customAnimationRateSec,
+                                                                   customAnimationRate,
                                                                    pollingWindowMaxMillis,
                                                                    pollingWindowMinMillis);
     }
@@ -3012,16 +3012,16 @@ public class DisplayDeviceConfig {
         /** Lowest brightness cap allowed for this device. */
         public final float brightnessLowestCapAllowed;
         /** Time take to animate brightness in seconds. */
-        public final float customAnimationRateSec;
+        public final float customAnimationRate;
         /** Time window for maximum polling power in milliseconds. */
         public final int pollingWindowMaxMillis;
         /** Time window for minimum polling power in milliseconds. */
         public final int pollingWindowMinMillis;
         public PowerThrottlingConfigData(float brightnessLowestCapAllowed,
-                float customAnimationRateSec, int pollingWindowMaxMillis,
+                float customAnimationRate, int pollingWindowMaxMillis,
                 int pollingWindowMinMillis) {
             this.brightnessLowestCapAllowed = brightnessLowestCapAllowed;
-            this.customAnimationRateSec = customAnimationRateSec;
+            this.customAnimationRate = customAnimationRate;
             this.pollingWindowMaxMillis = pollingWindowMaxMillis;
             this.pollingWindowMinMillis = pollingWindowMinMillis;
         }
@@ -3031,7 +3031,7 @@ public class DisplayDeviceConfig {
             return "PowerThrottlingConfigData{"
                     + "brightnessLowestCapAllowed: "
                     + brightnessLowestCapAllowed
-                    + ", customAnimationRateSec: " + customAnimationRateSec
+                    + ", customAnimationRate: " + customAnimationRate
                     + ", pollingWindowMaxMillis: " + pollingWindowMaxMillis
                     + ", pollingWindowMinMillis: " + pollingWindowMinMillis
                     + "} ";

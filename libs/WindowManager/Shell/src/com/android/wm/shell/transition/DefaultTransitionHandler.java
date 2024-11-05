@@ -61,6 +61,7 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_OPEN;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_OPEN;
+import static com.android.wm.shell.transition.DefaultSurfaceAnimator.buildSurfaceAnimation;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionTypeFromInfo;
@@ -68,8 +69,6 @@ import static com.android.wm.shell.transition.TransitionAnimationHelper.isCovere
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -81,7 +80,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -90,12 +88,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.Transformation;
 import android.window.TransitionInfo;
 import android.window.TransitionMetrics;
 import android.window.TransitionRequestInfo;
@@ -362,7 +358,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     isSeamlessDisplayChange = anim == ROTATION_ANIMATION_SEAMLESS;
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
                         final int flags = wallpaperTransit != WALLPAPER_TRANSITION_NONE
-                                && Flags.commonSurfaceAnimator()
                                 ? ScreenRotationAnimation.FLAG_HAS_WALLPAPER : 0;
                         startRotationAnimation(startTransaction, change, info, anim, flags,
                                 animations, onAnimFinish);
@@ -566,13 +561,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
                 final TransitionInfo.AnimationOptions options;
                 if (Flags.moveAnimationOptionsToChange()) {
-                    options = info.getAnimationOptions();
-                } else {
                     options = change.getAnimationOptions();
+                } else {
+                    options = info.getAnimationOptions();
                 }
                 if (options != null) {
-                    attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions(),
-                            cornerRadius);
+                    attachThumbnail(animations, onAnimFinish, change, options, cornerRadius);
                 }
             }
         }
@@ -823,72 +817,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return a;
     }
 
-    /** Builds an animator for the surface and adds it to the `animations` list. */
-    static void buildSurfaceAnimation(@NonNull ArrayList<Animator> animations,
-            @NonNull Animation anim, @NonNull SurfaceControl leash,
-            @NonNull Runnable finishCallback, @NonNull TransactionPool pool,
-            @NonNull ShellExecutor mainExecutor, @Nullable Point position, float cornerRadius,
-            @Nullable Rect clipRect, boolean isActivity) {
-        if (Flags.commonSurfaceAnimator()) {
-            DefaultSurfaceAnimator.buildSurfaceAnimation(animations, anim, leash, finishCallback,
-                    pool, mainExecutor, position, cornerRadius, clipRect, isActivity);
-            return;
-        }
-        final SurfaceControl.Transaction transaction = pool.acquire();
-        final ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
-        final Transformation transformation = new Transformation();
-        final float[] matrix = new float[9];
-        // Animation length is already expected to be scaled.
-        va.overrideDurationScale(1.0f);
-        va.setDuration(anim.computeDurationHint());
-        final ValueAnimator.AnimatorUpdateListener updateListener = animation -> {
-            final long currentPlayTime = Math.min(va.getDuration(), va.getCurrentPlayTime());
-
-            applyTransformation(currentPlayTime, transaction, leash, anim, transformation, matrix,
-                    position, cornerRadius, clipRect, isActivity);
-        };
-        va.addUpdateListener(updateListener);
-
-        final Runnable finisher = () -> {
-            applyTransformation(va.getDuration(), transaction, leash, anim, transformation, matrix,
-                    position, cornerRadius, clipRect, isActivity);
-
-            pool.release(transaction);
-            mainExecutor.execute(() -> {
-                animations.remove(va);
-                finishCallback.run();
-            });
-        };
-        va.addListener(new AnimatorListenerAdapter() {
-            // It is possible for the end/cancel to be called more than once, which may cause
-            // issues if the animating surface has already been released. Track the finished
-            // state here to skip duplicate callbacks. See b/252872225.
-            private boolean mFinished = false;
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                onFinish();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                onFinish();
-            }
-
-            private void onFinish() {
-                if (mFinished) return;
-                mFinished = true;
-                finisher.run();
-                // The update listener can continue to be called after the animation has ended if
-                // end() is called manually again before the finisher removes the animation.
-                // Remove it manually here to prevent animating a released surface.
-                // See b/252872225.
-                va.removeUpdateListener(updateListener);
-            }
-        });
-        animations.add(va);
-    }
-
     private void attachThumbnail(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, TransitionInfo.Change change,
             TransitionInfo.AnimationOptions options, float cornerRadius) {
@@ -1013,39 +941,5 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 || animType == ANIM_THUMBNAIL_SCALE_UP || animType == ANIM_THUMBNAIL_SCALE_DOWN
                 || animType == ANIM_CLIP_REVEAL || animType == ANIM_OPEN_CROSS_PROFILE_APPS
                 || animType == ANIM_FROM_STYLE;
-    }
-
-    private static void applyTransformation(long time, SurfaceControl.Transaction t,
-            SurfaceControl leash, Animation anim, Transformation tmpTransformation, float[] matrix,
-            Point position, float cornerRadius, @Nullable Rect immutableClipRect,
-            boolean isActivity) {
-        tmpTransformation.clear();
-        anim.getTransformation(time, tmpTransformation);
-        if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()
-                && anim.getExtensionEdges() != 0x0 && isActivity) {
-            t.setEdgeExtensionEffect(leash, anim.getExtensionEdges());
-        }
-        if (position != null) {
-            tmpTransformation.getMatrix().postTranslate(position.x, position.y);
-        }
-        t.setMatrix(leash, tmpTransformation.getMatrix(), matrix);
-        t.setAlpha(leash, tmpTransformation.getAlpha());
-
-        final Rect clipRect = immutableClipRect == null ? null : new Rect(immutableClipRect);
-        Insets extensionInsets = Insets.min(tmpTransformation.getInsets(), Insets.NONE);
-        if (!extensionInsets.equals(Insets.NONE) && clipRect != null && !clipRect.isEmpty()) {
-            // Clip out any overflowing edge extension
-            clipRect.inset(extensionInsets);
-            t.setCrop(leash, clipRect);
-        }
-
-        if (anim.hasRoundedCorners() && cornerRadius > 0 && clipRect != null) {
-            // We can only apply rounded corner if a crop is set
-            t.setCrop(leash, clipRect);
-            t.setCornerRadius(leash, cornerRadius);
-        }
-
-        t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
-        t.apply();
     }
 }
