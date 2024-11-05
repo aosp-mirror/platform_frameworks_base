@@ -86,6 +86,7 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
+    private static final String LIBRAVENWOOD_INITIALIZER_NAME = "ravenwood_initializer";
     private static final String RAVENWOOD_NATIVE_SYSPROP_NAME = "ravenwood_sysprop";
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
     private static final String RAVENWOOD_BUILD_PROP =
@@ -152,10 +153,13 @@ public class RavenwoodRuntimeEnvironmentController {
         }
         sInitialized = true;
 
+        // Some process-wide initialization. (maybe redirect stdout/stderr)
+        RavenwoodCommonUtils.loadJniLibrary(LIBRAVENWOOD_INITIALIZER_NAME);
+
         // We haven't initialized liblog yet, so directly write to System.out here.
         RavenwoodCommonUtils.log(TAG, "globalInit()");
 
-        // Load libravenwood_sysprop first
+        // Load libravenwood_sysprop before other libraries that may use SystemProperties.
         var libProp = RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_SYSPROP_NAME);
         System.load(libProp);
         RavenwoodRuntimeNative.reloadNativeLibrary(libProp);

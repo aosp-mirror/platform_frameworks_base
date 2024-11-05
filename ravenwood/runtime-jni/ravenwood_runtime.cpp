@@ -180,24 +180,6 @@ static jint Linux_gettid(JNIEnv* env, jobject) {
     return syscall(__NR_gettid);
 }
 
-static void maybeRedirectLog() {
-    auto ravenwoodLogOut = getenv("RAVENWOOD_LOG_OUT");
-    if (ravenwoodLogOut == NULL) {
-        return;
-    }
-    ALOGI("RAVENWOOD_LOG_OUT set. Redirecting output to %s", ravenwoodLogOut);
-
-    // Redirect stdin / stdout to /dev/tty.
-    int ttyFd = open(ravenwoodLogOut, O_WRONLY);
-    if (ttyFd == -1) {
-        ALOGW("$RAVENWOOD_LOG_OUT is set to %s, but failed to open: %s ", ravenwoodLogOut,
-                strerror(errno));
-        return;
-    }
-    dup2(ttyFd, 1);
-    dup2(ttyFd, 2);
-}
-
 // ---- Registration ----
 
 extern void register_android_system_OsConstants(JNIEnv* env);
@@ -218,8 +200,6 @@ static const JNINativeMethod sMethods[] =
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
-    maybeRedirectLog();
-
     ALOGI("%s: JNI_OnLoad", __FILE__);
 
     JNIEnv* env = GetJNIEnvOrDie(vm);
