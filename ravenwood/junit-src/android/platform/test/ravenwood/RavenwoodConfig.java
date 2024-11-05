@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Instrumentation;
 import android.content.Context;
+import android.os.Build;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -67,7 +68,7 @@ public final class RavenwoodConfig {
     String mTargetPackageName;
 
     int mMinSdkLevel;
-    int mTargetSdkLevel;
+    int mTargetSdkLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     boolean mProvideMainThread = false;
 

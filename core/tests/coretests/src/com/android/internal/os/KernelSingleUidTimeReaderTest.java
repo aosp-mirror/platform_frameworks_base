@@ -301,18 +301,14 @@ public class KernelSingleUidTimeReaderTest {
                         {1_000_000, 2_000_000, 3_000_000},
                         {4_000_000, 5_000_000}});
 
-        LongArrayMultiStateCounter.LongArrayContainer array =
-                new LongArrayMultiStateCounter.LongArrayContainer(5);
+
         long[] out = new long[5];
 
-        success = mInjector.addDelta(TEST_UID, counter, 2000, array);
+        success = mInjector.addDelta(TEST_UID, counter, 2000, out);
         assertThat(success).isTrue();
-
-        array.getValues(out);
         assertThat(out).isEqualTo(new long[]{1, 2, 3, 4, 5});
 
-        counter.getCounts(array, 0);
-        array.getValues(out);
+        counter.getCounts(out, 0);
         assertThat(out).isEqualTo(new long[]{1, 2, 3, 4, 5});
 
         counter.setState(1, 3000);
@@ -322,18 +318,14 @@ public class KernelSingleUidTimeReaderTest {
                         {11_000_000, 22_000_000, 33_000_000},
                         {44_000_000, 55_000_000}});
 
-        success = mInjector.addDelta(TEST_UID, counter, 4000, array);
+        success = mInjector.addDelta(TEST_UID, counter, 4000, out);
         assertThat(success).isTrue();
-
-        array.getValues(out);
         assertThat(out).isEqualTo(new long[]{10, 20, 30, 40, 50});
 
-        counter.getCounts(array, 0);
-        array.getValues(out);
+        counter.getCounts(out, 0);
         assertThat(out).isEqualTo(new long[]{1 + 5, 2 + 10, 3 + 15, 4 + 20, 5 + 25});
 
-        counter.getCounts(array, 1);
-        array.getValues(out);
+        counter.getCounts(out, 1);
         assertThat(out).isEqualTo(new long[]{5, 10, 15, 20, 25});
     }
 
@@ -385,7 +377,7 @@ public class KernelSingleUidTimeReaderTest {
 
         @Override
         public boolean addDelta(int uid, LongArrayMultiStateCounter counter, long timestampMs,
-                LongArrayMultiStateCounter.LongArrayContainer deltaOut) {
+                long[] deltaOut) {
             return addDeltaForTest(uid, counter, timestampMs, mCpuTimeInStatePerClusterNs,
                     deltaOut);
         }

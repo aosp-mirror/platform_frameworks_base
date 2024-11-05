@@ -68,7 +68,7 @@ constructor(private val profileTypes: ProfileTypeRepository, private val context
         return PolicyResult.Matched(
             policy = NAME,
             reason = WORK_TASK_IS_TOP,
-            CaptureParameters(
+            LegacyCaptureParameters(
                 type = IsolatedTask(taskId = childTask.id, taskBounds = childTask.bounds),
                 component = childTask.componentName ?: rootTask.topActivity,
                 owner = UserHandle.of(childTask.userId),

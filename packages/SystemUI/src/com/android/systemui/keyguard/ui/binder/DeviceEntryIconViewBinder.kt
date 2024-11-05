@@ -182,9 +182,11 @@ object DeviceEntryIconViewBinder {
             fgIconView.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     // Start with an empty state
+                    Log.d(TAG, "Initializing device entry fgIconView")
                     fgIconView.setImageState(StateSet.NOTHING, /* merge */ false)
                     launch("$TAG#fpIconView.viewModel") {
                         fgViewModel.viewModel.collect { viewModel ->
+                            Log.d(TAG, "Updating device entry icon image state $viewModel")
                             fgIconView.setImageState(
                                 view.getIconState(viewModel.type, viewModel.useAodVariant),
                                 /* merge */ false,

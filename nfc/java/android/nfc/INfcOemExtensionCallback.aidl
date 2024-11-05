@@ -27,7 +27,7 @@ import java.util.List;
  * @hide
  */
 interface INfcOemExtensionCallback {
-   void onTagConnected(boolean connected, in Tag tag);
+   void onTagConnected(boolean connected);
    void onStateUpdated(int state);
    void onApplyRouting(in ResultReceiver isSkipped);
    void onNdefRead(in ResultReceiver isSkipped);

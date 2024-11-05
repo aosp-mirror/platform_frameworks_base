@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
+#include "aassetstreamadaptor.h"
+
+#include <android/asset_manager.h>
+#include <android/bitmap.h>
+#include <android/data_space.h>
+#include <android/imagedecoder.h>
 #include <MimeType.h>
-#include <SkAlphaType.h>
+#include <android/rect.h>
+#include <hwui/ImageDecoder.h>
+#include <log/log.h>
 #include <SkAndroidCodec.h>
+#include <SkAlphaType.h>
 #include <SkCodec.h>
 #include <SkCodecAnimation.h>
 #include <SkColorSpace.h>
@@ -26,24 +35,14 @@
 #include <SkRefCnt.h>
 #include <SkSize.h>
 #include <SkStream.h>
-#include <android/asset_manager.h>
-#include <android/bitmap.h>
-#include <android/data_space.h>
-#include <android/imagedecoder.h>
-#include <android/rect.h>
+#include <utils/Color.h>
+
 #include <fcntl.h>
-#include <hwui/ImageDecoder.h>
-#include <log/log.h>
+#include <limits>
+#include <optional>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <utils/Color.h>
-#include <utils/StatsUtils.h>
-
-#include <limits>
-#include <optional>
-
-#include "aassetstreamadaptor.h"
 
 using namespace android;
 
@@ -401,7 +400,9 @@ size_t AImageDecoder_getMinimumStride(AImageDecoder* decoder) {
     return info.minRowBytes();
 }
 
-int AImageDecoder_decodeImage(AImageDecoder* decoder, void* pixels, size_t stride, size_t size) {
+int AImageDecoder_decodeImage(AImageDecoder* decoder,
+                              void* pixels, size_t stride,
+                              size_t size) {
     if (!decoder || !pixels || !stride) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
@@ -418,13 +419,7 @@ int AImageDecoder_decodeImage(AImageDecoder* decoder, void* pixels, size_t strid
         return ANDROID_IMAGE_DECODER_FINISHED;
     }
 
-    const auto result = ResultToErrorCode(imageDecoder->decode(pixels, stride));
-
-    if (result == ANDROID_IMAGE_DECODER_SUCCESS) {
-        uirenderer::logBitmapDecode(imageDecoder->getOutputInfo(), false);
-    }
-
-    return result;
+    return ResultToErrorCode(imageDecoder->decode(pixels, stride));
 }
 
 void AImageDecoder_delete(AImageDecoder* decoder) {

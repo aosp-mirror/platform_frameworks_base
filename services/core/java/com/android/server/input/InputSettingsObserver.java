@@ -143,6 +143,10 @@ class InputSettingsObserver extends ContentObserver {
             observer.accept("just booted");
         }
 
+        // TODO(b/365063048): add an entry to mObservers that calls this instead, once we have a
+        //   setting that can be observed.
+        updateTouchpadThreeFingerTapShortcutEnabled();
+
         configureUserActivityPokeInterval();
     }
 
@@ -203,6 +207,11 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateTouchpadRightClickZoneEnabled() {
         mNative.setTouchpadRightClickZoneEnabled(InputSettings.useTouchpadRightClickZone(mContext));
+    }
+
+    private void updateTouchpadThreeFingerTapShortcutEnabled() {
+        mNative.setTouchpadThreeFingerTapShortcutEnabled(
+                InputSettings.useTouchpadThreeFingerTapShortcut(mContext));
     }
 
     private void updateShowTouches() {

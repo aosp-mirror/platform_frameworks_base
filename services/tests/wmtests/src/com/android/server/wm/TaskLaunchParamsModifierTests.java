@@ -249,7 +249,7 @@ public class TaskLaunchParamsModifierTests extends
         ActivityRecord reusableActivity = createSourceActivity(fullscreenDisplay);
         ActivityRecord source = createSourceActivity(freeformDisplay);
         source.mHandoverLaunchDisplayId = freeformDisplay.mDisplayId;
-        source.noDisplay = true;
+        source.setIsNoDisplay(true);
 
         assertEquals(RESULT_CONTINUE,
                 new CalculateRequestBuilder()
@@ -272,7 +272,7 @@ public class TaskLaunchParamsModifierTests extends
         ActivityRecord reusableActivity = createSourceActivity(fullscreenDisplay);
         ActivityRecord source = createSourceActivity(freeformDisplay);
         source.mHandoverTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
-        source.noDisplay = true;
+        source.setIsNoDisplay(true);
 
         assertEquals(RESULT_CONTINUE,
                 new CalculateRequestBuilder()

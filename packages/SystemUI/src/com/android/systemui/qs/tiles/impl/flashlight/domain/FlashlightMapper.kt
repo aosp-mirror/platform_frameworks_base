@@ -30,10 +30,8 @@ import javax.inject.Inject
 /** Maps [FlashlightTileModel] to [QSTileState]. */
 class FlashlightMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Theme,
-) : QSTileDataToStateMapper<FlashlightTileModel> {
+constructor(@Main private val resources: Resources, private val theme: Theme) :
+    QSTileDataToStateMapper<FlashlightTileModel> {
 
     override fun map(config: QSTileConfig, data: FlashlightTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
@@ -43,15 +41,8 @@ constructor(
                 } else {
                     R.drawable.qs_flashlight_icon_off
                 }
-            val icon =
-                Icon.Loaded(
-                    resources.getDrawable(
-                        iconRes!!,
-                        theme,
-                    ),
-                    contentDescription = null
-                )
-            this.icon = { icon }
+
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
 
             contentDescription = label
 

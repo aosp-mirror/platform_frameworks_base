@@ -104,6 +104,11 @@ public final class SatelliteManager {
             sSatelliteCommunicationAllowedStateCallbackMap =
             new ConcurrentHashMap<>();
 
+    private static final ConcurrentHashMap<SatelliteDisallowedReasonsCallback,
+            ISatelliteDisallowedReasonsCallback>
+            sSatelliteDisallowedReasonsCallbackMap =
+            new ConcurrentHashMap<>();
+
     private final int mSubId;
 
     /**
@@ -1487,6 +1492,47 @@ public final class SatelliteManager {
     public @interface SatelliteCommunicationRestrictionReason {}
 
     /**
+     * Satellite is disallowed because it is not supported.
+     * @hide
+     */
+    public static final int SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED = 0;
+
+    /**
+     * Satellite is disallowed because it has not been provisioned.
+     * @hide
+     */
+    public static final int SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED = 1;
+
+    /**
+     * Satellite is disallowed because it is currently outside an allowed region.
+     * @hide
+     */
+    public static final int SATELLITE_DISALLOWED_REASON_NOT_IN_ALLOWED_REGION = 2;
+
+    /**
+     * Satellite is disallowed because an unsupported default message application is being used.
+     * @hide
+     */
+    public static final int SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP = 3;
+
+    /**
+     * Satellite is disallowed because location settings have been disabled.
+     * @hide
+     */
+    public static final int SATELLITE_DISALLOWED_REASON_LOCATION_DISABLED = 4;
+
+    /** @hide */
+    @IntDef(prefix = "SATELLITE_DISALLOWED_REASON_", value = {
+            SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED,
+            SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED,
+            SATELLITE_DISALLOWED_REASON_NOT_IN_ALLOWED_REGION,
+            SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP,
+            SATELLITE_DISALLOWED_REASON_LOCATION_DISABLED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SatelliteDisallowedReason {}
+
+    /**
      * Start receiving satellite transmission updates.
      * This can be called by the pointing UI when the user starts pointing to the satellite.
      * Modem should continue to report the pointing input as the device or satellite moves.
@@ -2576,6 +2622,119 @@ public final class SatelliteManager {
             ex.rethrowAsRuntimeException();
         }
         return new HashSet<>();
+    }
+
+    /**
+     * Returns list of disallowed reasons of satellite.
+     *
+     * @return list of disallowed reasons of satellite.
+     *
+     * @throws SecurityException     if caller doesn't have required permission.
+     * @throws IllegalStateException if Telephony process isn't available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteDisallowedReason
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @NonNull
+    public List<Integer> getSatelliteDisallowedReasons() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                int[] receivedArray = telephony.getSatelliteDisallowedReasons();
+                if (receivedArray.length == 0) {
+                    logd("receivedArray is empty, create empty list");
+                    return new ArrayList<>();
+                } else {
+                    return Arrays.stream(receivedArray).boxed().collect(Collectors.toList());
+                }
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("getSatelliteDisallowedReasons() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Registers for disallowed reasons change event from satellite service.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle disallowed reasons changed event.
+     *
+     * @throws SecurityException     if caller doesn't have required permission.
+     * @throws IllegalStateException if Telephony process is not available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void registerForSatelliteDisallowedReasonsChanged(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteDisallowedReasonsCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ISatelliteDisallowedReasonsCallback internalCallback =
+                        new ISatelliteDisallowedReasonsCallback.Stub() {
+                            @Override
+                            public void onSatelliteDisallowedReasonsChanged(
+                                    int[] disallowedReasons) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatelliteDisallowedReasonsChanged(
+                                                disallowedReasons)));
+                            }
+                        };
+                telephony.registerForSatelliteDisallowedReasonsChanged(internalCallback);
+                sSatelliteDisallowedReasonsCallbackMap.put(callback, internalCallback);
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForSatelliteDisallowedReasonsChanged() RemoteException" + ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Unregisters for disallowed reasons change event from satellite service.
+     *
+     * @param callback The callback that was passed to
+     * {@link #registerForSatelliteDisallowedReasonsChanged(
+     * Executor, SatelliteDisallowedReasonsCallback)}
+     *
+     * @throws SecurityException     if caller doesn't have required permission.
+     * @throws IllegalStateException if Telephony process is not available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void unregisterForSatelliteDisallowedReasonsChanged(
+            @NonNull SatelliteDisallowedReasonsCallback callback) {
+        Objects.requireNonNull(callback);
+        ISatelliteDisallowedReasonsCallback internalCallback =
+                sSatelliteDisallowedReasonsCallbackMap.remove(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (internalCallback != null) {
+                    telephony.unregisterForSatelliteDisallowedReasonsChanged(internalCallback);
+                } else {
+                    loge("unregisterForSatelliteDisallowedReasonsChanged: No internal callback.");
+                    throw new IllegalArgumentException("callback is not valid");
+                }
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForSatelliteDisallowedReasonsChanged() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
     }
 
     /**

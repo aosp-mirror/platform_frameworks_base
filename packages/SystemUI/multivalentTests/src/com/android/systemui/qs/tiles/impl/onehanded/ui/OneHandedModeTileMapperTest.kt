@@ -51,11 +51,11 @@ class OneHandedModeTileMapperTest : SysuiTestCase() {
                     .apply {
                         addOverride(
                             com.android.internal.R.drawable.ic_qs_one_handed_mode,
-                            TestStubDrawable()
+                            TestStubDrawable(),
                         )
                     }
                     .resources,
-                context.theme
+                context.theme,
             )
     }
 
@@ -69,7 +69,7 @@ class OneHandedModeTileMapperTest : SysuiTestCase() {
             createOneHandedModeTileState(
                 QSTileState.ActivationState.INACTIVE,
                 subtitleArray[1],
-                com.android.internal.R.drawable.ic_qs_one_handed_mode
+                com.android.internal.R.drawable.ic_qs_one_handed_mode,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -84,7 +84,7 @@ class OneHandedModeTileMapperTest : SysuiTestCase() {
             createOneHandedModeTileState(
                 QSTileState.ActivationState.ACTIVE,
                 subtitleArray[2],
-                com.android.internal.R.drawable.ic_qs_one_handed_mode
+                com.android.internal.R.drawable.ic_qs_one_handed_mode,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -96,7 +96,7 @@ class OneHandedModeTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_onehanded_label)
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -106,7 +106,7 @@ class OneHandedModeTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

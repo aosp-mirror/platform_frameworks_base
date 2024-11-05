@@ -52,10 +52,12 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
@@ -204,7 +206,8 @@ public final class ApduServiceInfo implements Parcelable {
         this(info, onHost, description, staticAidGroups, dynamicAidGroups,
                 requiresUnlock, requiresScreenOn, bannerResource, uid,
                 settingsActivityName, offHost, staticOffHost, isEnabled,
-                new HashMap<String, Boolean>(), new HashMap<Pattern, Boolean>());
+                new HashMap<String, Boolean>(), new TreeMap<>(
+                        Comparator.comparing(Pattern::toString)));
     }
 
     /**
@@ -340,7 +343,8 @@ public final class ApduServiceInfo implements Parcelable {
             mStaticAidGroups = new HashMap<String, AidGroup>();
             mDynamicAidGroups = new HashMap<String, AidGroup>();
             mAutoTransact = new HashMap<String, Boolean>();
-            mAutoTransactPatterns = new HashMap<Pattern, Boolean>();
+            mAutoTransactPatterns = new TreeMap<Pattern, Boolean>(
+                    Comparator.comparing(Pattern::toString));
             mOnHost = onHost;
 
             final int depth = parser.getDepth();
