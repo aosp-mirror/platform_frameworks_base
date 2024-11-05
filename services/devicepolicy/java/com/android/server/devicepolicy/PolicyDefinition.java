@@ -337,6 +337,13 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::noOp,
                     new PackageSetPolicySerializer());
 
+    static PolicyDefinition<Integer> MEMORY_TAGGING = new PolicyDefinition<>(
+                    new NoArgsPolicyKey(
+                            DevicePolicyIdentifiers.MEMORY_TAGGING_POLICY),
+                    new TopPriority<>(List.of(EnforcingAdmin.DPC_AUTHORITY)),
+                    PolicyEnforcerCallbacks::setMtePolicy,
+                    new IntegerPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -383,6 +390,8 @@ final class PolicyDefinition<V> {
                 PASSWORD_COMPLEXITY);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PACKAGES_SUSPENDED_POLICY,
                 PACKAGES_SUSPENDED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.MEMORY_TAGGING_POLICY,
+                MEMORY_TAGGING);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
