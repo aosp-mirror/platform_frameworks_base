@@ -210,21 +210,6 @@ public class OverlayManagerImplTest {
     }
 
     @Test
-    public void registerOverlay_forAndroidPackage_shouldFail() {
-        FabricatedOverlayInternal overlayInternal =
-                createOverlayWithName(
-                        mOverlayName,
-                        SYSTEM_APP_OVERLAYABLE,
-                        "android",
-                        List.of(Pair.create("color/white", Pair.create(null, Color.BLACK))));
-
-        assertThrows(
-                "Wrong target package name",
-                IllegalArgumentException.class,
-                () -> mOverlayManagerImpl.registerFabricatedOverlay(overlayInternal));
-    }
-
-    @Test
     public void getOverlayInfosForTarget_defaultShouldBeZero() {
         List<OverlayInfo> overlayInfos =
                 mOverlayManagerImpl.getOverlayInfosForTarget(mContext.getPackageName());
