@@ -183,6 +183,7 @@ import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.service.SensorPrivacyToggleSourceProto;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -4538,8 +4539,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE,
                     SensorPrivacyManager.Sensors.MICROPHONE);
 
-            mSensorPrivacyManager.setSensorPrivacy(SensorPrivacyManager.Sensors.MICROPHONE,
-                    !isEnabled);
+            mSensorPrivacyManager.setSensorPrivacy(SensorPrivacyToggleSourceProto.OTHER,
+                    SensorPrivacyManager.Sensors.MICROPHONE, !isEnabled, mCurrentUserId);
 
             int toastTextResId;
             if (isEnabled) {
