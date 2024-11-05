@@ -883,11 +883,10 @@ class DesktopTasksController(
             return
         }
 
-        // TODO(b/375356605): Introduce a new ResizeTrigger for drag-to-top.
         desktopModeEventLogger.logTaskResizingStarted(
-            ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
+            ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
         )
-        toggleDesktopTaskSize(taskInfo, ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent)
+        toggleDesktopTaskSize(taskInfo, ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent)
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {

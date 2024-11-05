@@ -2987,6 +2987,21 @@ class DesktopTasksControllerTest : ShellTestCase() {
     // Assert bounds set to stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct()
     assertThat(findBoundsChange(wct, task)).isEqualTo(STABLE_BOUNDS)
+    // Assert event is properly logged
+    verify(desktopModeEventLogger, times(1)).logTaskResizingStarted(
+      ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
+      motionEvent,
+      task,
+      displayController
+    )
+    verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
+      ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
+      motionEvent,
+      task,
+      STABLE_BOUNDS.height(),
+      STABLE_BOUNDS.width(),
+      displayController
+    )
   }
 
   @Test
@@ -3030,6 +3045,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
       eq(currentDragBounds),
       eq(STABLE_BOUNDS),
       anyOrNull(),
+    )
+    // Assert no event is logged
+    verify(desktopModeEventLogger, never()).logTaskResizingStarted(
+      any(), any(), any(), any(), any()
+    )
+    verify(desktopModeEventLogger, never()).logTaskResizingEnded(
+      any(), any(), any(), any(), any(), any(), any()
     )
   }
 
