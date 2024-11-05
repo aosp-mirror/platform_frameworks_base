@@ -171,6 +171,7 @@ public class PipTaskListener implements ShellTaskOrganizer.TaskListener,
                         "Leash is null for bounds transition.");
 
                 if (mWaitingForAspectRatioChange) {
+                    mWaitingForAspectRatioChange = false;
                     PipResizeAnimator animator = new PipResizeAnimator(mContext,
                             mPipTransitionState.mPinnedTaskLeash, startTx, finishTx,
                             destinationBounds,
