@@ -26,7 +26,7 @@
 
 
 # Regex to identify slow tests, in PCRE
-SLOW_TEST_RE='^(SystemUiRavenTests|CtsIcuTestCasesRavenwood)$'
+SLOW_TEST_RE='^(SystemUiRavenTests|CtsIcuTestCasesRavenwood|CarSystemUIRavenTests)$'
 
 smoke=0
 include_re=""
@@ -67,7 +67,7 @@ filter() {
     if [[ "$re" == "" ]] ; then
         cat # No filtering
     else
-        grep $grep_arg -P "$re"
+        grep $grep_arg -iP "$re"
     fi
 }
 
