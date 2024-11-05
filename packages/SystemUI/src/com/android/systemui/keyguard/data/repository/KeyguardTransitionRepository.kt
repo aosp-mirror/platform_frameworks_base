@@ -23,7 +23,7 @@ import android.annotation.FloatRange
 import android.annotation.SuppressLint
 import android.os.Trace
 import android.util.Log
-import com.android.app.tracing.coroutines.withContext
+import com.android.app.tracing.coroutines.withContextTraced as withContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
