@@ -228,13 +228,11 @@ class InsetsStateController {
             changed |= provider.updateClientVisibility(caller,
                     isImeProvider ? statsToken : null);
         }
-        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
-            if (changed) {
-                notifyInsetsChanged();
-                mDisplayContent.updateSystemGestureExclusion();
+        if (changed) {
+            notifyInsetsChanged();
+            mDisplayContent.updateSystemGestureExclusion();
 
-                mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
-            }
+            mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
         }
     }
 
