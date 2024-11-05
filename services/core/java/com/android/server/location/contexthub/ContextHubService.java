@@ -250,6 +250,7 @@ public class ContextHubService extends IContextHubService.Stub {
         public void handleServiceRestart() {
             Log.i(TAG, "Recovering from Context Hub HAL restart...");
             initExistingCallbacks();
+            mHubInfoRegistry.onHalRestart();
             resetSettings();
             if (Flags.reconnectHostEndpointsAfterHalRestart()) {
                 mClientManager.forEachClientOfHub(mContextHubId,
@@ -331,6 +332,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         initDefaultClientMap();
+        initEndpointCallback();
 
         initLocationSettingNotifications();
         initWifiSettingNotifications();
@@ -507,6 +509,18 @@ public class ContextHubService extends IContextHubService.Stub {
             queryNanoAppsInternal(contextHubId);
         }
         mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
+    }
+
+    private void initEndpointCallback() {
+        if (mHubInfoRegistry == null) {
+            return;
+        }
+        try {
+            mContextHubWrapper.registerEndpointCallback(
+                    new ContextHubHalEndpointCallback(mHubInfoRegistry));
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while registering IEndpointCallback", e);
+        }
     }
 
     /**
@@ -744,8 +758,10 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public List<HubEndpointInfo> findEndpoints(long endpointId) {
         super.findEndpoints_enforcePermission();
-        // TODO(b/375487784): connect this with mHubInfoRegistry
-        return Collections.emptyList();
+        if (mHubInfoRegistry == null) {
+            return Collections.emptyList();
+        }
+        return mHubInfoRegistry.findEndpoints(endpointId);
     }
 
     /**
