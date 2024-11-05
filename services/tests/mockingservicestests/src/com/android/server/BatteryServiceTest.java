@@ -77,7 +77,9 @@ public class BatteryServiceTest {
     private static final int TEMP_MORE_THEN_ONE_DEGREE_CELSIUS = 310;
     private static final int CURRENT_BATTERY_HEALTH = 2;
     private static final int UPDATED_BATTERY_HEALTH = 3;
-    private static final int HANDLER_IDLE_TIME_MS = 1000;
+    private static final int CURRENT_CHARGE_COUNTER = 4680000;
+    private static final int UPDATED_CHARGE_COUNTER = 4218000;
+    private static final int HANDLER_IDLE_TIME_MS = 5000;
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
             .mockStatic(SystemProperties.class)
@@ -141,7 +143,7 @@ public class BatteryServiceTest {
     @EnableFlags(Flags.FLAG_RATE_LIMIT_BATTERY_CHANGED_BROADCAST)
     public void onlyVoltageUpdated_lessThenOnePercent_broadcastNotSent() {
         mBatteryService.update(createHealthInfo(VOLTAGE_LESS_THEN_ONE_PERCENT, CURRENT_BATTERY_TEMP,
-                CURRENT_BATTERY_HEALTH));
+                CURRENT_CHARGE_COUNTER, CURRENT_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
 
@@ -153,6 +155,7 @@ public class BatteryServiceTest {
     public void onlyVoltageUpdated_beforeTwentySeconds_broadcastNotSent() {
         mBatteryService.update(
                 createHealthInfo(VOLTAGE_MORE_THEN_ONE_PERCENT, CURRENT_BATTERY_TEMP,
+                        CURRENT_CHARGE_COUNTER,
                         CURRENT_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
@@ -165,7 +168,7 @@ public class BatteryServiceTest {
     public void onlyVoltageUpdated_broadcastSent() {
         mBatteryService.mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime() - 20000;
         mBatteryService.update(createHealthInfo(VOLTAGE_MORE_THEN_ONE_PERCENT, CURRENT_BATTERY_TEMP,
-                CURRENT_BATTERY_HEALTH));
+                CURRENT_CHARGE_COUNTER, CURRENT_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
 
@@ -177,7 +180,7 @@ public class BatteryServiceTest {
     public void onlyTempUpdated_lessThenOneDegreeCelsius_broadcastNotSent() {
         mBatteryService.update(
                 createHealthInfo(CURRENT_BATTERY_VOLTAGE, TEMP_LESS_THEN_ONE_DEGREE_CELSIUS,
-                        CURRENT_BATTERY_HEALTH));
+                        CURRENT_CHARGE_COUNTER, CURRENT_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
 
@@ -190,7 +193,7 @@ public class BatteryServiceTest {
         long lastVoltageUpdateTime = mBatteryService.mLastBroadcastVoltageUpdateTime;
         mBatteryService.update(
                 createHealthInfo(VOLTAGE_LESS_THEN_ONE_PERCENT, TEMP_MORE_THEN_ONE_DEGREE_CELSIUS,
-                        CURRENT_BATTERY_HEALTH));
+                        UPDATED_CHARGE_COUNTER, CURRENT_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
 
@@ -203,15 +206,17 @@ public class BatteryServiceTest {
     public void batteryHealthUpdated_voltageAndTempConst_broadcastSent() {
         mBatteryService.update(
                 createHealthInfo(CURRENT_BATTERY_VOLTAGE, CURRENT_BATTERY_TEMP,
+                        CURRENT_CHARGE_COUNTER,
                         UPDATED_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
 
         verifyNumberOfTimesBroadcastSent(1);
 
-        // updating the voltage just after the health update does not triggers the broadcast.
+        // updating counter just after the health update does not triggers broadcast.
         mBatteryService.update(
-                createHealthInfo(VOLTAGE_MORE_THEN_ONE_PERCENT, CURRENT_BATTERY_TEMP,
+                createHealthInfo(CURRENT_BATTERY_VOLTAGE, CURRENT_BATTERY_TEMP,
+                        UPDATED_CHARGE_COUNTER,
                         UPDATED_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
@@ -223,7 +228,46 @@ public class BatteryServiceTest {
     @DisableFlags(Flags.FLAG_RATE_LIMIT_BATTERY_CHANGED_BROADCAST)
     public void voltageUpdated_lessThanOnePercent_flagDisabled_broadcastSent() {
         mBatteryService.update(createHealthInfo(VOLTAGE_LESS_THEN_ONE_PERCENT, CURRENT_BATTERY_TEMP,
-                CURRENT_BATTERY_HEALTH));
+                CURRENT_CHARGE_COUNTER, CURRENT_BATTERY_HEALTH));
+
+        waitForHandlerToExecute();
+
+        verifyNumberOfTimesBroadcastSent(1);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_RATE_LIMIT_BATTERY_CHANGED_BROADCAST)
+    public void onlyChargeCounterUpdated_broadcastNotSent() {
+        mBatteryService.update(
+                createHealthInfo(CURRENT_BATTERY_VOLTAGE, CURRENT_BATTERY_TEMP,
+                        UPDATED_CHARGE_COUNTER,
+                        CURRENT_BATTERY_HEALTH));
+
+        waitForHandlerToExecute();
+
+        verifyNumberOfTimesBroadcastSent(0);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_RATE_LIMIT_BATTERY_CHANGED_BROADCAST)
+    public void chargeCounterUpdated_tempUpdatedLessThanOneDegree_broadcastNotSent() {
+        mBatteryService.update(
+                createHealthInfo(CURRENT_BATTERY_VOLTAGE, TEMP_LESS_THEN_ONE_DEGREE_CELSIUS,
+                        UPDATED_CHARGE_COUNTER,
+                        CURRENT_BATTERY_HEALTH));
+
+        waitForHandlerToExecute();
+
+        verifyNumberOfTimesBroadcastSent(0);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_RATE_LIMIT_BATTERY_CHANGED_BROADCAST)
+    public void onlyChargeCounterUpdated_broadcastSent() {
+        mBatteryService.update(
+                createHealthInfo(CURRENT_BATTERY_VOLTAGE, CURRENT_BATTERY_TEMP,
+                        UPDATED_CHARGE_COUNTER,
+                        CURRENT_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
 
@@ -233,11 +277,12 @@ public class BatteryServiceTest {
     private HealthInfo createHealthInfo(
             int batteryVoltage,
             int batteryTemperature,
+            int batteryChargeCounter,
             int batteryHealth) {
         HealthInfo h = new HealthInfo();
         h.batteryVoltageMillivolts = batteryVoltage;
         h.batteryTemperatureTenthsCelsius = batteryTemperature;
-        h.batteryChargeCounterUah = 4680000;
+        h.batteryChargeCounterUah = batteryChargeCounter;
         h.batteryStatus = 5;
         h.batteryHealth = batteryHealth;
         h.batteryPresent = true;
@@ -253,7 +298,7 @@ public class BatteryServiceTest {
     }
 
     // Creates a new battery service objects and sets the initial values.
-    private void createBatteryService() {
+    private void createBatteryService() throws InterruptedException {
         final HandlerThread handlerThread = new HandlerThread("BatteryServiceTest");
         handlerThread.start();
 
@@ -262,6 +307,7 @@ public class BatteryServiceTest {
         // trigger the update to set the initial values.
         mBatteryService.update(
                 createHealthInfo(CURRENT_BATTERY_VOLTAGE, CURRENT_BATTERY_TEMP,
+                        CURRENT_CHARGE_COUNTER,
                         CURRENT_BATTERY_HEALTH));
 
         waitForHandlerToExecute();
@@ -289,5 +335,4 @@ public class BatteryServiceTest {
                         eq(BatteryService.BATTERY_CHANGED_OPTIONS), eq(UserHandle.USER_ALL)),
                 times(++numberOfTimes));
     }
-
 }

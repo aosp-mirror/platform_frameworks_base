@@ -733,6 +733,10 @@ public final class BatteryService extends SystemService {
             mHandler.post(this::notifyChargingPolicyChanged);
         }
 
+        final boolean includeChargeCounter =
+                !com.android.server.flags.Flags.rateLimitBatteryChangedBroadcast()
+                        && mHealthInfo.batteryChargeCounterUah != mLastBroadcastChargeCounter;
+
         if (force
                 || (mHealthInfo.batteryStatus != mLastBroadcastBatteryStatus
                 || mHealthInfo.batteryHealth != mLastBroadcastBatteryHealth
@@ -743,7 +747,7 @@ public final class BatteryService extends SystemService {
                 || mHealthInfo.batteryTemperatureTenthsCelsius != mLastBroadcastBatteryTemperature
                 || mHealthInfo.maxChargingCurrentMicroamps != mLastBroadcastMaxChargingCurrent
                 || mHealthInfo.maxChargingVoltageMicrovolts != mLastBroadcastMaxChargingVoltage
-                || mHealthInfo.batteryChargeCounterUah != mLastBroadcastChargeCounter
+                || includeChargeCounter
                 || mInvalidCharger != mLastBroadcastInvalidCharger
                 || mHealthInfo.batteryCycleCount != mLastBroadcastBatteryCycleCount
                 || mHealthInfo.chargingState != mLastBroadcastChargingState
@@ -1268,8 +1272,7 @@ public final class BatteryService extends SystemService {
                 || mInvalidCharger != mLastBroadcastInvalidCharger
                 || mHealthInfo.batteryCycleCount != mLastBroadcastBatteryCycleCount
                 || mHealthInfo.chargingState != mLastBroadcastChargingState
-                || mHealthInfo.batteryCapacityLevel != mLastBroadcastBatteryCapacityLevel
-                || mLastBroadcastChargeCounter != mHealthInfo.batteryChargeCounterUah;
+                || mHealthInfo.batteryCapacityLevel != mLastBroadcastBatteryCapacityLevel;
 
         // We only rate limit based on changes in the temp, voltage.
         if (otherStatesUpdated) {
