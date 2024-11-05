@@ -128,7 +128,7 @@ constructor(
         }
         val burnIn = rememberBurnIn(clockInteractor)
         AnimatedVisibility(
-            visibleState  = transitionState,
+            visibleState = transitionState,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier =
@@ -151,7 +151,7 @@ constructor(
                             )
                         }
                     }
-                },
+                }
             )
         }
     }
@@ -173,7 +173,7 @@ constructor(
         areNotificationsVisible: Boolean,
         isShadeLayoutWide: Boolean,
         burnInParams: BurnInParameters?,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier,
     ) {
         if (!areNotificationsVisible) {
             return
@@ -193,10 +193,7 @@ constructor(
                         if (burnInParams == null) {
                             it
                         } else {
-                            it.burnInAware(
-                                viewModel = aodBurnInViewModel,
-                                params = burnInParams,
-                            )
+                            it.burnInAware(viewModel = aodBurnInViewModel, params = burnInParams)
                         }
                     },
         )

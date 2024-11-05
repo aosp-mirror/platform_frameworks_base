@@ -1494,9 +1494,8 @@ public final class InputManager {
         try {
             return mIm.addCustomInputGesture(inputGestureData.getAidlData());
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
-        return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
     }
 
     /** Removes an existing custom gesture
@@ -1517,9 +1516,8 @@ public final class InputManager {
         try {
             return mIm.removeCustomInputGesture(inputGestureData.getAidlData());
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
-        return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
     }
 
     /** Removes all custom input gestures
@@ -1534,7 +1532,7 @@ public final class InputManager {
         try {
             mIm.removeAllCustomInputGestures();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1552,9 +1550,29 @@ public final class InputManager {
                 result.add(new InputGestureData(data));
             }
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
         return result;
+    }
+
+    /**
+     * Return the set of application launch bookmarks handled by the input framework.
+     *
+     * @return list of {@link InputGestureData} containing the application launch shortcuts parsed
+     * at boot time from {@code bookmarks.xml}.
+     *
+     * @hide
+     */
+    public List<InputGestureData> getAppLaunchBookmarks() {
+        try {
+            List<InputGestureData> result = new ArrayList<>();
+            for (AidlInputGestureData data : mIm.getAppLaunchBookmarks()) {
+                result.add(new InputGestureData(data));
+            }
+            return result;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

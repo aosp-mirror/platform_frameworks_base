@@ -184,10 +184,7 @@ class QSTileViewModelTest : SysuiTestCase() {
             {
                 object : QSTileDataToStateMapper<String> {
                     override fun map(config: QSTileConfig, data: String): QSTileState =
-                        QSTileState.build(
-                            { Icon.Resource(0, ContentDescription.Resource(0)) },
-                            data
-                        ) {}
+                        QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), data) {}
                 }
             },
             disabledByPolicyInteractor,

@@ -51,6 +51,8 @@ import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.pulseExpansionInteractor
+import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -68,6 +70,8 @@ import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.ui.viewmodel.notificationShadeWindowModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
@@ -106,6 +110,7 @@ class KosmosJavaAdapter() {
     val bouncerRepository by lazy { kosmos.bouncerRepository }
     val communalRepository by lazy { kosmos.fakeCommunalSceneRepository }
     val communalTransitionViewModel by lazy { kosmos.communalTransitionViewModel }
+    val activeNotificationsInteractor by lazy { kosmos.activeNotificationsInteractor }
     val headsUpNotificationInteractor by lazy { kosmos.headsUpNotificationInteractor }
     val seenNotificationsInteractor by lazy { kosmos.seenNotificationsInteractor }
     val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
@@ -119,6 +124,7 @@ class KosmosJavaAdapter() {
     val mobileConnectionsRepository by lazy { kosmos.fakeMobileConnectionsRepository }
     val simBouncerInteractor by lazy { kosmos.simBouncerInteractor }
     val statusBarStateController by lazy { kosmos.statusBarStateController }
+    val statusBarModePerDisplayRepository by lazy { kosmos.fakeStatusBarModePerDisplayRepository }
     val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
     val fakeSceneContainerConfig by lazy { kosmos.sceneContainerConfig }
     val sceneInteractor by lazy { kosmos.sceneInteractor }
@@ -164,4 +170,11 @@ class KosmosJavaAdapter() {
     val msdlPlayer by lazy { kosmos.fakeMSDLPlayer }
     val shadeModeInteractor by lazy { kosmos.shadeModeInteractor }
     val bouncerHapticHelper by lazy { kosmos.bouncerHapticPlayer }
+
+    val glanceableHubToLockscreenTransitionViewModel by lazy {
+        kosmos.glanceableHubToLockscreenTransitionViewModel
+    }
+    val lockscreenToGlanceableHubTransitionViewModel by lazy {
+        kosmos.lockscreenToGlanceableHubTransitionViewModel
+    }
 }

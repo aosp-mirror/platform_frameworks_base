@@ -57,6 +57,11 @@ constructor(binderFactory: HomeControlsRemoteServiceBinder.Factory) : LifecycleS
         super.onBind(intent)
         return binder
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binder.onDestroy()
+    }
 }
 
 class HomeControlsRemoteServiceBinder
@@ -146,6 +151,14 @@ constructor(
         } finally {
             finishBroadcast()
         }
+    }
+
+    fun onDestroy() {
+        logger.d("Service destroyed")
+        callbacks.kill()
+        callbackCount.set(0)
+        collectionJob?.cancel()
+        collectionJob = null
     }
 
     @AssistedFactory

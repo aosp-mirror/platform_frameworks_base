@@ -28,8 +28,6 @@ interface LightBarController : CoreStartable {
 
     fun setNavigationBar(navigationBar: LightBarTransitionsController)
 
-    fun setBiometricUnlockController(biometricUnlockController: BiometricUnlockController)
-
     fun onNavigationBarAppearanceChanged(
         @WindowInsetsController.Appearance appearance: Int,
         nbModeChanged: Boolean,

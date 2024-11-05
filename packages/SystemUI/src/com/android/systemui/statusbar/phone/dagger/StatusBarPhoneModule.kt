@@ -103,8 +103,12 @@ interface StatusBarPhoneModule {
         fun statusBarInitializerImpl(
             implFactory: StatusBarInitializerImpl.Factory,
             statusBarWindowControllerStore: StatusBarWindowControllerStore,
+            statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
         ): StatusBarInitializerImpl {
-            return implFactory.create(statusBarWindowControllerStore.defaultDisplay)
+            return implFactory.create(
+                statusBarWindowControllerStore.defaultDisplay,
+                statusBarModeRepositoryStore.defaultDisplay,
+            )
         }
 
         @Provides

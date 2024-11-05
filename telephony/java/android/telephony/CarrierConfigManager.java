@@ -10153,6 +10153,15 @@ public class CarrierConfigManager {
             "satellite_roaming_esos_inactivity_timeout_sec_int";
 
     /**
+     * A string array containing the list of messaging package names that support satellite.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_SUPPORTED_MSG_APPS_STRING_ARRAY =
+            "satellite_supported_msg_apps_string_array";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *

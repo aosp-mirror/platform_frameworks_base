@@ -544,10 +544,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                             .findFirst()
                             .get();
             final RemoteAnimationTarget openingTarget = TransitionUtil.newSyntheticTarget(
-                    homeTask, mShellTaskOrganizer.getHomeTaskOverlayContainer(), TRANSIT_OPEN,
+                    homeTask, mShellTaskOrganizer.getHomeTaskSurface(), TRANSIT_OPEN,
                     0, true /* isTranslucent */);
             final RemoteAnimationTarget closingTarget = TransitionUtil.newSyntheticTarget(
-                    homeTask, mShellTaskOrganizer.getHomeTaskOverlayContainer(), TRANSIT_CLOSE,
+                    homeTask, mShellTaskOrganizer.getHomeTaskSurface(), TRANSIT_CLOSE,
                     0, true /* isTranslucent */);
             final ArrayList<RemoteAnimationTarget> apps = new ArrayList<>();
             apps.add(openingTarget);

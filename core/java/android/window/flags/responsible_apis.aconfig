@@ -16,13 +16,6 @@ flag {
 }
 
 flag {
-    name: "bal_show_toasts"
-    namespace: "responsible_apis"
-    description: "Enable toasts to indicate (potential) BAL blocking."
-    bug: "308059069"
-}
-
-flag {
     name: "bal_show_toasts_blocked"
     namespace: "responsible_apis"
     description: "Enable toasts to indicate actual BAL blocking."
@@ -62,14 +55,6 @@ flag {
     namespace: "responsible_apis"
     description: "Add options parameter to IntentSender.sendIntent."
     bug: "339720406"
-}
-
-# replaced by bal_strict_mode_ro
-flag {
-    name: "bal_strict_mode"
-    namespace: "responsible_apis"
-    description: "Strict mode flag"
-    bug: "324089586"
 }
 
 flag {

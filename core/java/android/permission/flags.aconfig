@@ -332,3 +332,11 @@ flag {
     description: "Enables ExtServices to leverage TextClassifier for OTP detection"
     bug: "351976749"
 }
+
+flag {
+    name: "health_connect_backup_restore_permission_enabled"
+    is_fixed_read_only: true
+    namespace: "health_connect"
+    description: "This flag protects the permission that is required to call Health Connect backup and restore apis"
+    bug: "376014879" # android_fr bug
+}

@@ -468,6 +468,15 @@ flag {
 }
 
 flag {
+    name: "status_bar_notification_chips_test"
+    namespace: "systemui"
+    description: "Flag to enable certain features that let us test the status bar notification "
+        "chips with teamfooders. This flag should *never* be released to trunkfood or nextfood."
+    bug: "361346412"
+}
+
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
@@ -1515,6 +1524,16 @@ flag {
 }
 
 flag {
+  namespace: "systemui"
+  name: "user_aware_settings_repositories"
+  description: "Provide user-aware versions of SecureSettingsRepository and SystemSettingsRepository in SystemUI modules (see doc linked from b/356099784)."
+  bug: "356099784"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "notify_password_text_view_user_activity_in_background"
     namespace: "systemui"
     description: "Decide whether to notify the user activity in password text view, to power manager in the background thread."
@@ -1706,11 +1725,4 @@ flag {
     namespace: "systemui"
     description: "An implementation of shortcut customizations through shortcut helper."
     bug: "365064144"
-}
-
-flag {
-   name: "touchpad_three_finger_tap_customization"
-   namespace: "systemui"
-   description: "Customize touchpad three finger tap"
-   bug: "365063048"
 }

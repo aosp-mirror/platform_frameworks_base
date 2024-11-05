@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
 import android.hardware.input.AppLaunchData;
+import android.hardware.input.InputGestureData;
 import android.hardware.input.KeyGestureEvent;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -761,6 +762,30 @@ public class ModifierShortcutManager {
                     if (info != null) {
                         shortcuts.add(info);
                     }
+                }
+            }
+        }
+        return new KeyboardShortcutGroup(
+                mContext.getString(R.string.keyboard_shortcut_group_applications),
+                shortcuts);
+    }
+
+    /**
+     * @return a {@link KeyboardShortcutGroup} containing the application launch keyboard
+     *         shortcuts based on provided list of shortcut data.
+     */
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId,
+            List<InputGestureData> shortcutData) {
+        List<KeyboardShortcutInfo> shortcuts = new ArrayList<>();
+        KeyCharacterMap kcm = KeyCharacterMap.load(deviceId);
+        for (InputGestureData data : shortcutData) {
+            if (data.getTrigger() instanceof InputGestureData.KeyTrigger trigger) {
+                KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                        kcm.getDisplayLabel(trigger.getKeycode()),
+                        getIntentFromAppLaunchData(data.getAction().appLaunchData()),
+                        (trigger.getModifierState() & KeyEvent.META_SHIFT_ON) != 0);
+                if (info != null) {
+                    shortcuts.add(info);
                 }
             }
         }

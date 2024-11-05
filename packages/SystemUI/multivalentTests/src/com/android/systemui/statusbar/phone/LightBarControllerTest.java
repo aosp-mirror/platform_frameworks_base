@@ -98,7 +98,8 @@ public class LightBarControllerTest extends SysuiTestCase {
                 mock(NavigationModeController.class),
                 mStatusBarModeRepository,
                 mock(DumpManager.class),
-                mTestScope.getCoroutineContext());
+                mTestScope.getCoroutineContext(),
+                mock(BiometricUnlockController.class));
         mLightBarController.start();
     }
 

@@ -317,9 +317,9 @@ class InsetsStateController {
             // aborted.
             provider.updateFakeControlTarget(target);
         } else {
-            // TODO(b/329229469) if the IME controlTarget changes, any pending requests should fail
+            // TODO(b/353463205) if the IME controlTarget changes, any pending requests should fail
             provider.updateControlForTarget(target, false /* force */,
-                    null /* TODO(b/329229469) check if needed here */);
+                    null /* TODO(b/353463205) check if needed here */);
 
             // Get control target again in case the provider didn't accept the one we passed to it.
             target = provider.getControlTarget();

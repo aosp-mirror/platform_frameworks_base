@@ -74,7 +74,7 @@ public class LightBarControllerImpl implements
     private final DumpManager mDumpManager;
     private final StatusBarModePerDisplayRepository mStatusBarModeRepository;
     private final CoroutineContext mMainContext;
-    private BiometricUnlockController mBiometricUnlockController;
+    private final BiometricUnlockController mBiometricUnlockController;
 
     private LightBarTransitionsController mNavigationBarController;
     private @Appearance int mAppearance;
@@ -138,7 +138,8 @@ public class LightBarControllerImpl implements
             NavigationModeController navModeController,
             @Assisted StatusBarModePerDisplayRepository statusBarModeRepository,
             DumpManager dumpManager,
-            @Main CoroutineContext mainContext) {
+            @Main CoroutineContext mainContext,
+            BiometricUnlockController biometricUnlockController) {
         mCoroutineScope = coroutineScope;
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
@@ -146,6 +147,7 @@ public class LightBarControllerImpl implements
         mDumpManager = dumpManager;
         mStatusBarModeRepository = statusBarModeRepository;
         mMainContext = mainContext;
+        mBiometricUnlockController = biometricUnlockController;
         String dumpableNameSuffix =
                 displayId == Display.DEFAULT_DISPLAY ? "" : String.valueOf(displayId);
         mDumpableName = getClass().getSimpleName() + dumpableNameSuffix;
@@ -174,12 +176,6 @@ public class LightBarControllerImpl implements
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
         mNavigationBarController = navigationBar;
         updateNavigation();
-    }
-
-    @Override
-    public void setBiometricUnlockController(
-            BiometricUnlockController biometricUnlockController) {
-        mBiometricUnlockController = biometricUnlockController;
     }
 
     private void onStatusBarAppearanceChanged(@Nullable StatusBarAppearance params) {
@@ -388,9 +384,6 @@ public class LightBarControllerImpl implements
     }
 
     private boolean animateChange() {
-        if (mBiometricUnlockController == null) {
-            return false;
-        }
         int unlockMode = mBiometricUnlockController.getMode();
         return unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
                 && unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK;

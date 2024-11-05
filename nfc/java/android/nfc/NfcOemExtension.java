@@ -80,6 +80,7 @@ public final class NfcOemExtension {
     private boolean mCardEmulationActivated = false;
     private boolean mRfFieldActivated = false;
     private boolean mRfDiscoveryStarted = false;
+    private boolean mEeListenActivated = false;
 
     /**
      * Broadcast Action: Sent on NFC stack initialization when NFC OEM extensions are enabled.
@@ -195,9 +196,8 @@ public final class NfcOemExtension {
          * ex - if tag is connected  notify cover and Nfctest app if app is in testing mode
          *
          * @param connected status of the tag true if tag is connected otherwise false
-         * @param tag Tag details
          */
-        void onTagConnected(boolean connected, @NonNull Tag tag);
+        void onTagConnected(boolean connected);
 
         /**
          * Update the Nfc Adapter State
@@ -327,6 +327,13 @@ public final class NfcOemExtension {
         void onRfDiscoveryStarted(boolean isDiscoveryStarted);
 
         /**
+        * Notifies the NFCEE (NFC Execution Environment) Listen has been activated.
+        *
+        * @param isActivated true, if EE Listen is ON, else EE Listen is OFF.
+        */
+        void onEeListenActivated(boolean isActivated);
+
+        /**
          * Gets the intent to find the OEM package in the OEM App market. If the consumer returns
          * {@code null} or a timeout occurs, the intent from the first available package will be
          * used instead.
@@ -437,6 +444,7 @@ public final class NfcOemExtension {
                 callback.onCardEmulationActivated(mCardEmulationActivated);
                 callback.onRfFieldActivated(mRfFieldActivated);
                 callback.onRfDiscoveryStarted(mRfDiscoveryStarted);
+                callback.onEeListenActivated(mEeListenActivated);
             });
         }
     }
@@ -684,9 +692,9 @@ public final class NfcOemExtension {
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
 
         @Override
-        public void onTagConnected(boolean connected, Tag tag) throws RemoteException {
+        public void onTagConnected(boolean connected) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
-                    handleVoid2ArgCallback(connected, tag, cb::onTagConnected, ex));
+                    handleVoidCallback(connected, cb::onTagConnected, ex));
         }
 
         @Override
@@ -708,6 +716,13 @@ public final class NfcOemExtension {
             mRfDiscoveryStarted = isDiscoveryStarted;
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(isDiscoveryStarted, cb::onRfDiscoveryStarted, ex));
+        }
+
+        @Override
+        public void onEeListenActivated(boolean isActivated) throws RemoteException {
+            mEeListenActivated = isActivated;
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(isActivated, cb::onEeListenActivated, ex));
         }
 
         @Override

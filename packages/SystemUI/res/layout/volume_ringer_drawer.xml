@@ -65,7 +65,7 @@
         android:background="@drawable/volume_drawer_selection_bg"
         android:contentDescription="@string/volume_ringer_change"
         android:gravity="center"
-        android:padding="10dp"
+        android:padding="@dimen/volume_dialog_ringer_horizontal_padding"
         android:src="@drawable/ic_volume_media"
         android:tint="?androidprv:attr/materialColorOnPrimary" />
 

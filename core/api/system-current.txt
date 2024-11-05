@@ -3558,10 +3558,12 @@ package android.companion.virtual {
     method @Deprecated public int getDefaultActivityPolicy();
     method @Deprecated public int getDefaultNavigationPolicy();
     method public int getDevicePolicy(int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public java.time.Duration getDimDuration();
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @Nullable public android.content.ComponentName getHomeComponent();
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @Nullable public android.content.ComponentName getInputMethodComponent();
     method public int getLockState();
     method @Nullable public String getName();
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public java.time.Duration getScreenOffTimeout();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
     method @NonNull public java.util.List<android.companion.virtual.sensor.VirtualSensorConfig> getVirtualSensorConfigs();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -3579,6 +3581,7 @@ package android.companion.virtual {
     field @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public static final int POLICY_TYPE_BLOCKED_ACTIVITY = 6; // 0x6
     field @FlaggedApi("android.companion.virtual.flags.virtual_camera") public static final int POLICY_TYPE_CAMERA = 5; // 0x5
     field @FlaggedApi("android.companion.virtual.flags.cross_device_clipboard") public static final int POLICY_TYPE_CLIPBOARD = 4; // 0x4
+    field @FlaggedApi("android.companion.virtualdevice.flags.default_device_camera_access_policy") public static final int POLICY_TYPE_DEFAULT_DEVICE_CAMERA_ACCESS = 7; // 0x7
     field public static final int POLICY_TYPE_RECENTS = 2; // 0x2
     field public static final int POLICY_TYPE_SENSORS = 0; // 0x0
   }
@@ -3594,10 +3597,12 @@ package android.companion.virtual {
     method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDimDuration(@NonNull java.time.Duration);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setHomeComponent(@Nullable android.content.ComponentName);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setInputMethodComponent(@Nullable android.content.ComponentName);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setScreenOffTimeout(@NonNull java.time.Duration);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setVirtualSensorCallback(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.sensor.VirtualSensorCallback);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setVirtualSensorDirectChannelCallback(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.sensor.VirtualSensorDirectChannelCallback);

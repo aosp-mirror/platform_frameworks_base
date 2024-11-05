@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 final class PolicyDefinition<V> {
 
@@ -504,7 +505,8 @@ final class PolicyDefinition<V> {
     private final int mPolicyFlags;
     // A function that accepts  policy to apply, context, userId, callback arguments, and returns
     // true if the policy has been enforced successfully.
-    private final QuadFunction<V, Context, Integer, PolicyKey, Boolean> mPolicyEnforcerCallback;
+    private final QuadFunction<V, Context, Integer, PolicyKey, CompletableFuture<Boolean>>
+            mPolicyEnforcerCallback;
     private final PolicySerializer<V> mPolicySerializer;
 
     private PolicyDefinition<V> createPolicyDefinition(PolicyKey key) {
@@ -574,7 +576,7 @@ final class PolicyDefinition<V> {
         return mResolutionMechanism.resolve(adminsPolicy);
     }
 
-    boolean enforcePolicy(@Nullable V value, Context context, int userId) {
+    CompletableFuture<Boolean> enforcePolicy(@Nullable V value, Context context, int userId) {
         return mPolicyEnforcerCallback.apply(value, context, userId, mPolicyKey);
     }
 
@@ -592,7 +594,6 @@ final class PolicyDefinition<V> {
         POLICY_DEFINITIONS.put(key.getIdentifier(), definition);
     }
 
-
     /**
      * Callers must ensure that {@code policyType} have implemented an appropriate
      * {@link Object#equals} implementation.
@@ -600,7 +601,8 @@ final class PolicyDefinition<V> {
     private PolicyDefinition(
             @NonNull  PolicyKey key,
             ResolutionMechanism<V> resolutionMechanism,
-            QuadFunction<V, Context, Integer, PolicyKey, Boolean> policyEnforcerCallback,
+            QuadFunction<V, Context, Integer, PolicyKey, CompletableFuture<Boolean>>
+                    policyEnforcerCallback,
             PolicySerializer<V> policySerializer) {
         this(key, resolutionMechanism, POLICY_FLAG_NONE, policyEnforcerCallback, policySerializer);
     }
@@ -610,10 +612,11 @@ final class PolicyDefinition<V> {
      * {@link Object#equals} and {@link Object#hashCode()} implementation.
      */
     private PolicyDefinition(
-            @NonNull  PolicyKey policyKey,
+            @NonNull PolicyKey policyKey,
             ResolutionMechanism<V> resolutionMechanism,
             int policyFlags,
-            QuadFunction<V, Context, Integer, PolicyKey, Boolean> policyEnforcerCallback,
+            QuadFunction<V, Context, Integer, PolicyKey, CompletableFuture<Boolean>>
+                    policyEnforcerCallback,
             PolicySerializer<V> policySerializer) {
         Objects.requireNonNull(policyKey);
         mPolicyKey = policyKey;
