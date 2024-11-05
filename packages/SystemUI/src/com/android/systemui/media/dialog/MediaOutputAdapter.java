@@ -57,7 +57,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     private static final float DEVICE_CONNECTED_ALPHA = 1f;
     protected List<MediaItem> mMediaItemList = new CopyOnWriteArrayList<>();
 
-    public MediaOutputAdapter(MediaOutputController controller) {
+    public MediaOutputAdapter(MediaSwitchingController controller) {
         super(controller);
         setHasStableIds(true);
     }
@@ -170,12 +170,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 // Set different layout for each device
                 if (device.isMutingExpectedDevice()
                         && !mController.isCurrentConnectedDeviceRemote()) {
-                    updateTitleIcon(R.drawable.media_output_icon_volume,
-                            mController.getColorItemContent());
+                    updateUnmutedVolumeIcon(device);
                     mCurrentActivePosition = position;
                     updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(getItemTitle(device));
-                    initFakeActiveDevice();
+                    initFakeActiveDevice(device);
                 } else if (device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
                             (device.hasOngoingSession() && (currentlyConnected || isDeviceIncluded(
@@ -184,8 +183,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             && isActiveWithOngoingSession;
                     if (isActiveWithOngoingSession) {
                         mCurrentActivePosition = position;
-                        updateTitleIcon(R.drawable.media_output_icon_volume,
-                                mController.getColorItemContent());
+                        updateUnmutedVolumeIcon(device);
                         mSubTitleText.setText(device.getSubtextString());
                         updateTwoLineLayoutContentAlpha(DEVICE_CONNECTED_ALPHA);
                         updateEndClickAreaAsSessionEditing(device,
@@ -199,9 +197,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     } else {
                         if (currentlyConnected) {
                             mCurrentActivePosition = position;
-                            updateTitleIcon(R.drawable.media_output_icon_volume,
-                                    mController.getColorItemContent());
-                            initSeekbar(device, isCurrentSeekbarInvisible);
+                            updateUnmutedVolumeIcon(device);
                         } else {
                             setUpDeviceIcon(device);
                         }
@@ -243,8 +239,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     // selected device in group
                     boolean isDeviceDeselectable = isDeviceIncluded(
                             mController.getDeselectableMediaDevice(), device);
-                    updateTitleIcon(R.drawable.media_output_icon_volume,
-                            mController.getColorItemContent());
+                    updateUnmutedVolumeIcon(device);
                     updateGroupableCheckBox(true, isDeviceDeselectable, device);
                     updateEndClickArea(device, isDeviceDeselectable);
                     disableFocusPropertyForView(mContainerLayout);
@@ -264,8 +259,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         setSingleLineLayout(getItemTitle(device));
                     } else if (device.hasOngoingSession()) {
                         mCurrentActivePosition = position;
-                        updateTitleIcon(R.drawable.media_output_icon_volume,
-                                mController.getColorItemContent());
+                        updateUnmutedVolumeIcon(device);
                         updateEndClickAreaAsSessionEditing(device, device.isHostForOngoingSession()
                                 ? R.drawable.media_output_status_edit_session
                                 : R.drawable.ic_sound_bars_anim);
@@ -278,8 +272,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             && !mController.getSelectableMediaDevice().isEmpty()) {
                         //If device is connected and there's other selectable devices, layout as
                         // one of selected devices.
-                        updateTitleIcon(R.drawable.media_output_icon_volume,
-                                mController.getColorItemContent());
+                        updateUnmutedVolumeIcon(device);
                         boolean isDeviceDeselectable = isDeviceIncluded(
                                 mController.getDeselectableMediaDevice(), device);
                         updateGroupableCheckBox(true, isDeviceDeselectable, device);
@@ -291,8 +284,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                                 true /* showEndTouchArea */);
                         initSeekbar(device, isCurrentSeekbarInvisible);
                     } else {
-                        updateTitleIcon(R.drawable.media_output_icon_volume,
-                                mController.getColorItemContent());
+                        updateUnmutedVolumeIcon(device);
                         disableFocusPropertyForView(mContainerLayout);
                         setUpContentDescriptionForView(mSeekBar, device);
                         mCurrentActivePosition = position;
@@ -531,8 +523,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     @RequiresApi(34)
     private static class Api34Impl {
         @DoNotInline
-        static View.OnClickListener getClickListenerBasedOnSelectionBehavior(MediaDevice device,
-                MediaOutputController controller, View.OnClickListener defaultTransferListener) {
+        static View.OnClickListener getClickListenerBasedOnSelectionBehavior(
+                MediaDevice device,
+                MediaSwitchingController controller,
+                View.OnClickListener defaultTransferListener) {
             switch (device.getSelectionBehavior()) {
                 case SELECTION_BEHAVIOR_NONE:
                     return null;

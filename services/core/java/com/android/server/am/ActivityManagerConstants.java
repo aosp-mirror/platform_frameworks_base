@@ -163,6 +163,7 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final String KEY_USE_TIERED_CACHED_ADJ = "use_tiered_cached_adj";
     static final String KEY_TIERED_CACHED_ADJ_DECAY_TIME = "tiered_cached_adj_decay_time";
+    static final String KEY_TIERED_CACHED_ADJ_UI_TIER_SIZE = "tiered_cached_adj_ui_tier_size";
 
     /**
      * Whether or not to enable the new oom adjuster implementation.
@@ -246,8 +247,10 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final int DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS = 3000;
 
-    private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
+    private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = Flags.oomadjusterCachedAppTiers();
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
+    private static final int TIERED_CACHED_ADJ_MAX_UI_TIER_SIZE = 50;
+    private final int mDefaultTieredCachedAdjUiTierSize;
 
     /**
      * The default value to {@link #KEY_ENABLE_NEW_OOMADJ}.
@@ -685,11 +688,6 @@ final class ActivityManagerConstants extends ContentObserver {
     // default. Controlled by Settings.Global.FORCE_ENABLE_PSS_PROFILING
     volatile boolean mForceEnablePssProfiling = false;
 
-    // Indicates whether to use ApplicationInfo to determine launched state instead of PM user state
-    // This is a temporary workaround until the trunk-stable flag is pushed to nextfood.
-    // TODO: b/365979852 - remove this workaround when redundant
-    volatile boolean mFlagUseAppInfoNotLaunched = false;
-
     /**
      * Indicates whether the foreground service background start restriction is enabled for
      * caller app that is targeting S+.
@@ -1022,9 +1020,6 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final Uri FORCE_ENABLE_PSS_PROFILING_URI =
             Settings.Global.getUriFor(Settings.Global.FORCE_ENABLE_PSS_PROFILING);
 
-    private static final Uri ENABLE_USE_APP_INFO_NOT_LAUNCHED_URI =
-            Settings.Global.getUriFor(Settings.Global.ENABLE_USE_APP_INFO_NOT_LAUNCHED);
-
     /**
      * The threshold to decide if a given association should be dumped into metrics.
      */
@@ -1161,6 +1156,9 @@ final class ActivityManagerConstants extends ContentObserver {
 
     /** @see #KEY_TIERED_CACHED_ADJ_DECAY_TIME */
     public long TIERED_CACHED_ADJ_DECAY_TIME = DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME;
+
+    /** @see #KEY_TIERED_CACHED_ADJ_UI_TIER_SIZE */
+    public int TIERED_CACHED_ADJ_UI_TIER_SIZE;
 
     /** @see #KEY_ENABLE_NEW_OOMADJ */
     public boolean ENABLE_NEW_OOMADJ = DEFAULT_ENABLE_NEW_OOM_ADJ;
@@ -1371,6 +1369,7 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_USE_TIERED_CACHED_ADJ:
                             case KEY_TIERED_CACHED_ADJ_DECAY_TIME:
+                            case KEY_TIERED_CACHED_ADJ_UI_TIER_SIZE:
                                 updateUseTieredCachedAdj();
                                 break;
                             case KEY_DISABLE_APP_PROFILER_PSS_PROFILING:
@@ -1474,6 +1473,11 @@ final class ActivityManagerConstants extends ContentObserver {
         mDefaultPssToRssThresholdModifier = context.getResources().getFloat(
                 com.android.internal.R.dimen.config_am_pssToRssThresholdModifier);
         PSS_TO_RSS_THRESHOLD_MODIFIER = mDefaultPssToRssThresholdModifier;
+
+        mDefaultTieredCachedAdjUiTierSize = context.getResources().getInteger(
+                com.android.internal.R.integer.config_am_tieredCachedAdjUiTierSize);
+        TIERED_CACHED_ADJ_UI_TIER_SIZE = Math.min(
+                mDefaultTieredCachedAdjUiTierSize, TIERED_CACHED_ADJ_MAX_UI_TIER_SIZE);
     }
 
     public void start(ContentResolver resolver) {
@@ -1487,7 +1491,6 @@ final class ActivityManagerConstants extends ContentObserver {
                     false, this);
         }
         mResolver.registerContentObserver(FORCE_ENABLE_PSS_PROFILING_URI, false, this);
-        mResolver.registerContentObserver(ENABLE_USE_APP_INFO_NOT_LAUNCHED_URI, false, this);
         updateConstants();
         if (mSystemServerAutomaticHeapDumpEnabled) {
             updateEnableAutomaticSystemServerHeapDumps();
@@ -1504,7 +1507,6 @@ final class ActivityManagerConstants extends ContentObserver {
         updateActivityStartsLoggingEnabled();
         updateForegroundServiceStartsLoggingEnabled();
         updateForceEnablePssProfiling();
-        updateEnableUseAppInfoNotLaunched();
         // Read DropboxRateLimiter params from flags.
         mService.initDropboxRateLimiter();
     }
@@ -1550,8 +1552,6 @@ final class ActivityManagerConstants extends ContentObserver {
             updateEnableAutomaticSystemServerHeapDumps();
         } else if (FORCE_ENABLE_PSS_PROFILING_URI.equals(uri)) {
             updateForceEnablePssProfiling();
-        } else if (ENABLE_USE_APP_INFO_NOT_LAUNCHED_URI.equals(uri)) {
-            updateEnableUseAppInfoNotLaunched();
         }
     }
 
@@ -1669,11 +1669,6 @@ final class ActivityManagerConstants extends ContentObserver {
     private void updateForceEnablePssProfiling() {
         mForceEnablePssProfiling = Settings.Global.getInt(mResolver,
                 Settings.Global.FORCE_ENABLE_PSS_PROFILING, 0) == 1;
-    }
-
-    private void updateEnableUseAppInfoNotLaunched() {
-        mFlagUseAppInfoNotLaunched = Settings.Global.getInt(mResolver,
-                Settings.Global.ENABLE_USE_APP_INFO_NOT_LAUNCHED, 0) == 1;
     }
 
     private void updateBackgroundActivityStarts() {
@@ -2272,6 +2267,12 @@ final class ActivityManagerConstants extends ContentObserver {
             DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
             KEY_TIERED_CACHED_ADJ_DECAY_TIME,
             DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME);
+        TIERED_CACHED_ADJ_UI_TIER_SIZE = Math.min(
+                DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_TIERED_CACHED_ADJ_UI_TIER_SIZE,
+                    mDefaultTieredCachedAdjUiTierSize),
+                TIERED_CACHED_ADJ_MAX_UI_TIER_SIZE);
     }
 
     private void updateEnableNewOomAdj() {
@@ -2527,6 +2528,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);
         pw.print("  "); pw.print(KEY_TIERED_CACHED_ADJ_DECAY_TIME);
         pw.print("="); pw.println(TIERED_CACHED_ADJ_DECAY_TIME);
+        pw.print("  "); pw.print(KEY_TIERED_CACHED_ADJ_UI_TIER_SIZE);
+        pw.print("="); pw.println(TIERED_CACHED_ADJ_UI_TIER_SIZE);
 
         pw.print("  "); pw.print(KEY_ENABLE_NEW_OOMADJ);
         pw.print("="); pw.println(ENABLE_NEW_OOMADJ);
@@ -2555,8 +2558,6 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
         pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
         pw.println(mEnableWaitForFinishAttachApplication);
-        pw.print("  FLAG_USE_APP_INFO_NOT_LAUNCHED=");
-        pw.println(mFlagUseAppInfoNotLaunched);
 
         pw.print("  "); pw.print(KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);
         pw.print("="); pw.println(FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);

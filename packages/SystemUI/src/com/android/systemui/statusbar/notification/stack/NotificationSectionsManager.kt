@@ -20,12 +20,20 @@ import android.util.Log
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.SourceType
 import com.android.systemui.statusbar.notification.collection.NotificationClassificationFlag
 import com.android.systemui.statusbar.notification.collection.render.MediaContainerController
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
-import com.android.systemui.statusbar.notification.dagger.*
+import com.android.systemui.statusbar.notification.dagger.AlertingHeader
+import com.android.systemui.statusbar.notification.dagger.IncomingHeader
+import com.android.systemui.statusbar.notification.dagger.NewsHeader
+import com.android.systemui.statusbar.notification.dagger.PeopleHeader
+import com.android.systemui.statusbar.notification.dagger.PromoHeader
+import com.android.systemui.statusbar.notification.dagger.RecsHeader
+import com.android.systemui.statusbar.notification.dagger.SilentHeader
+import com.android.systemui.statusbar.notification.dagger.SocialHeader
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider
@@ -41,7 +49,7 @@ import javax.inject.Inject
 class NotificationSectionsManager
 @Inject
 internal constructor(
-    private val configurationController: ConfigurationController,
+    @ShadeDisplayAware private val configurationController: ConfigurationController,
     private val keyguardMediaController: KeyguardMediaController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val mediaContainerController: MediaContainerController,
@@ -53,7 +61,7 @@ internal constructor(
     @NewsHeader private val newsHeaderController: SectionHeaderController,
     @SocialHeader private val socialHeaderController: SectionHeaderController,
     @RecsHeader private val recsHeaderController: SectionHeaderController,
-    @PromoHeader private val promoHeaderController: SectionHeaderController
+    @PromoHeader private val promoHeaderController: SectionHeaderController,
 ) : SectionProvider {
 
     private val configurationListener =
@@ -135,14 +143,16 @@ internal constructor(
 
     override fun beginsSection(view: View, previous: View?): Boolean =
         view === silentHeaderView ||
-                view === mediaControlsView ||
-                view === peopleHeaderView ||
-                view === alertingHeaderView ||
-                view === incomingHeaderView ||
-                (NotificationClassificationFlag.isEnabled && (view === newsHeaderView
-                        || view === socialHeaderView || view === recsHeaderView
-                        || view === promoHeaderView)) ||
-                getBucket(view) != getBucket(previous)
+            view === mediaControlsView ||
+            view === peopleHeaderView ||
+            view === alertingHeaderView ||
+            view === incomingHeaderView ||
+            (NotificationClassificationFlag.isEnabled &&
+                (view === newsHeaderView ||
+                    view === socialHeaderView ||
+                    view === recsHeaderView ||
+                    view === promoHeaderView)) ||
+            getBucket(view) != getBucket(previous)
 
     private fun getBucket(view: View?): Int? =
         when {
@@ -164,6 +174,7 @@ internal constructor(
         data class Many(val first: ExpandableView, val last: ExpandableView) : SectionBounds()
 
         data class One(val lone: ExpandableView) : SectionBounds()
+
         object None : SectionBounds()
 
         fun addNotif(notif: ExpandableView): SectionBounds =
@@ -182,7 +193,7 @@ internal constructor(
 
         private fun NotificationSection.setFirstAndLastVisibleChildren(
             first: ExpandableView?,
-            last: ExpandableView?
+            last: ExpandableView?,
         ): Boolean {
             val firstChanged = setFirstVisibleChild(first)
             val lastChanged = setLastVisibleChild(last)
@@ -197,7 +208,7 @@ internal constructor(
      */
     fun updateFirstAndLastViewsForAllSections(
         sections: Array<NotificationSection>,
-        children: List<ExpandableView>
+        children: List<ExpandableView>,
     ): Boolean {
         // Create mapping of bucket to section
         val sectionBounds =
@@ -212,7 +223,7 @@ internal constructor(
                 .foldToSparseArray(
                     SectionBounds.None,
                     size = sections.size,
-                    operation = SectionBounds::addNotif
+                    operation = SectionBounds::addNotif,
                 )
 
         // Build a set of the old first/last Views of the sections

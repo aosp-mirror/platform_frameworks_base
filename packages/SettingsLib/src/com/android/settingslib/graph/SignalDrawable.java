@@ -42,6 +42,8 @@ import androidx.annotation.Nullable;
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 
+import java.util.Objects;
+
 /**
  * Drawable displaying a mobile cell signal indicator.
  */
@@ -90,6 +92,10 @@ public class SignalDrawable extends DrawableWrapper {
     private int mCurrentDot;
 
     public SignalDrawable(Context context) {
+        this(context, new Handler());
+    }
+
+    public SignalDrawable(@NonNull Context context, @NonNull Handler handler) {
         super(context.getDrawable(ICON_RES));
         final String attributionPathString = context.getString(
                 com.android.internal.R.string.config_signalAttributionPath);
@@ -106,7 +112,7 @@ public class SignalDrawable extends DrawableWrapper {
         mIntrinsicSize = context.getResources().getDimensionPixelSize(R.dimen.signal_icon_size);
         mTransparentPaint.setColor(context.getColor(android.R.color.transparent));
         mTransparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        mHandler = new Handler();
+        mHandler = handler;
         setDarkIntensity(0);
     }
 
@@ -302,6 +308,17 @@ public class SignalDrawable extends DrawableWrapper {
         return ((cutOut ? STATE_CUT : 0) << STATE_SHIFT)
                 | (numLevels << NUM_LEVEL_SHIFT)
                 | level;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+        return other instanceof SignalDrawable
+                && ((SignalDrawable) other).getLevel() == this.getLevel();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getLevel());
     }
 
     /** Returns the state representing empty mobile signal with the given number of levels. */

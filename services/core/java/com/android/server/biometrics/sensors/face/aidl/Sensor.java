@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+import static android.hardware.face.FaceSensorConfigurations.remapFqName;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -337,7 +338,8 @@ public class Sensor {
         if (mTestHalEnabled) {
             return true;
         }
-        return ServiceManager.checkService(IFace.DESCRIPTOR + "/" + halInstanceName) != null;
+        return ServiceManager.checkService(
+                remapFqName(IFace.DESCRIPTOR + "/" + halInstanceName)) != null;
     }
 
     /**

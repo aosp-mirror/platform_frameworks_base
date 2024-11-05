@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class FakeAudioSharingRepository : AudioSharingRepository {
+    private var mutableAvailable: Boolean = false
     private val mutableInAudioSharing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val mutablePrimaryGroupId: MutableStateFlow<Int> =
         MutableStateFlow(TEST_GROUP_ID_INVALID)
@@ -34,7 +35,13 @@ class FakeAudioSharingRepository : AudioSharingRepository {
     override val secondaryGroupId: StateFlow<Int> = mutableSecondaryGroupId
     override val volumeMap: StateFlow<GroupIdToVolumes> = mutableVolumeMap
 
+    override suspend fun audioSharingAvailable(): Boolean = mutableAvailable
+
     override suspend fun setSecondaryVolume(volume: Int) {}
+
+    fun setAudioSharingAvailable(available: Boolean) {
+        mutableAvailable = available
+    }
 
     fun setInAudioSharing(state: Boolean) {
         mutableInAudioSharing.value = state

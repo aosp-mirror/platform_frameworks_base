@@ -42,7 +42,7 @@ import org.junit.runners.Parameterized
 /**
  * Test the [android.app.ActivityOptions.makeCustomTaskAnimation].
  *
- * To run this test: `atest FlickerTests:OverrideTaskTransitionTest`
+ * To run this test: `atest FlickerTestsAppLaunch:OverrideTaskTransitionTest`
  *
  * Actions:
  * ```

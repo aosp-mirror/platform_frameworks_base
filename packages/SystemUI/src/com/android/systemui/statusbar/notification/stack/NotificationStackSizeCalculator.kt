@@ -29,7 +29,7 @@ import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Compile
 import com.android.systemui.util.children
@@ -74,7 +74,7 @@ constructor(
 
     /** Whether we allow keyguard to show less important notifications above the shelf. */
     private val limitLockScreenToOneImportant
-        get() = NotificationMinimalismPrototype.isEnabled
+        get() = NotificationMinimalism.isEnabled
 
     /** Minimum space between two notifications, see [calculateGapAndDividerHeight]. */
     private var dividerHeight by notNull<Float>()
@@ -406,7 +406,7 @@ constructor(
     fun updateResources() {
         maxKeyguardNotifications =
             infiniteIfNegative(resources.getInteger(R.integer.keyguard_max_notification_count))
-        maxNotificationsExcludesMedia = NotificationMinimalismPrototype.isEnabled
+        maxNotificationsExcludesMedia = NotificationMinimalism.isEnabled
 
         dividerHeight =
             max(1f, resources.getDimensionPixelSize(R.dimen.notification_divider_height).toFloat())

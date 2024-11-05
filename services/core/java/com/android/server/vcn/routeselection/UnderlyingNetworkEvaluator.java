@@ -25,16 +25,15 @@ import android.net.IpSecTransform;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.vcn.Flags;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.os.Handler;
 import android.os.ParcelUuid;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
 
@@ -103,17 +102,15 @@ public class UnderlyingNetworkEvaluator {
         updatePriorityClass(
                 underlyingNetworkTemplates, subscriptionGroup, lastSnapshot, carrierConfig);
 
-        if (isIpSecPacketLossDetectorEnabled()) {
-            try {
-                mMetricMonitors.add(
-                        mDependencies.newIpSecPacketLossDetector(
-                                mVcnContext,
-                                mNetworkRecordBuilder.getNetwork(),
-                                carrierConfig,
-                                new MetricMonitorCallbackImpl()));
-            } catch (IllegalAccessException e) {
-                // No action. Do not add anything to mMetricMonitors
-            }
+        try {
+            mMetricMonitors.add(
+                    mDependencies.newIpSecPacketLossDetector(
+                            mVcnContext,
+                            mNetworkRecordBuilder.getNetwork(),
+                            carrierConfig,
+                            new MetricMonitorCallbackImpl()));
+        } catch (IllegalAccessException e) {
+            // No action. Do not add anything to mMetricMonitors
         }
     }
 
@@ -189,23 +186,12 @@ public class UnderlyingNetworkEvaluator {
         }
     }
 
-    private boolean isIpSecPacketLossDetectorEnabled() {
-        return isIpSecPacketLossDetectorEnabled(mVcnContext);
-    }
-
-    private static boolean isIpSecPacketLossDetectorEnabled(VcnContext vcnContext) {
-        return vcnContext.isFlagIpSecTransformStateEnabled()
-                && vcnContext.isFlagNetworkMetricMonitorEnabled();
-    }
-
     /** Get the comparator for UnderlyingNetworkEvaluator */
     public static Comparator<UnderlyingNetworkEvaluator> getComparator(VcnContext vcnContext) {
         return (left, right) -> {
-            if (isIpSecPacketLossDetectorEnabled(vcnContext)) {
-                if (left.mIsPenalized != right.mIsPenalized) {
-                    // A penalized network should have lower priority which means a larger index
-                    return left.mIsPenalized ? 1 : -1;
-                }
+            if (left.mIsPenalized != right.mIsPenalized) {
+                // A penalized network should have lower priority which means a larger index
+                return left.mIsPenalized ? 1 : -1;
             }
 
             final int leftIndex = left.mPriorityClass;
@@ -297,10 +283,8 @@ public class UnderlyingNetworkEvaluator {
         updatePriorityClass(
                 underlyingNetworkTemplates, subscriptionGroup, lastSnapshot, carrierConfig);
 
-        if (Flags.evaluateIpsecLossOnLpNcChange()) {
-            for (NetworkMetricMonitor monitor : mMetricMonitors) {
-                monitor.onLinkPropertiesOrCapabilitiesChanged();
-            }
+        for (NetworkMetricMonitor monitor : mMetricMonitors) {
+            monitor.onLinkPropertiesOrCapabilitiesChanged();
         }
     }
 
@@ -316,10 +300,8 @@ public class UnderlyingNetworkEvaluator {
         updatePriorityClass(
                 underlyingNetworkTemplates, subscriptionGroup, lastSnapshot, carrierConfig);
 
-        if (Flags.evaluateIpsecLossOnLpNcChange()) {
-            for (NetworkMetricMonitor monitor : mMetricMonitors) {
-                monitor.onLinkPropertiesOrCapabilitiesChanged();
-            }
+        for (NetworkMetricMonitor monitor : mMetricMonitors) {
+            monitor.onLinkPropertiesOrCapabilitiesChanged();
         }
     }
 

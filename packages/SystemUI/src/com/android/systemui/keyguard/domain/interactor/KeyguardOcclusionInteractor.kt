@@ -80,7 +80,7 @@ constructor(
         // *_BOUNCER -> LOCKSCREEN.
         return powerInteractor.detailedWakefulness.value.powerButtonLaunchGestureTriggered &&
             KeyguardState.deviceIsAsleepInState(
-                internalTransitionInteractor.currentTransitionInfoInternal.value.to
+                internalTransitionInteractor.currentTransitionInfoInternal().to
             )
     }
 
@@ -100,13 +100,13 @@ constructor(
                             scene = Scenes.Gone,
                             stateWithoutSceneContainer = KeyguardState.GONE,
                         ),
-                        ::Pair
+                        ::Pair,
                     )
                     .map { (wakefulness, isOnGone) ->
                         wakefulness.powerButtonLaunchGestureTriggered && !isOnGone
                     },
                 // Emit false once that activity goes away.
-                isShowWhenLockedActivityOnTop.filter { !it }.map { false }
+                isShowWhenLockedActivityOnTop.filter { !it }.map { false },
             )
             .stateIn(applicationScope, SharingStarted.Eagerly, false)
 
@@ -134,7 +134,7 @@ constructor(
      */
     fun setWmNotifiedShowWhenLockedActivityOnTop(
         showWhenLockedActivityOnTop: Boolean,
-        taskInfo: RunningTaskInfo? = null
+        taskInfo: RunningTaskInfo? = null,
     ) {
         repository.setShowWhenLockedActivityInfo(showWhenLockedActivityOnTop, taskInfo)
     }

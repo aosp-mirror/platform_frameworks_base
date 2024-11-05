@@ -1,7 +1,10 @@
 package: "com.android.hardware.input"
 container: "system"
 
-# Project link: https://gantry.corp.google.com/projects/android_platform_input_native/changes
+# Project link: https://gantry.corp.google.com/projects/android_platform_input/changes
+
+# NOTE: the input_native namespace is deprecated. New flags should be added to the input namespace
+# instead.
 
 flag {
     namespace: "input_native"
@@ -23,14 +26,6 @@ flag {
     name: "keyboard_a11y_bounce_keys_flag"
     description: "Controls if the bounce keys accessibility feature for physical keyboard is available to the user"
     bug: "294546335"
-}
-
-flag {
-    namespace: "input_native"
-    name: "pointer_coords_is_resampled_api"
-    is_exported: true
-    description: "Makes MotionEvent.PointerCoords#isResampled() a public API"
-    bug: "298197511"
 }
 
 flag {
@@ -106,9 +101,20 @@ flag {
     description: "Manage key gestures through Input APIs"
     is_exported: true
     bug: "358569822"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
+}
+
+flag {
+    namespace: "input_native"
+    name: "use_key_gesture_event_handler"
+    description: "Use KeyGestureEvent handler APIs to control system shortcuts and key gestures"
+    bug: "358569822"
+}
+
+flag {
+    namespace: "input_native"
+    name: "use_key_gesture_event_handler_multi_press_gestures"
+    description: "Use KeyGestureEvent handler APIs to control multi key press gestures"
+    bug: "358569822"
 }
 
 flag {
@@ -123,4 +129,39 @@ flag {
   namespace: "input"
   description: "Controls whether external mouse vertical scrolling can be reversed"
   bug: "352598211"
+}
+
+flag {
+  name: "mouse_swap_primary_button"
+  namespace: "input"
+  description: "Controls whether the connected mice's primary buttons, left and right, can be swapped."
+  bug: "352598211"
+}
+
+flag {
+  name: "keyboard_a11y_shortcut_control"
+  namespace: "input"
+  description: "Adds shortcuts to toggle and control a11y features"
+  bug: "373458181"
+}
+
+flag {
+    name: "enable_customizable_input_gestures"
+    namespace: "input"
+    description: "Enables keyboard shortcut customization support"
+    bug: "365064144"
+}
+
+flag {
+  name: "override_power_key_behavior_in_focused_window"
+  namespace: "input_native"
+  description: "Allows privileged focused windows to capture power key events."
+  bug: "357144512"
+}
+
+flag {
+  name: "touchpad_three_finger_tap_shortcut"
+  namespace: "input"
+  description: "Turns three-finger touchpad taps into a customizable shortcut."
+  bug: "365063048"
 }

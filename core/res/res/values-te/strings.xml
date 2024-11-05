@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"మీ మీడియా సేకరణ నుండి లొకేషన్లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"బయోమెట్రిక్స్‌ను ఉపయోగించండి"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"బయోమెట్రిక్స్‌ను లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ఇది మీరేనని వెరిఫై చేసుకోండి"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ఈ చర్య చేస్తోంది మీరేనని వెరిఫై చేయండి"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"కొనసాగించడానికి, మీ బయోమెట్రిక్‌ను ఉపయోగించండి"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"కొనసాగించడానికి మీ బయోమెట్రిక్ లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"బయోమెట్రిక్ హార్డ్‌వేర్‌ అందుబాటులో లేదు"</string>
@@ -1937,12 +1937,14 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"వారపు రోజుల్లో రాత్రి"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్ర"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"స్లీప్ మోడ్"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ద్వారా మేనేజ్ చేయబడుతోంది"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ఆన్‌లో ఉంది"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ఆఫ్‌లో ఉంది"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ఏదైనా క్యాలెండర్"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"స్క్రీన్ లాక్‌ను సెట్ చేయండి"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"స్క్రీన్ లాక్‌ను సెట్ చేయండి"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"మీ ప్రైవేట్ స్పేస్‌ను ఉపయోగించడానికి, ఈ పరికరంలో స్క్రీన్ లాక్ సెట్ చేయండి"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"ప్రైవేట్ స్పేస్‌ను తొలగించడానికి, ఈ పరికరంలో స్క్రీన్ లాక్‌ను సెట్ చేయండి"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> అందుబాటులో లేదు"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు వైబ్రేట్ అవుతాయి"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు మ్యూట్ చేయబడతాయి"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"సిస్టమ్ మార్పులు"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"అంతరాయం కలిగించవద్దు"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"కొత్తది: అంతరాయం కలిగించవద్దు నోటిఫికేషన్‌లను దాస్తోంది"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"మరింత తెలుసుకోవడానికి మరియు మార్చడానికి నొక్కండి."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"అంతరాయం కలిగించవద్దు మార్చబడింది"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"బ్లాక్ చేయబడిన దాన్ని చెక్ చేయడానికి నొక్కండి."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"నోటిఫికేషన్ సెట్టింగ్‌లను రివ్యూ చేయండి"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13తో మొదలుకుని, మీరు ఇన్‌స్టాల్ చేసే యాప్‌లకు నోటిఫికేషన్‌లను పంపడానికి మీ అనుమతి అవసరం. ఇప్పటికే ఉన్న యాప్‌ల కోసం ఈ అనుమతిని మార్చడానికి ట్యాప్ చేయండి."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"తర్వాత గుర్తు చేయి"</string>
@@ -2152,7 +2150,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"సరే"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ఆఫ్ చేయండి"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"మరింత తెలుసుకోండి"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12లో Android అనుకూల నోటిఫికేషన్‌లను, మెరుగైన నోటిఫికేషన్‌లు రీప్లేస్‌ చేశాయి. ఈ ఫీచర్, సూచించిన చర్యలను, రిప్లయిలను చూపించి, మీ నోటిఫికేషన్‌లను ఆర్గనైజ్ చేస్తుంది.\n\nకాంటాక్ట్ పేర్లు, మెసేజ్‌లు లాంటి వ్యక్తిగత సమాచారంతో పాటు నోటిఫికేషన్ కంటెంట్‌ను మెరుగైన నోటిఫికేషన్‌లు యాక్సెస్ చేస్తాయి. ఫోన్ కాల్స్‌కు సమాధానమివ్వడం, \'అంతరాయం కలిగించవద్దు\' ఆప్షన్‌ను కంట్రోల్ చేయడం వంటి నోటిఫికేషన్‌లను విస్మరించడం లేదా వాటికి ప్రతిస్పందించడం కూడా ఈ ఫీచర్ చేయగలదు."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12లో \'మెరుగైన నోటిఫికేషన్‌లు\', \'Android అనుకూల నోటిఫికేషన్‌ల\'ను రీప్లేస్ చేశాయి. చేయాల్సిన పనులను, రిప్లయిలను ఈ ఫీచర్ మీకు చూపిస్తుంది. అలాగే మీ నోటిఫికేషన్‌లను ఆర్గనైజ్ చేస్తుంది. \n\nనోటిఫికేషన్ కంటెంట్‌ను \'మెరుగైన నోటిఫికేషన్‌లు\' ఫీచర్ యాక్సెస్ చేయగలదు. కాంటాక్ట్ పేర్లు, మెసేజ్‌ల వంటి వ్యక్తిగత సమాచారం కూడా ఈ కంటెంట్‌లో ఉంటుంది. ఈ ఫీచర్, నోటిఫికేషన్‌లను విస్మరించగలదు (డిస్మిస్ చేయగలదు) లేదా వాటికి ప్రతిస్పందించగలదు (రెస్పాండ్ కాగలదు). ఫోన్ కాల్స్‌కు సమాధానమివ్వడం, \'అంతరాయం కలిగించవద్దు\' ఆప్షన్‌ను కంట్రోల్ చేయడం లాంటి పనులు కూడా ఇందులో ఉంటాయి."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"బ్యాటరీ సేవర్ ఆన్ చేయబడింది"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"బ్యాటరీ జీవితకాలాన్ని పొడిగించడానికి బ్యాటరీ వినియోగాన్ని తగ్గించడం"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపండి, స్వీకరించండి"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"పెండింగ్‌లో ఉంది..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>‌ను ఇకపై గుర్తించడం సాధ్యం కాదు."</string>

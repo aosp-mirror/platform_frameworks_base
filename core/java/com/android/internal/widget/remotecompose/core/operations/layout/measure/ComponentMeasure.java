@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.internal.widget.remotecompose.core.operations.layout.measure;
+
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 
-/**
- * Encapsulate the result of a measure pass for a component
- */
+/** Encapsulate the result of a measure pass for a component */
 public class ComponentMeasure {
     int mId = -1;
     float mX;
@@ -31,24 +29,31 @@ public class ComponentMeasure {
     public void setX(float value) {
         mX = value;
     }
+
     public void setY(float value) {
         mY = value;
     }
+
     public void setW(float value) {
         mW = value;
     }
+
     public void setH(float value) {
         mH = value;
     }
+
     public float getX() {
         return mX;
     }
+
     public float getY() {
         return mY;
     }
+
     public float getW() {
         return mW;
     }
+
     public float getH() {
         return mH;
     }
@@ -61,8 +66,8 @@ public class ComponentMeasure {
         mVisibility = visibility;
     }
 
-    public ComponentMeasure(int id, float x, float y, float w, float h,
-                            Component.Visibility visibility) {
+    public ComponentMeasure(
+            int id, float x, float y, float w, float h, Component.Visibility visibility) {
         this.mId = id;
         this.mX = x;
         this.mY = y;
@@ -76,8 +81,12 @@ public class ComponentMeasure {
     }
 
     public ComponentMeasure(Component component) {
-        this(component.getComponentId(), component.getX(), component.getY(),
-                component.getWidth(), component.getHeight(),
+        this(
+                component.getComponentId(),
+                component.getX(),
+                component.getY(),
+                component.getWidth(),
+                component.getHeight(),
                 component.mVisibility);
     }
 
@@ -87,5 +96,9 @@ public class ComponentMeasure {
         mW = m.mW;
         mH = m.mH;
         mVisibility = m.mVisibility;
+    }
+
+    public boolean same(ComponentMeasure m) {
+        return mX == m.mX && mY == m.mY && mW == m.mW && mH == m.mH && mVisibility == m.mVisibility;
     }
 }

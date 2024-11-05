@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Slökkt"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Öll dagatöl"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> þaggar í einhverjum hljóðum"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Innra vandamál kom upp í tækinu og það kann að vera óstöðugt þangað til þú núllstillir það."</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Stilltu skjálás"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Stilla skjálás"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Stilltu skjálás í tækinu til að nota leynirými"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Stilltu skjálás í tækinu til að eyða leynirými"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Forrit er ekki tiltækt"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ekki tiltækt núna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ekki í boði"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Titringur er virkur fyrir símtöl og tilkynningar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Slökkt verður á hljóði símtala og tilkynninga"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Breytingar á kerfi"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ónáðið ekki"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nýtt: „Ónáðið ekki“ er að fela tilkynningar"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ýttu til að fá frekari upplýsingar og breyta."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Ónáðið ekki“ var breytt"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ýttu til að skoða hvað lokað hefur verið á."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Yfirfara tilkynningastillingar"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Frá og með Android 13 þurfa forrit sem þú setur upp heimild frá þér til að senda tilkynningar. Ýttu til að breyta þessari heimild fyrir forrit sem fyrir eru."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Minna mig á seinna"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Senda og fá skilaboð án tengingar við farsímakerfi eða Wi-Fi-net"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Opna Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Svona virkar þetta"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Í bið…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Setja upp fingrafarskenni aftur"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Ekki er hægt að bera kennsl á <xliff:g id="FINGERPRINT">%s</xliff:g> lengur."</string>

@@ -47,13 +47,15 @@ public final class StrategySelectionNotifyRequest {
     private final boolean mAllowAutoBrightnessWhileDozingConfig;
     // True if the auto brightness is enabled in the settings
     private final boolean mIsAutoBrightnessEnabled;
+    // True if wear bedtime mode is enabled in the settings.
+    private final boolean mIsBedtimeModeWearEnabled;
 
     public StrategySelectionNotifyRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest, int targetDisplayState,
             DisplayBrightnessStrategy displayBrightnessStrategy,
             float lastUserSetScreenBrightness,
             boolean userSetBrightnessChanged, boolean allowAutoBrightnessWhileDozingConfig,
-            boolean isAutoBrightnessEnabled) {
+            boolean isAutoBrightnessEnabled, boolean isBedtimeModeWearEnabled) {
         mDisplayPowerRequest = displayPowerRequest;
         mTargetDisplayState = targetDisplayState;
         mSelectedDisplayBrightnessStrategy = displayBrightnessStrategy;
@@ -61,6 +63,7 @@ public final class StrategySelectionNotifyRequest {
         mUserSetBrightnessChanged = userSetBrightnessChanged;
         mAllowAutoBrightnessWhileDozingConfig = allowAutoBrightnessWhileDozingConfig;
         mIsAutoBrightnessEnabled = isAutoBrightnessEnabled;
+        mIsBedtimeModeWearEnabled = isBedtimeModeWearEnabled;
     }
 
     public DisplayBrightnessStrategy getSelectedDisplayBrightnessStrategy() {
@@ -81,7 +84,8 @@ public final class StrategySelectionNotifyRequest {
                 && mLastUserSetScreenBrightness == other.getLastUserSetScreenBrightness()
                 && mAllowAutoBrightnessWhileDozingConfig
                 == other.isAllowAutoBrightnessWhileDozingConfig()
-                && mIsAutoBrightnessEnabled == other.isAutoBrightnessEnabled();
+                && mIsAutoBrightnessEnabled == other.isAutoBrightnessEnabled()
+                && mIsBedtimeModeWearEnabled == other.isBedtimeModeWearEnabled();
     }
 
     @Override
@@ -97,6 +101,10 @@ public final class StrategySelectionNotifyRequest {
 
     public boolean isUserSetBrightnessChanged() {
         return mUserSetBrightnessChanged;
+    }
+
+    public boolean isBedtimeModeWearEnabled() {
+        return mIsBedtimeModeWearEnabled;
     }
 
     public DisplayManagerInternal.DisplayPowerRequest getDisplayPowerRequest() {
@@ -126,6 +134,7 @@ public final class StrategySelectionNotifyRequest {
                 + " mLastUserSetScreenBrightness=" + mLastUserSetScreenBrightness
                 + " mUserSetBrightnessChanged=" + mUserSetBrightnessChanged
                 + " mAllowAutoBrightnessWhileDozingConfig=" + mAllowAutoBrightnessWhileDozingConfig
-                + " mIsAutoBrightnessEnabled=" + mIsAutoBrightnessEnabled;
+                + " mIsAutoBrightnessEnabled=" + mIsAutoBrightnessEnabled
+                + " mIsBedtimeModeWearEnabled" + mIsBedtimeModeWearEnabled;
     }
 }

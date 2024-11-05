@@ -23,6 +23,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.View
+import android.view.WindowInsets
 import android.view.WindowManager
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
 
@@ -38,6 +39,7 @@ class AdditionalSystemViewContainer(
     width: Int,
     height: Int,
     flags: Int,
+    @WindowInsets.Type.InsetsType forciblyShownTypes: Int = 0,
     override val view: View
 ) : AdditionalViewContainer() {
     val lp: WindowManager.LayoutParams = WindowManager.LayoutParams(
@@ -49,6 +51,7 @@ class AdditionalSystemViewContainer(
         title = "Additional view container of Task=$taskId"
         gravity = Gravity.LEFT or Gravity.TOP
         setTrustedOverlay()
+        this.forciblyShownTypes = forciblyShownTypes
     }
 
     constructor(
@@ -106,5 +109,28 @@ class AdditionalSystemViewContainer(
             this.y = y.toInt()
         }
         windowManagerWrapper.updateViewLayout(view, lp)
+    }
+
+    class Factory {
+        fun create(
+            windowManagerWrapper: WindowManagerWrapper,
+            taskId: Int,
+            x: Int,
+            y: Int,
+            width: Int,
+            height: Int,
+            flags: Int,
+            view: View,
+        ): AdditionalSystemViewContainer =
+            AdditionalSystemViewContainer(
+                windowManagerWrapper = windowManagerWrapper,
+                taskId = taskId,
+                x = x,
+                y = y,
+                width = width,
+                height = height,
+                flags = flags,
+                view = view
+            )
     }
 }

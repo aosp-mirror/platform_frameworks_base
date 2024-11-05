@@ -40,7 +40,7 @@ void strcpy16_htod(uint16_t* dst, const char16_t* src)
 void printStringPool(const ResStringPool* pool)
 {
     if (pool->getError() == NO_INIT) {
-        printf("String pool is unitialized.\n");
+        printf("String pool is uninitialized.\n");
         return;
     } else if (pool->getError() != NO_ERROR) {
         printf("String pool is corrupt/invalid.\n");

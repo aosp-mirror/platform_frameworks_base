@@ -18,13 +18,15 @@ package com.android.compose.animation.scene.transformation
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
+import com.android.compose.animation.scene.ElementStateScope
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** A transformation applied to one or more elements during a transition. */
@@ -33,14 +35,6 @@ sealed interface Transformation {
      * The matcher that should match the element(s) to which this transformation should be applied.
      */
     val matcher: ElementMatcher
-
-    /**
-     * The range during which the transformation is applied. If it is `null`, then the
-     * transformation will be applied throughout the whole scene transition.
-     */
-    // TODO(b/240432457): Move this back to PropertyTransformation.
-    val range: TransformationRange?
-        get() = null
 
     /*
      * Reverse this transformation. This is called when we use Transition(from = A, to = B) when
@@ -52,39 +46,43 @@ sealed interface Transformation {
 internal class SharedElementTransformation(
     override val matcher: ElementMatcher,
     internal val enabled: Boolean,
+    internal val elevateInContent: ContentKey?,
 ) : Transformation
 
 /** A transformation that changes the value of an element property, like its size or offset. */
-internal sealed interface PropertyTransformation<T> : Transformation {
+interface PropertyTransformation<T> : Transformation {
     /**
-     * Transform [value], i.e. the value of the transformed property without this transformation.
+     * Return the transformed value for the given property, i.e.:
+     * - the value at progress = 0% for elements that are entering the layout (i.e. elements in the
+     *   content we are transitioning to).
+     * - the value at progress = 100% for elements that are leaving the layout (i.e. elements in the
+     *   content we are transitioning from).
+     *
+     * The returned value will be interpolated using the [transition] progress and [idleValue], the
+     * value of the property when we are idle.
      */
-    // TODO(b/290184746): Figure out a public API for custom transformations that don't have access
-    // to these internal classes.
-    fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
-        value: T,
+        idleValue: T,
     ): T
 }
 
-/**
- * A [PropertyTransformation] associated to a range. This is a helper class so that normal
- * implementations of [PropertyTransformation] don't have to take care of reversing their range when
- * they are reversed.
- */
-internal class RangedPropertyTransformation<T>(
-    val delegate: PropertyTransformation<T>,
-    override val range: TransformationRange,
-) : PropertyTransformation<T> by delegate {
-    override fun reversed(): Transformation {
-        return RangedPropertyTransformation(
-            delegate.reversed() as PropertyTransformation<T>,
-            range.reversed(),
-        )
+interface PropertyTransformationScope : Density, ElementStateScope {
+    /** The current [direction][LayoutDirection] of the layout. */
+    val layoutDirection: LayoutDirection
+}
+
+/** A pair consisting of a [transformation] and optional [range]. */
+class TransformationWithRange<out T : Transformation>(
+    val transformation: T,
+    val range: TransformationRange?,
+) {
+    fun reversed(): TransformationWithRange<T> {
+        if (range == null) return this
+
+        return TransformationWithRange(transformation = transformation, range = range.reversed())
     }
 }
 

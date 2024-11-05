@@ -15,10 +15,8 @@
  */
 package android.media.session;
 
-import static com.android.media.flags.Flags.FLAG_ENABLE_NOTIFYING_ACTIVITY_MANAGER_WITH_MEDIA_SESSION_STATUS_CHANGE;
 
 import android.annotation.DrawableRes;
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.Nullable;
@@ -187,13 +185,21 @@ public final class PlaybackState implements Parcelable {
      */
     public static final long ACTION_SET_PLAYBACK_SPEED = 1 << 22;
 
-    /**
-     * @hide
-     */
-    @IntDef({STATE_NONE, STATE_STOPPED, STATE_PAUSED, STATE_PLAYING, STATE_FAST_FORWARDING,
-            STATE_REWINDING, STATE_BUFFERING, STATE_ERROR, STATE_CONNECTING,
-            STATE_SKIPPING_TO_PREVIOUS, STATE_SKIPPING_TO_NEXT, STATE_SKIPPING_TO_QUEUE_ITEM,
-            STATE_PLAYBACK_SUPPRESSED})
+    /** @hide */
+    @IntDef({
+        STATE_NONE,
+        STATE_STOPPED,
+        STATE_PAUSED,
+        STATE_PLAYING,
+        STATE_FAST_FORWARDING,
+        STATE_REWINDING,
+        STATE_BUFFERING,
+        STATE_ERROR,
+        STATE_CONNECTING,
+        STATE_SKIPPING_TO_PREVIOUS,
+        STATE_SKIPPING_TO_NEXT,
+        STATE_SKIPPING_TO_QUEUE_ITEM
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {}
 
@@ -288,19 +294,6 @@ public final class PlaybackState implements Parcelable {
      * @see Builder#setState
      */
     public static final int STATE_SKIPPING_TO_QUEUE_ITEM = 11;
-
-    /**
-     * State indicating that playback is paused due to an external transient interruption, like a
-     * phone call.
-     *
-     * <p>This state is different from {@link #STATE_PAUSED} in that it is deemed transitory,
-     * possibly allowing the service associated to the session in this state to run in the
-     * foreground.
-     *
-     * @see Builder#setState
-     */
-    @FlaggedApi(FLAG_ENABLE_NOTIFYING_ACTIVITY_MANAGER_WITH_MEDIA_SESSION_STATUS_CHANGE)
-    public static final int STATE_PLAYBACK_SUPPRESSED = 12;
 
     /**
      * Use this value for the position to indicate the position is not known.
@@ -401,7 +394,6 @@ public final class PlaybackState implements Parcelable {
      * <li> {@link PlaybackState#STATE_SKIPPING_TO_PREVIOUS}</li>
      * <li> {@link PlaybackState#STATE_SKIPPING_TO_NEXT}</li>
      * <li> {@link PlaybackState#STATE_SKIPPING_TO_QUEUE_ITEM}</li>
-     * <li> {@link PlaybackState#STATE_PLAYBACK_SUPPRESSED}</li>
      * </ul>
      */
     @State
@@ -525,7 +517,6 @@ public final class PlaybackState implements Parcelable {
      * <li>{@link #STATE_SKIPPING_TO_NEXT}</li>
      * <li>{@link #STATE_SKIPPING_TO_PREVIOUS}</li>
      * <li>{@link #STATE_SKIPPING_TO_QUEUE_ITEM}</li>
-     * <li>{@link #STATE_PLAYBACK_SUPPRESSED}</li>
      * </ul>
      */
     public boolean isActive() {
@@ -538,7 +529,6 @@ public final class PlaybackState implements Parcelable {
             case PlaybackState.STATE_BUFFERING:
             case PlaybackState.STATE_CONNECTING:
             case PlaybackState.STATE_PLAYING:
-            case PlaybackState.STATE_PLAYBACK_SUPPRESSED:
                 return true;
         }
         return false;
@@ -584,8 +574,6 @@ public final class PlaybackState implements Parcelable {
                 return "SKIPPING_TO_NEXT";
             case STATE_SKIPPING_TO_QUEUE_ITEM:
                 return "SKIPPING_TO_QUEUE_ITEM";
-            case STATE_PLAYBACK_SUPPRESSED:
-                return "STATE_PLAYBACK_SUPPRESSED";
             default:
                 return "UNKNOWN";
         }
@@ -823,7 +811,6 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#STATE_SKIPPING_TO_PREVIOUS}</li>
          * <li> {@link PlaybackState#STATE_SKIPPING_TO_NEXT}</li>
          * <li> {@link PlaybackState#STATE_SKIPPING_TO_QUEUE_ITEM}</li>
-         * <li> {@link PlaybackState#STATE_PLAYBACK_SUPPRESSED}</li>
          * </ul>
          *
          * @param state The current state of playback.
@@ -868,7 +855,6 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#STATE_SKIPPING_TO_PREVIOUS}</li>
          * <li> {@link PlaybackState#STATE_SKIPPING_TO_NEXT}</li>
          * <li> {@link PlaybackState#STATE_SKIPPING_TO_QUEUE_ITEM}</li>
-         * <li> {@link PlaybackState#STATE_PLAYBACK_SUPPRESSED}</li>
          * </ul>
          *
          * @param state The current state of playback.

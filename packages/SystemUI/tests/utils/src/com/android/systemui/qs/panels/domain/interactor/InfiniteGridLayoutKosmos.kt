@@ -16,10 +16,17 @@
 
 package com.android.systemui.qs.panels.domain.interactor
 
+import com.android.systemui.haptics.msdl.tileHapticsViewModelFactoryProvider
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.fixedColumnsSizeViewModel
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
 import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.infiniteGridViewModelFactory
 
 val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesViewModel, fixedColumnsSizeViewModel) }
+    Kosmos.Fixture {
+        InfiniteGridLayout(
+            iconTilesViewModel,
+            infiniteGridViewModelFactory,
+            tileHapticsViewModelFactoryProvider,
+        )
+    }

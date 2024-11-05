@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
@@ -100,6 +101,10 @@ interface SceneTransitionLayoutScope {
      * By default overlays are centered in their layout but they can be aligned differently using
      * [alignment].
      *
+     * If [isModal] is true (the default), then a protective layer will be added behind the overlay
+     * to prevent swipes from reaching other scenes or overlays behind this one. Clicking this
+     * protective layer will close the overlay.
+     *
      * Important: overlays must be defined after all scenes. Overlay order along the z-axis follows
      * call order. Calling overlay(A) followed by overlay(B) will mean that overlay B renders
      * after/above overlay A.
@@ -109,6 +114,7 @@ interface SceneTransitionLayoutScope {
         userActions: Map<UserAction, UserActionResult> =
             mapOf(Back to UserActionResult.HideOverlay(key)),
         alignment: Alignment = Alignment.Center,
+        isModal: Boolean = true,
         content: @Composable ContentScope.() -> Unit,
     )
 }
@@ -122,22 +128,23 @@ interface SceneTransitionLayoutScope {
 /** A scope that can be used to query the target state of an element or scene. */
 interface ElementStateScope {
     /**
-     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
-     * when idle, or `null` if the element is not composed and measured in that scene (yet).
+     * Return the *target* size of [this] element in the given [content], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and measured in that content
+     * (yet).
      */
-    fun ElementKey.targetSize(scene: SceneKey): IntSize?
+    fun ElementKey.targetSize(content: ContentKey): IntSize?
 
     /**
-     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
-     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
+     * Return the *target* offset of [this] element in the given [content], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and placed in that content (yet).
      */
-    fun ElementKey.targetOffset(scene: SceneKey): Offset?
+    fun ElementKey.targetOffset(content: ContentKey): Offset?
 
     /**
-     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
-     * the scene was never composed.
+     * Return the *target* size of [this] content, i.e. the size of the content when idle, or `null`
+     * if the content was not composed (yet).
      */
-    fun SceneKey.targetSize(): IntSize?
+    fun ContentKey.targetSize(): IntSize?
 }
 
 @Stable
@@ -401,6 +408,7 @@ data object Back : UserAction() {
 data class Swipe(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
+    val pointersType: PointerType? = null,
     val fromSource: SwipeSource? = null,
 ) : UserAction() {
     companion object {
@@ -416,6 +424,7 @@ data class Swipe(
         return Resolved(
             direction = direction.resolve(layoutDirection),
             pointerCount = pointerCount,
+            pointersType = pointersType,
             fromSource = fromSource?.resolve(layoutDirection),
         )
     }
@@ -425,6 +434,7 @@ data class Swipe(
         val direction: SwipeDirection.Resolved,
         val pointerCount: Int,
         val fromSource: SwipeSource.Resolved?,
+        val pointersType: PointerType?,
     ) : UserAction.Resolved()
 }
 
@@ -493,6 +503,12 @@ sealed class UserActionResult(
      * bigger than 100% when the user released their finger. `
      */
     open val requiresFullDistanceSwipe: Boolean,
+
+    /**
+     * Whether swiping back in the opposite direction past the origin point of the swipe can replace
+     * the action with the action for the opposite direction.
+     */
+    open val isIrreversible: Boolean = false,
 ) {
     internal abstract fun toContent(currentScene: SceneKey): ContentKey
 
@@ -502,6 +518,7 @@ sealed class UserActionResult(
         val toScene: SceneKey,
         override val transitionKey: TransitionKey? = null,
         override val requiresFullDistanceSwipe: Boolean = false,
+        override val isIrreversible: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = toScene
     }
@@ -511,6 +528,7 @@ sealed class UserActionResult(
         val overlay: OverlayKey,
         override val transitionKey: TransitionKey? = null,
         override val requiresFullDistanceSwipe: Boolean = false,
+        override val isIrreversible: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = overlay
     }
@@ -553,7 +571,14 @@ sealed class UserActionResult(
              * the user released their finger.
              */
             requiresFullDistanceSwipe: Boolean = false,
-        ): UserActionResult = ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe)
+
+            /**
+             * Whether swiping back in the opposite direction past the origin point of the swipe can
+             * replace the action with the action for the opposite direction.
+             */
+            isIrreversible: Boolean = false,
+        ): UserActionResult =
+            ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe, isIrreversible)
 
         /** A [UserActionResult] that shows [toOverlay]. */
         operator fun invoke(

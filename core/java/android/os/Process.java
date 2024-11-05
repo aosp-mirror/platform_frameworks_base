@@ -29,6 +29,11 @@ import android.annotation.TestApi;
 import android.annotation.UptimeMillisLong;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build.VERSION_CODES;
+import android.ravenwood.annotation.RavenwoodKeep;
+import android.ravenwood.annotation.RavenwoodKeepPartialClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
+import android.ravenwood.annotation.RavenwoodReplace;
 import android.sysprop.MemoryProperties;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -37,10 +42,9 @@ import android.system.StructPollfd;
 import android.util.Pair;
 import android.webkit.WebViewZygote;
 
-import com.android.internal.os.SomeArgs;
-import com.android.internal.util.Preconditions;
 import com.android.sdksandbox.flags.Flags;
 
+import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
@@ -54,6 +58,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * Tools for managing OS processes.
  */
+@RavenwoodKeepPartialClass
+@RavenwoodRedirectionClass("Process_ravenwood")
 public class Process {
     private static final String LOG_TAG = "Process";
 
@@ -670,7 +676,6 @@ public class Process {
      */
     public static final ZygoteProcess ZYGOTE_PROCESS = new ZygoteProcess();
 
-
     /**
      * The process name set via {@link #setArgV0(String)}.
      */
@@ -844,45 +849,18 @@ public class Process {
     /**
      * Returns true if the current process is a 64-bit runtime.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static final boolean is64Bit() {
         return VMRuntime.getRuntime().is64Bit();
-    }
-
-    private static volatile ThreadLocal<SomeArgs> sIdentity$ravenwood;
-
-    /** @hide */
-    @android.ravenwood.annotation.RavenwoodKeep
-    public static void init$ravenwood(final int uid, final int pid) {
-        sIdentity$ravenwood = ThreadLocal.withInitial(() -> {
-            final SomeArgs args = SomeArgs.obtain();
-            args.argi1 = uid;
-            args.argi2 = pid;
-            args.argi3 = Long.hashCode(Thread.currentThread().getId());
-            args.argi4 = THREAD_PRIORITY_DEFAULT;
-            args.arg1 = Boolean.TRUE; // backgroundOk
-            return args;
-        });
-    }
-
-    /** @hide */
-    @android.ravenwood.annotation.RavenwoodKeep
-    public static void reset$ravenwood() {
-        sIdentity$ravenwood = null;
     }
 
     /**
      * Returns the identifier of this process, which can be used with
      * {@link #killProcess} and {@link #sendSignal}.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodKeep
     public static final int myPid() {
         return Os.getpid();
-    }
-
-    /** @hide */
-    public static final int myPid$ravenwood() {
-        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get().argi2;
     }
 
     /**
@@ -898,14 +876,9 @@ public class Process {
      * Returns the identifier of the calling thread, which be used with
      * {@link #setThreadPriority(int, int)}.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodKeep
     public static final int myTid() {
         return Os.gettid();
-    }
-
-    /** @hide */
-    public static final int myTid$ravenwood() {
-        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get().argi3;
     }
 
     /**
@@ -914,14 +887,9 @@ public class Process {
      * app-specific sandbox.  It is different from {@link #myUserHandle} in that
      * a uid identifies a specific app sandbox in a specific user.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodKeep
     public static final int myUid() {
         return Os.getuid();
-    }
-
-    /** @hide */
-    public static final int myUid$ravenwood() {
-        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get().argi1;
     }
 
     /**
@@ -930,7 +898,7 @@ public class Process {
      * {@link #myUid()} in that a particular user will have multiple
      * distinct apps running under it each with their own uid.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static UserHandle myUserHandle() {
         return UserHandle.of(UserHandle.getUserId(myUid()));
     }
@@ -939,7 +907,7 @@ public class Process {
      * Returns whether the given uid belongs to a system core component or not.
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static boolean isCoreUid(int uid) {
         return UserHandle.isCore(uid);
     }
@@ -950,7 +918,7 @@ public class Process {
      * @return Whether the uid corresponds to an application sandbox running in
      *     a specific user.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static boolean isApplicationUid(int uid) {
         return UserHandle.isApp(uid);
     }
@@ -958,7 +926,7 @@ public class Process {
     /**
      * Returns whether the current process is in an isolated sandbox.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static final boolean isIsolated() {
         return isIsolated(myUid());
     }
@@ -970,7 +938,7 @@ public class Process {
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
             publicAlternatives = "Use {@link #isIsolatedUid(int)} instead.")
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static final boolean isIsolated(int uid) {
         return isIsolatedUid(uid);
     }
@@ -978,7 +946,7 @@ public class Process {
     /**
      * Returns whether the process with the given {@code uid} is an isolated sandbox.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static final boolean isIsolatedUid(int uid) {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
@@ -990,7 +958,7 @@ public class Process {
      * @see android.app.sdksandbox.SdkSandboxManager
      */
     @SuppressLint("UnflaggedApi") // promoting from @SystemApi.
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static final boolean isSdkSandboxUid(int uid) {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_SDK_SANDBOX_UID && uid <= LAST_SDK_SANDBOX_UID);
@@ -1006,7 +974,7 @@ public class Process {
      * @throws IllegalArgumentException if input is not an sdk sandbox uid
      */
     @SuppressLint("UnflaggedApi") // promoting from @SystemApi.
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static final int getAppUidForSdkSandboxUid(int uid) {
         if (!isSdkSandboxUid(uid)) {
             throw new IllegalArgumentException("Input UID is not an SDK sandbox UID");
@@ -1022,7 +990,7 @@ public class Process {
      */
     @SystemApi(client = MODULE_LIBRARIES)
     @TestApi
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     // TODO(b/318651609): Deprecate once Process#getSdkSandboxUidForAppUid is rolled out to 100%
     public static final int toSdkSandboxUid(int uid) {
         return uid + (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
@@ -1038,7 +1006,7 @@ public class Process {
      * @throws IllegalArgumentException if input is not an app uid
      */
     @FlaggedApi(Flags.FLAG_SDK_SANDBOX_UID_TO_APP_UID_API)
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static final int getSdkSandboxUidForAppUid(int uid) {
         if (!isApplicationUid(uid)) {
             throw new IllegalArgumentException("Input UID is not an app UID");
@@ -1049,7 +1017,7 @@ public class Process {
     /**
      * Returns whether the current process is a sdk sandbox process.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public static final boolean isSdkSandbox() {
         return isSdkSandboxUid(myUid());
     }
@@ -1126,27 +1094,10 @@ public class Process {
      * not have permission to modify the given thread, or to use the given
      * priority.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodRedirect
     public static final native void setThreadPriority(int tid,
             @IntRange(from = -20, to = THREAD_PRIORITY_LOWEST) int priority)
             throws IllegalArgumentException, SecurityException;
-
-    /** @hide */
-    public static final void setThreadPriority$ravenwood(int tid, int priority) {
-        final SomeArgs args =
-                Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get();
-        if (args.argi3 == tid) {
-            boolean backgroundOk = (args.arg1 == Boolean.TRUE);
-            if (priority >= THREAD_PRIORITY_BACKGROUND && !backgroundOk) {
-                throw new IllegalArgumentException(
-                        "Priority " + priority + " blocked by setCanSelfBackground()");
-            }
-            args.argi4 = priority;
-        } else {
-            throw new UnsupportedOperationException(
-                    "Cross-thread priority management not yet available in Ravenwood");
-        }
-    }
 
     /**
      * Call with 'false' to cause future calls to {@link #setThreadPriority(int)} to
@@ -1155,15 +1106,8 @@ public class Process {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodRedirect
     public static final native void setCanSelfBackground(boolean backgroundOk);
-
-    /** @hide */
-    public static final void setCanSelfBackground$ravenwood(boolean backgroundOk) {
-        final SomeArgs args =
-                Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get();
-        args.arg1 = Boolean.valueOf(backgroundOk);
-    }
 
     /**
      * Sets the scheduling group for a thread.
@@ -1293,13 +1237,12 @@ public class Process {
      *
      * @see #setThreadPriority(int, int)
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodReplace
     public static final native void setThreadPriority(
             @IntRange(from = -20, to = THREAD_PRIORITY_LOWEST) int priority)
             throws IllegalArgumentException, SecurityException;
 
-    /** @hide */
-    public static final void setThreadPriority$ravenwood(int priority) {
+    private static void setThreadPriority$ravenwood(int priority) {
         setThreadPriority(myTid(), priority);
     }
 
@@ -1316,22 +1259,10 @@ public class Process {
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodRedirect
     @IntRange(from = -20, to = THREAD_PRIORITY_LOWEST)
     public static final native int getThreadPriority(int tid)
             throws IllegalArgumentException;
-
-    /** @hide */
-    public static final int getThreadPriority$ravenwood(int tid) {
-        final SomeArgs args =
-                Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get();
-        if (args.argi3 == tid) {
-            return args.argi4;
-        } else {
-            throw new UnsupportedOperationException(
-                    "Cross-thread priority management not yet available in Ravenwood");
-        }
-    }
 
     /**
      * Return the current scheduling policy of a thread, based on Linux.
@@ -1410,6 +1341,7 @@ public class Process {
     public static void setArgV0(@NonNull String text) {
         sArgV0 = text;
         setArgV0Native(text);
+        VMDebug.setCurrentProcessName(text);
     }
 
     private static native void setArgV0Native(String text);

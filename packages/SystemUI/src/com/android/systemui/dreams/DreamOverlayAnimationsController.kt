@@ -45,7 +45,7 @@ import com.android.systemui.statusbar.CrossFadeHelper
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Controller for dream overlay animations. */
 @DreamOverlayScope

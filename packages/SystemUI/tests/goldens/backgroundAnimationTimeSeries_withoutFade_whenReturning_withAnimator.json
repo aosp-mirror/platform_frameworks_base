@@ -1,0 +1,492 @@
+{
+  "frame_ids": [
+    0,
+    20,
+    40,
+    60,
+    80,
+    100,
+    120,
+    140,
+    160,
+    180,
+    200,
+    220,
+    240,
+    260,
+    280,
+    300,
+    320,
+    340,
+    360,
+    380,
+    400,
+    420,
+    440,
+    460,
+    480,
+    500
+  ],
+  "features": [
+    {
+      "name": "bounds",
+      "type": "rect",
+      "data_points": [
+        {
+          "left": 100,
+          "top": 300,
+          "right": 200,
+          "bottom": 400
+        },
+        {
+          "left": 99,
+          "top": 296,
+          "right": 202,
+          "bottom": 404
+        },
+        {
+          "left": 95,
+          "top": 283,
+          "right": 207,
+          "bottom": 417
+        },
+        {
+          "left": 86,
+          "top": 256,
+          "right": 219,
+          "bottom": 443
+        },
+        {
+          "left": 68,
+          "top": 198,
+          "right": 243,
+          "bottom": 499
+        },
+        {
+          "left": 39,
+          "top": 110,
+          "right": 278,
+          "bottom": 584
+        },
+        {
+          "left": 26,
+          "top": 74,
+          "right": 292,
+          "bottom": 618
+        },
+        {
+          "left": 19,
+          "top": 55,
+          "right": 299,
+          "bottom": 637
+        },
+        {
+          "left": 15,
+          "top": 42,
+          "right": 304,
+          "bottom": 649
+        },
+        {
+          "left": 12,
+          "top": 33,
+          "right": 307,
+          "bottom": 658
+        },
+        {
+          "left": 9,
+          "top": 27,
+          "right": 310,
+          "bottom": 664
+        },
+        {
+          "left": 7,
+          "top": 21,
+          "right": 312,
+          "bottom": 669
+        },
+        {
+          "left": 6,
+          "top": 17,
+          "right": 314,
+          "bottom": 674
+        },
+        {
+          "left": 5,
+          "top": 13,
+          "right": 315,
+          "bottom": 677
+        },
+        {
+          "left": 4,
+          "top": 10,
+          "right": 316,
+          "bottom": 680
+        },
+        {
+          "left": 3,
+          "top": 8,
+          "right": 317,
+          "bottom": 682
+        },
+        {
+          "left": 2,
+          "top": 6,
+          "right": 318,
+          "bottom": 684
+        },
+        {
+          "left": 2,
+          "top": 5,
+          "right": 318,
+          "bottom": 685
+        },
+        {
+          "left": 1,
+          "top": 4,
+          "right": 319,
+          "bottom": 687
+        },
+        {
+          "left": 1,
+          "top": 2,
+          "right": 319,
+          "bottom": 688
+        },
+        {
+          "left": 1,
+          "top": 2,
+          "right": 319,
+          "bottom": 688
+        },
+        {
+          "left": 0,
+          "top": 1,
+          "right": 320,
+          "bottom": 689
+        },
+        {
+          "left": 0,
+          "top": 1,
+          "right": 320,
+          "bottom": 689
+        },
+        {
+          "left": 0,
+          "top": 0,
+          "right": 320,
+          "bottom": 690
+        },
+        {
+          "left": 0,
+          "top": 0,
+          "right": 320,
+          "bottom": 690
+        },
+        {
+          "left": 0,
+          "top": 0,
+          "right": 320,
+          "bottom": 690
+        }
+      ]
+    },
+    {
+      "name": "corner_radii",
+      "type": "cornerRadii",
+      "data_points": [
+        {
+          "top_left_x": 10,
+          "top_left_y": 10,
+          "top_right_x": 10,
+          "top_right_y": 10,
+          "bottom_right_x": 20,
+          "bottom_right_y": 20,
+          "bottom_left_x": 20,
+          "bottom_left_y": 20
+        },
+        {
+          "top_left_x": 9.865689,
+          "top_left_y": 9.865689,
+          "top_right_x": 9.865689,
+          "top_right_y": 9.865689,
+          "bottom_right_x": 19.731379,
+          "bottom_right_y": 19.731379,
+          "bottom_left_x": 19.731379,
+          "bottom_left_y": 19.731379
+        },
+        {
+          "top_left_x": 9.419104,
+          "top_left_y": 9.419104,
+          "top_right_x": 9.419104,
+          "top_right_y": 9.419104,
+          "bottom_right_x": 18.838207,
+          "bottom_right_y": 18.838207,
+          "bottom_left_x": 18.838207,
+          "bottom_left_y": 18.838207
+        },
+        {
+          "top_left_x": 8.533693,
+          "top_left_y": 8.533693,
+          "top_right_x": 8.533693,
+          "top_right_y": 8.533693,
+          "bottom_right_x": 17.067387,
+          "bottom_right_y": 17.067387,
+          "bottom_left_x": 17.067387,
+          "bottom_left_y": 17.067387
+        },
+        {
+          "top_left_x": 6.5919456,
+          "top_left_y": 6.5919456,
+          "top_right_x": 6.5919456,
+          "top_right_y": 6.5919456,
+          "bottom_right_x": 13.183891,
+          "bottom_right_y": 13.183891,
+          "bottom_left_x": 13.183891,
+          "bottom_left_y": 13.183891
+        },
+        {
+          "top_left_x": 3.6674318,
+          "top_left_y": 3.6674318,
+          "top_right_x": 3.6674318,
+          "top_right_y": 3.6674318,
+          "bottom_right_x": 7.3348637,
+          "bottom_right_y": 7.3348637,
+          "bottom_left_x": 7.3348637,
+          "bottom_left_y": 7.3348637
+        },
+        {
+          "top_left_x": 2.4832253,
+          "top_left_y": 2.4832253,
+          "top_right_x": 2.4832253,
+          "top_right_y": 2.4832253,
+          "bottom_right_x": 4.9664507,
+          "bottom_right_y": 4.9664507,
+          "bottom_left_x": 4.9664507,
+          "bottom_left_y": 4.9664507
+        },
+        {
+          "top_left_x": 1.8252907,
+          "top_left_y": 1.8252907,
+          "top_right_x": 1.8252907,
+          "top_right_y": 1.8252907,
+          "bottom_right_x": 3.6505814,
+          "bottom_right_y": 3.6505814,
+          "bottom_left_x": 3.6505814,
+          "bottom_left_y": 3.6505814
+        },
+        {
+          "top_left_x": 1.4077549,
+          "top_left_y": 1.4077549,
+          "top_right_x": 1.4077549,
+          "top_right_y": 1.4077549,
+          "bottom_right_x": 2.8155098,
+          "bottom_right_y": 2.8155098,
+          "bottom_left_x": 2.8155098,
+          "bottom_left_y": 2.8155098
+        },
+        {
+          "top_left_x": 1.1067667,
+          "top_left_y": 1.1067667,
+          "top_right_x": 1.1067667,
+          "top_right_y": 1.1067667,
+          "bottom_right_x": 2.2135334,
+          "bottom_right_y": 2.2135334,
+          "bottom_left_x": 2.2135334,
+          "bottom_left_y": 2.2135334
+        },
+        {
+          "top_left_x": 0.88593864,
+          "top_left_y": 0.88593864,
+          "top_right_x": 0.88593864,
+          "top_right_y": 0.88593864,
+          "bottom_right_x": 1.7718773,
+          "bottom_right_y": 1.7718773,
+          "bottom_left_x": 1.7718773,
+          "bottom_left_y": 1.7718773
+        },
+        {
+          "top_left_x": 0.7069988,
+          "top_left_y": 0.7069988,
+          "top_right_x": 0.7069988,
+          "top_right_y": 0.7069988,
+          "bottom_right_x": 1.4139977,
+          "bottom_right_y": 1.4139977,
+          "bottom_left_x": 1.4139977,
+          "bottom_left_y": 1.4139977
+        },
+        {
+          "top_left_x": 0.55613136,
+          "top_left_y": 0.55613136,
+          "top_right_x": 0.55613136,
+          "top_right_y": 0.55613136,
+          "bottom_right_x": 1.1122627,
+          "bottom_right_y": 1.1122627,
+          "bottom_left_x": 1.1122627,
+          "bottom_left_y": 1.1122627
+        },
+        {
+          "top_left_x": 0.44889355,
+          "top_left_y": 0.44889355,
+          "top_right_x": 0.44889355,
+          "top_right_y": 0.44889355,
+          "bottom_right_x": 0.8977871,
+          "bottom_right_y": 0.8977871,
+          "bottom_left_x": 0.8977871,
+          "bottom_left_y": 0.8977871
+        },
+        {
+          "top_left_x": 0.34557533,
+          "top_left_y": 0.34557533,
+          "top_right_x": 0.34557533,
+          "top_right_y": 0.34557533,
+          "bottom_right_x": 0.69115067,
+          "bottom_right_y": 0.69115067,
+          "bottom_left_x": 0.69115067,
+          "bottom_left_y": 0.69115067
+        },
+        {
+          "top_left_x": 0.27671337,
+          "top_left_y": 0.27671337,
+          "top_right_x": 0.27671337,
+          "top_right_y": 0.27671337,
+          "bottom_right_x": 0.55342674,
+          "bottom_right_y": 0.55342674,
+          "bottom_left_x": 0.55342674,
+          "bottom_left_y": 0.55342674
+        },
+        {
+          "top_left_x": 0.20785141,
+          "top_left_y": 0.20785141,
+          "top_right_x": 0.20785141,
+          "top_right_y": 0.20785141,
+          "bottom_right_x": 0.41570282,
+          "bottom_right_y": 0.41570282,
+          "bottom_left_x": 0.41570282,
+          "bottom_left_y": 0.41570282
+        },
+        {
+          "top_left_x": 0.1601448,
+          "top_left_y": 0.1601448,
+          "top_right_x": 0.1601448,
+          "top_right_y": 0.1601448,
+          "bottom_right_x": 0.3202896,
+          "bottom_right_y": 0.3202896,
+          "bottom_left_x": 0.3202896,
+          "bottom_left_y": 0.3202896
+        },
+        {
+          "top_left_x": 0.117860794,
+          "top_left_y": 0.117860794,
+          "top_right_x": 0.117860794,
+          "top_right_y": 0.117860794,
+          "bottom_right_x": 0.23572159,
+          "bottom_right_y": 0.23572159,
+          "bottom_left_x": 0.23572159,
+          "bottom_left_y": 0.23572159
+        },
+        {
+          "top_left_x": 0.08036041,
+          "top_left_y": 0.08036041,
+          "top_right_x": 0.08036041,
+          "top_right_y": 0.08036041,
+          "bottom_right_x": 0.16072083,
+          "bottom_right_y": 0.16072083,
+          "bottom_left_x": 0.16072083,
+          "bottom_left_y": 0.16072083
+        },
+        {
+          "top_left_x": 0.05836296,
+          "top_left_y": 0.05836296,
+          "top_right_x": 0.05836296,
+          "top_right_y": 0.05836296,
+          "bottom_right_x": 0.11672592,
+          "bottom_right_y": 0.11672592,
+          "bottom_left_x": 0.11672592,
+          "bottom_left_y": 0.11672592
+        },
+        {
+          "top_left_x": 0.03636551,
+          "top_left_y": 0.03636551,
+          "top_right_x": 0.03636551,
+          "top_right_y": 0.03636551,
+          "bottom_right_x": 0.07273102,
+          "bottom_right_y": 0.07273102,
+          "bottom_left_x": 0.07273102,
+          "bottom_left_y": 0.07273102
+        },
+        {
+          "top_left_x": 0.018137932,
+          "top_left_y": 0.018137932,
+          "top_right_x": 0.018137932,
+          "top_right_y": 0.018137932,
+          "bottom_right_x": 0.036275864,
+          "bottom_right_y": 0.036275864,
+          "bottom_left_x": 0.036275864,
+          "bottom_left_y": 0.036275864
+        },
+        {
+          "top_left_x": 0.0082063675,
+          "top_left_y": 0.0082063675,
+          "top_right_x": 0.0082063675,
+          "top_right_y": 0.0082063675,
+          "bottom_right_x": 0.016412735,
+          "bottom_right_y": 0.016412735,
+          "bottom_left_x": 0.016412735,
+          "bottom_left_y": 0.016412735
+        },
+        {
+          "top_left_x": 0.0031013489,
+          "top_left_y": 0.0031013489,
+          "top_right_x": 0.0031013489,
+          "top_right_y": 0.0031013489,
+          "bottom_right_x": 0.0062026978,
+          "bottom_right_y": 0.0062026978,
+          "bottom_left_x": 0.0062026978,
+          "bottom_left_y": 0.0062026978
+        },
+        {
+          "top_left_x": 0,
+          "top_left_y": 0,
+          "top_right_x": 0,
+          "top_right_y": 0,
+          "bottom_right_x": 0,
+          "bottom_right_y": 0,
+          "bottom_left_x": 0,
+          "bottom_left_y": 0
+        }
+      ]
+    },
+    {
+      "name": "alpha",
+      "type": "int",
+      "data_points": [
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        233,
+        191,
+        153,
+        117,
+        85,
+        57,
+        33,
+        14,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

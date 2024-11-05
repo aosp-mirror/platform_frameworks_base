@@ -16,6 +16,7 @@
 
 package android.app.job;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -238,6 +239,13 @@ public abstract class JobScheduler {
      * to defer this job.
      */
     public static final int PENDING_JOB_REASON_USER = 15;
+    /**
+     * The override deadline has not transpired.
+     *
+     * @see JobInfo.Builder#setOverrideDeadline(long)
+     */
+    @FlaggedApi(Flags.FLAG_GET_PENDING_JOB_REASONS_API)
+    public static final int PENDING_JOB_REASON_CONSTRAINT_DEADLINE = 16;
 
     /** @hide */
     @IntDef(prefix = {"PENDING_JOB_REASON_"}, value = {
@@ -259,6 +267,7 @@ public abstract class JobScheduler {
             PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION,
             PENDING_JOB_REASON_QUOTA,
             PENDING_JOB_REASON_USER,
+            PENDING_JOB_REASON_CONSTRAINT_DEADLINE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PendingJobReason {
@@ -458,10 +467,29 @@ public abstract class JobScheduler {
     /**
      * Returns a reason why the job is pending and not currently executing. If there are multiple
      * reasons why a job may be pending, this will only return one of them.
+     *
+     * @apiNote
+     * To know all the potential reasons why the job may be pending,
+     * use {@link #getPendingJobReasons(int)} instead.
      */
     @PendingJobReason
     public int getPendingJobReason(int jobId) {
         return PENDING_JOB_REASON_UNDEFINED;
+    }
+
+    /**
+     * Returns potential reasons why the job with the given {@code jobId} may be pending
+     * and not currently executing.
+     *
+     * The returned array will include {@link PendingJobReason reasons} composed of both
+     * explicitly set constraints on the job and implicit constraints imposed by the system.
+     * The results can be used to debug why a given job may not be currently executing.
+     */
+    @FlaggedApi(Flags.FLAG_GET_PENDING_JOB_REASONS_API)
+    @NonNull
+    @PendingJobReason
+    public int[] getPendingJobReasons(int jobId) {
+        return new int[] { PENDING_JOB_REASON_UNDEFINED };
     }
 
     /**

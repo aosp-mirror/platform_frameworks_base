@@ -37,9 +37,11 @@ import android.net.Uri;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.MathUtils;
 
 import com.android.internal.util.Preconditions;
@@ -54,6 +56,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * A VibrationEffect describes a haptic effect to be performed by a {@link Vibrator}.
@@ -564,6 +567,19 @@ public abstract class VibrationEffect implements Parcelable {
     public abstract long getDuration();
 
     /**
+     * Gets the estimated duration of the segment for given vibrator, in milliseconds.
+     *
+     * <p>For effects with hardware-dependent constants (e.g. primitive compositions), this returns
+     * the estimated duration based on the given {@link VibratorInfo}. For all other effects this
+     * will return the same as {@link #getDuration()}.
+     *
+     * @hide
+     */
+    public long getDuration(@Nullable VibratorInfo vibratorInfo) {
+        return getDuration();
+    }
+
+    /**
      * Checks if a vibrator with a given {@link VibratorInfo} can play this effect as intended.
      *
      * <p>See {@link VibratorInfo#areVibrationFeaturesSupported(VibrationEffect)} for more
@@ -903,13 +919,23 @@ public abstract class VibrationEffect implements Parcelable {
 
         @Override
         public long getDuration() {
+            return getDuration(VibrationEffectSegment::getDuration);
+        }
+
+        /** @hide */
+        @Override
+        public long getDuration(@Nullable VibratorInfo vibratorInfo) {
+            return getDuration(segment -> segment.getDuration(vibratorInfo));
+        }
+
+        private long getDuration(Function<VibrationEffectSegment, Long> durationFn) {
             if (mRepeatIndex >= 0) {
                 return Long.MAX_VALUE;
             }
             int segmentCount = mSegments.size();
             long totalDuration = 0;
             for (int i = 0; i < segmentCount; i++) {
-                long segmentDuration = mSegments.get(i).getDuration();
+                long segmentDuration = durationFn.apply(mSegments.get(i));
                 if (segmentDuration < 0) {
                     return segmentDuration;
                 }
@@ -1378,6 +1404,49 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Creates a new {@link VibrationEffect} that repeats the given effect indefinitely.
+     *
+     * <p>The input vibration must not be a repeating vibration. If it is, an
+     * {@link IllegalArgumentException} will be thrown.
+     *
+     * @param effect The {@link VibrationEffect} that will be repeated.
+     * @return A {@link VibrationEffect} that repeats the effect indefinitely.
+     * @throws IllegalArgumentException if the effect is already a repeating vibration.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    @NonNull
+    public static VibrationEffect createRepeatingEffect(@NonNull VibrationEffect effect) {
+        return VibrationEffect.startComposition()
+                .repeatEffectIndefinitely(effect)
+                .compose();
+    }
+
+    /**
+     * Creates a new {@link VibrationEffect} by merging the preamble and repeating vibration effect.
+     *
+     * <p>Neither input vibration may already be repeating. An {@link IllegalArgumentException} will
+     * be thrown if either input vibration is set to repeat indefinitely.
+     *
+     * @param preamble        The starting vibration effect, which must be finite.
+     * @param repeatingEffect The vibration effect to be repeated indefinitely after the preamble.
+     * @return A {@link VibrationEffect} that plays the preamble once followed by the
+     * `repeatingEffect` indefinitely.
+     * @throws IllegalArgumentException if either preamble or repeatingEffect is already a repeating
+     *                                  vibration.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    @NonNull
+    public static VibrationEffect createRepeatingEffect(@NonNull VibrationEffect preamble,
+            @NonNull VibrationEffect repeatingEffect) {
+        Preconditions.checkArgument(preamble.getDuration() < Long.MAX_VALUE,
+                "Can't repeat an indefinitely repeating effect.");
+        return VibrationEffect.startComposition()
+                .addEffect(preamble)
+                .repeatEffectIndefinitely(repeatingEffect)
+                .compose();
+    }
+
+    /**
      * A composition of haptic elements that are combined to be playable as a single
      * {@link VibrationEffect}.
      *
@@ -1667,6 +1736,179 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Start building a waveform vibration.
+     *
+     * <p>The waveform envelope builder offers more flexibility for creating waveform effects,
+     * allowing control over vibration amplitude and frequency via smooth transitions between
+     * values. The waveform will start the first transition from the vibrator off state, using
+     * the same frequency of the first control point. To provide a different initial vibration
+     * frequency, use {@link #startWaveformEnvelope(float)}.
+     *
+     * <p>Note: To check whether waveform envelope effects are supported, use
+     * {@link Vibrator#areEnvelopeEffectsSupported()}.
+     *
+     * @see VibrationEffect.WaveformEnvelopeBuilder
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    @NonNull
+    public static VibrationEffect.WaveformEnvelopeBuilder startWaveformEnvelope() {
+        return new WaveformEnvelopeBuilder();
+    }
+
+    /**
+     * Start building a waveform vibration with an initial frequency.
+     *
+     * <p>The waveform envelope builder offers more flexibility for creating waveform effects,
+     * allowing control over vibration amplitude and frequency via smooth transitions between
+     * values.
+     *
+     * <p>This is the same as {@link #startWaveformEnvelope()}, but the waveform will start
+     * vibrating at given frequency, in hertz, while it transitions to the new amplitude and
+     * frequency of the first control point.
+     *
+     * <p>Note: To check whether waveform envelope effects are supported, use
+     * {@link Vibrator#areEnvelopeEffectsSupported()}.
+     *
+     * @param initialFrequencyHz The starting frequency of the vibration, in hertz. Must be greater
+     *                           than zero.
+     *
+     * @see VibrationEffect.WaveformEnvelopeBuilder
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    @NonNull
+    public static VibrationEffect.WaveformEnvelopeBuilder startWaveformEnvelope(
+            @FloatRange(from = 0) float initialFrequencyHz) {
+        return new WaveformEnvelopeBuilder(initialFrequencyHz);
+    }
+
+    /**
+     * A builder for waveform effects described by its envelope.
+     *
+     * <p>Waveform effect envelopes are defined by one or more control points describing a target
+     * vibration amplitude and frequency, and a duration to reach those targets. The vibrator
+     * will perform smooth transitions between control points.
+     *
+     * <p>For example, the following code ramps a vibrator from off to full amplitude at 120Hz over
+     * 100ms, holds that state for 200ms, and then ramps back down over 100ms:
+     *
+     * <pre>{@code
+     * VibrationEffect effect = VibrationEffect.startWaveformEnvelope()
+     *     .addControlPoint(1.0f, 120f, 100)
+     *     .addControlPoint(1.0f, 120f, 200)
+     *     .addControlPoint(0.0f, 120f, 100)
+     *     .build();
+     * }</pre>
+     *
+     * <p>It is crucial to ensure that the frequency range used in your effect is compatible with
+     * the device's capabilities. The framework will not play any frequencies that fall partially
+     * or completely outside the device's supported range. It will also not attempt to correct or
+     * modify these frequencies.
+     *
+     * <p>Therefore, it is strongly recommended that you design your haptic effects with the
+     * device's frequency profile in mind. You can obtain the supported frequency range and other
+     * relevant frequency-related information by getting the
+     * {@link android.os.vibrator.VibratorFrequencyProfile} using the
+     * {@link Vibrator#getFrequencyProfile()} method.
+     *
+     * <p>In addition to these limitations, when designing vibration patterns, it is important to
+     * consider the physical limitations of the vibration actuator. These limitations include
+     * factors such as the maximum number of control points allowed in an envelope effect, the
+     * minimum and maximum durations permitted for each control point, and the maximum overall
+     * duration of the effect. If a pattern exceeds the maximum number of allowed control points,
+     * the framework will automatically break down the effect to ensure it plays correctly.
+     *
+     * <p>You can use the following APIs to obtain these limits:
+     * <ul>
+     * <li>Maximum envelope control points: {@link Vibrator#getMaxEnvelopeEffectSize()}</li>
+     * <li>Minimum control point duration:
+     * {@link Vibrator#getMinEnvelopeEffectControlPointDurationMillis()}</li>
+     * <li>Maximum control point duration:
+     * {@link Vibrator#getMaxEnvelopeEffectControlPointDurationMillis()}</li>
+     * <li>Maximum total effect duration: {@link Vibrator#getMaxEnvelopeEffectDurationMillis()}</li>
+     * </ul>
+     *
+     * @see VibrationEffect#startWaveformEnvelope()
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public static final class WaveformEnvelopeBuilder {
+
+        private ArrayList<PwleSegment> mSegments = new ArrayList<>();
+        private float mLastAmplitude = 0f;
+        private float mLastFrequencyHz = 0f;
+
+        private WaveformEnvelopeBuilder() {}
+
+        private WaveformEnvelopeBuilder(float initialFrequency) {
+            mLastFrequencyHz = initialFrequency;
+        }
+
+        /**
+         * Adds a new control point to the end of this waveform envelope.
+         *
+         * <p>Amplitude defines the vibrator's strength at this frequency, ranging from 0 (off) to 1
+         * (maximum achievable strength). This value scales linearly with output strength, not
+         * perceived intensity. It's determined by the actuator response curve.
+         *
+         * <p>Frequency must be greater than zero and within the supported range. To determine
+         * the supported range, use {@link Vibrator#getFrequencyProfile()}. This method returns a
+         * {@link android.os.vibrator.VibratorFrequencyProfile} object, which contains the
+         * minimum and maximum frequencies, among other frequency-related information. Creating
+         * effects using frequencies outside this range will result in the vibration not playing.
+         *
+         * <p>Time specifies the duration (in milliseconds) for the vibrator to smoothly transition
+         * from the previous control point to this new one. It must be greater than zero. To
+         * transition as quickly as possible, use
+         * {@link Vibrator#getMinEnvelopeEffectControlPointDurationMillis()}.
+         *
+         * @param amplitude   The amplitude value between 0 and 1, inclusive. 0 represents the
+         *                    vibrator being off, and 1 represents the maximum achievable amplitude
+         *                    at this frequency.
+         * @param frequencyHz The frequency in Hz, must be greater than zero.
+         * @param timeMillis  The transition time in milliseconds.
+         */
+        @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+        @SuppressWarnings("MissingGetterMatchingBuilder") // No getters to segments once created.
+        @NonNull
+        public WaveformEnvelopeBuilder addControlPoint(
+                @FloatRange(from = 0, to = 1) float amplitude,
+                @FloatRange(from = 0) float frequencyHz, int timeMillis) {
+
+            if (mLastFrequencyHz == 0) {
+                mLastFrequencyHz = frequencyHz;
+            }
+
+            mSegments.add(new PwleSegment(mLastAmplitude, amplitude, mLastFrequencyHz, frequencyHz,
+                    timeMillis));
+
+            mLastAmplitude = amplitude;
+            mLastFrequencyHz = frequencyHz;
+
+            return this;
+        }
+
+        /**
+         * Build the waveform as a single {@link VibrationEffect}.
+         *
+         * <p>The {@link WaveformEnvelopeBuilder} object is still valid after this call, so you can
+         * continue adding more primitives to it and generating more {@link VibrationEffect}s by
+         * calling this method again.
+         *
+         * @return The {@link VibrationEffect} resulting from the list of control points.
+         */
+        @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+        @NonNull
+        public VibrationEffect build() {
+            if (mSegments.isEmpty()) {
+                throw new IllegalStateException(
+                        "WaveformEnvelopeBuilder must have at least one control point to build.");
+            }
+            VibrationEffect effect = new Composed(mSegments, /* repeatIndex= */ -1);
+            effect.validate();
+            return effect;
+        }
+    }
+
+    /**
      * A builder for waveform haptic effects.
      *
      * <p>Waveform vibrations constitute of one or more timed transitions to new sets of vibration
@@ -1761,7 +2003,7 @@ public abstract class VibrationEffect implements Parcelable {
          * new value as fast as possible.
          *
          * <p>Vibration parameter values will be truncated to conform to the device capabilities
-         * according to the {@link android.os.vibrator.VibratorFrequencyProfile}.
+         * according to the {@link VibratorFrequencyProfileLegacy}.
          *
          * @param duration        The length of time this transition should take. Value must be
          *                        non-negative and will be truncated to milliseconds.
@@ -1792,7 +2034,7 @@ public abstract class VibrationEffect implements Parcelable {
          * new values as fast as possible.
          *
          * <p>Vibration parameters values will be truncated to conform to the device capabilities
-         * according to the {@link android.os.vibrator.VibratorFrequencyProfile}.
+         * according to the {@link VibratorFrequencyProfileLegacy}.
          *
          * @param duration         The length of time this transition should take. Value must be
          *                         non-negative and will be truncated to milliseconds.

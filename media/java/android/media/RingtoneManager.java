@@ -1089,7 +1089,24 @@ public class RingtoneManager {
         defaultRingtoneUri = ContentProvider.getUriWithoutUserId(defaultRingtoneUri);
         if (defaultRingtoneUri == null) {
             return -1;
-        } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_RINGTONE_URI)) {
+        }
+
+        if (Flags.enableRingtoneHapticsCustomization()
+                && Utils.hasVibration(defaultRingtoneUri)) {
+            // skip to check TYPE_ALARM because the customized haptic hasn't enabled in alarm
+            if (defaultRingtoneUri.toString()
+                    .contains(Settings.System.DEFAULT_RINGTONE_URI.toString())) {
+                return TYPE_RINGTONE;
+            } else if (defaultRingtoneUri.toString()
+                    .contains(Settings.System.DEFAULT_NOTIFICATION_URI.toString())) {
+                return TYPE_NOTIFICATION;
+            } else if (defaultRingtoneUri.toString()
+                    .contains(Settings.System.DEFAULT_ALARM_ALERT_URI.toString())) {
+                return TYPE_ALARM;
+            }
+        }
+
+        if (defaultRingtoneUri.equals(Settings.System.DEFAULT_RINGTONE_URI)) {
             return TYPE_RINGTONE;
         } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_NOTIFICATION_URI)) {
             return TYPE_NOTIFICATION;

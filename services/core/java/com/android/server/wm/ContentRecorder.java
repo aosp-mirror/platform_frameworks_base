@@ -23,7 +23,7 @@ import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.ViewProtoEnums.DISPLAY_STATE_OFF;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONTENT_RECORDING;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONTENT_RECORDING;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -285,6 +285,11 @@ final class ContentRecorder implements WindowContainerListener {
         }
     }
 
+    private boolean isDisplayReadyForMirroring() {
+        return mDisplayContent.getDisplayInfo().type != Display.TYPE_EXTERNAL
+                || mDisplayContent.mWmService.mDisplayManagerInternal.isDisplayReadyForMirroring(
+                        mDisplayContent.getDisplayId());
+    }
 
     /**
      * Ensure recording does not fall back to the display stack; ensure the recording is stopped
@@ -335,7 +340,7 @@ final class ContentRecorder implements WindowContainerListener {
             return;
         }
 
-        if (mContentRecordingSession.isWaitingForConsent()) {
+        if (mContentRecordingSession.isWaitingForConsent() || !isDisplayReadyForMirroring()) {
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING, "Content Recording: waiting to record, so do "
                     + "nothing");
             return;

@@ -117,6 +117,7 @@ public class InteractionJankMonitorTest {
 
         // Simulate a trace session and see if begin / end are invoked.
         assertThat(monitor.begin(mSurfaceControl, mActivity.getApplicationContext(),
+                mActivity.getMainThreadHandler(),
                 Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
         verify(tracker).begin();
         assertThat(monitor.end(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();

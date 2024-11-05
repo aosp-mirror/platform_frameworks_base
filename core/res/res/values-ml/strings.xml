@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ഓഫാണ്"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"എല്ലാ കലണ്ടറിലും"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ചില ശബ്‌ദങ്ങൾ മ്യൂട്ട് ചെയ്യുന്നു"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്, ഫാക്‌ടറി വിവര പുനഃസജ്ജീകരണം ചെയ്യുന്നതുവരെ ഇതു അസ്ഥിരമായിരിക്കാനിടയുണ്ട്."</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"സ്‌ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"സ്‌ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"സ്വകാര്യ സ്പേസിന്, ഇതിൽ സ്ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"സ്വകാര്യ സ്പേസ് ഇല്ലാതാക്കാൻ, ഈ ഉപകരണത്തിൽ സ്ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ലഭ്യമല്ല"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"കോളുകളും അറിയിപ്പുകളും വൈബ്രേറ്റ് ചെയ്യും"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"കോളുകളും അറിയിപ്പുകളും മ്യൂട്ട് ചെയ്യപ്പെടും"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"സിസ്‌റ്റത്തിലെ മാറ്റങ്ങൾ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ശല്യപ്പെടുത്തരുത്"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"പുതിയത്: അറിയിപ്പുകളെ \'ശല്യപ്പെടുത്തരുത്\' അദൃശ്യമാക്കുന്നു"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"കൂടുതലറിയാനും മാറ്റാനും ടാപ്പ് ചെയ്യുക."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"അറിയിപ്പ് ക്രമീകരണം അവലോകനം ചെയ്യുക"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 മുതൽ, നിങ്ങൾ ഇൻസ്‌റ്റാൾ ചെയ്യുന്ന ആപ്പുകൾക്ക് അറിയിപ്പുകൾ അയയ്‌ക്കാൻ നിങ്ങളുടെ അനുമതി വേണം. നിലവിലുള്ള ആപ്പുകൾക്ക് ഈ അനുമതി മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"പിന്നീട് ഓർമ്മിപ്പിക്കൂ"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"മൊബൈൽ അല്ലെങ്കിൽ വൈഫൈ നെറ്റ്‌വർക്ക് ഇല്ലാതെ സന്ദേശങ്ങൾ അയയ്ക്കുകയും സ്വീകരിക്കുകയും ചെയ്യുക"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ഇത് പ്രവർത്തിക്കുന്നത് എങ്ങനെയാണ്"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"തീർപ്പാക്കിയിട്ടില്ല..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ഇനി തിരിച്ചറിയാനാകില്ല."</string>
@@ -2449,7 +2455,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"സംഗീതം"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"കലണ്ടർ"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"കാൽക്കുലേറ്റർ"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"മാപ്പുകൾ"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ആപ്പുകൾ"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"നിങ്ങളുടെ ഫിംഗർപ്രിന്റുകൾ ഇനി തിരിച്ചറിയാനാകില്ല. ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
 </resources>

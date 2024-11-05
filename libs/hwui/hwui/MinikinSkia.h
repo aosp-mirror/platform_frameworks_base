@@ -32,7 +32,7 @@ class ANDROID_API MinikinFontSkia : public minikin::MinikinFont {
 public:
     MinikinFontSkia(sk_sp<SkTypeface> typeface, int sourceId, const void* fontData, size_t fontSize,
                     std::string_view filePath, int ttcIndex,
-                    const std::vector<minikin::FontVariation>& axes);
+                    const minikin::VariationSettings& axes);
 
     float GetHorizontalAdvance(uint32_t glyph_id, const minikin::MinikinPaint& paint,
                                const minikin::FontFakery& fakery) const override;
@@ -59,9 +59,9 @@ public:
     size_t GetFontSize() const;
     int GetFontIndex() const;
     const std::string& getFilePath() const { return mFilePath; }
-    const std::vector<minikin::FontVariation>& GetAxes() const;
+    const minikin::VariationSettings& GetAxes() const;
     std::shared_ptr<minikin::MinikinFont> createFontWithVariation(
-            const std::vector<minikin::FontVariation>&) const;
+            const minikin::VariationSettings&) const;
     int GetSourceId() const override { return mSourceId; }
 
     static uint32_t packFontFlags(const SkFont&);
@@ -80,7 +80,7 @@ private:
     const void* mFontData;
     size_t mFontSize;
     int mTtcIndex;
-    std::vector<minikin::FontVariation> mAxes;
+    minikin::VariationSettings mAxes;
     std::string mFilePath;
 };
 

@@ -103,11 +103,10 @@ public class AppOpsControllerTest extends SysuiTestCase {
     @Mock()
     private BroadcastDispatcher mDispatcher;
     @Mock(stubOnly = true)
-    private AudioManager.AudioRecordingCallback mRecordingCallback;
-    @Mock(stubOnly = true)
     private AudioRecordingConfiguration mPausedMockRecording;
 
     private AppOpsControllerImpl mController;
+    private AudioManager.AudioRecordingCallback mRecordingCallback;
     private TestableLooper mTestableLooper;
     private final FakeExecutor mBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -975,6 +974,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
     }
 
     private void verifyUnPausedSentActive(int micOpCode) {
+        // Setup stubs the initial active recording list with a single silenced client
         mController.addCallback(new int[]{micOpCode}, mCallback);
         mBgExecutor.runAllReady();
         mTestableLooper.processAllMessages();
@@ -982,11 +982,20 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME, true);
 
         mTestableLooper.processAllMessages();
-        mRecordingCallback.onRecordingConfigChanged(Collections.emptyList());
+
+        // Update with multiple recording configs, of which one is unsilenced
+        var mockARCUnsilenced = mock(AudioRecordingConfiguration.class);
+        when(mockARCUnsilenced.getClientUid()).thenReturn(TEST_UID);
+        when(mockARCUnsilenced.isClientSilenced()).thenReturn(false);
+
+        mRecordingCallback.onRecordingConfigChanged(List.of(
+                    mockARCUnsilenced, mPausedMockRecording));
 
         mTestableLooper.processAllMessages();
 
         verify(mCallback).onActiveStateChanged(micOpCode, TEST_UID, TEST_PACKAGE_NAME, true);
+        // For consistency since this runs in a loop
+        mController.removeCallback(new int[]{micOpCode}, mCallback);
     }
 
     private void verifyAudioPausedSentInactive(int micOpCode) {
@@ -997,11 +1006,16 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 TEST_PACKAGE_NAME, true);
         mTestableLooper.processAllMessages();
 
-        AudioRecordingConfiguration mockARC = mock(AudioRecordingConfiguration.class);
-        when(mockARC.getClientUid()).thenReturn(TEST_UID_OTHER);
-        when(mockARC.isClientSilenced()).thenReturn(true);
+        // Multiple recording configs, which are all silenced
+        AudioRecordingConfiguration mockARCOne = mock(AudioRecordingConfiguration.class);
+        when(mockARCOne.getClientUid()).thenReturn(TEST_UID_OTHER);
+        when(mockARCOne.isClientSilenced()).thenReturn(true);
 
-        mRecordingCallback.onRecordingConfigChanged(List.of(mockARC));
+        AudioRecordingConfiguration mockARCTwo = mock(AudioRecordingConfiguration.class);
+        when(mockARCTwo.getClientUid()).thenReturn(TEST_UID_OTHER);
+        when(mockARCTwo.isClientSilenced()).thenReturn(true);
+
+        mRecordingCallback.onRecordingConfigChanged(List.of(mockARCOne, mockARCTwo));
         mTestableLooper.processAllMessages();
 
         InOrder inOrder = inOrder(mCallback);
@@ -1009,6 +1023,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 micOpCode, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
         inOrder.verify(mCallback).onActiveStateChanged(
                 micOpCode, TEST_UID_OTHER, TEST_PACKAGE_NAME, false);
+        // For consistency since this runs in a loop
+        mController.removeCallback(new int[]{micOpCode}, mCallback);
     }
 
     private void verifySingleActiveOps(int op) {

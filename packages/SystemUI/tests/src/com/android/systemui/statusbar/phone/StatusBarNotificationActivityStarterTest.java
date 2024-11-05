@@ -35,7 +35,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -352,7 +351,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
-        verifyZeroInteractions(mContentIntent);
+        verifyNoMoreInteractions(mContentIntent);
 
         // Notification should not be cancelled.
         verify(mOnUserInteractionCallback, never())
@@ -385,7 +384,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
-        verifyZeroInteractions(mContentIntent);
+        verifyNoMoreInteractions(mContentIntent);
     }
 
     @Test

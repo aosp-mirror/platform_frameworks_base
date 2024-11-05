@@ -18,22 +18,18 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.scene.shared.model.Overlays
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
-import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.ui.viewmodel.dualShadeActions
+import com.android.systemui.shade.ui.viewmodel.singleShadeActions
+import com.android.systemui.shade.ui.viewmodel.splitShadeActions
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -64,16 +60,15 @@ constructor(
                 ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
                     buildList {
                             if (isCommunalAvailable) {
-                                add(Swipe.Left to Scenes.Communal)
+                                add(Swipe.Start to Scenes.Communal)
                             }
 
                             add(Swipe.Up to if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer)
 
                             addAll(
                                 when (shadeMode) {
-                                    ShadeMode.Single -> fullscreenShadeActions()
-                                    ShadeMode.Split ->
-                                        fullscreenShadeActions(transitionKey = ToSplitShade)
+                                    ShadeMode.Single -> singleShadeActions()
+                                    ShadeMode.Split -> splitShadeActions()
                                     ShadeMode.Dual -> dualShadeActions()
                                 }
                             )
@@ -82,37 +77,6 @@ constructor(
                 }
             }
             .collect { setActions(it) }
-    }
-
-    private fun fullscreenShadeActions(
-        transitionKey: TransitionKey? = null
-    ): Array<Pair<UserAction, UserActionResult>> {
-        val notifShadeSceneKey = UserActionResult(SceneFamilies.NotifShade, transitionKey)
-        val qsShadeSceneKey = UserActionResult(SceneFamilies.QuickSettings, transitionKey)
-        return arrayOf(
-            // Swiping down, not from the edge, always goes to shade.
-            Swipe.Down to notifShadeSceneKey,
-            swipeDown(pointerCount = 2) to notifShadeSceneKey,
-            // Swiping down from the top edge goes to QS.
-            swipeDownFromTop(pointerCount = 1) to qsShadeSceneKey,
-            swipeDownFromTop(pointerCount = 2) to qsShadeSceneKey,
-        )
-    }
-
-    private fun dualShadeActions(): Array<Pair<UserAction, UserActionResult>> {
-        return arrayOf(
-            Swipe.Down to Overlays.NotificationsShade,
-            Swipe(direction = SwipeDirection.Down, fromSource = SceneContainerEdge.TopRight) to
-                Overlays.QuickSettingsShade,
-        )
-    }
-
-    private fun swipeDownFromTop(pointerCount: Int): Swipe {
-        return Swipe(SwipeDirection.Down, fromSource = Edge.Top, pointerCount = pointerCount)
-    }
-
-    private fun swipeDown(pointerCount: Int): Swipe {
-        return Swipe(SwipeDirection.Down, pointerCount = pointerCount)
     }
 
     @AssistedFactory

@@ -17,6 +17,8 @@
 package android.nfc;
 
 import android.content.ComponentName;
+import android.nfc.INfcEventListener;
+
 import android.nfc.cardemulation.AidGroup;
 import android.nfc.cardemulation.ApduServiceInfo;
 import android.os.RemoteCallback;
@@ -51,4 +53,11 @@ interface INfcCardEmulation
     void overrideRoutingTable(int userHandle, String protocol, String technology, in String pkg);
     void recoverRoutingTable(int userHandle);
     boolean isEuiccSupported();
+    void setAutoChangeStatus(boolean state);
+    boolean isAutoChangeEnabled();
+    List<String> getRoutingStatus();
+    void overwriteRoutingTable(int userHandle, String emptyAid, String protocol, String tech, String sc);
+
+    void registerNfcEventListener(in INfcEventListener listener);
+    void unregisterNfcEventListener(in INfcEventListener listener);
 }

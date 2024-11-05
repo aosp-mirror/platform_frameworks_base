@@ -18,10 +18,20 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -30,18 +40,25 @@ import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.Adjustment;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 
 import com.android.server.UiServiceTestCase;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     @Test
     public void testExtractsAdjustment() {
@@ -109,6 +126,44 @@ public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
         assertTrue(r.getGroupKey().contains(GroupHelper.AUTOGROUP_KEY));
         assertEquals(people, r.getPeopleOverride());
         assertEquals(snoozeCriteria, r.getSnoozeCriteria());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION, FLAG_NOTIFICATION_FORCE_GROUPING})
+    public void testClassificationAdjustments_triggerRegrouping() {
+        GroupHelper groupHelper = mock(GroupHelper.class);
+        NotificationAdjustmentExtractor extractor = new NotificationAdjustmentExtractor();
+        extractor.setGroupHelper(groupHelper);
+
+        NotificationRecord r = generateRecord();
+
+        Bundle classificationAdj = new Bundle();
+        classificationAdj.putParcelable(Adjustment.KEY_TYPE, mock(NotificationChannel.class));
+        Adjustment adjustment = new Adjustment("pkg", r.getKey(), classificationAdj, "", 0);
+        r.addAdjustment(adjustment);
+
+        RankingReconsideration regroupingTask = extractor.process(r);
+        assertThat(regroupingTask).isNotNull();
+        regroupingTask.applyChangesLocked(r);
+        verify(groupHelper, times(1)).onChannelUpdated(r);
+    }
+
+    @Test
+    @DisableFlags({FLAG_NOTIFICATION_CLASSIFICATION, FLAG_NOTIFICATION_FORCE_GROUPING})
+    public void testClassificationAdjustments_notTriggerRegrouping_flagsDisabled() {
+        GroupHelper groupHelper = mock(GroupHelper.class);
+        NotificationAdjustmentExtractor extractor = new NotificationAdjustmentExtractor();
+        extractor.setGroupHelper(groupHelper);
+
+        NotificationRecord r = generateRecord();
+
+        Bundle classificationAdj = new Bundle();
+        classificationAdj.putParcelable(Adjustment.KEY_TYPE, mock(NotificationChannel.class));
+        Adjustment adjustment = new Adjustment("pkg", r.getKey(), classificationAdj, "", 0);
+        r.addAdjustment(adjustment);
+
+        RankingReconsideration regroupingTask = extractor.process(r);
+        assertThat(regroupingTask).isNull();
     }
 
     private NotificationRecord generateRecord() {

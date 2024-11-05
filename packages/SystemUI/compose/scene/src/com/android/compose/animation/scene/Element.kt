@@ -52,6 +52,9 @@ import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
+import com.android.compose.animation.scene.transformation.TransformationWithRange
+import com.android.compose.modifiers.thenIf
+import com.android.compose.ui.graphics.drawInContainer
 import com.android.compose.ui.util.lerp
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -146,8 +149,57 @@ internal fun Modifier.element(
     // TODO(b/341072461): Revert this and read the current transitions in ElementNode directly once
     // we can ensure that SceneTransitionLayoutImpl will compose new contents first.
     val currentTransitionStates = layoutImpl.state.transitionStates
-    return then(ElementModifier(layoutImpl, currentTransitionStates, content, key))
+    return thenIf(layoutImpl.state.isElevationPossible(content.key, key)) {
+            Modifier.maybeElevateInContent(layoutImpl, content, key, currentTransitionStates)
+        }
+        .then(ElementModifier(layoutImpl, currentTransitionStates, content, key))
         .testTag(key.testTag)
+}
+
+private fun Modifier.maybeElevateInContent(
+    layoutImpl: SceneTransitionLayoutImpl,
+    content: Content,
+    key: ElementKey,
+    transitionStates: List<TransitionState>,
+): Modifier {
+    fun isSharedElement(
+        stateByContent: Map<ContentKey, Element.State>,
+        transition: TransitionState.Transition,
+    ): Boolean {
+        fun inFromContent() = transition.fromContent in stateByContent
+        fun inToContent() = transition.toContent in stateByContent
+        fun inCurrentScene() = transition.currentScene in stateByContent
+
+        return if (transition is TransitionState.Transition.ReplaceOverlay) {
+            (inFromContent() && (inToContent() || inCurrentScene())) ||
+                (inToContent() && inCurrentScene())
+        } else {
+            inFromContent() && inToContent()
+        }
+    }
+
+    return drawInContainer(
+        content.containerState,
+        enabled = {
+            val stateByContent = layoutImpl.elements.getValue(key).stateByContent
+            val state = elementState(transitionStates, isInContent = { it in stateByContent })
+
+            state is TransitionState.Transition &&
+                state.transformationSpec
+                    .transformations(key, content.key)
+                    .shared
+                    ?.transformation
+                    ?.elevateInContent == content.key &&
+                isSharedElement(stateByContent, state) &&
+                isSharedElementEnabled(key, state) &&
+                shouldPlaceElement(
+                    layoutImpl,
+                    content.key,
+                    layoutImpl.elements.getValue(key),
+                    state,
+                )
+        },
+    )
 }
 
 /**
@@ -813,6 +865,10 @@ private fun shouldPlaceElement(
     element: Element,
     elementState: TransitionState,
 ): Boolean {
+    if (element.key.placeAllCopies) {
+        return true
+    }
+
     val transition =
         when (elementState) {
             is TransitionState.Idle -> {
@@ -847,7 +903,7 @@ private fun shouldPlaceElement(
     }
 
     val sharedTransformation = sharedElementTransformation(element.key, transition)
-    if (sharedTransformation?.enabled == false) {
+    if (sharedTransformation?.transformation?.enabled == false) {
         return true
     }
 
@@ -900,13 +956,13 @@ private fun isSharedElementEnabled(
     element: ElementKey,
     transition: TransitionState.Transition,
 ): Boolean {
-    return sharedElementTransformation(element, transition)?.enabled ?: true
+    return sharedElementTransformation(element, transition)?.transformation?.enabled ?: true
 }
 
 internal fun sharedElementTransformation(
     element: ElementKey,
     transition: TransitionState.Transition,
-): SharedElementTransformation? {
+): TransformationWithRange<SharedElementTransformation>? {
     val transformationSpec = transition.transformationSpec
     val sharedInFromContent =
         transformationSpec.transformations(element, transition.fromContent).shared
@@ -1190,7 +1246,7 @@ private inline fun <T> computeValue(
     element: Element,
     transition: TransitionState.Transition?,
     contentValue: (Element.State) -> T,
-    transformation: (ElementTransformations) -> PropertyTransformation<T>?,
+    transformation: (ElementTransformations) -> TransformationWithRange<PropertyTransformation<T>>?,
     currentValue: () -> T,
     isSpecified: (T) -> Boolean,
     lerp: (T, T, Float) -> T,
@@ -1226,14 +1282,14 @@ private inline fun <T> computeValue(
                 checkNotNull(if (currentContent == toContent) toState else fromState)
             val idleValue = contentValue(overscrollState)
             val targetValue =
-                propertySpec.transform(
-                    layoutImpl,
-                    currentContent,
-                    element,
-                    overscrollState,
-                    transition,
-                    idleValue,
-                )
+                with(propertySpec.transformation) {
+                    layoutImpl.propertyTransformationScope.transform(
+                        currentContent,
+                        element.key,
+                        transition,
+                        idleValue,
+                    )
+                }
 
             // Make sure we don't read progress if values are the same and we don't need to
             // interpolate, so we don't invalidate the phase where this is read.
@@ -1321,24 +1377,26 @@ private inline fun <T> computeValue(
         val idleValue = contentValue(contentState)
         val isEntering = content == toContent
         val previewTargetValue =
-            previewTransformation.transform(
-                layoutImpl,
-                content,
-                element,
-                contentState,
-                transition,
-                idleValue,
-            )
+            with(previewTransformation.transformation) {
+                layoutImpl.propertyTransformationScope.transform(
+                    content,
+                    element.key,
+                    transition,
+                    idleValue,
+                )
+            }
 
         val targetValueOrNull =
-            transformation?.transform(
-                layoutImpl,
-                content,
-                element,
-                contentState,
-                transition,
-                idleValue,
-            )
+            transformation?.let { transformation ->
+                with(transformation.transformation) {
+                    layoutImpl.propertyTransformationScope.transform(
+                        content,
+                        element.key,
+                        transition,
+                        idleValue,
+                    )
+                }
+            }
 
         // Make sure we don't read progress if values are the same and we don't need to interpolate,
         // so we don't invalidate the phase where this is read.
@@ -1405,7 +1463,14 @@ private inline fun <T> computeValue(
 
     val idleValue = contentValue(contentState)
     val targetValue =
-        transformation.transform(layoutImpl, content, element, contentState, transition, idleValue)
+        with(transformation.transformation) {
+            layoutImpl.propertyTransformationScope.transform(
+                content,
+                element.key,
+                transition,
+                idleValue,
+            )
+        }
 
     // Make sure we don't read progress if values are the same and we don't need to interpolate, so
     // we don't invalidate the phase where this is read.

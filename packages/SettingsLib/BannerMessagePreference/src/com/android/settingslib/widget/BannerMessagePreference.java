@@ -43,7 +43,7 @@ import com.android.settingslib.widget.preference.banner.R;
  * Banner message is a banner displaying important information (permission request, page error etc),
  * and provide actions for user to address. It requires a user action to be dismissed.
  */
-public class BannerMessagePreference extends Preference {
+public class BannerMessagePreference extends Preference implements GroupSectionDividerMixin {
 
     public enum AttentionLevel {
         HIGH(0, R.color.banner_background_attention_high, R.color.banner_accent_attention_high),

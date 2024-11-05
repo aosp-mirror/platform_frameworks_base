@@ -1338,7 +1338,7 @@
     <string name="network_available_sign_in" msgid="1520342291829283114">"Ingia katika mtandao"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
-    <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> haina uwezo wa kufikia intaneti"</string>
+    <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> haina intaneti"</string>
     <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Gusa ili upate chaguo"</string>
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mtandao wa simu hauna uwezo wa kufikia intaneti"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Mtandao hauna uwezo wa kufikia intaneti"</string>
@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Programu inazuia ombi la ruhusa kwa hivyo jibu lako haliwezi kuthibitishwa."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Gusa kipengele ili uanze kukitumia:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Chagua vipengele vya kutumia na kitufe cha zana za ufikivu"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Chagua vipengele vya kutumia kupitia njia ya mkato ya vitufe vya sauti"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Huduma ya <xliff:g id="SERVICE_NAME">%s</xliff:g> imezimwa"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Kubadilisha njia za mkato"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Nimemaliza"</string>
@@ -1944,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Imezimwa"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Kalenda yoyote"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> inazima baadhi ya sauti"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Kuna hitilafu ya ndani ya kifaa chako, na huenda kisiwe thabiti mpaka urejeshe mipangilio ya kiwandani."</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Weka mbinu ya kufunga skrini"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Weka mbinu ya kufunga skrini"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ili utumie sehemu ya faragha, weka mbinu ya kufunga skrini kwenye kifaa hiki"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Ili ufute sehemu ya faragha, weka mbinu ya kufunga skrini kwenye kifaa hiki"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Programu haipatikani"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> haipatikani hivi sasa."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> haipatikani"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Itatetema arifa ikitumwa au simu ikipigwa"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Haitatoa mlio arifa ikitumwa au simu ikipigwa"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Mabadiliko kwenye mfumo"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Usinisumbue"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Mpya: Kipengele cha Usinisumbue kinaficha arifa"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Gusa ili upate maelezo zaidi na ubadilishe."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Kipengele cha Usinisumbue kimebadilishwa"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Kagua mipangilio ya arifa"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Kuanzia Android toleo la 13, programu unazosakinisha zitahitaji ruhusa yako ili zitume arifa. Gusa ili ubadilishe ruhusa hii kwa programu zilizopo."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Nikumbushe baadaye"</string>
@@ -2408,9 +2405,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Muundo wa kibodi umewekwa kuwa <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Gusa ili ubadilishe."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Mipangilio ya kibodi halisi imewekwa"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Gusa ili uangalie kibodi"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Wa faragha"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Faragha"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Nakala"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Wa kazini"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Kazini"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Wa 2 wa Kazini"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Wa 3 wa Kazini"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Jaribio"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Tuma na upokee ujumbe bila kutumia mtandao wa simu wala Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Fungua Programu ya Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Utaratibu wake"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Inashughulikiwa..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Weka tena mipangilio ya Kufungua kwa Alama ya Kidole"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> haitambuliki tena."</string>

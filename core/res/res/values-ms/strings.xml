@@ -1735,7 +1735,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"HIDUP"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"MATI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Benarkan <xliff:g id="SERVICE">%1$s</xliff:g> mempunyai kawalan penuh atas peranti anda?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda berkaitan dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang berkaitan dengan keperluan kebolehaksesan anda tetapi bukan untuk kebanyakan apl."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Melihat dan melaksanakan tindakan"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Mati"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Sebarang kalendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> meredamkan sesetengah bunyi"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Terdapat masalah dalaman dengan peranti anda. Peranti mungkin tidak stabil sehingga anda membuat tetapan semula data kilang."</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Tetapkan kunci skrin"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Tetapkan kunci skrin"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Tetapkan kunci skrin pada peranti untuk menggunakan ruang privasi"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Untuk memadamkan ruang peribadi, tetapkan kunci skrin pada peranti ini"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Apl tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia sekarang."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> tidak tersedia"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Panggilan dan pemberitahuan akan bergetar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Panggilan dan pemberitahuan akan diredamkan"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Perubahan sistem"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Jangan Ganggu"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Baharu: Jangan Ganggu menyembunyikan pemberitahuan"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ketik untuk mengetahui lebih lanjut dan menukar tetapan."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Jangan Ganggu telah berubah"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ketik untuk menyemak item yang disekat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Semak tetapan pemberitahuan"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Bermula dengan Android 13, apl yang anda pasang memerlukan kebenaran anda untuk menghantar pemberitahuan. Ketik untuk menukar kebenaran ini bagi apl sedia ada."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ingatkan saya nanti"</string>
@@ -2418,7 +2416,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Ruang persendirian"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Umum"</string>
-    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Ruang privasi"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Ruang persendirian"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Kandungan pemberitahuan yang sensitif disembunyikan"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Kandungan apl disembunyikan daripada perkongsian skrin untuk keselamatan"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Hantar dan terima mesej tanpa rangkaian mudah alih atau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara ciri ini berfungsi"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Belum selesai..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Sediakan Buka Kunci Cap Jari sekali lagi"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dicam lagi."</string>

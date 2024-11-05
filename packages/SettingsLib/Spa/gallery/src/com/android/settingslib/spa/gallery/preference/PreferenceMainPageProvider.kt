@@ -17,42 +17,46 @@
 package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
-import com.android.settingslib.spa.framework.common.SettingsEntry
-import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
+import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
-import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.scaffold.RegularScaffold
+import com.android.settingslib.spa.widget.ui.Category
 
 private const val TITLE = "Category: Preference"
 
 object PreferenceMainPageProvider : SettingsPageProvider {
     override val name = "PreferenceMain"
-    private val owner = createSettingsPage()
 
-    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        return listOf(
-            PreferencePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            SwitchPreferencePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            MainSwitchPreferencePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            ListPreferencePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            TwoTargetSwitchPreferencePageProvider.buildInjectEntry()
-                .setLink(fromPage = owner).build(),
-        )
-    }
-
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = owner)
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
+    @Composable
+    override fun Page(arguments: Bundle?) {
+        RegularScaffold(TITLE) {
+            Category {
+                PreferencePageProvider.Entry()
+                ListPreferencePageProvider.Entry()
+                CheckBoxPreferencePageProvider.Entry()
             }
+            Category {
+                SwitchPreferencePageProvider.Entry()
+                MainSwitchPreferencePageProvider.Entry()
+                TwoTargetSwitchPreferencePageProvider.Entry()
+                TwoTargetButtonPreferencePageProvider.Entry()
+            }
+            Category {
+                ZeroStatePreferencePageProvider.Entry()
+                IntroPreferencePageProvider.Entry()
+                TopIntroPreferencePageProvider.Entry()
+            }
+        }
     }
 
-    override fun getTitle(arguments: Bundle?): String {
-        return TITLE
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
     }
 }

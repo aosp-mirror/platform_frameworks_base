@@ -12,6 +12,10 @@
         <option name="run-command" value="setprop debug.wm.disable_deprecated_target_sdk_dialog 1"/>
         <!-- keeps the screen on during tests -->
         <option name="screen-always-on" value="on"/>
+        <!-- Turns off Wi-fi -->
+        <option name="wifi" value="off"/>
+        <!-- Turns off Bluetooth -->
+        <option name="bluetooth" value="off"/>
         <!-- enable AOD -->
         <option name="set-secure-setting" key="doze_always_on" value="1" />
         <!-- prevents the phone from restarting -->

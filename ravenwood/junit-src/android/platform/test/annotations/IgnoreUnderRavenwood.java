@@ -51,4 +51,9 @@ public @interface IgnoreUnderRavenwood {
      * General free-form description of why this test is being ignored.
      */
     String reason() default "";
+
+    /**
+     * Tracking bug number, if any.
+     */
+    long bug() default 0;
 }

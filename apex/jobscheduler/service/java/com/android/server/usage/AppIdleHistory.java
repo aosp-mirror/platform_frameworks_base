@@ -629,14 +629,15 @@ public class AppIdleHistory {
     }
 
     /**
-     * Returns the index in the arrays of screenTimeThresholds and elapsedTimeThresholds
-     * that corresponds to how long since the app was used.
+     * Returns the index in the array of elapsedTimeThresholds that corresponds to
+     * how long since the app was used.
      * @param packageName
      * @param userId
      * @param elapsedRealtime current time
-     * @param screenTimeThresholds Array of screen times, in ascending order, first one is 0
+     * @param screenTimeThresholds Array of screen times, in ascending order,
+     *        first one is 0 (this will not be used any more)
      * @param elapsedTimeThresholds Array of elapsed time, in ascending order, first one is 0
-     * @return The index whose values the app's used time exceeds (in both arrays) or {@code -1} to
+     * @return The index whose values the app's used time exceeds or {@code -1} to
      *         indicate that the app has never been used.
      */
     int getThresholdIndex(String packageName, int userId, long elapsedRealtime,
@@ -646,7 +647,7 @@ public class AppIdleHistory {
                 elapsedRealtime, false);
         // If we don't have any state for the app, assume never used
         if (appUsageHistory == null || appUsageHistory.lastUsedElapsedTime < 0
-                || appUsageHistory.lastUsedScreenTime < 0) {
+                || (!Flags.screenTimeBypass() && appUsageHistory.lastUsedScreenTime < 0)) {
             return -1;
         }
 
@@ -659,7 +660,7 @@ public class AppIdleHistory {
         if (DEBUG) Slog.d(TAG, packageName + " screenOn=" + screenOnDelta
                 + ", elapsed=" + elapsedDelta);
         for (int i = screenTimeThresholds.length - 1; i >= 0; i--) {
-            if (screenOnDelta >= screenTimeThresholds[i]
+            if ((Flags.screenTimeBypass() || screenOnDelta >= screenTimeThresholds[i])
                 && elapsedDelta >= elapsedTimeThresholds[i]) {
                 return i;
             }

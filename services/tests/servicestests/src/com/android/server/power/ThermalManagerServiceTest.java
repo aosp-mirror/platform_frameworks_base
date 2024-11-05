@@ -296,11 +296,11 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
-    public void testNotify() throws RemoteException {
+    public void testNotifyThrottling() throws RemoteException {
         int status = Temperature.THROTTLING_SEVERE;
         // Should only notify event not status
         Temperature newBattery = new Temperature(50, Temperature.TYPE_BATTERY, "batt", status);
-        mFakeHal.mCallback.onValues(newBattery);
+        mFakeHal.mCallback.onTemperatureChanged(newBattery);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).notifyThrottling(newBattery);
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
@@ -312,7 +312,7 @@ public class ThermalManagerServiceTest {
         resetListenerMock();
         // Notify both event and status
         Temperature newSkin = new Temperature(50, Temperature.TYPE_SKIN, "skin1", status);
-        mFakeHal.mCallback.onValues(newSkin);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).notifyThrottling(newSkin);
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
@@ -325,7 +325,7 @@ public class ThermalManagerServiceTest {
         // Back to None, should only notify event not status
         status = Temperature.THROTTLING_NONE;
         newBattery = new Temperature(50, Temperature.TYPE_BATTERY, "batt", status);
-        mFakeHal.mCallback.onValues(newBattery);
+        mFakeHal.mCallback.onTemperatureChanged(newBattery);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).notifyThrottling(newBattery);
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
@@ -337,7 +337,7 @@ public class ThermalManagerServiceTest {
         resetListenerMock();
         // Should also notify status
         newSkin = new Temperature(50, Temperature.TYPE_SKIN, "skin1", status);
-        mFakeHal.mCallback.onValues(newSkin);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).notifyThrottling(newSkin);
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
@@ -362,7 +362,7 @@ public class ThermalManagerServiceTest {
     public void testGetCurrentStatus() throws RemoteException {
         int status = Temperature.THROTTLING_SEVERE;
         Temperature newSkin = new Temperature(100, Temperature.TYPE_SKIN, "skin1", status);
-        mFakeHal.mCallback.onValues(newSkin);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
         assertEquals(status, mService.mService.getCurrentThermalStatus());
         int battStatus = Temperature.THROTTLING_EMERGENCY;
         Temperature newBattery = new Temperature(60, Temperature.TYPE_BATTERY, "batt", battStatus);
@@ -373,11 +373,11 @@ public class ThermalManagerServiceTest {
     public void testThermalShutdown() throws RemoteException {
         int status = Temperature.THROTTLING_SHUTDOWN;
         Temperature newSkin = new Temperature(100, Temperature.TYPE_SKIN, "skin1", status);
-        mFakeHal.mCallback.onValues(newSkin);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
         verify(mIPowerManagerMock, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).shutdown(false, PowerManager.SHUTDOWN_THERMAL_STATE, false);
         Temperature newBattery = new Temperature(60, Temperature.TYPE_BATTERY, "batt", status);
-        mFakeHal.mCallback.onValues(newBattery);
+        mFakeHal.mCallback.onTemperatureChanged(newBattery);
         verify(mIPowerManagerMock, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).shutdown(false, PowerManager.SHUTDOWN_BATTERY_THERMAL_STATE, false);
     }
@@ -419,15 +419,35 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
-    public void testTemperatureWatcherUpdateSevereThresholds() throws RemoteException {
+    public void testTemperatureWatcherUpdateSevereThresholds() {
         TemperatureWatcher watcher = mService.mTemperatureWatcher;
-        watcher.mSevereThresholds.erase();
-        watcher.updateThresholds();
-        assertEquals(1, watcher.mSevereThresholds.size());
-        assertEquals("skin1", watcher.mSevereThresholds.keyAt(0));
-        Float threshold = watcher.mSevereThresholds.get("skin1");
-        assertNotNull(threshold);
-        assertEquals(40.0f, threshold, 0.0f);
+        synchronized (watcher.mSamples) {
+            watcher.mSevereThresholds.erase();
+            watcher.getAndUpdateThresholds();
+            assertEquals(1, watcher.mSevereThresholds.size());
+            assertEquals("skin1", watcher.mSevereThresholds.keyAt(0));
+            Float threshold = watcher.mSevereThresholds.get("skin1");
+            assertNotNull(threshold);
+            assertEquals(40.0f, threshold, 0.0f);
+            assertArrayEquals("Got" + Arrays.toString(watcher.mHeadroomThresholds),
+                    new float[]{Float.NaN, 0.6667f, 0.8333f, 1.0f, 1.166f, 1.3333f,
+                            1.5f},
+                    watcher.mHeadroomThresholds, 0.01f);
+
+            TemperatureThreshold newThreshold = new TemperatureThreshold();
+            newThreshold.name = "skin1";
+            newThreshold.hotThrottlingThresholds = new float[] {
+                    Float.NaN, 44.0f, 47.0f, 50.0f, Float.NaN, Float.NaN, Float.NaN
+            };
+            mFakeHal.mCallback.onThresholdChanged(newThreshold);
+            threshold = watcher.mSevereThresholds.get("skin1");
+            assertNotNull(threshold);
+            assertEquals(50.0f, threshold, 0.0f);
+            assertArrayEquals("Got" + Arrays.toString(watcher.mHeadroomThresholds),
+                    new float[]{Float.NaN, 0.8f, 0.9f, 1.0f, Float.NaN, Float.NaN,
+                            Float.NaN},
+                    watcher.mHeadroomThresholds, 0.01f);
+        }
     }
 
     @Test
@@ -436,25 +456,19 @@ public class ThermalManagerServiceTest {
         synchronized (watcher.mSamples) {
             Arrays.fill(watcher.mHeadroomThresholds, Float.NaN);
         }
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.LIGHT, 40, 49);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.MODERATE, 46, 49);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.SEVERE, 49, 49);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.CRITICAL, 64, 49);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.EMERGENCY, 70, 49);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.SHUTDOWN, 79, 49);
+        TemperatureThreshold threshold = new TemperatureThreshold();
+        threshold.hotThrottlingThresholds = new float[]{Float.NaN, 40, 46, 49, 64, 70, 79};
         synchronized (watcher.mSamples) {
+            watcher.updateTemperatureThresholdLocked(threshold, false /*override*/);
             assertArrayEquals(new float[]{Float.NaN, 0.7f, 0.9f, 1.0f, 1.5f, 1.7f, 2.0f},
                     watcher.mHeadroomThresholds, 0.01f);
         }
 
         // when another sensor reports different threshold, we expect to see smaller one to be used
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.LIGHT, 37, 52);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.MODERATE, 46, 52);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.SEVERE, 52, 52);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.CRITICAL, 64, 52);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.EMERGENCY, 100, 52);
-        watcher.updateHeadroomThreshold(ThrottlingSeverity.SHUTDOWN, 200, 52);
+        threshold = new TemperatureThreshold();
+        threshold.hotThrottlingThresholds = new float[]{Float.NaN, 37, 46, 52, 64, 100, 200};
         synchronized (watcher.mSamples) {
+            watcher.updateTemperatureThresholdLocked(threshold, false /*override*/);
             assertArrayEquals(new float[]{Float.NaN, 0.5f, 0.8f, 1.0f, 1.4f, 1.7f, 2.0f},
                     watcher.mHeadroomThresholds, 0.01f);
         }
@@ -486,7 +500,7 @@ public class ThermalManagerServiceTest {
         TemperatureWatcher watcher = mService.mTemperatureWatcher;
         ArrayList<TemperatureThreshold> thresholds = new ArrayList<>();
         mFakeHal.mTemperatureThresholdList = thresholds;
-        watcher.updateThresholds();
+        watcher.getAndUpdateThresholds();
         synchronized (watcher.mSamples) {
             assertArrayEquals(
                     new float[]{Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN,
@@ -501,7 +515,7 @@ public class ThermalManagerServiceTest {
         Arrays.fill(nanThresholds.hotThrottlingThresholds, Float.NaN);
         Arrays.fill(nanThresholds.coldThrottlingThresholds, Float.NaN);
         thresholds.add(nanThresholds);
-        watcher.updateThresholds();
+        watcher.getAndUpdateThresholds();
         synchronized (watcher.mSamples) {
             assertArrayEquals(
                     new float[]{Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN,

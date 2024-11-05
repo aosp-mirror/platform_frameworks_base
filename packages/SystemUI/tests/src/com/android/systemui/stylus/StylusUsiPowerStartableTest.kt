@@ -33,7 +33,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -81,7 +80,7 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
 
         startable.start()
 
-        verifyZeroInteractions(stylusManager)
+        verifyNoMoreInteractions(stylusManager)
     }
 
     @Test
@@ -109,7 +108,7 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
     fun onStylusAdded_external_noop() {
         startable.onStylusAdded(EXTERNAL_DEVICE_ID)
 
-        verifyZeroInteractions(stylusUsiPowerUi)
+        verifyNoMoreInteractions(stylusUsiPowerUi)
     }
 
     @Test

@@ -24,19 +24,23 @@ import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_R
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.window.DesktopModeFlags;
 import android.window.WindowContainerToken;
 
 import androidx.annotation.BinderThread;
@@ -51,13 +55,11 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.recents.IRecentsAnimationRunner;
-import com.android.wm.shell.shared.GroupedRecentTaskInfo;
+import com.android.wm.shell.shared.GroupedTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -80,14 +82,14 @@ import java.util.function.Consumer;
  * Manages the recent task list from the system, caching it as necessary.
  */
 public class RecentTasksController implements TaskStackListenerCallback,
-        RemoteCallable<RecentTasksController>, DesktopModeTaskRepository.ActiveTasksListener,
+        RemoteCallable<RecentTasksController>, DesktopRepository.ActiveTasksListener,
         TaskStackTransitionObserver.TaskStackTransitionObserverListener {
     private static final String TAG = RecentTasksController.class.getSimpleName();
 
     private final Context mContext;
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
-    private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
+    private final Optional<DesktopRepository> mDesktopRepository;
     private final ShellExecutor mMainExecutor;
     private final TaskStackListenerImpl mTaskStackListener;
     private final RecentTasksImpl mImpl = new RecentTasksImpl();
@@ -120,7 +122,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             TaskStackTransitionObserver taskStackTransitionObserver,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
@@ -128,7 +130,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             return null;
         }
         return new RecentTasksController(context, shellInit, shellController, shellCommandHandler,
-                taskStackListener, activityTaskManager, desktopModeTaskRepository,
+                taskStackListener, activityTaskManager, desktopRepository,
                 taskStackTransitionObserver, mainExecutor);
     }
 
@@ -138,7 +140,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             TaskStackTransitionObserver taskStackTransitionObserver,
             ShellExecutor mainExecutor) {
         mContext = context;
@@ -147,7 +149,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mActivityTaskManager = activityTaskManager;
         mPcFeatureEnabled = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mTaskStackListener = taskStackListener;
-        mDesktopModeTaskRepository = desktopModeTaskRepository;
+        mDesktopRepository = desktopRepository;
         mTaskStackTransitionObserver = taskStackTransitionObserver;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
@@ -167,7 +169,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mTaskStackListener.addListener(this);
-        mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTaskListener(this));
+        mDesktopRepository.ifPresent(it -> it.addActiveTaskListener(this));
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskStackTransitionObserver.addTaskStackTransitionObserverListener(this,
                     mMainExecutor);
@@ -288,6 +290,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     @Override
+    public void onTaskChangedThroughTransition(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        notifyTaskInfoChanged(taskInfo);
+    }
+
+    @Override
     public void onTaskMovedToFrontThroughTransition(
             ActivityManager.RunningTaskInfo runningTaskInfo) {
         notifyTaskMovedToFront(runningTaskInfo);
@@ -354,14 +361,28 @@ public class RecentTasksController implements TaskStackListenerCallback,
         }
     }
 
-    private void notifyTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
+    private void notifyTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         if (mListener == null
-                || !DesktopModeFlags.TASK_STACK_OBSERVER_IN_SHELL.isEnabled(mContext)
+                || !DesktopModeFlags.ENABLE_TASK_STACK_OBSERVER_IN_SHELL.isTrue()
                 || taskInfo.realActivity == null) {
             return;
         }
         try {
-            mListener.onTaskMovedToFront(taskInfo);
+            mListener.onTaskInfoChanged(taskInfo);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed call onTaskInfoChanged", e);
+        }
+    }
+
+    private void notifyTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mListener == null
+                || !DesktopModeFlags.ENABLE_TASK_STACK_OBSERVER_IN_SHELL.isTrue()
+                || taskInfo.realActivity == null) {
+            return;
+        }
+        try {
+            GroupedTaskInfo runningTask = GroupedTaskInfo.forFullscreenTasks(taskInfo);
+            mListener.onTaskMovedToFront(new GroupedTaskInfo[]{ runningTask });
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed call onTaskMovedToFront", e);
         }
@@ -370,7 +391,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private boolean shouldEnableRunningTasksForDesktopMode() {
         return mPcFeatureEnabled
                 || (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && DesktopModeFlags.TASKBAR_RUNNING_APPS.isEnabled(mContext));
+                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS.isTrue());
     }
 
     @VisibleForTesting
@@ -389,41 +410,51 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     @VisibleForTesting
-    ArrayList<GroupedRecentTaskInfo> getRecentTasks(int maxNum, int flags, int userId) {
+    ArrayList<GroupedTaskInfo> getRecentTasks(int maxNum, int flags, int userId) {
         // Note: the returned task list is from the most-recent to least-recent order
-        final List<ActivityManager.RecentTaskInfo> rawList = mActivityTaskManager.getRecentTasks(
+        final List<RecentTaskInfo> rawList = mActivityTaskManager.getRecentTasks(
                 maxNum, flags, userId);
 
         // Make a mapping of task id -> task info
-        final SparseArray<ActivityManager.RecentTaskInfo> rawMapping = new SparseArray<>();
+        final SparseArray<TaskInfo> rawMapping = new SparseArray<>();
         for (int i = 0; i < rawList.size(); i++) {
-            final ActivityManager.RecentTaskInfo taskInfo = rawList.get(i);
+            final TaskInfo taskInfo = rawList.get(i);
             rawMapping.put(taskInfo.taskId, taskInfo);
         }
 
-        ArrayList<ActivityManager.RecentTaskInfo> freeformTasks = new ArrayList<>();
+        ArrayList<TaskInfo> freeformTasks = new ArrayList<>();
         Set<Integer> minimizedFreeformTasks = new HashSet<>();
 
         int mostRecentFreeformTaskIndex = Integer.MAX_VALUE;
 
         // Pull out the pairs as we iterate back in the list
-        ArrayList<GroupedRecentTaskInfo> recentTasks = new ArrayList<>();
+        ArrayList<GroupedTaskInfo> recentTasks = new ArrayList<>();
         for (int i = 0; i < rawList.size(); i++) {
-            final ActivityManager.RecentTaskInfo taskInfo = rawList.get(i);
+            final RecentTaskInfo taskInfo = rawList.get(i);
             if (!rawMapping.contains(taskInfo.taskId)) {
                 // If it's not in the mapping, then it was already paired with another task
                 continue;
             }
 
             if (DesktopModeStatus.canEnterDesktopMode(mContext)
-                    && mDesktopModeTaskRepository.isPresent()
-                    && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
+                    && mDesktopRepository.isPresent()
+                    && mDesktopRepository.get().isActiveTask(taskInfo.taskId)) {
                 // Freeform tasks will be added as a separate entry
                 if (mostRecentFreeformTaskIndex == Integer.MAX_VALUE) {
                     mostRecentFreeformTaskIndex = recentTasks.size();
                 }
+                // If task has their app bounds set to null which happens after reboot, set the
+                // app bounds to persisted lastFullscreenBounds. Also set the position in parent
+                // to the top left of the bounds.
+                if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()
+                        && taskInfo.configuration.windowConfiguration.getAppBounds() == null) {
+                    taskInfo.configuration.windowConfiguration.setAppBounds(
+                            taskInfo.lastNonFullscreenBounds);
+                    taskInfo.positionInParent = new Point(taskInfo.lastNonFullscreenBounds.left,
+                            taskInfo.lastNonFullscreenBounds.top);
+                }
                 freeformTasks.add(taskInfo);
-                if (mDesktopModeTaskRepository.get().isMinimizedTask(taskInfo.taskId)) {
+                if (mDesktopRepository.get().isMinimizedTask(taskInfo.taskId)) {
                     minimizedFreeformTasks.add(taskInfo.taskId);
                 }
                 continue;
@@ -432,20 +463,20 @@ public class RecentTasksController implements TaskStackListenerCallback,
             final int pairedTaskId = mSplitTasks.get(taskInfo.taskId, INVALID_TASK_ID);
             if (pairedTaskId != INVALID_TASK_ID && rawMapping.contains(
                     pairedTaskId)) {
-                final ActivityManager.RecentTaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
+                final TaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
                 rawMapping.remove(pairedTaskId);
-                recentTasks.add(GroupedRecentTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
+                recentTasks.add(GroupedTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
                         mTaskSplitBoundsMap.get(pairedTaskId)));
             } else {
-                recentTasks.add(GroupedRecentTaskInfo.forSingleTask(taskInfo));
+                recentTasks.add(GroupedTaskInfo.forFullscreenTasks(taskInfo));
             }
         }
 
         // Add a special entry for freeform tasks
         if (!freeformTasks.isEmpty()) {
             recentTasks.add(mostRecentFreeformTaskIndex,
-                    GroupedRecentTaskInfo.forFreeformTasks(
-                            freeformTasks.toArray(new ActivityManager.RecentTaskInfo[0]),
+                    GroupedTaskInfo.forFreeformTasks(
+                            freeformTasks,
                             minimizedFreeformTasks));
         }
 
@@ -486,16 +517,16 @@ public class RecentTasksController implements TaskStackListenerCallback,
      * {@param ignoreTaskToken} if it is non-null.
      */
     @Nullable
-    public ActivityManager.RecentTaskInfo findTaskInBackground(ComponentName componentName,
+    public RecentTaskInfo findTaskInBackground(ComponentName componentName,
             int userId, @Nullable WindowContainerToken ignoreTaskToken) {
         if (componentName == null) {
             return null;
         }
-        List<ActivityManager.RecentTaskInfo> tasks = mActivityTaskManager.getRecentTasks(
+        List<RecentTaskInfo> tasks = mActivityTaskManager.getRecentTasks(
                 Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE,
                 ActivityManager.getCurrentUser());
         for (int i = 0; i < tasks.size(); i++) {
-            final ActivityManager.RecentTaskInfo task = tasks.get(i);
+            final RecentTaskInfo task = tasks.get(i);
             if (task.isVisible) {
                 continue;
             }
@@ -513,12 +544,12 @@ public class RecentTasksController implements TaskStackListenerCallback,
      * Find the background task that match the given taskId.
      */
     @Nullable
-    public ActivityManager.RecentTaskInfo findTaskInBackground(int taskId) {
-        List<ActivityManager.RecentTaskInfo> tasks = mActivityTaskManager.getRecentTasks(
+    public RecentTaskInfo findTaskInBackground(int taskId) {
+        List<RecentTaskInfo> tasks = mActivityTaskManager.getRecentTasks(
                 Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE,
                 ActivityManager.getCurrentUser());
         for (int i = 0; i < tasks.size(); i++) {
-            final ActivityManager.RecentTaskInfo task = tasks.get(i);
+            final RecentTaskInfo task = tasks.get(i);
             if (task.isVisible) {
                 continue;
             }
@@ -529,12 +560,20 @@ public class RecentTasksController implements TaskStackListenerCallback,
         return null;
     }
 
+    /**
+     * Remove the background task that match the given taskId. This will remove the task regardless
+     * of whether it's active or recent.
+     */
+    public boolean removeBackgroundTask(int taskId) {
+        return mActivityTaskManager.removeTask(taskId);
+    }
+
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(prefix + " mListener=" + mListener);
         pw.println(prefix + "Tasks:");
-        ArrayList<GroupedRecentTaskInfo> recentTasks = getRecentTasks(Integer.MAX_VALUE,
+        ArrayList<GroupedTaskInfo> recentTasks = getRecentTasks(Integer.MAX_VALUE,
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE, ActivityManager.getCurrentUser());
         for (int i = 0; i < recentTasks.size(); i++) {
             pw.println(innerPrefix + recentTasks.get(i));
@@ -548,9 +587,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private class RecentTasksImpl implements RecentTasks {
         @Override
         public void getRecentTasks(int maxNum, int flags, int userId, Executor executor,
-                Consumer<List<GroupedRecentTaskInfo>> callback) {
+                Consumer<List<GroupedTaskInfo>> callback) {
             mMainExecutor.execute(() -> {
-                List<GroupedRecentTaskInfo> tasks =
+                List<GroupedTaskInfo> tasks =
                         RecentTasksController.this.getRecentTasks(maxNum, flags, userId);
                 executor.execute(() -> callback.accept(tasks));
             });
@@ -614,8 +653,13 @@ public class RecentTasksController implements TaskStackListenerCallback,
             }
 
             @Override
-            public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
+            public void onTaskMovedToFront(GroupedTaskInfo[] taskInfo) {
                 mListener.call(l -> l.onTaskMovedToFront(taskInfo));
+            }
+
+            @Override
+            public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+                mListener.call(l -> l.onTaskInfoChanged(taskInfo));
             }
         };
 
@@ -651,17 +695,20 @@ public class RecentTasksController implements TaskStackListenerCallback,
         }
 
         @Override
-        public GroupedRecentTaskInfo[] getRecentTasks(int maxNum, int flags, int userId)
+        public GroupedTaskInfo[] getRecentTasks(int maxNum, int flags, int userId)
                 throws RemoteException {
             if (mController == null) {
                 // The controller is already invalidated -- just return an empty task list for now
-                return new GroupedRecentTaskInfo[0];
+                return new GroupedTaskInfo[0];
             }
 
-            final GroupedRecentTaskInfo[][] out = new GroupedRecentTaskInfo[][]{null};
+            final GroupedTaskInfo[][] out = new GroupedTaskInfo[][]{null};
             executeRemoteCallWithTaskPermission(mController, "getRecentTasks",
-                    (controller) -> out[0] = controller.getRecentTasks(maxNum, flags, userId)
-                            .toArray(new GroupedRecentTaskInfo[0]),
+                    (controller) -> {
+                        List<GroupedTaskInfo> tasks = controller.getRecentTasks(
+                                maxNum, flags, userId);
+                        out[0] = tasks.toArray(new GroupedTaskInfo[0]);
+                    },
                     true /* blocking */);
             return out[0];
         }

@@ -17,9 +17,11 @@
 package android.net.vcn;
 
 import static android.net.NetworkCapabilities.REDACT_FOR_NETWORK_SETTINGS;
+import static android.net.vcn.VcnGatewayConnectionConfig.MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS;
 import static android.net.vcn.VcnGatewayConnectionConfig.MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.NetworkCapabilities;
@@ -28,6 +30,8 @@ import android.net.wifi.WifiInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.SubscriptionManager;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 
@@ -47,6 +51,7 @@ import java.util.Objects;
  *
  * @hide
  */
+// TODO: Do not store WifiInfo and subscription ID in VcnTransportInfo anymore
 public class VcnTransportInfo implements TransportInfo, Parcelable {
     @Nullable private final WifiInfo mWifiInfo;
     private final int mSubId;
@@ -195,4 +200,42 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
                     return new VcnTransportInfo[size];
                 }
             };
+
+    /** This class can be used to construct a {@link VcnTransportInfo}. */
+    public static final class Builder {
+        private int mMinUdpPort4500NatTimeoutSeconds = MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET;
+
+        /** Construct Builder */
+        public Builder() {}
+
+        /**
+         * Sets the maximum supported IKEv2/IPsec NATT keepalive timeout.
+         *
+         * <p>This is used as a power-optimization hint for other IKEv2/IPsec use cases (e.g. VPNs,
+         * or IWLAN) to reduce the necessary keepalive frequency, thus conserving power and data.
+         *
+         * @param minUdpPort4500NatTimeoutSeconds the maximum keepalive timeout supported by the VCN
+         *     Gateway Connection, generally the minimum duration a NAT mapping is cached on the VCN
+         *     Gateway.
+         * @return this {@link Builder} instance, for chaining
+         */
+        @NonNull
+        public Builder setMinUdpPort4500NatTimeoutSeconds(
+                @IntRange(from = MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS)
+                        int minUdpPort4500NatTimeoutSeconds) {
+            Preconditions.checkArgument(
+                    minUdpPort4500NatTimeoutSeconds >= MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS,
+                    "Timeout must be at least 120s");
+
+            mMinUdpPort4500NatTimeoutSeconds = minUdpPort4500NatTimeoutSeconds;
+            return Builder.this;
+        }
+
+        /** Build a VcnTransportInfo instance */
+        @NonNull
+        public VcnTransportInfo build() {
+            return new VcnTransportInfo(
+                    null /* wifiInfo */, INVALID_SUBSCRIPTION_ID, mMinUdpPort4500NatTimeoutSeconds);
+        }
+    }
 }

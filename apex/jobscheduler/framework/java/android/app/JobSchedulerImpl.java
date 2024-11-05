@@ -173,6 +173,16 @@ public class JobSchedulerImpl extends JobScheduler {
     }
 
     @Override
+    @NonNull
+    public int[] getPendingJobReasons(int jobId) {
+        try {
+            return mBinder.getPendingJobReasons(mNamespace, jobId);
+        } catch (RemoteException e) {
+            return new int[] { PENDING_JOB_REASON_UNDEFINED };
+        }
+    }
+
+    @Override
     public boolean canRunUserInitiatedJobs() {
         try {
             return mBinder.canRunUserInitiatedJobs(mContext.getOpPackageName());

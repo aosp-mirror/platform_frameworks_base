@@ -234,7 +234,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"បើក​បណ្ដាញ​ឥត​ខ្សែ"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"បិទ​បណ្ដាញ​ឥតខ្សែ"</string>
     <string name="screen_lock" msgid="2072642720826409809">"ចាក់​សោ​អេក្រង់"</string>
-    <string name="power_off" msgid="4111692782492232778">"បិទ"</string>
+    <string name="power_off" msgid="4111692782492232778">"បិទថាមពល"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"បិទ​កម្ម​វិធី​រោទ៍"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"កម្មវិធី​រោទ៍​ញ័រ"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"បើក​កម្មវិធី​រោទ៍"</string>
@@ -258,11 +258,11 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"ជម្រើស Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ជម្រើស​ទូរស័ព្ទ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"ចាក់​សោ​អេក្រង់"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"បិទ"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"បិទថាមពល"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"ថាមពល"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"ចាប់ផ្ដើមឡើងវិញ"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"អាសន្ន"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"របាយការណ៍​កំហុស"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"របាយការណ៍អំពីបញ្ហា"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"បញ្ចប់​សម័យ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"រូបថតអេក្រង់"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"របាយការណ៍អំពីបញ្ហា"</string>
@@ -1216,7 +1216,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{ផ្កាយមួយ​ក្នុងចំណោមផ្កាយ {max}}other{ផ្កាយ # ក្នុងចំណោមផ្កាយ {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"កំពុងដំណើរការ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %%1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"បញ្ចប់សកម្មភាព"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"បើក​ជាមួយ %1$s"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"បិទ"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ប្រតិទិនណាមួយ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> កំពុង​បិទសំឡេង​មួយចំនួន"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ហើយវាអ្នកមិនមានស្ថេរភាព រហូតទាល់តែអ្នកកំណត់ដូចដើមវិញទាំងស្រុង។"</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"កំណត់​ការចាក់​សោអេក្រង់"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"កំណត់​ការចាក់​សោ​អេក្រង់"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ដើម្បីប្រើលំហឯកជនរបស់អ្នក សូមកំណត់ការចាក់សោអេក្រង់នៅលើឧបករណ៍នេះ"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"ដើម្បីលុបលំហឯកជនរបស់អ្នក សូមកំណត់ការចាក់សោអេក្រង់នៅលើឧបករណ៍នេះ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"មិនអាច​ប្រើ​កម្មវិធី​នេះបានទេ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"មិនអាច​ប្រើ <xliff:g id="APP_NAME">%1$s</xliff:g> នៅពេល​នេះ​បានទេ​។"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"មិនអាចប្រើ <xliff:g id="ACTIVITY">%1$s</xliff:g> បានទេ"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹងញ័រ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹង​បិទសំឡេង"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ការផ្លាស់ប្ដូរ​ប្រព័ន្ធ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"កុំ​រំខាន"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ថ្មី៖ មុខងារ​កុំរំខាន​កំពុងលាក់​ការជូនដំណឹង"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ចុចដើម្បីស្វែងយល់បន្ថែម និងផ្លាស់ប្ដូរ។"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ពិនិត្យមើលការកំណត់ការជូនដំណឹង"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"ចាប់ពី Android 13 ឡើងទៅ កម្មវិធីដែលអ្នកដំឡើងត្រូវការ​ការអនុញ្ញាតរបស់អ្នក ដើម្បីផ្ញើការជូនដំណឹង។ សូមចុចដើម្បីផ្លាស់ប្ដូរការអនុញ្ញាតនេះសម្រាប់កម្មវិធីដែលមានស្រាប់។"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"រំលឹក​ខ្ញុំ​ពេលក្រោយ"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ផ្ញើ និងទទួលសារដោយគ្មានបណ្ដាញ Wi-Fi ឬបណ្ដាញទូរសព្ទចល័ត"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"បើក​កម្មវិធី Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"របៀបដែលវាដំណើរការ"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"កំពុងរង់ចាំ..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"រៀបចំការដោះសោ​ដោយស្កេន​ស្នាមម្រាមដៃម្ដងទៀត"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"លែងអាចសម្គាល់ <xliff:g id="FINGERPRINT">%s</xliff:g> បានទៀតហើយ។"</string>

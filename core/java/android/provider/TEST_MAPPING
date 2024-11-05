@@ -24,12 +24,7 @@
             "name": "SettingsProviderTest"
         },
         {
-            "name": "CtsPackageManagerHostTestCases",
-            "options": [
-                {
-                    "include-filter": "android.appsecurity.cts.ReadableSettingsFieldsTest"
-                }
-            ]
+            "name": "CtsPackageManagerHostTestCases_cts_readablesettingsfieldstest"
         }
     ],
     "postsubmit": [

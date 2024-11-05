@@ -31,6 +31,7 @@
 #include <binder/IBinder.h>
 
 #include <ui/Rotation.h>
+#include <ui/LayerStack.h>
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -119,6 +120,18 @@ public:
         float endColors[4][3];   // End colors of dynamic color transition.
     };
 
+    // Collects all attributes that must be tracked per physical display.
+    struct Display {
+        int width;
+        int height;
+        int initWidth;
+        int initHeight;
+        EGLDisplay  eglSurface;
+        sp<IBinder> displayToken;
+        sp<SurfaceControl> surfaceControl;
+        sp<Surface> surface;
+    };
+
     // All callbacks will be called from this class's internal thread.
     class Callbacks : public RefBase {
     public:
@@ -181,14 +194,18 @@ private:
         bool premultiplyAlpha = true);
     status_t initFont(Font* font, const char* fallback);
     void initShaders();
-    bool android();
+    bool android(const Display& display);
+    status_t initDisplaysAndSurfaces();
     bool movie();
-    void drawText(const char* str, const Font& font, bool bold, int* x, int* y);
-    void drawClock(const Font& font, const int xPos, const int yPos);
-    void drawProgress(int percent, const Font& font, const int xPos, const int yPos);
+    void drawText(const char* str, const Font& font, bool bold,
+                  int* x, int* y, const Display& display);
+    void drawClock(const Font& font, const int xPos, const int yPos, const Display& display);
+    void drawProgress(int percent, const Font& font,
+                      const int xPos, const int yPos, const Display& display);
     void fadeFrame(int frameLeft, int frameBottom, int frameWidth, int frameHeight,
                    const Animation::Part& part, int fadedFramesCount);
-    void drawTexturedQuad(float xStart, float yStart, float width, float height);
+    void drawTexturedQuad(float xStart, float yStart,
+                          float width, float height, const Display& display);
     bool validClock(const Animation::Part& part);
     Animation* loadAnimation(const String8&);
     bool playAnimation(const Animation&);
@@ -200,36 +217,31 @@ private:
     bool preloadAnimation();
     EGLConfig getEglConfig(const EGLDisplay&);
     ui::Size limitSurfaceSize(int width, int height) const;
-    void resizeSurface(int newWidth, int newHeight);
-    void projectSceneToWindow();
-    void rotateAwayFromNaturalOrientationIfNeeded();
+    void resizeSurface(int newWidth, int newHeight, Display& display);
+    void projectSceneToWindow(const Display& display);
+    void rotateAwayFromNaturalOrientationIfNeeded(Display& display);
     ui::Rotation parseOrientationProperty();
+    void configureDisplayAndLayerStack(const Display& display, ui::LayerStack layerStack);
 
     bool shouldStopPlayingPart(const Animation::Part& part, int fadedFramesCount,
                                int lastDisplayedProgress);
     void checkExit();
 
-    void handleViewport(nsecs_t timestep);
+    void handleViewport(nsecs_t timestep, const Display& display);
     void initDynamicColors();
 
     sp<SurfaceComposerClient>       mSession;
     AssetManager mAssets;
     Texture     mAndroid[2];
-    int         mWidth;
-    int         mHeight;
-    int         mInitWidth;
-    int         mInitHeight;
     int         mMaxWidth = 0;
     int         mMaxHeight = 0;
     int         mCurrentInset;
     int         mTargetInset;
     bool        mUseNpotTextures = false;
-    EGLDisplay  mDisplay;
-    EGLDisplay  mContext;
-    EGLDisplay  mSurface;
-    sp<IBinder> mDisplayToken;
-    sp<SurfaceControl> mFlingerSurfaceControl;
-    sp<Surface> mFlingerSurface;
+    EGLDisplay  mEgl;
+    EGLDisplay  mEglContext;
+    // Per-Display Attributes (to support multi-display)
+    std::vector<Display> mDisplays;
     bool        mClockEnabled;
     bool        mTimeIsAccurate;
     bool        mTimeFormat12Hour;

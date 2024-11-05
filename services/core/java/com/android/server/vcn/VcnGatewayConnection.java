@@ -90,11 +90,11 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
@@ -176,6 +176,10 @@ public class VcnGatewayConnection extends StateMachine {
 
     /** Default number of parallel SAs requested */
     static final int TUNNEL_AGGREGATION_SA_COUNT_MAX_DEFAULT = 1;
+
+    // The returned string of
+    // TelephonyManager#getNetworkTypeName(TelephonyManager.NETWORK_TYPE_UNKNOWN)
+    private static final String NETWORK_TYPE_STRING_UNKNOWN = "UNKNOWN";
 
     // Matches DataConnection.NETWORK_TYPE private constant, and magic string from
     // ConnectivityManager#getNetworkTypeName()
@@ -1815,9 +1819,7 @@ public class VcnGatewayConnection extends StateMachine {
                             .setLegacyType(ConnectivityManager.TYPE_MOBILE)
                             .setLegacyTypeName(NETWORK_INFO_NETWORK_TYPE_STRING)
                             .setLegacySubType(TelephonyManager.NETWORK_TYPE_UNKNOWN)
-                            .setLegacySubTypeName(
-                                    TelephonyManager.getNetworkTypeName(
-                                            TelephonyManager.NETWORK_TYPE_UNKNOWN))
+                            .setLegacySubTypeName(NETWORK_TYPE_STRING_UNKNOWN)
                             .setLegacyExtraInfo(NETWORK_INFO_EXTRA_INFO)
                             .build();
 
@@ -1910,9 +1912,7 @@ public class VcnGatewayConnection extends StateMachine {
                 // Transforms do not need to be persisted; the IkeSession will keep them alive
                 mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
 
-                if (direction == IpSecManager.DIRECTION_IN
-                        && mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                        && mVcnContext.isFlagIpSecTransformStateEnabled()) {
+                if (direction == IpSecManager.DIRECTION_IN) {
                     mUnderlyingNetworkController.updateInboundTransform(mUnderlying, transform);
                 }
 

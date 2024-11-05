@@ -46,14 +46,15 @@ interface IMediaProjectionManager {
     boolean hasProjectionPermission(int processUid, String packageName);
 
     /**
-     * Returns a new {@link IMediaProjection} instance associated with the given package.
+     * Returns a new {@link IMediaProjection} instance associated with the given package for the
+     * given display id.
      *
      * @param processUid the process UID as returned by {@link android.os.Process.myUid()}.
      */
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     IMediaProjection createProjection(int processUid, String packageName, int type,
-            boolean permanentGrant);
+            boolean permanentGrant, int displayId);
 
     /**
      * Returns the current {@link IMediaProjection} instance associated with the given

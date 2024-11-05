@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Slog;
@@ -135,7 +136,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             Supplier<T> lazyDaemon, IBinder token, int biometricId, int userId, String owner,
             BiometricUtils<S> utils, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            Map<Integer, Long> authenticatorIds);
+            Map<Integer, Long> authenticatorIds, int reason);
 
     protected InternalCleanupClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             int userId, @NonNull String owner, int sensorId,
@@ -158,7 +159,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         mCurrentTask = getRemovalClient(getContext(), mLazyDaemon, getToken(),
                 template.mIdentifier.getBiometricId(), template.mUserId,
                 getContext().getPackageName(), mBiometricUtils, getSensorId(),
-                getLogger(), getBiometricContext(), mAuthenticatorIds);
+                getLogger(), getBiometricContext(), mAuthenticatorIds,
+                BiometricsProtoEnums.UNENROLL_REASON_DANGLING_HAL);
 
         getLogger().logUnknownEnrollmentInHal();
 

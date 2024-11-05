@@ -36,6 +36,7 @@ import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.server.backup.Flags;
+import com.android.server.notification.NotificationBackupHelper;
 
 import com.google.android.collect.Sets;
 

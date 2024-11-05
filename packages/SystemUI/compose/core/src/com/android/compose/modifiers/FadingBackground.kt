@@ -39,11 +39,7 @@ import androidx.compose.ui.unit.LayoutDirection
  * @param alpha alpha of the background
  * @param shape desired shape of the background
  */
-fun Modifier.background(
-    color: Color,
-    alpha: () -> Float,
-    shape: Shape = RectangleShape,
-) =
+fun Modifier.fadingBackground(color: Color, alpha: () -> Float, shape: Shape = RectangleShape) =
     this.then(
         FadingBackground(
             brush = SolidColor(color),
@@ -56,7 +52,7 @@ fun Modifier.background(
                     properties["color"] = color
                     properties["alpha"] = alpha
                     properties["shape"] = shape
-                }
+                },
         )
     )
 
@@ -65,7 +61,7 @@ constructor(
     private val brush: Brush,
     private val shape: Shape,
     private val alpha: () -> Float,
-    inspectorInfo: InspectorInfo.() -> Unit
+    inspectorInfo: InspectorInfo.() -> Unit,
 ) : DrawModifier, InspectorValueInfo(inspectorInfo) {
     // naive cache outline calculation if size is the same
     private var lastSize: Size? = null

@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"অফ আছে"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"যিকোনো কেলেণ্ডাৰ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>এ কিছুমান ধ্বনি মিউট কৰি আছে"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"আপোনাৰ ডিভাইচত এটা আভ্যন্তৰীণ সমস্যা আছে আৰু আপুনি ফেক্টৰী ডেটা ৰিছেট নকৰালৈকে ই সুস্থিৰভাৱে কাম নকৰিব পাৰে।"</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"এটা স্ক্ৰীন লক ছেট কৰক"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"স্ক্ৰীন লক ছেট কৰা"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"আপোনাৰ প্ৰাইভেট স্পে\'চ ব্যৱহাৰ কৰিবলৈ এই ডিভাইচটোত স্ক্ৰীন লক ছেট কৰক"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"প্ৰাইভেট স্পে’চ মচিবলৈ, এই ডিভাইচটোত এটা স্ক্ৰীন লক ছেট কৰক"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"এপ্‌টো উপলব্ধ নহয়"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূৰ্তত <xliff:g id="APP_NAME">%1$s</xliff:g> উপলব্ধ নহয়।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> উপলব্ধ নহয়"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"কল আৰু জাননীসমূহে কম্পন কৰিব"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"কল আৰু জাননীসমূহ মিউট কৰা হ\'ব"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ছিষ্টেমৰ সালসলনি"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"অসুবিধা নিদিব"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"নতুন: অসুবিধা নিদিব ম\'ডে জাননীসমূহ লুকাই ৰাখিছে"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"অধিক জানিবলৈ আৰু সলনি কৰিবলৈ টিপক।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"অসুবিধা নিদিব সলনি হৈছে"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"কি কি অৱৰোধ কৰা হৈছে জানিবলৈ টিপক।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"জাননীৰ ছেটিং পৰ্যালোচনা কৰক"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13ৰ পৰা, আপুনি ইনষ্টল কৰা এপক জাননী পঠিয়াবলৈ আপোনাৰ অনুমতিৰ প্ৰয়োজন। আগৰে পৰা থকা এপৰ বাবে এই অনুমতিটো সলনি কৰিবলৈ টিপক।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"পাছত মনত পেলাই দিব"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"আপুনি কোনো ম’বাইল বা ৱাই-ফাই নেটৱৰ্ক নোহোৱাকৈ বাৰ্তা পঠিয়াওক আৰু লাভ কৰক"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খোলক"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ই কেনেকৈ কাম কৰে"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বিবেচনাধীন হৈ আছে..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰক"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> আৰু চিনাক্ত কৰিব নোৱাৰি।"</string>

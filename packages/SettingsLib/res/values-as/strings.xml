@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"উন্নত সংযোগ সুবিধাটো সক্ষম কৰে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টাৰ্মিনেল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শ্বেলৰ এক্সেছ দিয়া টাৰ্মিনেল এপ্ সক্ষম কৰক"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux বিকাশৰ পৰিৱেশ"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidত Linux টাৰ্মিনেল চলাওক"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পৰীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP পৰীক্ষণ আচৰণ ছেট কৰক"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
@@ -582,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"এই মাত্ৰ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"এই ফ’নটো"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"এই টেবলেটটো"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"এই কম্পিউটাৰ (অভ্যন্তৰীণ)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ড’ক স্পীকাৰ"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"অক্ষম কৰা আছে"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"সক্ষম কৰা আছে"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"এই সলনিটো কার্যকৰী হ’বলৈ আপোনাৰ ডিভাইচটো ৰিবুট কৰিবই লাগিব। এতিয়াই ৰিবুট কৰক অথবা বাতিল কৰক।"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"তাঁৰযুক্ত হেডফ\'ন"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"তাঁৰযুক্ত হেডফ’ন"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"তাঁৰযুক্ত অডিঅ’"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"ইউএছবি অডিঅ\'"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"তাঁৰযুক্ত মাইক্ৰ’ফ’ন"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"ইউএছবি মাইক্ৰ’ফ’ন"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"ব্লুটুথ মাইক্ৰ’ফ’ন"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"অন"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"অফ"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"বাহক নেটৱৰ্কৰ পৰিৱৰ্তন"</string>

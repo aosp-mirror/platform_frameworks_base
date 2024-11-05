@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.util.IndentingPrintWriter
+import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
 import java.util.function.Consumer
@@ -32,8 +34,9 @@ import java.util.function.Consumer
 class ScrollViewFields {
     /** Used to produce the clipping path */
     var scrimClippingShape: ShadeScrimShape? = null
-    /** Whether the notifications are scrolled all the way to the top (i.e. when freshly opened) */
-    var isScrolledToTop: Boolean = true
+
+    /** Scroll state of the notification shade. */
+    var scrollState: ShadeScrollState = ShadeScrollState()
 
     /**
      * Height in view pixels at which the Notification Stack would like to be laid out, including
@@ -47,6 +50,13 @@ class ScrollViewFields {
      * placeholder
      */
     var syntheticScrollConsumer: Consumer<Float>? = null
+
+    /**
+     * When the NSSL navigates through the notifications with TalkBack, it can send scroll events
+     * here, to be able to browse through the whole list of notifications in the shade.
+     */
+    var accessibilityScrollEventConsumer: Consumer<AccessibilityScrollEvent>? = null
+
     /**
      * When a gesture is consumed internally by NSSL but needs to be handled by other elements (such
      * as the notif scrim) as overscroll, we can notify the placeholder through here.
@@ -57,11 +67,12 @@ class ScrollViewFields {
      * guts off of this gesture, we can notify the placeholder through here.
      */
     var currentGestureInGutsConsumer: Consumer<Boolean>? = null
+
     /**
-     * Any time the heads up height is recalculated, it should be updated here to be used by the
-     * placeholder
+     * When a notification begins remote input, its bottom Y bound is sent to the placeholder
+     * through here in order to adjust to accommodate the IME.
      */
-    var headsUpHeightConsumer: Consumer<Float>? = null
+    var remoteInputRowBottomBoundConsumer: Consumer<Float?>? = null
 
     /** send the [syntheticScroll] to the [syntheticScrollConsumer], if present. */
     fun sendSyntheticScroll(syntheticScroll: Float) =
@@ -75,13 +86,19 @@ class ScrollViewFields {
     fun sendCurrentGestureInGuts(isCurrentGestureInGuts: Boolean) =
         currentGestureInGutsConsumer?.accept(isCurrentGestureInGuts)
 
-    /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */
-    fun sendHeadsUpHeight(headsUpHeight: Float) = headsUpHeightConsumer?.accept(headsUpHeight)
+    /** send [bottomY] to the [remoteInputRowBottomBoundConsumer], if present. */
+    fun sendRemoteInputRowBottomBound(bottomY: Float?) =
+        remoteInputRowBottomBoundConsumer?.accept(bottomY)
+
+    /** send an [AccessibilityScrollEvent] to the [accessibilityScrollEventConsumer] if present */
+    fun sendAccessibilityScrollEvent(event: AccessibilityScrollEvent) {
+        accessibilityScrollEventConsumer?.accept(event)
+    }
 
     fun dump(pw: IndentingPrintWriter) {
         pw.printSection("StackViewStates") {
             pw.println("scrimClippingShape", scrimClippingShape)
-            pw.println("isScrolledToTop", isScrolledToTop)
+            pw.println("scrollState", scrollState)
         }
     }
 }

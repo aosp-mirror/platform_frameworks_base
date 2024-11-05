@@ -23,10 +23,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.graphics.PointF;
-import android.testing.AndroidTestingRunner;
+
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -37,6 +37,7 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.FlingAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Prefs;
@@ -57,7 +58,7 @@ import org.mockito.junit.MockitoRule;
 import java.util.Optional;
 
 /** Tests for {@link MenuAnimationController}. */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class MenuAnimationControllerTest extends SysuiTestCase {
@@ -172,7 +173,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
                 mMenuAnimationController.mPositionAnimations.values().stream().findAny();
         anyAnimation.ifPresent(this::skipAnimationToEnd);
 
-        verifyZeroInteractions(onSpringAnimationsEndCallback);
+        verifyNoMoreInteractions(onSpringAnimationsEndCallback);
     }
 
     @Test
@@ -224,7 +225,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
                 .filter(animation -> animation instanceof SpringAnimation)
                 .forEach(this::skipAnimationToEnd);
 
-        verifyZeroInteractions(onSpringAnimationsEndCallback);
+        verifyNoMoreInteractions(onSpringAnimationsEndCallback);
     }
 
     @Test

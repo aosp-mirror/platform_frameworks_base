@@ -8,7 +8,8 @@ import android.content.pm.ApplicationInfo
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Looper
-import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationAdapter
@@ -63,7 +64,6 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
 
     private lateinit var activityTransitionAnimator: ActivityTransitionAnimator
     @get:Rule val rule = MockitoJUnit.rule()
-    @get:Rule val setFlagsRule = SetFlagsRule()
 
     @Before
     fun setup() {
@@ -90,7 +90,7 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         animator: ActivityTransitionAnimator = this.activityTransitionAnimator,
         controller: ActivityTransitionAnimator.Controller? = this.controller,
         animate: Boolean = true,
-        intentStarter: (RemoteAnimationAdapter?) -> Int
+        intentStarter: (RemoteAnimationAdapter?) -> Int,
     ) {
         // We start in a new thread so that we can ensure that the callbacks are called in the main
         // thread.
@@ -98,7 +98,7 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
                 animator.startIntentWithAnimation(
                     controller = controller,
                     animate = animate,
-                    intentStarter = intentStarter
+                    intentStarter = intentStarter,
                 )
             }
             .join()
@@ -175,9 +175,9 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         assertFalse(willAnimateCaptor.value)
     }
 
+    @EnableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY)
     @Test
     fun registersReturnIffCookieIsPresent() {
-        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY)
         `when`(callback.isOnKeyguard()).thenReturn(false)
 
         startIntentWithAnimation(activityTransitionAnimator, controller) { _ ->
@@ -203,10 +203,12 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         assertTrue(testShellTransitions.remotesForTakeover.isEmpty())
     }
 
+    @EnableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
     @Test
     fun registersLongLivedTransition() {
-        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY)
-
         activityTransitionAnimator.register(
             object : DelegateTransitionAnimatorController(controller) {
                 override val transitionCookie =
@@ -226,10 +228,12 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         assertEquals(4, testShellTransitions.remotes.size)
     }
 
+    @EnableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
     @Test
     fun registersLongLivedTransitionOverridingPreviousRegistration() {
-        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY)
-
         val cookie = ActivityTransitionAnimator.TransitionCookie("test_cookie")
         activityTransitionAnimator.register(
             object : DelegateTransitionAnimatorController(controller) {
@@ -251,9 +255,9 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         }
     }
 
+    @DisableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED)
     @Test
     fun doesNotRegisterLongLivedTransitionIfFlagIsDisabled() {
-        setFlagsRule.disableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY)
 
         val controller =
             object : DelegateTransitionAnimatorController(controller) {
@@ -266,9 +270,9 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         }
     }
 
+    @EnableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED)
     @Test
     fun doesNotRegisterLongLivedTransitionIfMissingRequiredProperties() {
-        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY)
 
         // No TransitionCookie
         val controllerWithoutCookie =
@@ -310,9 +314,12 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         }
     }
 
+    @EnableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
     @Test
     fun unregistersLongLivedTransition() {
-        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY)
 
         val cookies = arrayOfNulls<ActivityTransitionAnimator.TransitionCookie>(3)
 
@@ -411,7 +418,7 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
             SurfaceControl(),
             Rect(),
             taskInfo,
-            false
+            false,
         )
     }
 }
@@ -430,7 +437,7 @@ private class FakeShellTransitions : ShellTransitions {
 
     override fun registerRemoteForTakeover(
         filter: TransitionFilter,
-        remoteTransition: RemoteTransition
+        remoteTransition: RemoteTransition,
     ) {
         remotesForTakeover[filter] = remoteTransition
     }
@@ -460,7 +467,7 @@ private class TestTransitionAnimatorController(override var transitionContainer:
             left = 300,
             right = 400,
             topCornerRadius = 10f,
-            bottomCornerRadius = 20f
+            bottomCornerRadius = 20f,
         )
 
     private fun assertOnMainThread() {
@@ -480,7 +487,7 @@ private class TestTransitionAnimatorController(override var transitionContainer:
     override fun onTransitionAnimationProgress(
         state: TransitionAnimator.State,
         progress: Float,
-        linearProgress: Float
+        linearProgress: Float,
     ) {
         assertOnMainThread()
     }

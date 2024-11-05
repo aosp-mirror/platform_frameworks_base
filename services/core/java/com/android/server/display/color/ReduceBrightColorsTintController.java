@@ -123,6 +123,14 @@ public class ReduceBrightColorsTintController extends TintController {
         return computeComponentValue(mStrength) * nits;
     }
 
+    /**
+     * Returns the effective brightness (in nits), which has been adjusted to account for the effect
+     * of the bright color reduction.
+     */
+    public float getAdjustedNitsForStrength(float nits, int strength) {
+        return computeComponentValue(strength) * nits;
+    }
+
     private float computeComponentValue(int strengthLevel) {
         final float percentageStrength = strengthLevel / 100f;
         final float squaredPercentageStrength = percentageStrength * percentageStrength;

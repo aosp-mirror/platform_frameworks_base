@@ -22,8 +22,6 @@ import com.android.systemui.notifications.ui.composable.NotificationsShadeSessio
 import com.android.systemui.scene.domain.SceneDomainModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
-import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolverModule
-import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolverModule
 import com.android.systemui.scene.domain.startable.KeyguardStateCallbackStartable
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
@@ -46,22 +44,19 @@ import dagger.multibindings.IntoMap
         [
             BouncerSceneModule::class,
             CommunalSceneModule::class,
+            DreamSceneModule::class,
             EmptySceneModule::class,
             GoneSceneModule::class,
             LockscreenSceneModule::class,
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
             QuickSettingsShadeOverlayModule::class,
-            QuickSettingsShadeSceneModule::class,
             NotificationsShadeOverlayModule::class,
-            NotificationsShadeSceneModule::class,
             NotificationsShadeSessionModule::class,
             SceneDomainModule::class,
 
             // List SceneResolver modules for supported SceneFamilies
             HomeSceneFamilyResolverModule::class,
-            NotifShadeSceneFamilyResolverModule::class,
-            QuickSettingsSceneFamilyResolverModule::class,
         ]
 )
 interface SceneContainerFrameworkModule {
@@ -104,6 +99,7 @@ interface SceneContainerFrameworkModule {
                     listOfNotNull(
                         Scenes.Gone,
                         Scenes.Communal,
+                        Scenes.Dream,
                         Scenes.Lockscreen,
                         Scenes.Bouncer,
                         Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
@@ -120,9 +116,10 @@ interface SceneContainerFrameworkModule {
                             Scenes.Gone to 0,
                             Scenes.Lockscreen to 0,
                             Scenes.Communal to 1,
-                            Scenes.Shade to 2.takeUnless { DualShade.isEnabled },
-                            Scenes.QuickSettings to 3.takeUnless { DualShade.isEnabled },
-                            Scenes.Bouncer to 4,
+                            Scenes.Dream to 2,
+                            Scenes.Shade to 3.takeUnless { DualShade.isEnabled },
+                            Scenes.QuickSettings to 4.takeUnless { DualShade.isEnabled },
+                            Scenes.Bouncer to 5,
                         )
                         .filterValues { it != null }
                         .mapValues { checkNotNull(it.value) },

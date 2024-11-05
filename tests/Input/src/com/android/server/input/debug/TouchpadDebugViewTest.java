@@ -16,6 +16,7 @@
 
 package com.android.server.input.debug;
 
+import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 
 import static org.junit.Assert.assertEquals;
@@ -29,13 +30,16 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.input.InputManager;
 import android.testing.TestableContext;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.widget.TextView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -53,19 +57,23 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Consumer;
+
 /**
  * Build/Install/Run:
  * atest TouchpadDebugViewTest
  */
 @RunWith(AndroidJUnit4.class)
 public class TouchpadDebugViewTest {
-    private static final int TOUCHPAD_DEVICE_ID = 6;
+    private static final int TOUCHPAD_DEVICE_ID = 60;
 
     private TouchpadDebugView mTouchpadDebugView;
     private WindowManager.LayoutParams mWindowLayoutParams;
 
     @Mock
     WindowManager mWindowManager;
+    @Mock
+    InputManager mInputManager;
 
     Rect mWindowBounds;
     WindowMetrics mWindowMetrics;
@@ -78,16 +86,27 @@ public class TouchpadDebugViewTest {
         mTestableContext = new TestableContext(context);
 
         mTestableContext.addMockSystemService(WindowManager.class, mWindowManager);
+        mTestableContext.addMockSystemService(InputManager.class, mInputManager);
 
         mWindowBounds = new Rect(0, 0, 2560, 1600);
         mWindowMetrics = new WindowMetrics(mWindowBounds, new WindowInsets(mWindowBounds), 1.0f);
 
         when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
 
+        InputDevice inputDevice = new InputDevice.Builder()
+                .setId(TOUCHPAD_DEVICE_ID)
+                .setSources(InputDevice.SOURCE_TOUCHPAD | SOURCE_MOUSE)
+                .setName("Test Device " + TOUCHPAD_DEVICE_ID)
+                .build();
+
+        when(mInputManager.getInputDevice(TOUCHPAD_DEVICE_ID)).thenReturn(inputDevice);
+
+        Consumer<Integer> touchpadSwitchHandler = id -> {};
+
         mTouchpadDebugView = new TouchpadDebugView(mTestableContext, TOUCHPAD_DEVICE_ID,
-                new TouchpadHardwareProperties.Builder(500f, 500f, 500f,
-                        500f, 0f, 0f, -5f, 5f, (short) 10, true,
-                        true).build());
+                new TouchpadHardwareProperties.Builder(0f, 0f, 500f,
+                        500f, 45f, 47f, -4f, 5f, (short) 10, true,
+                        true).build(), touchpadSwitchHandler);
 
         mTouchpadDebugView.measure(
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
@@ -306,25 +325,150 @@ public class TouchpadDebugViewTest {
                 new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
 
-        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(),
+                Color.parseColor("#769763"));
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
 
-        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.RED);
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(),
+                Color.parseColor("#5455A9"));
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
 
-        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(),
+                Color.parseColor("#769763"));
 
         // Color should not change because hardware state of a different touchpad
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID + 1);
 
-        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(),
+                Color.parseColor("#769763"));
+    }
+
+    @Test
+    public void testTouchpadGesture() {
+        int gestureType = 3;
+        TextView child = mTouchpadDebugView.getGestureInfoView();
+
+        mTouchpadDebugView.updateGestureInfo(gestureType, TOUCHPAD_DEVICE_ID);
+        assertEquals(child.getText().toString(), TouchpadDebugView.getGestureText(gestureType));
+
+        gestureType = 6;
+        mTouchpadDebugView.updateGestureInfo(gestureType, TOUCHPAD_DEVICE_ID);
+        assertEquals(child.getText().toString(), TouchpadDebugView.getGestureText(gestureType));
+    }
+
+    @Test
+    public void testTwoFingerDrag() {
+        float offsetX = ViewConfiguration.get(mTestableContext).getScaledTouchSlop() + 10;
+        float offsetY = ViewConfiguration.get(mTestableContext).getScaledTouchSlop() + 10;
+
+        // Simulate ACTION_DOWN event (gesture starts).
+        MotionEvent actionDown = new MotionEventBuilder(MotionEvent.ACTION_DOWN, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f)
+                )
+                .classification(MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionDown);
+
+        // Simulate ACTION_MOVE event (dragging with two fingers, processed as one pointer).
+        MotionEvent actionMove = new MotionEventBuilder(MotionEvent.ACTION_MOVE, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f + offsetX)
+                        .y(40f + offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionMove);
+
+        // Simulate ACTION_UP event (gesture ends).
+        MotionEvent actionUp = new MotionEventBuilder(MotionEvent.ACTION_UP, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f + offsetX)
+                        .y(40f + offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionUp);
+
+        // Verify that no updateViewLayout is called (as expected for a two-finger drag gesture).
+        verify(mWindowManager, times(0)).updateViewLayout(any(), any());
+    }
+
+    @Test
+    public void testPinchDrag() {
+        float offsetY = ViewConfiguration.get(mTestableContext).getScaledTouchSlop() + 10;
+
+        MotionEvent actionDown = new MotionEventBuilder(MotionEvent.ACTION_DOWN, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionDown);
+
+        MotionEvent pointerDown = new MotionEventBuilder(MotionEvent.ACTION_POINTER_DOWN,
+                SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f)
+                )
+                .pointer(new PointerBuilder(1, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(45f)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(pointerDown);
+
+        // Simulate ACTION_MOVE event (both fingers moving apart).
+        MotionEvent actionMove = new MotionEventBuilder(MotionEvent.ACTION_MOVE, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f - offsetY)
+                )
+                .rawXCursorPosition(mWindowLayoutParams.x + 10f)
+                .rawYCursorPosition(mWindowLayoutParams.y + 10f)
+                .pointer(new PointerBuilder(1, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(45f + offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionMove);
+
+        MotionEvent pointerUp = new MotionEventBuilder(MotionEvent.ACTION_POINTER_UP, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f - offsetY)
+                )
+                .pointer(new PointerBuilder(1, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(45f + offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(pointerUp);
+
+        MotionEvent actionUp = new MotionEventBuilder(MotionEvent.ACTION_UP, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f - offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_PINCH)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionUp);
+
+        // Verify that no updateViewLayout is called (as expected for a two-finger drag gesture).
+        verify(mWindowManager, times(0)).updateViewLayout(any(), any());
     }
 }

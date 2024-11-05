@@ -358,7 +358,6 @@ public class SQLiteDatabaseTest {
         assertTrue("ReadThread failed with errors: " + errors, errors.isEmpty());
     }
 
-    @RequiresFlagsEnabled(Flags.FLAG_SQLITE_ALLOW_TEMP_TABLES)
     @Test
     public void testTempTable() {
         boolean allowed;

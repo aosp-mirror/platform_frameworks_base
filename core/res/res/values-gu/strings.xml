@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"બાયોમેટ્રિક્સનો ઉપયોગ કરો"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"બાયોમેટ્રિક્સ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"તે તમે જ છો એ ચકાસો"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"આ તમે જ છો તેની ચકાસણી કરો"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"આગળ વધવા માટે બાયોમેટ્રિકનો ઉપયોગ કરો"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ચાલુ રાખવા માટે તમારા બાયોમેટ્રિક ડેટા અથવા સ્ક્રીન લૉક સુવિધાનો ઉપયોગ કરો"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"બંધ છે"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"કોઈપણ કૅલેન્ડર"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> અમુક અવાજોને મ્યૂટ કરે છે"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"તમારા ઉપકરણમાં આંતરિક સમસ્યા છે અને જ્યાં સુધી તમે ફેક્ટરી ડેટા ફરીથી સેટ કરશો નહીં ત્યાં સુધી તે અસ્થિર રહી શકે છે."</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"સ્ક્રીન લૉક સેટ કરો"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"સ્ક્રીન લૉક સેટ કરો"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"તમારી ખાનગી સ્પેસનો ઉપયોગ કરવા, આ ડિવાઇસ પર સ્ક્રીન લૉક સેટ કરો"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"ખાનગી સ્પેસનો ડિલીટ કરવા, આ ડિવાઇસ પર સ્ક્રીન લૉક સેટ કરો"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ઍપ ઉપલબ્ધ નથી"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> હાલમાં ઉપલબ્ધ નથી."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ઉપલબ્ધ નથી"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"કૉલ અને નોટિફિકેશન માટે ઉપકરણ વાઇબ્રેટ થશે"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"કૉલ અને નોટિફિકેશન મ્યૂટ કરવામાં આવશે"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"સિસ્ટમના ફેરફારો"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ખલેલ પાડશો નહીં"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"નવું: ખલેલ પાડશો નહીં હવે નોટિફિકેશન છુપાવી શકે છે"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"વધુ જાણવા અને બદલવા માટે ટૅપ કરો."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"નોટિફિકેશનના સેટિંગ રિવ્યૂ કરો"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13થી શરૂઆત કરીને, તમે જે પણ ઍપ ઇન્સ્ટૉલ કરશો, તેને નોટિફિકેશન મોકલવા માટે તમારી પરવાનગીની જરૂર રહેશે. હાલની બધી ઍપ માટે આ પરવાનગીમાં ફેરફાર કરવા માટે ટૅપ કરો."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"મને પછી યાદ અપાવજો"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"મોબાઇલ કે વાઇ-ફાઇ નેટવર્ક વિના મેસેજ મોકલો અને મેળવો"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ખોલો"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"તેની કામ કરવાની રીત"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"બાકી..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"હવે <xliff:g id="FINGERPRINT">%s</xliff:g> ઓળખી શકાતી નથી."</string>
@@ -2443,13 +2449,13 @@
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"મ્યૂટ કરો"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"સાઉન્ડ મ્યૂટ કરવા માટે ટૅપ કરો"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"બ્રાઉઝર"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"સંપર્કો"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contacts"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"ઇમેઇલ"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"મ્યુઝિક"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"કૅલેન્ડર"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"કેલ્ક્યુલેટર"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"નકશા"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ઍપ્લિકેશનો"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"તમારી ફિંગરપ્રિન્ટને હવેથી ઓળખી શકાશે નહીં. ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
 </resources>

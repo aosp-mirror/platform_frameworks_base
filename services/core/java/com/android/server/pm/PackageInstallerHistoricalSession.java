@@ -79,6 +79,8 @@ public final class PackageInstallerHistoricalSession {
     private final String mSessionErrorMessage;
     private final String mPreVerifiedDomains;
     private final String mPackageName;
+    private final int mInitialVerificationPolicy;
+    private final int mCurrentVerificationPolicy;
 
     PackageInstallerHistoricalSession(int sessionId, int userId, int originalInstallerUid,
             String originalInstallerPackageName, InstallSource installSource, int installerUid,
@@ -90,7 +92,8 @@ public final class PackageInstallerHistoricalSession {
             int[] childSessionIds, boolean sessionApplied, boolean sessionFailed,
             boolean sessionReady, int sessionErrorCode, String sessionErrorMessage,
             PreapprovalDetails preapprovalDetails, DomainSet preVerifiedDomains,
-            String packageNameFromApk) {
+            String packageNameFromApk, int initialVerificationPolicy,
+            int currentVerificationPolicy) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.mOriginalInstallerUid = originalInstallerUid;
@@ -140,6 +143,8 @@ public final class PackageInstallerHistoricalSession {
 
         this.mPackageName = preapprovalDetails != null ? preapprovalDetails.getPackageName()
                 : packageNameFromApk != null ? packageNameFromApk : params.appPackageName;
+        this.mInitialVerificationPolicy = initialVerificationPolicy;
+        this.mCurrentVerificationPolicy = currentVerificationPolicy;
     }
 
     void dump(IndentingPrintWriter pw) {
@@ -184,6 +189,8 @@ public final class PackageInstallerHistoricalSession {
         pw.printPair("mPreapprovalDetails", mPreapprovalDetails);
         pw.printPair("mPreVerifiedDomains", mPreVerifiedDomains);
         pw.printPair("mAppPackageName", mPackageName);
+        pw.printPair("mInitialVerificationPolicy", mInitialVerificationPolicy);
+        pw.printPair("mCurrentVerificationPolicy", mCurrentVerificationPolicy);
         pw.println();
 
         pw.decreaseIndent();

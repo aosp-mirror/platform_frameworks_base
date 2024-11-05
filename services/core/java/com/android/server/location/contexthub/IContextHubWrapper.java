@@ -494,16 +494,11 @@ public abstract class IContextHubWrapper {
             }
 
             public void handleMessageDeliveryStatus(
-                    char hostEndpointId,
-                    MessageDeliveryStatus messageDeliveryStatus) {
-                if (Flags.reliableMessageImplementation()) {
-                    mHandler.post(() -> {
-                        mCallback.handleMessageDeliveryStatus(messageDeliveryStatus);
-                    });
-                } else {
-                    Log.w(TAG, "handleMessageDeliveryStatus called when the "
-                            + "reliableMessageImplementation flag is disabled");
-                }
+                    char hostEndpointId, MessageDeliveryStatus messageDeliveryStatus) {
+                mHandler.post(
+                        () -> {
+                            mCallback.handleMessageDeliveryStatus(messageDeliveryStatus);
+                        });
             }
 
             public byte[] getUuid() {
@@ -682,9 +677,8 @@ public abstract class IContextHubWrapper {
             // Only process the message normally if not using test mode manager or if
             // the test mode manager call returned false as this indicates it did not
             // process the message.
-            boolean useTestModeManager = Flags.reliableMessageImplementation()
-                    && Flags.reliableMessageTestModeBehavior()
-                    && mIsTestModeEnabled.get();
+            boolean useTestModeManager =
+                    Flags.reliableMessageTestModeBehavior() && mIsTestModeEnabled.get();
             if (!useTestModeManager || !mTestModeManager.sendMessageToContextHub(
                     sendMessage, message)) {
                 try {

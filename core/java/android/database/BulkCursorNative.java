@@ -53,7 +53,7 @@ public abstract class BulkCursorNative extends Binder implements IBulkCursor
 
         return new BulkCursorProxy(obj);
     }
-    
+
     @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
             throws RemoteException {
@@ -79,7 +79,7 @@ public abstract class BulkCursorNative extends Binder implements IBulkCursor
                     reply.writeNoException();
                     return true;
                 }
-                
+
                 case CLOSE_TRANSACTION: {
                     data.enforceInterface(IBulkCursor.descriptor);
                     close();
@@ -212,15 +212,22 @@ final class BulkCursorProxy implements IBulkCursor {
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IBulkCursor.descriptor);
-
-            mRemote.transact(CLOSE_TRANSACTION, data, reply, 0);
-            DatabaseUtils.readExceptionFromParcel(reply);
+            // If close() is being called from the finalizer thread, do not wait for a reply from
+            // the remote side.
+            final boolean fromFinalizer =
+                    android.database.sqlite.Flags.onewayFinalizerCloseFixed()
+                    && "FinalizerDaemon".equals(Thread.currentThread().getName());
+            mRemote.transact(CLOSE_TRANSACTION, data, reply,
+                    fromFinalizer ? IBinder.FLAG_ONEWAY: 0);
+            if (!fromFinalizer) {
+                DatabaseUtils.readExceptionFromParcel(reply);
+            }
         } finally {
             data.recycle();
             reply.recycle();
         }
     }
-    
+
     public int requery(IContentObserver observer) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -282,4 +289,3 @@ final class BulkCursorProxy implements IBulkCursor {
         }
     }
 }
-

@@ -50,7 +50,7 @@
     <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Enterprise 192-bit"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Disimpan"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Terputus"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Tidak terhubung"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Nonaktif"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Kegagalan Konfigurasi IP"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Masalah autentikasi"</string>
@@ -82,7 +82,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Sangat Cepat"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Sudah tidak berlaku"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Sambungan terputus"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Tidak terhubung"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Memutus sambungan..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Menghubungkan…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Terhubung<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -287,8 +287,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Izinkan bootloader dibuka kuncinya"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Izinkan buka kunci OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PERINGATAN: Fitur perlindungan perangkat tidak akan berfungsi di perangkat ini saat setelan diaktifkan."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Pilih aplikasi lokasi palsu"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Tidak ada aplikasi lokasi palsu yang disetel"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Pilih aplikasi lokasi simulasi"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Tidak ada aplikasi lokasi simulasi yang disetel"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikasi lokasi palsu: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Jaringan"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Sertifikasi layar nirkabel"</string>
@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Mengaktifkan fitur Konektivitas Yang Disempurnakan."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal lokal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktifkan aplikasi terminal yang menawarkan akses kerangka lokal"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Lingkungan pengembangan Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Jalankan terminal Linux di Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Pemeriksaan HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Setel perilaku pemeriksaan HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Proses debug"</string>
@@ -582,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Baru saja"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ponsel ini"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Tablet ini"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Komputer ini (internal)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Speaker dok"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Nonaktif"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktif"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Perangkat Anda harus di-reboot agar perubahan ini diterapkan. Reboot sekarang atau batalkan."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Headphone berkabel"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Headphone berkabel"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Audio berkabel"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Audio USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Mikrofon berkabel"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Mikrofon USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Mikrofon BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aktif"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Nonaktif"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Jaringan operator berubah"</string>

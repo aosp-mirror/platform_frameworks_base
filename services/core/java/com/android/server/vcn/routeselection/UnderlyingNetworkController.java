@@ -46,11 +46,11 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.routeselection.UnderlyingNetworkEvaluator.NetworkEvaluatorCallback;
@@ -204,11 +204,8 @@ public class UnderlyingNetworkController {
         List<NetworkCallback> oldCellCallbacks = new ArrayList<>(mCellBringupCallbacks);
         mCellBringupCallbacks.clear();
 
-        if (mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                && mVcnContext.isFlagIpSecTransformStateEnabled()) {
-            for (UnderlyingNetworkEvaluator evaluator : mUnderlyingNetworkRecords.values()) {
-                evaluator.close();
-            }
+        for (UnderlyingNetworkEvaluator evaluator : mUnderlyingNetworkRecords.values()) {
+            evaluator.close();
         }
 
         mUnderlyingNetworkRecords.clear();
@@ -360,7 +357,10 @@ public class UnderlyingNetworkController {
         final NetworkRequest.Builder nrBuilder =
                 getBaseNetworkRequestBuilder()
                         .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                        .setNetworkSpecifier(new TelephonyNetworkSpecifier(subId));
+                        .setNetworkSpecifier(
+                                new TelephonyNetworkSpecifier.Builder()
+                                        .setSubscriptionId(subId)
+                                        .build());
 
         for (CapabilityMatchCriteria capMatchCriteria : capsMatchCriteria) {
             final int cap = capMatchCriteria.capability;
@@ -427,11 +427,7 @@ public class UnderlyingNetworkController {
         if (oldSnapshot
                 .getAllSubIdsInGroup(mSubscriptionGroup)
                 .equals(newSnapshot.getAllSubIdsInGroup(mSubscriptionGroup))) {
-
-            if (mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                    && mVcnContext.isFlagIpSecTransformStateEnabled()) {
-                reevaluateNetworks();
-            }
+            reevaluateNetworks();
             return;
         }
         registerOrUpdateNetworkRequests();
@@ -444,12 +440,6 @@ public class UnderlyingNetworkController {
      */
     public void updateInboundTransform(
             @NonNull UnderlyingNetworkRecord currentNetwork, @NonNull IpSecTransform transform) {
-        if (!mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                || !mVcnContext.isFlagIpSecTransformStateEnabled()) {
-            logWtf("#updateInboundTransform: unexpected call; flags missing");
-            return;
-        }
-
         Objects.requireNonNull(currentNetwork, "currentNetwork is null");
         Objects.requireNonNull(transform, "transform is null");
 
@@ -572,11 +562,7 @@ public class UnderlyingNetworkController {
 
         @Override
         public void onLost(@NonNull Network network) {
-            if (mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                    && mVcnContext.isFlagIpSecTransformStateEnabled()) {
-                mUnderlyingNetworkRecords.get(network).close();
-            }
-
+            mUnderlyingNetworkRecords.get(network).close();
             mUnderlyingNetworkRecords.remove(network);
 
             reevaluateNetworks();
@@ -649,12 +635,6 @@ public class UnderlyingNetworkController {
     class NetworkEvaluatorCallbackImpl implements NetworkEvaluatorCallback {
         @Override
         public void onEvaluationResultChanged() {
-            if (!mVcnContext.isFlagNetworkMetricMonitorEnabled()
-                    || !mVcnContext.isFlagIpSecTransformStateEnabled()) {
-                logWtf("#onEvaluationResultChanged: unexpected call; flags missing");
-                return;
-            }
-
             mVcnContext.ensureRunningOnLooperThread();
             reevaluateNetworks();
         }

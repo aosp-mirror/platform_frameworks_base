@@ -17,9 +17,11 @@
 package com.android.systemui.plugins.statusbar
 
 import com.android.internal.logging.uiEventLogger
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.scene.domain.interactor.sceneBackInteractor
@@ -36,6 +38,7 @@ var Kosmos.statusBarStateController: SysuiStatusBarStateController by
             uiEventLogger,
             { interactionJankMonitor },
             mock(),
+            { keyguardInteractor },
             { keyguardTransitionInteractor },
             { shadeInteractor },
             { deviceUnlockedInteractor },
@@ -43,5 +46,6 @@ var Kosmos.statusBarStateController: SysuiStatusBarStateController by
             { sceneContainerOcclusionInteractor },
             { keyguardClockInteractor },
             { sceneBackInteractor },
+            { alternateBouncerInteractor },
         )
     }

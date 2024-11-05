@@ -19,8 +19,6 @@ package com.android.server.integrity.model;
 import android.annotation.Nullable;
 import android.content.integrity.Rule;
 
-import com.android.internal.util.FrameworkStatsLog;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -80,21 +78,6 @@ public final class IntegrityCheckResult {
      */
     public static IntegrityCheckResult deny(List<Rule> ruleList) {
         return new IntegrityCheckResult(Effect.DENY, ruleList);
-    }
-
-    /**
-     * Returns the in value of the integrity check result for logging purposes.
-     */
-    public int getLoggingResponse() {
-        if (getEffect() == Effect.DENY) {
-            return FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED;
-        } else if (getEffect() == Effect.ALLOW && getMatchedRules().isEmpty()) {
-            return FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED;
-        } else if (getEffect() == Effect.ALLOW && !getMatchedRules().isEmpty()) {
-            return FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED;
-        } else {
-            throw new IllegalStateException("IntegrityCheckResult is not valid.");
-        }
     }
 
     /** Returns true when the {@code mEffect} is caused by an app certificate mismatch. */

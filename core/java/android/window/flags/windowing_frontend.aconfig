@@ -9,6 +9,16 @@ flag {
 }
 
 flag {
+  name: "reset_draw_state_on_client_invisible"
+  namespace: "windowing_frontend"
+  description: "Reset draw state if the client is notified to be invisible"
+  bug: "373023636"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "wait_for_transition_on_display_switch"
     namespace: "windowing_frontend"
     description: "Waits for Shell transition to start before unblocking the screen after display switch"
@@ -36,6 +46,17 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+  name: "respect_animation_clip"
+  namespace: "windowing_frontend"
+  description: "Fix missing clip transformation of animation"
+  bug: "376601866"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -111,6 +132,17 @@ flag {
 }
 
 flag {
+    name: "remove_activity_starter_dream_callback"
+    namespace: "windowing_frontend"
+    description: "Avoid a race with DreamManagerService callbacks for isDreaming by checking Activity state directly"
+    bug: "366452352"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+    is_fixed_read_only: true
+}
+
+flag {
     name: "supports_multi_instance_system_ui"
     is_exported: true
     namespace: "multitasking"
@@ -141,6 +173,23 @@ flag {
   namespace: "windowing_frontend"
   description: "Use higher priority for top-like processes"
   bug: "200769420"
+}
+
+flag {
+  name: "universal_resizable_by_default"
+  namespace: "windowing_frontend"
+  description: "The orientation, aspect ratio, resizability of activity will follow system behavior by default"
+  bug: "357141415"
+}
+
+flag {
+  name: "filter_irrelevant_input_device_change"
+  namespace: "windowing_frontend"
+  description: "Recompute display configuration only for necessary input device changes"
+  bug: "368461853"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -239,15 +288,6 @@ flag {
 }
 
 flag {
-  name: "custom_animations_behind_translucent"
-  namespace: "windowing_frontend"
-  description: "A change can use its own layer parameters to animate behind a translucent activity"
-  bug: "327332488"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-flag {
   name: "migrate_predictive_back_transition"
   namespace: "windowing_frontend"
   description: "Create transition when visibility change from predictive back"
@@ -267,4 +307,85 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "remove_starting_window_wait_for_multi_transitions"
+  namespace: "windowing_frontend"
+  description: "Avoid remove starting window too early when playing multiple transitions"
+  bug: "362347290"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "ensure_keyguard_does_transition_starting"
+  namespace: "windowing_frontend"
+  description: "Ensure that keyguard is the one starting transitions, instead of delegating to Core"
+  bug: "364930619"
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "predictive_back_priority_system_navigation_observer"
+    namespace: "systemui"
+    description: "PRIORITY_SYSTEM_NAVIGATION_OBSERVER predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
+}
+
+flag {
+    name: "predictive_back_timestamp_api"
+    namespace: "systemui"
+    description: "expose timestamp in BackEvent (API extension)"
+    is_fixed_read_only: true
+    bug: "362938401"
+}
+
+flag {
+    name: "predictive_back_swipe_edge_none_api"
+    namespace: "systemui"
+    description: "EDGE_NONE swipeEdge option in BackEvent"
+    is_fixed_read_only: true
+    bug: "362938401"
+}
+
+flag {
+  name: "unify_back_navigation_transition"
+  namespace: "windowing_frontend"
+  description: "Always create predictive back transition when start back gesture animation"
+  bug: "372230928"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "defer_predictive_animation_if_no_snapshot"
+  namespace: "windowing_frontend"
+  description: "If no snapshot for previous window, start animation until the client has draw."
+  bug: "374621014"
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "disallow_app_progress_embedded_window"
+  namespace: "windowing_frontend"
+  description: "Pilfer pointers when app transfer input gesture to embedded window."
+  bug: "365504126"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "predictive_back_system_override_callback"
+    namespace: "windowing_frontend"
+    description: "Provide pre-make predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
 }

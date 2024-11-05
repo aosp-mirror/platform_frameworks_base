@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"הפעלה של תכונת הקישוריות המשופרת."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"מסוף מקומי"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"הפעלה של אפליקציית מסוף המציעה גישה מקומית למעטפת"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"‏סביבת פיתוח של Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"‏הפעלת טרמינל Linux ב-Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏בדיקת HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏הגדרת האופן של בדיקת HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ניפוי באגים"</string>
@@ -416,7 +418,7 @@
     <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"הפעלה ליום אחד נוסף"</string>
     <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"מתבצעת השבתה אחרי יום אחד"</string>
     <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"בוצעה הפעלה ללא הגבלת זמן"</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"קנה מידה לאנימציה של חלון"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"מהירות אנימציית מעבר במסכים"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"קנה מידה לאנימציית מעבר"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"קנה מידה למשך זמן אנימציה"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"יצירת הדמיה של תצוגות משניות"</string>
@@ -582,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"הטלפון הזה"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"הטאבלט הזה"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"המחשב הזה (פנימי)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"רמקול של אביזר העגינה"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"מושבת"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"מופעל"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"צריך להפעיל מחדש את המכשיר כדי להחיל את השינוי. יש להפעיל מחדש עכשיו או לבטל."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"אוזניות חוטיות"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"אוזניות חוטיות"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"אודיו עם חיבור קווי"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"‏אודיו ב-USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"מיקרופון עם חיבור קווי"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"‏מיקרופון ב-USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"‏מיקרופון BT"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"פועלת"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"מצב כבוי"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"רשת ספק משתנה"</string>

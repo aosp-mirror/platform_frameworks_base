@@ -18,10 +18,9 @@ package com.android.compose.animation.scene.transformation
 
 import androidx.compose.ui.geometry.Offset
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.Scale
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /**
@@ -34,14 +33,11 @@ internal class DrawScale(
     private val scaleY: Float,
     private val pivot: Offset = Offset.Unspecified,
 ) : PropertyTransformation<Scale> {
-
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
-        value: Scale,
+        idleValue: Scale,
     ): Scale {
         return Scale(scaleX, scaleY, pivot)
     }

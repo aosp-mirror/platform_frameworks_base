@@ -605,7 +605,7 @@ public final class DreamManagerService extends SystemService {
     private ComponentName chooseDreamForUser(boolean doze, int userId) {
         if (doze) {
             ComponentName dozeComponent = getDozeComponent(userId);
-            return validateDream(dozeComponent) ? dozeComponent : null;
+            return validateDream(dozeComponent, userId) ? dozeComponent : null;
         }
 
         if (mSystemDreamComponent != null) {
@@ -616,11 +616,11 @@ public final class DreamManagerService extends SystemService {
         return dreams != null && dreams.length != 0 ? dreams[0] : null;
     }
 
-    private boolean validateDream(ComponentName component) {
+    private boolean validateDream(ComponentName component, int userId) {
         if (component == null) return false;
-        final ServiceInfo serviceInfo = getServiceInfo(component);
+        final ServiceInfo serviceInfo = getServiceInfo(component, userId);
         if (serviceInfo == null) {
-            Slog.w(TAG, "Dream " + component + " does not exist");
+            Slog.w(TAG, "Dream " + component + " does not exist on user " + userId);
             return false;
         } else if (serviceInfo.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP
                 && !BIND_DREAM_SERVICE.equals(serviceInfo.permission)) {
@@ -647,7 +647,7 @@ public final class DreamManagerService extends SystemService {
         List<ComponentName> validComponents = new ArrayList<>();
         if (components != null) {
             for (ComponentName component : components) {
-                if (validateDream(component)) {
+                if (validateDream(component, userId)) {
                     validComponents.add(component);
                 }
             }
@@ -718,9 +718,10 @@ public final class DreamManagerService extends SystemService {
         return userId == mainUserId;
     }
 
-    private ServiceInfo getServiceInfo(ComponentName name) {
+    private ServiceInfo getServiceInfo(ComponentName name, int userId) {
+        final Context userContext = mContext.createContextAsUser(UserHandle.of(userId), 0);
         try {
-            return name != null ? mContext.getPackageManager().getServiceInfo(name,
+            return name != null ? userContext.getPackageManager().getServiceInfo(name,
                     PackageManager.MATCH_DEBUG_TRIAGED_MISSING) : null;
         } catch (NameNotFoundException e) {
             return null;
@@ -813,7 +814,7 @@ public final class DreamManagerService extends SystemService {
 
     private void writePulseGestureEnabled() {
         ComponentName name = getDozeComponent();
-        boolean dozeEnabled = validateDream(name);
+        boolean dozeEnabled = validateDream(name, ActivityManager.getCurrentUser());
         LocalServices.getService(InputManagerInternal.class).setPulseGestureEnabled(dozeEnabled);
     }
 

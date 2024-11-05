@@ -29,6 +29,7 @@ import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.fixes.SuggestedFix;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.util.ASTHelpers;
+import com.google.errorprone.util.ErrorProneComment;
 import com.google.errorprone.util.ErrorProneToken;
 import com.google.errorprone.util.ErrorProneTokens;
 import com.sun.source.tree.ClassTree;
@@ -37,7 +38,6 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
-import com.sun.tools.javac.parser.Tokens;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class HideInCommentsChecker extends BugChecker implements
         final Map<Integer, Tree> javadocableTrees = findJavadocableTrees(tree, state);
         final String sourceCode = state.getSourceCode().toString();
         for (ErrorProneToken token : ErrorProneTokens.getTokens(sourceCode, state.context)) {
-            for (Tokens.Comment comment : token.comments()) {
+            for (ErrorProneComment comment : token.comments()) {
                 if (!javadocableTrees.containsKey(token.pos())) {
                     continue;
                 }
@@ -81,7 +81,7 @@ public class HideInCommentsChecker extends BugChecker implements
         return NO_MATCH;
     }
 
-    private static Optional<SuggestedFix> generateFix(Tokens.Comment comment) {
+    private static Optional<SuggestedFix> generateFix(ErrorProneComment comment) {
         final String text = comment.getText();
         if (text.startsWith("/**")) {
             return Optional.empty();

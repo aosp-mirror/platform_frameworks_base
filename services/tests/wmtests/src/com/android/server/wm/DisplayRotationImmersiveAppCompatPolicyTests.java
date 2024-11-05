@@ -26,7 +26,6 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertFalse;
@@ -73,7 +72,6 @@ public class DisplayRotationImmersiveAppCompatPolicyTests extends WindowTestsBas
         when(mMockWindowState.getRequestedVisibleTypes()).thenReturn(0);
         when(mMockActivityRecord.findMainWindow()).thenReturn(mMockWindowState);
 
-        spy(mDisplayContent);
         doReturn(mMockActivityRecord).when(mDisplayContent).topRunningActivity();
         when(mDisplayContent.getIgnoreOrientationRequest()).thenReturn(true);
 

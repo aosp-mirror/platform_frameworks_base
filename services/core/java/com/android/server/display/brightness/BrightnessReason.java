@@ -50,8 +50,10 @@ public final class BrightnessReason {
     public static final int MODIFIER_THROTTLED = 0x8;
     public static final int MODIFIER_MIN_LUX = 0x10;
     public static final int MODIFIER_MIN_USER_SET_LOWER_BOUND = 0x20;
+    public static final int MODIFIER_STYLUS_UNDER_USE = 0x40;
     public static final int MODIFIER_MASK = MODIFIER_DIMMED | MODIFIER_LOW_POWER | MODIFIER_HDR
-            | MODIFIER_THROTTLED | MODIFIER_MIN_LUX | MODIFIER_MIN_USER_SET_LOWER_BOUND;
+            | MODIFIER_THROTTLED | MODIFIER_MIN_LUX | MODIFIER_MIN_USER_SET_LOWER_BOUND
+            | MODIFIER_STYLUS_UNDER_USE;
 
     // ADJUSTMENT_*
     // These things can happen at any point, even if the main brightness reason doesn't
@@ -157,6 +159,9 @@ public final class BrightnessReason {
         }
         if ((mModifier & MODIFIER_MIN_USER_SET_LOWER_BOUND) != 0) {
             sb.append(" user_min_pref");
+        }
+        if ((mModifier & MODIFIER_STYLUS_UNDER_USE) != 0) {
+            sb.append(" stylus_under_use");
         }
         int strlen = sb.length();
         if (sb.charAt(strlen - 1) == '[') {

@@ -28,7 +28,7 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_V
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 
 import android.compat.testing.PlatformCompatChangeRule;
 import android.platform.test.annotations.DisableFlags;
@@ -218,7 +218,7 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
     }
 
     @Test
-    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testShouldApplyCameraCompatFreeformTreatment_flagIsDisabled_returnsFalse() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponentInNewTask();
@@ -229,7 +229,7 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
 
     @Test
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testShouldApplyCameraCompatFreeformTreatment_overrideEnabled_returnsFalse() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponentInNewTask();
@@ -240,7 +240,7 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
 
     @Test
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testShouldApplyCameraCompatFreeformTreatment_disabledByOverride_returnsFalse() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponentInNewTask();
@@ -250,7 +250,7 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testShouldApplyCameraCompatFreeformTreatment_notDisabledByOverride_returnsTrue() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponentInNewTask();

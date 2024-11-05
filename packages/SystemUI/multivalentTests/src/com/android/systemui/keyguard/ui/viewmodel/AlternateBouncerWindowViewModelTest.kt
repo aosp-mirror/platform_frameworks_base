@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
@@ -34,7 +33,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
@@ -49,7 +47,6 @@ class AlternateBouncerWindowViewModelTest : SysuiTestCase() {
     @Test
     fun alternateBouncerTransition_alternateBouncerWindowRequiredTrue() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
             val alternateBouncerWindowRequired by
                 collectLastValue(underTest.alternateBouncerWindowRequired)
             fingerprintPropertyRepository.supportsUdfps()
@@ -64,28 +61,7 @@ class AlternateBouncerWindowViewModelTest : SysuiTestCase() {
             assertThat(alternateBouncerWindowRequired).isTrue()
 
             transitionRepository.sendTransitionSteps(
-                listOf(
-                    stepFromAlternateBouncer(1.0f, TransitionState.FINISHED),
-                ),
-                testScope,
-            )
-            assertThat(alternateBouncerWindowRequired).isFalse()
-        }
-
-    @Test
-    fun deviceEntryUdfpsFlagDisabled_alternateBouncerWindowRequiredFalse() =
-        testScope.runTest {
-            mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-            val alternateBouncerWindowRequired by
-                collectLastValue(underTest.alternateBouncerWindowRequired)
-            fingerprintPropertyRepository.supportsUdfps()
-            transitionRepository.sendTransitionSteps(
-                listOf(
-                    stepFromAlternateBouncer(0f, TransitionState.STARTED),
-                    stepFromAlternateBouncer(.4f),
-                    stepFromAlternateBouncer(.6f),
-                    stepFromAlternateBouncer(1f),
-                ),
+                listOf(stepFromAlternateBouncer(1.0f, TransitionState.FINISHED)),
                 testScope,
             )
             assertThat(alternateBouncerWindowRequired).isFalse()
@@ -94,7 +70,6 @@ class AlternateBouncerWindowViewModelTest : SysuiTestCase() {
     @Test
     fun lockscreenTransition_alternateBouncerWindowRequiredFalse() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
             val alternateBouncerWindowRequired by
                 collectLastValue(underTest.alternateBouncerWindowRequired)
             fingerprintPropertyRepository.supportsUdfps()
@@ -113,7 +88,6 @@ class AlternateBouncerWindowViewModelTest : SysuiTestCase() {
     @Test
     fun rearFps_alternateBouncerWindowRequiredFalse() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
             val alternateBouncerWindowRequired by
                 collectLastValue(underTest.alternateBouncerWindowRequired)
             fingerprintPropertyRepository.supportsRearFps()
@@ -131,7 +105,7 @@ class AlternateBouncerWindowViewModelTest : SysuiTestCase() {
 
     private fun stepFromAlternateBouncer(
         value: Float,
-        state: TransitionState = TransitionState.RUNNING
+        state: TransitionState = TransitionState.RUNNING,
     ): TransitionStep {
         return step(
             from = KeyguardState.ALTERNATE_BOUNCER,
@@ -143,7 +117,7 @@ class AlternateBouncerWindowViewModelTest : SysuiTestCase() {
 
     private fun stepFromDozingToLockscreen(
         value: Float,
-        state: TransitionState = TransitionState.RUNNING
+        state: TransitionState = TransitionState.RUNNING,
     ): TransitionStep {
         return step(
             from = KeyguardState.DOZING,
@@ -157,14 +131,14 @@ class AlternateBouncerWindowViewModelTest : SysuiTestCase() {
         from: KeyguardState,
         to: KeyguardState,
         value: Float,
-        transitionState: TransitionState
+        transitionState: TransitionState,
     ): TransitionStep {
         return TransitionStep(
             from = from,
             to = to,
             value = value,
             transitionState = transitionState,
-            ownerName = "AlternateBouncerViewModelTest"
+            ownerName = "AlternateBouncerViewModelTest",
         )
     }
 }

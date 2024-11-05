@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Отговорът ви не може да бъде потвърден, тъй като приложение прикрива заявката за разрешение."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Докоснете дадена функция, за да започнете да я използвате:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Избиране на функции, които да използвате с бутона за достъпност"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Избиране на функции, които да използвате с прекия път чрез бутоните за силата на звука"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Изключихте <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редактиране на преките пътища"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
@@ -1944,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Изкл."</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Всички календари"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> заглушава някои звуци"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Възникна вътрешен проблем с устройството ви. То може да е нестабилно, докато не възстановите фабричните настройки."</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Настройте заключване на екрана"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Заключване на екрана"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"За да ползвате частното си пространство, настройте заключване на екрана"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"За да изтриете личното пространство, настройте заключване на екрана"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложението не е достъпно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"В момента няма достъп до <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> не е налице"</string>
@@ -2129,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"При обаждания и известия устройството ще вибрира"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Обажданията и известията ще бъдат заглушени"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Промени в системата"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не безпокойте"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Ново: Режимът „Не безпокойте“ скрива известията"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Докоснете, за да научите повече и да извършите промени."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Настройките за „Не безпокойте“ са променени"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Докоснете, за да проверите какво е блокирано."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Преглед на настройките за известия"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"От Android 13 инсталираните от вас приложения трябва да получат разрешението ви, за да изпращат известия. Докоснете, за да промените това разрешение за съществуващите приложения."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Напомняне по-късно"</string>
@@ -2408,9 +2405,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"За клавиатурната подредба са зададени <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> и <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Докоснете за промяна."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физическите клавиатури са конфигурирани"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Докоснете за преглед на клавиатурите"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Частни"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Частен"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Клониране"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Служебни"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Служебен"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Служебни 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Служебни 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Тестване"</string>
@@ -2429,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Изпращайте и получавайте съобщения без мобилна или Wi-Fi мрежа"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Отваряне на Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Начин на работа"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Изчаква..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Повторно настройване на „Отключване с отпечатък“"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> вече не може да се разпознае."</string>

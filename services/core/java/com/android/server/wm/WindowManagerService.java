@@ -101,18 +101,18 @@ import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ER
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.window.WindowProviderService.isWindowProviderService;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
-import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_BOOT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IME;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SCREEN_ON;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STARTING_WINDOW;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_MOVEMENT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_ERROR;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_TRANSACTIONS;
 import static com.android.internal.util.FrameworkStatsLog.SENSITIVE_NOTIFICATION_APP_PROTECTION_APPLIED;
 import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
@@ -335,7 +335,7 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.protolog.LegacyProtoLogImpl;
 import com.android.internal.protolog.ProtoLog;
-import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -1186,9 +1186,13 @@ public class WindowManagerService extends IWindowManager.Stub
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, WindowManagerPolicy policy,
             ActivityTaskManagerService atm) {
+        // Using SysUI context to have access to Material colors extracted from Wallpaper.
+        final AppCompatConfiguration appCompat = new AppCompatConfiguration(
+                ActivityThread.currentActivityThread().getSystemUiContext());
+
         final WindowManagerService wms = main(context, im, showBootMsgs, policy, atm,
                 new DisplayWindowSettingsProvider(), SurfaceControl.Transaction::new,
-                SurfaceControl.Builder::new);
+                SurfaceControl.Builder::new, appCompat);
         WindowManagerGlobal.setWindowManagerServiceForSystemProcess(wms);
         return wms;
     }
@@ -1202,12 +1206,14 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
             DisplayWindowSettingsProvider displayWindowSettingsProvider,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<SurfaceControl.Builder> surfaceControlFactory) {
+            Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            AppCompatConfiguration appCompat) {
+
         final WindowManagerService[] wms = new WindowManagerService[1];
         DisplayThread.getHandler().runWithScissors(() ->
                 wms[0] = new WindowManagerService(context, im, showBootMsgs, policy, atm,
                         displayWindowSettingsProvider, transactionFactory,
-                        surfaceControlFactory), 0);
+                        surfaceControlFactory, appCompat), 0);
         return wms[0];
     }
 
@@ -1231,7 +1237,8 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
             DisplayWindowSettingsProvider displayWindowSettingsProvider,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<SurfaceControl.Builder> surfaceControlFactory) {
+            Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            AppCompatConfiguration appCompat) {
         installLock(this, INDEX_WINDOW);
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
@@ -1283,9 +1290,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     | WindowInsets.Type.navigationBars();
         }
 
-        mAppCompatConfiguration = new AppCompatConfiguration(
-                // Using SysUI context to have access to Material colors extracted from Wallpaper.
-                ActivityThread.currentActivityThread().getSystemUiContext());
+        mAppCompatConfiguration = appCompat;
 
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -2104,7 +2109,7 @@ public class WindowManagerService extends IWindowManager.Stub
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Removing %s from %s", win, token);
         // Window will already be removed from token before this post clean-up method is called.
         if (token.isEmpty() && !token.mPersistOnEmpty) {
-            token.removeImmediately();
+            token.removeIfPossible();
         }
 
         if (win.mActivityRecord != null) {
@@ -3416,9 +3421,11 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
         synchronized (mGlobalLock) {
+            final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
             if (!dreamHandlesConfirmKeys()
-                    && getDefaultDisplayContentLocked().getDisplayPolicy().isShowingDreamLw()) {
-                mAtmService.mTaskSupervisor.wakeUp("leaveDream");
+                    && defaultDisplayContent.getDisplayPolicy().isShowingDreamLw()) {
+                mAtmService.mTaskSupervisor.wakeUp(
+                        defaultDisplayContent.getDisplayId(), "leaveDream");
             }
             mPolicy.dismissKeyguardLw(callback, message);
         }
@@ -3885,8 +3892,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized (mGlobalLock) {
             mAtmService.getTransitionController().mIsWaitingForDisplayEnabled = false;
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Notified TransitionController "
-                    + "that the display is ready.");
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Notified TransitionController that the display is ready.");
         }
     }
 
@@ -6805,30 +6812,36 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param logLevel  Determines the amount of data to be written to the Protobuf.
      */
     void dumpDebugLocked(ProtoOutputStream proto, @WindowTracingLogLevel int logLevel) {
-        mPolicy.dumpDebug(proto, POLICY);
-        mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
-        final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
-        if (topFocusedDisplayContent.mCurrentFocus != null) {
-            topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
-        }
-        if (topFocusedDisplayContent.mFocusedApp != null) {
-            topFocusedDisplayContent.mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
-        }
-        final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
-        if (imeWindow != null) {
-            imeWindow.writeIdentifierToProto(proto, INPUT_METHOD_WINDOW);
-        }
-        proto.write(DISPLAY_FROZEN, mDisplayFrozen);
-        proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
-        proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "dumpDebugLocked");
+        try {
+            mPolicy.dumpDebug(proto, POLICY);
+            mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
+            final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
+            if (topFocusedDisplayContent.mCurrentFocus != null) {
+                topFocusedDisplayContent.mCurrentFocus
+                        .writeIdentifierToProto(proto, FOCUSED_WINDOW);
+            }
+            if (topFocusedDisplayContent.mFocusedApp != null) {
+                topFocusedDisplayContent.mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
+            }
+            final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
+            if (imeWindow != null) {
+                imeWindow.writeIdentifierToProto(proto, INPUT_METHOD_WINDOW);
+            }
+            proto.write(DISPLAY_FROZEN, mDisplayFrozen);
+            proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
+            proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
 
-        // This is always true for now since we still update the window frames at the server side.
-        // Once we move the window layout to the client side, this can be false when we are waiting
-        // for the frames.
-        proto.write(WINDOW_FRAMES_VALID, true);
+            // This is always true for now since we still update the window frames at the server
+            // side. Once we move the window layout to the client side, this can be false when we
+            // are waiting for the frames.
+            proto.write(WINDOW_FRAMES_VALID, true);
 
-        // Write the BackNavigationController's state into the protocol buffer
-        mAtmService.mBackNavigationController.dumpDebug(proto, BACK_NAVIGATION);
+            // Write the BackNavigationController's state into the protocol buffer
+            mAtmService.mBackNavigationController.dumpDebug(proto, BACK_NAVIGATION);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
     }
 
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
@@ -8371,6 +8384,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setIgnoreActivitySizeRestrictionsOnDisplay(@NonNull String displayUniqueId,
+                int displayType, boolean enabled) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mGlobalLock) {
+                    mDisplayWindowSettings.setIgnoreActivitySizeRestrictionsOnDisplayLocked(
+                            displayUniqueId, displayType, enabled);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
+        @Override
         public void clearDisplaySettings(String displayUniqueId, int displayType) {
             final long origId = Binder.clearCallingIdentity();
             try {
@@ -9002,7 +9029,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final boolean isInputTargetNotFocused =
                 mFocusedInputTarget != t && mFocusedInputTarget != null;
-        if (!isInputTargetNotFocused) {
+        final boolean isTouchOnFocusedDisplay = mFocusedInputTarget != null
+                && t.getDisplayId() == mFocusedInputTarget.getDisplayId();
+        if (!(isInputTargetNotFocused && isTouchOnFocusedDisplay)) {
             return false;
         }
 
@@ -9207,6 +9236,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final InputApplicationHandle applicationHandle;
         final String name;
         Objects.requireNonNull(outInputChannel);
+        Objects.requireNonNull(inputTransferToken);
+
         synchronized (mGlobalLock) {
             WindowState hostWindowState = hostInputTransferToken != null
                     ? mInputToWindowMap.get(hostInputTransferToken.getToken()) : null;
@@ -9231,6 +9262,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Objects.requireNonNull(transferFromToken);
         Objects.requireNonNull(transferToToken);
 
+        final int callingUid = Binder.getCallingUid();
         final long identity = Binder.clearCallingIdentity();
         boolean didTransfer;
         try {
@@ -9240,12 +9272,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 // represents an embedded window so transfer from host to embedded.
                 WindowState windowStateTo = mInputToWindowMap.get(transferToToken.getToken());
                 if (windowStateTo != null) {
-                    didTransfer = mEmbeddedWindowController.transferToHost(transferFromToken,
+                    didTransfer = mEmbeddedWindowController.transferToHost(callingUid,
+                            transferFromToken,
                             windowStateTo);
                 } else {
                     WindowState windowStateFrom = mInputToWindowMap.get(
                             transferFromToken.getToken());
-                    didTransfer = mEmbeddedWindowController.transferToEmbedded(windowStateFrom,
+                    didTransfer = mEmbeddedWindowController.transferToEmbedded(callingUid,
+                            windowStateFrom,
                             transferToToken);
                 }
             }
@@ -10155,6 +10189,22 @@ public class WindowManagerService extends IWindowManager.Stub
         final long identity = Binder.clearCallingIdentity();
         try {
             return mAtmService.mTaskSupervisor.isDeviceOwnerUid(displayId, callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Returns whether the display with the given ID is trusted.
+     */
+    @Override
+    public boolean isDisplayTrusted(int displayId) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                DisplayContent dc = mRoot.getDisplayContent(displayId);
+                return dc != null && dc.isTrusted();
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

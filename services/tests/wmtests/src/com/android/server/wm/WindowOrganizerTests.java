@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.app.ActivityManager.START_CANCELED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -28,6 +29,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
@@ -37,6 +40,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
@@ -61,6 +65,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.quality.Strictness.LENIENT;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -69,6 +74,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
@@ -87,6 +93,7 @@ import android.view.WindowInsets;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskOrganizer;
 import android.window.IWindowContainerTransactionCallback;
+import android.window.RemoteTransition;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
@@ -102,6 +109,7 @@ import com.android.window.flags.Flags;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -635,6 +643,66 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(taskFragment.isFocusable());
         assertTrue(taskFragment.isTopActivityFocusable());
         assertFalse(taskFragment.isForceTranslucent());
+    }
+
+    @Test
+    public void testStartActivityInTaskFragment_checkCallerPermission() {
+        final ActivityStartController activityStartController =
+                mWm.mAtmService.getActivityStartController();
+        spyOn(activityStartController);
+        final ArgumentCaptor<SafeActivityOptions> activityOptionsCaptor =
+                ArgumentCaptor.forClass(SafeActivityOptions.class);
+
+        final int uid = Binder.getCallingUid();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+        final TaskFragmentOrganizer organizer =
+                createTaskFragmentOrganizer(t, true /* isSystemOrganizer */);
+        final IBinder token = new Binder();
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(rootTask)
+                .setFragmentToken(token)
+                .setOrganizer(organizer)
+                .createActivityCount(1)
+                .build();
+        mWm.mAtmService.mWindowOrganizerController.mLaunchTaskFragments.put(token, taskFragment);
+        final ActivityRecord ownerActivity = taskFragment.getTopMostActivity();
+
+        // Start Activity in TaskFragment with remote transition.
+        final RemoteTransition transition = mock(RemoteTransition.class);
+        final ActivityOptions options = ActivityOptions.makeRemoteTransition(transition);
+        final Intent intent = new Intent();
+        t.startActivityInTaskFragment(token, ownerActivity.token, intent, options.toBundle());
+        mWm.mAtmService.mWindowOrganizerController.applyTaskFragmentTransactionLocked(
+                t, TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_OPEN,
+                false /* shouldApplyIndependently */, null /* remoteTransition */);
+
+        // Get the ActivityOptions.
+        verify(activityStartController).startActivityInTaskFragment(
+                eq(taskFragment), eq(intent), activityOptionsCaptor.capture(),
+                eq(ownerActivity.token), eq(uid), anyInt(), any());
+        final SafeActivityOptions safeActivityOptions = activityOptionsCaptor.getValue();
+
+        final MockitoSession session =
+                mockitoSession().strictness(LENIENT).spyStatic(ActivityTaskManagerService.class)
+                        .startMocking();
+        try {
+            // Without the CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS permission, start activity with
+            // remote transition is not allowed.
+            doReturn(PERMISSION_DENIED).when(() -> ActivityTaskManagerService.checkPermission(
+                    eq(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS), anyInt(), eq(uid)));
+            assertThrows(SecurityException.class,
+                    () -> safeActivityOptions.getOptions(mWm.mAtmService.mTaskSupervisor));
+
+            // With the CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS permission, start activity with
+            // remote transition is allowed.
+            doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
+                    eq(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS), anyInt(), eq(uid)));
+            safeActivityOptions.getOptions(mWm.mAtmService.mTaskSupervisor);
+        } finally {
+            session.finishMocking();
+        }
     }
 
     @Test

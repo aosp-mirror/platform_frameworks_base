@@ -61,6 +61,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIcon.Shape;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Flags;
+import com.android.systemui.modes.shared.ModesUiIcons;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.NotificationContentDescription;
 import com.android.systemui.statusbar.notification.NotificationDozeHelper;
@@ -215,7 +216,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         // We scale notification icons (on the left) plus icons on the right that explicitly
         // want FIXED_SPACE.
         boolean useNonSystemIconScaling = isNotification()
-                || (usesModeIcons() && mIcon != null && mIcon.shape == Shape.FIXED_SPACE);
+                || (ModesUiIcons.isEnabled() && mIcon != null && mIcon.shape == Shape.FIXED_SPACE);
 
         if (useNonSystemIconScaling) {
             updateIconScaleForNonSystemIcons();
@@ -415,7 +416,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);
         }
-        if (usesModeIcons() && icon.shape == Shape.FIXED_SPACE) {
+        if (ModesUiIcons.isEnabled() && icon.shape == Shape.FIXED_SPACE) {
             setScaleType(ScaleType.FIT_CENTER);
         }
         if (!visibilityEquals) {
@@ -506,7 +507,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     @Nullable
     private Drawable loadDrawable(Context context, StatusBarIcon statusBarIcon) {
-        if (usesModeIcons() && statusBarIcon.preloadedIcon != null) {
+        if (ModesUiIcons.isEnabled() && statusBarIcon.preloadedIcon != null) {
             Drawable.ConstantState cached = statusBarIcon.preloadedIcon.getConstantState();
             if (cached != null) {
                 return cached.newDrawable(mContext.getResources()).mutate();
@@ -1040,10 +1041,5 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      */
     public boolean showsConversation() {
         return mShowsConversation;
-    }
-
-    private static boolean usesModeIcons() {
-        return android.app.Flags.modesApi() && android.app.Flags.modesUi()
-                && android.app.Flags.modesUiIcons();
     }
 }

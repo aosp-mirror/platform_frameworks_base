@@ -60,7 +60,12 @@ class AudioManagerEventsReceiverTest {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        underTest = AudioManagerEventsReceiverImpl(context, testScope.backgroundScope)
+        underTest =
+            AudioManagerEventsReceiverImpl(
+                context,
+                testScope.backgroundScope,
+                testScope.testScheduler,
+            )
     }
 
     @Test

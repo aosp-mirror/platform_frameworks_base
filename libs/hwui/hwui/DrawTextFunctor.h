@@ -73,6 +73,7 @@ static void simplifyPaint(int color, Paint* paint) {
     }
     paint->setStrokeJoin(SkPaint::kRound_Join);
     paint->setLooper(nullptr);
+    paint->setBlendMode(SkBlendMode::kSrcOver);
 }
 
 class DrawTextFunctor {

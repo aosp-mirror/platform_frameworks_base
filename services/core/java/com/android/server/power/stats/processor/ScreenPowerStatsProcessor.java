@@ -89,14 +89,15 @@ class ScreenPowerStatsProcessor extends PowerStatsProcessor {
             return true;
         }
 
-        mLastUsedDescriptor = descriptor;
-        mStatsLayout = new ScreenPowerStatsLayout(descriptor);
-        if (mStatsLayout.getDisplayCount() != mDisplayCount) {
-            Slog.e(TAG, "Incompatible number of displays: " + mStatsLayout.getDisplayCount()
+        ScreenPowerStatsLayout statsLayout = new ScreenPowerStatsLayout(descriptor);
+        if (statsLayout.getDisplayCount() != mDisplayCount) {
+            Slog.e(TAG, "Incompatible number of displays: " + statsLayout.getDisplayCount()
                     + ", expected: " + mDisplayCount);
             return false;
         }
 
+        mLastUsedDescriptor = descriptor;
+        mStatsLayout = statsLayout;
         mTmpDeviceStatsArray = new long[descriptor.statsArrayLength];
         mTmpUidStatsArray = new long[descriptor.uidStatsArrayLength];
         return true;

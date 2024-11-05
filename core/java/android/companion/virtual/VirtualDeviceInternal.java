@@ -26,7 +26,6 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.virtual.audio.VirtualAudioDevice;
@@ -251,6 +250,22 @@ public class VirtualDeviceInternal {
         }
     }
 
+    void goToSleep() {
+        try {
+            mVirtualDevice.goToSleep();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void wakeUp() {
+        try {
+            mVirtualDevice.wakeUp();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     void launchPendingIntent(
             int displayId,
             @NonNull PendingIntent pendingIntent,
@@ -281,14 +296,12 @@ public class VirtualDeviceInternal {
                 new DisplayManagerGlobal.VirtualDisplayCallback(callback, executor);
         final int displayId;
         try {
-            displayId = mService.createVirtualDisplay(config, callbackWrapper, mVirtualDevice,
-                    mContext.getPackageName());
+            displayId = mVirtualDevice.createVirtualDisplay(config, callbackWrapper);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
         DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
-        return displayManager.createVirtualDisplayWrapper(config, callbackWrapper,
-                displayId);
+        return displayManager.createVirtualDisplayWrapper(config, callbackWrapper, displayId);
     }
 
     void close() {
@@ -407,7 +420,6 @@ public class VirtualDeviceInternal {
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualStylus createVirtualStylus(@NonNull VirtualStylusConfig config) {
         try {
@@ -420,7 +432,6 @@ public class VirtualDeviceInternal {
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualRotaryEncoder createVirtualRotaryEncoder(@NonNull VirtualRotaryEncoderConfig config) {
         try {
@@ -471,7 +482,6 @@ public class VirtualDeviceInternal {
         return mVirtualAudioDevice;
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualCamera createVirtualCamera(@NonNull VirtualCameraConfig config) {
         try {

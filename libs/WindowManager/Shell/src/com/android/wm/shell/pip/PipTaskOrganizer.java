@@ -960,7 +960,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final SurfaceControl.Transaction boundsChangeTx =
                 mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
-                .crop(boundsChangeTx, mLeash, destinationBounds)
+                .cropAndPosition(boundsChangeTx, mLeash, destinationBounds)
                 .round(boundsChangeTx, mLeash, true /* applyCornerRadius */);
 
         mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
@@ -988,7 +988,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .resetScale(tx, mLeash, destinationBounds)
-                .crop(tx, mLeash, destinationBounds)
+                .cropAndPosition(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, isInPip());
         // The animation is finished in the Launcher and here we directly apply the final touch.
         applyEnterPipSyncTransaction(destinationBounds, () -> {
@@ -1525,7 +1525,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipBoundsState.setBounds(toBounds);
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
-                .crop(tx, mLeash, toBounds)
+                .cropAndPosition(tx, mLeash, toBounds)
                 .round(tx, mLeash, mPipTransitionState.isInPip());
         if (shouldSyncPipTransactionWithMenu()) {
             mPipMenuController.resizePipMenu(mLeash, tx, toBounds);
@@ -1628,7 +1628,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             Rect destinationBounds) {
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
-                .crop(tx, mLeash, destinationBounds)
+                .cropAndPosition(tx, mLeash, destinationBounds)
                 .resetScale(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, mPipTransitionState.isInPip());
         return tx;
@@ -2033,7 +2033,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         tx.apply();
     }
 
-    private void cancelCurrentAnimator() {
+    /**
+     * Cancels the currently running animator if there is one and removes an overlay if present.
+     */
+    public void cancelCurrentAnimator() {
         final PipAnimationController.PipTransitionAnimator<?> animator =
                 mPipAnimationController.getCurrentAnimator();
         // remove any overlays if present

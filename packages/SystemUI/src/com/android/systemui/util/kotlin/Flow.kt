@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Returns a new [Flow] that combines the two most recent emissions from [this] using [transform].
@@ -168,7 +168,7 @@ fun <A, B, C> Flow<A>.sample(other: Flow<B>, transform: suspend (A, B) -> C): Fl
     coroutineScope {
         val noVal = Any()
         val sampledRef = AtomicReference(noVal)
-        val job = launch(Dispatchers.Unconfined) { other.collect { sampledRef.set(it) } }
+        val job = launch(context = Dispatchers.Unconfined) { other.collect { sampledRef.set(it) } }
         collect {
             val sampled = sampledRef.get()
             if (sampled != noVal) {

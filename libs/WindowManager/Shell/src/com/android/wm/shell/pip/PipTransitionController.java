@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_PIP;
 
@@ -346,16 +347,29 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         return false;
     }
 
+    /**
+     * Gets a change amongst the transition targets that is in a different final orientation than
+     * the display, signalling a potential fixed rotation transition.
+     */
+    @Nullable
+    public TransitionInfo.Change findFixedRotationChange(@NonNull TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getEndFixedRotation() != ROTATION_UNDEFINED) {
+                return change;
+            }
+        }
+        return null;
+    }
+
     /** End the currently-playing PiP animation. */
     public void end() {
     }
 
     /**
      * Finish the current transition if possible.
-     *
-     * @param tx transaction to be applied with a potentially new draw after finishing.
      */
-    public void finishTransition(@Nullable SurfaceControl.Transaction tx) {
+    public void finishTransition() {
     }
 
     /**

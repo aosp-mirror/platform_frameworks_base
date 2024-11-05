@@ -16,6 +16,7 @@
 
 package com.android.systemui.education.data.model
 
+import com.android.systemui.contextualeducation.GestureType
 import java.time.Instant
 
 /**
@@ -23,6 +24,7 @@ import java.time.Instant
  * gesture stores its own model separately.
  */
 data class GestureEduModel(
+    val gestureType: GestureType,
     val signalCount: Int = 0,
     val educationShownCount: Int = 0,
     val lastShortcutTriggeredTime: Instant? = null,

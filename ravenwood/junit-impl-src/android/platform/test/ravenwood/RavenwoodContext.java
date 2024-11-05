@@ -60,6 +60,8 @@ public class RavenwoodContext extends RavenwoodBaseContext {
     private final File mCacheDir;
     private final Supplier<Resources> mResourcesSupplier;
 
+    private RavenwoodContext mAppContext;
+
     @GuardedBy("mLock")
     private Resources mResources;
 
@@ -77,8 +79,8 @@ public class RavenwoodContext extends RavenwoodBaseContext {
         mPackageName = packageName;
         mMainThread = mainThread;
         mResourcesSupplier = resourcesSupplier;
-        mFilesDir = createTempDir("files-dir");
-        mCacheDir = createTempDir("cache-dir");
+        mFilesDir = createTempDir(packageName + "_files-dir");
+        mCacheDir = createTempDir(packageName + "_cache-dir");
 
         // Services provided by a typical shipping device
         registerService(ClipboardManager.class,
@@ -131,34 +133,35 @@ public class RavenwoodContext extends RavenwoodBaseContext {
     @Override
     public Looper getMainLooper() {
         Objects.requireNonNull(mMainThread,
-                "Test must request setProvideMainThread() via RavenwoodRule");
+                "Test must request setProvideMainThread() via RavenwoodConfig");
         return mMainThread.getLooper();
     }
 
     @Override
     public Handler getMainThreadHandler() {
         Objects.requireNonNull(mMainThread,
-                "Test must request setProvideMainThread() via RavenwoodRule");
+                "Test must request setProvideMainThread() via RavenwoodConfig");
         return mMainThread.getThreadHandler();
     }
 
     @Override
     public Executor getMainExecutor() {
         Objects.requireNonNull(mMainThread,
-                "Test must request setProvideMainThread() via RavenwoodRule");
+                "Test must request setProvideMainThread() via RavenwoodConfig");
         return mMainThread.getThreadExecutor();
     }
 
     @Override
     public String getPackageName() {
         return Objects.requireNonNull(mPackageName,
-                "Test must request setPackageName() via RavenwoodRule");
+                "Test must request setPackageName() (or setTargetPackageName())"
+                + " via RavenwoodConfig");
     }
 
     @Override
     public String getOpPackageName() {
         return Objects.requireNonNull(mPackageName,
-                "Test must request setPackageName() via RavenwoodRule");
+                "Test must request setPackageName() via RavenwoodConfig");
     }
 
     @Override
@@ -225,6 +228,15 @@ public class RavenwoodContext extends RavenwoodBaseContext {
     @Override
     public String getPackageResourcePath() {
         return new File(RAVENWOOD_RESOURCE_APK).getAbsolutePath();
+    }
+
+    public void setApplicationContext(RavenwoodContext appContext) {
+        mAppContext = appContext;
+    }
+
+    @Override
+    public Context getApplicationContext() {
+        return mAppContext;
     }
 
     /**

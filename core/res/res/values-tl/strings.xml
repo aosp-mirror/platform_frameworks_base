@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Naka-off"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>, <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Anumang kalendaryo"</string>
     <string name="muted_by" msgid="91464083490094950">"Minu-mute ng <xliff:g id="THIRD_PARTY">%1$s</xliff:g> ang ilang tunog"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"May internal na problema sa iyong device, at maaaring hindi ito maging stable hanggang sa i-reset mo ang factory data."</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Magtakda ng lock ng screen"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Itakda ang lock ng screen"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Para gamitin ang iyong pribadong space, magtakda ng lock ng screen sa device na ito."</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Para mag-delete ng pribadong space, magtakda ng lock ng screen sa device na ito"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Hindi available ang app"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Hindi available sa ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Hindi available ang <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Magva-vibrate ang mga tawag at notification"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Mamu-mute ang mga tawag at notification"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Mga pagbabago sa system"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Huwag Istorbohin"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Bago: Itinatago ng Huwag Istorbohin ang mga notification"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"I-tap para matuto pa at baguhin."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Binago ang Huwag Istorbohin"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"I-tap para tingnan kung ano ang naka-block."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Suriin ang mga setting ng notification"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Simula sa Android 13, kakailanganin na ng mga app na ii-install mo ang iyong pahintulot para makapagpadala ng mga notification. I-tap para baguhin ang pahintulot na ito para sa mga kasalukuyang app."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ipaalala mamaya"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Magpadala at tumanggap ng mga mensahe nang walang mobile o Wi-Fi network"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buksan ang Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Paano ito gumagana"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nakabinbin..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"I-set up ulit ang Pag-unlock Gamit ang Fingerprint"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Hindi na makilala ang <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
@@ -2438,7 +2444,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Hindi na makilala ang iyong face model. I-set up ulit ang Pag-unlock Gamit ang Mukha."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"I-set up"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Huwag muna"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm para kay/sa <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm para kay <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Magpalit ng user"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"I-mute"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"I-tap para i-mute ang tunog"</string>

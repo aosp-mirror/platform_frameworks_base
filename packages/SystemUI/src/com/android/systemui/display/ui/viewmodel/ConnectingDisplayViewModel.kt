@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Shows/hides a dialog to allow the user to decide whether to use the external display for
@@ -79,7 +79,7 @@ constructor(
             .combine(concurrentDisplaysInProgessFlow) { pendingDisplay, concurrentDisplaysInProgress
                 ->
                 if (pendingDisplay == null) {
-                    hideDialog()
+                    dismissDialog()
                 } else {
                     showDialog(pendingDisplay, concurrentDisplaysInProgress)
                 }
@@ -88,17 +88,17 @@ constructor(
     }
 
     private fun showDialog(pendingDisplay: PendingDisplay, concurrentDisplaysInProgess: Boolean) {
-        hideDialog()
+        dismissDialog()
         dialog =
             bottomSheetFactory
                 .createDialog(
                     onStartMirroringClickListener = {
-                        scope.launch(bgDispatcher) { pendingDisplay.enable() }
-                        hideDialog()
+                        scope.launch(context = bgDispatcher) { pendingDisplay.enable() }
+                        dismissDialog()
                     },
                     onCancelMirroring = {
-                        scope.launch(bgDispatcher) { pendingDisplay.ignore() }
-                        hideDialog()
+                        scope.launch(context = bgDispatcher) { pendingDisplay.ignore() }
+                        dismissDialog()
                     },
                     navbarBottomInsetsProvider = { Utils.getNavbarInsets(context).bottom },
                     showConcurrentDisplayInfo = concurrentDisplaysInProgess
@@ -106,8 +106,8 @@ constructor(
                 .apply { show() }
     }
 
-    private fun hideDialog() {
-        dialog?.hide()
+    private fun dismissDialog() {
+        dialog?.dismiss()
         dialog = null
     }
 

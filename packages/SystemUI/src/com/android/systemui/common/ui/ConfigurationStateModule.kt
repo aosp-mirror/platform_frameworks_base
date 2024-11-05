@@ -28,7 +28,7 @@ import javax.inject.Qualifier
 /**
  * Annotates elements that provide information from the global configuration.
  *
- * The global configuration is the one associted with the main display. Secondary displays will
+ * The global configuration is the one associated with the main display. Secondary displays will
  * apply override to the global configuration. Elements annotated with this shouldn't be used for
  * secondary displays.
  */

@@ -40,6 +40,8 @@ public final class TestRunningTaskInfoBuilder {
 
     private WindowContainerToken mToken = createMockWCToken();
     private int mParentTaskId = INVALID_TASK_ID;
+    private int mUid = INVALID_TASK_ID;
+    private int mTaskId = INVALID_TASK_ID;
     private Intent mBaseIntent = new Intent();
     private @WindowConfiguration.ActivityType int mActivityType = ACTIVITY_TYPE_STANDARD;
     private @WindowConfiguration.WindowingMode int mWindowingMode = WINDOWING_MODE_UNDEFINED;
@@ -47,6 +49,8 @@ public final class TestRunningTaskInfoBuilder {
     private ActivityManager.TaskDescription.Builder mTaskDescriptionBuilder = null;
     private final Point mPositionInParent = new Point();
     private boolean mIsVisible = false;
+    private boolean mIsTopActivityTransparent = false;
+    private int mNumActivities = 1;
     private long mLastActiveTime;
 
     public static WindowContainerToken createMockWCToken() {
@@ -68,6 +72,18 @@ public final class TestRunningTaskInfoBuilder {
 
     public TestRunningTaskInfoBuilder setParentTaskId(int taskId) {
         mParentTaskId = taskId;
+        return this;
+    }
+
+    /** Sets the task info's effective UID. */
+    public TestRunningTaskInfoBuilder setUid(int uid) {
+        mUid = uid;
+        return this;
+    }
+
+    /** Sets the task info's UID. */
+    public TestRunningTaskInfoBuilder setTaskId(int taskId) {
+        mTaskId = taskId;
         return this;
     }
 
@@ -113,6 +129,16 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    public TestRunningTaskInfoBuilder setTopActivityTransparent(boolean isTopActivityTransparent) {
+        mIsTopActivityTransparent = isTopActivityTransparent;
+        return this;
+    }
+
+    public TestRunningTaskInfoBuilder setNumActivities(int numActivities) {
+        mNumActivities = numActivities;
+        return this;
+    }
+
     public TestRunningTaskInfoBuilder setLastActiveTime(long lastActiveTime) {
         mLastActiveTime = lastActiveTime;
         return this;
@@ -120,7 +146,8 @@ public final class TestRunningTaskInfoBuilder {
 
     public ActivityManager.RunningTaskInfo build() {
         final ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
-        info.taskId = sNextTaskId++;
+        info.taskId = (mTaskId == INVALID_TASK_ID) ? sNextTaskId++ : mTaskId;
+        info.effectiveUid = mUid;
         info.baseIntent = mBaseIntent;
         info.parentTaskId = mParentTaskId;
         info.displayId = mDisplayId;
@@ -134,6 +161,8 @@ public final class TestRunningTaskInfoBuilder {
                 mTaskDescriptionBuilder != null ? mTaskDescriptionBuilder.build() : null;
         info.positionInParent = mPositionInParent;
         info.isVisible = mIsVisible;
+        info.isTopActivityTransparent = mIsTopActivityTransparent;
+        info.numActivities = mNumActivities;
         info.lastActiveTime = mLastActiveTime;
         return info;
     }

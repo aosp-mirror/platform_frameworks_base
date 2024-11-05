@@ -91,10 +91,9 @@ class SysUICoroutinesModule {
     @Background
     @SysUISingleton
     fun bgCoroutineContext(
-        @Tracing tracingCoroutineContext: CoroutineContext,
         @Background bgCoroutineDispatcher: CoroutineDispatcher,
     ): CoroutineContext {
-        return bgCoroutineDispatcher + tracingCoroutineContext
+        return bgCoroutineDispatcher
     }
 
     /** Coroutine dispatcher for background operations on for UI. */
@@ -112,9 +111,8 @@ class SysUICoroutinesModule {
     @UiBackground
     @SysUISingleton
     fun uiBgCoroutineContext(
-        @Tracing tracingCoroutineContext: CoroutineContext,
         @UiBackground uiBgCoroutineDispatcher: CoroutineDispatcher,
     ): CoroutineContext {
-        return uiBgCoroutineDispatcher + tracingCoroutineContext
+        return uiBgCoroutineDispatcher
     }
 }

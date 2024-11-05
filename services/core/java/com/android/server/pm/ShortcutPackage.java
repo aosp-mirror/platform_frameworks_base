@@ -729,11 +729,6 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             pinnedShortcuts.addAll(pinned);
         });
-        if (ShortcutService.DEBUG) {
-            Slog.v(TAG, "ShortcutPackage#refreshPinnedFlags: "
-                    + " pinnedShortcuts: " + pinnedShortcuts.stream().collect(
-                            Collectors.joining(", ", "[", "]")));
-        }
         // Secondly, update the pinned state if necessary.
         final List<ShortcutInfo> pinned = findAll(pinnedShortcuts);
         if (pinned != null) {
@@ -917,12 +912,13 @@ class ShortcutPackage extends ShortcutPackageItem {
      * available ShareTarget definitions in this package.
      */
     public List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
-            @NonNull final IntentFilter filter) {
-        return getMatchingShareTargets(filter, null);
+            @NonNull final IntentFilter filter, final int callingUserId) {
+        return getMatchingShareTargets(filter, null, callingUserId);
     }
 
     List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
-            @NonNull final IntentFilter filter, @Nullable final String pkgName) {
+            @NonNull final IntentFilter filter, @Nullable final String pkgName,
+            final int callingUserId) {
         synchronized (mPackageItemLock) {
             final List<ShareTargetInfo> matchedTargets = new ArrayList<>();
             for (int i = 0; i < mShareTargets.size(); i++) {
@@ -946,7 +942,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             // included in the result
             findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
                     ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
-                    pkgName, 0, /*getPinnedByAnyLauncher=*/ false);
+                    pkgName, callingUserId, /*getPinnedByAnyLauncher=*/ false);
 
             final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
             for (int i = 0; i < shortcuts.size(); i++) {

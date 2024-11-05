@@ -30,7 +30,7 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [NotificationIconContainer] to a [NotificationIconContainerAlwaysOnDisplayViewModel]. */
 class NotificationIconContainerAlwaysOnDisplayViewBinder

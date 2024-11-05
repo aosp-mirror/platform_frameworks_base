@@ -39,6 +39,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ApplicationInfo.CATEGORY_SOCIAL;
+import static android.content.pm.ApplicationInfo.CATEGORY_GAME;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
@@ -2655,21 +2657,47 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testSetOrientation() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        activity.setVisible(true);
+        assertSetOrientation(Build.VERSION_CODES.VANILLA_ICE_CREAM, CATEGORY_SOCIAL, true);
+    }
+
+    @Test
+    public void testSetOrientation_restrictedByTargetSdk() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT);
+        mDisplayContent.setIgnoreOrientationRequest(true);
+        makeDisplayLargeScreen(mDisplayContent);
+
+        assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_SOCIAL, false);
+        assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_GAME, true);
+
+        // Blanket application, also ignoring Target SDK
+        mWm.mConstants.mIgnoreActivityOrientationRequest = true;
+        assertSetOrientation(Build.VERSION_CODES.VANILLA_ICE_CREAM, CATEGORY_SOCIAL, false);
+    }
+
+    private void assertSetOrientation(int targetSdk, int category, boolean expectRotate) {
+        final String packageName = targetSdk <= Build.VERSION_CODES.VANILLA_ICE_CREAM
+                ? mContext.getPackageName() // WmTests uses legacy sdk.
+                : null; // Simulate CUR_DEVELOPMENT by invalid package (see PlatformCompat).
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setComponent(getUniqueComponentName(packageName)).build();
+        activity.info.applicationInfo.category = category;
 
         // Assert orientation is unspecified to start.
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, activity.getOrientation());
 
+        // Request orientation and see if it can be applied.
         activity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, activity.getOrientation());
+        if (expectRotate) {
+            assertEquals("targetSdk=" + targetSdk + " should be able to enter landscape",
+                    SCREEN_ORIENTATION_LANDSCAPE, activity.getOrientation());
+        } else {
+            assertEquals("targetSdk=" + targetSdk + " should not be able to enter landscape",
+                    SCREEN_ORIENTATION_UNSPECIFIED, activity.getOrientation());
+        }
 
         mDisplayContent.removeAppToken(activity.token);
         // Assert orientation is unset to after container is removed.
         assertEquals(SCREEN_ORIENTATION_UNSET, activity.getOrientation());
-
-        // Reset display frozen state
-        mWm.mDisplayFrozen = false;
     }
 
     @Test
@@ -3189,23 +3217,32 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
     }
 
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testSetVisibility_visibleToInvisible() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true).build();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+        final ActivityRecord activity = mAppWindow.mActivityRecord;
+        makeWindowVisibleAndDrawn(mAppWindow);
         // By default, activity is visible.
         assertTrue(activity.isVisible());
         assertTrue(activity.isVisibleRequested());
-        assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
+        assertTrue(mAppWindow.isDrawn());
+        assertFalse(mAppWindow.setReportResizeHints());
 
         // Request the activity to be invisible. Since the visibility changes, app transition
         // animation should be applied on this activity.
-        mDisplayContent.prepareAppTransition(0);
+        activity.mTransitionController.requestCloseTransitionIfNeeded(activity);
         activity.setVisibility(false);
         assertTrue(activity.isVisible());
         assertFalse(activity.isVisibleRequested());
-        assertFalse(activity.mDisplayContent.mOpeningApps.contains(activity));
-        assertTrue(activity.mDisplayContent.mClosingApps.contains(activity));
+
+        player.start();
+        mSetFlagsRule.enableFlags(Flags.FLAG_RESET_DRAW_STATE_ON_CLIENT_INVISIBLE);
+        // ActivityRecord#commitVisibility(false) -> WindowState#sendAppVisibilityToClients().
+        player.finish();
+        assertFalse(activity.isVisible());
+        assertFalse("Reset draw state after committing invisible", mAppWindow.isDrawn());
+        assertTrue("Set pending redraw hint", mAppWindow.setReportResizeHints());
     }
 
     @Test

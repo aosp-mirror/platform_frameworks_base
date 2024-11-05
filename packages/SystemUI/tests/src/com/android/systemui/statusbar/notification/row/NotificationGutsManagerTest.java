@@ -28,8 +28,6 @@ import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanki
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,8 +85,6 @@ import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -159,12 +155,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Mock private UserManager mUserManager;
 
-    private final ActiveNotificationListRepository mActiveNotificationListRepository =
-            new ActiveNotificationListRepository();
-    private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
-            new ActiveNotificationsInteractor(mActiveNotificationListRepository,
-                    StandardTestDispatcher(null, null));
-
     private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
 
     @Before
@@ -179,7 +169,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 new FakeKeyguardRepository(),
                 mHeadsUpManager,
                 PowerInteractorFactory.create().getPowerInteractor(),
-                mActiveNotificationsInteractor,
+                mKosmos.getActiveNotificationsInteractor(),
                 () -> mKosmos.getSceneInteractor()
         );
 

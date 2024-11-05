@@ -49,6 +49,7 @@ import android.content.ComponentName;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
@@ -168,8 +169,11 @@ public final class TransitionInfo implements Parcelable {
     /** This change represents its start configuration for the duration of the animation. */
     public static final int FLAG_CONFIG_AT_END = 1 << 22;
 
+    /** This change represents one of a Task Display Area. */
+    public static final int FLAG_IS_TASK_DISPLAY_AREA = 1 << 23;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 23;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 24;
 
     /** The change belongs to a window that won't contain activities. */
     public static final int FLAGS_IS_NON_APP_WINDOW =
@@ -204,6 +208,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_MOVED_TO_TOP,
             FLAG_SYNC,
             FLAG_CONFIG_AT_END,
+            FLAG_IS_TASK_DISPLAY_AREA,
             FLAG_FIRST_CUSTOM
     }, flag = true)
     public @interface ChangeFlags {}
@@ -552,6 +557,9 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_MOVED_TO_TOP) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("MOVE_TO_TOP");
         }
+        if ((flags & FLAG_IS_TASK_DISPLAY_AREA) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("FLAG_IS_TASK_DISPLAY_AREA");
+        }
         return sb.toString();
     }
 
@@ -681,6 +689,7 @@ public final class TransitionInfo implements Parcelable {
         private float mSnapshotLuma;
         private ComponentName mActivityComponent = null;
         private AnimationOptions mAnimationOptions = null;
+        private IBinder mTaskFragmentToken = null;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -712,6 +721,7 @@ public final class TransitionInfo implements Parcelable {
             mSnapshotLuma = in.readFloat();
             mActivityComponent = in.readTypedObject(ComponentName.CREATOR);
             mAnimationOptions = in.readTypedObject(AnimationOptions.CREATOR);
+            mTaskFragmentToken = in.readStrongBinder();
         }
 
         private Change localRemoteCopy() {
@@ -737,6 +747,7 @@ public final class TransitionInfo implements Parcelable {
             out.mSnapshotLuma = mSnapshotLuma;
             out.mActivityComponent = mActivityComponent;
             out.mAnimationOptions = mAnimationOptions;
+            out.mTaskFragmentToken = mTaskFragmentToken;
             return out;
         }
 
@@ -852,6 +863,14 @@ public final class TransitionInfo implements Parcelable {
                 return;
             }
             mAnimationOptions = options;
+        }
+
+        /**
+         * Sets the client-defined TaskFragment token. Only set this if the window is a
+         * client-organized TaskFragment.
+         */
+        public void setTaskFragmentToken(@Nullable IBinder token) {
+            mTaskFragmentToken = token;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -1009,6 +1028,15 @@ public final class TransitionInfo implements Parcelable {
             return mAnimationOptions;
         }
 
+        /**
+         * Returns the client-defined TaskFragment token. {@code null} if this window is not a
+         * client-organized TaskFragment.
+         */
+        @Nullable
+        public IBinder getTaskFragmentToken() {
+            return mTaskFragmentToken;
+        }
+
         /** @hide */
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -1035,6 +1063,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeFloat(mSnapshotLuma);
             dest.writeTypedObject(mActivityComponent, flags);
             dest.writeTypedObject(mAnimationOptions, flags);
+            dest.writeStrongBinder(mTaskFragmentToken);
         }
 
         @NonNull
@@ -1109,6 +1138,9 @@ public final class TransitionInfo implements Parcelable {
             }
             if (mAnimationOptions != null) {
                 sb.append(" opt=").append(mAnimationOptions);
+            }
+            if (mTaskFragmentToken != null) {
+                sb.append(" taskFragmentToken=").append(mTaskFragmentToken);
             }
             sb.append('}');
             return sb.toString();

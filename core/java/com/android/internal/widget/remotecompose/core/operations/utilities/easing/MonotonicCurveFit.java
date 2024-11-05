@@ -17,12 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations.utilities.easi
 
 import java.util.Arrays;
 
-/**
- * This performs a spline interpolation in multiple dimensions
- *
- *
- */
-public class MonotonicCurveFit  {
+/** This performs a spline interpolation in multiple dimensions */
+public class MonotonicCurveFit {
     private static final String TAG = "MonotonicCurveFit";
     private double[] mT;
     private double[][] mY;
@@ -32,6 +28,7 @@ public class MonotonicCurveFit  {
 
     /**
      * create a collection of curves
+     *
      * @param time the point along the curve
      * @param y the parameter at those points
      */
@@ -78,6 +75,7 @@ public class MonotonicCurveFit  {
 
     /**
      * Get the position of all curves at time t
+     *
      * @param t
      * @param v
      */
@@ -137,6 +135,7 @@ public class MonotonicCurveFit  {
 
     /**
      * Get the position of all curves at time t
+     *
      * @param t
      * @param v
      */
@@ -196,6 +195,7 @@ public class MonotonicCurveFit  {
 
     /**
      * Get the position of the jth curve at time t
+     *
      * @param t
      * @param j
      * @return
@@ -230,7 +230,6 @@ public class MonotonicCurveFit  {
                 double t1 = mTangent[i][j];
                 double t2 = mTangent[i + 1][j];
                 return interpolate(h, x, y1, y2, t1, t2);
-
             }
         }
         return 0; // should never reach here
@@ -238,6 +237,7 @@ public class MonotonicCurveFit  {
 
     /**
      * Get the slope of all the curves at position t
+     *
      * @param t
      * @param v
      */
@@ -264,11 +264,11 @@ public class MonotonicCurveFit  {
                 break;
             }
         }
-        return;
     }
 
     /**
      * Get the slope of the j curve at position t
+     *
      * @param t
      * @param j
      * @return
@@ -299,34 +299,38 @@ public class MonotonicCurveFit  {
         return mT;
     }
 
-    /**
-     * Cubic Hermite spline
-     */
-    private static double interpolate(double h,
-                                      double x,
-                                      double y1,
-                                      double y2,
-                                      double t1,
-                                      double t2) {
+    /** Cubic Hermite spline */
+    private static double interpolate(
+            double h, double x, double y1, double y2, double t1, double t2) {
         double x2 = x * x;
         double x3 = x2 * x;
-        return -2 * x3 * y2 + 3 * x2 * y2 + 2 * x3 * y1 - 3 * x2 * y1 + y1
-                + h * t2 * x3 + h * t1 * x3 - h * t2 * x2 - 2 * h * t1 * x2
+        return -2 * x3 * y2
+                + 3 * x2 * y2
+                + 2 * x3 * y1
+                - 3 * x2 * y1
+                + y1
+                + h * t2 * x3
+                + h * t1 * x3
+                - h * t2 * x2
+                - 2 * h * t1 * x2
                 + h * t1 * x;
     }
 
-    /**
-     * Cubic Hermite spline slope differentiated
-     */
+    /** Cubic Hermite spline slope differentiated */
     private static double diff(double h, double x, double y1, double y2, double t1, double t2) {
         double x2 = x * x;
-        return -6 * x2 * y2 + 6 * x * y2 + 6 * x2 * y1 - 6 * x * y1 + 3 * h * t2 * x2
-                + 3 * h * t1 * x2 - 2 * h * t2 * x - 4 * h * t1 * x + h * t1;
+        return -6 * x2 * y2
+                + 6 * x * y2
+                + 6 * x2 * y1
+                - 6 * x * y1
+                + 3 * h * t2 * x2
+                + 3 * h * t1 * x2
+                - 2 * h * t2 * x
+                - 4 * h * t1 * x
+                + h * t1;
     }
 
-    /**
-     * This builds a monotonic spline to be used as a wave function
-     */
+    /** This builds a monotonic spline to be used as a wave function */
     public static MonotonicCurveFit buildWave(String configString) {
         // done this way for efficiency
         String str = configString;

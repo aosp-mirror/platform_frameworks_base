@@ -217,7 +217,6 @@ public class SplitScreenControllerTests extends ShellTestCase {
         // Put the same component to the top running task
         ActivityManager.RunningTaskInfo topRunningTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
         doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask(any());
 
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
@@ -238,7 +237,6 @@ public class SplitScreenControllerTests extends ShellTestCase {
         // Put the same component to the top running task
         ActivityManager.RunningTaskInfo topRunningTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
         doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask(any());
         // Put the same component into a task in the background
         ActivityManager.RecentTaskInfo sameTaskInfo = new ActivityManager.RecentTaskInfo();
@@ -294,6 +292,28 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 SPLIT_POSITION_TOP_OR_LEFT, null /* options */, null /* hideTaskToken */);
 
         verify(mStageCoordinator).switchSplitPosition(anyString());
+    }
+
+    @Test
+    public void startIntent_forceLaunchNewTaskTrue_skipsBackgroundTasks() {
+        Intent startIntent = createStartIntent("startActivity");
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
+        mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
+                SPLIT_POSITION_TOP_OR_LEFT, null /* options */, null /* hideTaskToken */,
+                true /* forceLaunchNewTask */);
+        verify(mRecentTasks, never()).findTaskInBackground(any(), anyInt(), any());
+    }
+
+    @Test
+    public void startIntent_forceLaunchNewTaskFalse_checksBackgroundTasks() {
+        Intent startIntent = createStartIntent("startActivity");
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
+        mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
+                SPLIT_POSITION_TOP_OR_LEFT, null /* options */, null /* hideTaskToken */,
+                false /* forceLaunchNewTask */);
+        verify(mRecentTasks).findTaskInBackground(any(), anyInt(), any());
     }
 
     @Test

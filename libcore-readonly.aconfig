@@ -1,0 +1,25 @@
+package: "com.android.libcore.readonly"
+container: "system"
+
+# These are the read-only version of the aconfig flags in com.android.libcore
+# that will be built with 'force-read-only' mode.
+# See b/368409430 - these flags will be removed once the new aconfig API landed.
+flag {
+    namespace: "core_libraries"
+    name: "post_cleanup_apis"
+    is_exported: false
+    description: "This flag includes APIs to add/remove/call callbacks post-cleanup"
+    bug: "331243037"
+    # APIs provided by a mainline module can only use a frozen flag.
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "core_libraries"
+    name: "native_metrics"
+    is_exported: false
+    description: "This flag includes APIs fo maintaining and exposing native allocation metrics"
+    bug: "331243037"
+    # APIs provided by a mainline module can only use a frozen flag.
+    is_fixed_read_only: true
+}

@@ -14,15 +14,93 @@
 # limitations under the License.
 
 # Run all the ravenwood tests + hoststubgen unit tests.
+#
+# Options:
+#
+#   -s: "Smoke" test -- skip slow tests (SysUI, ICU)
+#
+#   -x PCRE: Specify exclusion filter in PCRE
+#            Example: -x '^(Cts|hoststub)' # Exclude CTS and hoststubgen tests.
+#
+#   -f PCRE: Specify inclusion filter in PCRE
 
-all_tests="hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test ravenwood-stats-checker"
 
-# "echo" is to remove the newlines
-all_tests="$all_tests $(echo $(${0%/*}/list-ravenwood-tests.sh) )"
+# Regex to identify slow tests, in PCRE
+SLOW_TEST_RE='^(SystemUiRavenTests|CtsIcuTestCasesRavenwood|CarSystemUIRavenTests)$'
 
-run() {
-    echo "Running: $*"
-    "${@}"
+smoke=0
+include_re=""
+exclude_re=""
+smoke_exclude_re=""
+dry_run=""
+while getopts "sx:f:d" opt; do
+case "$opt" in
+    s)
+        # Remove slow tests.
+        smoke_exclude_re="$SLOW_TEST_RE"
+        ;;
+    x)
+        # Take a PCRE from the arg, and use it as an exclusion filter.
+        exclude_re="$OPTARG"
+        ;;
+    f)
+        # Take a PCRE from the arg, and use it as an inclusion filter.
+        include_re="$OPTARG"
+        ;;
+    d)
+        # Dry run
+        dry_run="echo"
+        ;;
+    '?')
+        exit 1
+        ;;
+esac
+done
+shift $(($OPTIND - 1))
+
+all_tests=(hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test ravenwood-stats-checker)
+all_tests+=( $(${0%/*}/list-ravenwood-tests.sh) )
+
+filter() {
+    local re="$1"
+    local grep_arg="$2"
+    if [[ "$re" == "" ]] ; then
+        cat # No filtering
+    else
+        grep $grep_arg -iP "$re"
+    fi
 }
 
-run ${ATEST:-atest} $all_tests
+filter_in() {
+    filter "$1"
+}
+
+filter_out() {
+    filter "$1" -v
+}
+
+
+# Remove the slow tests.
+targets=( $(
+    for t in "${all_tests[@]}"; do
+        echo $t | filter_in "$include_re" | filter_out "$smoke_exclude_re" | filter_out "$exclude_re"
+    done
+) )
+
+# Show the target tests
+
+echo "Target tests:"
+for t in "${targets[@]}"; do
+    echo "  $t"
+done
+
+# Calculate the removed tests.
+
+diff="$(diff  <(echo "${all_tests[@]}" | tr ' ' '\n') <(echo "${targets[@]}" | tr ' ' '\n') )"
+
+if [[ "$diff" != "" ]]; then
+    echo "Excluded tests:"
+    echo "$diff"
+fi
+
+$dry_run ${ATEST:-atest} "${targets[@]}"

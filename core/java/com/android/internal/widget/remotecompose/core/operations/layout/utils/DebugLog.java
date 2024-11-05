@@ -17,9 +17,7 @@ package com.android.internal.widget.remotecompose.core.operations.layout.utils;
 
 import java.util.ArrayList;
 
-/**
- * Internal utility debug class
- */
+/** Internal utility debug class */
 public class DebugLog {
 
     public static final boolean DEBUG_LAYOUT_ON = false;
@@ -109,8 +107,12 @@ public class DebugLog {
                 if (node instanceof LogNode) {
                     builder.append(indentation).append("     ").append(node.name).append("\n");
                 } else {
-                    builder.append(indentation).append("-- ").append(node.name)
-                            .append(" : ").append(node.endString).append("\n");
+                    builder.append(indentation)
+                            .append("-- ")
+                            .append(node.name)
+                            .append(" : ")
+                            .append(node.endString)
+                            .append("\n");
                 }
             }
         }
@@ -124,4 +126,3 @@ public class DebugLog {
         }
     }
 }
-

@@ -36,6 +36,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Display;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -43,7 +44,9 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
+import com.android.systemui.recordissue.ScreenRecordingStartTimeStore;
 import com.android.systemui.res.R;
+import com.android.systemui.screenrecord.ScreenMediaRecorder.SavedRecording;
 import com.android.systemui.screenrecord.ScreenMediaRecorder.ScreenMediaRecorderListener;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -61,6 +64,9 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
 
     private static final int USER_ID_NOT_SPECIFIED = -1;
     protected static final int NOTIF_BASE_ID = 4273;
+    protected static final int NOTIF_GROUP_ID_SAVED = NOTIF_BASE_ID + 1;
+    protected static final int NOTIF_GROUP_ID_ERROR_SAVING = NOTIF_BASE_ID + 2;
+    protected static final int NOTIF_GROUP_ID_ERROR_STARTING = NOTIF_BASE_ID + 3;
     private static final String TAG = "RecordingService";
     private static final String CHANNEL_ID = "screen_record";
     @VisibleForTesting static final String GROUP_KEY_SAVED = "screen_record_saved";
@@ -71,6 +77,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     private static final String EXTRA_AUDIO_SOURCE = "extra_useAudio";
     private static final String EXTRA_SHOW_TAPS = "extra_showTaps";
     private static final String EXTRA_CAPTURE_TARGET = "extra_captureTarget";
+    private static final String EXTRA_DISPLAY_ID = "extra_displayId";
 
     protected static final String ACTION_START = "com.android.systemui.screenrecord.START";
     protected static final String ACTION_SHOW_START_NOTIF =
@@ -89,6 +96,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     private boolean mShowTaps;
     private boolean mOriginalShowTaps;
     private ScreenMediaRecorder mRecorder;
+    private final ScreenRecordingStartTimeStore mScreenRecordingStartTimeStore;
     private final Executor mLongExecutor;
     private final UiEventLogger mUiEventLogger;
     protected final NotificationManager mNotificationManager;
@@ -100,7 +108,8 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     public RecordingService(RecordingController controller, @LongRunning Executor executor,
             @Main Handler handler, UiEventLogger uiEventLogger,
             NotificationManager notificationManager,
-            UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
+            UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil,
+            ScreenRecordingStartTimeStore screenRecordingStartTimeStore) {
         mController = controller;
         mLongExecutor = executor;
         mMainHandler = handler;
@@ -108,6 +117,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         mNotificationManager = notificationManager;
         mUserContextTracker = userContextTracker;
         mKeyguardDismissUtil = keyguardDismissUtil;
+        mScreenRecordingStartTimeStore = screenRecordingStartTimeStore;
     }
 
     /**
@@ -131,6 +141,30 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 .putExtra(EXTRA_AUDIO_SOURCE, audioSource)
                 .putExtra(EXTRA_SHOW_TAPS, showTaps)
                 .putExtra(EXTRA_CAPTURE_TARGET, captureTarget);
+    }
+
+    /**
+     * Get an intent to start the recording service.
+     *
+     * @param context Context from the requesting activity
+     * @param resultCode The result code from {@link android.app.Activity#onActivityResult(int, int,
+     *     android.content.Intent)}
+     * @param audioSource The ordinal value of the audio source {@link
+     *     com.android.systemui.screenrecord.ScreenRecordingAudioSource}
+     * @param showTaps True to make touches visible while recording
+     * @param captureTarget pass this parameter to capture a specific part instead of the full
+     *     screen
+     * @param displayId The id of the display to record.
+     */
+    public static Intent getStartIntent(
+            Context context,
+            int resultCode,
+            int audioSource,
+            boolean showTaps,
+            int displayId,
+            @Nullable MediaProjectionCaptureTarget captureTarget) {
+        return getStartIntent(context, resultCode, audioSource, showTaps, captureTarget)
+                .putExtra(EXTRA_DISPLAY_ID, displayId);
     }
 
     @Override
@@ -166,6 +200,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 mOriginalShowTaps = Settings.System.getInt(
                         getApplicationContext().getContentResolver(),
                         Settings.System.SHOW_TOUCHES, 0) != 0;
+                int displayId = intent.getIntExtra(EXTRA_DISPLAY_ID, Display.DEFAULT_DISPLAY);
 
                 setTapsVisible(mShowTaps);
 
@@ -175,7 +210,9 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         currentUid,
                         mAudioSource,
                         captureTarget,
-                        this
+                        displayId,
+                        this,
+                        mScreenRecordingStartTimeStore
                 );
 
                 if (startRecording()) {
@@ -280,7 +317,11 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
      */
     @VisibleForTesting
     protected void createErrorStartingNotification(UserHandle currentUser) {
-        createErrorNotification(currentUser, strings().getStartError(), GROUP_KEY_ERROR_STARTING);
+        createErrorNotification(
+                currentUser,
+                strings().getStartError(),
+                GROUP_KEY_ERROR_STARTING,
+                NOTIF_GROUP_ID_ERROR_STARTING);
     }
 
     /**
@@ -289,13 +330,21 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
      */
     @VisibleForTesting
     protected void createErrorSavingNotification(UserHandle currentUser) {
-        createErrorNotification(currentUser, strings().getSaveError(), GROUP_KEY_ERROR_SAVING);
+        createErrorNotification(
+                currentUser,
+                strings().getSaveError(),
+                GROUP_KEY_ERROR_SAVING,
+                NOTIF_GROUP_ID_ERROR_SAVING);
     }
 
     private void createErrorNotification(
-            UserHandle currentUser, String notificationContentTitle, String groupKey) {
+            UserHandle currentUser,
+            String notificationContentTitle,
+            String groupKey,
+            int notificationIdForGroup) {
         // Make sure error notifications get their own group.
-        postGroupSummaryNotification(currentUser, notificationContentTitle, groupKey);
+        postGroupSummaryNotification(
+                currentUser, notificationContentTitle, groupKey, notificationIdForGroup);
 
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, strings().getTitle());
@@ -364,8 +413,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     }
 
     @VisibleForTesting
-    protected Notification createSaveNotification(
-            @Nullable ScreenMediaRecorder.SavedRecording recording) {
+    protected Notification createSaveNotification(@Nullable SavedRecording recording) {
         Uri uri = recording != null ? recording.getUri() : null;
         Intent viewIntent = new Intent(Intent.ACTION_VIEW)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -410,17 +458,20 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     }
 
     /**
-     * Adds a group summary notification for save notifications so that save notifications from
-     * multiple recordings are grouped together, and the foreground service recording notification
-     * is not.
+     * Posts a group summary notification for the given group.
+     *
+     * Notifications that should be grouped:
+     *  - Save notifications
+     *  - Error saving notifications
+     *  - Error starting notifications
+     *
+     * The foreground service recording notification should never be grouped.
      */
-    private void postGroupSummaryNotificationForSaves(UserHandle currentUser) {
-        postGroupSummaryNotification(currentUser, strings().getSaveTitle(), GROUP_KEY_SAVED);
-    }
-
-    /** Posts a group summary notification for the given group. */
     private void postGroupSummaryNotification(
-            UserHandle currentUser, String notificationContentTitle, String groupKey) {
+            UserHandle currentUser,
+            String notificationContentTitle,
+            String groupKey,
+            int notificationIdForGroup) {
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 strings().getTitle());
@@ -431,7 +482,8 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 .setGroupSummary(true)
                 .setExtras(extras)
                 .build();
-        mNotificationManager.notifyAsUser(getTag(), mNotificationId, groupNotif, currentUser);
+        mNotificationManager.notifyAsUser(
+                getTag(), notificationIdForGroup, groupNotif, currentUser);
     }
 
     private void stopService() {
@@ -482,11 +534,13 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         mLongExecutor.execute(() -> {
             try {
                 Log.d(getTag(), "saving recording");
-                Notification notification = createSaveNotification(
-                        getRecorder() != null ? getRecorder().save() : null);
-                postGroupSummaryNotificationForSaves(currentUser);
-                mNotificationManager.notifyAsUser(null, mNotificationId,  notification,
-                        currentUser);
+                SavedRecording savedRecording = getRecorder() != null ? getRecorder().save() : null;
+                postGroupSummaryNotification(
+                        currentUser,
+                        strings().getSaveTitle(),
+                        GROUP_KEY_SAVED,
+                        NOTIF_GROUP_ID_SAVED);
+                onRecordingSaved(savedRecording, currentUser);
             } catch (IOException | IllegalStateException e) {
                 Log.e(getTag(), "Error saving screen recording: " + e.getMessage());
                 e.printStackTrace();
@@ -494,6 +548,12 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 mNotificationManager.cancelAsUser(null, mNotificationId, currentUser);
             }
         });
+    }
+
+    protected void onRecordingSaved(ScreenMediaRecorder.SavedRecording savedRecording,
+            UserHandle currentUser) {
+        mNotificationManager.notifyAsUser(null, mNotificationId,
+                createSaveNotification(savedRecording), currentUser);
     }
 
     private void setTapsVisible(boolean turnOn) {

@@ -23,11 +23,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
+import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.ui.TutorialNotificationCoordinator
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.settings.userTracker
+import com.android.systemui.statusbar.commandline.commandRegistry
+import com.android.systemui.testKosmos
 import com.android.systemui.touchpad.data.repository.FakeTouchpadRepository
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.hours
@@ -58,7 +61,7 @@ import org.mockito.kotlin.verify
 class TutorialNotificationCoordinatorTest : SysuiTestCase() {
 
     private lateinit var underTest: TutorialNotificationCoordinator
-    private val kosmos = Kosmos()
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyboardRepository = FakeKeyboardRepository()
     private val touchpadRepository = FakeTouchpadRepository()
@@ -75,16 +78,23 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
             TutorialSchedulerRepository(
                 context,
                 dataStoreScope,
-                dataStoreName = "TutorialNotificationCoordinatorTest"
+                dataStoreName = "TutorialNotificationCoordinatorTest",
             )
         val interactor =
-            TutorialSchedulerInteractor(keyboardRepository, touchpadRepository, repository)
+            TutorialSchedulerInteractor(
+                keyboardRepository,
+                touchpadRepository,
+                repository,
+                kosmos.inputDeviceTutorialLogger,
+                kosmos.commandRegistry,
+            )
         underTest =
             TutorialNotificationCoordinator(
                 testScope.backgroundScope,
                 context,
                 interactor,
-                notificationManager
+                notificationManager,
+                kosmos.userTracker,
             )
         notificationCaptor = ArgumentCaptor.forClass(Notification::class.java)
         underTest.start()
@@ -92,7 +102,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
 
     @After
     fun clear() {
-        runBlocking { repository.clearDataStore() }
+        runBlocking { repository.clear() }
         dataStoreScope.cancel()
     }
 
@@ -103,7 +113,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
             advanceTimeBy(LAUNCH_DELAY)
             verifyNotification(
                 R.string.launch_keyboard_tutorial_notification_title,
-                R.string.launch_keyboard_tutorial_notification_content
+                R.string.launch_keyboard_tutorial_notification_content,
             )
         }
 
@@ -114,7 +124,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
             advanceTimeBy(LAUNCH_DELAY)
             verifyNotification(
                 R.string.launch_touchpad_tutorial_notification_title,
-                R.string.launch_touchpad_tutorial_notification_content
+                R.string.launch_touchpad_tutorial_notification_content,
             )
         }
 
@@ -126,7 +136,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
             advanceTimeBy(LAUNCH_DELAY)
             verifyNotification(
                 R.string.launch_keyboard_touchpad_tutorial_notification_title,
-                R.string.launch_keyboard_touchpad_tutorial_notification_content
+                R.string.launch_keyboard_touchpad_tutorial_notification_content,
             )
         }
 
@@ -134,12 +144,13 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
     fun doNotShowNotification() =
         testScope.runTest {
             advanceTimeBy(LAUNCH_DELAY)
-            verify(notificationManager, never()).notify(eq(TAG), eq(NOTIFICATION_ID), any())
+            verify(notificationManager, never())
+                .notifyAsUser(eq(TAG), eq(NOTIFICATION_ID), any(), any())
         }
 
     private fun verifyNotification(@StringRes titleResId: Int, @StringRes contentResId: Int) {
         verify(notificationManager)
-            .notify(eq(TAG), eq(NOTIFICATION_ID), notificationCaptor.capture())
+            .notifyAsUser(eq(TAG), eq(NOTIFICATION_ID), notificationCaptor.capture(), any())
         val notification = notificationCaptor.value
         val actualTitle = notification.getString(Notification.EXTRA_TITLE)
         val actualContent = notification.getString(Notification.EXTRA_TEXT)

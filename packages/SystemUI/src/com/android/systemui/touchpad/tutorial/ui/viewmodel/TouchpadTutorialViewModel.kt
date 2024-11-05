@@ -65,5 +65,4 @@ enum class Screen {
     BACK_GESTURE,
     HOME_GESTURE,
     RECENT_APPS_GESTURE,
-    ACTION_KEY,
 }

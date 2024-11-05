@@ -69,20 +69,23 @@ class BouncerHapticPlayer @Inject constructor(private val msdlPlayer: dagger.Laz
                 HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
             )
         } else {
-            msdlPlayer.get().playToken(MSDLToken.DRAG_INDICATOR)
+            msdlPlayer.get().playToken(MSDLToken.DRAG_INDICATOR_DISCRETE)
         }
     }
 
     /** Deliver MSDL feedback when the delete key of the pin bouncer is pressed */
     fun playDeleteKeyPressFeedback() = msdlPlayer.get().playToken(MSDLToken.KEYPRESS_DELETE)
 
-    /**
-     * Deliver MSDL feedback when the delete key of the pin bouncer is long-pressed
-     *
-     * @return whether MSDL feedback is allowed to play.
-     */
+    /** Deliver MSDL feedback when the delete key of the pin bouncer is long-pressed. */
     fun playDeleteKeyLongPressedFeedback() = msdlPlayer.get().playToken(MSDLToken.LONG_PRESS)
 
     /** Deliver MSDL feedback when a numpad key is pressed on the pin bouncer */
     fun playNumpadKeyFeedback() = msdlPlayer.get().playToken(MSDLToken.KEYPRESS_STANDARD)
+
+    /** Deliver MSDL feedback when clicking on the emergency button */
+    fun playEmergencyButtonClickFeedback() {
+        if (isEnabled) {
+            msdlPlayer.get().playToken(MSDLToken.KEYPRESS_RETURN)
+        }
+    }
 }

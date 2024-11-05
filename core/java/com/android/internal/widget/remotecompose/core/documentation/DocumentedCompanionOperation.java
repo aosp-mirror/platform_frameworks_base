@@ -15,8 +15,6 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
-
-public interface DocumentedCompanionOperation extends CompanionOperation {
+public interface DocumentedCompanionOperation {
     void documentation(DocumentationBuilder doc);
 }

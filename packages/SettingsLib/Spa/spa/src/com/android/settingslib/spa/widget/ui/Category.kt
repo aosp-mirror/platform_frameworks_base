@@ -16,9 +16,13 @@
 
 package com.android.settingslib.spa.widget.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,25 +31,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
+import com.android.settingslib.spa.widget.preference.Preference
+import com.android.settingslib.spa.widget.preference.PreferenceModel
 
-/**
- * A category title that is placed before a group of similar items.
- */
+/** A category title that is placed before a group of similar items. */
 @Composable
 fun CategoryTitle(title: String) {
     Text(
         text = title,
-        modifier = Modifier.padding(
-            start = SettingsDimension.itemPaddingStart,
-            top = 20.dp,
-            end = SettingsDimension.itemPaddingEnd,
-            bottom = 8.dp,
-        ),
+        modifier =
+            Modifier.padding(
+                start =
+                    if (isSpaExpressiveEnabled) SettingsDimension.paddingSmall
+                    else SettingsDimension.itemPaddingStart,
+                top = 20.dp,
+                end =
+                    if (isSpaExpressiveEnabled) SettingsDimension.paddingSmall
+                    else SettingsDimension.itemPaddingEnd,
+                bottom = 8.dp,
+            ),
         color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.labelMedium,
     )
@@ -56,14 +68,31 @@ fun CategoryTitle(title: String) {
  * visually separates groups of items.
  */
 @Composable
-fun Category(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column {
-        var displayTitle by remember { mutableStateOf(false) }
-        if (displayTitle) CategoryTitle(title = title)
+fun Category(title: String? = null, content: @Composable ColumnScope.() -> Unit) {
+    var displayTitle by remember { mutableStateOf(false) }
+    Column(
+        modifier =
+            if (isSpaExpressiveEnabled && displayTitle)
+                Modifier.padding(
+                    horizontal = SettingsDimension.paddingLarge,
+                    vertical = SettingsDimension.paddingSmall,
+                )
+            else Modifier
+    ) {
+        if (title != null && displayTitle) CategoryTitle(title = title)
         Column(
-            modifier = Modifier.onGloballyPositioned { coordinates ->
-                displayTitle = coordinates.size.height > 0
-            },
+            modifier =
+                Modifier.onGloballyPositioned { coordinates ->
+                        displayTitle = coordinates.size.height > 0
+                    }
+                    .then(
+                        if (isSpaExpressiveEnabled)
+                            Modifier.fillMaxWidth().clip(SettingsShape.CornerMedium2)
+                        else Modifier
+                    ),
+            verticalArrangement =
+                if (isSpaExpressiveEnabled) Arrangement.spacedBy(SettingsDimension.paddingTiny)
+                else Arrangement.Top,
             content = content,
         )
     }
@@ -73,6 +102,21 @@ fun Category(title: String, content: @Composable ColumnScope.() -> Unit) {
 @Composable
 private fun CategoryPreview() {
     SettingsTheme {
-        CategoryTitle("Appearance")
+        Category("Appearance") {
+            Preference(
+                object : PreferenceModel {
+                    override val title = "Title"
+                    override val summary = { "Summary" }
+                }
+            )
+            Preference(
+                object : PreferenceModel {
+                    override val title = "Title"
+                    override val summary = { "Summary" }
+                    override val icon =
+                        @Composable { SettingsIcon(imageVector = Icons.Outlined.TouchApp) }
+                }
+            )
+        }
     }
 }

@@ -60,16 +60,22 @@ public interface CallerValidator {
      * Validates that the caller can execute the specified app function.
      *
      * <p>The caller can execute if the app function's package name is the same as the caller's
-     * package or the caller has either {@link Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or
-     * {@link Manifest.permission.EXECUTE_APP_FUNCTIONS} granted. In some cases, app functions can
-     * still opt-out of caller having {@link Manifest.permission.EXECUTE_APP_FUNCTIONS}.
+     * package or the caller has either {@link Manifest.permission#EXECUTE_APP_FUNCTIONS_TRUSTED} or
+     * {@link Manifest.permission#EXECUTE_APP_FUNCTIONS} granted. In some cases, app functions can
+     * still opt-out of caller having {@link Manifest.permission#EXECUTE_APP_FUNCTIONS}.
      *
+     * @param callingUid The calling uid.
+     * @param callingPid The calling pid.
+     * @param targetUser The user which the caller is requesting to execute as.
      * @param callerPackageName The calling package (as previously validated).
      * @param targetPackageName The package that owns the app function to execute.
      * @param functionId The id of the app function to execute.
      * @return Whether the caller can execute the specified app function.
      */
     AndroidFuture<Boolean> verifyCallerCanExecuteAppFunction(
+            int callingUid,
+            int callingPid,
+            @NonNull UserHandle targetUser,
             @NonNull String callerPackageName,
             @NonNull String targetPackageName,
             @NonNull String functionId);

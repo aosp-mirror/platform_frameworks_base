@@ -16,6 +16,8 @@
 
 package com.android.systemui.reardisplay;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -26,6 +28,7 @@ import android.content.res.Resources;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerGlobal;
+import android.hardware.devicestate.feature.flags.Flags;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -42,6 +45,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieDrawable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -66,11 +71,12 @@ public class RearDisplayDialogController implements
         ConfigurationController.ConfigurationListener,
         CommandQueue.Callbacks {
 
-    private int[] mFoldedStates;
+    private List<Integer> mFoldedStates;
     private boolean mStartedFolded;
     private boolean mServiceNotified = false;
     private int mAnimationRepeatCount = LottieDrawable.INFINITE;
 
+    private final DeviceStateManager mDeviceStateManager;
     private DeviceStateManagerGlobal mDeviceStateManagerGlobal;
     private DeviceStateManager.DeviceStateCallback mDeviceStateManagerCallback =
             new DeviceStateManagerCallback();
@@ -90,12 +96,14 @@ public class RearDisplayDialogController implements
             @Main Executor executor,
             @Main Resources resources,
             LayoutInflater layoutInflater,
-            SystemUIDialog.Factory systemUIDialogFactory) {
+            SystemUIDialog.Factory systemUIDialogFactory,
+            DeviceStateManager deviceStateManager) {
         mCommandQueue = commandQueue;
         mExecutor = executor;
         mResources = resources;
         mLayoutInflater = layoutInflater;
         mSystemUIDialogFactory = systemUIDialogFactory;
+        mDeviceStateManager = deviceStateManager;
     }
 
     @Override
@@ -180,10 +188,23 @@ public class RearDisplayDialogController implements
      */
     private void initializeValues(int startingBaseState) {
         mRearDisplayEducationDialog = mSystemUIDialogFactory.create();
-        // TODO(b/329170810): Refactor and remove with updated DeviceStateManager values.
-        if (mFoldedStates == null) {
-            mFoldedStates = mResources.getIntArray(
-                    com.android.internal.R.array.config_foldedDeviceStates);
+        if (Flags.deviceStatePropertyMigration()) {
+            if (mFoldedStates == null) {
+                mFoldedStates = new ArrayList<>();
+                List<DeviceState> deviceStates = mDeviceStateManager.getSupportedDeviceStates();
+                for (int i = 0; i < deviceStates.size(); i++) {
+                    DeviceState state = deviceStates.get(i);
+                    if (state.hasProperty(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)) {
+                        mFoldedStates.add(state.getIdentifier());
+                    }
+                }
+            }
+        } else {
+            // TODO(b/329170810): Refactor and remove with updated DeviceStateManager values.
+            if (mFoldedStates == null) {
+                mFoldedStates = copyIntArrayToList(mResources.getIntArray(
+                        com.android.internal.R.array.config_foldedDeviceStates));
+            }
         }
         mStartedFolded = isFoldedState(startingBaseState);
         mDeviceStateManagerGlobal = DeviceStateManagerGlobal.getInstance();
@@ -191,9 +212,17 @@ public class RearDisplayDialogController implements
                 mExecutor);
     }
 
+    private List<Integer> copyIntArrayToList(int[] intArray) {
+        List<Integer> integerList = new ArrayList<>(intArray.length);
+        for (int i = 0; i < intArray.length; i++) {
+            integerList.add(intArray[i]);
+        }
+        return integerList;
+    }
+
     private boolean isFoldedState(int state) {
-        for (int i = 0; i < mFoldedStates.length; i++) {
-            if (mFoldedStates[i] == state) return true;
+        for (int i = 0; i < mFoldedStates.size(); i++) {
+            if (mFoldedStates.get(i) == state) return true;
         }
         return false;
     }
@@ -213,7 +242,7 @@ public class RearDisplayDialogController implements
      * TestAPI to allow us to set the folded states array, instead of reading from resources.
      */
     @TestApi
-    void setFoldedStates(int[] foldedStates) {
+    void setFoldedStates(List<Integer> foldedStates) {
         mFoldedStates = foldedStates;
     }
 

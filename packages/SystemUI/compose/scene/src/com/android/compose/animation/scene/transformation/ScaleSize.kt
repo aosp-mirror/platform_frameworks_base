@@ -18,9 +18,8 @@ package com.android.compose.animation.scene.transformation
 
 import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.roundToInt
 
@@ -33,17 +32,15 @@ internal class ScaleSize(
     private val width: Float = 1f,
     private val height: Float = 1f,
 ) : PropertyTransformation<IntSize> {
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
-        value: IntSize,
+        idleValue: IntSize,
     ): IntSize {
         return IntSize(
-            width = (value.width * width).roundToInt(),
-            height = (value.height * height).roundToInt(),
+            width = (idleValue.width * width).roundToInt(),
+            height = (idleValue.height * height).roundToInt(),
         )
     }
 }

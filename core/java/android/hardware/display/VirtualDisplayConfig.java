@@ -29,6 +29,7 @@ import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PowerManager;
 import android.util.ArraySet;
 import android.view.Display;
 import android.view.DisplayCutout;
@@ -60,6 +61,8 @@ public final class VirtualDisplayConfig implements Parcelable {
     private final float mRequestedRefreshRate;
     private final boolean mIsHomeSupported;
     private final DisplayCutout mDisplayCutout;
+    private final boolean mIgnoreActivitySizeRestrictions;
+    private final float mDefaultBrightness;
 
     private VirtualDisplayConfig(
             @NonNull String name,
@@ -74,7 +77,9 @@ public final class VirtualDisplayConfig implements Parcelable {
             @NonNull ArraySet<String> displayCategories,
             float requestedRefreshRate,
             boolean isHomeSupported,
-            @Nullable DisplayCutout displayCutout) {
+            @Nullable DisplayCutout displayCutout,
+            boolean ignoreActivitySizeRestrictions,
+            @FloatRange(from = 0.0f, to = 1.0f) float defaultBrightness) {
         mName = name;
         mWidth = width;
         mHeight = height;
@@ -88,6 +93,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         mRequestedRefreshRate = requestedRefreshRate;
         mIsHomeSupported = isHomeSupported;
         mDisplayCutout = displayCutout;
+        mIgnoreActivitySizeRestrictions = ignoreActivitySizeRestrictions;
+        mDefaultBrightness = defaultBrightness;
     }
 
     /**
@@ -154,6 +161,22 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     /**
+     * Returns the default brightness of the display.
+     *
+     * <p>Value of {@code 0.0} indicates the minimum supported brightness and value of {@code 1.0}
+     * indicates the maximum supported brightness.</p>
+     *
+     * @see Builder#setDefaultBrightness(float)
+     * @hide
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+    @SystemApi
+    public @FloatRange(from = 0.0f, to = 1.0f) float getDefaultBrightness() {
+        return mDefaultBrightness;
+    }
+
+
+    /**
      * Returns the unique identifier for the display. Shouldn't be displayed to the user.
      * @hide
      */
@@ -193,6 +216,20 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     /**
+     * Whether this virtual display ignores fixed orientation, aspect ratio and resizability
+     * of apps.
+     *
+     * @see Builder#setIgnoreActivitySizeRestrictions(boolean)
+     * @hide
+     */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_VDM_FORCE_APP_UNIVERSAL_RESIZABLE_API)
+    @SystemApi
+    public boolean isIgnoreActivitySizeRestrictions() {
+        return mIgnoreActivitySizeRestrictions
+                && com.android.window.flags.Flags.vdmForceAppUniversalResizableApi();
+    }
+
+    /**
      * Returns the display categories.
      *
      * @see Builder#setDisplayCategories
@@ -227,6 +264,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         dest.writeFloat(mRequestedRefreshRate);
         dest.writeBoolean(mIsHomeSupported);
         DisplayCutout.ParcelableWrapper.writeCutoutToParcel(mDisplayCutout, dest, flags);
+        dest.writeBoolean(mIgnoreActivitySizeRestrictions);
+        dest.writeFloat(mDefaultBrightness);
     }
 
     @Override
@@ -253,7 +292,9 @@ public final class VirtualDisplayConfig implements Parcelable {
                 && Objects.equals(mDisplayCategories, that.mDisplayCategories)
                 && mRequestedRefreshRate == that.mRequestedRefreshRate
                 && mIsHomeSupported == that.mIsHomeSupported
-                && Objects.equals(mDisplayCutout, that.mDisplayCutout);
+                && mIgnoreActivitySizeRestrictions == that.mIgnoreActivitySizeRestrictions
+                && Objects.equals(mDisplayCutout, that.mDisplayCutout)
+                && mDefaultBrightness == that.mDefaultBrightness;
     }
 
     @Override
@@ -261,7 +302,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         int hashCode = Objects.hash(
                 mName, mWidth, mHeight, mDensityDpi, mFlags, mSurface, mUniqueId,
                 mDisplayIdToMirror, mWindowManagerMirroringEnabled, mDisplayCategories,
-                mRequestedRefreshRate, mIsHomeSupported, mDisplayCutout);
+                mRequestedRefreshRate, mIsHomeSupported, mDisplayCutout,
+                mIgnoreActivitySizeRestrictions, mDefaultBrightness);
         return hashCode;
     }
 
@@ -282,6 +324,8 @@ public final class VirtualDisplayConfig implements Parcelable {
                 + " mRequestedRefreshRate=" + mRequestedRefreshRate
                 + " mIsHomeSupported=" + mIsHomeSupported
                 + " mDisplayCutout=" + mDisplayCutout
+                + " mIgnoreActivitySizeRestrictions=" + mIgnoreActivitySizeRestrictions
+                + " mDefaultBrightness=" + mDefaultBrightness
                 + ")";
     }
 
@@ -299,6 +343,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         mRequestedRefreshRate = in.readFloat();
         mIsHomeSupported = in.readBoolean();
         mDisplayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(in);
+        mIgnoreActivitySizeRestrictions = in.readBoolean();
+        mDefaultBrightness = in.readFloat();
     }
 
     @NonNull
@@ -332,6 +378,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         private float mRequestedRefreshRate = 0.0f;
         private boolean mIsHomeSupported = false;
         private DisplayCutout mDisplayCutout = null;
+        private boolean mIgnoreActivitySizeRestrictions = false;
+        private float mDefaultBrightness = 0.0f;
 
         /**
          * Creates a new Builder.
@@ -506,6 +554,53 @@ public final class VirtualDisplayConfig implements Parcelable {
         }
 
         /**
+         * Sets whether this display ignores fixed orientation, aspect ratio and resizability
+         * of apps.
+         *
+         * <p>Note: setting to {@code true} requires the display to have
+         * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED}. If this is false, this property
+         * is ignored.</p>
+         *
+         * @hide
+         */
+        @FlaggedApi(com.android.window.flags.Flags.FLAG_VDM_FORCE_APP_UNIVERSAL_RESIZABLE_API)
+        @SystemApi
+        @NonNull
+        public Builder setIgnoreActivitySizeRestrictions(boolean enabled) {
+            mIgnoreActivitySizeRestrictions = enabled;
+            return this;
+        }
+
+        /**
+         * Sets the default brightness of the display.
+         *
+         * <p>The system will use this brightness value whenever the display should be bright, i.e.
+         * it is powered on and not dimmed due to user activity or app activity.</p>
+         *
+         * <p>Value of {@code 0.0} indicates the minimum supported brightness and value of
+         * {@code 1.0} indicates the maximum supported brightness.</p>
+         *
+         * <p>If unset, defaults to {@code 0.0}</p>
+         *
+         * @see android.view.View#setKeepScreenOn(boolean)
+         * @see Builder#setDefaultBrightness(float)
+         * @see VirtualDisplay.Callback#onRequestedBrightnessChanged(float)
+         * @hide
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+        @SystemApi
+        @NonNull
+        public Builder setDefaultBrightness(@FloatRange(from = 0.0f, to = 1.0f) float brightness) {
+            if (brightness < PowerManager.BRIGHTNESS_MIN
+                    || brightness > PowerManager.BRIGHTNESS_MAX) {
+                throw new IllegalArgumentException(
+                        "Virtual display default brightness must be in range [0.0, 1.0]");
+            }
+            mDefaultBrightness = brightness;
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDisplayConfig} instance.
          */
         @NonNull
@@ -523,7 +618,9 @@ public final class VirtualDisplayConfig implements Parcelable {
                     mDisplayCategories,
                     mRequestedRefreshRate,
                     mIsHomeSupported,
-                    mDisplayCutout);
+                    mDisplayCutout,
+                    mIgnoreActivitySizeRestrictions,
+                    mDefaultBrightness);
         }
     }
 }

@@ -16,6 +16,8 @@
 package android.hardware.display;
 
 import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
+import android.annotation.SystemApi;
 import android.view.Display;
 import android.view.Surface;
 
@@ -112,18 +114,6 @@ public final class VirtualDisplay {
     }
 
     /**
-     * Sets the on/off state for a virtual display.
-     *
-     * @param isOn Whether the display should be on or off.
-     * @hide
-     */
-    public void setDisplayState(boolean isOn) {
-        if (mToken != null) {
-            mGlobal.setVirtualDisplayState(mToken, isOn);
-        }
-    }
-
-    /**
      * Sets the rotation of the virtual display.
      *
      * @param rotation the new rotation of the display. May be one of {@link Surface#ROTATION_0},
@@ -176,5 +166,25 @@ public final class VirtualDisplay {
          * of the application to release() the virtual display.
          */
         public void onStopped() { }
+
+        /**
+         * Called when the requested brightness of the display has changed.
+         *
+         * <p>The system may adjust the display's brightness based on user or app activity. This
+         * callback will only be invoked if the display has an explicitly specified default
+         * brightness value.</p>
+         *
+         * <p>Value of {@code 0.0} indicates the minimum supported brightness and value of
+         * {@code 1.0} indicates the maximum supported brightness.</p>
+         *
+         * @see android.view.View#setKeepScreenOn(boolean)
+         * @see android.view.WindowManager.LayoutParams#screenBrightness
+         * @see VirtualDisplayConfig.Builder#setDefaultBrightness(float)
+         * @hide
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+        @SystemApi
+        public void onRequestedBrightnessChanged(
+                @FloatRange(from = 0.0f, to = 1.0f) float brightness) {}
     }
 }

@@ -84,7 +84,7 @@ class FutureAppSearchSessionTest {
             val schema = session.setSchema(setSchemaRequest)
             assertThat(schema.get()).isNotNull()
             val appFunctionRuntimeMetadata =
-                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID, "").build()
+                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID).build()
             val putDocumentsRequest: PutDocumentsRequest =
                 PutDocumentsRequest.Builder()
                     .addGenericDocuments(appFunctionRuntimeMetadata)
@@ -110,7 +110,7 @@ class FutureAppSearchSessionTest {
             val schema = session.setSchema(setSchemaRequest)
             assertThat(schema.get()).isNotNull()
             val appFunctionRuntimeMetadata =
-                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID, "").build()
+                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID).build()
             val putDocumentsRequest: PutDocumentsRequest =
                 PutDocumentsRequest.Builder()
                     .addGenericDocuments(appFunctionRuntimeMetadata)
@@ -144,7 +144,7 @@ class FutureAppSearchSessionTest {
             val schema = session.setSchema(setSchemaRequest)
             assertThat(schema.get()).isNotNull()
             val appFunctionRuntimeMetadata =
-                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID, "").build()
+                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID).build()
             val putDocumentsRequest: PutDocumentsRequest =
                 PutDocumentsRequest.Builder()
                     .addGenericDocuments(appFunctionRuntimeMetadata)
@@ -175,7 +175,7 @@ class FutureAppSearchSessionTest {
                     .build()
             session.setSchema(setSchemaRequest).get()
             val appFunctionRuntimeMetadata =
-                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID, "").build()
+                AppFunctionRuntimeMetadata.Builder(TEST_PACKAGE_NAME, TEST_FUNCTION_ID).build()
             val putDocumentsRequest: PutDocumentsRequest =
                 PutDocumentsRequest.Builder()
                     .addGenericDocuments(appFunctionRuntimeMetadata)

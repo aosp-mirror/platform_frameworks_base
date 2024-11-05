@@ -17,7 +17,6 @@
 package android.hardware.input;
 
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.graphics.PointF;
@@ -30,8 +29,8 @@ import android.view.MotionEvent;
  * A virtual mouse representing a relative input mechanism on a remote device, such as a mouse or
  * trackpad.
  *
- * This registers an InputDevice that is interpreted like a physically-connected device and
- * dispatches received events to it.
+ * <p>This registers an InputDevice that is interpreted like a physically-connected device and
+ * dispatches received events to it.</p>
  *
  * @hide
  */
@@ -50,7 +49,6 @@ public class VirtualMouse extends VirtualInputDevice {
      * @throws IllegalStateException if the display this mouse is associated with is not currently
      * targeted
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendButtonEvent(@NonNull VirtualMouseButtonEvent event) {
         try {
             if (!mVirtualDevice.sendButtonEvent(mToken, event)) {
@@ -70,7 +68,6 @@ public class VirtualMouse extends VirtualInputDevice {
      * @throws IllegalStateException if the display this mouse is associated with is not currently
      * targeted
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendScrollEvent(@NonNull VirtualMouseScrollEvent event) {
         try {
             if (!mVirtualDevice.sendScrollEvent(mToken, event)) {
@@ -89,7 +86,6 @@ public class VirtualMouse extends VirtualInputDevice {
      * @throws IllegalStateException if the display this mouse is associated with is not currently
      * targeted
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendRelativeEvent(@NonNull VirtualMouseRelativeEvent event) {
         try {
             if (!mVirtualDevice.sendRelativeEvent(mToken, event)) {
@@ -108,7 +104,6 @@ public class VirtualMouse extends VirtualInputDevice {
      * @throws IllegalStateException if the display this mouse is associated with is not currently
      * targeted
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public @NonNull PointF getCursorPosition() {
         try {
             return mVirtualDevice.getCursorPosition(mToken);

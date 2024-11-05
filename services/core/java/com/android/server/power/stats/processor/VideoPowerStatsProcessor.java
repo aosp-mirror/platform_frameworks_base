@@ -20,11 +20,10 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 
 import com.android.internal.os.PowerProfile;
-import com.android.server.power.stats.PowerStatsUidResolver;
 
 class VideoPowerStatsProcessor extends BinaryStatePowerStatsProcessor {
-    VideoPowerStatsProcessor(PowerProfile powerProfile, PowerStatsUidResolver uidResolver) {
-        super(BatteryConsumer.POWER_COMPONENT_VIDEO, uidResolver,
+    VideoPowerStatsProcessor(PowerProfile powerProfile) {
+        super(BatteryConsumer.POWER_COMPONENT_VIDEO,
                 powerProfile.getAveragePower(PowerProfile.POWER_VIDEO));
     }
 

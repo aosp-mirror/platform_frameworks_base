@@ -1509,7 +1509,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- @hide -->
-    <style name="PointerIconVectorStyleFillYellow">
+    <style name="PointerIconVectorStyleFillRed">
         <item name="pointerIconVectorFill">#F55E57</item>
         <item name="pointerIconVectorFillInverse">#F55E57</item>
     </style>
@@ -1524,6 +1524,12 @@ please see styles_device_defaults.xml.
     <style name="PointerIconVectorStyleFillBlue">
         <item name="pointerIconVectorFill">#009DC9</item>
         <item name="pointerIconVectorFillInverse">#009DC9</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillPurple">
+        <item name="pointerIconVectorFill">#AD72FF</item>
+        <item name="pointerIconVectorFillInverse">#AD72FF</item>
     </style>
 
     <!-- @hide -->

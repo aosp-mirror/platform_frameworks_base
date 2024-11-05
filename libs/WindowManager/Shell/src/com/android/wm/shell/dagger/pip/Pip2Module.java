@@ -77,10 +77,12 @@ public abstract class Pip2Module {
             PipTaskListener pipTaskListener,
             @NonNull PipScheduler pipScheduler,
             @NonNull PipTransitionState pipStackListenerController,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             @NonNull PipUiStateChangeController pipUiStateChangeController) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, null, pipBoundsAlgorithm, pipTaskListener,
-                pipScheduler, pipStackListenerController, pipUiStateChangeController);
+                pipScheduler, pipStackListenerController, pipDisplayLayoutState,
+                pipUiStateChangeController);
     }
 
     @WMSingleton
@@ -125,11 +127,9 @@ public abstract class Pip2Module {
     @Provides
     static PipScheduler providePipScheduler(Context context,
             PipBoundsState pipBoundsState,
-            PhonePipMenuController pipMenuController,
             @ShellMainThread ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState) {
-        return new PipScheduler(context, pipBoundsState, pipMenuController,
-                mainExecutor, pipTransitionState);
+        return new PipScheduler(context, pipBoundsState, mainExecutor, pipTransitionState);
     }
 
     @WMSingleton
@@ -138,10 +138,13 @@ public abstract class Pip2Module {
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             SystemWindows systemWindows,
             PipUiEventLogger pipUiEventLogger,
+            PipTaskListener pipTaskListener,
+            @NonNull PipTransitionState pipTransitionState,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
-                systemWindows, pipUiEventLogger, mainExecutor, mainHandler);
+                systemWindows, pipUiEventLogger, pipTaskListener, pipTransitionState, mainExecutor,
+                mainHandler);
     }
 
 

@@ -17,13 +17,13 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.annotation.FloatRange
+import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * This interactor provides direct access to [KeyguardTransitionRepository] internals and exposes
@@ -32,9 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 @SysUISingleton
 class InternalKeyguardTransitionInteractor
 @Inject
-constructor(
-    private val repository: KeyguardTransitionRepository,
-) {
+constructor(private val repository: KeyguardTransitionRepository) {
 
     /**
      * The [TransitionInfo] of the most recent call to
@@ -58,14 +56,19 @@ constructor(
      * *will* be emitted, and therefore that it can safely request an AOD -> LOCKSCREEN transition
      * which will subsequently cancel GONE -> AOD.
      */
-    internal val currentTransitionInfoInternal: StateFlow<TransitionInfo> =
-        repository.currentTransitionInfoInternal
+    internal fun currentTransitionInfoInternal(): TransitionInfo {
+        return if (transitionRaceCondition()) {
+            repository.currentTransitionInfo
+        } else {
+            repository.currentTransitionInfoInternal.value
+        }
+    }
 
     suspend fun startTransition(info: TransitionInfo) = repository.startTransition(info)
 
     suspend fun updateTransition(
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
-        state: TransitionState
+        state: TransitionState,
     ) = repository.updateTransition(transitionId, value, state)
 }

@@ -24,7 +24,4 @@ public interface RecentsTransitionStateListener {
     /** Notifies whether the recents animation is running. */
     default void onAnimationStateChanged(boolean running) {
     }
-
-    /** Notifies that a recents shell transition has started. */
-    default void onTransitionStarted(IBinder transition) {}
 }

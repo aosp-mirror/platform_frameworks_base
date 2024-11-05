@@ -17,12 +17,9 @@
 package com.android.compose.animation.scene.transformation
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.isSpecified
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the translation of an element to another element. */
@@ -30,13 +27,11 @@ internal class AnchoredTranslate(
     override val matcher: ElementMatcher,
     private val anchor: ElementKey,
 ) : PropertyTransformation<Offset> {
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
-        value: Offset,
+        idleValue: Offset,
     ): Offset {
         fun throwException(content: ContentKey?): Nothing {
             throwMissingAnchorException(
@@ -46,24 +41,19 @@ internal class AnchoredTranslate(
             )
         }
 
-        val anchor = layoutImpl.elements[anchor] ?: throwException(content = null)
-        fun anchorOffsetIn(content: ContentKey): Offset? {
-            return anchor.stateByContent[content]?.targetOffset?.takeIf { it.isSpecified }
-        }
-
         // [element] will move the same amount as [anchor] does.
         // TODO(b/290184746): Also support anchors that are not shared but translated because of
         // other transformations, like an edge translation.
         val anchorFromOffset =
-            anchorOffsetIn(transition.fromContent) ?: throwException(transition.fromContent)
+            anchor.targetOffset(transition.fromContent) ?: throwException(transition.fromContent)
         val anchorToOffset =
-            anchorOffsetIn(transition.toContent) ?: throwException(transition.toContent)
+            anchor.targetOffset(transition.toContent) ?: throwException(transition.toContent)
         val offset = anchorToOffset - anchorFromOffset
 
         return if (content == transition.toContent) {
-            Offset(value.x - offset.x, value.y - offset.y)
+            Offset(idleValue.x - offset.x, idleValue.y - offset.y)
         } else {
-            Offset(value.x + offset.x, value.y + offset.y)
+            Offset(idleValue.x + offset.x, idleValue.y + offset.y)
         }
     }
 }

@@ -27,13 +27,13 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
-import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -316,6 +316,16 @@ public class AuthContainerView extends LinearLayout
         mBiometricCallback = new BiometricCallback();
         mMSDLPlayer = msdlPlayer;
 
+        // Listener for when device locks from adaptive auth, dismiss prompt
+        getContext().getSystemService(KeyguardManager.class).addKeyguardLockedStateListener(
+                getContext().getMainExecutor(),
+                isKeyguardLocked -> {
+                    if (isKeyguardLocked) {
+                        onStartedGoingToSleep();
+                    }
+                }
+        );
+
         final BiometricModalities biometricModalities = new BiometricModalities(
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
                 Utils.findFirstSensorProperties(faceProps, mConfig.mSensorIds));
@@ -323,7 +333,7 @@ public class AuthContainerView extends LinearLayout
         final boolean isLandscape = mContext.getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
         mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
-        mPromptSelectorInteractorProvider.get().setPrompt(mConfig.mPromptInfo, mEffectiveUserId,
+        mPromptSelectorInteractorProvider.get().setPrompt(mConfig.mPromptInfo, mConfig.mUserId,
                 getRequestId(), biometricModalities, mConfig.mOperationId, mConfig.mOpPackageName,
                 false /*onSwitchToCredential*/, isLandscape);
 
@@ -676,10 +686,8 @@ public class AuthContainerView extends LinearLayout
 
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
-            if (Flags.customBiometricPrompt()) {
                 // TODO(b/288175645): resetPrompt calls should be lifecycle aware
                 mPromptSelectorInteractorProvider.get().resetPrompt(getRequestId());
-            }
             removeWindowIfAttached();
         };
 

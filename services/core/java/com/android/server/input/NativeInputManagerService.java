@@ -48,7 +48,7 @@ interface NativeInputManagerService {
 
     int getSwitchState(int deviceId, int sourceMask, int sw);
 
-    void addKeyRemapping(int deviceId, int fromKeyCode, int toKeyCode);
+    void setKeyRemapping(int[] fromKeyCodes, int[] toKeyCodes);
 
     boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
 
@@ -127,6 +127,10 @@ interface NativeInputManagerService {
 
     void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
 
+    void setMouseReverseVerticalScrollingEnabled(boolean enabled);
+
+    void setMouseSwapPrimaryButtonEnabled(boolean enabled);
+
     void setTouchpadPointerSpeed(int speed);
 
     void setTouchpadNaturalScrollingEnabled(boolean enabled);
@@ -139,9 +143,11 @@ interface NativeInputManagerService {
 
     void setTouchpadRightClickZoneEnabled(boolean enabled);
 
+    void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
+
     void setShowTouches(boolean enabled);
 
-    void setInteractive(boolean interactive);
+    void setNonInteractiveDisplays(int[] displayIds);
 
     void reloadCalibration();
 
@@ -212,7 +218,7 @@ interface NativeInputManagerService {
 
     void setMotionClassifierEnabled(boolean enabled);
 
-    void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
+    void setKeyRepeatConfiguration(int timeoutMs, int delayMs, boolean keyRepeatEnabled);
 
     InputSensorInfo[] getSensorList(int deviceId);
 
@@ -283,6 +289,17 @@ interface NativeInputManagerService {
      */
     int getLastUsedInputDeviceId();
 
+    /**
+     * Set whether the given input device can wake up the kernel from sleep
+     * when it generates input events. By default, usually only internal (built-in)
+     * input devices can wake the kernel from sleep. For an external input device
+     * that supports remote wakeup to be able to wake the kernel, this must be called
+     * after each time the device is connected/added.
+     *
+     * Returns true if setting power wakeup was successful.
+     */
+    boolean setKernelWakeEnabled(int deviceId, boolean enabled);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -311,7 +328,7 @@ interface NativeInputManagerService {
         public native int getSwitchState(int deviceId, int sourceMask, int sw);
 
         @Override
-        public native void addKeyRemapping(int deviceId, int fromKeyCode, int toKeyCode);
+        public native void setKeyRemapping(int[] fromKeyCodes, int[] toKeyCodes);
 
         @Override
         public native boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes,
@@ -388,6 +405,12 @@ interface NativeInputManagerService {
         public native void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
 
         @Override
+        public native void setMouseReverseVerticalScrollingEnabled(boolean enabled);
+
+        @Override
+        public native void setMouseSwapPrimaryButtonEnabled(boolean enabled);
+
+        @Override
         public native void setTouchpadPointerSpeed(int speed);
 
         @Override
@@ -406,10 +429,13 @@ interface NativeInputManagerService {
         public native void setTouchpadRightClickZoneEnabled(boolean enabled);
 
         @Override
+        public native void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
+
+        @Override
         public native void setShowTouches(boolean enabled);
 
         @Override
-        public native void setInteractive(boolean interactive);
+        public native void setNonInteractiveDisplays(int[] displayIds);
 
         @Override
         public native void reloadCalibration();
@@ -509,7 +535,8 @@ interface NativeInputManagerService {
         public native void setMotionClassifierEnabled(boolean enabled);
 
         @Override
-        public native void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
+        public native void setKeyRepeatConfiguration(int timeoutMs, int delayMs,
+                boolean keyRepeatEnabled);
 
         @Override
         public native InputSensorInfo[] getSensorList(int deviceId);
@@ -562,5 +589,8 @@ interface NativeInputManagerService {
 
         @Override
         public native int getLastUsedInputDeviceId();
+
+        @Override
+        public native boolean setKernelWakeEnabled(int deviceId, boolean enabled);
     }
 }

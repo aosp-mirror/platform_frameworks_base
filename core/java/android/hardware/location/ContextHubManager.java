@@ -750,9 +750,7 @@ public final class ContextHubManager {
                 executor.execute(
                         () -> {
                             callback.onMessageFromNanoApp(client, message);
-                            if (Flags.reliableMessage()
-                                        && Flags.reliableMessageImplementation()
-                                        && message.isReliable()) {
+                            if (message.isReliable()) {
                                 client.reliableMessageCallbackFinished(
                                         message.getMessageSequenceNumber(), ErrorCode.OK);
                             } else {

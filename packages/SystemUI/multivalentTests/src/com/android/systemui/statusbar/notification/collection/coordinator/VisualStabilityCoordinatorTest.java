@@ -20,8 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
 
-import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
-
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,12 +29,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.compose.animation.scene.ObservableTransitionState;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.dump.DumpManager;
@@ -67,9 +69,6 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.test.TestScope;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,6 +77,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
+
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -511,6 +513,32 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // WHEN the animation has stopped playing
         setPanelCollapsing(false);
+
+        // invalidate is called, b/c we were previously suppressing the pipeline from running
+        verifyStabilityManagerWasInvalidated(times(1));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_CHECK_LOCKSCREEN_GONE_TRANSITION)
+    public void testNotLockscreenInGoneTransition_invalidationCalled() {
+        // GIVEN visual stability is being maintained b/c animation is playing
+        mKosmos.getKeyguardTransitionRepository().sendTransitionStepJava(
+                mTestScope, new TransitionStep(
+                        KeyguardState.LOCKSCREEN,
+                        KeyguardState.GONE,
+                        1f,
+                        TransitionState.RUNNING),  /* validateStep = */ false);
+        mTestScope.getTestScheduler().runCurrent();
+        assertFalse(mNotifStabilityManager.isPipelineRunAllowed());
+
+        // WHEN the animation has stopped playing
+        mKosmos.getKeyguardTransitionRepository().sendTransitionStepJava(
+                mTestScope, new TransitionStep(
+                        KeyguardState.LOCKSCREEN,
+                        KeyguardState.GONE,
+                        1f,
+                        TransitionState.FINISHED),  /* validateStep = */ false);
+        mTestScope.getTestScheduler().runCurrent();
 
         // invalidate is called, b/c we were previously suppressing the pipeline from running
         verifyStabilityManagerWasInvalidated(times(1));

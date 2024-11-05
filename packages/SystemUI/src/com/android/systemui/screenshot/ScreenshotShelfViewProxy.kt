@@ -67,7 +67,7 @@ constructor(
     shelfViewBinder: ScreenshotShelfViewBinder,
     private val thumbnailObserver: ThumbnailObserver,
     @Assisted private val context: Context,
-    @Assisted private val displayId: Int
+    @Assisted private val displayId: Int,
 ) {
 
     interface ScreenshotViewCallback {
@@ -117,7 +117,7 @@ constructor(
             animationController,
             LayoutInflater.from(context),
             onDismissalRequested = { event, velocity -> requestDismissal(event, velocity) },
-            onUserInteraction = { callbacks?.onUserInteraction() }
+            onUserInteraction = { callbacks?.onUserInteraction() },
         )
         view.updateInsets(windowManager.currentWindowMetrics.windowInsets)
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
@@ -130,7 +130,7 @@ constructor(
         screenshotPreview = view.screenshotPreview
         thumbnailObserver.setViews(
             view.blurredScreenshotPreview,
-            view.requireViewById(R.id.screenshot_preview_border)
+            view.requireViewById(R.id.screenshot_preview_border),
         )
         view.addOnAttachStateChangeListener(
             object : View.OnAttachStateChangeListener {
@@ -204,7 +204,6 @@ constructor(
 
     fun prepareScrollingTransition(
         response: ScrollCaptureResponse,
-        screenBitmap: Bitmap, // unused
         newScreenshot: Bitmap,
         screenshotTakenInPortrait: Boolean,
         onTransitionPrepared: Runnable,
@@ -224,7 +223,7 @@ constructor(
                 0,
                 0,
                 context.resources.displayMetrics.widthPixels,
-                context.resources.displayMetrics.heightPixels
+                context.resources.displayMetrics.heightPixels,
             )
         )
         return r
@@ -239,7 +238,7 @@ constructor(
             animationController.runLongScreenshotTransition(
                 transitionDestination,
                 longScreenshot,
-                onTransitionEnd
+                onTransitionEnd,
             )
         transitionAnimation.doOnEnd { callbacks?.onDismiss() }
         transitionAnimation.start()
@@ -295,7 +294,7 @@ constructor(
                         .findOnBackInvokedDispatcher()
                         ?.registerOnBackInvokedCallback(
                             OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                            onBackInvokedCallback
+                            onBackInvokedCallback,
                         )
                 }
 

@@ -44,7 +44,7 @@ java_test_host {
         "block_device_writer_jar",
     ],
     test_suites: ["device-tests"],
-    data: [
+    device_common_data: [
         ":PackageManagerTestApex",
         ":PackageManagerTestApexApp",
         ":PackageManagerServiceServerTests",
@@ -53,7 +53,7 @@ java_test_host {
         "block_device_writer",
         "fsverity_multilib",
     ],
-    java_resources: [
+    device_common_java_resources: [
         ":PackageManagerTestOverlayActor",
         ":PackageManagerTestOverlay",
         ":PackageManagerTestOverlayTarget",
@@ -73,7 +73,7 @@ java_test_host {
     ],
 }
 
-genrule {
+java_genrule {
     name: "PackageManagerTestAppVersion3Invalid",
     tools: [
         "soong_zip",

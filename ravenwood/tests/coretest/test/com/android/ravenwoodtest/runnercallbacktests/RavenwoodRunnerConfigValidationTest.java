@@ -106,17 +106,11 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: testMethod1(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest)
     testFailure: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest.sConfig expected to be public static
-    testFinished: testMethod1(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest)
-    testStarted: testMethod2(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest)
-    testFailure: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest.sConfig expected to be public static
-    testFinished: testMethod2(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest)
-    testStarted: testMethod3(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest)
-    testFailure: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest.sConfig expected to be public static
-    testFinished: testMethod3(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest)
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ErrorMustBeReportedFromEachTest)
     testSuiteFinished: classes
-    testRunFinished: 3,3,0,0
+    testRunFinished: 1,1,0,0
     """)
     // CHECKSTYLE:ON
     public static class ErrorMustBeReportedFromEachTest {
@@ -145,9 +139,9 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$DuplicateConfigTest)
-    testFailure: Class com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest.DuplicateConfigTest has multiple fields with @RavenwoodConfiguration.Config
-    testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$DuplicateConfigTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$DuplicateConfigTest)
+    testFailure: Class com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest.DuplicateConfigTest has multiple fields with @RavenwoodConfig.Config
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$DuplicateConfigTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)
@@ -175,9 +169,9 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonStaticConfigTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonStaticConfigTest)
     testFailure: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonStaticConfigTest.sConfig expected to be public static
-    testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonStaticConfigTest)
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonStaticConfigTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)
@@ -201,9 +195,9 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonPublicConfigTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonPublicConfigTest)
     testFailure: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonPublicConfigTest.sConfig expected to be public static
-    testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonPublicConfigTest)
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$NonPublicConfigTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)
@@ -220,16 +214,16 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     }
 
     /**
-     * @Config's must be of type RavenwoodConfiguration.
+     * @Config's must be of type RavenwoodConfig.
      */
     @RunWith(AndroidJUnit4.class)
     // CHECKSTYLE:OFF
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeConfigTest)
-    testFailure: Field com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest.WrongTypeConfigTest.sConfig has @RavenwoodConfiguration.Config but type is not RavenwoodConfiguration
-    testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeConfigTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeConfigTest)
+    testFailure: Field com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest.WrongTypeConfigTest.sConfig has @RavenwoodConfig.Config but type is not RavenwoodConfig
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeConfigTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)
@@ -237,8 +231,36 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     public static class WrongTypeConfigTest {
 
         @RavenwoodConfig.Config
-        public Object sConfig =
+        public static Object sConfig =
                 new RavenwoodConfig.Builder().build();
+
+        @Test
+        public void testConfig() {
+        }
+
+    }
+
+    /**
+     * @Rule must be of type RavenwoodRule.
+     */
+    @RunWith(AndroidJUnit4.class)
+    // CHECKSTYLE:OFF
+    @Expected("""
+    testRunStarted: classes
+    testSuiteStarted: classes
+    testSuiteStarted: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeRuleTest
+    testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeRuleTest)
+    testFailure: If you have a RavenwoodRule in your test, make sure the field type is RavenwoodRule so Ravenwood can detect it.
+    testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeRuleTest)
+    testSuiteFinished: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeRuleTest
+    testSuiteFinished: classes
+    testRunFinished: 1,1,0,0
+    """)
+    // CHECKSTYLE:ON
+    public static class WrongTypeRuleTest {
+
+        @Rule
+        public TestRule mRule = new RavenwoodRule.Builder().build();
 
         @Test
         public void testConfig() {
@@ -254,9 +276,9 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithInstanceRuleTest)
-    testFailure: RavenwoodConfiguration and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfiguration.
-    testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithInstanceRuleTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithInstanceRuleTest)
+    testFailure: RavenwoodConfig and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfig.
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithInstanceRuleTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)
@@ -283,9 +305,9 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: Constructor(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithStaticRuleTest)
-    testFailure: Exception detected in constructor
-    testFinished: Constructor(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithStaticRuleTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithStaticRuleTest)
+    testFailure: Failed to instantiate class androidx.test.ext.junit.runners.AndroidJUnit4
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithStaticRuleTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)
@@ -372,9 +394,9 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testStarted: test(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleInBaseClassTest)
-    testFailure: RavenwoodConfiguration and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfiguration.
-    testFinished: test(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleInBaseClassTest)
+    testStarted: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleInBaseClassTest)
+    testFailure: RavenwoodConfig and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfig.
+    testFinished: initializationError(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleInBaseClassTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
     """)
@@ -408,10 +430,11 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testSuiteStarted: classes
     testSuiteStarted: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$RuleWithDifferentTypeInBaseClassSuccessTest
     testStarted: testRuleInBaseClass(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$RuleWithDifferentTypeInBaseClassSuccessTest)
+    testFailure: If you have a RavenwoodRule in your test, make sure the field type is RavenwoodRule so Ravenwood can detect it.
     testFinished: testRuleInBaseClass(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$RuleWithDifferentTypeInBaseClassSuccessTest)
     testSuiteFinished: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$RuleWithDifferentTypeInBaseClassSuccessTest
     testSuiteFinished: classes
-    testRunFinished: 1,0,0,0
+    testRunFinished: 1,1,0,0
     """)
     // CHECKSTYLE:ON
     public static class RuleWithDifferentTypeInBaseClassSuccessTest extends RuleWithDifferentTypeInBaseClass {
@@ -434,7 +457,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testSuiteStarted: classes
     testSuiteStarted: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleWithDifferentTypeInBaseClassTest
     testStarted: test(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleWithDifferentTypeInBaseClassTest)
-    testFailure: RavenwoodConfiguration and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfiguration.
+    testFailure: If you have a RavenwoodRule in your test, make sure the field type is RavenwoodRule so Ravenwood can detect it.
     testFinished: test(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleWithDifferentTypeInBaseClassTest)
     testSuiteFinished: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleWithDifferentTypeInBaseClassTest
     testSuiteFinished: classes

@@ -2169,6 +2169,22 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2;
 
+    /**
+     * <p>Use
+     * {@link CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE android.colorCorrection.colorTemperature} and
+     * {@link CaptureRequest#COLOR_CORRECTION_COLOR_TINT android.colorCorrection.colorTint} to adjust the white balance based
+     * on correlated color temperature.</p>
+     * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
+     * CCT is ignored.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE
+     * @see CaptureRequest#COLOR_CORRECTION_COLOR_TINT
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final int COLOR_CORRECTION_MODE_CCT = 3;
+
     //
     // Enumeration values for CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
     //
@@ -2270,7 +2286,17 @@ public abstract class CameraMetadata<TKey> {
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are ignored. The
      * application has control over the various
      * android.flash.* fields.</p>
+     * <p>If the device supports manual flash strength control, i.e.,
+     * if {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} are greater than 1, then
+     * the auto-exposure (AE) precapture metering sequence should be
+     * triggered for the configured flash mode and strength to avoid
+     * the image being incorrectly exposed at different
+     * {@link CaptureRequest#FLASH_STRENGTH_LEVEL android.flash.strengthLevel}.</p>
      *
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
+     * @see CaptureRequest#FLASH_STRENGTH_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
@@ -3895,36 +3921,6 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#DISTORTION_CORRECTION_MODE
      */
     public static final int DISTORTION_CORRECTION_MODE_HIGH_QUALITY = 2;
-
-    //
-    // Enumeration values for CaptureRequest#EFV_STABILIZATION_MODE
-    //
-
-    /**
-     * <p>No stabilization.</p>
-     * @see CaptureRequest#EFV_STABILIZATION_MODE
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final int EFV_STABILIZATION_MODE_OFF = 0;
-
-    /**
-     * <p>Gimbal stabilization mode.</p>
-     * @see CaptureRequest#EFV_STABILIZATION_MODE
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final int EFV_STABILIZATION_MODE_GIMBAL = 1;
-
-    /**
-     * <p>Locked stabilization mode which uses the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * stabilization to directionally steady the target region.</p>
-     * @see CaptureRequest#EFV_STABILIZATION_MODE
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final int EFV_STABILIZATION_MODE_LOCKED = 2;
 
     //
     // Enumeration values for CaptureResult#CONTROL_AE_STATE

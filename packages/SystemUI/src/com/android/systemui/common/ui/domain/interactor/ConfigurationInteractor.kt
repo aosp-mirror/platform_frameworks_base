@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 
 /** Business logic related to configuration changes. */
+// TODO: b/374267505 - Create a @ShadeDisplayWindow annotated version of this.
 @SysUISingleton
 class ConfigurationInteractor @Inject constructor(private val repository: ConfigurationRepository) {
     /**

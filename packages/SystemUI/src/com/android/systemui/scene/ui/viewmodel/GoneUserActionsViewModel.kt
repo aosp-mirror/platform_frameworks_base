@@ -16,17 +16,13 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
-import com.android.compose.animation.scene.Edge
-import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.scene.shared.model.Overlays
-import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.ui.viewmodel.dualShadeActions
+import com.android.systemui.shade.ui.viewmodel.singleShadeActions
+import com.android.systemui.shade.ui.viewmodel.splitShadeActions
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
@@ -37,31 +33,19 @@ constructor(private val shadeInteractor: ShadeInteractor) : UserActionsViewModel
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         shadeInteractor.shadeMode.collect { shadeMode ->
             setActions(
-                when (shadeMode) {
-                    ShadeMode.Single -> fullscreenShadeActions()
-                    ShadeMode.Split -> fullscreenShadeActions(transitionKey = ToSplitShade)
-                    ShadeMode.Dual -> dualShadeActions()
-                }
+                buildList {
+                        addAll(
+                            when (shadeMode) {
+                                ShadeMode.Single ->
+                                    singleShadeActions(requireTwoPointersForTopEdgeForQs = true)
+                                ShadeMode.Split -> splitShadeActions()
+                                ShadeMode.Dual -> dualShadeActions()
+                            }
+                        )
+                    }
+                    .associate { it }
             )
         }
-    }
-
-    private fun fullscreenShadeActions(
-        transitionKey: TransitionKey? = null
-    ): Map<UserAction, UserActionResult> {
-        return mapOf(
-            Swipe.Down to UserActionResult(Scenes.Shade, transitionKey),
-            Swipe(direction = SwipeDirection.Down, pointerCount = 2, fromSource = Edge.Top) to
-                UserActionResult(Scenes.Shade, transitionKey),
-        )
-    }
-
-    private fun dualShadeActions(): Map<UserAction, UserActionResult> {
-        return mapOf(
-            Swipe.Down to Overlays.NotificationsShade,
-            Swipe(direction = SwipeDirection.Down, fromSource = SceneContainerEdge.TopRight) to
-                Overlays.QuickSettingsShade,
-        )
     }
 
     @AssistedFactory

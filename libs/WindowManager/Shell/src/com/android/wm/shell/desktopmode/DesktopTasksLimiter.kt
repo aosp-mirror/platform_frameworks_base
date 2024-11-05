@@ -16,19 +16,21 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
+import android.os.Handler
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
+import android.window.DesktopModeFlags
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
-import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionObserver
 
@@ -36,16 +38,17 @@ import com.android.wm.shell.transition.Transitions.TransitionObserver
  * Limits the number of tasks shown in Desktop Mode.
  *
  * This class should only be used if
- * [com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
+ * [android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
  * is enabled and [maxTasksLimit] is strictly greater than 0.
  */
 class DesktopTasksLimiter (
         transitions: Transitions,
-        private val taskRepository: DesktopModeTaskRepository,
+        private val taskRepository: DesktopRepository,
         private val shellTaskOrganizer: ShellTaskOrganizer,
         private val maxTasksLimit: Int,
         private val interactionJankMonitor: InteractionJankMonitor,
-        private val context: Context
+        private val context: Context,
+        @ShellMainThread private val handler: Handler,
 ) {
     private val minimizeTransitionObserver = MinimizeTransitionObserver()
     @VisibleForTesting
@@ -53,13 +56,11 @@ class DesktopTasksLimiter (
 
     init {
         require(maxTasksLimit > 0) {
-            "DesktopTasksLimiter should not be created with a maxTasksLimit at 0 or less. " +
-                    "Current value: $maxTasksLimit."
+            "DesktopTasksLimiter: maxTasksLimit should be greater than 0. Current value: $maxTasksLimit."
         }
         transitions.registerObserver(minimizeTransitionObserver)
         taskRepository.addActiveTaskListener(leftoverMinimizedTasksRemover)
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksLimiter: starting limiter with a maximum of %d tasks", maxTasksLimit)
+        logV("Starting limiter with a maximum of %d tasks", maxTasksLimit)
     }
 
     private data class TaskDetails(
@@ -84,20 +85,14 @@ class DesktopTasksLimiter (
             finishTransaction: SurfaceControl.Transaction
         ) {
             val taskToMinimize = pendingTransitionTokensAndTasks.remove(transition) ?: return
-
             if (!taskRepository.isActiveTask(taskToMinimize.taskId)) return
-
-            if (!isTaskReorderedToBackOrInvisible(info, taskToMinimize)) {
-                ProtoLog.v(
-                        ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                        "DesktopTasksLimiter: task %d is not reordered to back nor invis",
-                        taskToMinimize.taskId)
+            if (!isTaskReadyForMinimize(info, taskToMinimize)) {
+                logV("task %d is not reordered to back nor invis", taskToMinimize.taskId)
                 return
             }
-
             taskToMinimize.transitionInfo = info
             activeTransitionTokensAndTasks[transition] = taskToMinimize
-            this@DesktopTasksLimiter.markTaskMinimized(
+            this@DesktopTasksLimiter.minimizeTask(
                     taskToMinimize.displayId, taskToMinimize.taskId)
         }
 
@@ -105,18 +100,15 @@ class DesktopTasksLimiter (
          * Returns whether the Task [taskDetails] is being reordered to the back in the transition
          * [info], or is already invisible.
          *
-         * This check can be used to double-check that a task was indeed minimized before
-         * marking it as such.
+         * This check confirms a task should be minimized before minimizing it.
          */
-        private fun isTaskReorderedToBackOrInvisible(
-                info: TransitionInfo,
-                taskDetails: TaskDetails
+        private fun isTaskReadyForMinimize(
+            info: TransitionInfo,
+            taskDetails: TaskDetails
         ): Boolean {
             val taskChange = info.changes.find { change ->
                 change.taskInfo?.taskId == taskDetails.taskId }
-            if (taskChange == null) {
-                return !taskRepository.isVisibleTask(taskDetails.taskId)
-            }
+            if (taskChange == null) return !taskRepository.isVisibleTask(taskDetails.taskId)
             return taskChange.mode == TRANSIT_TO_BACK
         }
 
@@ -125,7 +117,7 @@ class DesktopTasksLimiter (
             if (mActiveTaskDetails != null && mActiveTaskDetails.transitionInfo != null) {
                 // Begin minimize window CUJ instrumentation.
                 interactionJankMonitor.begin(
-                    mActiveTaskDetails.transitionInfo?.rootLeash, context,
+                    mActiveTaskDetails.transitionInfo?.rootLeash, context, handler,
                     CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
                 )
             }
@@ -141,9 +133,6 @@ class DesktopTasksLimiter (
         }
 
         override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
-            ProtoLog.v(
-                    ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                    "DesktopTasksLimiter: transition %s finished", transition)
             if (activeTransitionTokensAndTasks.remove(transition) != null) {
                 if (aborted) {
                     interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW)
@@ -156,26 +145,21 @@ class DesktopTasksLimiter (
     }
 
     @VisibleForTesting
-    inner class LeftoverMinimizedTasksRemover : DesktopModeTaskRepository.ActiveTasksListener {
+    inner class LeftoverMinimizedTasksRemover : DesktopRepository.ActiveTasksListener {
         override fun onActiveTasksChanged(displayId: Int) {
+            // If back navigation is enabled, we shouldn't remove the leftover tasks
+            if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
             val wct = WindowContainerTransaction()
             removeLeftoverMinimizedTasks(displayId, wct)
             shellTaskOrganizer.applyTransaction(wct)
         }
 
         fun removeLeftoverMinimizedTasks(displayId: Int, wct: WindowContainerTransaction) {
-            if (taskRepository.getActiveNonMinimizedOrderedTasks(displayId).isNotEmpty()) {
-                return
-            }
+            if (taskRepository.getExpandedTasksOrdered(displayId).isNotEmpty()) return
             val remainingMinimizedTasks = taskRepository.getMinimizedTasks(displayId)
-            if (remainingMinimizedTasks.isEmpty()) {
-                return
-            }
-            ProtoLog.v(
-                ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksLimiter: removing leftover minimized tasks: %s",
-                remainingMinimizedTasks,
-            )
+            if (remainingMinimizedTasks.isEmpty()) return
+
+            logV("Removing leftover minimized tasks: %s", remainingMinimizedTasks)
             remainingMinimizedTasks.forEach { taskIdToRemove ->
                 val taskToRemove = shellTaskOrganizer.getRunningTaskInfo(taskIdToRemove)
                 if (taskToRemove != null) {
@@ -186,44 +170,41 @@ class DesktopTasksLimiter (
     }
 
     /**
-     * Mark [taskId], which must be on [displayId], as minimized, this should only be done after the
-     * corresponding transition has finished so we don't minimize the task if the transition fails.
+     * Mark task with [taskId] on [displayId] as minimized.
+     *
+     * This should be after the corresponding transition has finished so we don't
+     * minimize the task if the transition fails.
      */
-    private fun markTaskMinimized(displayId: Int, taskId: Int) {
-        ProtoLog.v(
-                ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksLimiter: marking %d as minimized", taskId)
+    private fun minimizeTask(displayId: Int, taskId: Int) {
+        logV("Minimize taskId=%d, displayId=%d", taskId, displayId)
         taskRepository.minimizeTask(displayId, taskId)
     }
 
     /**
-     * Add a minimize-transition to [wct] if adding [newFrontTaskInfo] brings us over the task
+     * Adds a minimize-transition to [wct] if adding [newFrontTaskInfo] crosses task
      * limit, returning the task to minimize.
-     *
-     * The task must be on [displayId].
      */
-    fun addAndGetMinimizeTaskChangesIfNeeded(
+    fun addAndGetMinimizeTaskChanges(
             displayId: Int,
             wct: WindowContainerTransaction,
-            newFrontTaskInfo: RunningTaskInfo,
-    ): RunningTaskInfo? {
-        ProtoLog.v(
-                ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksLimiter: addMinimizeBackTaskChangesIfNeeded, newFrontTask=%d",
-                newFrontTaskInfo.taskId)
-        val newTaskListOrderedFrontToBack = createOrderedTaskListWithGivenTaskInFront(
-                taskRepository.getActiveNonMinimizedOrderedTasks(displayId),
-                newFrontTaskInfo.taskId)
-        val taskToMinimize = getTaskToMinimizeIfNeeded(newTaskListOrderedFrontToBack)
-        if (taskToMinimize != null) {
-            wct.reorder(taskToMinimize.token, false /* onTop */)
-            return taskToMinimize
+            newFrontTaskId: Int,
+    ): Int? {
+        logV("addAndGetMinimizeTaskChanges, newFrontTask=%d", newFrontTaskId)
+
+        val taskIdToMinimize =
+            getTaskIdToMinimize(
+                taskRepository.getExpandedTasksOrdered(displayId),
+                newFrontTaskId
+            )
+        // If it's a running task, reorder it to back.
+        taskIdToMinimize?.let { shellTaskOrganizer.getRunningTaskInfo(it) }?.let {
+            wct.reorder(it.token, false /* onTop */)
         }
-        return null
+        return taskIdToMinimize
     }
 
     /**
-     * Add a pending minimize transition change, to update the list of minimized apps once the
+     * Add a pending minimize transition change to update the list of minimized apps once the
      * transition goes through.
      */
     fun addPendingMinimizeChange(transition: IBinder, displayId: Int, taskId: Int) {
@@ -232,51 +213,45 @@ class DesktopTasksLimiter (
     }
 
     /**
-     * Returns the Task to minimize given 1. a list of visible tasks ordered from front to back and
-     * 2. a new task placed in front of all the others.
+     * Returns the minimized task from the list of visible tasks ordered from front to back with
+     * the new task placed in front of other tasks.
      */
-    fun getTaskToMinimizeIfNeeded(
-            visibleFreeformTaskIdsOrderedFrontToBack: List<Int>,
-            newTaskIdInFront: Int
-    ): RunningTaskInfo? {
-        return getTaskToMinimizeIfNeeded(
-                createOrderedTaskListWithGivenTaskInFront(
-                        visibleFreeformTaskIdsOrderedFrontToBack, newTaskIdInFront))
+    fun getTaskIdToMinimize(
+            visibleOrderedTasks: List<Int>,
+            newTaskIdInFront: Int? = null
+    ): Int? {
+        return getTaskIdToMinimize(
+            createOrderedTaskListWithGivenTaskInFront(
+                visibleOrderedTasks, newTaskIdInFront))
     }
 
     /** Returns the Task to minimize given a list of visible tasks ordered from front to back. */
-    fun getTaskToMinimizeIfNeeded(
-            visibleFreeformTaskIdsOrderedFrontToBack: List<Int>
-    ): RunningTaskInfo? {
-        if (visibleFreeformTaskIdsOrderedFrontToBack.size <= maxTasksLimit) {
-            ProtoLog.v(
-                    ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                    "DesktopTasksLimiter: no need to minimize; tasks below limit")
+    private fun getTaskIdToMinimize(visibleOrderedTasks: List<Int>): Int? {
+        if (visibleOrderedTasks.size <= maxTasksLimit) {
+            logV("No need to minimize; tasks below limit")
             // No need to minimize anything
             return null
         }
-        val taskIdToMinimize = visibleFreeformTaskIdsOrderedFrontToBack.last()
-        val taskToMinimize =
-                shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize)
-        if (taskToMinimize == null) {
-            ProtoLog.e(
-                    ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                    "DesktopTasksLimiter: taskToMinimize(taskId = %d) == null",
-                    taskIdToMinimize,
-                )
-            return null
-        }
-        return taskToMinimize
+        return visibleOrderedTasks.last()
     }
 
     private fun createOrderedTaskListWithGivenTaskInFront(
             existingTaskIdsOrderedFrontToBack: List<Int>,
-            newTaskId: Int
+            newTaskId: Int?
     ): List<Int> {
-        return listOf(newTaskId) +
+        return if (newTaskId == null) existingTaskIdsOrderedFrontToBack
+        else listOf(newTaskId) +
                 existingTaskIdsOrderedFrontToBack.filter { taskId -> taskId != newTaskId }
     }
 
     @VisibleForTesting
     fun getTransitionObserver(): TransitionObserver = minimizeTransitionObserver
+
+    private fun logV(msg: String, vararg arguments: Any?) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
+    }
+
+    private companion object {
+        const val TAG = "DesktopTasksLimiter"
+    }
 }

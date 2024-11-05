@@ -41,12 +41,6 @@ enum class KeyguardState {
      */
     DREAMING,
     /**
-     * A device state after the device times out, which can be from both LOCKSCREEN or GONE states.
-     * It is a special version of DREAMING state but not DOZING. The active dream will be windowless
-     * and hosted in the lockscreen.
-     */
-    DREAMING_LOCKSCREEN_HOSTED,
-    /**
      * The device has entered a special low-power mode within SystemUI, also called the Always-on
      * Display (AOD). A minimal UI is presented to show critical information. If the device is in
      * low-power mode without a UI, then it is DOZING.
@@ -125,7 +119,6 @@ enum class KeyguardState {
             OFF,
             DOZING,
             DREAMING,
-            DREAMING_LOCKSCREEN_HOSTED,
             AOD,
             ALTERNATE_BOUNCER,
             OCCLUDED,
@@ -142,7 +135,6 @@ enum class KeyguardState {
             OFF,
             DOZING,
             DREAMING,
-            DREAMING_LOCKSCREEN_HOSTED,
             AOD,
             ALTERNATE_BOUNCER,
             OCCLUDED,
@@ -166,7 +158,6 @@ enum class KeyguardState {
                 OFF -> false
                 DOZING -> false
                 DREAMING -> false
-                DREAMING_LOCKSCREEN_HOSTED -> false
                 GLANCEABLE_HUB -> true
                 AOD -> false
                 ALTERNATE_BOUNCER -> true

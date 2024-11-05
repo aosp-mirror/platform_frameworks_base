@@ -16,17 +16,15 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
-import androidx.compose.runtime.getValue
-import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 class BouncerContainerViewModel
 @AssistedInject
@@ -34,13 +32,7 @@ constructor(
     private val legacyInteractor: PrimaryBouncerInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
     private val selectedUserInteractor: SelectedUserInteractor,
-    private val viewMediatorCallback: ViewMediatorCallback?,
 ) : ExclusiveActivatable() {
-
-    private val hydrator = Hydrator("BouncerContainerViewModel")
-
-    val isVisible: Boolean by
-        hydrator.hydratedStateOf(traceName = "isVisible", source = legacyInteractor.isShowing)
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
@@ -53,15 +45,7 @@ constructor(
                     }
                 }
             }
-
-            launch {
-                legacyInteractor.startingDisappearAnimation.collect {
-                    it.run()
-                    legacyInteractor.hide()
-                }
-            }
-
-            hydrator.activate()
+            awaitCancellation()
         }
     }
 

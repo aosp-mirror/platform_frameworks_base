@@ -31,6 +31,7 @@ import static android.os.VibrationAttributes.USAGE_UNKNOWN;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.app.UidObserver;
 import android.content.BroadcastReceiver;
@@ -74,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /** Controls all the system settings related to vibration. */
@@ -147,9 +149,6 @@ final class VibrationSettings {
                     PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE,
                     PowerManager.GO_TO_SLEEP_REASON_TIMEOUT));
 
-    private static final IntentFilter INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER =
-            new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
-
     /** Listener for changes on vibration settings. */
     interface OnVibratorSettingsChanged {
         /** Callback triggered when any of the vibrator settings change. */
@@ -158,15 +157,18 @@ final class VibrationSettings {
 
     private final Object mLock = new Object();
     private final Context mContext;
-    private final String mSystemUiPackage;
     @VisibleForTesting
     final SettingsContentObserver mSettingObserver;
     @VisibleForTesting
-    final SettingsBroadcastReceiver mSettingChangeReceiver;
+    final RingerModeBroadcastReceiver mRingerModeBroadcastReceiver;
+    @VisibleForTesting
+    final BatteryBroadcastReceiver mBatteryBroadcastReceiver;
     @VisibleForTesting
     final VibrationUidObserver mUidObserver;
     @VisibleForTesting
     final VibrationUserSwitchObserver mUserSwitchObserver;
+    @VisibleForTesting
+    final VibrationLowPowerModeListener mLowPowerModeListener;
 
     @GuardedBy("mLock")
     private final List<OnVibratorSettingsChanged> mListeners = new ArrayList<>();
@@ -180,9 +182,12 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     @Nullable
     private PowerManagerInternal mPowerManagerInternal;
+    @GuardedBy("mLock")
     @Nullable
     private VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
 
+    @GuardedBy("mLock")
+    private String mSystemUiPackage;
     @GuardedBy("mLock")
     private boolean mVibrateInputDevices;
     @GuardedBy("mLock")
@@ -205,11 +210,11 @@ final class VibrationSettings {
         mContext = context;
         mVibrationConfig = config;
         mSettingObserver = new SettingsContentObserver(handler);
-        mSettingChangeReceiver = new SettingsBroadcastReceiver();
+        mRingerModeBroadcastReceiver = new RingerModeBroadcastReceiver();
+        mBatteryBroadcastReceiver = new BatteryBroadcastReceiver();
         mUidObserver = new VibrationUidObserver();
         mUserSwitchObserver = new VibrationUserSwitchObserver();
-        mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
-                .getSystemUiServiceComponent().getPackageName();
+        mLowPowerModeListener = new VibrationLowPowerModeListener();
 
         VibrationEffect clickEffect = createEffectFromResource(
                 com.android.internal.R.array.config_virtualKeyVibePattern);
@@ -233,18 +238,34 @@ final class VibrationSettings {
     }
 
     public void onSystemReady() {
-        PowerManagerInternal pm = LocalServices.getService(PowerManagerInternal.class);
-        AudioManager am = mContext.getSystemService(AudioManager.class);
-        int ringerMode = am.getRingerModeInternal();
+        onSystemReady(LocalServices.getService(PackageManagerInternal.class),
+                LocalServices.getService(PowerManagerInternal.class),
+                ActivityManager.getService(),
+                LocalServices.getService(VirtualDeviceManagerInternal.class),
+                mContext.getSystemService(AudioManager.class));
+    }
+
+    @VisibleForTesting
+    void onSystemReady(PackageManagerInternal packageManagerInternal,
+            PowerManagerInternal powerManagerInternal,
+            IActivityManager activityManagerInternal,
+            @Nullable VirtualDeviceManagerInternal virtualDeviceManagerInternal,
+            @Nullable AudioManager audioManager) {
+        int ringerMode = (audioManager == null)
+                ? AudioManager.RINGER_MODE_NORMAL
+                : audioManager.getRingerModeInternal();
+        String sysUiPackage = packageManagerInternal.getSystemUiServiceComponent().getPackageName();
 
         synchronized (mLock) {
-            mPowerManagerInternal = pm;
-            mAudioManager = am;
+            mPowerManagerInternal = powerManagerInternal;
+            mVirtualDeviceManagerInternal = virtualDeviceManagerInternal;
+            mAudioManager = audioManager;
             mRingerMode = ringerMode;
+            mSystemUiPackage = sysUiPackage;
         }
 
         try {
-            ActivityManager.getService().registerUidObserver(mUidObserver,
+            activityManagerInternal.registerUidObserver(mUidObserver,
                     ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE,
                     ActivityManager.PROCESS_STATE_UNKNOWN, /* callingPackage= */ null);
         } catch (RemoteException e) {
@@ -252,32 +273,16 @@ final class VibrationSettings {
         }
 
         try {
-            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
+            activityManagerInternal.registerUserSwitchObserver(mUserSwitchObserver, TAG);
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }
 
-        pm.registerLowPowerModeObserver(
-                new PowerManagerInternal.LowPowerModeListener() {
-                    @Override
-                    public int getServiceType() {
-                        return PowerManager.ServiceType.VIBRATION;
-                    }
+        powerManagerInternal.registerLowPowerModeObserver(mLowPowerModeListener);
 
-                    @Override
-                    public void onLowPowerModeChanged(PowerSaveState result) {
-                        boolean shouldNotifyListeners;
-                        synchronized (mLock) {
-                            shouldNotifyListeners = result.batterySaverEnabled != mBatterySaverMode;
-                            mBatterySaverMode = result.batterySaverEnabled;
-                        }
-                        if (shouldNotifyListeners) {
-                            notifyListeners();
-                        }
-                    }
-                });
-
-        registerSettingsChangeReceiver(INTERNAL_RINGER_MODE_CHANGED_INTENT_FILTER);
+        mContext.registerReceiver(mRingerModeBroadcastReceiver,
+                new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION),
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         // Listen to all settings that might affect the result of Vibrator.getVibrationIntensity.
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
@@ -301,12 +306,7 @@ final class VibrationSettings {
 
         if (mVibrationConfig.ignoreVibrationsOnWirelessCharger()) {
             Intent batteryStatus = mContext.registerReceiver(
-                    new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            updateBatteryInfo(intent);
-                        }
-                    },
+                    mBatteryBroadcastReceiver,
                     new IntentFilter(Intent.ACTION_BATTERY_CHANGED),
                     Context.RECEIVER_NOT_EXPORTED);
             // After registering the receiver for battery status, process the sticky broadcast that
@@ -476,8 +476,10 @@ final class VibrationSettings {
     public boolean shouldCancelVibrationOnScreenOff(@NonNull CallerInfo callerInfo,
             long vibrationStartUptimeMillis) {
         PowerManagerInternal pm;
+        String sysUiPackageName;
         synchronized (mLock) {
             pm = mPowerManagerInternal;
+            sysUiPackageName = mSystemUiPackage;
         }
         if (pm != null) {
             // The SleepData from PowerManager may refer to a more recent sleep than the broadcast
@@ -501,7 +503,7 @@ final class VibrationSettings {
         }
         // Only allow vibrations from System packages to continue vibrating when the screen goes off
         return callerInfo.uid != Process.SYSTEM_UID && callerInfo.uid != 0
-                && !mSystemUiPackage.equals(callerInfo.opPkg);
+                && !Objects.equals(sysUiPackageName, callerInfo.opPkg);
     }
 
     /**
@@ -782,11 +784,6 @@ final class VibrationSettings {
                 UserHandle.USER_ALL);
     }
 
-    private void registerSettingsChangeReceiver(IntentFilter intentFilter) {
-        mContext.registerReceiver(mSettingChangeReceiver, intentFilter,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
-    }
-
     @Nullable
     private VibrationEffect createEffectFromResource(int resId) {
         return createEffectFromResource(mContext.getResources(), resId);
@@ -833,12 +830,11 @@ final class VibrationSettings {
     }
 
     private boolean isAppRunningOnAnyVirtualDevice(int uid) {
-        if (mVirtualDeviceManagerInternal == null) {
-            mVirtualDeviceManagerInternal =
-                    LocalServices.getService(VirtualDeviceManagerInternal.class);
+        VirtualDeviceManagerInternal vdm;
+        synchronized (mLock) {
+            vdm = mVirtualDeviceManagerInternal;
         }
-        return mVirtualDeviceManagerInternal != null
-                && mVirtualDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(uid);
+        return vdm != null && vdm.isAppRunningOnAnyVirtualDevice(uid);
     }
 
     /** Implementation of {@link ContentObserver} to be registered to a setting {@link Uri}. */
@@ -857,13 +853,25 @@ final class VibrationSettings {
 
     /** Implementation of {@link BroadcastReceiver} to update on ringer mode change. */
     @VisibleForTesting
-    final class SettingsBroadcastReceiver extends BroadcastReceiver {
+    final class RingerModeBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION.equals(action)) {
                 updateRingerMode();
                 notifyListeners();
+            }
+        }
+    }
+
+    /** Implementation of {@link BroadcastReceiver} to update on battery mode change. */
+    @VisibleForTesting
+    final class BatteryBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
+                updateBatteryInfo(intent);
             }
         }
     }
@@ -911,6 +919,27 @@ final class VibrationSettings {
             // Reload all settings including ones from AudioManager,
             // as they are based on UserHandle.USER_CURRENT.
             update();
+        }
+    }
+
+    /** Implementation of {@link PowerManagerInternal.LowPowerModeListener} for low battery. */
+    @VisibleForTesting
+    final class VibrationLowPowerModeListener implements PowerManagerInternal.LowPowerModeListener {
+        @Override
+        public int getServiceType() {
+            return PowerManager.ServiceType.VIBRATION;
+        }
+
+        @Override
+        public void onLowPowerModeChanged(PowerSaveState result) {
+            boolean shouldNotifyListeners;
+            synchronized (mLock) {
+                shouldNotifyListeners = result.batterySaverEnabled != mBatterySaverMode;
+                mBatterySaverMode = result.batterySaverEnabled;
+            }
+            if (shouldNotifyListeners) {
+                notifyListeners();
+            }
         }
     }
 }

@@ -38,13 +38,14 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_WAKE;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_KEEP_SCREEN_ON;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SLEEP_TOKEN;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WALLPAPER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -104,6 +105,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserProperties;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.power.Mode;
@@ -152,6 +154,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.Slogf;
+import com.android.server.wm.utils.RegionUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -269,6 +272,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private boolean mTaskLayersChanged = true;
     private int mTmpTaskLayerRank;
     private final RankTaskLayersRunnable mRankTaskLayersRunnable = new RankTaskLayersRunnable();
+    private Region mTmpOccludingRegion;
+    private Region mTmpTaskRegion;
 
     private String mDestroyAllActivitiesReason;
     private final Runnable mDestroyAllActivitiesRunnable = new Runnable() {
@@ -1406,7 +1411,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             displayId = rootTask != null ? rootTask.getDisplayId() : DEFAULT_DISPLAY;
         }
 
-        final DisplayContent display = getDisplayContent(displayId);
+        final DisplayContent display = getDisplayContentOrCreate(displayId);
         return display.reduceOnAllTaskDisplayAreas((taskDisplayArea, result) ->
                         result | startHomeOnTaskDisplayArea(userId, reason, taskDisplayArea,
                                 allowInstrumenting, fromHomeKey),
@@ -1841,6 +1846,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean attachApplication(WindowProcessController app) throws RemoteException {
+        app.mHasEverAttached = true;
         final ArrayList<ActivityRecord> activities = mService.mStartingProcessActivities;
         RemoteException remoteException = null;
         boolean hasActivityStarted = false;
@@ -2866,7 +2872,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             token = new SleepToken(tag, displayId);
             mSleepTokens.put(tokenKey, token);
             display.mAllSleepTokens.add(token);
-            ProtoLog.d(WM_DEBUG_STATES, "Create sleep token: tag=%s, displayId=%d", tag, displayId);
+            ProtoLog.d(WM_DEBUG_SLEEP_TOKEN, "Create SleepToken: tag=%s, displayId=%d",
+                    tag, displayId);
         } else {
             throw new RuntimeException("Create the same sleep token twice: " + token);
         }
@@ -2885,8 +2892,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return;
         }
 
-        ProtoLog.d(WM_DEBUG_STATES, "Remove sleep token: tag=%s, displayId=%d", token.mTag,
-                token.mDisplayId);
+        ProtoLog.d(WM_DEBUG_SLEEP_TOKEN, "Remove SleepToken: tag=%s, displayId=%d",
+                token.mTag, token.mDisplayId);
         display.mAllSleepTokens.remove(token);
         if (display.mAllSleepTokens.isEmpty()) {
             mService.updateSleepIfNeededLocked();
@@ -2918,6 +2925,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         });
     }
 
+    void invalidateTaskLayersAndUpdateOomAdjIfNeeded() {
+        mRankTaskLayersRunnable.mCheckUpdateOomAdj = true;
+        invalidateTaskLayers();
+    }
+
     void invalidateTaskLayers() {
         if (!mTaskLayersChanged) {
             mTaskLayersChanged = true;
@@ -2935,13 +2947,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Only rank for leaf tasks because the score of activity is based on immediate parent.
         forAllLeafTasks(task -> {
             final int oldRank = task.mLayerRank;
-            final ActivityRecord r = task.topRunningActivityLocked();
-            if (r != null && r.isVisibleRequested()) {
+            final int oldRatio = task.mNonOccludedFreeformAreaRatio;
+            task.mNonOccludedFreeformAreaRatio = 0;
+            if (task.isVisibleRequested()) {
                 task.mLayerRank = ++mTmpTaskLayerRank;
+                if (task.inFreeformWindowingMode()) {
+                    computeNonOccludedFreeformAreaRatio(task);
+                }
             } else {
                 task.mLayerRank = Task.LAYER_RANK_INVISIBLE;
             }
-            if (task.mLayerRank != oldRank) {
+            if (task.mLayerRank != oldRank
+                    || task.mNonOccludedFreeformAreaRatio != oldRatio) {
                 task.forAllActivities(activity -> {
                     if (activity.hasProcess()) {
                         mTaskSupervisor.onProcessActivityStateChanged(activity.app,
@@ -2950,10 +2967,40 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 });
             }
         }, true /* traverseTopToBottom */);
-
-        if (!mTaskSupervisor.inActivityVisibilityUpdate()) {
-            mTaskSupervisor.computeProcessActivityStateBatch();
+        if (mTmpOccludingRegion != null) {
+            mTmpOccludingRegion.setEmpty();
         }
+        boolean changed = false;
+        if (!mTaskSupervisor.inActivityVisibilityUpdate()) {
+            changed = mTaskSupervisor.computeProcessActivityStateBatch();
+        }
+        if (mRankTaskLayersRunnable.mCheckUpdateOomAdj) {
+            mRankTaskLayersRunnable.mCheckUpdateOomAdj = false;
+            if (changed) {
+                mService.updateOomAdj();
+            }
+        }
+    }
+
+    /** This method is called for visible freeform task from top to bottom. */
+    private void computeNonOccludedFreeformAreaRatio(@NonNull Task task) {
+        if (!com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()) {
+            return;
+        }
+        if (mTmpOccludingRegion == null) {
+            mTmpOccludingRegion = new Region();
+            mTmpTaskRegion = new Region();
+        }
+        final Rect taskBounds = task.getBounds();
+        mTmpTaskRegion.set(taskBounds);
+        // Exclude the area outside the display.
+        mTmpTaskRegion.op(task.mDisplayContent.getBounds(), Region.Op.INTERSECT);
+        // Exclude the area covered by the above tasks.
+        mTmpTaskRegion.op(mTmpOccludingRegion, Region.Op.DIFFERENCE);
+        task.mNonOccludedFreeformAreaRatio = 100 * RegionUtils.getAreaSize(mTmpTaskRegion)
+                        / (taskBounds.width() * taskBounds.height());
+        // Accumulate the occluding region for other visible tasks behind.
+        mTmpOccludingRegion.op(taskBounds, Region.Op.UNION);
     }
 
     void clearOtherAppTimeTrackers(AppTimeTracker except) {
@@ -3859,6 +3906,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     private class RankTaskLayersRunnable implements Runnable {
+        boolean mCheckUpdateOomAdj;
+
         @Override
         public void run() {
             synchronized (mService.mGlobalLock) {

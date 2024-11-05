@@ -545,6 +545,7 @@ public class MediaControlPanel {
 
     /** Bind this player view based on the data given. */
     public void bindPlayer(@NonNull MediaData data, String key) {
+        SceneContainerFlag.assertInLegacyMode();
         if (mMediaViewHolder == null) {
             return;
         }
@@ -638,10 +639,7 @@ public class MediaControlPanel {
         // to something which might impact the measurement
         // State refresh interferes with the translation animation, only run it if it's not running.
         if (!mMetadataAnimationHandler.isRunning()) {
-            // Don't refresh in scene framework, because it will calculate with invalid layout sizes
-            if (!SceneContainerFlag.isEnabled()) {
-                mMediaViewController.refreshState();
-            }
+            mMediaViewController.refreshState();
         }
 
         if (shouldPlayTurbulenceNoise()) {
@@ -907,11 +905,6 @@ public class MediaControlPanel {
         // Capture width & height from views in foreground for artwork scaling in background
         int width = mMediaViewHolder.getAlbumView().getMeasuredWidth();
         int height = mMediaViewHolder.getAlbumView().getMeasuredHeight();
-        if (SceneContainerFlag.isEnabled() && (width <= 0 || height <= 0)) {
-            // TODO(b/312714128): ensure we have a valid size before setting background
-            width = mMediaViewController.getWidthInSceneContainerPx();
-            height = mMediaViewController.getHeightInSceneContainerPx();
-        }
 
         final int finalWidth = width;
         final int finalHeight = height;

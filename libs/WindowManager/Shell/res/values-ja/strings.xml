@@ -97,6 +97,9 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"カメラに関する問題の場合は、\nタップすると修正できます"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"修正されなかった場合は、\nタップすると元に戻ります"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"カメラに関する問題でない場合は、タップすると閉じます。"</string>
+    <string name="windowing_app_handle_education_tooltip" msgid="2929643449849791854">"アプリメニューはここにあります"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="2523468503353474095">"デスクトップ ビューに切り替えて複数のアプリを同時に開けます"</string>
+    <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"アプリメニューからいつでも全画面表示に戻れます"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"表示を拡大して機能を強化"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"分割画面にするにはもう 1 つのアプリをドラッグしてください"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"位置を変えるにはアプリの外側をダブルタップしてください"</string>
@@ -123,10 +126,22 @@
     <string name="screenshot_text" msgid="1477704010087786671">"スクリーンショット"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ブラウザで開く"</string>
     <string name="new_window_text" msgid="6318648868380652280">"新しいウィンドウ"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"ウィンドウを管理する"</string>
     <string name="close_text" msgid="4986518933445178928">"閉じる"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"メニューを閉じる"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"メニューを開く"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"メニューを開く"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"画面の最大化"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"画面のスナップ"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"このアプリはサイズ変更できません"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"アプリはここに移動できません"</string>
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"没入モード"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"復元"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"最大化"</string>
+    <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"復元"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"左にスナップ"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"右にスナップ"</string>
+    <string name="open_by_default_settings_text" msgid="2526548548598185500">"デフォルトの設定で開く"</string>
+    <string name="open_by_default_dialog_subheader_text" msgid="1729599730664063881">"このアプリのウェブリンクを開く方法を選択"</string>
+    <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"アプリ内"</string>
+    <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"ブラウザ内"</string>
+    <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"OK"</string>
 </resources>

@@ -25,6 +25,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
 import com.android.compose.animation.scene.transformation.DrawScale
@@ -32,10 +33,10 @@ import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
 import com.android.compose.animation.scene.transformation.OverscrollTranslate
 import com.android.compose.animation.scene.transformation.PropertyTransformation
-import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.Transformation
+import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.animation.scene.transformation.Translate
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
@@ -152,6 +153,7 @@ internal constructor(
         internal val DefaultSwipeSpec =
             spring(
                 stiffness = Spring.StiffnessMediumLow,
+                dampingRatio = Spring.DampingRatioLowBouncy,
                 visibilityThreshold = OffsetVisibilityThreshold,
             )
 
@@ -190,20 +192,21 @@ interface TransitionSpec {
     fun reversed(): TransitionSpec
 
     /**
-     * The [TransformationSpec] associated to this [TransitionSpec].
+     * The [TransformationSpec] associated to this [TransitionSpec] for the given [transition].
      *
      * Note that this is called once whenever a transition associated to this [TransitionSpec] is
      * started.
      */
-    fun transformationSpec(): TransformationSpec
+    fun transformationSpec(transition: TransitionState.Transition): TransformationSpec
 
     /**
-     * The preview [TransformationSpec] associated to this [TransitionSpec].
+     * The preview [TransformationSpec] associated to this [TransitionSpec] for the given
+     * [transition].
      *
      * Note that this is called once whenever a transition associated to this [TransitionSpec] is
      * started.
      */
-    fun previewTransformationSpec(): TransformationSpec?
+    fun previewTransformationSpec(transition: TransitionState.Transition): TransformationSpec?
 }
 
 interface TransformationSpec {
@@ -230,7 +233,7 @@ interface TransformationSpec {
     val distance: UserActionDistance?
 
     /** The list of [Transformation] applied to elements during this transition. */
-    val transformations: List<Transformation>
+    val transformations: List<TransformationWithRange<*>>
 
     companion object {
         internal val Empty =
@@ -240,7 +243,7 @@ interface TransformationSpec {
                 distance = null,
                 transformations = emptyList(),
             )
-        internal val EmptyProvider = { Empty }
+        internal val EmptyProvider = { _: TransitionState.Transition -> Empty }
     }
 }
 
@@ -248,9 +251,13 @@ internal class TransitionSpecImpl(
     override val key: TransitionKey?,
     override val from: ContentKey?,
     override val to: ContentKey?,
-    private val previewTransformationSpec: (() -> TransformationSpecImpl)? = null,
-    private val reversePreviewTransformationSpec: (() -> TransformationSpecImpl)? = null,
-    private val transformationSpec: () -> TransformationSpecImpl,
+    private val previewTransformationSpec:
+        ((TransitionState.Transition) -> TransformationSpecImpl)? =
+        null,
+    private val reversePreviewTransformationSpec:
+        ((TransitionState.Transition) -> TransformationSpecImpl)? =
+        null,
+    private val transformationSpec: (TransitionState.Transition) -> TransformationSpecImpl,
 ) : TransitionSpec {
     override fun reversed(): TransitionSpecImpl {
         return TransitionSpecImpl(
@@ -259,8 +266,8 @@ internal class TransitionSpecImpl(
             to = from,
             previewTransformationSpec = reversePreviewTransformationSpec,
             reversePreviewTransformationSpec = previewTransformationSpec,
-            transformationSpec = {
-                val reverse = transformationSpec.invoke()
+            transformationSpec = { transition ->
+                val reverse = transformationSpec.invoke(transition)
                 TransformationSpecImpl(
                     progressSpec = reverse.progressSpec,
                     swipeSpec = reverse.swipeSpec,
@@ -271,10 +278,13 @@ internal class TransitionSpecImpl(
         )
     }
 
-    override fun transformationSpec(): TransformationSpecImpl = this.transformationSpec.invoke()
+    override fun transformationSpec(
+        transition: TransitionState.Transition
+    ): TransformationSpecImpl = transformationSpec.invoke(transition)
 
-    override fun previewTransformationSpec(): TransformationSpecImpl? =
-        previewTransformationSpec?.invoke()
+    override fun previewTransformationSpec(
+        transition: TransitionState.Transition
+    ): TransformationSpecImpl? = previewTransformationSpec?.invoke(transition)
 }
 
 /** The definition of the overscroll behavior of the [content]. */
@@ -315,7 +325,7 @@ internal class TransformationSpecImpl(
     override val progressSpec: AnimationSpec<Float>,
     override val swipeSpec: SpringSpec<Float>?,
     override val distance: UserActionDistance?,
-    override val transformations: List<Transformation>,
+    override val transformations: List<TransformationWithRange<*>>,
 ) : TransformationSpec {
     private val cache = mutableMapOf<ElementKey, MutableMap<ContentKey, ElementTransformations>>()
 
@@ -330,42 +340,14 @@ internal class TransformationSpecImpl(
         element: ElementKey,
         content: ContentKey,
     ): ElementTransformations {
-        var shared: SharedElementTransformation? = null
-        var offset: PropertyTransformation<Offset>? = null
-        var size: PropertyTransformation<IntSize>? = null
-        var drawScale: PropertyTransformation<Scale>? = null
-        var alpha: PropertyTransformation<Float>? = null
+        var shared: TransformationWithRange<SharedElementTransformation>? = null
+        var offset: TransformationWithRange<PropertyTransformation<Offset>>? = null
+        var size: TransformationWithRange<PropertyTransformation<IntSize>>? = null
+        var drawScale: TransformationWithRange<PropertyTransformation<Scale>>? = null
+        var alpha: TransformationWithRange<PropertyTransformation<Float>>? = null
 
-        fun <T> onPropertyTransformation(
-            root: PropertyTransformation<T>,
-            current: PropertyTransformation<T> = root,
-        ) {
-            when (current) {
-                is Translate,
-                is OverscrollTranslate,
-                is EdgeTranslate,
-                is AnchoredTranslate -> {
-                    throwIfNotNull(offset, element, name = "offset")
-                    offset = root as PropertyTransformation<Offset>
-                }
-                is ScaleSize,
-                is AnchoredSize -> {
-                    throwIfNotNull(size, element, name = "size")
-                    size = root as PropertyTransformation<IntSize>
-                }
-                is DrawScale -> {
-                    throwIfNotNull(drawScale, element, name = "drawScale")
-                    drawScale = root as PropertyTransformation<Scale>
-                }
-                is Fade -> {
-                    throwIfNotNull(alpha, element, name = "alpha")
-                    alpha = root as PropertyTransformation<Float>
-                }
-                is RangedPropertyTransformation -> onPropertyTransformation(root, current.delegate)
-            }
-        }
-
-        transformations.fastForEach { transformation ->
+        transformations.fastForEach { transformationWithRange ->
+            val transformation = transformationWithRange.transformation
             if (!transformation.matcher.matches(element, content)) {
                 return@fastForEach
             }
@@ -373,16 +355,50 @@ internal class TransformationSpecImpl(
             when (transformation) {
                 is SharedElementTransformation -> {
                     throwIfNotNull(shared, element, name = "shared")
-                    shared = transformation
+                    shared =
+                        transformationWithRange
+                            as TransformationWithRange<SharedElementTransformation>
                 }
-                is PropertyTransformation<*> -> onPropertyTransformation(transformation)
+                is Translate,
+                is OverscrollTranslate,
+                is EdgeTranslate,
+                is AnchoredTranslate -> {
+                    throwIfNotNull(offset, element, name = "offset")
+                    offset =
+                        transformationWithRange
+                            as TransformationWithRange<PropertyTransformation<Offset>>
+                }
+                is ScaleSize,
+                is AnchoredSize -> {
+                    throwIfNotNull(size, element, name = "size")
+                    size =
+                        transformationWithRange
+                            as TransformationWithRange<PropertyTransformation<IntSize>>
+                }
+                is DrawScale -> {
+                    throwIfNotNull(drawScale, element, name = "drawScale")
+                    drawScale =
+                        transformationWithRange
+                            as TransformationWithRange<PropertyTransformation<Scale>>
+                }
+                is Fade -> {
+                    throwIfNotNull(alpha, element, name = "alpha")
+                    alpha =
+                        transformationWithRange
+                            as TransformationWithRange<PropertyTransformation<Float>>
+                }
+                else -> error("Unknown transformation: $transformation")
             }
         }
 
         return ElementTransformations(shared, offset, size, drawScale, alpha)
     }
 
-    private fun throwIfNotNull(previous: Transformation?, element: ElementKey, name: String) {
+    private fun throwIfNotNull(
+        previous: TransformationWithRange<*>?,
+        element: ElementKey,
+        name: String,
+    ) {
         if (previous != null) {
             error("$element has multiple $name transformations")
         }
@@ -391,9 +407,9 @@ internal class TransformationSpecImpl(
 
 /** The transformations of an element during a transition. */
 internal class ElementTransformations(
-    val shared: SharedElementTransformation?,
-    val offset: PropertyTransformation<Offset>?,
-    val size: PropertyTransformation<IntSize>?,
-    val drawScale: PropertyTransformation<Scale>?,
-    val alpha: PropertyTransformation<Float>?,
+    val shared: TransformationWithRange<SharedElementTransformation>?,
+    val offset: TransformationWithRange<PropertyTransformation<Offset>>?,
+    val size: TransformationWithRange<PropertyTransformation<IntSize>>?,
+    val drawScale: TransformationWithRange<PropertyTransformation<Scale>>?,
+    val alpha: TransformationWithRange<PropertyTransformation<Float>>?,
 )

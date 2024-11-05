@@ -30,7 +30,6 @@ import android.accounts.AccountManager;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.Notification.Action;
@@ -90,9 +89,9 @@ import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import libcore.io.Streams;
-
 import com.google.android.collect.Lists;
+
+import libcore.io.Streams;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -117,7 +116,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -171,8 +172,20 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_ORIGINAL_INTENT = "android.intent.extra.ORIGINAL_INTENT";
     static final String EXTRA_INFO = "android.intent.extra.INFO";
-    static final String EXTRA_EXTRA_ATTACHMENT_URI =
-            "android.intent.extra.EXTRA_ATTACHMENT_URI";
+    static final String EXTRA_EXTRA_ATTACHMENT_URIS =
+            "android.intent.extra.EXTRA_ATTACHMENT_URIS";
+
+    private static final ThreadFactory sBugreportManagerCallbackThreadFactory =
+            new ThreadFactory() {
+                private static final ThreadFactory mFactory = Executors.defaultThreadFactory();
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thread = mFactory.newThread(r);
+                    thread.setName("BRMgrCallbackThread");
+                    return thread;
+                }
+            };
 
     private static final int MSG_SERVICE_COMMAND = 1;
     private static final int MSG_DELAYED_SCREENSHOT = 2;
@@ -277,6 +290,7 @@ public class BugreportProgressService extends Service {
 
     private boolean mIsWatch;
     private boolean mIsTv;
+    private ExecutorService mBugreportSingleThreadExecutor;
 
     @Override
     public void onCreate() {
@@ -307,6 +321,8 @@ public class BugreportProgressService extends Service {
                         isTv(this) ? NotificationManager.IMPORTANCE_DEFAULT
                                 : NotificationManager.IMPORTANCE_LOW));
         mBugreportManager = mContext.getSystemService(BugreportManager.class);
+        mBugreportSingleThreadExecutor = Executors.newSingleThreadExecutor(
+                sBugreportManagerCallbackThreadFactory);
     }
 
     @Override
@@ -337,6 +353,7 @@ public class BugreportProgressService extends Service {
     public void onDestroy() {
         mServiceHandler.getLooper().quit();
         mScreenshotHandler.getLooper().quit();
+        mBugreportSingleThreadExecutor.close();
         super.onDestroy();
     }
 
@@ -682,10 +699,11 @@ public class BugreportProgressService extends Service {
         long nonce = intent.getLongExtra(EXTRA_BUGREPORT_NONCE, 0);
         String baseName = getBugreportBaseName(bugreportType);
         String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
-        Uri extraAttachment = intent.getParcelableExtra(EXTRA_EXTRA_ATTACHMENT_URI, Uri.class);
+        List<Uri> extraAttachments =
+                intent.getParcelableArrayListExtra(EXTRA_EXTRA_ATTACHMENT_URIS, Uri.class);
 
         BugreportInfo info = new BugreportInfo(mContext, baseName, name, shareTitle,
-                shareDescription, bugreportType, mBugreportsDir, nonce, extraAttachment);
+                shareDescription, bugreportType, mBugreportsDir, nonce, extraAttachments);
         synchronized (mLock) {
             if (info.bugreportFile.exists()) {
                 Log.e(TAG, "Failed to start bugreport generation, the requested bugreport file "
@@ -713,8 +731,6 @@ public class BugreportProgressService extends Service {
             }
         }
 
-        final Executor executor = ActivityThread.currentActivityThread().getExecutor();
-
         Log.i(TAG, "bugreport type = " + bugreportType
                 + " bugreport file fd: " + bugreportFd
                 + " screenshot file fd: " + screenshotFd);
@@ -723,7 +739,8 @@ public class BugreportProgressService extends Service {
         try {
             synchronized (mLock) {
                 mBugreportManager.startBugreport(bugreportFd, screenshotFd,
-                        new BugreportParams(bugreportType), executor, bugreportCallback);
+                        new BugreportParams(bugreportType), mBugreportSingleThreadExecutor,
+                        bugreportCallback);
                 bugreportCallback.trackInfoWithIdLocked();
             }
         } catch (RuntimeException e) {
@@ -1233,9 +1250,13 @@ public class BugreportProgressService extends Service {
             clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
             attachments.add(screenshotUri);
         }
-        if (info.extraAttachment != null) {
-            clipData.addItem(new ClipData.Item(null, null, null, info.extraAttachment));
-            attachments.add(info.extraAttachment);
+        if (info.extraAttachments != null) {
+            info.extraAttachments.forEach(it -> {
+                if (it != null) {
+                    clipData.addItem(new ClipData.Item(null, null, null, it));
+                    attachments.add(it);
+                }
+            });
         }
         intent.setClipData(clipData);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
@@ -2096,7 +2117,7 @@ public class BugreportProgressService extends Service {
         final long nonce;
 
         @Nullable
-        public Uri extraAttachment = null;
+        public List<Uri> extraAttachments = null;
 
         private final Object mLock = new Object();
 
@@ -2106,7 +2127,7 @@ public class BugreportProgressService extends Service {
         BugreportInfo(Context context, String baseName, String name,
                 @Nullable String shareTitle, @Nullable String shareDescription,
                 @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce,
-                @Nullable Uri extraAttachment) {
+                @Nullable List<Uri> extraAttachments) {
             this.context = context;
             this.name = this.initialName = name;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
@@ -2115,7 +2136,7 @@ public class BugreportProgressService extends Service {
             this.nonce = nonce;
             this.baseName = baseName;
             this.bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
-            this.extraAttachment = extraAttachment;
+            this.extraAttachments = extraAttachments;
         }
 
         void createBugreportFile() {

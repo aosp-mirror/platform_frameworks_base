@@ -39,6 +39,7 @@
 #include <utils/SystemClock.h>
 
 #include <chrono>
+#include <future>
 #include <set>
 #include <utility>
 #include <vector>
@@ -104,6 +105,7 @@ private:
     size_t mAvailableSlots GUARDED_BY(sHintMutex) = 0;
     bool mHalSupported = true;
     HalMessageQueue::MemTransaction mFmqTransaction GUARDED_BY(sHintMutex);
+    std::future<bool> mChannelCreationFinished;
 };
 
 struct APerformanceHintManager {
@@ -218,6 +220,8 @@ APerformanceHintManager::~APerformanceHintManager() {
 }
 
 APerformanceHintManager* APerformanceHintManager::getInstance() {
+    static std::once_flag creationFlag;
+    static APerformanceHintManager* instance = nullptr;
     if (gHintManagerForTesting) {
         return gHintManagerForTesting.get();
     }
@@ -226,7 +230,7 @@ APerformanceHintManager* APerformanceHintManager::getInstance() {
                 std::shared_ptr<APerformanceHintManager>(create(*gIHintManagerForTesting));
         return gHintManagerForTesting.get();
     }
-    static APerformanceHintManager* instance = create(nullptr);
+    std::call_once(creationFlag, []() { instance = create(nullptr); });
     return instance;
 }
 
@@ -522,25 +526,28 @@ bool FMQWrapper::isSupported() {
 }
 
 bool FMQWrapper::startChannel(IHintManager* manager) {
-    if (isSupported() && !isActive()) {
-        std::optional<hal::ChannelConfig> config;
-        auto ret = manager->getSessionChannel(mToken, &config);
-        if (ret.isOk() && config.has_value()) {
-            std::scoped_lock lock{sHintMutex};
-            mQueue = std::make_shared<HalMessageQueue>(config->channelDescriptor, true);
-            if (config->eventFlagDescriptor.has_value()) {
-                mFlagQueue = std::make_shared<HalFlagQueue>(*config->eventFlagDescriptor, true);
-                android::hardware::EventFlag::createEventFlag(mFlagQueue->getEventFlagWord(),
-                                                              &mEventFlag);
-                mWriteMask = config->writeFlagBitmask;
+    if (isSupported() && !isActive() && manager->isRemote()) {
+        mChannelCreationFinished = std::async(std::launch::async, [&, this, manager]() {
+            std::optional<hal::ChannelConfig> config;
+            auto ret = manager->getSessionChannel(mToken, &config);
+            if (ret.isOk() && config.has_value()) {
+                std::scoped_lock lock{sHintMutex};
+                mQueue = std::make_shared<HalMessageQueue>(config->channelDescriptor, true);
+                if (config->eventFlagDescriptor.has_value()) {
+                    mFlagQueue = std::make_shared<HalFlagQueue>(*config->eventFlagDescriptor, true);
+                    android::hardware::EventFlag::createEventFlag(mFlagQueue->getEventFlagWord(),
+                                                                  &mEventFlag);
+                    mWriteMask = config->writeFlagBitmask;
+                }
+                updatePersistentTransaction();
+            } else if (ret.isOk() && !config.has_value()) {
+                ALOGV("FMQ channel enabled but unsupported.");
+                setUnsupported();
+            } else {
+                ALOGE("%s: FMQ channel initialization failed: %s", __FUNCTION__, ret.getMessage());
             }
-            updatePersistentTransaction();
-        } else if (ret.isOk() && !config.has_value()) {
-            ALOGV("FMQ channel enabled but unsupported.");
-            setUnsupported();
-        } else {
-            ALOGE("%s: FMQ channel initialization failed: %s", __FUNCTION__, ret.getMessage());
-        }
+            return true;
+        });
     }
     return isActive();
 }

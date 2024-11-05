@@ -17,6 +17,7 @@
 package com.android.server.power.stats.wakeups;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_BLUETOOTH;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SENSOR;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER;
@@ -52,6 +53,7 @@ public class CpuWakeupStatsTest {
     private static final String KERNEL_REASON_SOUND_TRIGGER_IRQ = "129 test.sound_trigger.device";
     private static final String KERNEL_REASON_SENSOR_IRQ = "15 test.sensor.device";
     private static final String KERNEL_REASON_CELLULAR_DATA_IRQ = "18 test.cellular_data.device";
+    private static final String KERNEL_REASON_BLUETOOTH_IRQ = "19 test.bluetooth.device";
     private static final String KERNEL_REASON_UNKNOWN_IRQ = "140 test.unknown.device";
     private static final String KERNEL_REASON_UNKNOWN_FORMAT = "free-form-reason test.alarm.device";
     private static final String KERNEL_REASON_ALARM_ABNORMAL = "-1 test.alarm.device";
@@ -62,12 +64,14 @@ public class CpuWakeupStatsTest {
     private static final int TEST_UID_3 = 92261423;
     private static final int TEST_UID_4 = 56926423;
     private static final int TEST_UID_5 = 76421423;
+    private static final int TEST_UID_6 = 62345353;
 
     private static final int TEST_PROC_STATE_1 = 72331;
     private static final int TEST_PROC_STATE_2 = 792351;
     private static final int TEST_PROC_STATE_3 = 138831;
     private static final int TEST_PROC_STATE_4 = 23231;
     private static final int TEST_PROC_STATE_5 = 42;
+    private static final int TEST_PROC_STATE_6 = 129942;
 
     private static final Context sContext = InstrumentationRegistry.getTargetContext();
     private final Handler mHandler = Mockito.mock(Handler.class);
@@ -79,6 +83,7 @@ public class CpuWakeupStatsTest {
         obj.mUidProcStates.put(TEST_UID_3, TEST_PROC_STATE_3);
         obj.mUidProcStates.put(TEST_UID_4, TEST_PROC_STATE_4);
         obj.mUidProcStates.put(TEST_UID_5, TEST_PROC_STATE_5);
+        obj.mUidProcStates.put(TEST_UID_6, TEST_PROC_STATE_6);
     }
 
     @Test
@@ -118,6 +123,7 @@ public class CpuWakeupStatsTest {
                 CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER,
                 CPU_WAKEUP_SUBSYSTEM_SENSOR,
                 CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA,
+                CPU_WAKEUP_SUBSYSTEM_BLUETOOTH,
         };
 
         final String[] kernelReasons = new String[] {
@@ -126,10 +132,11 @@ public class CpuWakeupStatsTest {
                 KERNEL_REASON_SOUND_TRIGGER_IRQ,
                 KERNEL_REASON_SENSOR_IRQ,
                 KERNEL_REASON_CELLULAR_DATA_IRQ,
+                KERNEL_REASON_BLUETOOTH_IRQ,
         };
 
         final int[] uids = new int[] {
-                TEST_UID_2, TEST_UID_3, TEST_UID_4, TEST_UID_1, TEST_UID_5
+                TEST_UID_2, TEST_UID_3, TEST_UID_4, TEST_UID_1, TEST_UID_5, TEST_UID_6
         };
 
         final int[] procStates = new int[] {
@@ -137,7 +144,8 @@ public class CpuWakeupStatsTest {
                 TEST_PROC_STATE_3,
                 TEST_PROC_STATE_4,
                 TEST_PROC_STATE_1,
-                TEST_PROC_STATE_5
+                TEST_PROC_STATE_5,
+                TEST_PROC_STATE_6
         };
 
         final int total = subsystems.length;
@@ -285,6 +293,40 @@ public class CpuWakeupStatsTest {
     }
 
     @Test
+    public void bluetoothIrqAttributionSolo() {
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
+        final long wakeupTime = 1236121;
+
+        populateDefaultProcStates(obj);
+
+        obj.noteWakeupTimeAndReason(wakeupTime, 1, KERNEL_REASON_BLUETOOTH_IRQ);
+
+        // Outside the window, so should be ignored.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH,
+                wakeupTime - obj.mConfig.WAKEUP_MATCHING_WINDOW_MS - 1, TEST_UID_1);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH,
+                wakeupTime + obj.mConfig.WAKEUP_MATCHING_WINDOW_MS + 1, TEST_UID_2);
+        // Should be attributed
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH, wakeupTime + 5, TEST_UID_3,
+                TEST_UID_5);
+
+        final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        assertThat(attribution).isNotNull();
+        assertThat(attribution.size()).isEqualTo(1);
+        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH)).isTrue();
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH).indexOfKey(
+                TEST_UID_1)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH).indexOfKey(
+                TEST_UID_2)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH).get(TEST_UID_3)).isEqualTo(
+                TEST_PROC_STATE_3);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH).indexOfKey(
+                TEST_UID_4)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH).get(TEST_UID_5)).isEqualTo(
+                TEST_PROC_STATE_5);
+    }
+
+    @Test
     public void alarmAndWifiIrqAttribution() {
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 92123210;
@@ -393,6 +435,47 @@ public class CpuWakeupStatsTest {
                 TEST_PROC_STATE_3);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).indexOfKey(TEST_UID_4)).isLessThan(0);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_5)).isEqualTo(
+                TEST_PROC_STATE_5);
+        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_UNKNOWN)).isTrue();
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_UNKNOWN)).isNull();
+        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_ALARM)).isFalse();
+    }
+
+    @Test
+    public void unknownAndBluetoothAttribution() {
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
+        final long wakeupTime = 92123520;
+
+        populateDefaultProcStates(obj);
+
+        obj.noteWakeupTimeAndReason(wakeupTime, 24,
+                KERNEL_REASON_UNKNOWN_IRQ + ":" + KERNEL_REASON_BLUETOOTH_IRQ);
+
+        // Bluetooth activity
+        // Outside the window, so should be ignored.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH,
+                wakeupTime - obj.mConfig.WAKEUP_MATCHING_WINDOW_MS - 1, TEST_UID_4);
+        // Should be attributed
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH, wakeupTime + 2, TEST_UID_1);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH, wakeupTime - 1, TEST_UID_3,
+                TEST_UID_5);
+
+        // Unrelated, should be ignored.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 5, TEST_UID_3);
+
+        final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        assertThat(attribution).isNotNull();
+        assertThat(attribution.size()).isEqualTo(2);
+        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH)).isTrue();
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH).get(TEST_UID_1)).isEqualTo(
+                TEST_PROC_STATE_1);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH)
+                .indexOfKey(TEST_UID_2)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH).get(TEST_UID_3)).isEqualTo(
+                TEST_PROC_STATE_3);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH)
+                .indexOfKey(TEST_UID_4)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH).get(TEST_UID_5)).isEqualTo(
                 TEST_PROC_STATE_5);
         assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_UNKNOWN)).isTrue();
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_UNKNOWN)).isNull();

@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.documentation;
 
 public interface DocumentationBuilder {
     void add(String value);
-    Operation operation(String category, int id, String name);
-    Operation wipOperation(String category, int id, String name);
+
+    DocumentedOperation operation(String category, int id, String name);
+
+    DocumentedOperation wipOperation(String category, int id, String name);
 }

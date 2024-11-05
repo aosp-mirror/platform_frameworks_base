@@ -22,3 +22,7 @@ per-file *RemoteInput* = set noparent
 per-file *RemoteInput* = file:notification/OWNERS
 per-file *EmptyShadeView* = set noparent
 per-file *EmptyShadeView* = file:notification/OWNERS
+per-file *Lockscreen* = set noparent
+per-file *Lockscreen* = file:../keyguard/OWNERS
+per-file *Scrim* = set noparent
+per-file *Scrim* = file:../keyguard/OWNERS

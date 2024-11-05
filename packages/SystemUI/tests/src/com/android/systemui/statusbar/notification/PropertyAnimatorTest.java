@@ -31,12 +31,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.testing.AndroidTestingRunner;
-import android.testing.UiThreadTest;
 import android.util.FloatProperty;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.app.animation.Interpolators;

@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
 import static com.android.server.wm.SurfaceAnimatorProto.ANIMATION_ADAPTER;
 import static com.android.server.wm.SurfaceAnimatorProto.ANIMATION_START_DELAYED;
 import static com.android.server.wm.SurfaceAnimatorProto.LEASH;

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.4.0-alpha08" type="baseline" client="" dependencies="true" name="" variant="all" version="8.4.0-alpha08">
+
+    <issue
+        id="MissingPermissionAnnotation"
+        message="isSupervisionEnabled should be annotated with either @EnforcePermission, @RequiresNoPermission or @PermissionManuallyEnforced."
+        errorLine1="    @Override"
+        errorLine2="    ^">
+        <location
+            file="frameworks/base/services/supervision/java/com/android/server/supervision/SupervisionService.java"
+            line="45"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="MissingPermissionAnnotation"
+        message="onShellCommand should be annotated with either @EnforcePermission, @RequiresNoPermission or @PermissionManuallyEnforced."
+        errorLine1="    @Override"
+        errorLine2="    ^">
+        <location
+            file="frameworks/base/services/supervision/java/com/android/server/supervision/SupervisionService.java"
+            line="50"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="MissingPermissionAnnotation"
+        message="dump should be annotated with either @EnforcePermission, @RequiresNoPermission or @PermissionManuallyEnforced."
+        errorLine1="    @Override"
+        errorLine2="    ^">
+        <location
+            file="frameworks/base/services/supervision/java/com/android/server/supervision/SupervisionService.java"
+            line="62"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="SimpleRequiresNoPermission"
+        message="Method isSupervisionEnabled doesn&apos;t perform any permission checks, meaning it should be annotated with @RequiresNoPermission."
+        errorLine1="    @Override"
+        errorLine2="    ^">
+        <location
+            file="frameworks/base/services/supervision/java/com/android/server/supervision/SupervisionService.java"
+            line="45"
+            column="5"/>
+    </issue>
+
+</issues>

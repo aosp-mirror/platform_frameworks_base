@@ -57,7 +57,10 @@ class PermissionAnnotationDetector : AidlImplementationDetector() {
             ISSUE_MISSING_PERMISSION_ANNOTATION,
             node,
             context.getLocation(node),
-            "The method ${node.name} is not permission-annotated."
+            """
+                ${node.name} should be annotated with either @EnforcePermission, \
+                @RequiresNoPermission or @PermissionManuallyEnforced.
+            """.trimMargin()
         )
     }
 

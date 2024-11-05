@@ -18,6 +18,7 @@ package com.android.wm.shell.bubbles.bar
 
 import android.app.ActivityManager
 import android.content.Context
+import android.content.pm.ShortcutInfo
 import android.graphics.Insets
 import android.graphics.Rect
 import android.view.LayoutInflater
@@ -27,30 +28,34 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.BubbleData
 import com.android.wm.shell.bubbles.BubbleExpandedViewManager
+import com.android.wm.shell.bubbles.BubbleLogger
 import com.android.wm.shell.bubbles.BubblePositioner
 import com.android.wm.shell.bubbles.BubbleTaskView
 import com.android.wm.shell.bubbles.BubbleTaskViewFactory
 import com.android.wm.shell.bubbles.DeviceConfig
 import com.android.wm.shell.bubbles.RegionSamplingProvider
+import com.android.wm.shell.bubbles.UiEventSubject.Companion.assertThat
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.handles.RegionSamplingHelper
 import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
+import com.google.common.util.concurrent.MoreExecutors.directExecutor
+import java.util.Collections
+import java.util.concurrent.Executor
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.util.Collections
-import java.util.concurrent.Executor
 
 /** Tests for [BubbleBarExpandedViewTest] */
 @SmallTest
@@ -70,14 +75,18 @@ class BubbleBarExpandedViewTest {
     private lateinit var expandedViewManager: BubbleExpandedViewManager
     private lateinit var positioner: BubblePositioner
     private lateinit var bubbleTaskView: BubbleTaskView
+    private lateinit var bubble: Bubble
 
     private lateinit var bubbleExpandedView: BubbleBarExpandedView
     private var testableRegionSamplingHelper: TestableRegionSamplingHelper? = null
     private var regionSamplingProvider: TestRegionSamplingProvider? = null
 
+    private val uiEventLoggerFake = UiEventLoggerFake()
+
     @Before
     fun setUp() {
         ProtoLog.REQUIRE_PROTOLOGTOOL = false
+        ProtoLog.init()
         mainExecutor = TestExecutor()
         bgExecutor = TestExecutor()
         positioner = BubblePositioner(context, windowManager)
@@ -106,11 +115,12 @@ class BubbleBarExpandedViewTest {
         bubbleExpandedView.initialize(
             expandedViewManager,
             positioner,
+            BubbleLogger(uiEventLoggerFake),
             false /* isOverflow */,
             bubbleTaskView,
             mainExecutor,
             bgExecutor,
-            regionSamplingProvider
+            regionSamplingProvider,
         )
 
         getInstrumentation().runOnMainSync(Runnable {
@@ -118,6 +128,20 @@ class BubbleBarExpandedViewTest {
             // Helper should be created once attached to window
             testableRegionSamplingHelper = regionSamplingProvider!!.helper
         })
+
+        bubble = Bubble(
+            "key",
+            ShortcutInfo.Builder(context, "id").build(),
+            100 /* desiredHeight */,
+            0 /* desiredHeightResId */,
+            "title",
+            0 /* taskId */,
+            null /* locus */,
+            true /* isDismissable */,
+            directExecutor(),
+            directExecutor()
+        ) {}
+        bubbleExpandedView.update(bubble)
     }
 
     @After
@@ -189,6 +213,19 @@ class BubbleBarExpandedViewTest {
 
         bubbleExpandedView.isAnimating = false
         assertThat(testableRegionSamplingHelper!!.isStopped).isTrue()
+    }
+
+    @Test
+    fun testEventLogging_dismissBubbleViaAppMenu() {
+        getInstrumentation().runOnMainSync { bubbleExpandedView.handleView.performClick() }
+        val dismissMenuItem =
+            bubbleExpandedView.findViewWithTag<View>(BubbleBarMenuView.DISMISS_ACTION_TAG)
+        assertThat(dismissMenuItem).isNotNull()
+        getInstrumentation().runOnMainSync { dismissMenuItem.performClick() }
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.logs[0].eventId)
+            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU.id)
+        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
     }
 
     private inner class FakeBubbleTaskViewFactory : BubbleTaskViewFactory {

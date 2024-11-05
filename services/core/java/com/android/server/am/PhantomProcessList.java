@@ -514,6 +514,15 @@ public final class PhantomProcessList {
         app.killLocked("Caused by child process: " + msg, reasonCode, subReason, true);
     }
 
+    @GuardedBy("mLock")
+    private SparseArray<PhantomProcessRecord> getPhantomProcessOfAppLocked(ProcessRecord app) {
+        int index = mAppPhantomProcessMap.indexOfKey(app.getPid());
+        if (index >= 0) {
+            return mAppPhantomProcessMap.valueAt(index);
+        }
+        return null;
+    }
+
     /**
      * Iterate all phantom process belonging to the given app, and invokve callback
      * for each of them.
@@ -521,16 +530,31 @@ public final class PhantomProcessList {
     void forEachPhantomProcessOfApp(final ProcessRecord app,
             final Function<PhantomProcessRecord, Boolean> callback) {
         synchronized (mLock) {
-            int index = mAppPhantomProcessMap.indexOfKey(app.getPid());
-            if (index >= 0) {
-                final SparseArray<PhantomProcessRecord> array =
-                        mAppPhantomProcessMap.valueAt(index);
-                for (int i = array.size() - 1; i >= 0; i--) {
-                    final PhantomProcessRecord r = array.valueAt(i);
-                    if (!callback.apply(r)) {
-                        break;
-                    }
+            final SparseArray<PhantomProcessRecord> array = getPhantomProcessOfAppLocked(app);
+            if (array == null) {
+                return;
+            }
+            for (int i = array.size() - 1; i >= 0; i--) {
+                final PhantomProcessRecord r = array.valueAt(i);
+                if (!callback.apply(r)) {
+                    break;
                 }
+            }
+        }
+    }
+
+    /**
+     * Set process group of phantom process belonging to the given app.
+     */
+    void setProcessGroupForPhantomProcessOfApp(final ProcessRecord app, final int group) {
+        synchronized (mLock) {
+            final SparseArray<PhantomProcessRecord> array = getPhantomProcessOfAppLocked(app);
+            if (array == null) {
+                return;
+            }
+            for (int i = array.size() - 1; i >= 0; i--) {
+                final PhantomProcessRecord r = array.valueAt(i);
+                mService.mOomAdjuster.setProcessGroup(r.mPid, group, r.mProcessName);
             }
         }
     }

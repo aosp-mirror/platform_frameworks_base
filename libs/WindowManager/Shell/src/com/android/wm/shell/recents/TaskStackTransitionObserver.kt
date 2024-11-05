@@ -17,15 +17,13 @@
 package com.android.wm.shell.recents
 
 import android.app.ActivityManager.RunningTaskInfo
-import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
-import android.content.Context
 import android.os.IBinder
 import android.util.ArrayMap
 import android.view.SurfaceControl
-import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CHANGE
+import android.window.DesktopModeFlags
 import android.window.TransitionInfo
 import com.android.wm.shell.shared.TransitionUtil
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import dagger.Lazy
@@ -38,20 +36,14 @@ import java.util.concurrent.Executor
  * TODO(346588978) Move split/pip signals here as well so that launcher don't need to handle it
  */
 class TaskStackTransitionObserver(
-    private val context: Context,
     private val transitions: Lazy<Transitions>,
     shellInit: ShellInit
 ) : Transitions.TransitionObserver {
-
-    private val transitionToTransitionChanges: MutableMap<IBinder, TransitionChanges> =
-        mutableMapOf()
     private val taskStackTransitionObserverListeners =
         ArrayMap<TaskStackTransitionObserverListener, Executor>()
 
     init {
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            shellInit.addInitCallback(::onInit, this)
-        }
+        shellInit.addInitCallback(::onInit, this)
     }
 
     fun onInit() {
@@ -64,10 +56,7 @@ class TaskStackTransitionObserver(
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction
     ) {
-        if (DesktopModeFlags.TASK_STACK_OBSERVER_IN_SHELL.isEnabled(context)) {
-            val taskInfoList = mutableListOf<RunningTaskInfo>()
-            val transitionTypeList = mutableListOf<Int>()
-
+        if (DesktopModeFlags.ENABLE_TASK_STACK_OBSERVER_IN_SHELL.isTrue) {
             for (change in info.changes) {
                 if (change.flags and TransitionInfo.FLAG_IS_WALLPAPER != 0) {
                     continue
@@ -78,59 +67,23 @@ class TaskStackTransitionObserver(
                     continue
                 }
 
-                // Filter out changes that we care about
-                if (change.mode == WindowManager.TRANSIT_OPEN) {
-                    change.taskInfo?.let { taskInfoList.add(it) }
-                    transitionTypeList.add(change.mode)
+                // Find the first task that is opening, this should be the one at the front after
+                // the transition
+                if (TransitionUtil.isOpeningType(change.mode)) {
+                    notifyOnTaskMovedToFront(taskInfo)
+                    break
+                } else if (change.mode == TRANSIT_CHANGE) {
+                    notifyOnTaskChanged(taskInfo)
                 }
-            }
-            // Only add the transition to map if it has a change we care about
-            if (taskInfoList.isNotEmpty()) {
-                transitionToTransitionChanges.put(
-                    transition,
-                    TransitionChanges(taskInfoList, transitionTypeList)
-                )
             }
         }
     }
 
     override fun onTransitionStarting(transition: IBinder) {}
 
-    override fun onTransitionMerged(merged: IBinder, playing: IBinder) {
-        val mergedTransitionChanges =
-            transitionToTransitionChanges.get(merged)
-                ?:
-                // We are adding changes of the merged transition to changes of the playing
-                // transition so if there is no changes nothing to do.
-                return
+    override fun onTransitionMerged(merged: IBinder, playing: IBinder) {}
 
-        transitionToTransitionChanges.remove(merged)
-        val playingTransitionChanges = transitionToTransitionChanges.get(playing)
-        if (playingTransitionChanges != null) {
-            playingTransitionChanges.merge(mergedTransitionChanges)
-        } else {
-            transitionToTransitionChanges.put(playing, mergedTransitionChanges)
-        }
-    }
-
-    override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
-        val taskInfoList =
-            transitionToTransitionChanges.getOrDefault(transition, TransitionChanges()).taskInfoList
-        val typeList =
-            transitionToTransitionChanges
-                .getOrDefault(transition, TransitionChanges())
-                .transitionTypeList
-        transitionToTransitionChanges.remove(transition)
-
-        for ((index, taskInfo) in taskInfoList.withIndex()) {
-            if (
-                TransitionUtil.isOpeningType(typeList[index]) &&
-                    taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
-            ) {
-                notifyTaskStackTransitionObserverListeners(taskInfo)
-            }
-        }
-    }
+    override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {}
 
     fun addTaskStackTransitionObserverListener(
         taskStackTransitionObserverListener: TaskStackTransitionObserverListener,
@@ -145,9 +98,15 @@ class TaskStackTransitionObserver(
         taskStackTransitionObserverListeners.remove(taskStackTransitionObserverListener)
     }
 
-    private fun notifyTaskStackTransitionObserverListeners(taskInfo: RunningTaskInfo) {
+    private fun notifyOnTaskMovedToFront(taskInfo: RunningTaskInfo) {
         taskStackTransitionObserverListeners.forEach { (listener, executor) ->
             executor.execute { listener.onTaskMovedToFrontThroughTransition(taskInfo) }
+        }
+    }
+
+    private fun notifyOnTaskChanged(taskInfo: RunningTaskInfo) {
+        taskStackTransitionObserverListeners.forEach { (listener, executor) ->
+            executor.execute { listener.onTaskChangedThroughTransition(taskInfo) }
         }
     }
 
@@ -155,15 +114,7 @@ class TaskStackTransitionObserver(
     interface TaskStackTransitionObserverListener {
         /** Called when a task is moved to front. */
         fun onTaskMovedToFrontThroughTransition(taskInfo: RunningTaskInfo) {}
-    }
-
-    private data class TransitionChanges(
-        val taskInfoList: MutableList<RunningTaskInfo> = ArrayList(),
-        val transitionTypeList: MutableList<Int> = ArrayList(),
-    ) {
-        fun merge(transitionChanges: TransitionChanges) {
-            taskInfoList.addAll(transitionChanges.taskInfoList)
-            transitionTypeList.addAll(transitionChanges.transitionTypeList)
-        }
+        /** Called when a task info has changed. */
+        fun onTaskChangedThroughTransition(taskInfo: RunningTaskInfo) {}
     }
 }

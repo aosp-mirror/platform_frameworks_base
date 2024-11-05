@@ -37,18 +37,20 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.fakeDarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.StatusBarLongPressGestureDetector
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.data.repository.fakeStatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
@@ -75,7 +77,9 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
-    private val kosmos = Kosmos()
+    private val kosmos = testKosmos()
+    private val statusBarContentInsetsProviderStore = kosmos.fakeStatusBarContentInsetsProviderStore
+    private val statusBarContentInsetsProvider = statusBarContentInsetsProviderStore.defaultDisplay
 
     private val fakeDarkIconDispatcher = kosmos.fakeDarkIconDispatcher
     @Mock private lateinit var shadeViewController: ShadeViewController
@@ -93,7 +97,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var windowRootView: Provider<WindowRootView>
     @Mock private lateinit var shadeLogger: ShadeLogger
     @Mock private lateinit var viewUtil: ViewUtil
-    @Mock private lateinit var statusBarContentInsetsProvider: StatusBarContentInsetsProvider
+    @Mock private lateinit var mStatusBarLongPressGestureDetector: StatusBarLongPressGestureDetector
     private lateinit var statusBarWindowStateController: StatusBarWindowStateController
 
     private lateinit var view: PhoneStatusBarView
@@ -390,13 +394,14 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 shadeControllerImpl,
                 shadeViewController,
                 panelExpansionInteractor,
+                { mStatusBarLongPressGestureDetector },
                 windowRootView,
                 shadeLogger,
                 viewUtil,
                 configurationController,
                 mStatusOverlayHoverListenerFactory,
                 fakeDarkIconDispatcher,
-                statusBarContentInsetsProvider,
+                statusBarContentInsetsProviderStore,
             )
             .create(view)
             .also { it.init() }

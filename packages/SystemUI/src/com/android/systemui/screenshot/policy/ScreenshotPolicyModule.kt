@@ -37,7 +37,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 
 @Module
 interface ScreenshotPolicyModule {
-
     @Binds
     @SysUISingleton
     fun bindProfileTypeRepository(impl: ProfileTypeRepositoryImpl): ProfileTypeRepository
@@ -67,6 +66,7 @@ interface ScreenshotPolicyModule {
             imageCapture: ImageCapture,
             displayContentRepo: DisplayContentRepository,
             policyListProvider: Provider<List<CapturePolicy>>,
+            standardPolicy: ScreenshotPolicy,
         ): ScreenshotRequestProcessor {
             return PolicyRequestProcessor(
                 background = background,
@@ -75,7 +75,8 @@ interface ScreenshotPolicyModule {
                 policies = policyListProvider.get(),
                 defaultOwner = Process.myUserHandle(),
                 defaultComponent =
-                    ComponentName(context.packageName, SystemUIService::class.java.toString())
+                    ComponentName(context.packageName, SystemUIService::class.java.toString()),
+                policy = standardPolicy,
             )
         }
     }

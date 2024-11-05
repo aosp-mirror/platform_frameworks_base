@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Huwasha kipengele cha Muunganisho Ulioboreshwa."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Kituo cha karibu"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Washa programu ya mwisho inayotoa ufikiaji mkuu wa karibu"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Mazingira ya usanidi wa Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Tumia temino ya Linux kwenye Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Inakagua HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Weka HDCP ya kukagua tabia"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Utatuzi"</string>
@@ -582,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sasa hivi"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Simu hii"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Kishikwambi hiki"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Kompyuta hii (spika ya ndani)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Spika ya kituo"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Imezimwa"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Imewashwa"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Ni lazima uwashe tena kifaa chako ili mabadiliko haya yatekelezwe. Washa tena sasa au ughairi."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Vipokea sauti vya waya"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Kipokea sauti cha kichwani chenye waya"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Kipokea sauti cha kichwani kinachotumia waya"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Sauti ya USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Maikrofoni inayotumia waya"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Maikrofoni ya USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Maikrofoni ya Bluetooth"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Umewashwa"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Umezimwa"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Mabadiliko katika mtandao wa mtoa huduma"</string>

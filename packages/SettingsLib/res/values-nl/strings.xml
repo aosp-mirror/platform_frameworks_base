@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Hiermee wordt de functie voor verbeterde connectiviteit aangezet."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokale terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Terminal-app aanzetten die lokale shell-toegang biedt"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-ontwikkelomgeving"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Linux-terminal uitvoeren op Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-controle"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP-controlegedrag instellen"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Foutopsporing"</string>
@@ -577,11 +579,12 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duur"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Altijd vragen"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Totdat je uitzet"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Totdat je ze uitzet"</string>
     <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Geen naam)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Zojuist"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Deze telefoon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Deze tablet"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Deze computer (intern)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dockspeaker"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uit"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aan"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Je apparaat moet opnieuw worden opgestart om deze wijziging toe te passen. Start nu opnieuw op of annuleer de wijziging."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade koptelefoon"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Bedrade koptelefoon"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Bedrade audio"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-audio"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Bedrade microfoon"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-microfoon"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT-microfoon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Uit"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Netwerk van provider wordt gewijzigd"</string>

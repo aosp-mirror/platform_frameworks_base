@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.applications.InterestingConfigChanges
 import com.android.systemui.Dumpable
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
@@ -57,7 +58,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 // TODO(307945185) Split View concerns into a ViewBinder

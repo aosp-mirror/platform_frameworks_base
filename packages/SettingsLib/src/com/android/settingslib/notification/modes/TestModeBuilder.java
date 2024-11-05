@@ -167,6 +167,13 @@ public class TestModeBuilder {
         return this;
     }
 
+    public TestModeBuilder setVisualEffect(int effect, boolean allowed) {
+        ZenPolicy newPolicy = new ZenPolicy.Builder(mRule.getZenPolicy())
+                .showVisualEffect(effect, allowed).build();
+        setZenPolicy(newPolicy);
+        return this;
+    }
+
     public TestModeBuilder setEnabled(boolean enabled) {
         return setEnabled(enabled, /* byUser= */ false);
     }

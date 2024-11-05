@@ -68,11 +68,16 @@ interface KeyguardClockRepository {
 
     val previewClock: Flow<ClockController>
 
+    /** top of notifications without bcsmartspace in small clock settings */
+    val notificationDefaultTop: StateFlow<Float>
+
     val clockEventController: ClockEventController
 
     val shouldForceSmallClock: Boolean
 
     fun setClockSize(size: ClockSize)
+
+    fun setNotificationDefaultTop(top: Float)
 }
 
 @SysUISingleton
@@ -108,7 +113,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = getClockSize()
+                initialValue = getClockSize(),
             )
 
     override val currentClockId: Flow<ClockId> =
@@ -138,7 +143,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = clockRegistry.createCurrentClock()
+                initialValue = clockRegistry.createCurrentClock(),
             )
 
     override val previewClock: Flow<ClockController> =
@@ -148,6 +153,14 @@ constructor(
             // at the same time
             clockRegistry.createCurrentClock()
         }
+
+    private val _notificationDefaultTop: MutableStateFlow<Float> = MutableStateFlow(0F)
+
+    override val notificationDefaultTop: StateFlow<Float> = _notificationDefaultTop.asStateFlow()
+
+    override fun setNotificationDefaultTop(top: Float) {
+        _notificationDefaultTop.value = top
+    }
 
     override val shouldForceSmallClock: Boolean
         get() =
@@ -160,7 +173,7 @@ constructor(
             secureSettings.getIntForUser(
                 Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
                 /* defaultValue= */ 1,
-                UserHandle.USER_CURRENT
+                UserHandle.USER_CURRENT,
             )
         )
     }

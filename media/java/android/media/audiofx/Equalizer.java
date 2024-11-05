@@ -153,9 +153,8 @@ public class Equalizer extends AudioEffect {
             param[0] = PARAM_GET_PRESET_NAME;
             for (int i = 0; i < mNumPresets; i++) {
                 param[1] = i;
-                checkStatus(getParameter(param, value));
-                int length = 0;
-                while (value[length] != 0) length++;
+                final int length = getParameter(param, value);
+                checkStatus(length);
                 try {
                     mPresetNames[i] = new String(value, 0, length, "ISO-8859-1");
                 } catch (java.io.UnsupportedEncodingException e) {

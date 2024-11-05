@@ -104,6 +104,7 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
         mContext = spy(mContext);
         Display display = mock(Display.class);
         when(display.getUniqueId()).thenReturn(UNIQUE_DISPLAY_ID_PRIMARY);
+        when(display.getType()).thenReturn(Display.TYPE_INTERNAL);
         when(mContext.getDisplayNoVerify()).thenReturn(display);
 
         // Override the resources to Display Primary
@@ -360,6 +361,7 @@ public class FullscreenMagnificationControllerTest extends SysuiTestCase {
 
         Display newDisplay = mock(Display.class);
         when(newDisplay.getUniqueId()).thenReturn(UNIQUE_DISPLAY_ID_SECONDARY);
+        when(newDisplay.getType()).thenReturn(Display.TYPE_INTERNAL);
         when(mContext.getDisplayNoVerify()).thenReturn(newDisplay);
         // Override the resources to Display Secondary
         mContext.getOrCreateTestableResources()

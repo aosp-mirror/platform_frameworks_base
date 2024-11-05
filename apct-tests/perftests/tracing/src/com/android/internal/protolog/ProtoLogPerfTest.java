@@ -17,10 +17,12 @@ package com.android.internal.protolog;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.perftests.utils.Stats;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
 
@@ -30,6 +32,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import perfetto.protos.ProtologCommon;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,24 +69,48 @@ public class ProtoLogPerfTest {
         };
     }
 
+    private IProtoLog mProcessedProtoLogger;
+    private static final String MOCK_TEST_FILE_PATH = "mock/file/path";
+    private static final perfetto.protos.Protolog.ProtoLogViewerConfig VIEWER_CONFIG =
+            perfetto.protos.Protolog.ProtoLogViewerConfig.newBuilder()
+                .addGroups(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.Group.newBuilder()
+                                .setId(1)
+                                .setName(TestProtoLogGroup.TEST_GROUP.toString())
+                                .setTag(TestProtoLogGroup.TEST_GROUP.getTag())
+                ).addMessages(
+                        perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
+                                .setMessageId(123)
+                                .setMessage("My Test Debug Log Message %b")
+                                .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_DEBUG)
+                                .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:123")
+                ).build();
+
     @BeforeClass
     public static void init() {
         ProtoLog.init(TestProtoLogGroup.values());
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws ServiceNotFoundException {
         TestProtoLogGroup.TEST_GROUP.setLogToProto(mLogToProto);
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(mLogToLogcat);
+
+        mProcessedProtoLogger = new ProcessedPerfettoProtoLogImpl(
+                MOCK_TEST_FILE_PATH,
+                () -> new AutoClosableProtoInputStream(VIEWER_CONFIG.toByteArray()),
+                () -> {},
+                TestProtoLogGroup.values()
+        );
     }
 
     @Test
     public void log_Processed_NoArgs() {
-        final var protoLog = ProtoLog.getSingleInstance();
         final var perfMonitor = new PerfMonitor();
 
         while (perfMonitor.keepRunning()) {
-            protoLog.log(
+            mProcessedProtoLogger.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 123,
                     0, (Object[]) null);
         }
@@ -90,11 +118,10 @@ public class ProtoLogPerfTest {
 
     @Test
     public void log_Processed_WithArgs() {
-        final var protoLog = ProtoLog.getSingleInstance();
         final var perfMonitor = new PerfMonitor();
 
         while (perfMonitor.keepRunning()) {
-            protoLog.log(
+            mProcessedProtoLogger.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 123,
                     0b1110101001010100,
                     new Object[]{"test", 1, 2, 3, 0.4, 0.5, 0.6, true});

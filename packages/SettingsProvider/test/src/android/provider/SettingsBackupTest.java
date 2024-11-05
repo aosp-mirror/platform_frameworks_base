@@ -223,7 +223,6 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
-                    Settings.Global.ENABLE_USE_APP_INFO_NOT_LAUNCHED,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
@@ -904,8 +903,8 @@ public class SettingsBackupTest {
                         Settings.System.EGG_MODE, // I am the lolrus
                         Settings.System.END_BUTTON_BEHAVIOR, // bug?
                         Settings.System.DEFAULT_DEVICE_FONT_SCALE, // Non configurable
-                        Settings.System
-                                .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                        Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                        Settings.System.INPUT_GAIN_INDEX_SETTINGS,
                         // candidate for backup?
                         Settings.System.LOCKSCREEN_DISABLED, // ?
                         Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
@@ -945,7 +944,8 @@ public class SettingsBackupTest {
                         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                         Settings.System.WEAR_TTS_PREWARM_ENABLED,
                         Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
+                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED, // form-factor/OEM specific
+                        Settings.System.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME // internal cache
                 );
         if (!Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
             settings.add(Settings.System.MIN_REFRESH_RATE);

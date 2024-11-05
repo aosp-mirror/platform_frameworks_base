@@ -62,6 +62,12 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @VisibleForTesting
     static final int FLAG_HAS_BINDERS = 1 << 12;
 
+    /**
+     * Indicates there may be intents with creator tokens contained in this bundle. When unparceled,
+     * they should be verified if tokens are missing or invalid.
+     */
+    static final int FLAG_VERIFY_TOKENS_PRESENT = 1 << 13;
+
 
     /**
      * Status when the Bundle can <b>assert</b> that the underlying Parcel DOES NOT contain
@@ -272,6 +278,11 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             mFlags &= ~FLAG_ALLOW_FDS;
         }
         return orig;
+    }
+
+    /** {@hide} */
+    public void setIsIntentExtra() {
+        mFlags |= FLAG_VERIFY_TOKENS_PRESENT;
     }
 
     /**

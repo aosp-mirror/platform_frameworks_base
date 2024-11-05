@@ -239,9 +239,15 @@
     <!-- Max width for the bubble popup view. -->
     <dimen name="bubble_popup_content_max_width">300dp</dimen>
     <!-- Horizontal margin for the bubble popup view. -->
-    <dimen name="bubble_popup_margin_horizontal">32dp</dimen>
-    <!-- Top margin for the bubble popup view. -->
-    <dimen name="bubble_popup_margin_top">16dp</dimen>
+    <dimen name="bubble_popup_margin_horizontal">24dp</dimen>
+    <!-- Top margin for the bubble bar education views. -->
+    <dimen name="bubble_popup_margin_top">24dp</dimen>
+    <!-- Bottom padding for the bubble bar education views. -->
+    <dimen name="bubble_popup_padding_bottom">8dp</dimen>
+    <!-- Text margin for the bubble bar education views. -->
+    <dimen name="bubble_popup_text_margin">16dp</dimen>
+    <!-- Size of icons in the bubble bar education views. -->
+    <dimen name="bubble_popup_icon_size">32dp</dimen>
     <!-- Width for the bubble popup view arrow. -->
     <dimen name="bubble_popup_arrow_width">12dp</dimen>
     <!-- Height for the bubble popup view arrow. -->
@@ -250,6 +256,8 @@
     <dimen name="bubble_popup_arrow_corner_radius">2dp</dimen>
     <!-- Padding for the bubble popup view contents. -->
     <dimen name="bubble_popup_padding">24dp</dimen>
+    <!-- Elevation of the popup user education views for the bubble bar -->
+    <dimen name="bubble_popup_elevation">2dp</dimen>
     <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
     <dimen name="bubble_bar_expanded_view_caption_height">36dp</dimen>
     <!-- The width of the caption bar at the top of bubble bar expanded view. -->
@@ -304,31 +312,31 @@
     <dimen name="letterbox_education_dialog_corner_radius">28dp</dimen>
 
     <!-- The width of the top icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_title_icon_width">45dp</dimen>
+    <dimen name="letterbox_education_dialog_title_icon_width">32dp</dimen>
 
     <!-- The height of the top icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_title_icon_height">44dp</dimen>
+    <dimen name="letterbox_education_dialog_title_icon_height">32dp</dimen>
 
     <!-- The width of an icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_icon_width">40dp</dimen>
+    <dimen name="letterbox_education_dialog_icon_width">28dp</dimen>
 
     <!-- The height of an icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_icon_height">32dp</dimen>
+    <dimen name="letterbox_education_dialog_icon_height">22dp</dimen>
 
     <!-- The fixed width of the dialog if there is enough space in the parent. -->
-    <dimen name="letterbox_education_dialog_width">472dp</dimen>
+    <dimen name="letterbox_education_dialog_width">364dp</dimen>
 
     <!-- The margin between the dialog container and its parent. -->
-    <dimen name="letterbox_education_dialog_margin">16dp</dimen>
+    <dimen name="letterbox_education_dialog_margin">24dp</dimen>
 
     <!-- The width of each action container in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_action_width">140dp</dimen>
+    <dimen name="letterbox_education_dialog_action_width">124dp</dimen>
 
     <!-- The space between two actions in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_space_between_actions">24dp</dimen>
+    <dimen name="letterbox_education_dialog_space_between_actions">32dp</dimen>
 
     <!-- The corner radius of the buttons in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_button_radius">12dp</dimen>
+    <dimen name="letterbox_education_dialog_button_radius">28dp</dimen>
 
     <!-- The horizontal padding for the buttons in the letterbox education dialog -->
     <dimen name="letterbox_education_dialog_horizontal_padding">16dp</dimen>
@@ -367,7 +375,7 @@
     <dimen name="letterbox_restart_dialog_button_width">82dp</dimen>
 
     <!-- The width of the buttons in the restart dialog -->
-    <dimen name="letterbox_restart_dialog_button_height">36dp</dimen>
+    <dimen name="letterbox_restart_dialog_button_height">40dp</dimen>
 
     <!-- The corner radius of the buttons in the restart dialog -->
     <dimen name="letterbox_restart_dialog_button_radius">18dp</dimen>
@@ -471,8 +479,10 @@
     <!-- The default minimum allowed window height when resizing a window in desktop mode. -->
     <dimen name="desktop_mode_minimum_window_height">352dp</dimen>
 
-    <!-- The width of the maximize menu in desktop mode. -->
-    <dimen name="desktop_mode_maximize_menu_width">228dp</dimen>
+    <!-- The width of the maximize menu in desktop mode, depending on the number of options -->
+    <dimen name="desktop_mode_maximize_menu_width_one_options">126dp</dimen>
+    <dimen name="desktop_mode_maximize_menu_width_two_options">228dp</dimen>
+    <dimen name="desktop_mode_maximize_menu_width_three_options">330dp</dimen>
 
     <!-- The height of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_height">114dp</dimen>
@@ -492,8 +502,16 @@
     <dimen name="desktop_mode_maximize_menu_buttons_outline_stroke">1dp</dimen>
     <!-- The radius of the inner fill of the maximize menu buttons. -->
     <dimen name="desktop_mode_maximize_menu_buttons_fill_radius">4dp</dimen>
-    <!-- The padding between the outline and fill of the maximize menu buttons. -->
-    <dimen name="desktop_mode_maximize_menu_buttons_fill_padding">4dp</dimen>
+    <!-- The padding between the outline and fill of the maximize menu snap and maximize buttons. -->
+    <dimen name="desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding">4dp</dimen>
+    <!-- The padding between the outline and fill of the maximize menu snap and maximize buttons. -->
+    <dimen name="desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding_bottom">8dp</dimen>
+    <!-- The vertical padding between the outline and fill of the maximize menu restore button. -->
+    <dimen name="desktop_mode_maximize_menu_restore_button_fill_vertical_padding">13dp</dimen>
+    <!-- The horizontal padding between the outline and fill of the maximize menu restore button. -->
+    <dimen name="desktop_mode_maximize_menu_restore_button_fill_horizontal_padding">21dp</dimen>
+    <!-- The padding between the outline and fill of the maximize menu immersive button. -->
+    <dimen name="desktop_mode_maximize_menu_immersive_button_fill_padding">4dp</dimen>
 
     <!-- The corner radius of the maximize menu. -->
     <dimen name="desktop_mode_maximize_menu_corner_radius">8dp</dimen>
@@ -504,9 +522,10 @@
     <!-- The width of the handle menu in desktop mode.  -->
     <dimen name="desktop_mode_handle_menu_width">216dp</dimen>
 
-    <!-- The maximum height of the handle menu in desktop mode. Four pills (52dp each) plus 2dp
-        spacing between them plus 4dp top padding. -->
-    <dimen name="desktop_mode_handle_menu_height">270dp</dimen>
+    <!-- The maximum height of the handle menu in desktop mode. Three pills at 52dp each,
+         additional actions pill 208dp, plus 2dp spacing between them plus 4dp top padding.
+         52*3 + 52*4 + (4-1)*2 + 4 = 374 -->
+    <dimen name="desktop_mode_handle_menu_height">374dp</dimen>
 
     <!-- The elevation set on the handle menu pills. -->
     <dimen name="desktop_mode_handle_menu_pill_elevation">1dp</dimen>
@@ -520,11 +539,17 @@
     <!-- The maximum height of the handle menu's "New Window" button in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_new_window_height">52dp</dimen>
 
+    <!-- The maximum height of the handle menu's "Manage Windows" button in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_manage_windows_height">52dp</dimen>
+
     <!-- The maximum height of the handle menu's "Screenshot" button in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_screenshot_height">52dp</dimen>
 
     <!-- The height of the handle menu's "Open in browser" pill in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_open_in_browser_pill_height">52dp</dimen>
+
+    <!-- The height of the handle menu's "Change aspect ratio" pill in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_change_aspect_ratio_height">52dp</dimen>
 
     <!-- The margin between pills of the handle menu in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_pill_spacing_margin">2dp</dimen>
@@ -605,6 +630,9 @@
     <!-- The horizontal inset to apply to the close button's ripple drawable -->
     <dimen name="desktop_mode_header_close_ripple_inset_horizontal">6dp</dimen>
 
+    <!-- The padding added to all sides of windowing education tooltip -->
+    <dimen name="desktop_windowing_education_tooltip_padding">8dp</dimen>
+
     <!-- The acceptable area ratio of fg icon area/bg icon area, i.e. (72 x 72) / (108 x 108) -->
     <item type="dimen" format="float" name="splash_icon_enlarge_foreground_threshold">0.44</item>
     <!-- Scaling factor applied to splash icons without provided background i.e. (192 / 160) -->
@@ -618,4 +646,19 @@
     <!-- The offset from the left edge of the entering page for the cross-activity animation -->
     <dimen name="cross_activity_back_entering_start_offset">96dp</dimen>
 
+    <!-- The open by default settings dialog menu width. -->
+    <dimen name="open_by_default_settings_dialog_width">348dp</dimen>
+    <!-- The open by default settings dialog menu height. -->
+    <dimen name="open_by_default_settings_dialog_height">380dp</dimen>
+    <!-- The height of radio buttons in the open by default settings dialog. -->
+    <dimen name="open_by_default_settings_dialog_radio_button_height">64dp</dimen>
+    <!-- The width of radio buttons in the open by default settings dialog. -->
+    <dimen name="open_by_default_settings_dialog_radio_button_width">316dp</dimen>
+
+    <!-- The width of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_width">412dp</dimen>
+    <!-- The height of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_height">352dp</dimen>
+    <!-- The corner radius of the desktop windowing education promo. -->
+    <dimen name="desktop_windowing_education_promo_corner_radius">28dp</dimen>
 </resources>

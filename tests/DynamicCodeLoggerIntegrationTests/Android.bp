@@ -55,6 +55,8 @@ android_test {
 
     java_resources: [
         ":DynamicCodeLoggerTestLibrary",
+    ],
+    device_first_java_resources: [
         ":DynamicCodeLoggerNativeExecutable",
     ],
 }

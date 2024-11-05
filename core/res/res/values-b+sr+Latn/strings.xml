@@ -1944,6 +1944,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Isključeno"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Bilo koji kalendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> isključuje neke zvuke"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Došlo je do internog problema u vezi sa uređajem i možda će biti nestabilan dok ne obavite resetovanje na fabrička podešavanja."</string>
@@ -2011,6 +2013,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Podesite otključavanje ekrana"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Podesi otključavanje ekrana"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Da biste koristili privatni prostor, podesite otključavanje ekrana na ovom uređaju"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Da biste izbrisali privatan prostor, podesite otključavanje ekrana na ovom uređaju"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija nije dostupna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno nije dostupna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – nije dostupno"</string>
@@ -2129,11 +2132,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibracija za pozive i obaveštenja je uključena"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Melodija zvona za pozive i obaveštenje je isključena"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistemske promene"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne uznemiravaj"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novo: Režim Ne uznemiravaj krije obaveštenja"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Dodirnite da biste saznali više i promenili podešavanje."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režim Ne uznemiravaj je promenjen"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Dodirnite da biste proverili šta je blokirano."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Pregledajte podešavanja obaveštenja"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Od Android-a 13 aplikacije koje instalirate moraju da imaju dozvolu za slanje obaveštenja. Dodirnite da biste promenili ovu dozvolu za postojeće aplikacije."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Podseti me kasnije"</string>
@@ -2429,6 +2427,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Šaljite i primajte poruke bez mobilne ili WiFi mreže"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvori Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Princip rada"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Na čekanju..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Ponovo podesite otključavanje otiskom prsta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> više ne može da se prepozna."</string>

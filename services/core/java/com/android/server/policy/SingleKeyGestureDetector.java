@@ -105,9 +105,9 @@ public final class SingleKeyGestureDetector {
 
         /**
          *  Maximum count of multi presses.
-         *  Return 1 will trigger onPress immediately when {@link KeyEvent.ACTION_UP}.
+         *  Return 1 will trigger onPress immediately when {@link KeyEvent#ACTION_UP}.
          *  Otherwise trigger onMultiPress immediately when reach max count when
-         *  {@link KeyEvent.ACTION_DOWN}.
+         *  {@link KeyEvent#ACTION_DOWN}.
          */
         int getMaxMultiPressCount() {
             return 1;
@@ -153,8 +153,10 @@ public final class SingleKeyGestureDetector {
          * @param eventTime  the timestamp of this event
          * @param pressCount the number of presses detected leading up to this key up event
          * @param displayId  the display ID of the event
+         * @param deviceId   the ID of the input device that generated this event
+         * @param metaState  the state of the modifiers when this gesture was detected
          */
-        void onKeyUp(long eventTime, int pressCount, int displayId) {}
+        void onKeyUp(long eventTime, int pressCount, int displayId, int deviceId, int metaState) {}
 
         @Override
         public String toString() {
@@ -183,7 +185,11 @@ public final class SingleKeyGestureDetector {
     }
 
     private record MessageObject(SingleKeyRule activeRule, int keyCode, int pressCount,
-                                 int displayId) {
+                                 int displayId, int metaState, int deviceId) {
+        MessageObject(SingleKeyRule activeRule, int keyCode, int pressCount, KeyEvent event) {
+            this(activeRule, keyCode, pressCount, event.getDisplayId(), event.getMetaState(),
+                    event.getDeviceId());
+        }
     }
 
     static SingleKeyGestureDetector get(Context context, Looper looper) {
@@ -236,7 +242,7 @@ public final class SingleKeyGestureDetector {
                 mHandler.removeMessages(MSG_KEY_LONG_PRESS);
                 mHandler.removeMessages(MSG_KEY_VERY_LONG_PRESS);
                 MessageObject object = new MessageObject(mActiveRule, keyCode, /* pressCount= */ 1,
-                        event.getDisplayId());
+                        event);
                 final Message msg = mHandler.obtainMessage(MSG_KEY_LONG_PRESS, object);
                 msg.setAsynchronous(true);
                 mHandler.sendMessage(msg);
@@ -284,7 +290,7 @@ public final class SingleKeyGestureDetector {
         if (mKeyPressCounter == 1) {
             if (mActiveRule.supportLongPress()) {
                 MessageObject object = new MessageObject(mActiveRule, keyCode, mKeyPressCounter,
-                        event.getDisplayId());
+                        event);
                 final Message msg = mHandler.obtainMessage(MSG_KEY_LONG_PRESS, object);
                 msg.setAsynchronous(true);
                 mHandler.sendMessageDelayed(msg, mActiveRule.getLongPressTimeoutMs());
@@ -292,7 +298,7 @@ public final class SingleKeyGestureDetector {
 
             if (mActiveRule.supportVeryLongPress()) {
                 MessageObject object = new MessageObject(mActiveRule, keyCode, mKeyPressCounter,
-                        event.getDisplayId());
+                        event);
                 final Message msg = mHandler.obtainMessage(MSG_KEY_VERY_LONG_PRESS, object);
                 msg.setAsynchronous(true);
                 mHandler.sendMessageDelayed(msg, mActiveRule.getVeryLongPressTimeoutMs());
@@ -310,7 +316,7 @@ public final class SingleKeyGestureDetector {
                             + " reached the max count " + mKeyPressCounter);
                 }
                 MessageObject object = new MessageObject(mActiveRule, keyCode, mKeyPressCounter,
-                        event.getDisplayId());
+                        event);
                 final Message msg = mHandler.obtainMessage(MSG_KEY_DELAYED_PRESS, object);
                 msg.setAsynchronous(true);
                 mHandler.sendMessage(msg);
@@ -351,7 +357,7 @@ public final class SingleKeyGestureDetector {
         if (event.getKeyCode() == mActiveRule.mKeyCode) {
             // key-up action should always be triggered if not processed by long press.
             MessageObject object = new MessageObject(mActiveRule, mActiveRule.mKeyCode,
-                    mKeyPressCounter, event.getDisplayId());
+                    mKeyPressCounter, event);
             Message msgKeyUp = mHandler.obtainMessage(MSG_KEY_UP, object);
             msgKeyUp.setAsynchronous(true);
             mHandler.sendMessage(msgKeyUp);
@@ -362,7 +368,7 @@ public final class SingleKeyGestureDetector {
                     Log.i(TAG, "press key " + KeyEvent.keyCodeToString(event.getKeyCode()));
                 }
                 object = new MessageObject(mActiveRule, mActiveRule.mKeyCode,
-                        /* pressCount= */ 1, event.getDisplayId());
+                        /* pressCount= */ 1, event);
                 Message msg = mHandler.obtainMessage(MSG_KEY_DELAYED_PRESS, object);
                 msg.setAsynchronous(true);
                 mHandler.sendMessage(msg);
@@ -373,7 +379,7 @@ public final class SingleKeyGestureDetector {
             // This could be a multi-press.  Wait a little bit longer to confirm.
             if (mKeyPressCounter < mActiveRule.getMaxMultiPressCount()) {
                 object = new MessageObject(mActiveRule, mActiveRule.mKeyCode,
-                        mKeyPressCounter, event.getDisplayId());
+                        mKeyPressCounter, event);
                 Message msg = mHandler.obtainMessage(MSG_KEY_DELAYED_PRESS, object);
                 msg.setAsynchronous(true);
                 mHandler.sendMessageDelayed(msg, MULTI_PRESS_TIMEOUT);
@@ -452,7 +458,8 @@ public final class SingleKeyGestureDetector {
                         Log.i(TAG, "Detect key up " + KeyEvent.keyCodeToString(keyCode)
                                 + " on display " + displayId);
                     }
-                    rule.onKeyUp(mLastDownTime, pressCount, displayId);
+                    rule.onKeyUp(mLastDownTime, pressCount, displayId, object.deviceId,
+                            object.metaState);
                     break;
                 case MSG_KEY_LONG_PRESS:
                     if (DEBUG) {

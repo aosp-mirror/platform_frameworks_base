@@ -18,10 +18,10 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowContainerChildProto.WINDOW_TOKEN;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -89,6 +89,9 @@ class WindowToken extends WindowContainer<WindowState> {
 
     // Is key dispatching paused for this token?
     boolean paused = false;
+
+    /** Whether this container should be removed when it no longer animates. */
+    boolean mIsExiting;
 
     /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
     final boolean mOwnerCanManageAppTokens;
@@ -274,6 +277,28 @@ class WindowToken extends WindowContainer<WindowState> {
             mWmService.mWindowPlacerLocked.performSurfacePlacement();
             mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
         }
+    }
+
+    @Override
+    void removeIfPossible() {
+        if (mTransitionController.isPlayingTarget(this)) {
+            // Defer removing this container until the transition is finished. So the removal can
+            // execute after the finish transaction (see Transition#buildFinishTransaction) which
+            // may reparent it to original parent.
+            mIsExiting = true;
+            return;
+        }
+        mIsExiting = false;
+        removeAllWindowsIfPossible();
+        removeImmediately();
+    }
+
+    @Override
+    boolean handleCompleteDeferredRemoval() {
+        if (mIsExiting) {
+            removeIfPossible();
+        }
+        return super.handleCompleteDeferredRemoval();
     }
 
     /**
@@ -589,6 +614,12 @@ class WindowToken extends WindowContainer<WindowState> {
         final int rotation = getRelativeDisplayRotation();
         if (rotation == Surface.ROTATION_0) return mFixedRotationTransformLeash;
         if (mFixedRotationTransformLeash != null) return mFixedRotationTransformLeash;
+        if (ActivityTaskManagerService.isPip2ExperimentEnabled() && asActivityRecord() != null
+                && mTransitionController.getWindowingModeAtStart(
+                asActivityRecord()) == WINDOWING_MODE_PINNED) {
+            // PiP handles fixed rotation animation in Shell, so do not create the rotation leash.
+            return null;
+        }
 
         final SurfaceControl leash = makeSurface().setContainerLayer()
                 .setParent(getParentSurfaceControl())
@@ -724,6 +755,9 @@ class WindowToken extends WindowContainer<WindowState> {
             pw.print(prefix);
             pw.print("fixedRotationConfig=");
             pw.println(mFixedRotationTransformState.mRotatedOverrideConfiguration);
+        }
+        if (mIsExiting) {
+            pw.print(prefix); pw.println("isExiting=true");
         }
     }
 

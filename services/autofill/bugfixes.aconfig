@@ -49,3 +49,10 @@ flag {
   description: "Include the session id into the FillEventHistory events as part of ClientState"
   bug: "333927465"
 }
+
+flag {
+  name: "highlight_autofill_single_field"
+  namespace: "autofill"
+  description: "Highlight single field after autofill selection"
+  bug: "41496744"
+}

@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.ui.binder
 
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import android.view.View
 import android.view.layoutInflater
@@ -24,7 +23,6 @@ import android.view.mockedLayoutInflater
 import android.view.windowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.domain.interactor.givenCanShowAlternateBouncer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -63,7 +61,7 @@ class AlternateBouncerViewBinderTest : SysuiTestCase() {
                 kosmos.mockedLayoutInflater.inflate(
                     eq(R.layout.alternate_bouncer),
                     isNull(),
-                    anyBoolean()
+                    anyBoolean(),
                 )
             )
             .thenReturn(mockedAltBouncerView)
@@ -71,7 +69,6 @@ class AlternateBouncerViewBinderTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     fun addViewToWindowManager() {
         testScope.runTest {
             kosmos.givenCanShowAlternateBouncer()
@@ -85,7 +82,6 @@ class AlternateBouncerViewBinderTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     fun viewRemovedImmediatelyIfAlreadyAttachedToWindow() {
         testScope.runTest {
             kosmos.givenCanShowAlternateBouncer()
@@ -107,7 +103,6 @@ class AlternateBouncerViewBinderTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
     fun viewNotRemovedUntilAttachedToWindow() {
         testScope.runTest {
             kosmos.givenCanShowAlternateBouncer()

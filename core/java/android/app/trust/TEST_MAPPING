@@ -1,28 +1,12 @@
 {
   "presubmit": [
     {
-      "name": "TrustTests",
-      "options": [
-        {
-          "include-filter": "android.trust.test"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "TrustTests_trust_test"
     }
   ],
   "trust-tablet": [
     {
-      "name": "TrustTests",
-      "options": [
-        {
-          "include-filter": "android.trust.test"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "TrustTests_trust_test"
     }
   ]
 }

@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
@@ -41,6 +42,7 @@ import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
@@ -49,6 +51,7 @@ import com.android.systemui.shade.domain.startable.shadeStartable
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -76,6 +79,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        kosmos.sceneContainerStartable.start()
         underTest.activateIn(testScope)
     }
 
@@ -230,6 +234,41 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
                     }
                 )
                 .isEmpty()
+        }
+
+    @Test
+    fun upTransitionSceneKey_backToCommunal() =
+        testScope.runTest {
+            val actions by collectLastValue(underTest.actions)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            kosmos.sceneInteractor.changeScene(Scenes.Communal, "")
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+            kosmos.sceneInteractor.changeScene(Scenes.Shade, "")
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+
+            assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Communal))
+        }
+
+    @Test
+    fun upTransitionSceneKey_neverGoesBackToShadeScene() =
+        testScope.runTest {
+            val actions by collectValues(underTest.actions)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            kosmos.sceneInteractor.changeScene(Scenes.Shade, "")
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+
+            kosmos.sceneInteractor.changeScene(Scenes.QuickSettings, "")
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
+
+            actions.forEachIndexed { index, map ->
+                assertWithMessage(
+                        "Actions on index $index is incorrectly mapping back to the Shade scene!"
+                    )
+                    .that((map[Swipe.Up] as? UserActionResult.ChangeScene)?.toScene)
+                    .isNotEqualTo(Scenes.Shade)
+            }
         }
 
     private fun TestScope.setDeviceEntered(isEntered: Boolean) {

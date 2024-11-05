@@ -16,11 +16,19 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Slog;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -30,7 +38,7 @@ import java.util.function.Consumer;
  * {@link android.app.Service} to its clients.  In particular, this:
  *
  * <ul>
- * <li> Keeps track of a set of registered {@link IInterface} callbacks,
+ * <li> Keeps track of a set of registered {@link IInterface} objects,
  * taking care to identify them through their underlying unique {@link IBinder}
  * (by calling {@link IInterface#asBinder IInterface.asBinder()}.
  * <li> Attaches a {@link IBinder.DeathRecipient IBinder.DeathRecipient} to
@@ -47,7 +55,7 @@ import java.util.function.Consumer;
  * the registered clients, use {@link #beginBroadcast},
  * {@link #getBroadcastItem}, and {@link #finishBroadcast}.
  *
- * <p>If a registered callback's process goes away, this class will take
+ * <p>If a registered interface's process goes away, this class will take
  * care of automatically removing it from the list.  If you want to do
  * additional work in this situation, you can create a subclass that
  * implements the {@link #onCallbackDied} method.
@@ -56,78 +64,346 @@ import java.util.function.Consumer;
 public class RemoteCallbackList<E extends IInterface> {
     private static final String TAG = "RemoteCallbackList";
 
+    private static final int DEFAULT_MAX_QUEUE_SIZE = 1000;
+
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = {"FROZEN_CALLEE_POLICY_"}, value = {
+            FROZEN_CALLEE_POLICY_UNSET,
+            FROZEN_CALLEE_POLICY_ENQUEUE_ALL,
+            FROZEN_CALLEE_POLICY_ENQUEUE_MOST_RECENT,
+            FROZEN_CALLEE_POLICY_DROP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FrozenCalleePolicy {
+    }
+
+    /**
+     * Callbacks are invoked immediately regardless of the frozen state of the target process.
+     *
+     * Not recommended. Only exists for backward-compatibility. This represents the behavior up to
+     * SDK 35. Starting with SDK 36, clients should set a policy to govern callback invocations when
+     * recipients are frozen.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public static final int FROZEN_CALLEE_POLICY_UNSET = 0;
+
+    /**
+     * When the callback recipient's process is frozen, callbacks are enqueued so they're invoked
+     * after the recipient is unfrozen.
+     *
+     * This is commonly used when the recipient wants to receive all callbacks without losing any
+     * history, e.g. the recipient maintains a running count of events that occurred.
+     *
+     * Queued callbacks are invoked in the order they were originally broadcasted.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public static final int FROZEN_CALLEE_POLICY_ENQUEUE_ALL = 1;
+
+    /**
+     * When the callback recipient's process is frozen, only the most recent callback is enqueued,
+     * which is later invoked after the recipient is unfrozen.
+     *
+     * This can be used when only the most recent state matters, for instance when clients are
+     * listening to screen brightness changes.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public static final int FROZEN_CALLEE_POLICY_ENQUEUE_MOST_RECENT = 2;
+
+    /**
+     * When the callback recipient's process is frozen, callbacks are suppressed as if they never
+     * happened.
+     *
+     * This could be useful in the case where the recipient wishes to react to callbacks only when
+     * they occur while the recipient is not frozen. For example, certain network events are only
+     * worth responding to if the response can be immediate. Another example is recipients having
+     * another way of getting the latest state once it's unfrozen. Therefore there is no need to
+     * save callbacks that happened while the recipient was frozen.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public static final int FROZEN_CALLEE_POLICY_DROP = 3;
+
     @UnsupportedAppUsage
-    /*package*/ ArrayMap<IBinder, Callback> mCallbacks
-            = new ArrayMap<IBinder, Callback>();
+    /*package*/ ArrayMap<IBinder, Interface> mInterfaces = new ArrayMap<IBinder, Interface>();
     private Object[] mActiveBroadcast;
     private int mBroadcastCount = -1;
     private boolean mKilled = false;
     private StringBuilder mRecentCallers;
 
-    private final class Callback implements IBinder.DeathRecipient {
-        final E mCallback;
-        final Object mCookie;
+    private final @FrozenCalleePolicy int mFrozenCalleePolicy;
+    private final int mMaxQueueSize;
 
-        Callback(E callback, Object cookie) {
-            mCallback = callback;
+    private final class Interface implements IBinder.DeathRecipient,
+            IBinder.FrozenStateChangeCallback {
+        final IBinder mBinder;
+        final E mInterface;
+        final Object mCookie;
+        final Queue<Consumer<E>> mCallbackQueue;
+        int mCurrentState = IBinder.FrozenStateChangeCallback.STATE_UNFROZEN;
+
+        Interface(E callbackInterface, Object cookie) {
+            mBinder = callbackInterface.asBinder();
+            mInterface = callbackInterface;
             mCookie = cookie;
+            mCallbackQueue = mFrozenCalleePolicy == FROZEN_CALLEE_POLICY_ENQUEUE_ALL
+                || mFrozenCalleePolicy == FROZEN_CALLEE_POLICY_ENQUEUE_MOST_RECENT
+                ? new ConcurrentLinkedQueue<>() : null;
+        }
+
+        @Override
+        public synchronized void onFrozenStateChanged(@NonNull IBinder who, int state) {
+            if (state == STATE_UNFROZEN && mCallbackQueue != null) {
+                while (!mCallbackQueue.isEmpty()) {
+                    Consumer<E> callback = mCallbackQueue.poll();
+                    callback.accept(mInterface);
+                }
+            }
+            mCurrentState = state;
+        }
+
+        void addCallback(@NonNull Consumer<E> callback) {
+            if (mFrozenCalleePolicy == FROZEN_CALLEE_POLICY_UNSET) {
+                callback.accept(mInterface);
+                return;
+            }
+            synchronized (this) {
+                if (mCurrentState == STATE_UNFROZEN) {
+                    callback.accept(mInterface);
+                    return;
+                }
+                switch (mFrozenCalleePolicy) {
+                    case FROZEN_CALLEE_POLICY_ENQUEUE_ALL:
+                        if (mCallbackQueue.size() >= mMaxQueueSize) {
+                            mCallbackQueue.poll();
+                        }
+                        mCallbackQueue.offer(callback);
+                        break;
+                    case FROZEN_CALLEE_POLICY_ENQUEUE_MOST_RECENT:
+                        mCallbackQueue.clear();
+                        mCallbackQueue.offer(callback);
+                        break;
+                    case FROZEN_CALLEE_POLICY_DROP:
+                        // Do nothing. Just ignore the callback.
+                        break;
+                    case FROZEN_CALLEE_POLICY_UNSET:
+                        // Do nothing. Should have returned at the start of the method.
+                        break;
+                }
+            }
+        }
+
+        public void maybeSubscribeToFrozenCallback() throws RemoteException {
+            if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
+                mBinder.addFrozenStateChangeCallback(this);
+            }
+        }
+
+        public void maybeUnsubscribeFromFrozenCallback() {
+            if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
+                mBinder.removeFrozenStateChangeCallback(this);
+            }
         }
 
         public void binderDied() {
-            synchronized (mCallbacks) {
-                mCallbacks.remove(mCallback.asBinder());
+            synchronized (mInterfaces) {
+                mInterfaces.remove(mBinder);
+                maybeUnsubscribeFromFrozenCallback();
             }
-            onCallbackDied(mCallback, mCookie);
+            onCallbackDied(mInterface, mCookie);
         }
+    }
+
+    /**
+     * Builder for {@link RemoteCallbackList}.
+     *
+     * @param <E> The remote callback interface type.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public static final class Builder<E extends IInterface> {
+        private @FrozenCalleePolicy int mFrozenCalleePolicy;
+        private int mMaxQueueSize = DEFAULT_MAX_QUEUE_SIZE;
+        private InterfaceDiedCallback mInterfaceDiedCallback;
+
+        /**
+         * Creates a Builder for {@link RemoteCallbackList}.
+         *
+         * @param frozenCalleePolicy When the callback recipient's process is frozen, this parameter
+         * specifies when/whether callbacks are invoked. It's important to choose a strategy that's
+         * right for the use case. Leaving the policy unset with {@link #FROZEN_CALLEE_POLICY_UNSET}
+         * is not recommended as it allows callbacks to be invoked while the recipient is frozen.
+         */
+        public Builder(@FrozenCalleePolicy int frozenCalleePolicy) {
+            mFrozenCalleePolicy = frozenCalleePolicy;
+        }
+
+        /**
+         * Sets the max queue size.
+         *
+         * @param maxQueueSize The max size limit on the queue that stores callbacks added when the
+         * recipient's process is frozen. Once the limit is reached, the oldest callback is dropped
+         * to keep the size under the limit. Should only be called for
+         * {@link #FROZEN_CALLEE_POLICY_ENQUEUE_ALL}.
+         *
+         * @return This builder.
+         * @throws IllegalArgumentException if the maxQueueSize is not positive.
+         * @throws UnsupportedOperationException if frozenCalleePolicy is not
+         * {@link #FROZEN_CALLEE_POLICY_ENQUEUE_ALL}.
+         */
+        public @NonNull Builder setMaxQueueSize(int maxQueueSize) {
+            if (maxQueueSize <= 0) {
+                throw new IllegalArgumentException("maxQueueSize must be positive");
+            }
+            if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_ENQUEUE_ALL) {
+                throw new UnsupportedOperationException(
+                        "setMaxQueueSize can only be called for FROZEN_CALLEE_POLICY_ENQUEUE_ALL");
+            }
+            mMaxQueueSize = maxQueueSize;
+            return this;
+        }
+
+        /**
+         * Sets the callback to be invoked when an interface dies.
+         */
+        public @NonNull Builder setInterfaceDiedCallback(
+                @NonNull InterfaceDiedCallback<E> callback) {
+            mInterfaceDiedCallback = callback;
+            return this;
+        }
+
+        /**
+         * For notifying when the process hosting a callback interface has died.
+         *
+         * @param <E> The remote callback interface type.
+         */
+        @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+        public interface InterfaceDiedCallback<E extends IInterface> {
+            /**
+             * Invoked when a callback interface has died.
+             *
+             * @param remoteCallbackList the list that the interface was registered with.
+             * @param deadInterface the interface that has died.
+             * @param cookie the cookie specified on interface registration.
+             */
+            void onInterfaceDied(@NonNull RemoteCallbackList<E> remoteCallbackList,
+                    E deadInterface, @Nullable Object cookie);
+        }
+
+        /**
+         * Builds and returns a {@link RemoteCallbackList}.
+         *
+         * @return The built {@link RemoteCallbackList} object.
+         */
+        public @NonNull RemoteCallbackList<E> build() {
+            if (mInterfaceDiedCallback != null) {
+                return new RemoteCallbackList<E>(mFrozenCalleePolicy, mMaxQueueSize) {
+                    @Override
+                    public void onCallbackDied(E deadInterface, Object cookie) {
+                        mInterfaceDiedCallback.onInterfaceDied(this, deadInterface, cookie);
+                    }
+                };
+            }
+            return new RemoteCallbackList<E>(mFrozenCalleePolicy, mMaxQueueSize);
+        }
+    }
+
+    /**
+     * Returns the frozen callee policy.
+     *
+     * @return The frozen callee policy.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public @FrozenCalleePolicy int getFrozenCalleePolicy() {
+        return mFrozenCalleePolicy;
+    }
+
+    /**
+     * Returns the max queue size.
+     *
+     * @return The max queue size.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public int getMaxQueueSize() {
+        return mMaxQueueSize;
+    }
+
+    /**
+     * Creates a RemoteCallbackList with {@link #FROZEN_CALLEE_POLICY_UNSET}. This is equivalent to
+     * <pre>
+     * new RemoteCallbackList.Build(RemoteCallbackList.FROZEN_CALLEE_POLICY_UNSET).build()
+     * </pre>
+     */
+    public RemoteCallbackList() {
+        this(FROZEN_CALLEE_POLICY_UNSET, DEFAULT_MAX_QUEUE_SIZE);
+    }
+
+    /**
+     * Creates a RemoteCallbackList with the specified frozen callee policy.
+     *
+     * @param frozenCalleePolicy When the callback recipient's process is frozen, this parameter
+     * specifies when/whether callbacks are invoked. It's important to choose a strategy that's
+     * right for the use case. Leaving the policy unset with {@link #FROZEN_CALLEE_POLICY_UNSET}
+     * is not recommended as it allows callbacks to be invoked while the recipient is frozen.
+     *
+     * @param maxQueueSize The max size limit on the queue that stores callbacks added when the
+     * recipient's process is frozen. Once the limit is reached, the oldest callbacks would be
+     * dropped to keep the size under limit. Ignored except for
+     * {@link #FROZEN_CALLEE_POLICY_ENQUEUE_ALL}.
+     */
+    private RemoteCallbackList(@FrozenCalleePolicy int frozenCalleePolicy, int maxQueueSize) {
+        mFrozenCalleePolicy = frozenCalleePolicy;
+        mMaxQueueSize = maxQueueSize;
     }
 
     /**
      * Simple version of {@link RemoteCallbackList#register(E, Object)}
      * that does not take a cookie object.
      */
-    public boolean register(E callback) {
-        return register(callback, null);
+    public boolean register(E callbackInterface) {
+        return register(callbackInterface, null);
     }
 
     /**
-     * Add a new callback to the list.  This callback will remain in the list
+     * Add a new interface to the list.  This interface will remain in the list
      * until a corresponding call to {@link #unregister} or its hosting process
-     * goes away.  If the callback was already registered (determined by
-     * checking to see if the {@link IInterface#asBinder callback.asBinder()}
-     * object is already in the list), then it will be left as-is.
+     * goes away.  If the interface was already registered (determined by
+     * checking to see if the {@link IInterface#asBinder callbackInterface.asBinder()}
+     * object is already in the list), then it will be replaced with the new interface.
      * Registrations are not counted; a single call to {@link #unregister}
-     * will remove a callback after any number calls to register it.
+     * will remove an interface after any number calls to register it.
      *
-     * @param callback The callback interface to be added to the list.  Must
+     * @param callbackInterface The callback interface to be added to the list.  Must
      * not be null -- passing null here will cause a NullPointerException.
      * Most services will want to check for null before calling this with
      * an object given from a client, so that clients can't crash the
      * service with bad data.
      *
      * @param cookie Optional additional data to be associated with this
-     * callback.
-     * 
-     * @return Returns true if the callback was successfully added to the list.
+     * interface.
+     *
+     * @return Returns true if the interface was successfully added to the list.
      * Returns false if it was not added, either because {@link #kill} had
-     * previously been called or the callback's process has gone away.
+     * previously been called or the interface's process has gone away.
      *
      * @see #unregister
      * @see #kill
      * @see #onCallbackDied
      */
-    public boolean register(E callback, Object cookie) {
-        synchronized (mCallbacks) {
+    public boolean register(E callbackInterface, Object cookie) {
+        synchronized (mInterfaces) {
             if (mKilled) {
                 return false;
             }
             // Flag unusual case that could be caused by a leak. b/36778087
-            logExcessiveCallbacks();
-            IBinder binder = callback.asBinder();
+            logExcessiveInterfaces();
+            IBinder binder = callbackInterface.asBinder();
             try {
-                Callback cb = new Callback(callback, cookie);
-                unregister(callback);
-                binder.linkToDeath(cb, 0);
-                mCallbacks.put(binder, cb);
+                Interface i = new Interface(callbackInterface, cookie);
+                unregister(callbackInterface);
+                binder.linkToDeath(i, 0);
+                i.maybeSubscribeToFrozenCallback();
+                mInterfaces.put(binder, i);
                 return true;
             } catch (RemoteException e) {
                 return false;
@@ -136,27 +412,28 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
-     * Remove from the list a callback that was previously added with
+     * Remove from the list an interface that was previously added with
      * {@link #register}.  This uses the
-     * {@link IInterface#asBinder callback.asBinder()} object to correctly
+     * {@link IInterface#asBinder callbackInterface.asBinder()} object to correctly
      * find the previous registration.
      * Registrations are not counted; a single unregister call will remove
-     * a callback after any number calls to {@link #register} for it.
+     * an interface after any number calls to {@link #register} for it.
      *
-     * @param callback The callback to be removed from the list.  Passing
+     * @param callbackInterface The interface to be removed from the list.  Passing
      * null here will cause a NullPointerException, so you will generally want
      * to check for null before calling.
      *
-     * @return Returns true if the callback was found and unregistered.  Returns
-     * false if the given callback was not found on the list.
+     * @return Returns true if the interface was found and unregistered.  Returns
+     * false if the given interface was not found on the list.
      *
      * @see #register
      */
-    public boolean unregister(E callback) {
-        synchronized (mCallbacks) {
-            Callback cb = mCallbacks.remove(callback.asBinder());
-            if (cb != null) {
-                cb.mCallback.asBinder().unlinkToDeath(cb, 0);
+    public boolean unregister(E callbackInterface) {
+        synchronized (mInterfaces) {
+            Interface i = mInterfaces.remove(callbackInterface.asBinder());
+            if (i != null) {
+                i.mInterface.asBinder().unlinkToDeath(i, 0);
+                i.maybeUnsubscribeFromFrozenCallback();
                 return true;
             }
             return false;
@@ -164,20 +441,21 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
-     * Disable this callback list.  All registered callbacks are unregistered,
+     * Disable this interface list.  All registered interfaces are unregistered,
      * and the list is disabled so that future calls to {@link #register} will
      * fail.  This should be used when a Service is stopping, to prevent clients
-     * from registering callbacks after it is stopped.
+     * from registering interfaces after it is stopped.
      *
      * @see #register
      */
     public void kill() {
-        synchronized (mCallbacks) {
-            for (int cbi=mCallbacks.size()-1; cbi>=0; cbi--) {
-                Callback cb = mCallbacks.valueAt(cbi);
-                cb.mCallback.asBinder().unlinkToDeath(cb, 0);
+        synchronized (mInterfaces) {
+            for (int cbi = mInterfaces.size() - 1; cbi >= 0; cbi--) {
+                Interface i = mInterfaces.valueAt(cbi);
+                i.mInterface.asBinder().unlinkToDeath(i, 0);
+                i.maybeUnsubscribeFromFrozenCallback();
             }
-            mCallbacks.clear();
+            mInterfaces.clear();
             mKilled = true;
         }
     }
@@ -186,15 +464,15 @@ public class RemoteCallbackList<E extends IInterface> {
      * Old version of {@link #onCallbackDied(E, Object)} that
      * does not provide a cookie.
      */
-    public void onCallbackDied(E callback) {
+    public void onCallbackDied(E callbackInterface) {
     }
     
     /**
-     * Called when the process hosting a callback in the list has gone away.
+     * Called when the process hosting an interface in the list has gone away.
      * The default implementation calls {@link #onCallbackDied(E)}
      * for backwards compatibility.
      * 
-     * @param callback The callback whose process has died.  Note that, since
+     * @param callbackInterface The interface whose process has died.  Note that, since
      * its process has died, you can not make any calls on to this interface.
      * You can, however, retrieve its IBinder and compare it with another
      * IBinder to see if it is the same object.
@@ -203,13 +481,15 @@ public class RemoteCallbackList<E extends IInterface> {
      * 
      * @see #register
      */
-    public void onCallbackDied(E callback, Object cookie) {
-        onCallbackDied(callback);
+    public void onCallbackDied(E callbackInterface, Object cookie) {
+        onCallbackDied(callbackInterface);
     }
 
     /**
-     * Prepare to start making calls to the currently registered callbacks.
-     * This creates a copy of the callback list, which you can retrieve items
+     * Use {@link #broadcast(Consumer)} instead to ensure proper handling of frozen processes.
+     *
+     * Prepare to start making calls to the currently registered interfaces.
+     * This creates a copy of the interface list, which you can retrieve items
      * from using {@link #getBroadcastItem}.  Note that only one broadcast can
      * be active at a time, so you must be sure to always call this from the
      * same thread (usually by scheduling with {@link Handler}) or
@@ -219,44 +499,56 @@ public class RemoteCallbackList<E extends IInterface> {
      * <p>A typical loop delivering a broadcast looks like this:
      *
      * <pre>
-     * int i = callbacks.beginBroadcast();
+     * int i = interfaces.beginBroadcast();
      * while (i &gt; 0) {
      *     i--;
      *     try {
-     *         callbacks.getBroadcastItem(i).somethingHappened();
+     *         interfaces.getBroadcastItem(i).somethingHappened();
      *     } catch (RemoteException e) {
      *         // The RemoteCallbackList will take care of removing
      *         // the dead object for us.
      *     }
      * }
-     * callbacks.finishBroadcast();</pre>
+     * interfaces.finishBroadcast();</pre>
      *
-     * @return Returns the number of callbacks in the broadcast, to be used
+     * Note that this method is only supported for {@link #FROZEN_CALLEE_POLICY_UNSET}. For other
+     * policies use {@link #broadcast(Consumer)} instead.
+     *
+     * @return Returns the number of interfaces in the broadcast, to be used
      * with {@link #getBroadcastItem} to determine the range of indices you
      * can supply.
+     *
+     * @throws UnsupportedOperationException if an frozen callee policy is set.
      *
      * @see #getBroadcastItem
      * @see #finishBroadcast
      */
     public int beginBroadcast() {
-        synchronized (mCallbacks) {
+        if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
+            throw new UnsupportedOperationException();
+        }
+        return beginBroadcastInternal();
+    }
+
+    private int beginBroadcastInternal() {
+        synchronized (mInterfaces) {
             if (mBroadcastCount > 0) {
                 throw new IllegalStateException(
                         "beginBroadcast() called while already in a broadcast");
             }
             
-            final int N = mBroadcastCount = mCallbacks.size();
-            if (N <= 0) {
+            final int n = mBroadcastCount = mInterfaces.size();
+            if (n <= 0) {
                 return 0;
             }
             Object[] active = mActiveBroadcast;
-            if (active == null || active.length < N) {
-                mActiveBroadcast = active = new Object[N];
+            if (active == null || active.length < n) {
+                mActiveBroadcast = active = new Object[n];
             }
-            for (int i=0; i<N; i++) {
-                active[i] = mCallbacks.valueAt(i);
+            for (int i = 0; i < n; i++) {
+                active[i] = mInterfaces.valueAt(i);
             }
-            return N;
+            return n;
         }
     }
 
@@ -267,24 +559,23 @@ public class RemoteCallbackList<E extends IInterface> {
      * calling {@link #finishBroadcast}.
      *
      * <p>Note that it is possible for the process of one of the returned
-     * callbacks to go away before you call it, so you will need to catch
+     * interfaces to go away before you call it, so you will need to catch
      * {@link RemoteException} when calling on to the returned object.
-     * The callback list itself, however, will take care of unregistering
+     * The interface list itself, however, will take care of unregistering
      * these objects once it detects that it is no longer valid, so you can
      * handle such an exception by simply ignoring it.
      *
-     * @param index Which of the registered callbacks you would like to
+     * @param index Which of the registered interfaces you would like to
      * retrieve.  Ranges from 0 to {@link #beginBroadcast}-1, inclusive.
      *
-     * @return Returns the callback interface that you can call.  This will
-     * always be non-null.
+     * @return Returns the interface that you can call.  This will always be non-null.
      *
      * @see #beginBroadcast
      */
     public E getBroadcastItem(int index) {
-        return ((Callback)mActiveBroadcast[index]).mCallback;
+        return ((Interface) mActiveBroadcast[index]).mInterface;
     }
-    
+
     /**
      * Retrieve the cookie associated with the item
      * returned by {@link #getBroadcastItem(int)}.
@@ -292,7 +583,7 @@ public class RemoteCallbackList<E extends IInterface> {
      * @see #getBroadcastItem
      */
     public Object getBroadcastCookie(int index) {
-        return ((Callback)mActiveBroadcast[index]).mCookie;
+        return ((Interface) mActiveBroadcast[index]).mCookie;
     }
 
     /**
@@ -303,7 +594,7 @@ public class RemoteCallbackList<E extends IInterface> {
      * @see #beginBroadcast
      */
     public void finishBroadcast() {
-        synchronized (mCallbacks) {
+        synchronized (mInterfaces) {
             if (mBroadcastCount < 0) {
                 throw new IllegalStateException(
                         "finishBroadcast() called outside of a broadcast");
@@ -322,16 +613,18 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
-     * Performs {@code action} on each callback, calling
-     * {@link #beginBroadcast()}/{@link #finishBroadcast()} before/after looping
+     * Performs {@code callback} on each registered interface.
      *
-     * @hide
+     * This is equivalent to #beginBroadcast, followed by iterating over the items using
+     * #getBroadcastItem and then @finishBroadcast, except that this method supports
+     * frozen callee policies.
      */
-    public void broadcast(Consumer<E> action) {
-        int itemCount = beginBroadcast();
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public void broadcast(@NonNull Consumer<E> callback) {
+        int itemCount = beginBroadcastInternal();
         try {
             for (int i = 0; i < itemCount; i++) {
-                action.accept(getBroadcastItem(i));
+                ((Interface) mActiveBroadcast[i]).addCallback(callback);
             }
         } finally {
             finishBroadcast();
@@ -339,16 +632,16 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
-     * Performs {@code action} for each cookie associated with a callback, calling
+     * Performs {@code callback} for each cookie associated with an interface, calling
      * {@link #beginBroadcast()}/{@link #finishBroadcast()} before/after looping
      *
      * @hide
      */
-    public <C> void broadcastForEachCookie(Consumer<C> action) {
+    public <C> void broadcastForEachCookie(Consumer<C> callback) {
         int itemCount = beginBroadcast();
         try {
             for (int i = 0; i < itemCount; i++) {
-                action.accept((C) getBroadcastCookie(i));
+                callback.accept((C) getBroadcastCookie(i));
             }
         } finally {
             finishBroadcast();
@@ -356,16 +649,16 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
-     * Performs {@code action} on each callback and associated cookie, calling {@link
+     * Performs {@code callback} on each interface and associated cookie, calling {@link
      * #beginBroadcast()}/{@link #finishBroadcast()} before/after looping.
      *
      * @hide
      */
-    public <C> void broadcast(BiConsumer<E, C> action) {
+    public <C> void broadcast(BiConsumer<E, C> callback) {
         int itemCount = beginBroadcast();
         try {
             for (int i = 0; i < itemCount; i++) {
-                action.accept(getBroadcastItem(i), (C) getBroadcastCookie(i));
+                callback.accept(getBroadcastItem(i), (C) getBroadcastCookie(i));
             }
         } finally {
             finishBroadcast();
@@ -373,10 +666,10 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
-     * Returns the number of registered callbacks. Note that the number of registered
-     * callbacks may differ from the value returned by {@link #beginBroadcast()} since
-     * the former returns the number of callbacks registered at the time of the call
-     * and the second the number of callback to which the broadcast will be delivered.
+     * Returns the number of registered interfaces. Note that the number of registered
+     * interfaces may differ from the value returned by {@link #beginBroadcast()} since
+     * the former returns the number of interfaces registered at the time of the call
+     * and the second the number of interfaces to which the broadcast will be delivered.
      * <p>
      * This function is useful to decide whether to schedule a broadcast if this
      * requires doing some work which otherwise would not be performed.
@@ -385,39 +678,39 @@ public class RemoteCallbackList<E extends IInterface> {
      * @return The size.
      */
     public int getRegisteredCallbackCount() {
-        synchronized (mCallbacks) {
+        synchronized (mInterfaces) {
             if (mKilled) {
                 return 0;
             }
-            return mCallbacks.size();
+            return mInterfaces.size();
         }
     }
 
     /**
-     * Return a currently registered callback.  Note that this is
+     * Return a currently registered interface.  Note that this is
      * <em>not</em> the same as {@link #getBroadcastItem} and should not be used
-     * interchangeably with it.  This method returns the registered callback at the given
+     * interchangeably with it.  This method returns the registered interface at the given
      * index, not the current broadcast state.  This means that it is not itself thread-safe:
      * any call to {@link #register} or {@link #unregister} will change these indices, so you
      * must do your own thread safety between these to protect from such changes.
      *
-     * @param index Index of which callback registration to return, from 0 to
+     * @param index Index of which interface registration to return, from 0 to
      * {@link #getRegisteredCallbackCount()} - 1.
      *
-     * @return Returns whatever callback is associated with this index, or null if
+     * @return Returns whatever interface is associated with this index, or null if
      * {@link #kill()} has been called.
      */
     public E getRegisteredCallbackItem(int index) {
-        synchronized (mCallbacks) {
+        synchronized (mInterfaces) {
             if (mKilled) {
                 return null;
             }
-            return mCallbacks.valueAt(index).mCallback;
+            return mInterfaces.valueAt(index).mInterface;
         }
     }
 
     /**
-     * Return any cookie associated with a currently registered callback.  Note that this is
+     * Return any cookie associated with a currently registered interface.  Note that this is
      * <em>not</em> the same as {@link #getBroadcastCookie} and should not be used
      * interchangeably with it.  This method returns the current cookie registered at the given
      * index, not the current broadcast state.  This means that it is not itself thread-safe:
@@ -431,25 +724,25 @@ public class RemoteCallbackList<E extends IInterface> {
      * {@link #kill()} has been called.
      */
     public Object getRegisteredCallbackCookie(int index) {
-        synchronized (mCallbacks) {
+        synchronized (mInterfaces) {
             if (mKilled) {
                 return null;
             }
-            return mCallbacks.valueAt(index).mCookie;
+            return mInterfaces.valueAt(index).mCookie;
         }
     }
 
     /** @hide */
     public void dump(PrintWriter pw, String prefix) {
-        synchronized (mCallbacks) {
-            pw.print(prefix); pw.print("callbacks: "); pw.println(mCallbacks.size());
+        synchronized (mInterfaces) {
+            pw.print(prefix); pw.print("callbacks: "); pw.println(mInterfaces.size());
             pw.print(prefix); pw.print("killed: "); pw.println(mKilled);
             pw.print(prefix); pw.print("broadcasts count: "); pw.println(mBroadcastCount);
         }
     }
 
-    private void logExcessiveCallbacks() {
-        final long size = mCallbacks.size();
+    private void logExcessiveInterfaces() {
+        final long size = mInterfaces.size();
         final long TOO_MANY = 3000;
         final long MAX_CHARS = 1000;
         if (size >= TOO_MANY) {

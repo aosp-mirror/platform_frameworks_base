@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.os.fakeExecutorHandler
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 
 val Kosmos.keyguardBlueprintViewModel by
@@ -25,5 +26,6 @@ val Kosmos.keyguardBlueprintViewModel by
         KeyguardBlueprintViewModel(
             fakeExecutorHandler,
             keyguardBlueprintInteractor,
+            keyguardTransitionInteractor,
         )
     }

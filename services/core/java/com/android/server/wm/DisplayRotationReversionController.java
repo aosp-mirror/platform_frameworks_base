@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_LOCKED;
 
 import android.annotation.Nullable;

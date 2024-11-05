@@ -31,7 +31,6 @@ java_library_static {
 filegroup {
     name: "services-tethering-shared-srcs",
     srcs: [
-        ":framework-annotations",
         "java/android/net/util/NetworkConstants.java",
     ],
     visibility: [

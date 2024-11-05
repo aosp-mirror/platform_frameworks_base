@@ -19,11 +19,13 @@ package com.android.systemui.inputdevice.tutorial
 import android.content.Context
 import android.content.Intent
 import android.os.UserHandle
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.inputdevice.tutorial.ui.TutorialNotificationCoordinator
+import com.android.systemui.shared.Flags
 import com.android.systemui.testKosmos
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,16 +45,17 @@ class KeyboardTouchpadTutorialCoreStartableTest : SysuiTestCase() {
         KeyboardTouchpadTutorialCoreStartable(
             { mock<TutorialNotificationCoordinator>() },
             broadcastDispatcher,
-            context
+            context,
         )
 
     @Test
+    @EnableFlags(Flags.FLAG_NEW_TOUCHPAD_GESTURES_TUTORIAL)
     fun registersBroadcastReceiverStartingActivityAsSystemUser() {
         underTest.start()
 
         broadcastDispatcher.sendIntentToMatchingReceiversOnly(
             context,
-            Intent("com.android.systemui.action.KEYBOARD_TOUCHPAD_TUTORIAL")
+            Intent("com.android.systemui.action.KEYBOARD_TOUCHPAD_TUTORIAL"),
         )
 
         verify(context).startActivityAsUser(any(), eq(UserHandle.SYSTEM))

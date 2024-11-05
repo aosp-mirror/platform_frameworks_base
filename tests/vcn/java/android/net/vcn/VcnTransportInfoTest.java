@@ -25,6 +25,7 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiConfiguration;
@@ -39,6 +40,7 @@ public class VcnTransportInfoTest {
     private static final int SUB_ID = 1;
     private static final int NETWORK_ID = 5;
     private static final int MIN_UDP_PORT_4500_NAT_TIMEOUT = 120;
+    private static final int MIN_UDP_PORT_4500_NAT_TIMEOUT_INVALID = 119;
     private static final WifiInfo WIFI_INFO =
             new WifiInfo.Builder().setNetworkId(NETWORK_ID).build();
 
@@ -46,6 +48,27 @@ public class VcnTransportInfoTest {
             new VcnTransportInfo(SUB_ID, MIN_UDP_PORT_4500_NAT_TIMEOUT);
     private static final VcnTransportInfo WIFI_UNDERLYING_INFO =
             new VcnTransportInfo(WIFI_INFO, MIN_UDP_PORT_4500_NAT_TIMEOUT);
+
+    @Test
+    public void testBuilder() {
+        final VcnTransportInfo transportInfo =
+                new VcnTransportInfo.Builder()
+                        .setMinUdpPort4500NatTimeoutSeconds(MIN_UDP_PORT_4500_NAT_TIMEOUT)
+                        .build();
+
+        assertEquals(
+                MIN_UDP_PORT_4500_NAT_TIMEOUT, transportInfo.getMinUdpPort4500NatTimeoutSeconds());
+    }
+
+    @Test
+    public void testBuilder_withInvalidNatTimeout() {
+        try {
+            new VcnTransportInfo.Builder()
+                    .setMinUdpPort4500NatTimeoutSeconds(MIN_UDP_PORT_4500_NAT_TIMEOUT_INVALID);
+            fail("Expected to fail due to invalid NAT timeout");
+        } catch (Exception expected) {
+        }
+    }
 
     @Test
     public void testGetWifiInfo() {

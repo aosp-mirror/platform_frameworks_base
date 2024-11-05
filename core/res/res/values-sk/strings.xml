@@ -644,7 +644,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Umožňuje aplikácii čítať polohy zo zbierky médií."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Použiť biometrické údaje"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Použiť biometrické údaje alebo zámku obrazovky"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Overenie, že ste to vy"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrďte, že ste to vy"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Ak chcete pokračovať, použite biometrický údaj"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Pokračujte použitím biometrických údajov alebo zámky obrazovky"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrický hardvér nie je k dispozícii"</string>
@@ -1945,6 +1945,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Vypnuté"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Ľubovoľný kalendár"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vypína niektoré zvuky"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Vo vašom zariadení došlo k internému problému. Môže byť nestabilné, kým neobnovíte jeho výrobné nastavenia."</string>
@@ -2012,6 +2014,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Nastavte zámku obrazovky"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Nastaviť zámku obrazovky"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ak chcete používať súkromný priestor, nastavte v tomto zariadení zámku obrazovky"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Ak chcete odstrániť súkromný priestor, nastavte v tomto zariadení zámku obrazovky"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
@@ -2130,11 +2133,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Hovory a upozornenia budú vibrovať"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Hovory a upozornenia budú stlmené"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Zmeny systému"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Režim bez vyrušení"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novinka: režim bez vyrušení skrýva upozornenia"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Klepnutím získate ďalšie informácie a budete môcť vykonať zmeny."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režim bez vyrušení sa zmenil"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím skontrolujete, čo je blokované."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Kontrola nastavení upozornení"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"V Androide verzie 13 a novších vyžadujú nainštalované aplikácie povolenie, aby mohli odosielať upozornenia. Klepnutím môžete zmeniť toto povolenie pre existujúce aplikácie."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Pripomenúť neskôr"</string>
@@ -2414,8 +2412,8 @@
     <string name="profile_label_work" msgid="3495359133038584618">"Pracovné"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"2. pracovný"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"3. pracovný"</string>
-    <string name="profile_label_test" msgid="9168641926186071947">"Testovací"</string>
-    <string name="profile_label_communal" msgid="8743921499944800427">"Spoločný"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Spoločné"</string>
     <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Pracovný profil"</string>
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Súkromný priestor"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
@@ -2430,6 +2428,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Odosielajte a prijímajte správy bez mobilnej siete či siete Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ako to funguje"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nespracovaná…"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Znova nastavte odomknutie odtlačkom prsta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> sa už nedari rozpoznať."</string>

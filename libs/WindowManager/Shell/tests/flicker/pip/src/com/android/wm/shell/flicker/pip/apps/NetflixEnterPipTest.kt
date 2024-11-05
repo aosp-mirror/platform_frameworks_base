@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from Netflix app by interacting with the app UI
  *
- * To run this test: `atest WMShellFlickerTests:NetflixEnterPipTest`
+ * To run this test: `atest WMShellFlickerTestsPipAppsCSuite:NetflixEnterPipTest`
  *
  * Actions:
  * ```

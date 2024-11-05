@@ -121,11 +121,12 @@ public final class DisplayBrightnessControllerTest {
         int targetDisplayState = Display.STATE_DOZE;
         when(mDisplayBrightnessStrategySelector.selectStrategy(
                 any(StrategySelectionRequest.class))).thenReturn(displayBrightnessStrategy);
-        mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState, mock(
-                DisplayManagerInternal.DisplayOffloadSession.class));
+        mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState,
+                mock(DisplayManagerInternal.DisplayOffloadSession.class),
+                /* isBedtimeModeWearEnabled= */ false);
         verify(displayBrightnessStrategy).updateBrightness(
                 eq(new StrategyExecutionRequest(displayPowerRequest, DEFAULT_BRIGHTNESS,
-                        /* userSetBrightnessChanged= */ false)));
+                        /* userSetBrightnessChanged= */ false, /* isStylusBeingUsed */ false)));
         assertEquals(mDisplayBrightnessController.getCurrentDisplayBrightnessStrategy(),
                 displayBrightnessStrategy);
     }
@@ -558,5 +559,12 @@ public final class DisplayBrightnessControllerTest {
         verify(autoBrightnessFallbackStrategy).setupAutoBrightnessFallbackSensor(sensorManager,
                 displayDeviceConfig, handler, brightnessMappingStrategy, isDisplayEnabled,
                 leadDisplayId);
+    }
+
+    @Test
+    public void setStylusBeingUsed_setsStylusInUseState() {
+        assertFalse(mDisplayBrightnessController.isStylusBeingUsed());
+        mDisplayBrightnessController.setStylusBeingUsed(true);
+        assertTrue(mDisplayBrightnessController.isStylusBeingUsed());
     }
 }

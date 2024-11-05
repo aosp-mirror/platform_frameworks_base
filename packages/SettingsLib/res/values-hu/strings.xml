@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Bekapcsolja az Enhanced Connectivity funkciót."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Helyi végpont"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Végalkalmazás engedélyezése a helyi rendszerhéj eléréséhez"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux fejlesztői környezet"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Linux-terminál futtatása Androidon"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-ellenőrzés"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP-ellenőrzés beállítása"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Hibakeresés"</string>
@@ -582,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Az imént"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ez a telefon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Ez a táblagép"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Ez a számítógép (belső)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokkhangszóró"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Letiltva"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Engedélyezve"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Az eszközt újra kell indítani, hogy a módosítás megtörténjen. Indítsa újra most, vagy vesse el a módosítást."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Vezetékes fejhallgató"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Vezetékes fejhallgató"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Vezetékes audio"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-hangeszköz"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Vezetékes mikrofon"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-mikrofon"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT-mikrofon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Be"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Ki"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Szolgáltatói hálózat váltása"</string>

@@ -22,7 +22,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.smartspace.ui.viewmodel.SmartspaceViewModel
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds the view and view-model for the smartspace. */
 object SmartspaceViewBinder {

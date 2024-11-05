@@ -46,6 +46,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.FileDescriptor;
@@ -89,6 +90,8 @@ public class SearchManagerService extends ISearchManager.Stub {
     @GuardedBy("mSearchables")
     private final SparseArray<Searchables> mSearchables = new SparseArray<>();
 
+    private final UserManagerInternal mUserManagerInternal;
+
     /**
      * Initializes the Search Manager service in the provided system context.
      * Only one instance of this object should be created!
@@ -101,6 +104,7 @@ public class SearchManagerService extends ISearchManager.Stub {
         mMyPackageMonitor.register(context, null, UserHandle.ALL, true);
         new GlobalSearchProviderObserver(context.getContentResolver());
         mHandler = BackgroundThread.getHandler();
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
     }
 
     private Searchables getSearchables(int userId) {
@@ -336,6 +340,14 @@ public class SearchManagerService extends ISearchManager.Stub {
 
     @Override
     public void launchAssist(int userHandle, Bundle args) {
+        // Currently, visible background users are not allowed to launch assist.(b/332222893)
+        // TODO(b/368715893): Consider indirect calls from system service when checking the
+        // calling user.
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (mUserManagerInternal.isVisibleBackgroundFullUser(callingUserId)) {
+            throw new SecurityException("Visible background user(u" + callingUserId
+                    + ") is not permitted to launch assist.");
+        }
         StatusBarManagerInternal statusBarManager =
                 LocalServices.getService(StatusBarManagerInternal.class);
         if (statusBarManager != null) {

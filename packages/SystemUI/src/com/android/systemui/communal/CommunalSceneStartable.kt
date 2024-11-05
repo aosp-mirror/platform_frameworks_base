@@ -16,14 +16,17 @@
 
 package com.android.systemui.communal
 
+import android.os.UserHandle
 import android.provider.Settings
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.shared.model.EditModeState
@@ -59,7 +62,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -84,6 +87,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    private val uiEventLogger: UiEventLogger,
 ) : CoreStartable {
     private var screenTimeout: Int = DEFAULT_SCREEN_TIMEOUT
 
@@ -144,9 +148,10 @@ constructor(
             .emitOnStart()
             .onEach {
                 screenTimeout =
-                    systemSettings.getInt(
+                    systemSettings.getIntForUser(
                         Settings.System.SCREEN_OFF_TIMEOUT,
-                        DEFAULT_SCREEN_TIMEOUT
+                        DEFAULT_SCREEN_TIMEOUT,
+                        UserHandle.USER_CURRENT,
                     )
             }
             .launchIn(bgScope)
@@ -160,7 +165,7 @@ constructor(
             combine(
                     communalSceneInteractor.currentScene,
                     // Emit a value on start so the combine starts.
-                    communalInteractor.userActivity.emitOnStart()
+                    communalInteractor.userActivity.emitOnStart(),
                 ) { scene, _ ->
                     // Only timeout if we're on the hub is open.
                     scene == CommunalScenes.Communal
@@ -184,6 +189,7 @@ constructor(
                             CommunalScenes.Blank,
                             "dream started after timeout",
                         )
+                        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_TIMEOUT)
                     }
                 }
         }
@@ -212,6 +218,7 @@ constructor(
                             newScene = CommunalScenes.Blank,
                             loggingReason = "hub timeout",
                         )
+                        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_TIMEOUT)
                     }
                     timeoutJob = null
                 }
@@ -219,7 +226,7 @@ constructor(
     }
 
     private suspend fun determineSceneAfterTransition(
-        lastStartedTransition: TransitionStep,
+        lastStartedTransition: TransitionStep
     ): Pair<SceneKey, TransitionKey>? {
         val to = lastStartedTransition.to
         val from = lastStartedTransition.from
@@ -251,9 +258,8 @@ constructor(
                 Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
             }
             from == KeyguardState.DOZING && to == KeyguardState.GLANCEABLE_HUB -> {
-                // Make sure the communal hub is showing (immediately, not fading in) when
-                // transitioning from dozing to hub.
-                Pair(CommunalScenes.Communal, CommunalTransitionKeys.Immediately)
+                // Make sure the communal hub is showing when transitioning from dozing to hub.
+                Pair(CommunalScenes.Communal, CommunalTransitionKeys.SimpleFade)
             }
             else -> null
         }

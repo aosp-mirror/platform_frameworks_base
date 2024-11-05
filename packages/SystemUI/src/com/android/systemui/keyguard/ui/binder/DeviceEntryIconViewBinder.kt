@@ -28,9 +28,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.common.ui.view.LongPressHandlingView
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
@@ -43,7 +42,7 @@ import com.android.systemui.util.kotlin.DisposableHandles
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @ExperimentalCoroutinesApi
 object DeviceEntryIconViewBinder {
@@ -68,7 +67,6 @@ object DeviceEntryIconViewBinder {
         vibratorHelper: VibratorHelper,
         overrideColor: Color? = null,
     ): DisposableHandle {
-        DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
         val disposables = DisposableHandles()
         val longPressHandlingView = view.longPressHandlingView
         val fgIconView = view.iconView
@@ -79,7 +77,7 @@ object DeviceEntryIconViewBinder {
                     view: View,
                     x: Int,
                     y: Int,
-                    isA11yAction: Boolean
+                    isA11yAction: Boolean,
                 ) {
                     if (
                         !isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)
@@ -87,14 +85,11 @@ object DeviceEntryIconViewBinder {
                         Log.d(
                             TAG,
                             "Long press rejected because it is not a11yAction " +
-                                "and it is a falseLongTap"
+                                "and it is a falseLongTap",
                         )
                         return
                     }
-                    vibratorHelper.performHapticFeedback(
-                        view,
-                        HapticFeedbackConstants.CONFIRM,
-                    )
+                    vibratorHelper.performHapticFeedback(view, HapticFeedbackConstants.CONFIRM)
                     applicationScope.launch {
                         view.clearFocus()
                         view.clearAccessibilityFocus()
@@ -187,12 +182,14 @@ object DeviceEntryIconViewBinder {
             fgIconView.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     // Start with an empty state
+                    Log.d(TAG, "Initializing device entry fgIconView")
                     fgIconView.setImageState(StateSet.NOTHING, /* merge */ false)
                     launch("$TAG#fpIconView.viewModel") {
                         fgViewModel.viewModel.collect { viewModel ->
+                            Log.d(TAG, "Updating device entry icon image state $viewModel")
                             fgIconView.setImageState(
                                 view.getIconState(viewModel.type, viewModel.useAodVariant),
-                                /* merge */ false
+                                /* merge */ false,
                             )
                             if (viewModel.type.contentDescriptionResId != -1) {
                                 fgIconView.contentDescription =

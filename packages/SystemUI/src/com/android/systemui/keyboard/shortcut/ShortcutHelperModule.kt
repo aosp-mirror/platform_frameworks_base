@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyboard.shortcut
 
-import android.app.Activity
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.keyboardShortcutHelperRewrite
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
@@ -31,8 +30,7 @@ import com.android.systemui.keyboard.shortcut.qualifiers.CurrentAppShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.InputShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.MultitaskingShortcuts
 import com.android.systemui.keyboard.shortcut.qualifiers.SystemShortcuts
-import com.android.systemui.keyboard.shortcut.ui.ShortcutHelperActivityStarter
-import com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity
+import com.android.systemui.keyboard.shortcut.ui.ShortcutHelperDialogStarter
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -42,11 +40,6 @@ import dagger.multibindings.IntoMap
 
 @Module
 interface ShortcutHelperModule {
-
-    @Binds
-    @IntoMap
-    @ClassKey(ShortcutHelperActivity::class)
-    fun activity(impl: ShortcutHelperActivity): Activity
 
     @Binds
     @SystemShortcuts
@@ -73,8 +66,8 @@ interface ShortcutHelperModule {
     companion object {
         @Provides
         @IntoMap
-        @ClassKey(ShortcutHelperActivityStarter::class)
-        fun starter(implLazy: Lazy<ShortcutHelperActivityStarter>): CoreStartable {
+        @ClassKey(ShortcutHelperDialogStarter::class)
+        fun starter(implLazy: Lazy<ShortcutHelperDialogStarter>): CoreStartable {
             return if (keyboardShortcutHelperRewrite()) {
                 implLazy.get()
             } else {

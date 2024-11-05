@@ -17,6 +17,7 @@ cc_binary {
         "libutils",
         "libbinder",
         "libjnigraphics",
+        "libhwui",
         "libui",
         "libgui",
     ],

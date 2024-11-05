@@ -253,7 +253,7 @@ class BatterySaverTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label = context.getString(R.string.battery_detail_switch_title)
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -265,7 +265,7 @@ class BatterySaverTileMapperTest : SysuiTestCase() {
             stateDescription,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

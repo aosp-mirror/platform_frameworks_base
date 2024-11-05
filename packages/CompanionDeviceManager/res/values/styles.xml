@@ -137,4 +137,10 @@
         <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
     </style>
 
+    <style name="DeviceIcon">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
 </resources>

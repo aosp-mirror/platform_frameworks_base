@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Habilita la función Conectividad mejorada."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Habilitar aplicac. de terminal que ofrece acceso al shell local"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Entorno de desarrollo de Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Ejecuta la terminal de Linux en Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Comprobación HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Configurar comportamiento de la comprobación HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Depuración"</string>
@@ -564,8 +566,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas y recordatorios"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite que esta app establezca alarmas y programe acciones para horarios específicos. De esta manera, la app puede ejecutarse en segundo plano, lo que podría aumentar el consumo de batería.\n\nSi se desactiva este permiso, no funcionarán las alarmas ni los eventos basados en el tiempo existentes que programe esta app."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programar, alarma, recordatorio, reloj"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"No interrumpir"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"No interrumpir"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activar No interrumpir"</string>
@@ -583,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Recién"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tablet"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Esta computadora (interna)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina de la estación de carga"</string>
@@ -685,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Inhabilitado"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Habilitado"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Debes reiniciar el dispositivo para que se aplique el cambio. Reinícialo ahora o cancela la acción."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Auriculares con cable"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Auriculares con cable"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Auriculares con cable"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Audio USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Micrófono con cable"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Micrófono USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Micrófono Bluetooth"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Activar"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Desactivar"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Cambio de proveedor de red"</string>

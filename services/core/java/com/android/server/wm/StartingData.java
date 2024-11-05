@@ -68,7 +68,9 @@ public abstract class StartingData {
      * window.
      * Note this isn't equal to transition playing, the period should be
      * Sync finishNow -> Start transaction apply.
+     * @deprecated TODO(b/362347290): cleanup after fix ramp up
      */
+    @Deprecated
     boolean mWaitForSyncTransactionCommit;
 
     /**

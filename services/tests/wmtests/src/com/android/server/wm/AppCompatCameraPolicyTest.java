@@ -18,13 +18,13 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.server.wm.AppCompatCameraPolicy.isTreatmentEnabledForActivity;
+import static com.android.server.wm.AppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 
 import android.compat.testing.PlatformCompatChangeRule;
 import android.platform.test.annotations.DisableFlags;
@@ -85,50 +85,50 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_presentWhenEnabledAndDW() {
         runTestScenario((robot) -> {
-            robot.allowEnterDesktopMode(/* isAllowed= */ true);
+            robot.dw().allowEnterDesktopMode(/* isAllowed= */ true);
             robot.activity().createActivityWithComponentInNewTaskAndDisplay();
             robot.checkTopActivityHasCameraCompatFreeformPolicy(/* exists= */ true);
         });
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_notPresentWhenNoDW() {
         runTestScenario((robot) -> {
-            robot.allowEnterDesktopMode(/* isAllowed= */ false);
+            robot.dw().allowEnterDesktopMode(/* isAllowed= */ false);
             robot.activity().createActivityWithComponentInNewTaskAndDisplay();
             robot.checkTopActivityHasCameraCompatFreeformPolicy(/* exists= */ false);
         });
     }
 
     @Test
-    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_notPresentWhenNoFlag() {
         runTestScenario((robot) -> {
-            robot.allowEnterDesktopMode(/* isAllowed= */ true);
+            robot.dw().allowEnterDesktopMode(/* isAllowed= */ true);
             robot.activity().createActivityWithComponentInNewTaskAndDisplay();
             robot.checkTopActivityHasCameraCompatFreeformPolicy(/* exists= */ false);
         });
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_notPresentWhenNoFlagAndNoDW() {
         runTestScenario((robot) -> {
-            robot.allowEnterDesktopMode(/* isAllowed= */ false);
+            robot.dw().allowEnterDesktopMode(/* isAllowed= */ false);
             robot.activity().createActivityWithComponentInNewTaskAndDisplay();
             robot.checkTopActivityHasCameraCompatFreeformPolicy(/* exists= */ false);
         });
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_startedWhenEnabledAndDW() {
         runTestScenario((robot) -> {
-            robot.allowEnterDesktopMode(/* isAllowed= */ true);
+            robot.dw().allowEnterDesktopMode(/* isAllowed= */ true);
             robot.activity().createActivityWithComponentInNewTaskAndDisplay();
             robot.checkTopActivityHasCameraCompatFreeformPolicy(/* exists= */ true);
             robot.checkTopActivityCameraCompatFreeformPolicyIsRunning();
@@ -136,10 +136,10 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraStateManager_existsWhenCameraCompatFreeformExists() {
         runTestScenario((robot) -> {
-            robot.allowEnterDesktopMode(true);
+            robot.dw().allowEnterDesktopMode(true);
             robot.activity().createActivityWithComponentInNewTaskAndDisplay();
             robot.checkTopActivityHasCameraCompatFreeformPolicy(/* exists= */ true);
             robot.checkTopActivityHasCameraStateMonitor(/* exists= */ true);
@@ -147,10 +147,10 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraStateManager_startedWhenCameraCompatFreeformExists() {
         runTestScenario((robot) -> {
-            robot.allowEnterDesktopMode(true);
+            robot.dw().allowEnterDesktopMode(true);
             robot.activity().createActivityWithComponentInNewTaskAndDisplay();
             robot.checkTopActivityHasCameraCompatFreeformPolicy(/* exists= */ true);
             robot.checkTopActivityHasCameraStateMonitor(/* exists= */ true);
@@ -180,7 +180,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraStateManager_doesNotExistWhenNoPolicyExists() {
         runTestScenario((robot) -> {
             robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ false);
@@ -194,9 +194,10 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     @Test
     public void testIsCameraCompatTreatmentActive_whenTreatmentForTopActivityIsEnabled() {
         runTestScenario((robot) -> {
+            robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ true);
             robot.applyOnActivity((a)-> {
-                a.createActivityWithComponent();
-                a.enableTreatmentForTopActivity(/* enabled */ true);
+                a.createActivityWithComponentInNewTaskAndDisplay();
+                a.enableFullscreenCameraCompatTreatmentForTopActivity(/* enabled */ true);
             });
 
             robot.checkIsCameraCompatTreatmentActiveForTopActivity(/* active */ true);
@@ -206,9 +207,10 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     @Test
     public void testIsCameraCompatTreatmentNotActive_whenTreatmentForTopActivityIsDisabled() {
         runTestScenario((robot) -> {
+            robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ true);
             robot.applyOnActivity((a)-> {
                 a.createActivityWithComponent();
-                a.enableTreatmentForTopActivity(/* enabled */ false);
+                a.enableFullscreenCameraCompatTreatmentForTopActivity(/* enabled */ false);
             });
 
             robot.checkIsCameraCompatTreatmentActiveForTopActivity(/* active */ false);
@@ -220,9 +222,10 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     public void testShouldOverrideMinAspectRatioForCamera_whenCameraIsNotRunning() {
         runTestScenario((robot) -> {
             robot.applyOnActivity((a)-> {
+                robot.dw().allowEnterDesktopMode(true);
                 robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ true);
                 a.createActivityWithComponentInNewTaskAndDisplay();
-                a.setTopActivityCameraActive(/* active */ false);
+                a.setIsCameraRunningAndWindowingModeEligibleFullscreen(/* enabled */ false);
             });
 
             robot.checkShouldOverrideMinAspectRatioForCamera(/* active */ false);
@@ -234,9 +237,10 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     public void testShouldOverrideMinAspectRatioForCamera_whenCameraIsRunning_overrideDisabled() {
         runTestScenario((robot) -> {
             robot.applyOnActivity((a)-> {
+                robot.dw().allowEnterDesktopMode(true);
                 robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ true);
                 a.createActivityWithComponentInNewTaskAndDisplay();
-                a.setTopActivityCameraActive(/* active */ true);
+                a.setIsCameraRunningAndWindowingModeEligibleFullscreen(/* active */ true);
             });
 
             robot.checkShouldOverrideMinAspectRatioForCamera(/* active */ false);
@@ -245,12 +249,28 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
 
     @Test
     @EnableCompatChanges(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA)
-    public void testShouldOverrideMinAspectRatioForCamera_whenCameraIsRunning_overrideEnabled() {
+    public void testShouldOverrideMinAspectRatioForCameraFullscr_cameraIsRunning_overrideEnabled() {
         runTestScenario((robot) -> {
             robot.applyOnActivity((a)-> {
                 robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ true);
                 a.createActivityWithComponentInNewTaskAndDisplay();
-                a.setTopActivityCameraActive(/* active */ true);
+                a.setIsCameraRunningAndWindowingModeEligibleFullscreen(/* active */ true);
+            });
+
+            robot.checkShouldOverrideMinAspectRatioForCamera(/* active */ true);
+        });
+    }
+
+
+    @Test
+    @EnableCompatChanges(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testShouldOverrideMinAspectRatioForCameraFreeform_cameraRunning_overrideEnabled() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a)-> {
+                robot.dw().allowEnterDesktopMode(true);
+                a.createActivityWithComponentInNewTaskAndDisplay();
+                a.setIsCameraRunningAndWindowingModeEligibleFreeform(/* active */ true);
             });
 
             robot.checkShouldOverrideMinAspectRatioForCamera(/* active */ true);
@@ -318,23 +338,11 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
         }
 
         void checkIsCameraCompatTreatmentActiveForTopActivity(boolean active) {
-            assertEquals(getTopAppCompatCameraPolicy()
-                    .isTreatmentEnabledForActivity(activity().top()), active);
+            assertEquals(active, isTreatmentEnabledForActivity(activity().top()));
         }
 
         void checkShouldOverrideMinAspectRatioForCamera(boolean expected) {
-            assertEquals(getTopAppCompatCameraPolicy()
-                    .shouldOverrideMinAspectRatioForCamera(activity().top()), expected);
-        }
-
-        // TODO(b/350460645): Create Desktop Windowing Robot to reuse common functionalities.
-        void allowEnterDesktopMode(boolean isAllowed) {
-            doReturn(isAllowed).when(() ->
-                    DesktopModeHelper.canEnterDesktopMode(any()));
-        }
-
-        private AppCompatCameraPolicy getTopAppCompatCameraPolicy() {
-            return activity().top().mDisplayContent.mAppCompatCameraPolicy;
+            assertEquals(expected, shouldOverrideMinAspectRatioForCamera(activity().top()));
         }
     }
 }

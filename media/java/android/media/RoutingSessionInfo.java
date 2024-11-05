@@ -22,7 +22,6 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -56,8 +55,6 @@ public final class RoutingSessionInfo implements Parcelable {
                     return new RoutingSessionInfo[size];
                 }
             };
-
-    private static final String TAG = "RoutingSessionInfo";
 
     private static final String KEY_GROUP_ROUTE = "androidx.mediarouter.media.KEY_GROUP_ROUTE";
     private static final String KEY_VOLUME_HANDLING = "volumeHandling";
@@ -142,15 +139,7 @@ public final class RoutingSessionInfo implements Parcelable {
         mVolume = builder.mVolume;
 
         mIsSystemSession = builder.mIsSystemSession;
-
-        boolean volumeAdjustmentForRemoteGroupSessions = Resources.getSystem().getBoolean(
-                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
-        mVolumeHandling =
-                defineVolumeHandling(
-                        mIsSystemSession,
-                        builder.mVolumeHandling,
-                        mSelectedRoutes,
-                        volumeAdjustmentForRemoteGroupSessions);
+        mVolumeHandling = builder.mVolumeHandling;
 
         mControlHints = updateVolumeHandlingInHints(builder.mControlHints, mVolumeHandling);
         mTransferReason = builder.mTransferReason;
@@ -205,20 +194,6 @@ public final class RoutingSessionInfo implements Parcelable {
         }
         //Return same Bundle.
         return controlHints;
-    }
-
-    @MediaRoute2Info.PlaybackVolume
-    private static int defineVolumeHandling(
-            boolean isSystemSession,
-            @MediaRoute2Info.PlaybackVolume int volumeHandling,
-            List<String> selectedRoutes,
-            boolean volumeAdjustmentForRemoteGroupSessions) {
-        if (!isSystemSession
-                && !volumeAdjustmentForRemoteGroupSessions
-                && selectedRoutes.size() > 1) {
-            return MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
-        }
-        return volumeHandling;
     }
 
     @NonNull

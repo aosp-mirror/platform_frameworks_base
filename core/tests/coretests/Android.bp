@@ -25,6 +25,7 @@ filegroup {
         "BinderProxyCountingTestApp/src/**/*.java",
         "BinderProxyCountingTestService/src/**/*.java",
         "BinderDeathRecipientHelperApp/src/**/*.java",
+        "AppThatCallsBinderMethods/src/**/*.kt",
     ],
     visibility: ["//visibility:private"],
 }
@@ -104,6 +105,7 @@ android_test {
         "mockito-target-extended-minus-junit4",
         "TestParameterInjector",
         "android.content.res.flags-aconfig-java",
+        "android.security.flags-aconfig-java",
     ],
 
     libs: [
@@ -143,6 +145,12 @@ android_test {
         ":BinderProxyCountingTestApp",
         ":BinderProxyCountingTestService",
         ":AppThatUsesAppOps",
+        ":AppThatCallsBinderMethods",
+        ":HelloWorldSdk1",
+        ":HelloWorldUsingSdk1AndSdk1",
+        ":HelloWorldUsingSdk1And2",
+        ":HelloWorldUsingSdkMalformedNegativeVersion",
+        ":CtsStaticSharedLibConsumerApp1",
     ],
 }
 
@@ -247,7 +255,7 @@ android_ravenwood_test {
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "androidx.test.uiautomator_uiautomator",
-        "compatibility-device-util-axt",
+        "compatibility-device-util-axt-ravenwood",
         "flag-junit",
         "platform-test-annotations",
         "flag-junit",
@@ -259,6 +267,7 @@ android_ravenwood_test {
         "src/android/content/ContextTest.java",
         "src/android/content/pm/PackageManagerTest.java",
         "src/android/content/pm/UserInfoTest.java",
+        "src/android/app/PropertyInvalidatedCacheTests.java",
         "src/android/database/CursorWindowTest.java",
         "src/android/os/**/*.java",
         "src/android/content/res/*.java",

@@ -21,6 +21,7 @@ import static android.os.Flags.adpfUseFmqChannel;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.power.hint.Flags.adpfSessionTag;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
+import static com.android.server.power.hint.Flags.resetOnForkEnabled;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1057,6 +1058,25 @@ public final class HintManagerService extends SystemService {
                     Slogf.w(TAG, errMsg);
                     throw new SecurityException(errMsg);
                 }
+                if (resetOnForkEnabled()){
+                    try {
+                        for (int tid : tids) {
+                            int policy = Process.getThreadScheduler(tid);
+                            // If the thread is not using the default scheduling policy (SCHED_OTHER),
+                            // we don't change it.
+                            if (policy != Process.SCHED_OTHER) {
+                                continue;
+                            }
+                            // set the SCHED_RESET_ON_FORK flag.
+                            int prio = Process.getThreadPriority(tid);
+                            Process.setThreadScheduler(tid, Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK, 0);
+                            Process.setThreadPriority(tid, prio);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Failed to set SCHED_RESET_ON_FORK for tids "
+                                + Arrays.toString(tids), e);
+                    }
+                }
 
                 if (adpfSessionTag() && tag == SessionTag.APP) {
                     // If the category of the app is a game,
@@ -1282,11 +1302,9 @@ public final class HintManagerService extends SystemService {
         boolean updateHintAllowedByProcState(boolean allowed) {
             synchronized (this) {
                 if (allowed && !mUpdateAllowedByProcState && !mShouldForcePause) {
-                    Slogf.e(TAG, "ADPF IS GETTING RESUMED? UID: " + mUid + " TAG: " + mTag);
                     resume();
                 }
                 if (!allowed && mUpdateAllowedByProcState) {
-                    Slogf.e(TAG, "ADPF IS GETTING PAUSED? UID: " + mUid + " TAG: " + mTag);
                     pause();
                 }
                 mUpdateAllowedByProcState = allowed;
@@ -1448,6 +1466,25 @@ public final class HintManagerService extends SystemService {
                                     invalidTid);
                             Slogf.w(TAG, errMsg);
                             throw new SecurityException(errMsg);
+                        }
+                        if (resetOnForkEnabled()){
+                            try {
+                                for (int tid : tids) {
+                                    int policy = Process.getThreadScheduler(tid);
+                                    // If the thread is not using the default scheduling policy (SCHED_OTHER),
+                                    // we don't change it.
+                                    if (policy != Process.SCHED_OTHER) {
+                                        continue;
+                                    }
+                                    // set the SCHED_RESET_ON_FORK flag.
+                                    int prio = Process.getThreadPriority(tid);
+                                    Process.setThreadScheduler(tid, Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK, 0);
+                                    Process.setThreadPriority(tid, prio);
+                                }
+                            } catch (Exception e) {
+                                Slog.e(TAG, "Failed to set SCHED_RESET_ON_FORK for tids "
+                                        + Arrays.toString(tids), e);
+                            }
                         }
                         if (powerhintThreadCleanup()) {
                             synchronized (mNonIsolatedTidsLock) {

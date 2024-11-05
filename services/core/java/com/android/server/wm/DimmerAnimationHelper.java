@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DIMMER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DIMMER;
 import static com.android.server.wm.AlphaAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.AlphaAnimationSpecProto.FROM;
 import static com.android.server.wm.AlphaAnimationSpecProto.TO;
@@ -27,11 +27,13 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 
@@ -108,7 +110,7 @@ public class DimmerAnimationHelper {
     }
 
     // Sets the requested layer to reparent the dim to without applying it immediately
-    void setRequestedGeometryParent(WindowContainer<?> geometryParent) {
+    void setRequestedGeometryParent(@Nullable WindowContainer<?> geometryParent) {
         if (geometryParent != null) {
             mRequestedProperties.mGeometryParent = geometryParent;
         }
@@ -153,6 +155,9 @@ public class DimmerAnimationHelper {
                         ? mRequestedProperties.mGeometryParent.getSurfaceControl() : null,
                 mRequestedProperties.mDimmingContainer != startProperties.mDimmingContainer
                         ? mRequestedProperties.mDimmingContainer.getSurfaceControl() : null, t);
+        if (Flags.useTasksDimOnly()) {
+            setBounds(dim, mCurrentProperties.mDimmingContainer, t);
+        }
 
         if (!startProperties.hasSameVisualProperties(mRequestedProperties)) {
             stopCurrentAnimation(dim.mDimSurface);
@@ -251,6 +256,32 @@ public class DimmerAnimationHelper {
         } catch (NullPointerException e) {
             Log.w(TAG, "Tried to change parent of dim " + dimLayer + " after remove", e);
         }
+    }
+
+    static void setBounds(@NonNull Dimmer.DimState dim, @NonNull WindowState relativeParent,
+                          @NonNull SurfaceControl.Transaction t) {
+        TaskFragment taskFragment = relativeParent.getTaskFragment();
+        Rect taskFragmentBounds = taskFragment != null ? taskFragment.getBounds() : null;
+        Task task = relativeParent.getTask();
+        Rect taskBounds = task != null ? task.getBounds() : null;
+        Rect hostBounds = dim.mHostContainer.getBounds();
+        boolean isEmbedded = taskFragment != null && taskFragment.isEmbedded();
+
+        Rect relativeBounds = new Rect();
+        if (isEmbedded) {
+            // Embedded activities can be dimmed at task or fragment level
+            dim.mDimBounds.set(taskFragment.isDimmingOnParentTask()
+                    ? taskBounds : taskFragmentBounds);
+            relativeBounds.set(dim.mDimBounds);
+            relativeBounds.offset(-taskBounds.left, -taskBounds.top);
+        } else {
+            dim.mDimBounds.set(hostBounds);
+            relativeBounds.set(dim.mDimBounds);
+            relativeBounds.offsetTo(0, 0);
+        }
+
+        t.setWindowCrop(dim.mDimSurface, relativeBounds.width(), relativeBounds.height());
+        t.setPosition(dim.mDimSurface, relativeBounds.left, relativeBounds.top);
     }
 
     void setCurrentAlphaBlur(@NonNull Dimmer.DimState dim, @NonNull SurfaceControl.Transaction t) {

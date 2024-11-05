@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -23,6 +24,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConstantState;
 import android.os.Build;
+import android.os.Trace;
 import android.util.LongArray;
 
 import java.util.ArrayList;
@@ -73,6 +75,13 @@ public abstract class Animator implements Cloneable {
     private static long sBackgroundPauseDelay = 1000;
 
     /**
+     * If true, when the animation plays normally to the end, the callback
+     * {@link AnimatorListener#onAnimationEnd(Animator)} will be scheduled on the next frame.
+     * It is to avoid the last animation frame being delayed by the implementation of listeners.
+     */
+    static boolean sPostNotifyEndListenerEnabled;
+
+    /**
      * A cache of the values in a list. Used so that when calling the list, we have a copy
      * of it in case the list is modified while iterating. The array can be reused to avoid
      * allocation on every notification.
@@ -121,6 +130,14 @@ public abstract class Animator implements Cloneable {
     public static void setAnimatorPausingEnabled(boolean enable) {
         AnimationHandler.setAnimatorPausingEnabled(enable);
         AnimationHandler.setOverrideAnimatorPausingSystemProperty(!enable);
+    }
+
+    /**
+     * @see #sPostNotifyEndListenerEnabled
+     * @hide
+     */
+    public static void setPostNotifyEndListenerEnabled(boolean enable) {
+        sPostNotifyEndListenerEnabled = enable;
     }
 
     /**
@@ -632,6 +649,28 @@ public abstract class Animator implements Cloneable {
         mStartListenersCalled = false;
         if (mListeners != null && startListenersCalled) {
             notifyListeners(AnimatorCaller.ON_END, isReversing);
+        }
+    }
+
+    void notifyEndListenersFromEndAnimation(boolean isReversing, boolean postNotifyEndListener) {
+        if (postNotifyEndListener) {
+            AnimationHandler.getInstance().postEndAnimationCallback(
+                    () -> completeEndAnimation(isReversing, "postNotifyAnimEnd"));
+        } else {
+            completeEndAnimation(isReversing, "notifyAnimEnd");
+        }
+    }
+
+    @CallSuper
+    void completeEndAnimation(boolean isReversing, String notifyListenerTraceName) {
+        final boolean useTrace = mListeners != null && Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
+        if (useTrace) {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, notifyListenerTraceName
+                    + "-" + getClass().getSimpleName());
+        }
+        notifyEndListeners(isReversing);
+        if (useTrace) {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
     }
 

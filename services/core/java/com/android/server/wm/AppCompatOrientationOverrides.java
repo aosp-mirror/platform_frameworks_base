@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
@@ -104,6 +105,16 @@ class AppCompatOrientationOverrides {
 
     boolean isOverrideRespectRequestedOrientationEnabled() {
         return isChangeEnabled(mActivityRecord, OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
+    }
+
+    boolean shouldRespectRequestedOrientationDueToOverride() {
+        // Checking TaskFragment rather than ActivityRecord to ensure that transition
+        // between fullscreen and PiP would work well. Checking TaskFragment rather than
+        // Task to ensure that Activity Embedding is excluded.
+        return mActivityRecord.isVisibleRequested() && mActivityRecord.getTaskFragment() != null
+                && mActivityRecord.getTaskFragment().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && mActivityRecord.mAppCompatController.getAppCompatOrientationOverrides()
+                    .isOverrideRespectRequestedOrientationEnabled();
     }
 
     /**

@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.tools.traces.Utils.busyWaitForDataSourceRegistration;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions;
@@ -28,7 +30,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static java.io.File.createTempFile;
 import static java.nio.file.Files.createTempDirectory;
 
-import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.Presubmit;
 import android.tools.ScenarioBuilder;
 import android.tools.traces.io.ResultWriter;
@@ -36,9 +37,6 @@ import android.tools.traces.monitors.PerfettoTraceMonitor;
 import android.view.Choreographer;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
-
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,12 +44,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import perfetto.protos.PerfettoConfig.TracingServiceState;
 import perfetto.protos.PerfettoConfig.WindowManagerConfig.LogFrequency;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * Test class for {@link WindowTracingPerfetto}.
@@ -74,7 +69,7 @@ public class WindowTracingPerfettoTest {
         sChoreographer = Mockito.mock(Choreographer.class);
         sWindowTracing = new WindowTracingPerfetto(sWmMock, sChoreographer,
                 new WindowManagerGlobalLock(), TEST_DATA_SOURCE_NAME);
-        waitDataSourceIsAvailable();
+        busyWaitForDataSourceRegistration(TEST_DATA_SOURCE_NAME);
     }
 
     @Before
@@ -155,68 +150,5 @@ public class WindowTracingPerfettoTest {
                 .setRunComplete();
 
         mTraceMonitor.stop(writer);
-    }
-
-    private static void waitDataSourceIsAvailable() {
-        final int timeoutMs = 10000;
-        final int busyWaitIntervalMs = 100;
-
-        int elapsedMs = 0;
-
-        while (!isDataSourceAvailable()) {
-            try {
-                Thread.sleep(busyWaitIntervalMs);
-                elapsedMs += busyWaitIntervalMs;
-                if (elapsedMs >= timeoutMs) {
-                    throw new RuntimeException("Data source didn't become available."
-                            + " Waited for: " + timeoutMs + " ms");
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private static boolean isDataSourceAvailable() {
-        byte[] proto = executeShellCommand("perfetto --query-raw");
-
-        try {
-            TracingServiceState state = TracingServiceState.parseFrom(proto);
-
-            Optional<Integer> producerId = Optional.empty();
-
-            for (TracingServiceState.Producer producer : state.getProducersList()) {
-                if (producer.getPid() == android.os.Process.myPid()) {
-                    producerId = Optional.of(producer.getId());
-                    break;
-                }
-            }
-
-            if (producerId.isEmpty()) {
-                return false;
-            }
-
-            for (TracingServiceState.DataSource ds : state.getDataSourcesList()) {
-                if (ds.getDsDescriptor().getName().equals(TEST_DATA_SOURCE_NAME)
-                        && ds.getProducerId() == producerId.get()) {
-                    return true;
-                }
-            }
-        } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
-        }
-
-        return false;
-    }
-
-    private static byte[] executeShellCommand(String command) {
-        try {
-            ParcelFileDescriptor fd = InstrumentationRegistry.getInstrumentation().getUiAutomation()
-                    .executeShellCommand(command);
-            FileInputStream is = new ParcelFileDescriptor.AutoCloseInputStream(fd);
-            return is.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

@@ -517,9 +517,15 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_DEVICE_FOLD = 13;
 
     /**
+     * Go to sleep reason code: reason unknown.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_MAX =  GO_TO_SLEEP_REASON_DEVICE_FOLD;
+    public static final int GO_TO_SLEEP_REASON_UNKNOWN = 14;
+
+    /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MAX =  GO_TO_SLEEP_REASON_UNKNOWN;
 
     /**
      * @hide
@@ -540,6 +546,7 @@ public final class PowerManager {
             case GO_TO_SLEEP_REASON_QUIESCENT: return "quiescent";
             case GO_TO_SLEEP_REASON_SLEEP_BUTTON: return "sleep_button";
             case GO_TO_SLEEP_REASON_TIMEOUT: return "timeout";
+            case GO_TO_SLEEP_REASON_UNKNOWN: return "unknown";
             default: return Integer.toString(sleepReason);
         }
     }
@@ -635,6 +642,7 @@ public final class PowerManager {
             GO_TO_SLEEP_REASON_QUIESCENT,
             GO_TO_SLEEP_REASON_SLEEP_BUTTON,
             GO_TO_SLEEP_REASON_TIMEOUT,
+            GO_TO_SLEEP_REASON_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface GoToSleepReason{}
@@ -1144,9 +1152,10 @@ public final class PowerManager {
     }
 
     private static final String CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY =
-            "cache_key.is_power_save_mode";
+            PropertyInvalidatedCache.createSystemCacheKey("is_power_save_mode");
 
-    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY = "cache_key.is_interactive";
+    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY =
+            PropertyInvalidatedCache.createSystemCacheKey("is_interactive");
 
     private static final int MAX_CACHE_ENTRIES = 1;
 
@@ -1343,6 +1352,9 @@ public final class PowerManager {
      * @see #ON_AFTER_RELEASE
      */
     public WakeLock newWakeLock(int levelAndFlags, String tag) {
+        if (android.companion.virtualdevice.flags.Flags.displayPowerManagerApis()) {
+            return newWakeLock(levelAndFlags, tag, mContext.getDisplayId());
+        }
         validateWakeLockParameters(levelAndFlags, tag);
         return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName(),
                 Display.INVALID_DISPLAY);
@@ -1566,27 +1578,9 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
-     * to turn on.
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY default display} to turn on.
      *
-     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is
-     * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
-     * the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is already
-     * on then nothing will happen.
-     *
-     * <p>
-     * This is what happens when the power key is pressed to turn on the screen.
-     * </p><p>
-     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
-     * </p>
-     *
-     * @param time The time when the request to wake up was issued, in the
-     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
-     * order the wake up request with other power management functions.  It should be set
-     * to the timestamp of the input event that caused the request to wake up.
-     *
-     * @see #userActivity
-     * @see #goToSleep
+     * @see #wakeUp(long, int, String, int)
      *
      * @deprecated Use {@link #wakeUp(long, int, String)} instead.
      * @removed Requires signature permission.
@@ -1597,30 +1591,9 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
-     * to turn on.
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY default display} to turn on.
      *
-     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is
-     * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
-     * the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is already
-     * on then nothing will happen.
-     *
-     * <p>
-     * This is what happens when the power key is pressed to turn on the screen.
-     * </p><p>
-     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
-     * </p>
-     *
-     * @param time The time when the request to wake up was issued, in the
-     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
-     * order the wake up request with other power management functions.  It should be set
-     * to the timestamp of the input event that caused the request to wake up.
-     *
-     * @param details A free form string to explain the specific details behind the wake up for
-     *                debugging purposes.
-     *
-     * @see #userActivity
-     * @see #goToSleep
+     * @see #wakeUp(long, int, String, int)
      *
      * @deprecated Use {@link #wakeUp(long, int, String)} instead.
      * @hide
@@ -1634,9 +1607,23 @@ public final class PowerManager {
     /**
      * Forces the {@link android.view.Display#DEFAULT_DISPLAY default display} to turn on.
      *
-     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY default display} is turned off it will
-     * be turned on. Additionally, if the device is asleep it will be awoken. If the {@link
-     * android.view.Display#DEFAULT_DISPLAY default display} is already on then nothing will happen.
+     * @see #wakeUp(long, int, String, int)
+     * @hide
+     */
+    public void wakeUp(long time, @WakeReason int reason, String details) {
+        try {
+            mService.wakeUp(time, reason, details, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Forces the display with the supplied displayId to turn on.
+     *
+     * <p>If the corresponding display is turned off, it will be turned on. Additionally, if the
+     * device is asleep it will be awoken. If the corresponding display is already on then nothing
+     * will happen. If the corresponding display does not exist, then nothing will happen.
      *
      * <p>If the device is an Android TV playback device, it will attempt to turn on the
      * HDMI-connected TV and become the current active source via the HDMI-CEC One Touch Play
@@ -1657,14 +1644,16 @@ public final class PowerManager {
      *
      * @param details A free form string to explain the specific details behind the wake up for
      *                debugging purposes.
+     * @param displayId The displayId of the display to be woken up.
      *
      * @see #userActivity
      * @see #goToSleep
      * @hide
      */
-    public void wakeUp(long time, @WakeReason int reason, String details) {
+    public void wakeUp(long time, @WakeReason int reason, String details, int displayId) {
         try {
-            mService.wakeUp(time, reason, details, mContext.getOpPackageName());
+            mService.wakeUpWithDisplayId(time, reason, details, mContext.getOpPackageName(),
+                    displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1756,6 +1745,10 @@ public final class PowerManager {
      */
     public boolean isWakeLockLevelSupported(int level) {
         try {
+            if (android.companion.virtualdevice.flags.Flags.displayPowerManagerApis()) {
+                return mService.isWakeLockLevelSupportedWithDisplayId(
+                        level, mContext.getDisplayId());
+            }
             return mService.isWakeLockLevelSupported(level);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1819,6 +1812,9 @@ public final class PowerManager {
      * @see android.content.Intent#ACTION_SCREEN_OFF
      */
     public boolean isInteractive() {
+        if (android.companion.virtualdevice.flags.Flags.displayPowerManagerApis()) {
+            return isInteractive(mContext.getDisplayId());
+        }
         return mInteractiveCache.query(null);
     }
 

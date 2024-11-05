@@ -53,7 +53,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -160,7 +160,7 @@ constructor(
     }
 
     override fun onBootCompleted() {
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             try {
                 statusBarService.disableForUser(
                     StatusBarManager.DISABLE_NONE,

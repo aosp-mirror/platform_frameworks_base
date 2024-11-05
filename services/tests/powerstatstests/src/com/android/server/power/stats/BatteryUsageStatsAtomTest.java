@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -56,19 +57,26 @@ public class BatteryUsageStatsAtomTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
+    private static final boolean DEBUG = false;
     private static final int UID_0 = 1000;
     private static final int UID_1 = 2000;
     private static final int UID_2 = 3000;
     private static final int UID_3 = 4000;
 
     @Test
-    public void testAtom_BatteryUsageStatsPerUid() {
+    public void testAtom_BatteryUsageStatsPerUid() throws Exception {
         final BatteryUsageStats bus = buildBatteryUsageStats();
         BatteryStatsService.FrameworkStatsLogger statsLogger =
                 mock(BatteryStatsService.FrameworkStatsLogger.class);
 
         List<StatsEvent> actual = new ArrayList<>();
         new BatteryStatsService.StatsPerUidLogger(statsLogger).logStats(bus, actual);
+
+        bus.close();
+
+        if (DEBUG) {
+            System.out.println(mockingDetails(statsLogger).printInvocations());
+        }
 
         // Device-wide totals
         verify(statsLogger).buildStatsEvent(
@@ -278,7 +286,7 @@ public class BatteryUsageStatsAtomTest {
     }
 
     @Test
-    public void testAtom_BatteryUsageStatsAtomsProto() {
+    public void testAtom_BatteryUsageStatsAtomsProto() throws Exception {
         final BatteryUsageStats bus = buildBatteryUsageStats();
         final byte[] bytes = bus.getStatsProto();
         BatteryUsageStatsAtomsProto proto;
@@ -341,6 +349,7 @@ public class BatteryUsageStatsAtomTest {
 
         // UID_3 - Should be none, since no interesting data (done last for debugging convenience).
         assertEquals(3, proto.uidBatteryConsumers.length);
+        bus.close();
     }
 
     private void assertSameBatteryConsumer(String message, BatteryConsumer consumer,
@@ -576,7 +585,7 @@ public class BatteryUsageStatsAtomTest {
     }
 
     @Test
-    public void testLargeAtomTruncated() {
+    public void testLargeAtomTruncated() throws Exception {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[0], true, false, false, false, 0);
         // If not truncated, this BatteryUsageStats object would generate a proto buffer
@@ -609,8 +618,10 @@ public class BatteryUsageStatsAtomTest {
 
         BatteryUsageStats batteryUsageStats = builder.build();
         final byte[] bytes = batteryUsageStats.getStatsProto();
-        assertThat(bytes.length).isGreaterThan(40000);
+        assertThat(bytes.length).isGreaterThan(20000);
         assertThat(bytes.length).isLessThan(50000);
+
+        batteryUsageStats.close();
 
         BatteryUsageStatsAtomsProto proto;
         try {

@@ -16,8 +16,10 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Log;
 import android.util.Printer;
@@ -819,16 +821,25 @@ public class Handler {
     }
 
     /**
+     * WARNING: This API is dangerous because if the implementation
+     * of equals() is broken, it would delete unrelated events. For example,
+     * if object.equals() always returns true, it'd remove all messages.
+     *
+     * For this reason, never expose this API to non-platform code. i.e.
+     * this shouldn't be exposed to SystemApi.PRIVILEGED_APPS.
+     *
      * Remove any pending posts of messages with code 'what' and whose obj is
      * 'object' that are in the message queue.  If <var>object</var> is null,
      * all messages will be removed.
-     * <p>
-     * Similar to {@link #removeMessages(int, Object)} but uses object equality
+     *
+     * <p>Similar to {@link #removeMessages(int, Object)} but uses object equality
      * ({@link Object#equals(Object)}) instead of reference equality (==) in
      * determining whether object is the message's obj'.
      *
      *@hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
     public final void removeEqualMessages(int what, @Nullable Object object) {
         mQueue.removeEqualMessages(this, what, disallowNullArgumentIfShared(object));
     }
@@ -843,12 +854,25 @@ public class Handler {
     }
 
     /**
+     * WARNING: This API is dangerous because if the implementation
+     * of equals() is broken, it would delete unrelated events. For example,
+     * if object.equals() always returns true, it'd remove all messages.
+     *
+     * For this reason, never expose this API to non-platform code. i.e.
+     * this shouldn't be exposed to SystemApi.PRIVILEGED_APPS.
+     *
      * Remove any pending posts of callbacks and sent messages whose
      * <var>obj</var> is <var>token</var>.  If <var>token</var> is null,
      * all callbacks and messages will be removed.
      *
+     * <p>Similar to {@link #removeCallbacksAndMessages(Object)} but uses object
+     * equality ({@link Object#equals(Object)}) instead of reference equality (==) in
+     * determining whether object is the message's obj'.
+     *
      *@hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
     public final void removeCallbacksAndEqualMessages(@Nullable Object token) {
         mQueue.removeCallbacksAndEqualMessages(this, disallowNullArgumentIfShared(token));
     }
@@ -864,6 +888,8 @@ public class Handler {
      * Return whether there are any messages or callbacks currently scheduled on this handler.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
     public final boolean hasMessagesOrCallbacks() {
         return mQueue.hasMessages(this);
     }

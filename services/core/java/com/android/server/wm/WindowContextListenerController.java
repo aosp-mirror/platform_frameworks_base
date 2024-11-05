@@ -21,8 +21,8 @@ import static android.view.Display.isSuspendedState;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.window.WindowProviderService.isWindowProviderService;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_ERROR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

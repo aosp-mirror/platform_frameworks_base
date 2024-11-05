@@ -567,7 +567,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #INFO_SESSION_CONFIGURATION_QUERY_VERSION
      */
     @NonNull
-    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
     public List<CameraCharacteristics.Key<?>> getAvailableSessionCharacteristicsKeys() {
         if (mAvailableSessionCharacteristicsKeys != null) {
             return mAvailableSessionCharacteristicsKeys;
@@ -774,6 +773,46 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<int[]> COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES =
             new Key<int[]>("android.colorCorrection.availableAberrationModes", int[].class);
+
+    /**
+     * <p>The range of supported color temperature values for
+     * {@link CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE android.colorCorrection.colorTemperature}.</p>
+     * <p>This key lists the valid range of color temperature values for
+     * {@link CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE android.colorCorrection.colorTemperature} supported by this camera device.</p>
+     * <p>This key will be null on devices that do not support CCT mode for
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
+     * <p><b>Range of valid values:</b><br></p>
+     * <p>The minimum supported range will be [2856K,6500K]. The maximum supported
+     * range will be [1000K,40000K].</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_COLOR_TEMPERATURE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final Key<android.util.Range<Integer>> COLOR_CORRECTION_COLOR_TEMPERATURE_RANGE =
+            new Key<android.util.Range<Integer>>("android.colorCorrection.colorTemperatureRange", new TypeReference<android.util.Range<Integer>>() {{ }});
+
+    /**
+     * <p>List of color correction modes for {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} that are
+     * supported by this camera device.</p>
+     * <p>This key lists the valid modes for {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}. If no
+     * color correction modes are available for a device, this key will be null.</p>
+     * <p>Camera devices that have a FULL hardware level will always include at least
+     * FAST, HIGH_QUALITY, and TRANSFORM_MATRIX modes.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final Key<int[]> COLOR_CORRECTION_AVAILABLE_MODES =
+            new Key<int[]>("android.colorCorrection.availableModes", int[].class);
 
     /**
      * <p>List of auto-exposure antibanding modes for {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode} that are
@@ -1485,7 +1524,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_SINGLE_STRENGTH_MAX_LEVEL =
             new Key<Integer>("android.flash.singleStrengthMaxLevel", int.class);
 
@@ -1501,7 +1539,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL =
             new Key<Integer>("android.flash.singleStrengthDefaultLevel", int.class);
 
@@ -1525,7 +1562,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_TORCH_STRENGTH_MAX_LEVEL =
             new Key<Integer>("android.flash.torchStrengthMaxLevel", int.class);
 
@@ -1541,7 +1577,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_TORCH_STRENGTH_DEFAULT_LEVEL =
             new Key<Integer>("android.flash.torchStrengthDefaultLevel", int.class);
 
@@ -4252,7 +4287,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}.</p>
      * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4278,7 +4313,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}.</p>
      * <p><b>Units</b>: Pixels</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4303,7 +4338,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}.</p>
      * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4337,7 +4372,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      * <li>This key will be present if
      *   {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     *   lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}, since RAW
+     *   lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}, since RAW
      *   images may not necessarily have a regular bayer pattern when
      *   {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}} is set to
      *   {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</li>
@@ -5210,7 +5245,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
     public static final Key<Integer> INFO_SESSION_CONFIGURATION_QUERY_VERSION =
             new Key<Integer>("android.info.sessionConfigurationQueryVersion", int.class);
 
@@ -5741,6 +5775,122 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
 
     /**
+     * <p>The available HEIC (ISO/IEC 23008-12/24) UltraHDR stream
+     * configurations that this camera device supports
+     * (i.e. format, width, height, output/input stream).</p>
+     * <p>The configurations are listed as <code>(format, width, height, input?)</code> tuples.</p>
+     * <p>All the static, control, and dynamic metadata tags related to JPEG apply to HEIC formats.
+     * Configuring JPEG and HEIC streams at the same time is not supported.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_HEIF_GAINMAP)
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> HEIC_AVAILABLE_HEIC_ULTRA_HDR_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.heic.availableHeicUltraHdrStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for HEIC UltraHDR output formats.</p>
+     * <p>This should correspond to the frame duration when only that
+     * stream is active, with all processing (typically in android.*.mode)
+     * set to either OFF or FAST.</p>
+     * <p>When multiple streams are used in a request, the minimum frame
+     * duration will be max(individual stream min durations).</p>
+     * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
+     * android.scaler.availableStallDurations for more details about
+     * calculating the max frame rate.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_HEIF_GAINMAP)
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> HEIC_AVAILABLE_HEIC_ULTRA_HDR_MIN_FRAME_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicUltraHdrMinFrameDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination for HEIC UltraHDR streams.</p>
+     * <p>A stall duration is how much extra time would get added
+     * to the normal minimum frame duration for a repeating request
+     * that has streams with non-zero stall.</p>
+     * <p>This functions similarly to
+     * android.scaler.availableStallDurations for HEIC UltraHDR
+     * streams.</p>
+     * <p>All HEIC output stream formats may have a nonzero stall
+     * duration.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_HEIF_GAINMAP)
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> HEIC_AVAILABLE_HEIC_ULTRA_HDR_STALL_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicUltraHdrStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>The available HEIC (ISO/IEC 23008-12/24) UltraHDR stream
+     * configurations that this camera device supports
+     * (i.e. format, width, height, output/input stream) for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Refer to android.heic.availableHeicStreamConfigurations for details.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_HEIF_GAINMAP)
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> HEIC_AVAILABLE_HEIC_ULTRA_HDR_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.heic.availableHeicUltraHdrStreamConfigurationsMaximumResolution", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for HEIC UltraHDR output formats for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Refer to android.heic.availableHeicMinFrameDurations for details.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_HEIF_GAINMAP)
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> HEIC_AVAILABLE_HEIC_ULTRA_HDR_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicUltraHdrMinFrameDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination for HEIC UltraHDR streams for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Refer to android.heic.availableHeicStallDurations for details.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_HEIF_GAINMAP)
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> HEIC_AVAILABLE_HEIC_ULTRA_HDR_STALL_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicUltraHdrStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
      * <p>The direction of the camera faces relative to the vehicle body frame and the
      * passenger seats.</p>
      * <p>This enum defines the lens facing characteristic of the cameras on the automotive
@@ -5977,28 +6127,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> JPEGR_AVAILABLE_JPEG_R_STALL_DURATIONS_MAXIMUM_RESOLUTION =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.jpegr.availableJpegRStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
-
-    /**
-     * <p>Minimum and maximum padding zoom factors supported by this camera device for
-     * android.efv.paddingZoomFactor used for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension.</p>
-     * <p>The minimum and maximum padding zoom factors supported by the device for
-     * android.efv.paddingZoomFactor used as part of the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension feature. This extension specific camera characteristic can be queried using
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#get }.</p>
-     * <p><b>Units</b>: A pair of padding zoom factors in floating-points:
-     * (minPaddingZoomFactor, maxPaddingZoomFactor)</p>
-     * <p><b>Range of valid values:</b><br></p>
-     * <p>1.0 &lt; minPaddingZoomFactor &lt;= maxPaddingZoomFactor</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
-            new Key<android.util.Range<Float>>("android.efv.paddingZoomFactorRange", new TypeReference<android.util.Range<Float>>() {{ }});
 
 
     /**

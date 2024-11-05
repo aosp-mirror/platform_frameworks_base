@@ -24,6 +24,7 @@ import java.util.function.IntSupplier;
 /** Handle the visibility state of the Compat UI components. */
 public class CompatUIStatusManager {
 
+    private static final int COMPAT_UI_EDUCATION_UNDEFINED = -1;
     public static final int COMPAT_UI_EDUCATION_HIDDEN = 0;
     public static final int COMPAT_UI_EDUCATION_VISIBLE = 1;
 
@@ -32,24 +33,40 @@ public class CompatUIStatusManager {
     @NonNull
     private final IntSupplier mReader;
 
+    private int mCurrentValue = COMPAT_UI_EDUCATION_UNDEFINED;
+
     public CompatUIStatusManager(@NonNull IntConsumer writer, @NonNull IntSupplier reader) {
         mWriter = writer;
         mReader = reader;
     }
 
     public CompatUIStatusManager() {
-        this(i -> { }, () -> COMPAT_UI_EDUCATION_HIDDEN);
+        this(i -> {
+        }, () -> COMPAT_UI_EDUCATION_HIDDEN);
     }
 
     void onEducationShown() {
-        mWriter.accept(COMPAT_UI_EDUCATION_VISIBLE);
+        if (mCurrentValue != COMPAT_UI_EDUCATION_VISIBLE) {
+            mCurrentValue = COMPAT_UI_EDUCATION_VISIBLE;
+            mWriter.accept(mCurrentValue);
+        }
     }
 
     void onEducationHidden() {
-        mWriter.accept(COMPAT_UI_EDUCATION_HIDDEN);
+        if (mCurrentValue != COMPAT_UI_EDUCATION_HIDDEN) {
+            mCurrentValue = COMPAT_UI_EDUCATION_HIDDEN;
+            mWriter.accept(mCurrentValue);
+        }
     }
 
     boolean isEducationVisible() {
-        return mReader.getAsInt() == COMPAT_UI_EDUCATION_VISIBLE;
+        return getCurrentValue() == COMPAT_UI_EDUCATION_VISIBLE;
+    }
+
+    private int getCurrentValue() {
+        if (mCurrentValue == COMPAT_UI_EDUCATION_UNDEFINED) {
+            mCurrentValue = mReader.getAsInt();
+        }
+        return mCurrentValue;
     }
 }

@@ -114,6 +114,10 @@ interface KeyedObservable<K> {
     fun notifyChange(key: K, reason: Int)
 }
 
+/** Delegation of [KeyedObservable]. */
+open class KeyedObservableDelegate<K>(delegate: KeyedObservable<K>) :
+    KeyedObservable<K> by delegate
+
 /** A thread safe implementation of [KeyedObservable]. */
 open class KeyedDataObservable<K> : KeyedObservable<K> {
     // Instead of @GuardedBy("this"), guarded by itself because KeyedDataObservable object could be
@@ -198,4 +202,20 @@ open class KeyedDataObservable<K> : KeyedObservable<K> {
             entry.value.execute { observer.onKeyChanged(key, reason) }
         }
     }
+}
+
+/** [KeyedObservable] with no-op implementations for all interfaces. */
+open class NoOpKeyedObservable<K> : KeyedObservable<K> {
+
+    override fun addObserver(observer: KeyedObserver<K?>, executor: Executor) = true
+
+    override fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor) = true
+
+    override fun removeObserver(observer: KeyedObserver<K?>) = true
+
+    override fun removeObserver(key: K, observer: KeyedObserver<K>) = true
+
+    override fun notifyChange(reason: Int) {}
+
+    override fun notifyChange(key: K, reason: Int) {}
 }

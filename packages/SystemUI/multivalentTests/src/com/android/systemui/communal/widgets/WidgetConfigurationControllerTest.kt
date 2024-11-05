@@ -18,16 +18,18 @@ package com.android.systemui.communal.widgets
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.IntentSender
+import android.os.Binder
+import android.os.OutcomeReceiver
 import androidx.activity.ComponentActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.shared.model.fakeGlanceableHubMultiUserHelper
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -37,15 +39,22 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class WidgetConfigurationControllerTest : SysuiTestCase() {
-    @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
-    @Mock private lateinit var ownerActivity: ComponentActivity
+    private val appWidgetHost = mock<CommunalAppWidgetHost>()
+    private val ownerActivity = mock<ComponentActivity>()
+
+    private val outcomeReceiverCaptor = argumentCaptor<OutcomeReceiver<IntentSender?, Throwable>>()
 
     private val kosmos = testKosmos()
 
@@ -53,13 +62,19 @@ class WidgetConfigurationControllerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
         underTest =
-            WidgetConfigurationController(ownerActivity, appWidgetHost, kosmos.testDispatcher)
+            WidgetConfigurationController(
+                ownerActivity,
+                { appWidgetHost },
+                kosmos.testDispatcher,
+                kosmos.fakeGlanceableHubMultiUserHelper,
+                { kosmos.mockGlanceableHubWidgetManager },
+                kosmos.fakeExecutor,
+            )
     }
 
     @Test
-    fun configurationFailsWhenActivityNotFound() =
+    fun configureWidget_activityNotFound_returnsFalse() =
         with(kosmos) {
             testScope.runTest {
                 whenever(
@@ -68,7 +83,7 @@ class WidgetConfigurationControllerTest : SysuiTestCase() {
                             eq(123),
                             anyInt(),
                             eq(WidgetConfigurationController.REQUEST_CODE),
-                            any()
+                            any(),
                         )
                     )
                     .thenThrow(ActivityNotFoundException())
@@ -78,7 +93,7 @@ class WidgetConfigurationControllerTest : SysuiTestCase() {
         }
 
     @Test
-    fun configurationFails() =
+    fun configureWidget_configurationFails_returnsFalse() =
         with(kosmos) {
             testScope.runTest {
                 val result = async { underTest.configureWidget(123) }
@@ -94,7 +109,7 @@ class WidgetConfigurationControllerTest : SysuiTestCase() {
         }
 
     @Test
-    fun configurationSuccessful() =
+    fun configureWidget_configurationSucceeds_returnsTrue() =
         with(kosmos) {
             testScope.runTest {
                 val result = async { underTest.configureWidget(123) }
@@ -107,5 +122,117 @@ class WidgetConfigurationControllerTest : SysuiTestCase() {
                 assertThat(result.await()).isTrue()
                 result.cancel()
             }
+        }
+
+    @Test
+    fun configureWidget_headlessSystemUser_activityNotFound_returnsFalse() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeGlanceableHubMultiUserHelper.setIsInHeadlessSystemUser(true)
+
+                // Activity not found
+                whenever(
+                        mockGlanceableHubWidgetManager.getIntentSenderForConfigureActivity(
+                            anyInt(),
+                            outcomeReceiverCaptor.capture(),
+                            any(),
+                        )
+                    )
+                    .then { outcomeReceiverCaptor.firstValue.onError(ActivityNotFoundException()) }
+
+                val result = async { underTest.configureWidget(123) }
+                runCurrent()
+
+                assertThat(result.await()).isFalse()
+                result.cancel()
+            }
+        }
+
+    @Test
+    fun configureWidget_headlessSystemUser_intentSenderNull_returnsFalse() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeGlanceableHubMultiUserHelper.setIsInHeadlessSystemUser(true)
+
+                prepareIntentSender(null)
+
+                assertThat(underTest.configureWidget(123)).isFalse()
+            }
+        }
+
+    @Test
+    fun configureWidget_headlessSystemUser_configurationFails_returnsFalse() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeGlanceableHubMultiUserHelper.setIsInHeadlessSystemUser(true)
+
+                val intentSender = IntentSender(Binder())
+                prepareIntentSender(intentSender)
+
+                val result = async { underTest.configureWidget(123) }
+                runCurrent()
+                assertThat(result.isCompleted).isFalse()
+
+                verify(ownerActivity)
+                    .startIntentSenderForResult(
+                        eq(intentSender),
+                        eq(WidgetConfigurationController.REQUEST_CODE),
+                        anyOrNull(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        any(),
+                    )
+
+                underTest.setConfigurationResult(Activity.RESULT_CANCELED)
+                runCurrent()
+
+                assertThat(result.await()).isFalse()
+                result.cancel()
+            }
+        }
+
+    @Test
+    fun configureWidget_headlessSystemUser_configurationSucceeds_returnsTrue() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeGlanceableHubMultiUserHelper.setIsInHeadlessSystemUser(true)
+
+                val intentSender = IntentSender(Binder())
+                prepareIntentSender(intentSender)
+
+                val result = async { underTest.configureWidget(123) }
+                runCurrent()
+                assertThat(result.isCompleted).isFalse()
+
+                verify(ownerActivity)
+                    .startIntentSenderForResult(
+                        eq(intentSender),
+                        eq(WidgetConfigurationController.REQUEST_CODE),
+                        anyOrNull(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        any(),
+                    )
+
+                underTest.setConfigurationResult(Activity.RESULT_OK)
+                runCurrent()
+
+                assertThat(result.await()).isTrue()
+                result.cancel()
+            }
+        }
+
+    private fun prepareIntentSender(intentSender: IntentSender?) =
+        with(kosmos) {
+            whenever(
+                    mockGlanceableHubWidgetManager.getIntentSenderForConfigureActivity(
+                        anyInt(),
+                        outcomeReceiverCaptor.capture(),
+                        any(),
+                    )
+                )
+                .then { outcomeReceiverCaptor.firstValue.onResult(intentSender) }
         }
 }

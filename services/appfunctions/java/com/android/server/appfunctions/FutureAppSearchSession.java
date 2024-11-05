@@ -39,20 +39,6 @@ import java.util.List;
 /** A future API wrapper of {@link AppSearchSession} APIs. */
 public interface FutureAppSearchSession extends Closeable {
 
-    /** Converts a failed app search result codes into an exception. */
-    @NonNull
-    static Exception failedResultToException(@NonNull AppSearchResult<?> appSearchResult) {
-        return switch (appSearchResult.getResultCode()) {
-            case AppSearchResult.RESULT_INVALID_ARGUMENT ->
-                    new IllegalArgumentException(appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_IO_ERROR ->
-                    new IOException(appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_SECURITY_ERROR ->
-                    new SecurityException(appSearchResult.getErrorMessage());
-            default -> new IllegalStateException(appSearchResult.getErrorMessage());
-        };
-    }
-
     /**
      * Sets the schema that represents the organizational structure of data within the AppSearch
      * database.
@@ -75,7 +61,7 @@ public interface FutureAppSearchSession extends Closeable {
      * AppSearchSession} database.
      */
     AndroidFuture<AppSearchBatchResult<String, GenericDocument>> getByDocumentId(
-            GetByDocumentIdRequest getRequest);
+            @NonNull GetByDocumentIdRequest getRequest);
 
     /**
      * Retrieves documents from the open {@link AppSearchSession} that match a given query string
@@ -84,16 +70,6 @@ public interface FutureAppSearchSession extends Closeable {
     AndroidFuture<FutureSearchResults> search(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
-    /** A future API wrapper of {@link android.app.appsearch.SearchResults}. */
-    interface FutureSearchResults {
-
-        /**
-         * Retrieves the next page of {@link SearchResult} objects from the {@link AppSearchSession}
-         * database.
-         *
-         * <p>Continue calling this method to access results until it returns an empty list,
-         * signifying there are no more results.
-         */
-        AndroidFuture<List<SearchResult>> getNextPage();
-    }
+    @Override
+    void close();
 }

@@ -1031,7 +1031,9 @@ public class ActivityManager {
             | PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
 
     /**
-     * All implicit capabilities. There are capabilities that process automatically have.
+     * All implicit capabilities. This capability set is currently only used for processes under
+     * active instrumentation. The intent is to allow CTS tests to always have these capabilities
+     * so that every test doesn't need to launch FGS.
      * @hide
      */
     @TestApi
@@ -2762,14 +2764,19 @@ public class ActivityManager {
         /**
          * Information of organized child tasks.
          *
+         * @deprecated No longer used
          * @hide
          */
+        @Deprecated
         public ArrayList<RecentTaskInfo> childrenTaskInfos = new ArrayList<>();
 
         /**
          * Information about the last snapshot taken for this task.
+         *
+         * @deprecated No longer used
          * @hide
          */
+        @Deprecated
         public PersistedTaskSnapshotData lastSnapshotData = new PersistedTaskSnapshotData();
 
         public RecentTaskInfo() {
@@ -2791,7 +2798,7 @@ public class ActivityManager {
             lastSnapshotData.taskSize = source.readTypedObject(Point.CREATOR);
             lastSnapshotData.contentInsets = source.readTypedObject(Rect.CREATOR);
             lastSnapshotData.bufferSize = source.readTypedObject(Point.CREATOR);
-            super.readFromParcel(source);
+            super.readTaskFromParcel(source);
         }
 
         @Override
@@ -2802,7 +2809,7 @@ public class ActivityManager {
             dest.writeTypedObject(lastSnapshotData.taskSize, flags);
             dest.writeTypedObject(lastSnapshotData.contentInsets, flags);
             dest.writeTypedObject(lastSnapshotData.bufferSize, flags);
-            super.writeToParcel(dest, flags);
+            super.writeTaskToParcel(dest, flags);
         }
 
         public static final @android.annotation.NonNull Creator<RecentTaskInfo> CREATOR
@@ -2986,13 +2993,13 @@ public class ActivityManager {
 
         public void readFromParcel(Parcel source) {
             id = source.readInt();
-            super.readFromParcel(source);
+            super.readTaskFromParcel(source);
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
-            super.writeToParcel(dest, flags);
+            super.writeTaskToParcel(dest, flags);
         }
 
         public static final @android.annotation.NonNull Creator<RunningTaskInfo> CREATOR = new Creator<RunningTaskInfo>() {

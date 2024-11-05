@@ -25,11 +25,14 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_SYNC;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.os.Binder;
@@ -37,6 +40,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.view.SurfaceControl;
+import android.view.animation.AlphaAnimation;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 
@@ -55,6 +59,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
 
 /**
  * Tests for the default animation handler that is used if no other special-purpose handler picks
@@ -184,6 +190,34 @@ public class DefaultTransitionHandlerTest extends ShellTestCase {
         flushHandlers();
 
         verify(startT, never()).setColor(any(), any());
+    }
+
+    @Test
+    public void testBuildSurfaceAnimation() {
+        final ArrayList<Animator> animators = new ArrayList<>();
+        final AlphaAnimation animation = new AlphaAnimation(0, 1);
+        final long durationMs = 500;
+        animation.setDuration(durationMs);
+        final long[] lastCurrentPlayTime = new long[1];
+        final int[] finishCount = new int[1];
+        final Runnable finishCallback = () -> finishCount[0]++;
+        DefaultSurfaceAnimator.buildSurfaceAnimation(animators, animation, finishCallback,
+                mTransactionPool, mMainExecutor,
+                new DefaultSurfaceAnimator.AnimationAdapter(mock(SurfaceControl.class)) {
+                    @Override
+                    void applyTransformation(ValueAnimator animator, long currentPlayTime) {
+                        lastCurrentPlayTime[0] = currentPlayTime;
+                    }
+                });
+        final ValueAnimator animator = (ValueAnimator) animators.get(0);
+        mAnimExecutor.execute(() -> {
+            animator.start();
+            animator.end();
+        });
+        flushHandlers();
+        assertEquals(durationMs, lastCurrentPlayTime[0]);
+        assertEquals(1f, animator.getAnimatedFraction(), 0f /* delta */);
+        assertEquals(1, finishCount[0]);
     }
 
     @Test

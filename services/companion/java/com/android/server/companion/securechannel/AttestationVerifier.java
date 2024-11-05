@@ -53,9 +53,8 @@ public class AttestationVerifier {
      *
      * @param remoteAttestation the full certificate chain containing attestation extension.
      * @param attestationChallenge attestation challenge for authentication.
-     * @return true if attestation is successfully verified; false otherwise.
+     * @return 1 if attestation is successfully verified; 0 otherwise.
      */
-    @NonNull
     public int verifyAttestation(
             @NonNull byte[] remoteAttestation,
             @NonNull byte[] attestationChallenge

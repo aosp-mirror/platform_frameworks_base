@@ -68,6 +68,7 @@ constructor(
                     }
                 }
                 is MediaProjectionState.Projecting.EntireScreen,
+                is MediaProjectionState.Projecting.NoScreen,
                 is MediaProjectionState.NotProjecting -> {
                     flowOf(TaskSwitchState.NotProjectingTask)
                 }

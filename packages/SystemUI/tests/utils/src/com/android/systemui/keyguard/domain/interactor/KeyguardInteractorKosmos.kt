@@ -24,7 +24,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 
 val Kosmos.keyguardInteractor: KeyguardInteractor by
     Kosmos.Fixture {
@@ -39,7 +38,6 @@ val Kosmos.keyguardInteractor: KeyguardInteractor by
             fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
             fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
             fromOccludedTransitionInteractor = { fromOccludedTransitionInteractor },
-            sharedNotificationContainerInteractor = { sharedNotificationContainerInteractor },
             applicationScope = testScope.backgroundScope,
         )
     }

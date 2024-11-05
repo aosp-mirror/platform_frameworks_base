@@ -1407,7 +1407,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB activa"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración por USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar depuración USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuración inalámbrica conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar la depuración inalámbrica"</string>
@@ -1944,6 +1944,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivado"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Cualquier calendario"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> silencia algunos sonidos"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Se ha producido un problema interno en el dispositivo y es posible que este no sea estable hasta que restablezcas el estado de fábrica."</string>
@@ -2011,6 +2013,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Define un bloqueo de pantalla"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Establecer bloqueo de pantalla"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Para usar el espacio privado, define un bloqueo de pantalla"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Para eliminar el espacio privado, define un método de desbloqueo de pantalla en este dispositivo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"La aplicación no está disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"En estos momentos, <xliff:g id="APP_NAME">%1$s</xliff:g> no está disponible."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> no disponible"</string>
@@ -2129,11 +2132,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Las llamadas y las notificaciones vibrarán"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Las llamadas y las notificaciones se silenciarán"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Cambios del sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"No molestar"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novedad: El modo No molestar oculta las notificaciones"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toca para obtener más información y hacer cambios."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ha cambiado el modo No molestar"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca para consultar lo que se está bloqueando."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulta los ajustes de notificaciones"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"A partir de Android 13, las aplicaciones que instalas necesitan tu permiso para enviar notificaciones. Toca para cambiar este permiso en las aplicaciones que ya tengas."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Recordar más tarde"</string>
@@ -2429,6 +2427,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envía y recibe mensajes sin una red móvil ni Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abre Mensajes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cómo funciona"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendiente..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configura Desbloqueo con huella digital de nuevo"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ya no puede reconocerse."</string>

@@ -42,8 +42,9 @@ static jlong createDump(JNIEnv*, jobject, jint fd, jboolean isProto) {
     return reinterpret_cast<jlong>(dump);
 }
 
-static void addToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath, jstring jpackage,
-                      jlong versionCode, jlong startTime, jlong endTime, jbyteArray jdata) {
+static void addToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath, jint uid,
+                      jstring jpackage, jlong versionCode, jlong startTime, jlong endTime,
+                      jbyteArray jdata) {
     std::string path;
     const ProfileData* data = nullptr;
     LOG_ALWAYS_FATAL_IF(jdata == nullptr && jpath == nullptr, "Path and data can't both be null");
@@ -68,7 +69,8 @@ static void addToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath, jstrin
     LOG_ALWAYS_FATAL_IF(!dump, "null passed for dump pointer");
 
     const std::string package(packageChars.c_str(), packageChars.size());
-    GraphicsStatsService::addToDump(dump, path, package, versionCode, startTime, endTime, data);
+    GraphicsStatsService::addToDump(dump, path, static_cast<uid_t>(uid), package, versionCode,
+                                    startTime, endTime, data);
 }
 
 static void addFileToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath) {
@@ -91,7 +93,7 @@ static void finishDumpInMemory(JNIEnv* env, jobject, jlong dumpPtr, jlong pulled
     GraphicsStatsService::finishDumpInMemory(dump, data, lastFullDay == JNI_TRUE);
 }
 
-static void saveBuffer(JNIEnv* env, jobject clazz, jstring jpath, jstring jpackage,
+static void saveBuffer(JNIEnv* env, jobject clazz, jstring jpath, jint uid, jstring jpackage,
                        jlong versionCode, jlong startTime, jlong endTime, jbyteArray jdata) {
     ScopedByteArrayRO buffer(env, jdata);
     LOG_ALWAYS_FATAL_IF(buffer.size() != sizeof(ProfileData),
@@ -106,7 +108,8 @@ static void saveBuffer(JNIEnv* env, jobject clazz, jstring jpath, jstring jpacka
     const std::string path(pathChars.c_str(), pathChars.size());
     const std::string package(packageChars.c_str(), packageChars.size());
     const ProfileData* data = reinterpret_cast<const ProfileData*>(buffer.get());
-    GraphicsStatsService::saveBuffer(path, package, versionCode, startTime, endTime, data);
+    GraphicsStatsService::saveBuffer(path, static_cast<uid_t>(uid), package, versionCode, startTime,
+                                     endTime, data);
 }
 
 static jobject gGraphicsStatsServiceObject = nullptr;
@@ -173,16 +176,16 @@ static void nativeDestructor(JNIEnv* env, jobject javaObject) {
 } // namespace android
 using namespace android;
 
-static const JNINativeMethod sMethods[] =
-        {{"nGetAshmemSize", "()I", (void*)getAshmemSize},
-         {"nCreateDump", "(IZ)J", (void*)createDump},
-         {"nAddToDump", "(JLjava/lang/String;Ljava/lang/String;JJJ[B)V", (void*)addToDump},
-         {"nAddToDump", "(JLjava/lang/String;)V", (void*)addFileToDump},
-         {"nFinishDump", "(J)V", (void*)finishDump},
-         {"nFinishDumpInMemory", "(JJZ)V", (void*)finishDumpInMemory},
-         {"nSaveBuffer", "(Ljava/lang/String;Ljava/lang/String;JJJ[B)V", (void*)saveBuffer},
-         {"nativeInit", "()V", (void*)nativeInit},
-         {"nativeDestructor", "()V", (void*)nativeDestructor}};
+static const JNINativeMethod sMethods[] = {
+        {"nGetAshmemSize", "()I", (void*)getAshmemSize},
+        {"nCreateDump", "(IZ)J", (void*)createDump},
+        {"nAddToDump", "(JLjava/lang/String;ILjava/lang/String;JJJ[B)V", (void*)addToDump},
+        {"nAddToDump", "(JLjava/lang/String;)V", (void*)addFileToDump},
+        {"nFinishDump", "(J)V", (void*)finishDump},
+        {"nFinishDumpInMemory", "(JJZ)V", (void*)finishDumpInMemory},
+        {"nSaveBuffer", "(Ljava/lang/String;ILjava/lang/String;JJJ[B)V", (void*)saveBuffer},
+        {"nativeInit", "()V", (void*)nativeInit},
+        {"nativeDestructor", "()V", (void*)nativeDestructor}};
 
 int register_android_graphics_GraphicsStatsService(JNIEnv* env) {
     jclass graphicsStatsService_class =

@@ -23,9 +23,7 @@ import com.android.internal.widget.remotecompose.core.operations.Utils;
 
 import java.util.Arrays;
 
-/**
- * Paint Bundle represents a delta of changes to a paint object
- */
+/** Paint Bundle represents a delta of changes to a paint object */
 public class PaintBundle {
     int[] mArray = new int[200];
     int[] mOutArray = null;
@@ -33,6 +31,7 @@ public class PaintBundle {
 
     /**
      * Apply changes to a PaintChanges interface
+     *
      * @param paintContext
      * @param p
      */
@@ -46,10 +45,9 @@ public class PaintBundle {
             int cmd = mOutArray[i++];
             mask = mask | (1 << (cmd - 1));
             switch (cmd & 0xFFFF) {
-                case TEXT_SIZE: {
+                case TEXT_SIZE:
                     p.setTextSize(Float.intBitsToFloat(mOutArray[i++]));
                     break;
-                }
                 case TYPEFACE:
                     int style = (cmd >> 16);
                     int weight = style & 0x3ff;
@@ -59,99 +57,86 @@ public class PaintBundle {
                     p.setTypeFace(font_type, weight, italic);
                     break;
                 case COLOR_ID: // mOutArray should have already decoded it
-                case COLOR: {
+                case COLOR:
                     p.setColor(mOutArray[i++]);
                     break;
-                }
-                case STROKE_WIDTH: {
+                case STROKE_WIDTH:
                     p.setStrokeWidth(Float.intBitsToFloat(mOutArray[i++]));
                     break;
-                }
-                case STROKE_MITER: {
+                case STROKE_MITER:
                     p.setStrokeMiter(Float.intBitsToFloat(mOutArray[i++]));
                     break;
-                }
-                case STROKE_CAP: {
+                case STROKE_CAP:
                     p.setStrokeCap(cmd >> 16);
                     break;
-                }
-                case STYLE: {
+                case STYLE:
                     p.setStyle(cmd >> 16);
                     break;
-                }
-                case SHADER: {
+                case SHADER:
                     p.setShader(mOutArray[i++]);
                     break;
-                }
-                case STROKE_JOIN: {
+                case STROKE_JOIN:
                     p.setStrokeJoin(cmd >> 16);
                     break;
-                }
-                case IMAGE_FILTER_QUALITY: {
+                case IMAGE_FILTER_QUALITY:
                     p.setImageFilterQuality(cmd >> 16);
                     break;
-                }
-                case BLEND_MODE: {
+                case BLEND_MODE:
                     p.setBlendMode(cmd >> 16);
                     break;
-                }
-                case FILTER_BITMAP: {
+                case FILTER_BITMAP:
                     p.setFilterBitmap(!((cmd >> 16) == 0));
                     break;
-                }
-                case GRADIENT: {
+                case GRADIENT:
                     i = callSetGradient(cmd, mOutArray, i, p);
                     break;
-                }
-                case COLOR_FILTER: {
+                case COLOR_FILTER_ID:
+                case COLOR_FILTER:
                     p.setColorFilter(mOutArray[i++], cmd >> 16);
                     break;
-                }
-                case ALPHA: {
+                case ALPHA:
                     p.setAlpha(Float.intBitsToFloat(mOutArray[i++]));
                     break;
-                }
+                case CLEAR_COLOR_FILTER:
+                    p.clear(0x1L << PaintBundle.COLOR_FILTER);
+                    break;
             }
         }
-
-        mask = (~mask) & PaintChanges.VALID_BITS;
-
-        p.clear(mask);
     }
 
-    private String toName(int id) {
-        switch (id) {
-            case TEXT_SIZE:
-                return "TEXT_SIZE";
-            case COLOR:
-                return "COLOR";
-            case STROKE_WIDTH:
-                return "STROKE_WIDTH";
-            case STROKE_MITER:
-                return "STROKE_MITER";
-            case TYPEFACE:
-                return "TYPEFACE";
-            case STROKE_CAP:
-                return "CAP";
-            case STYLE:
-                return "STYLE";
-            case SHADER:
-                return "SHADER";
-            case IMAGE_FILTER_QUALITY:
-                return "IMAGE_FILTER_QUALITY";
-            case BLEND_MODE:
-                return "BLEND_MODE";
-            case FILTER_BITMAP:
-                return "FILTER_BITMAP";
-            case GRADIENT:
-                return "GRADIENT_LINEAR";
-            case ALPHA:
-                return "ALPHA";
-            case COLOR_FILTER:
-                return "COLOR_FILTER";
-        }
-        return "????" + id + "????";
-    }
+    //    private String toName(int id) {
+    //        switch (id) {
+    //            case TEXT_SIZE:
+    //                return "TEXT_SIZE";
+    //            case COLOR:
+    //                return "COLOR";
+    //            case STROKE_WIDTH:
+    //                return "STROKE_WIDTH";
+    //            case STROKE_MITER:
+    //                return "STROKE_MITER";
+    //            case TYPEFACE:
+    //                return "TYPEFACE";
+    //            case STROKE_CAP:
+    //                return "CAP";
+    //            case STYLE:
+    //                return "STYLE";
+    //            case SHADER:
+    //                return "SHADER";
+    //            case IMAGE_FILTER_QUALITY:
+    //                return "IMAGE_FILTER_QUALITY";
+    //            case BLEND_MODE:
+    //                return "BLEND_MODE";
+    //            case FILTER_BITMAP:
+    //                return "FILTER_BITMAP";
+    //            case GRADIENT:
+    //                return "GRADIENT_LINEAR";
+    //            case ALPHA:
+    //                return "ALPHA";
+    //            case COLOR_FILTER:
+    //                return "COLOR_FILTER";
+    //        }
+    //        return "????" + id + "????";
+    //    }
 
     private static String colorInt(int color) {
         String str = "000000000000" + Integer.toHexString(color);
@@ -185,103 +170,189 @@ public class PaintBundle {
             int cmd = mArray[i++];
             int type = cmd & 0xFFFF;
             switch (type) {
-
-                case TEXT_SIZE: {
-                    ret.append("    TextSize("
-                            + asFloatStr(mArray[i++]));
-                }
-
-                break;
-                case TYPEFACE: {
+                case TEXT_SIZE:
+                    ret.append("    TextSize(" + asFloatStr(mArray[i++]));
+                    break;
+                case TYPEFACE:
                     int style = (cmd >> 16);
                     int weight = style & 0x3ff;
                     boolean italic = (style >> 10) > 0;
                     int font_type = mArray[i++];
-                    ret.append("    TypeFace(" + (font_type + ", "
-                            + weight + ", " + italic));
-                }
-                break;
-                case COLOR: {
+                    ret.append("    TypeFace(" + (font_type + ", " + weight + ", " + italic));
+                    break;
+                case COLOR:
                     ret.append("    Color(" + colorInt(mArray[i++]));
-                }
-                break;
-                case COLOR_ID: {
+                    break;
+                case COLOR_ID:
                     ret.append("    ColorId([" + mArray[i++] + "]");
-                }
-                break;
-                case STROKE_WIDTH: {
-                    ret.append("    StrokeWidth("
-                            + (asFloatStr(mArray[i++])));
-                }
-                break;
-                case STROKE_MITER: {
-                    ret.append("    StrokeMiter("
-                            + (asFloatStr(mArray[i++])));
-                }
-                break;
-                case STROKE_CAP: {
-                    ret.append("    StrokeCap("
-                            + (cmd >> 16));
-                }
-                break;
-                case STYLE: {
+                    break;
+                case STROKE_WIDTH:
+                    ret.append("    StrokeWidth(" + asFloatStr(mArray[i++]));
+                    break;
+                case STROKE_MITER:
+                    ret.append("    StrokeMiter(" + asFloatStr(mArray[i++]));
+                    break;
+                case STROKE_CAP:
+                    ret.append("    StrokeCap(" + (cmd >> 16));
+                    break;
+                case STYLE:
                     ret.append("    Style(" + (cmd >> 16));
-                }
-                break;
-                case COLOR_FILTER: {
-                    ret.append("    ColorFilter(color="
-                            + colorInt(mArray[i++])
-                            + ", mode=" + blendModeString(cmd >> 16));
-                }
-                break;
-                case SHADER: {
+                    break;
+                case COLOR_FILTER:
+                    ret.append(
+                            "    ColorFilter(color="
+                                    + colorInt(mArray[i++])
+                                    + ", mode="
+                                    + blendModeString(cmd >> 16));
+                    break;
+                case COLOR_FILTER_ID:
+                    ret.append(
+                            "    ColorFilterID(color=["
+                                    + mArray[i++]
+                                    + "], mode="
+                                    + blendModeString(cmd >> 16));
+                    break;
+                case CLEAR_COLOR_FILTER:
+                    ret.append("    clearColorFilter");
+                    break;
+                case SHADER:
                     ret.append("    Shader(" + mArray[i++]);
-                }
-                break;
-                case ALPHA: {
-                    ret.append("    Alpha("
-                            + (asFloatStr(mArray[i++])));
-                }
-                break;
-                case IMAGE_FILTER_QUALITY: {
+                    break;
+                case ALPHA:
+                    ret.append("    Alpha(" + asFloatStr(mArray[i++]));
+                    break;
+                case IMAGE_FILTER_QUALITY:
                     ret.append("    ImageFilterQuality(" + (cmd >> 16));
-                }
-                break;
-                case BLEND_MODE: {
+                    break;
+                case BLEND_MODE:
                     ret.append("    BlendMode(" + blendModeString(cmd >> 16));
-                }
-                break;
-                case FILTER_BITMAP: {
-                    ret.append("    FilterBitmap("
-                            + (!((cmd >> 16) == 0)));
-                }
-                break;
-                case STROKE_JOIN: {
+                    break;
+                case FILTER_BITMAP:
+                    ret.append("    FilterBitmap(" + !(cmd >> 16 == 0));
+                    break;
+                case STROKE_JOIN:
                     ret.append("    StrokeJoin(" + (cmd >> 16));
-                }
-                break;
-                case ANTI_ALIAS: {
+                    break;
+                case ANTI_ALIAS:
                     ret.append("    AntiAlias(" + (cmd >> 16));
-                }
-                break;
-                case GRADIENT: {
+                    break;
+                case GRADIENT:
                     i = callPrintGradient(cmd, mArray, i, ret);
-                }
             }
             ret.append("),\n");
         }
         return ret.toString();
     }
 
+    private void registerFloat(int iv, RemoteContext context, VariableSupport support) {
+        float v = Float.intBitsToFloat(iv);
+        if (Float.isNaN(v)) {
+            context.listensTo(Utils.idFromNan(v), support);
+        }
+    }
+
+    int callRegisterGradient(
+            int cmd, int[] array, int i, RemoteContext context, VariableSupport support) {
+        int ret = i;
+        int type = (cmd >> 16);
+        int control = array[ret++];
+        int len = 0xFF & control; // maximum 256 colors
+        int register = 0xFFFF & (control >> 16);
+        int tileMode = 0;
+        switch (type) {
+            /* see {@link #setLinearGradient} */
+            case LINEAR_GRADIENT:
+                if (len > 0) {
+
+                    for (int j = 0; j < len; j++) {
+                        int color = array[ret++];
+                        if ((register & (1 << j)) != 0) {
+                            context.listensTo(color, support);
+                        }
+                    }
+                }
+                len = array[ret++];
+
+                if (len > 0) {
+
+                    for (int j = 0; j < len; j++) {
+                        registerFloat(array[ret++], context, support);
+                    }
+                }
+
+                //  start x
+                registerFloat(array[ret++], context, support);
+                //  start y
+                registerFloat(array[ret++], context, support);
+                // end x
+                registerFloat(array[ret++], context, support);
+                // end y
+                registerFloat(array[ret++], context, support);
+                tileMode = array[ret++];
+                break;
+            /* see {@link #setRadialGradient} */
+            case RADIAL_GRADIENT:
+                if (len > 0) {
+
+                    for (int j = 0; j < len; j++) {
+                        int color = array[ret++];
+                        if ((register & (1 << j)) != 0) {
+                            context.listensTo(color, support);
+                        }
+                    }
+                }
+                len = array[ret++]; // stops
+                for (int j = 0; j < len; j++) {
+                    registerFloat(array[ret++], context, support);
+                }
+
+                //  center x
+                registerFloat(array[ret++], context, support);
+                //  center y
+                registerFloat(array[ret++], context, support);
+                // radius
+                registerFloat(array[ret++], context, support);
+
+                tileMode = array[ret++]; // tile Mode
+                break;
+            /* see {@link #setSweepGradient} */
+            case SWEEP_GRADIENT:
+                if (len > 0) {
+
+                    for (int j = 0; j < len; j++) {
+                        int color = array[ret++];
+                        if ((register & (1 << j)) != 0) {
+                            context.listensTo(color, support);
+                        }
+                    }
+                }
+
+                len = array[ret++]; // stops
+                for (int j = 0; j < len; j++) {
+                    registerFloat(array[ret++], context, support);
+                }
+                //  center x
+                registerFloat(array[ret++], context, support);
+                //  center y
+                registerFloat(array[ret++], context, support);
+                break;
+            default:
+                System.out.println("error ");
+        }
+
+        return ret;
+    }
+
     int callPrintGradient(int cmd, int[] array, int i, StringBuilder p) {
         int ret = i;
         int type = (cmd >> 16);
+        int tileMode = 0;
+        int len = array[ret++];
+        int[] colors = null;
+        String[] stops = null;
         switch (type) {
-
-            case 0: {
+            case 0:
                 p.append("    LinearGradient(\n");
-                int len = array[ret++];
-                int[] colors = null;
                 if (len > 0) {
                     colors = new int[len];
                     for (int j = 0; j < colors.length; j++) {
@@ -289,7 +360,6 @@ public class PaintBundle {
                     }
                 }
                 len = array[ret++];
-                String[] stops = null;
                 if (len > 0) {
                     stops = new String[len];
                     for (int j = 0; j < stops.length; j++) {
@@ -305,24 +375,18 @@ public class PaintBundle {
                 p.append("      end = ");
                 p.append("[" + asFloatStr(array[ret++]));
                 p.append(", " + asFloatStr(array[ret++]) + "],\n");
-                int tileMode = array[ret++];
+                tileMode = array[ret++];
                 p.append("      tileMode = " + tileMode + "\n    ");
-            }
-
-            break;
-            case 1: {
+                break;
+            case 1:
                 p.append("    RadialGradient(\n");
-                int len = array[ret++];
-                int[] colors = null;
                 if (len > 0) {
                     colors = new int[len];
                     for (int j = 0; j < colors.length; j++) {
                         colors[j] = array[ret++];
-
                     }
                 }
                 len = array[ret++];
-                String[] stops = null;
                 if (len > 0) {
                     stops = new String[len];
                     for (int j = 0; j < stops.length; j++) {
@@ -337,24 +401,18 @@ public class PaintBundle {
                 p.append(", " + asFloatStr(array[ret++]) + "],\n");
                 p.append("      radius =");
                 p.append(" " + asFloatStr(array[ret++]) + ",\n");
-                int tileMode = array[ret++];
+                tileMode = array[ret++];
                 p.append("      tileMode = " + tileMode + "\n    ");
-            }
-
-            break;
-            case 2: {
+                break;
+            case 2:
                 p.append("    SweepGradient(\n");
-                int len = array[ret++];
-                int[] colors = null;
                 if (len > 0) {
                     colors = new int[len];
                     for (int j = 0; j < colors.length; j++) {
                         colors[j] = array[ret++];
-
                     }
                 }
                 len = array[ret++];
-                String[] stops = null;
                 if (len > 0) {
                     stops = new String[len];
                     for (int j = 0; j < stops.length; j++) {
@@ -365,13 +423,10 @@ public class PaintBundle {
                 p.append("      stops = " + Arrays.toString(stops) + ",\n");
                 p.append("      center = ");
                 p.append("[" + asFloatStr(array[ret++]));
-                p.append(", "
-                        + asFloatStr(array[ret++]) + "],\n    ");
-            }
-            break;
-            default: {
+                p.append(", " + asFloatStr(array[ret++]) + "],\n    ");
+                break;
+            default:
                 p.append("GRADIENT_??????!!!!");
-            }
         }
 
         return ret;
@@ -381,7 +436,8 @@ public class PaintBundle {
         int ret = i;
         int gradientType = (cmd >> 16);
 
-        int len = array[ret++];
+        int len = 0xFF & array[ret++]; // maximum 256 colors
+
         int[] colors = null;
         if (len > 0) {
             colors = new int[len];
@@ -402,33 +458,30 @@ public class PaintBundle {
             return ret;
         }
 
-        switch (gradientType) {
+        int tileMode = 0;
+        float centerX = 0f;
+        float centerY = 0f;
 
-            case LINEAR_GRADIENT: {
+        switch (gradientType) {
+            case LINEAR_GRADIENT:
                 float startX = Float.intBitsToFloat(array[ret++]);
                 float startY = Float.intBitsToFloat(array[ret++]);
                 float endX = Float.intBitsToFloat(array[ret++]);
                 float endY = Float.intBitsToFloat(array[ret++]);
-                int tileMode = array[ret++];
-                p.setLinearGradient(colors, stops, startX,
-                        startY, endX, endY, tileMode);
-            }
-
-            break;
-            case RADIAL_GRADIENT: {
-                float centerX = Float.intBitsToFloat(array[ret++]);
-                float centerY = Float.intBitsToFloat(array[ret++]);
+                tileMode = array[ret++];
+                p.setLinearGradient(colors, stops, startX, startY, endX, endY, tileMode);
+                break;
+            case RADIAL_GRADIENT:
+                centerX = Float.intBitsToFloat(array[ret++]);
+                centerY = Float.intBitsToFloat(array[ret++]);
                 float radius = Float.intBitsToFloat(array[ret++]);
-                int tileMode = array[ret++];
-                p.setRadialGradient(colors, stops, centerX, centerY,
-                        radius, tileMode);
-            }
-            break;
-            case SWEEP_GRADIENT: {
-                float centerX = Float.intBitsToFloat(array[ret++]);
-                float centerY = Float.intBitsToFloat(array[ret++]);
+                tileMode = array[ret++];
+                p.setRadialGradient(colors, stops, centerX, centerY, radius, tileMode);
+                break;
+            case SWEEP_GRADIENT:
+                centerX = Float.intBitsToFloat(array[ret++]);
+                centerY = Float.intBitsToFloat(array[ret++]);
                 p.setSweepGradient(colors, stops, centerX, centerY);
-            }
         }
 
         return ret;
@@ -453,9 +506,9 @@ public class PaintBundle {
         mPos = len;
     }
 
-    public static final int TEXT_SIZE = 1;  // float
+    public static final int TEXT_SIZE = 1; // float
 
-    public static final int COLOR = 4;  // int
+    public static final int COLOR = 4; // int
     public static final int STROKE_WIDTH = 5; // float
     public static final int STROKE_MITER = 6;
     public static final int STROKE_CAP = 7; //  int
@@ -470,7 +523,9 @@ public class PaintBundle {
     public static final int TYPEFACE = 16;
     public static final int FILTER_BITMAP = 17;
     public static final int BLEND_MODE = 18;
-    public static final int COLOR_ID = 19;  // int
+    public static final int COLOR_ID = 19;
+    public static final int COLOR_FILTER_ID = 20;
+    public static final int CLEAR_COLOR_FILTER = 21;
 
     public static final int BLEND_MODE_CLEAR = 0;
     public static final int BLEND_MODE_SRC = 1;
@@ -524,27 +579,28 @@ public class PaintBundle {
     /**
      * sets a shader that draws a linear gradient along a line.
      *
-     * @param startX   The x-coordinate for the start of the gradient line
-     * @param startY   The y-coordinate for the start of the gradient line
-     * @param endX     The x-coordinate for the end of the gradient line
-     * @param endY     The y-coordinate for the end of the gradient line
-     * @param colors   The sRGB colors to be distributed along the gradient line
-     * @param stops    May be null. The relative positions [0..1] of
-     *                 each corresponding color in the colors array. If this is null,
-     *                 the colors are distributed evenly along the gradient line.
+     * @param startX The x-coordinate for the start of the gradient line
+     * @param startY The y-coordinate for the start of the gradient line
+     * @param endX The x-coordinate for the end of the gradient line
+     * @param endY The y-coordinate for the end of the gradient line
+     * @param colors The sRGB colors to be distributed along the gradient line
+     * @param stops May be null. The relative positions [0..1] of each corresponding color in the
+     *     colors array. If this is null, the colors are distributed evenly along the gradient line.
      * @param tileMode The Shader tiling mode
      */
-    public void setLinearGradient(int[] colors,
-                                  float[] stops,
-                                  float startX,
-                                  float startY,
-                                  float endX,
-                                  float endY,
-                                  int tileMode) {
-        int startPos = mPos;
+    public void setLinearGradient(
+            int[] colors,
+            int idMask,
+            float[] stops,
+            float startX,
+            float startY,
+            float endX,
+            float endY,
+            int tileMode) {
+        //        int startPos = mPos;
         int len;
         mArray[mPos++] = GRADIENT | (LINEAR_GRADIENT << 16);
-        mArray[mPos++] = len = (colors == null) ? 0 : colors.length;
+        mArray[mPos++] = (idMask << 16) | (len = (colors == null) ? 0 : colors.length);
         for (int i = 0; i < len; i++) {
             mArray[mPos++] = colors[i];
         }
@@ -565,20 +621,18 @@ public class PaintBundle {
      *
      * @param centerX The x-coordinate of the center
      * @param centerY The y-coordinate of the center
-     * @param colors  The sRGB colors to be distributed around the center.
-     *                There must be at least 2 colors in the array.
-     * @param stops   May be NULL. The relative position of
-     *                each corresponding color in the colors array, beginning
-     *                with 0 and ending with 1.0. If the values are not
-     *                monotonic, the drawing may produce unexpected results.
-     *                If positions is NULL, then the colors are automatically
-     *                spaced evenly.
+     * @param colors The sRGB colors to be distributed around the center. There must be at least 2
+     *     colors in the array.
+     * @param stops May be NULL. The relative position of each corresponding color in the colors
+     *     array, beginning with 0 and ending with 1.0. If the values are not monotonic, the drawing
+     *     may produce unexpected results. If positions is NULL, then the colors are automatically
+     *     spaced evenly.
      */
-    public void setSweepGradient(int[] colors, float[] stops, float centerX, float centerY) {
-        int startPos = mPos;
+    public void setSweepGradient(
+            int[] colors, int idMask, float[] stops, float centerX, float centerY) {
         int len;
         mArray[mPos++] = GRADIENT | (SWEEP_GRADIENT << 16);
-        mArray[mPos++] = len = (colors == null) ? 0 : colors.length;
+        mArray[mPos++] = (idMask << 16) | (len = (colors == null) ? 0 : colors.length);
         for (int i = 0; i < len; i++) {
             mArray[mPos++] = colors[i];
         }
@@ -594,29 +648,28 @@ public class PaintBundle {
     /**
      * Sets a shader that draws a radial gradient given the center and radius.
      *
-     * @param centerX  The x-coordinate of the center of the radius
-     * @param centerY  The y-coordinate of the center of the radius
-     * @param radius   Must be positive. The radius of the gradient.
-     * @param colors   The sRGB colors distributed between the center and edge
-     * @param stops    May be <code>null</code>.
-     *                 Valid values are between <code>0.0f</code> and
-     *                 <code>1.0f</code>. The relative position of each
-     *                 corresponding color in
-     *                 the colors array. If <code>null</code>, colors are
-     *                 distributed evenly
-     *                 between the center and edge of the circle.
+     * @param centerX The x-coordinate of the center of the radius
+     * @param centerY The y-coordinate of the center of the radius
+     * @param radius Must be positive. The radius of the gradient.
+     * @param colors The sRGB colors distributed between the center and edge
+     * @param stops May be <code>null</code>. Valid values are between <code>0.0f</code> and <code>
+     *      1.0f</code>. The relative position of each corresponding color in the colors array. If
+     *     <code>null</code>, colors are distributed evenly between the center and edge of the
+     *     circle.
      * @param tileMode The Shader tiling mode
      */
-    public void setRadialGradient(int[] colors,
-                                  float[] stops,
-                                  float centerX,
-                                  float centerY,
-                                  float radius,
-                                  int tileMode) {
-        int startPos = mPos;
+    public void setRadialGradient(
+            int[] colors,
+            int idMask,
+            float[] stops,
+            float centerX,
+            float centerY,
+            float radius,
+            int tileMode) {
+        //        int startPos = mPos;
         int len;
         mArray[mPos++] = GRADIENT | (RADIAL_GRADIENT << 16);
-        mArray[mPos++] = len = (colors == null) ? 0 : colors.length;
+        mArray[mPos++] = (idMask << 16) | (len = (colors == null) ? 0 : colors.length);
         for (int i = 0; i < len; i++) {
             mArray[mPos++] = colors[i];
         }
@@ -629,14 +682,13 @@ public class PaintBundle {
         mArray[mPos++] = Float.floatToRawIntBits(centerY);
         mArray[mPos++] = Float.floatToRawIntBits(radius);
         mArray[mPos++] = tileMode;
-
     }
 
     /**
      * Create a color filter that uses the specified color and Porter-Duff mode.
      *
      * @param color The ARGB source color used with the Porter-Duff mode
-     * @param mode  The porter-duff mode that is applied
+     * @param mode The porter-duff mode that is applied
      */
     public void setColorFilter(int color, int mode) {
         mArray[mPos] = COLOR_FILTER | (mode << 16);
@@ -645,12 +697,29 @@ public class PaintBundle {
     }
 
     /**
+     * Create a color filter that uses the specified color and Porter-Duff mode.
+     *
+     * @param color The id source color used with the Porter-Duff mode
+     * @param mode The porter-duff mode that is applied
+     */
+    public void setColorFilterId(int color, int mode) {
+        mArray[mPos] = COLOR_FILTER_ID | (mode << 16);
+        mPos++;
+        mArray[mPos++] = color;
+    }
+
+    /** This sets the color filter to null */
+    public void clearColorFilter() {
+        mArray[mPos] = CLEAR_COLOR_FILTER;
+        mPos++;
+    }
+
+    /**
      * Set the paint's text size. This value must be > 0
      *
      * @param size set the paint's text size in pixel units.
      */
     public void setTextSize(float size) {
-        int p = mPos;
         mArray[mPos] = TEXT_SIZE;
         mPos++;
         mArray[mPos] = Float.floatToRawIntBits(size);
@@ -659,22 +728,21 @@ public class PaintBundle {
 
     /**
      * @param fontType 0 = default 1 = sans serif 2 = serif 3 = monospace
-     * @param weight   100-1000
-     * @param italic   tur
+     * @param weight 100-1000
+     * @param italic tur
      */
     public void setTextStyle(int fontType, int weight, boolean italic) {
-        int style = (weight & 0x3FF) | (italic ? 2048 : 0);  // pack the weight and italic
+        int style = (weight & 0x3FF) | (italic ? 2048 : 0); // pack the weight and italic
         mArray[mPos++] = TYPEFACE | (style << 16);
         mArray[mPos++] = fontType;
     }
 
     /**
-     * Set the width for stroking.
-     * Pass 0 to stroke in hairline mode.
-     * Hairlines always draws a single pixel independent of the canvas's matrix.
+     * Set the width for stroking. Pass 0 to stroke in hairline mode. Hairlines always draws a
+     * single pixel independent of the canvas's matrix.
      *
-     * @param width set the paint's stroke width, used whenever the paint's
-     *              style is Stroke or StrokeAndFill.
+     * @param width set the paint's stroke width, used whenever the paint's style is Stroke or
+     *     StrokeAndFill.
      */
     public void setStrokeWidth(float width) {
         mArray[mPos] = STROKE_WIDTH;
@@ -685,6 +753,7 @@ public class PaintBundle {
 
     /**
      * Set the Color based on Color
+     *
      * @param color
      */
     public void setColor(int color) {
@@ -696,6 +765,7 @@ public class PaintBundle {
 
     /**
      * Set the color based the R,G,B,A values
+     *
      * @param r red (0 to 255)
      * @param g green (0 to 255)
      * @param b blue (0 to 255)
@@ -708,17 +778,19 @@ public class PaintBundle {
 
     /**
      * Set the color based the R,G,B,A values
+     *
      * @param r red (0.0 to 1.0)
      * @param g green (0.0 to 1.0)
      * @param b blue (0.0 to 1.0)
      * @param a alpha (0.0 to 1.0)
      */
     public void setColor(float r, float g, float b, float a) {
-        setColor((int) r * 255, (int) g * 255, (int) b * 255, (int) a * 255);
+        setColor((int) (r * 255), (int) (g * 255), (int) (b * 255), (int) (a * 255));
     }
 
     /**
      * Set the Color based on ID
+     *
      * @param color
      */
     public void setColorId(int color) {
@@ -728,12 +800,11 @@ public class PaintBundle {
         mPos++;
     }
 
-
     /**
      * Set the paint's Cap.
      *
-     * @param cap set the paint's line cap style, used whenever the paint's
-     *            style is Stroke or StrokeAndFill.
+     * @param cap set the paint's line cap style, used whenever the paint's style is Stroke or
+     *     StrokeAndFill.
      */
     public void setStrokeCap(int cap) {
         mArray[mPos] = STROKE_CAP | (cap << 16);
@@ -742,6 +813,7 @@ public class PaintBundle {
 
     /**
      * Set the style STROKE and/or FILL
+     *
      * @param style
      */
     public void setStyle(int style) {
@@ -751,6 +823,7 @@ public class PaintBundle {
 
     /**
      * Set the shader id to use
+     *
      * @param shaderId
      */
     public void setShader(int shaderId) {
@@ -760,9 +833,7 @@ public class PaintBundle {
         mPos++;
     }
 
-    /**
-     * Set the Alpha value
-     */
+    /** Set the Alpha value */
     public void setAlpha(float alpha) {
         mArray[mPos] = ALPHA;
         mPos++;
@@ -771,11 +842,11 @@ public class PaintBundle {
     }
 
     /**
-     * Set the paint's stroke miter value. This is used to control the behavior
-     * of miter joins when the joins angle is sharp. This value must be >= 0.
+     * Set the paint's stroke miter value. This is used to control the behavior of miter joins when
+     * the joins angle is sharp. This value must be >= 0.
      *
-     * @param miter set the miter limit on the paint, used whenever the paint's
-     *              style is Stroke or StrokeAndFill.
+     * @param miter set the miter limit on the paint, used whenever the paint's style is Stroke or
+     *     StrokeAndFill.
      */
     public void setStrokeMiter(float miter) {
         mArray[mPos] = STROKE_MITER;
@@ -787,8 +858,7 @@ public class PaintBundle {
     /**
      * Set the paint's Join.
      *
-     * @param join set the paint's Join, used whenever the paint's style is
-     *             Stroke or StrokeAndFill.
+     * @param join set the paint's Join, used whenever the paint's style is Stroke or StrokeAndFill.
      */
     public void setStrokeJoin(int join) {
         mArray[mPos] = STROKE_JOIN | (join << 16);
@@ -801,10 +871,8 @@ public class PaintBundle {
     }
 
     /**
-     * Set or clear the blend mode. A blend mode defines how source pixels
-     * (generated by a drawing command) are composited with the
-     * destination pixels
-     * (content of the render target).
+     * Set or clear the blend mode. A blend mode defines how source pixels (generated by a drawing
+     * command) are composited with the destination pixels (content of the render target).
      *
      * @param blendmode The blend mode to be installed in the paint
      */
@@ -814,15 +882,14 @@ public class PaintBundle {
     }
 
     /**
-     * Helper for setFlags(), setting or clearing the ANTI_ALIAS_FLAG bit
-     * AntiAliasing smooths out the edges of what is being drawn, but is has
-     * no impact on the interior of the shape. See setDither() and
-     * setFilterBitmap() to affect how colors are treated.
+     * Helper for setFlags(), setting or clearing the ANTI_ALIAS_FLAG bit AntiAliasing smooths out
+     * the edges of what is being drawn, but is has no impact on the interior of the shape. See
+     * setDither() and setFilterBitmap() to affect how colors are treated.
      *
      * @param aa true to set the antialias bit in the flags, false to clear it
      */
     public void setAntiAlias(boolean aa) {
-        mArray[mPos] = ANTI_ALIAS | (((aa) ? 1 : 0) << 16);
+        mArray[mPos] = ANTI_ALIAS | (aa ? 1 : 0) << 16;
         mPos++;
     }
 
@@ -903,6 +970,7 @@ public class PaintBundle {
 
     /**
      * Check all the floats for Nan(id) floats and call listenTo
+     *
      * @param context
      * @param support
      */
@@ -921,6 +989,7 @@ public class PaintBundle {
                         context.listensTo(Utils.idFromNan(v), support);
                     }
                     break;
+                case COLOR_FILTER_ID:
                 case COLOR_ID:
                     context.listensTo(mArray[i++], support);
                     break;
@@ -940,16 +1009,15 @@ public class PaintBundle {
                 case ANTI_ALIAS:
                     break;
 
-                case GRADIENT: {
-                    // TODO gradients should be handled correctly
-                    i = callPrintGradient(cmd, mArray, i, new StringBuilder());
-                }
+                case GRADIENT:
+                    i = callRegisterGradient(cmd, mArray, i, context, support);
             }
         }
     }
 
     /**
      * Update variables if any are float ids
+     *
      * @param context
      */
     public void updateVariables(RemoteContext context) {
@@ -970,6 +1038,7 @@ public class PaintBundle {
                     mOutArray[i] = fixFloatVar(mArray[i], context);
                     i++;
                     break;
+                case COLOR_FILTER_ID:
                 case COLOR_ID:
                     mOutArray[i] = fixColor(mArray[i], context);
                     i++;
@@ -987,12 +1056,12 @@ public class PaintBundle {
                 case IMAGE_FILTER_QUALITY:
                 case BLEND_MODE:
                 case ANTI_ALIAS:
+                case CLEAR_COLOR_FILTER:
                     break;
 
-                case GRADIENT: {
+                case GRADIENT:
                     // TODO gradients should be handled correctly
                     i = updateFloatsInGradient(cmd, mOutArray, mArray, i, context);
-                }
             }
         }
     }
@@ -1011,21 +1080,25 @@ public class PaintBundle {
         return n;
     }
 
-    int updateFloatsInGradient(int cmd, int[] out, int[] array,
-                               int i,
-                               RemoteContext context) {
+    int updateFloatsInGradient(int cmd, int[] out, int[] array, int i, RemoteContext context) {
         int ret = i;
         int type = (cmd >> 16);
+        int control = array[ret++];
+        int len = 0xFF & control; // maximum 256 colors
+        int register = 0xFFFF & (control >> 16);
         switch (type) {
-            case 0: {
-                int len = array[ret++];
+            case LINEAR_GRADIENT:
                 if (len > 0) {
+
                     for (int j = 0; j < len; j++) {
+                        int color = array[ret];
+                        if ((register & (1 << j)) != 0) {
+                            out[ret] = fixColor(color, context);
+                        }
                         ret++;
                     }
                 }
                 len = array[ret++];
-
                 if (len > 0) {
                     for (int j = 0; j < len; j++) {
                         out[ret] = fixFloatVar(array[ret], context);
@@ -1044,14 +1117,16 @@ public class PaintBundle {
                 out[ret] = fixFloatVar(array[ret], context);
                 ret++;
                 ret++; // tileMode
-            }
-
-            break;
-            case 1: {
+                break;
+            case RADIAL_GRADIENT:
                 //   RadialGradient
-                int len = array[ret++];
                 if (len > 0) {
+
                     for (int j = 0; j < len; j++) {
+                        int color = array[ret];
+                        if ((register & (1 << j)) != 0) {
+                            out[ret] = fixColor(color, context);
+                        }
                         ret++;
                     }
                 }
@@ -1063,7 +1138,6 @@ public class PaintBundle {
                     }
                 }
 
-
                 //    center
                 out[ret] = fixFloatVar(array[ret], context);
                 ret++;
@@ -1073,19 +1147,17 @@ public class PaintBundle {
                 out[ret] = fixFloatVar(array[ret], context);
                 ret++;
                 ret++; // tileMode
-
-            }
-
-            break;
-            case 2: {
+                break;
+            case SWEEP_GRADIENT:
                 //   SweepGradient
-                int len = array[ret++];
-                int[] colors = null;
                 if (len > 0) {
-                    colors = new int[len];
-                    for (int j = 0; j < colors.length; j++) {
-                        colors[j] = array[ret++];
 
+                    for (int j = 0; j < len; j++) {
+                        int color = array[ret];
+                        if ((register & (1 << j)) != 0) {
+                            out[ret] = fixColor(color, context);
+                        }
+                        ret++;
                     }
                 }
                 len = array[ret++];
@@ -1103,14 +1175,12 @@ public class PaintBundle {
                 ret++;
                 out[ret] = fixFloatVar(array[ret], context);
                 ret++;
-            }
-            break;
-            default: {
+
+                break;
+            default:
                 System.err.println("gradient type unknown");
-            }
         }
 
         return ret;
     }
-
 }

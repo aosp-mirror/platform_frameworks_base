@@ -121,7 +121,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 MediaData(
                     userId = USER_ID,
                     instanceId = InstanceId.fakeInstanceId(2),
-                    artist = ARTIST
+                    artist = ARTIST,
                 )
 
             mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
@@ -145,10 +145,17 @@ class MediaControlInteractorTest : SysuiTestCase() {
 
         val clickIntent = mock<PendingIntent> { whenever(it.isActivity).thenReturn(true) }
         val expandable = mock<Expandable>()
+        val activityController = mock<ActivityTransitionAnimator.Controller>()
+        whenever(expandable.activityTransitionController(any())).thenReturn(activityController)
 
         underTest.startClickIntent(expandable, clickIntent, SMARTSPACE_CARD_CLICK_EVENT, 1)
 
-        verify(clickIntent).send(any<Bundle>())
+        verify(activityStarter)
+            .startPendingIntentMaybeDismissingKeyguard(
+                eq(clickIntent),
+                eq(null),
+                eq(activityController),
+            )
     }
 
     @Test
@@ -174,7 +181,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 mediaData.appUid,
                 surface = SURFACE,
                 cardinality = 2,
-                rank = 1
+                rank = 1,
             )
         verify(activityStarter)
             .postStartActivityDismissingKeyguard(eq(clickIntent), eq(activityController))
@@ -232,7 +239,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 eq(true),
                 eq(dialogTransitionController),
                 eq(null),
-                eq(null)
+                eq(null),
             )
     }
 
@@ -248,7 +255,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
             .createBroadcastDialogWithController(
                 eq(APP_NAME),
                 eq(PACKAGE_NAME),
-                eq(dialogTransitionController)
+                eq(dialogTransitionController),
             )
     }
 
@@ -279,7 +286,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 anyInt(),
                 anyInt(),
                 anyInt(),
-                anyBoolean()
+                anyBoolean(),
             )
         verify(listener).onMediaDataRemoved(eq(KEY), eq(true))
     }
@@ -307,7 +314,7 @@ class MediaControlInteractorTest : SysuiTestCase() {
                 mediaData.appUid,
                 surface = SURFACE,
                 cardinality = 2,
-                rank = 1
+                rank = 1,
             )
         verify(listener).onMediaDataRemoved(eq(KEY), eq(true))
     }

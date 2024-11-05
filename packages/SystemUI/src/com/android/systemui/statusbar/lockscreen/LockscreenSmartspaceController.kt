@@ -91,7 +91,6 @@ class LockscreenSmartspaceController
 constructor(
         private val context: Context,
         private val featureFlags: FeatureFlags,
-        private val smartspaceManager: SmartspaceManager?,
         private val activityStarter: ActivityStarter,
         private val falsingManager: FalsingManager,
         private val systemClock: SystemClock,
@@ -124,6 +123,7 @@ constructor(
         private const val MAX_RECENT_SMARTSPACE_DATA_FOR_DUMP = 5
     }
 
+    private var userSmartspaceManager: SmartspaceManager? = null
     private var session: SmartspaceSession? = null
     private val datePlugin: BcSmartspaceDataPlugin? = optionalDatePlugin.orElse(null)
     private val weatherPlugin: BcSmartspaceDataPlugin? = optionalWeatherPlugin.orElse(null)
@@ -461,7 +461,11 @@ constructor(
     }
 
     private fun connectSession() {
-        if (smartspaceManager == null) return
+        if (userSmartspaceManager == null) {
+            userSmartspaceManager =
+                userTracker.userContext.getSystemService(SmartspaceManager::class.java)
+        }
+        if (userSmartspaceManager == null) return
         if (datePlugin == null && weatherPlugin == null && plugin == null) return
         if (session != null || smartspaceViews.isEmpty()) {
             return
@@ -474,12 +478,14 @@ constructor(
             return
         }
 
-        val newSession = smartspaceManager.createSmartspaceSession(
-                SmartspaceConfig.Builder(
-                        context, BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD).build())
+        val newSession = userSmartspaceManager?.createSmartspaceSession(
+            SmartspaceConfig.Builder(
+                userTracker.userContext, BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD
+            ).build()
+        )
         Log.d(TAG, "Starting smartspace session for " +
                 BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
-        newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
+        newSession?.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
         deviceProvisionedController.removeCallback(deviceProvisionedListener)

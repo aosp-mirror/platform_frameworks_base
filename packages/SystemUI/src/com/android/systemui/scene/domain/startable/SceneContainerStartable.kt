@@ -19,6 +19,7 @@
 package com.android.systemui.scene.domain.startable
 
 import android.app.StatusBarManager
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
@@ -45,7 +46,6 @@ import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
@@ -61,6 +61,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.session.shared.SessionStorage
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.logger.SceneLogger
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -95,18 +96,17 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /**
  * Hooks up business logic that manipulates the state of the [SceneInteractor] for the system UI
  * scene container based on state from other systems.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SceneContainerStartable
 @Inject
@@ -136,7 +136,6 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val sceneBackInteractor: SceneBackInteractor,
     private val shadeSessionStorage: SessionStorage,
-    private val windowMgrLockscreenVisInteractor: WindowManagerLockscreenVisibilityInteractor,
     private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     private val statusBarStateController: SysuiStatusBarStateController,
@@ -191,22 +190,16 @@ constructor(
                         // We are in a session if either Shade or QuickSettings is on the back stack
                         .map { backStack ->
                             backStack.asIterable().any {
+                                // TODO(b/356596436): Include overlays in the back stack as well.
                                 it == Scenes.Shade || it == Scenes.QuickSettings
                             }
                         }
                         .distinctUntilChanged(),
-                    sceneInteractor.transitionState
-                        .mapNotNull { state ->
-                            // We are also in a session if either Shade or QuickSettings is the
-                            // current scene
-                            when (state) {
-                                is ObservableTransitionState.Idle -> state.currentScene
-                                is ObservableTransitionState.Transition -> state.fromContent
-                            }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
-                        }
-                        .distinctUntilChanged(),
-                ) { inBackStack, isCurrentScene ->
-                    inBackStack || isCurrentScene
+                    // We are also in a session if either Notifications Shade or QuickSettings Shade
+                    // is currently shown (whether idle or animating).
+                    shadeInteractor.isAnyExpanded,
+                ) { inBackStack, isShadeShown ->
+                    inBackStack || isShadeShown
                 }
                 // Once a session has ended, clear the session storage.
                 .filter { inSession -> !inSession }
@@ -217,7 +210,6 @@ constructor(
     /** Updates the visibility of the scene container. */
     private fun hydrateVisibility() {
         applicationScope.launch {
-            // TODO(b/296114544): Combine with some global hun state to make it visible!
             deviceProvisioningInteractor.isDeviceProvisioned
                 .flatMapLatest { isAllowedToBeVisible ->
                     if (isAllowedToBeVisible) {
@@ -227,8 +219,10 @@ constructor(
                                         is ObservableTransitionState.Idle -> {
                                             if (state.currentScene != Scenes.Gone) {
                                                 true to "scene is not Gone"
+                                            } else if (state.currentOverlays.isNotEmpty()) {
+                                                true to "overlay is shown"
                                             } else {
-                                                false to "scene is Gone"
+                                                false to "scene is Gone and no overlays are shown"
                                             }
                                         }
                                         is ObservableTransitionState.Transition -> {
@@ -273,27 +267,6 @@ constructor(
         handleDeviceUnlockStatus()
         handlePowerState()
         handleShadeTouchability()
-        handleSurfaceBehindKeyguardVisibility()
-    }
-
-    private fun handleSurfaceBehindKeyguardVisibility() {
-        applicationScope.launch {
-            sceneInteractor.currentScene.collectLatest { currentScene ->
-                if (currentScene == Scenes.Lockscreen) {
-                    // Wait for the screen to be on
-                    powerInteractor.isAwake.first { it }
-                    // Wait for surface to become visible
-                    windowMgrLockscreenVisInteractor.surfaceBehindVisibility.first { it }
-                    // Make sure the device is actually unlocked before force-changing the scene
-                    deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
-                    // Override the current transition, if any, by forcing the scene to Gone
-                    sceneInteractor.changeScene(
-                        toScene = Scenes.Gone,
-                        loggingReason = "surface behind keyguard is visible",
-                    )
-                }
-            }
-        }
     }
 
     private fun handleBouncerImeVisibility() {
@@ -302,7 +275,7 @@ constructor(
             bouncerInteractor.onImeHiddenByUser.collectLatest {
                 if (sceneInteractor.currentScene.value == Scenes.Bouncer) {
                     sceneInteractor.changeScene(
-                        toScene = Scenes.Lockscreen, // TODO(b/336581871): add sceneState?
+                        toScene = Scenes.Lockscreen,
                         loggingReason = "IME hidden",
                     )
                 }
@@ -320,7 +293,6 @@ constructor(
                     when {
                         isAnySimLocked -> {
                             switchToScene(
-                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Bouncer,
                                 loggingReason = "Need to authenticate locked SIM card.",
                             )
@@ -328,7 +300,6 @@ constructor(
                         unlockStatus.isUnlocked &&
                             deviceEntryInteractor.canSwipeToEnter.value == false -> {
                             switchToScene(
-                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Gone,
                                 loggingReason =
                                     "All SIM cards unlocked and device already unlocked and " +
@@ -337,7 +308,6 @@ constructor(
                         }
                         else -> {
                             switchToScene(
-                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Lockscreen,
                                 loggingReason =
                                     "All SIM cards unlocked and device still locked" +
@@ -408,8 +378,7 @@ constructor(
                         }
                         isOnPrimaryBouncer -> {
                             // When the device becomes unlocked in primary Bouncer,
-                            // notify dismiss succeeded and
-                            // go to previous scene or Gone.
+                            // notify dismiss succeeded and go to previous scene or Gone.
                             dismissCallbackRegistry.notifyDismissSucceeded()
                             if (
                                 previousScene.value == Scenes.Lockscreen ||
@@ -596,12 +565,12 @@ constructor(
             combine(
                     sceneInteractor.transitionState
                         .mapNotNull { it as? ObservableTransitionState.Idle }
-                        .map { it.currentScene }
                         .distinctUntilChanged(),
                     occlusionInteractor.invisibleDueToOcclusion,
-                ) { sceneKey, invisibleDueToOcclusion ->
+                ) { idleState, invisibleDueToOcclusion ->
                     SceneContainerPlugin.SceneContainerPluginState(
-                        scene = sceneKey,
+                        scene = idleState.currentScene,
+                        overlays = idleState.currentOverlays,
                         invisibleDueToOcclusion = invisibleDueToOcclusion,
                     )
                 }
@@ -712,19 +681,21 @@ constructor(
                     if (isDeviceLocked) {
                         sceneInteractor.transitionState
                             .mapNotNull { it as? ObservableTransitionState.Idle }
-                            .map { it.currentScene }
+                            .map { it.currentScene to it.currentOverlays }
                             .distinctUntilChanged()
-                            .map { sceneKey ->
-                                when (sceneKey) {
+                            .map { (sceneKey, currentOverlays) ->
+                                when {
                                     // When locked, showing the lockscreen scene should be reported
                                     // as "interacting" while showing other scenes should report as
                                     // "not interacting".
                                     //
                                     // This is done here in order to match the legacy
                                     // implementation. The real reason why is lost to lore and myth.
-                                    Scenes.Lockscreen -> true
-                                    Scenes.Bouncer -> false
-                                    Scenes.Shade -> false
+                                    Overlays.NotificationsShade in currentOverlays -> false
+                                    Overlays.QuickSettingsShade in currentOverlays -> null
+                                    sceneKey == Scenes.Lockscreen -> true
+                                    sceneKey == Scenes.Bouncer -> false
+                                    sceneKey == Scenes.Shade -> false
                                     else -> null
                                 }
                             }

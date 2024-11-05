@@ -6,31 +6,19 @@
     { "name": "hoststubgen-invoke-test" },
     { "name": "RavenwoodMockitoTest_device" },
     { "name": "RavenwoodBivalentTest_device" },
+    { "name": "RavenwoodBivalentTest_device_ravenizer" },
+
+    { "name": "RavenwoodBivalentInstTest_nonself_inst" },
+    { "name": "RavenwoodBivalentInstTest_self_inst_device" },
 
     // The sysui tests should match vendor/unbundled_google/packages/SystemUIGoogle/TEST_MAPPING
     {
-      "name": "SystemUIGoogleTests",
-      "options": [
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "SystemUIGoogleTests"
     }
   ],
   "presubmit-large": [
     {
-      "name": "SystemUITests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "SystemUITests"
     }
   ],
   "ravenwood-presubmit": [
@@ -47,14 +35,17 @@
     },
     {
       "name": "CarLibHostUnitTest",
+      "keywords": ["automotive_code_coverage"],
       "host": true
     },
     {
       "name": "CarServiceHostUnitTest",
+      "keywords": ["automotive_code_coverage"],
       "host": true
     },
     {
       "name": "CarSystemUIRavenTests",
+      "keywords": ["automotive_code_coverage"],
       "host": true
     },
     {
@@ -71,6 +62,10 @@
     },
     {
       "name": "CtsDatabaseTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsDeviceConfigTestCasesRavenwood",
       "host": true
     },
     {
@@ -138,6 +133,14 @@
       "host": true
     },
     {
+      "name": "RavenwoodBivalentInstTest_nonself_inst",
+      "host": true
+    },
+    {
+      "name": "RavenwoodBivalentInstTest_self_inst",
+      "host": true
+    },
+    {
       "name": "RavenwoodBivalentTest",
       "host": true
     },
@@ -164,11 +167,13 @@
     {
       "name": "RavenwoodServicesTest",
       "host": true
-    },
+    }
+    // AUTO-GENERATED-END
+  ],
+  "ravenwood-postsubmit": [
     {
       "name": "SystemUiRavenTests",
       "host": true
     }
-    // AUTO-GENERATED-END
   ]
 }

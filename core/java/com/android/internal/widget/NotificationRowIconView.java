@@ -39,17 +39,24 @@ import com.android.internal.R;
 
 /**
  * An image view that holds the icon displayed at the start of a notification row.
+ * This can generally either display the "small icon" of a notification set via
+ * {@link this#setImageIcon(Icon)}, or an app icon controlled and fetched by the provider set
+ * through {@link this#setIconProvider(NotificationIconProvider)}.
  */
 @RemoteViews.RemoteView
 public class NotificationRowIconView extends CachingIconView {
+    private NotificationIconProvider mIconProvider;
+
     private boolean mApplyCircularCrop = false;
     private boolean mShouldShowAppIcon = false;
+    private Drawable mAppIcon = null;
 
-    // Padding and background set on the view prior to being changed by setShouldShowAppIcon(true),
-    // to be restored if shouldShowAppIcon becomes false again.
+    // Padding, background and colors set on the view prior to being overridden when showing the app
+    // icon, to be restored if we're showing the small icon again.
     private Rect mOriginalPadding = null;
     private Drawable mOriginalBackground = null;
-
+    private int mOriginalBackgroundColor = ColoredIconHelper.COLOR_INVALID;
+    private int mOriginalIconColor = ColoredIconHelper.COLOR_INVALID;
 
     public NotificationRowIconView(Context context) {
         super(context);
@@ -81,6 +88,71 @@ public class NotificationRowIconView extends CachingIconView {
         super.onFinishInflate();
     }
 
+    /**
+     * Sets the icon provider for this view. This is used to determine whether we should show the
+     * app icon instead of the small icon, and to fetch the app icon if needed.
+     */
+    public void setIconProvider(NotificationIconProvider iconProvider) {
+        mIconProvider = iconProvider;
+    }
+
+    private Drawable loadAppIcon() {
+        if (mIconProvider != null && mIconProvider.shouldShowAppIcon()) {
+            return mIconProvider.getAppIcon();
+        }
+        return null;
+    }
+
+    @RemotableViewMethod(asyncImpl = "setImageIconAsync")
+    @Override
+    public void setImageIcon(Icon icon) {
+        if (Flags.notificationsRedesignAppIcons()) {
+            if (mAppIcon != null) {
+                // We already know that we should be using the app icon, and we already loaded it.
+                // We assume that cannot change throughout the lifetime of a notification, so
+                // there's nothing to do here.
+                return;
+            }
+            mAppIcon = loadAppIcon();
+            if (mAppIcon != null) {
+                setImageDrawable(mAppIcon);
+                adjustViewForAppIcon();
+            } else {
+                super.setImageIcon(icon);
+                restoreViewForSmallIcon();
+            }
+            return;
+        }
+        super.setImageIcon(icon);
+    }
+
+    @RemotableViewMethod
+    @Override
+    public Runnable setImageIconAsync(Icon icon) {
+        if (Flags.notificationsRedesignAppIcons()) {
+            if (mAppIcon != null) {
+                // We already know that we should be using the app icon, and we already loaded it.
+                // We assume that cannot change throughout the lifetime of a notification, so
+                // there's nothing to do here.
+                return () -> {
+                };
+            }
+            mAppIcon = loadAppIcon();
+            if (mAppIcon != null) {
+                return () -> {
+                    setImageDrawable(mAppIcon);
+                    adjustViewForAppIcon();
+                };
+            } else {
+                return () -> {
+                    super.setImageIcon(icon);
+                    restoreViewForSmallIcon();
+                };
+            }
+        }
+        return super.setImageIconAsync(icon);
+    }
+
     /** Whether the icon represents the app icon (instead of the small icon). */
     @RemotableViewMethod
     public void setShouldShowAppIcon(boolean shouldShowAppIcon) {
@@ -91,32 +163,119 @@ public class NotificationRowIconView extends CachingIconView {
 
             mShouldShowAppIcon = shouldShowAppIcon;
             if (mShouldShowAppIcon) {
-                if (mOriginalPadding == null && mOriginalBackground == null) {
-                    mOriginalPadding = new Rect(getPaddingLeft(), getPaddingTop(),
-                            getPaddingRight(), getPaddingBottom());
-                    mOriginalBackground = getBackground();
-                }
-
-                setPadding(0, 0, 0, 0);
-
-                // Make the background white in case the icon itself doesn't have one.
-                ColorFilter colorFilter = new PorterDuffColorFilter(Color.WHITE,
-                        PorterDuff.Mode.SRC_ATOP);
-
-                if (mOriginalBackground == null) {
-                    setBackground(getContext().getDrawable(R.drawable.notification_icon_circle));
-                }
-                getBackground().mutate().setColorFilter(colorFilter);
+                adjustViewForAppIcon();
             } else {
                 // Restore original padding and background if needed
-                if (mOriginalPadding != null) {
-                    setPadding(mOriginalPadding.left, mOriginalPadding.top, mOriginalPadding.right,
-                            mOriginalPadding.bottom);
-                    mOriginalPadding = null;
-                }
-                setBackground(mOriginalBackground);
-                mOriginalBackground = null;
+                restoreViewForSmallIcon();
             }
+        }
+    }
+
+    /**
+     * Override padding and background from the view to display the app icon.
+     */
+    private void adjustViewForAppIcon() {
+        removePadding();
+
+        if (Flags.notificationsUseAppIconInRow()) {
+            addWhiteBackground();
+        } else {
+            // No need to set the background for notification redesign, since the icon
+            // factory already does that for us.
+            removeBackground();
+        }
+    }
+
+    /**
+     * Restore padding and background overridden by {@link this#adjustViewForAppIcon}.
+     * Does nothing if they were not overridden.
+     */
+    private void restoreViewForSmallIcon() {
+        restorePadding();
+        restoreBackground();
+        restoreColors();
+    }
+
+    private void removePadding() {
+        if (mOriginalPadding == null) {
+            mOriginalPadding = new Rect(getPaddingLeft(), getPaddingTop(),
+                    getPaddingRight(), getPaddingBottom());
+        }
+        setPadding(0, 0, 0, 0);
+    }
+
+    private void restorePadding() {
+        if (mOriginalPadding != null) {
+            setPadding(mOriginalPadding.left, mOriginalPadding.top,
+                    mOriginalPadding.right,
+                    mOriginalPadding.bottom);
+            mOriginalPadding = null;
+        }
+    }
+
+    private void removeBackground() {
+        if (mOriginalBackground == null) {
+            mOriginalBackground = getBackground();
+        }
+
+        setBackground(null);
+    }
+
+    private void addWhiteBackground() {
+        if (mOriginalBackground == null) {
+            mOriginalBackground = getBackground();
+        }
+
+        // Make the background white in case the icon itself doesn't have one.
+        ColorFilter colorFilter = new PorterDuffColorFilter(Color.WHITE,
+                PorterDuff.Mode.SRC_ATOP);
+
+        if (mOriginalBackground == null) {
+            setBackground(getContext().getDrawable(R.drawable.notification_icon_circle));
+        }
+        getBackground().mutate().setColorFilter(colorFilter);
+    }
+
+    private void restoreBackground() {
+        // NOTE: This will not work if the original background was null, but that's better than
+        //  accidentally clearing the background. We expect that there's generally going to be one
+        //  anyway unless we manually clear it.
+        if (mOriginalBackground != null) {
+            setBackground(mOriginalBackground);
+            mOriginalBackground = null;
+        }
+    }
+
+    private void restoreColors() {
+        if (mOriginalBackgroundColor != ColoredIconHelper.COLOR_INVALID) {
+            super.setBackgroundColor(mOriginalBackgroundColor);
+            mOriginalBackgroundColor = ColoredIconHelper.COLOR_INVALID;
+        }
+        if (mOriginalIconColor != ColoredIconHelper.COLOR_INVALID) {
+            super.setOriginalIconColor(mOriginalIconColor);
+            mOriginalIconColor = ColoredIconHelper.COLOR_INVALID;
+        }
+    }
+
+    @RemotableViewMethod
+    @Override
+    public void setBackgroundColor(int color) {
+        // Ignore color overrides if we're showing the app icon.
+        if (mAppIcon == null) {
+            super.setBackgroundColor(color);
+        } else {
+            mOriginalBackgroundColor = color;
+        }
+    }
+
+    @RemotableViewMethod
+    @Override
+    public void setOriginalIconColor(int color) {
+        // Ignore color overrides if we're showing the app icon.
+        if (mAppIcon == null) {
+            super.setOriginalIconColor(color);
+        } else {
+            mOriginalIconColor = color;
         }
     }
 
@@ -196,5 +355,18 @@ public class NotificationRowIconView extends CachingIconView {
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    /**
+     * A provider that allows this view to verify whether it should use the app icon instead of the
+     * icon provided to it via setImageIcon, as well as actually fetching the app icon. It should
+     * primarily be called on the background thread.
+     */
+    public interface NotificationIconProvider {
+        /** Whether this notification should use the app icon instead of the small icon. */
+        boolean shouldShowAppIcon();
+
+        /** Get the app icon for this notification. */
+        Drawable getAppIcon();
     }
 }

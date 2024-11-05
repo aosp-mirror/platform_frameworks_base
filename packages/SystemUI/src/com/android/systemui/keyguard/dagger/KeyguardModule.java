@@ -59,9 +59,8 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffor
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionBootInteractor;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
-import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
-import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransitionModule;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModelModule;
 import com.android.systemui.log.SessionTracker;
@@ -175,6 +174,7 @@ public interface KeyguardModule {
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
             KeyguardInteractor keyguardInteractor,
+            KeyguardTransitionBootInteractor transitionBootInteractor,
             WindowManagerOcclusionManager windowManagerOcclusionManager) {
         return new KeyguardViewMediator(
                 context,
@@ -225,6 +225,7 @@ public interface KeyguardModule {
                 wmLockscreenVisibilityManager,
                 selectedUserInteractor,
                 keyguardInteractor,
+                transitionBootInteractor,
                 windowManagerOcclusionManager);
     }
 
@@ -232,12 +233,6 @@ public interface KeyguardModule {
     @Provides
     static ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
-    }
-
-    /** */
-    @Provides
-    static KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
-        return new KeyguardQuickAffordancesMetricsLoggerImpl();
     }
 
     /** */

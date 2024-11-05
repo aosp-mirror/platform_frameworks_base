@@ -104,6 +104,12 @@ public class VibratorHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void createVibrationEffectFromSoundUri_opaqueUri() {
+        Uri uri = Uri.parse("a:b#c");
+        assertNull(mVibratorHelper.createVibrationEffectFromSoundUri(uri));
+    }
+
+    @Test
     public void createVibrationEffectFromSoundUri_uriWithoutRequiredQueryParameter() {
         Uri uri = Settings.System.DEFAULT_NOTIFICATION_URI;
         assertNull(mVibratorHelper.createVibrationEffectFromSoundUri(uri));

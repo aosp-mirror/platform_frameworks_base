@@ -436,6 +436,12 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             case android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION:
                 pw.println(android.app.job.Flags.backupJobsExemption());
                 break;
+            case android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND:
+                pw.println(android.app.job.Flags.ignoreImportantWhileForeground());
+                break;
+            case android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API:
+                pw.println(android.app.job.Flags.getPendingJobReasonsApi());
+                break;
             default:
                 pw.println("Unknown flag: " + flagName);
                 break;

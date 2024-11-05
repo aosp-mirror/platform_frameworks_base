@@ -28,5 +28,5 @@ java_test_host {
     libs: ["tradefed"],
     test_suites: ["general-tests"],
     required: ["preload-check-device"],
-    data: [":preload-check-device"],
+    device_common_data: [":preload-check-device"],
 }

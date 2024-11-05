@@ -16,9 +16,11 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import android.service.dream.dreamManager
 import com.android.systemui.common.usagestats.domain.interactor.usageStatsInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.shared.system.taskStackChangeListeners
@@ -32,6 +34,8 @@ val Kosmos.widgetTrampolineInteractor: WidgetTrampolineInteractor by
             keyguardTransitionInteractor = keyguardTransitionInteractor,
             taskStackChangeListeners = taskStackChangeListeners,
             usageStatsInteractor = usageStatsInteractor,
+            dreamManager = dreamManager,
+            bgScope = applicationCoroutineScope,
             logBuffer = logcatLogBuffer("WidgetTrampolineInteractor"),
         )
     }

@@ -17,6 +17,7 @@
 package com.android.systemui.unfold
 
 import android.content.Context
+import android.hardware.devicestate.DeviceStateManager
 import android.util.Log
 import com.android.app.tracing.TraceUtils.traceAsync
 import com.android.app.tracing.instantForTrack
@@ -52,7 +53,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withTimeout
 
 /**
@@ -72,7 +73,8 @@ constructor(
     @UnfoldSingleThreadBg private val singleThreadBgExecutor: Executor,
     @Application private val applicationScope: CoroutineScope,
     private val displaySwitchLatencyLogger: DisplaySwitchLatencyLogger,
-    private val systemClock: SystemClock
+    private val systemClock: SystemClock,
+    private val deviceStateManager: DeviceStateManager
 ) : CoreStartable {
 
     private val backgroundDispatcher = singleThreadBgExecutor.asCoroutineDispatcher()
@@ -81,10 +83,10 @@ constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun start() {
-        if (!isDeviceFoldable(context)) {
+        if (!isDeviceFoldable(context.resources, deviceStateManager)) {
             return
         }
-        applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(context = backgroundDispatcher) {
             deviceStateRepository.state
                 .pairwise()
                 .filter {

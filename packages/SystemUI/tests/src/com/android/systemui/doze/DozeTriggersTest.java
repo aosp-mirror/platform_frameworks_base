@@ -481,6 +481,25 @@ public class DozeTriggersTest extends SysuiTestCase {
         verify(mAuthController).onAodInterrupt(anyInt(), anyInt(), anyFloat(), anyFloat());
     }
 
+    @Test
+    @EnableFlags(android.hardware.biometrics.Flags.FLAG_SCREEN_OFF_UNLOCK_UDFPS)
+    public void udfpsLongPress_triggeredWhenDoze() {
+        // GIVEN device is DOZE
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+
+        // WHEN udfps long-press is triggered
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, 100, 100,
+                new float[]{0, 1, 2, 3, 4});
+
+        // THEN the pulse is NOT dropped
+        verify(mDozeLog, never()).tracePulseDropped(anyString(), any());
+
+        // WHEN the screen state is OFF
+        mTriggers.onScreenState(Display.STATE_OFF);
+
+        // THEN aod interrupt never be sent
+        verify(mAuthController, never()).onAodInterrupt(anyInt(), anyInt(), anyFloat(), anyFloat());
+    }
 
     @Test
     public void udfpsLongPress_dozeState_notRegistered() {

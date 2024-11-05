@@ -25,10 +25,12 @@ import android.os.Handler
 import android.os.UserManager
 import android.view.IWindowManager
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.launcher3.icons.BubbleIconFactory
@@ -55,7 +57,9 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 /** Test inflating bubbles with [BubbleViewInfoTask]. */
 @SmallTest
@@ -70,6 +74,7 @@ class BubbleViewInfoTaskTest {
     private lateinit var bgExecutor: TestExecutor
     private lateinit var bubbleStackView: BubbleStackView
     private lateinit var bubblePositioner: BubblePositioner
+    private lateinit var bubbleLogger: BubbleLogger
     private lateinit var expandedViewManager: BubbleExpandedViewManager
 
     private val bubbleTaskViewFactory = BubbleTaskViewFactory {
@@ -103,10 +108,11 @@ class BubbleViewInfoTaskTest {
                 mainExecutor
             )
         bubblePositioner = BubblePositioner(context, windowManager)
+        bubbleLogger = BubbleLogger(UiEventLoggerFake())
         val bubbleData =
             BubbleData(
                 context,
-                mock<BubbleLogger>(),
+                bubbleLogger,
                 bubblePositioner,
                 BubbleEducationController(context),
                 mainExecutor,
@@ -138,7 +144,7 @@ class BubbleViewInfoTaskTest {
                 WindowManagerShellWrapper(mainExecutor),
                 mock<UserManager>(),
                 mock<LauncherApps>(),
-                mock<BubbleLogger>(),
+                bubbleLogger,
                 mock<TaskStackListenerImpl>(),
                 mock<ShellTaskOrganizer>(),
                 bubblePositioner,
@@ -155,18 +161,23 @@ class BubbleViewInfoTaskTest {
                 mock<BubbleProperties>()
             )
 
-        val bubbleStackViewManager = BubbleStackViewManager.fromBubbleController(bubbleController)
-        bubbleStackView =
-            BubbleStackView(
-                context,
-                bubbleStackViewManager,
-                bubblePositioner,
-                bubbleData,
-                surfaceSynchronizer,
-                FloatingContentCoordinator(),
-                bubbleController,
-                mainExecutor
-            )
+        // TODO: (b/371829099) - when optional overflow is no longer flagged we can enable this
+        //  again, something about the overflow being added uncovers an issue with Robolectric and
+        //  bitmaps; this is switched to a mock to work around that (b/375513387).
+//        val bubbleStackViewManager = BubbleStackViewManager.fromBubbleController(bubbleController)
+//        bubbleStackView = BubbleStackView(
+//                context,
+//                bubbleStackViewManager,
+//                bubblePositioner,
+//                bubbleData,
+//                surfaceSynchronizer,
+//                FloatingContentCoordinator(),
+//                bubbleController,
+//                mainExecutor
+//            )
+        bubbleStackView = mock<BubbleStackView>()
+        whenever(bubbleStackView.generateLayoutParams(any()))
+            .thenReturn(FrameLayout.LayoutParams(1000, 1000))
         expandedViewManager = BubbleExpandedViewManager.fromBubbleController(bubbleController)
     }
 
@@ -314,6 +325,7 @@ class BubbleViewInfoTaskTest {
             expandedViewManager,
             bubbleTaskViewFactory,
             bubblePositioner,
+            bubbleLogger,
             bubbleStackView,
             null /* layerView */,
             iconFactory,

@@ -16,11 +16,12 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DIMMER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DIMMER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.Surface;
@@ -128,7 +129,7 @@ class Dimmer {
         /**
          * Set the parameters to prepare the dim to be relative parented to the dimming container
          */
-        void prepareReparent(@NonNull WindowContainer<?> geometryParent,
+        void prepareReparent(@Nullable WindowContainer<?> geometryParent,
                 @NonNull WindowState relativeParent) {
             mAnimationHelper.setRequestedRelativeParent(relativeParent);
             mAnimationHelper.setRequestedGeometryParent(geometryParent);
@@ -221,7 +222,7 @@ class Dimmer {
      * @param dimmingContainer      The container that is dimming. The dim layer will be rel-z
      *                              parented below it
      */
-    public void adjustPosition(@NonNull WindowContainer<?> geometryParent,
+    public void adjustPosition(@Nullable WindowContainer<?> geometryParent,
                                     @NonNull WindowState dimmingContainer) {
         if (mDimState != null) {
             mDimState.prepareReparent(geometryParent, dimmingContainer);
@@ -260,6 +261,14 @@ class Dimmer {
         }
     }
 
+    boolean hasDimState() {
+        return mDimState != null;
+    }
+
+    boolean isDimming() {
+        return mDimState != null && mDimState.isDimming();
+    }
+
     @NonNull
     private DimState obtainDimState(@NonNull WindowState window) {
         if (mDimState == null) {
@@ -275,7 +284,6 @@ class Dimmer {
         return mDimState != null ? mDimState.mDimSurface : null;
     }
 
-    @Deprecated
     Rect getDimBounds() {
         return mDimState != null ? mDimState.mDimBounds : null;
     }

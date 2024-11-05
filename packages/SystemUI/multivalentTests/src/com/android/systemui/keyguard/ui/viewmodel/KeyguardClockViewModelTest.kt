@@ -16,14 +16,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.BrokenWithSceneContainer
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardClockRepository
@@ -229,8 +228,8 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun testSmallClockTop_splitShade_composeLockscreenOn() =
+    @EnableSceneContainer
+    fun testSmallClockTop_splitShade_sceneContainerOn() =
         testScope.runTest {
             with(kosmos) {
                 shadeRepository.setShadeLayoutWide(true)
@@ -244,8 +243,8 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun testSmallClockTop_splitShade_composeLockscreenOff() =
+    @DisableSceneContainer
+    fun testSmallClockTop_splitShade_sceneContainerOff() =
         testScope.runTest {
             with(kosmos) {
                 shadeRepository.setShadeLayoutWide(true)
@@ -257,8 +256,8 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun testSmallClockTop_nonSplitShade_composeLockscreenOn() =
+    @EnableSceneContainer
+    fun testSmallClockTop_nonSplitShade_sceneContainerOn() =
         testScope.runTest {
             with(kosmos) {
                 shadeRepository.setShadeLayoutWide(false)
@@ -270,8 +269,8 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase()
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
-    fun testSmallClockTop_nonSplitShade_composeLockscreenOff() =
+    @DisableSceneContainer
+    fun testSmallClockTop_nonSplitShade_sceneContainerOff() =
         testScope.runTest {
             with(kosmos) {
                 shadeRepository.setShadeLayoutWide(false)

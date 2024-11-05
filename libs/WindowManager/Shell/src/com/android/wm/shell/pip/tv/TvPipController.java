@@ -476,6 +476,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
         mPipTaskOrganizer.removePip();
         mTvPipMenuController.closeMenu();
+        mPipNotificationController.dismiss();
     }
 
     @Override

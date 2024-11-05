@@ -20,6 +20,20 @@ import com.android.hoststubgen.ArgumentsException
 import com.android.hoststubgen.SetOnce
 import com.android.hoststubgen.ensureFileExists
 import com.android.hoststubgen.log
+import java.nio.file.Paths
+import kotlin.io.path.exists
+
+/**
+ * If this file exits, we also read options from it. This is "unsafe" because it could break
+ * incremental builds, if it sets any flag that affects the output file.
+ * (however, for now, there's no such options.)
+ *
+ * For example, to enable verbose logging, do `echo '-v' > ~/.raveniezr-unsafe`
+ *
+ * (but even the content of this file changes, soong won't rerun the command, so you need to
+ * remove the output first and then do a build again.)
+ */
+private val RAVENIZER_DOTFILE = System.getenv("HOME") + "/.raveniezr-unsafe"
 
 class RavenizerOptions(
     /** Input jar file*/
@@ -32,12 +46,22 @@ class RavenizerOptions(
     var enableValidation: SetOnce<Boolean> = SetOnce(true),
 
     /** Whether the validation failure is fatal or not. */
-    var fatalValidation: SetOnce<Boolean> = SetOnce(false),
+    var fatalValidation: SetOnce<Boolean> = SetOnce(true),
+
+    /** Whether to remove mockito and dexmaker classes. */
+    var stripMockito: SetOnce<Boolean> = SetOnce(false),
 ) {
     companion object {
-        fun parseArgs(args: Array<String>): RavenizerOptions {
+
+        fun parseArgs(origArgs: Array<String>): RavenizerOptions {
+            val args = origArgs.toMutableList()
+            if (Paths.get(RAVENIZER_DOTFILE).exists()) {
+                log.i("Reading options from $RAVENIZER_DOTFILE")
+                args.add(0, "@$RAVENIZER_DOTFILE")
+            }
+
             val ret = RavenizerOptions()
-            val ai = ArgIterator.withAtFiles(args)
+            val ai = ArgIterator.withAtFiles(args.toTypedArray())
 
             while (true) {
                 val arg = ai.nextArgOptional()
@@ -63,6 +87,9 @@ class RavenizerOptions(
 
                         "--fatal-validation" -> ret.fatalValidation.set(true)
                         "--no-fatal-validation" -> ret.fatalValidation.set(false)
+
+                        "--strip-mockito" -> ret.stripMockito.set(true)
+                        "--no-strip-mockito" -> ret.stripMockito.set(false)
 
                         else -> throw ArgumentsException("Unknown option: $arg")
                     }

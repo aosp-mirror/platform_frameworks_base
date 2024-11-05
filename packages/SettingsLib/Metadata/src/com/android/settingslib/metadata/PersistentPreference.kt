@@ -161,14 +161,14 @@ interface DiscreteIntValue : DiscreteValue<Int> {
 /** Value is between a range. */
 interface RangeValue : ValueDescriptor {
     /** The lower bound (inclusive) of the range. */
-    val minValue: Int
+    fun getMinValue(context: Context): Int
 
     /** The upper bound (inclusive) of the range. */
-    val maxValue: Int
+    fun getMaxValue(context: Context): Int
 
     /** The increment step within the range. 0 means unset, which implies step size is 1. */
-    val incrementStep: Int
-        get() = 0
+    fun getIncrementStep(context: Context) = 0
 
-    override fun isValidValue(context: Context, index: Int) = index in minValue..maxValue
+    override fun isValidValue(context: Context, index: Int) =
+        index in getMinValue(context)..getMaxValue(context)
 }

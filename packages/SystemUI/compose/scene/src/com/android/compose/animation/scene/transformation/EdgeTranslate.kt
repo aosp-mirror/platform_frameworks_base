@@ -19,9 +19,8 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.geometry.Offset
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
-import com.android.compose.animation.scene.Element
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Translate an element from an edge of the layout. */
@@ -30,44 +29,41 @@ internal class EdgeTranslate(
     private val edge: Edge,
     private val startsOutsideLayoutBounds: Boolean = true,
 ) : PropertyTransformation<Offset> {
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
-        value: Offset,
+        idleValue: Offset,
     ): Offset {
-        val sceneSize = layoutImpl.content(content).targetSize
-        val elementSize = stateInContent.targetSize
-        if (elementSize == Element.SizeUnspecified) {
-            return value
-        }
+        val sceneSize =
+            content.targetSize()
+                ?: error("Content ${content.debugName} does not have a target size")
+        val elementSize = element.targetSize(content) ?: return idleValue
 
-        return when (edge.resolve(layoutImpl.layoutDirection)) {
+        return when (edge.resolve(layoutDirection)) {
             Edge.Resolved.Top ->
                 if (startsOutsideLayoutBounds) {
-                    Offset(value.x, -elementSize.height.toFloat())
+                    Offset(idleValue.x, -elementSize.height.toFloat())
                 } else {
-                    Offset(value.x, 0f)
+                    Offset(idleValue.x, 0f)
                 }
             Edge.Resolved.Left ->
                 if (startsOutsideLayoutBounds) {
-                    Offset(-elementSize.width.toFloat(), value.y)
+                    Offset(-elementSize.width.toFloat(), idleValue.y)
                 } else {
-                    Offset(0f, value.y)
+                    Offset(0f, idleValue.y)
                 }
             Edge.Resolved.Bottom ->
                 if (startsOutsideLayoutBounds) {
-                    Offset(value.x, sceneSize.height.toFloat())
+                    Offset(idleValue.x, sceneSize.height.toFloat())
                 } else {
-                    Offset(value.x, (sceneSize.height - elementSize.height).toFloat())
+                    Offset(idleValue.x, (sceneSize.height - elementSize.height).toFloat())
                 }
             Edge.Resolved.Right ->
                 if (startsOutsideLayoutBounds) {
-                    Offset(sceneSize.width.toFloat(), value.y)
+                    Offset(sceneSize.width.toFloat(), idleValue.y)
                 } else {
-                    Offset((sceneSize.width - elementSize.width).toFloat(), value.y)
+                    Offset((sceneSize.width - elementSize.width).toFloat(), idleValue.y)
                 }
         }
     }

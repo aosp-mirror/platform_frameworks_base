@@ -16,10 +16,15 @@
 
 package com.android.server.security;
 
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_BOOT_STATE;
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_KEYSTORE_REQUIREMENTS;
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_CERTS;
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS;
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_PATCH_LEVEL_DIFF;
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_UNKNOWN;
 import static android.security.attestationverification.AttestationVerificationManager.PARAM_CHALLENGE;
+import static android.security.attestationverification.AttestationVerificationManager.PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS;
 import static android.security.attestationverification.AttestationVerificationManager.PARAM_PUBLIC_KEY;
-import static android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE;
-import static android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS;
 import static android.security.attestationverification.AttestationVerificationManager.TYPE_CHALLENGE;
 import static android.security.attestationverification.AttestationVerificationManager.TYPE_PUBLIC_KEY;
 import static android.security.attestationverification.AttestationVerificationManager.localBindingTypeToString;
@@ -34,10 +39,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.AttestationVerificationManager.LocalBindingType;
 import android.util.IndentingPrintWriter;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -99,7 +102,6 @@ import java.util.Set;
  */
 class AttestationVerificationPeerDeviceVerifier {
     private static final String TAG = "AVF";
-    private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
     private static final int MAX_PATCH_AGE_MONTHS = 12;
 
     /**
@@ -174,8 +176,8 @@ class AttestationVerificationPeerDeviceVerifier {
 
         MyDumpData dumpData = new MyDumpData();
 
-        int result =
-                verifyAttestationInternal(localBindingType, requirements, attestation, dumpData);
+        int result = verifyAttestationInternal(localBindingType, requirements, attestation,
+                dumpData);
         dumpData.mResult = result;
         mDumpLogger.logAttempt(dumpData);
         return result;
@@ -187,32 +189,24 @@ class AttestationVerificationPeerDeviceVerifier {
             @NonNull byte[] attestation,
             @NonNull MyDumpData dumpData) {
         if (mCertificateFactory == null) {
-            debugVerboseLog("Unable to access CertificateFactory");
-            return RESULT_FAILURE;
+            Slog.e(TAG, "Unable to access CertificateFactory");
+            return FLAG_FAILURE_CERTS;
         }
         dumpData.mCertificationFactoryAvailable = true;
 
         if (mCertPathValidator == null) {
-            debugVerboseLog("Unable to access CertPathValidator");
-            return RESULT_FAILURE;
+            Slog.e(TAG, "Unable to access CertPathValidator");
+            return FLAG_FAILURE_CERTS;
         }
         dumpData.mCertPathValidatorAvailable = true;
 
-
-        // Check if the provided local binding type is supported and if the provided requirements
-        // "match" the binding type.
-        if (!validateAttestationParameters(localBindingType, requirements)) {
-            return RESULT_FAILURE;
-        }
-        dumpData.mAttestationParametersOk = true;
-
         // To provide the most information in the dump logs, we track the failure state but keep
         // verifying the rest of the attestation. For code safety, there are no transitions past
-        // here to set failed = false
-        boolean failed = false;
+        // here to set result = 0.
+        int result = 0;
 
         try {
-            // First: parse and validate the certificate chain.
+            // 1. parse and validate the certificate chain.
             final List<X509Certificate> certificateChain = getCertificates(attestation);
             // (returns void, but throws CertificateException and other similar Exceptions)
             validateCertificateChain(certificateChain);
@@ -221,32 +215,38 @@ class AttestationVerificationPeerDeviceVerifier {
             final var leafCertificate = certificateChain.get(0);
             final var attestationExtension = fromCertificate(leafCertificate);
 
-            // Second: verify if the attestation satisfies the "peer device" profile.
-            if (!checkAttestationForPeerDeviceProfile(attestationExtension, dumpData)) {
-                failed = true;
+            // 2. Check if the provided local binding type is supported and if the provided
+            // requirements "match" the binding type.
+            if (!validateAttestationParameters(localBindingType, requirements)) {
+                return FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS;
             }
+            dumpData.mAttestationParametersOk = true;
 
-            // Third: check if the attestation satisfies local binding requirements.
+            // 3. check if the attestation satisfies local binding requirements.
             if (!checkLocalBindingRequirements(
                     leafCertificate, attestationExtension, localBindingType, requirements,
                     dumpData)) {
-                failed = true;
+                result |= FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS;
             }
+
+            // 4. verify if the attestation satisfies the "peer device" profile.
+            result |= checkAttestationForPeerDeviceProfile(requirements, attestationExtension,
+                    dumpData);
         } catch (CertificateException | CertPathValidatorException
                  | InvalidAlgorithmParameterException | IOException e) {
-            // Catch all non-RuntimeExpceptions (all of these are thrown by either getCertificates()
+            // Catch all non-RuntimeExceptions (all of these are thrown by either getCertificates()
             // or validateCertificateChain() or
             // AndroidKeystoreAttestationVerificationAttributes.fromCertificate())
-            debugVerboseLog("Unable to parse/validate Android Attestation certificate(s)", e);
-            failed = true;
+            Slog.e(TAG, "Unable to parse/validate Android Attestation certificate(s)", e);
+            result = FLAG_FAILURE_CERTS;
         } catch (RuntimeException e) {
-            // Catch everyting else (RuntimeExpcetions), since we don't want to throw any exceptions
-            // out of this class/method.
-            debugVerboseLog("Unexpected error", e);
-            failed = true;
+            // Catch everything else (RuntimeExceptions), since we don't want to throw any
+            // exceptions out of this class/method.
+            Slog.e(TAG, "Unexpected error", e);
+            result = FLAG_FAILURE_UNKNOWN;
         }
 
-        return failed ? RESULT_FAILURE : RESULT_SUCCESS;
+        return result;
     }
 
     @NonNull
@@ -268,22 +268,22 @@ class AttestationVerificationPeerDeviceVerifier {
     private boolean validateAttestationParameters(
             @LocalBindingType int localBindingType, @NonNull Bundle requirements) {
         if (localBindingType != TYPE_PUBLIC_KEY && localBindingType != TYPE_CHALLENGE) {
-            debugVerboseLog("Binding type is not supported: " + localBindingType);
+            Slog.e(TAG, "Binding type is not supported: " + localBindingType);
             return false;
         }
 
         if (requirements.size() < 1) {
-            debugVerboseLog("At least 1 requirement is required.");
+            Slog.e(TAG, "At least 1 requirement is required.");
             return false;
         }
 
         if (localBindingType == TYPE_PUBLIC_KEY && !requirements.containsKey(PARAM_PUBLIC_KEY)) {
-            debugVerboseLog("Requirements does not contain key: " + PARAM_PUBLIC_KEY);
+            Slog.e(TAG, "Requirements does not contain key: " + PARAM_PUBLIC_KEY);
             return false;
         }
 
         if (localBindingType == TYPE_CHALLENGE && !requirements.containsKey(PARAM_CHALLENGE)) {
-            debugVerboseLog("Requirements does not contain key: " + PARAM_CHALLENGE);
+            Slog.e(TAG, "Requirements does not contain key: " + PARAM_CHALLENGE);
             return false;
         }
 
@@ -294,7 +294,7 @@ class AttestationVerificationPeerDeviceVerifier {
             throws CertificateException, CertPathValidatorException,
             InvalidAlgorithmParameterException {
         if (certificates.size() < 2) {
-            debugVerboseLog("Certificate chain less than 2 in size.");
+            Slog.e(TAG, "Certificate chain less than 2 in size.");
             throw new CertificateException("Certificate chain less than 2 in size.");
         }
 
@@ -353,7 +353,7 @@ class AttestationVerificationPeerDeviceVerifier {
                 final boolean publicKeyMatches = checkPublicKey(
                         leafCertificate, requirements.getByteArray(PARAM_PUBLIC_KEY));
                 if (!publicKeyMatches) {
-                    debugVerboseLog(
+                    Slog.e(TAG,
                             "Provided public key does not match leaf certificate public key.");
                     return false;
                 }
@@ -364,7 +364,7 @@ class AttestationVerificationPeerDeviceVerifier {
                 final boolean attestationChallengeMatches = checkAttestationChallenge(
                         attestationAttributes, requirements.getByteArray(PARAM_CHALLENGE));
                 if (!attestationChallengeMatches) {
-                    debugVerboseLog(
+                    Slog.e(TAG,
                             "Provided challenge does not match leaf certificate challenge.");
                     return false;
                 }
@@ -384,7 +384,7 @@ class AttestationVerificationPeerDeviceVerifier {
                 final boolean ownedBySystem = checkOwnedBySystem(
                         leafCertificate, attestationAttributes);
                 if (!ownedBySystem) {
-                    debugVerboseLog("Certificate public key is not owned by the AndroidSystem.");
+                    Slog.e(TAG, "Certificate public key is not owned by the AndroidSystem.");
                     return false;
                 }
                 dumpData.mSystemOwned = true;
@@ -399,94 +399,102 @@ class AttestationVerificationPeerDeviceVerifier {
         return true;
     }
 
-    private boolean checkAttestationForPeerDeviceProfile(
+    private int checkAttestationForPeerDeviceProfile(
+            @NonNull Bundle requirements,
             @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes,
             MyDumpData dumpData) {
-        boolean result = true;
+        int result = 0;
 
         // Checks for support of Keymaster 4.
         if (attestationAttributes.getAttestationVersion() < 3) {
-            debugVerboseLog("Attestation version is not at least 3 (Keymaster 4).");
-            result = false;
+            Slog.e(TAG, "Attestation version is not at least 3 (Keymaster 4).");
+            result |= FLAG_FAILURE_KEYSTORE_REQUIREMENTS;
         } else {
             dumpData.mAttestationVersionAtLeast3 = true;
         }
 
         // Checks for support of Keymaster 4.
         if (attestationAttributes.getKeymasterVersion() < 4) {
-            debugVerboseLog("Keymaster version is not at least 4.");
-            result = false;
+            Slog.e(TAG, "Keymaster version is not at least 4.");
+            result |= FLAG_FAILURE_KEYSTORE_REQUIREMENTS;
         } else {
             dumpData.mKeymasterVersionAtLeast4 = true;
         }
 
         // First two characters are Android OS version.
         if (attestationAttributes.getKeyOsVersion() < 100000) {
-            debugVerboseLog("Android OS version is not 10+.");
-            result = false;
+            Slog.e(TAG, "Android OS version is not 10+.");
+            result |= FLAG_FAILURE_KEYSTORE_REQUIREMENTS;
         } else {
             dumpData.mOsVersionAtLeast10 = true;
         }
 
         if (!attestationAttributes.isAttestationHardwareBacked()) {
-            debugVerboseLog("Key is not HW backed.");
-            result = false;
+            Slog.e(TAG, "Key is not HW backed.");
+            result |= FLAG_FAILURE_KEYSTORE_REQUIREMENTS;
         } else {
             dumpData.mKeyHwBacked = true;
         }
 
         if (!attestationAttributes.isKeymasterHardwareBacked()) {
-            debugVerboseLog("Keymaster is not HW backed.");
-            result = false;
+            Slog.e(TAG, "Keymaster is not HW backed.");
+            result |= FLAG_FAILURE_KEYSTORE_REQUIREMENTS;
         } else {
             dumpData.mKeymasterHwBacked = true;
         }
 
         if (attestationAttributes.getVerifiedBootState() != VERIFIED) {
-            debugVerboseLog("Boot state not Verified.");
-            result = false;
+            Slog.e(TAG, "Boot state not Verified.");
+            result |= FLAG_FAILURE_BOOT_STATE;
         } else {
             dumpData.mBootStateIsVerified = true;
         }
 
         try {
             if (!attestationAttributes.isVerifiedBootLocked()) {
-                debugVerboseLog("Verified boot state is not locked.");
-                result = false;
+                Slog.e(TAG, "Verified boot state is not locked.");
+                result |= FLAG_FAILURE_BOOT_STATE;
             } else {
                 dumpData.mVerifiedBootStateLocked = true;
             }
         } catch (IllegalStateException e) {
-            debugVerboseLog("VerifiedBootLocked is not set.", e);
-            result = false;
+            Slog.e(TAG, "VerifiedBootLocked is not set.", e);
+            result = FLAG_FAILURE_BOOT_STATE;
         }
 
-        // Patch level integer YYYYMM is expected to be within 1 year of today.
-        if (!isValidPatchLevel(attestationAttributes.getKeyOsPatchLevel())) {
-            debugVerboseLog("OS patch level is not within valid range.");
-            result = false;
+        int maxPatchLevelDiffMonths = requirements.getInt(PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS,
+                MAX_PATCH_AGE_MONTHS);
+
+        // Patch level integer YYYYMM is expected to be within maxPatchLevelDiffMonths of today.
+        if (!isValidPatchLevel(attestationAttributes.getKeyOsPatchLevel(),
+                maxPatchLevelDiffMonths)) {
+            Slog.e(TAG, "OS patch level is not within valid range.");
+            result |= FLAG_FAILURE_PATCH_LEVEL_DIFF;
         } else {
             dumpData.mOsPatchLevelInRange = true;
         }
 
-        // Patch level integer YYYYMMDD is expected to be within 1 year of today.
-        if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel())) {
-            debugVerboseLog("Boot patch level is not within valid range.");
-            result = false;
+        // Patch level integer YYYYMMDD is expected to be within maxPatchLevelDiffMonths of today.
+        if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel(),
+                maxPatchLevelDiffMonths)) {
+            Slog.e(TAG, "Boot patch level is not within valid range.");
+            result |= FLAG_FAILURE_PATCH_LEVEL_DIFF;
         } else {
             dumpData.mKeyBootPatchLevelInRange = true;
         }
 
-        if (!isValidPatchLevel(attestationAttributes.getKeyVendorPatchLevel())) {
-            debugVerboseLog("Vendor patch level is not within valid range.");
-            result = false;
+        if (!isValidPatchLevel(attestationAttributes.getKeyVendorPatchLevel(),
+                maxPatchLevelDiffMonths)) {
+            Slog.e(TAG, "Vendor patch level is not within valid range.");
+            result |= FLAG_FAILURE_PATCH_LEVEL_DIFF;
         } else {
             dumpData.mKeyVendorPatchLevelInRange = true;
         }
 
-        if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel())) {
-            debugVerboseLog("Boot patch level is not within valid range.");
-            result = false;
+        if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel(),
+                maxPatchLevelDiffMonths)) {
+            Slog.e(TAG, "Boot patch level is not within valid range.");
+            result |= FLAG_FAILURE_PATCH_LEVEL_DIFF;
         } else {
             dumpData.mKeyBootPatchLevelInRange = true;
         }
@@ -512,7 +520,7 @@ class AttestationVerificationPeerDeviceVerifier {
         final Set<String> ownerPackages =
                 attestationAttributes.getApplicationPackageNameVersion().keySet();
         if (!ANDROID_SYSTEM_PACKAGE_NAME_SET.equals(ownerPackages)) {
-            debugVerboseLog("Owner is not system, packages=" + ownerPackages);
+            Slog.e(TAG, "Owner is not system, packages=" + ownerPackages);
             return false;
         }
 
@@ -525,7 +533,7 @@ class AttestationVerificationPeerDeviceVerifier {
      * is not enough. Therefore, we also confirm the patch level for the remote and local device are
      * similar.
      */
-    private boolean isValidPatchLevel(int patchLevel) {
+    private boolean isValidPatchLevel(int patchLevel, int maxPatchLevelDiffMonths) {
         LocalDate currentDate = mTestSystemDate != null
                 ? mTestSystemDate : LocalDate.now(ZoneId.systemDefault());
 
@@ -538,12 +546,14 @@ class AttestationVerificationPeerDeviceVerifier {
                 localPatchDate = LocalDate.parse(Build.VERSION.SECURITY_PATCH);
             }
         } catch (Throwable t) {
-            debugVerboseLog("Build.VERSION.SECURITY_PATCH: "
+            Slog.e(TAG, "Build.VERSION.SECURITY_PATCH: "
                     + Build.VERSION.SECURITY_PATCH + " is not in format YYYY-MM-DD");
             return false;
         }
 
-        // Check local patch date is not in last year of system clock.
+        // Check local patch date is not in last year of system clock. If the local patch already
+        // has a year's worth of bugs and vulnerabilities, it has no security meanings to check the
+        // remote patch level.
         if (ChronoUnit.MONTHS.between(localPatchDate, currentDate) > MAX_PATCH_AGE_MONTHS) {
             return true;
         }
@@ -551,7 +561,7 @@ class AttestationVerificationPeerDeviceVerifier {
         // Convert remote patch dates to LocalDate.
         String remoteDeviceDateStr = String.valueOf(patchLevel);
         if (remoteDeviceDateStr.length() != 6 && remoteDeviceDateStr.length() != 8) {
-            debugVerboseLog("Patch level is not in format YYYYMM or YYYYMMDD");
+            Slog.e(TAG, "Patch level is not in format YYYYMM or YYYYMMDD");
             return false;
         }
 
@@ -559,19 +569,9 @@ class AttestationVerificationPeerDeviceVerifier {
         int patchMonth = Integer.parseInt(remoteDeviceDateStr.substring(4, 6));
         LocalDate remotePatchDate = LocalDate.of(patchYear, patchMonth, 1);
 
-        // Check patch dates are within 1 year of each other
-        boolean IsRemotePatchWithinOneYearOfLocalPatch;
-        if (remotePatchDate.compareTo(localPatchDate) > 0) {
-            IsRemotePatchWithinOneYearOfLocalPatch = ChronoUnit.MONTHS.between(
-                    localPatchDate, remotePatchDate) <= MAX_PATCH_AGE_MONTHS;
-        } else if (remotePatchDate.compareTo(localPatchDate) < 0) {
-            IsRemotePatchWithinOneYearOfLocalPatch = ChronoUnit.MONTHS.between(
-                    remotePatchDate, localPatchDate) <= MAX_PATCH_AGE_MONTHS;
-        } else {
-            IsRemotePatchWithinOneYearOfLocalPatch = true;
-        }
-
-        return IsRemotePatchWithinOneYearOfLocalPatch;
+        // Check patch dates are within the max patch level diff of each other
+        return Math.abs(ChronoUnit.MONTHS.between(localPatchDate, remotePatchDate))
+                <= maxPatchLevelDiffMonths;
     }
 
     /**
@@ -664,18 +664,6 @@ class AttestationVerificationPeerDeviceVerifier {
         }
     }
 
-    private static void debugVerboseLog(String str, Throwable t) {
-        if (DEBUG) {
-            Slog.v(TAG, str, t);
-        }
-    }
-
-    private static void debugVerboseLog(String str) {
-        if (DEBUG) {
-            Slog.v(TAG, str);
-        }
-    }
-
     /* Mutable data class for tracking dump data from verifications. */
     private static class MyDumpData extends AttestationVerificationManagerService.DumpData {
 
@@ -715,9 +703,7 @@ class AttestationVerificationPeerDeviceVerifier {
         @SuppressLint("WrongConstant")
         @Override
         public void dumpTo(IndentingPrintWriter writer) {
-            writer.println(
-                    "Result: " + AttestationVerificationManager.verificationResultCodeToString(
-                            mResult));
+            writer.println("Result: " + mResult);
             if (!mCertificationFactoryAvailable) {
                 writer.println("Certificate Factory Unavailable");
                 return;

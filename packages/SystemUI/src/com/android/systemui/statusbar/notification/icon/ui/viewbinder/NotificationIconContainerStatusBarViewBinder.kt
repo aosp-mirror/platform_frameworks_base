@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [NotificationIconContainer] to a [NotificationIconContainerStatusBarViewModel]. */
 class NotificationIconContainerStatusBarViewBinder

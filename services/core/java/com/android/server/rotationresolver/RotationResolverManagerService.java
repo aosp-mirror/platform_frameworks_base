@@ -191,8 +191,7 @@ public class RotationResolverManagerService extends
                         SensorPrivacyManager.Sensors.CAMERA);
                 if (mIsServiceEnabled && isCameraAvailable) {
                     final RotationResolverManagerPerUserService service =
-                            getServiceForUserLocked(
-                                    UserHandle.getCallingUserId());
+                            getServiceForUserLocked(UserHandle.USER_CURRENT);
                     final RotationResolutionRequest request;
                     if (packageName == null) {
                         request = new RotationResolutionRequest(/* packageName */ "",

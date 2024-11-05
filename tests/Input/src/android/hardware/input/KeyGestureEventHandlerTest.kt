@@ -18,20 +18,17 @@ package android.hardware.input
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.os.Handler
 import android.os.IBinder
-import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.KeyEvent
 import androidx.test.core.app.ApplicationProvider
 import com.android.server.testutils.any
-import org.junit.After
+import com.android.test.input.MockInputManagerRule
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.`when`
@@ -69,20 +66,16 @@ class KeyGestureEventHandlerTest {
 
     @get:Rule
     val rule = SetFlagsRule()
+    @get:Rule
+    val inputManagerRule = MockInputManagerRule()
 
-    private val testLooper = TestLooper()
     private var registeredListener: IKeyGestureHandler? = null
     private lateinit var context: Context
     private lateinit var inputManager: InputManager
-    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
-
-    @Mock
-    private lateinit var iInputManagerMock: IInputManager
 
     @Before
     fun setUp() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManagerMock)
         inputManager = InputManager(context)
         `when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
                 .thenReturn(inputManager)
@@ -97,7 +90,7 @@ class KeyGestureEventHandlerTest {
             }
             registeredListener = listener
             null
-        }.`when`(iInputManagerMock).registerKeyGestureHandler(any())
+        }.`when`(inputManagerRule.mock).registerKeyGestureHandler(any())
 
         // Handle key gesture handler being unregistered.
         doAnswer {
@@ -108,14 +101,7 @@ class KeyGestureEventHandlerTest {
             }
             registeredListener = null
             null
-        }.`when`(iInputManagerMock).unregisterKeyGestureHandler(any())
-    }
-
-    @After
-    fun tearDown() {
-        if (this::inputManagerGlobalSession.isInitialized) {
-            inputManagerGlobalSession.close()
-        }
+        }.`when`(inputManagerRule.mock).unregisterKeyGestureHandler(any())
     }
 
     private fun handleKeyGestureEvent(event: KeyGestureEvent) {

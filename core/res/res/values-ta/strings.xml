@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ஆஃப்"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ஏதேனும் கேலெண்டர்"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> சில ஒலிகளை முடக்குகிறது"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது, அதனை ஆரம்பநிலைக்கு மீட்டமைக்கும் வரை நிலையற்று இயங்கலாம்."</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"திரைப் பூட்டை அமையுங்கள்"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"திரைப் பூட்டை அமை"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ரகசிய இடத்தைப் பயன்படுத்த, சாதனத்தில் திரைப் பூட்டை அமையுங்கள்"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"ரகசிய இடத்தை நீக்க, இந்தச் சாதனத்தில் திரைப் பூட்டை அமையுங்கள்"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"இந்த ஆப்ஸ் இப்போது கிடைப்பதில்லை"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் இப்போது கிடைப்பதில்லை."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> இல்லை"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு அதிரும்"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு ஒலியை முடக்கும்"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"சிஸ்டம் மாற்றங்கள்"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"தொந்தரவு செய்ய வேண்டாம்"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"புதியது: \'தொந்தரவு செய்ய வேண்டாம்\' பயன்முறையானது அறிவிப்புகளைக் காட்டாமல் மறைக்கிறது"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"மேலும் அறிந்து மாற்ற, தட்டவும்."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"தொந்தரவு செய்ய வேண்டாம் அமைப்புகள் மாற்றப்பட்டன"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"எவற்றையெல்லாம் தடுக்கிறது என்பதைப் பார்க்க, தட்டவும்."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"அறிவிப்பு அமைப்புகளை மதிப்பாய்வு செய்யுங்கள்"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 பதிப்பு முதல், நீங்கள் நிறுவுகின்ற ஆப்ஸ் உங்களுக்கு அறிவிப்புகளை அனுப்ப அனுமதி தேவை. ஏற்கெனவே உள்ள ஆப்ஸுக்கு இந்த அனுமதியை மாற்ற தட்டவும்."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"பின்னர் நினைவூட்டு"</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"மொபைல்/வைஃபை நெட்வொர்க் இல்லாமல் மெசேஜ்களை அனுப்பலாம், பெறலாம்"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ஆப்ஸைத் திறக்கவும்"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"இது செயல்படும் விதம்"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"நிலுவையிலுள்ளது..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>ஐ இனி அடையாளம் காண முடியாது."</string>

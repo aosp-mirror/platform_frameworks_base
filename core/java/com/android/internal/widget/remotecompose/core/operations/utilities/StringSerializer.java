@@ -15,15 +15,14 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
-/**
- * Utility serializer maintaining an indent buffer
- */
+/** Utility serializer maintaining an indent buffer */
 public class StringSerializer {
     StringBuffer mBuffer = new StringBuffer();
     String mIndentBuffer = "                                                                      ";
 
     /**
      * Append some content to the current buffer
+     *
      * @param indent the indentation level to use
      * @param content content to append
      */
@@ -35,17 +34,17 @@ public class StringSerializer {
         mBuffer.append("\n");
     }
 
-    /**
-     * Reset the buffer
-     */
+    /** Reset the buffer */
     public void reset() {
         mBuffer = new StringBuffer();
     }
 
     /**
      * Return a string representation of the buffer
+     *
      * @return string representation
      */
+    @Override
     public String toString() {
         return mBuffer.toString();
     }

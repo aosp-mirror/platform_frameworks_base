@@ -230,12 +230,14 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.os.ApplicationSharedMemory;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.DebugStore;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SafeZipPathValidatorCallback;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.DecorView;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -255,6 +257,7 @@ import libcore.io.ForwardingOs;
 import libcore.io.IoUtils;
 import libcore.io.Os;
 import libcore.net.event.NetworkEventDispatcher;
+import libcore.util.NativeAllocationRegistry;
 
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
@@ -1300,6 +1303,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 long[] disabledCompatChanges,
                 long[] loggableCompatChanges,
                 SharedMemory serializedSystemFontMap,
+                FileDescriptor applicationSharedMemoryFd,
                 long startRequestedElapsedTime,
                 long startRequestedUptime) {
             if (services != null) {
@@ -1326,6 +1330,16 @@ public final class ActivityThread extends ClientTransactionHandler
 
                 // Setup the service cache in the ServiceManager
                 ServiceManager.initServiceCache(services);
+            }
+
+            // This must be initialized as early as possible to ensure availability for any
+            // downstream callers.
+            if (com.android.internal.os.Flags.applicationSharedMemoryEnabled()) {
+                ApplicationSharedMemory instance =
+                        ApplicationSharedMemory.fromFileDescriptor(
+                                applicationSharedMemoryFd, /* mutable= */ false);
+                instance.closeFileDescriptor();
+                ApplicationSharedMemory.setInstance(instance);
             }
 
             setCoreSettings(coreSettings);
@@ -1610,6 +1624,32 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @NeverCompile
+        private void dumpMemInfoNativeAllocations(PrintWriter pw) {
+            pw.println(" ");
+            pw.println(" Native Allocations");
+            printRow(pw, TWO_COUNT_COLUMN_HEADER, "", "Count", "", "Total(kB)");
+            printRow(pw, TWO_COUNT_COLUMN_HEADER, "", "------", "", "------");
+
+            for (NativeAllocationRegistry.Metrics m : NativeAllocationRegistry.getMetrics()) {
+                // group into 3 major categories: Bitmap, HardwareBuffer and Other
+                final String className = switch (m.getClassName()) {
+                    case "android.graphics.Bitmap" -> "Bitmap";
+                    case "android.hardware.HardwareBuffer" -> "HardwareBuffer";
+                    default -> "Other";
+                };
+
+                if (m.getMallocedCount() != 0 || m.getMallocedBytes() != 0) {
+                    printRow(pw, TWO_COUNT_COLUMNS, className + " (malloced):",
+                        m.getMallocedCount(), "", m.getMallocedBytes() / 1024);
+                }
+                if (m.getNonmallocedCount() != 0 || m.getNonmallocedBytes() != 0) {
+                    printRow(pw, TWO_COUNT_COLUMNS, className + " (nonmalloced):",
+                        m.getNonmallocedCount(), "", m.getNonmallocedBytes() / 1024);
+                }
+            }
+        }
+
+        @NeverCompile
         private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
                 boolean dumpUnreachable, boolean dumpAllocatorStats) {
@@ -1706,6 +1746,10 @@ public final class ActivityThread extends ClientTransactionHandler
                     "Parcel count:", parcelCount);
             printRow(pw, TWO_COUNT_COLUMNS, "Death Recipients:", binderDeathObjectCount,
                     "WebViews:", webviewInstanceCount);
+
+            if (com.android.libcore.readonly.Flags.nativeMetrics()) {
+                dumpMemInfoNativeAllocations(pw);
+            }
 
             // SQLite mem info
             pw.println(" ");
@@ -1917,8 +1961,12 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void dumpCacheInfo(ParcelFileDescriptor pfd, String[] args) {
-            PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
-            IoUtils.closeQuietly(pfd);
+            try {
+                PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
+                BroadcastStickyCache.dump(pfd);
+            } finally {
+                IoUtils.closeQuietly(pfd);
+            }
         }
 
         private File getDatabasesDir(Context context) {
@@ -2633,7 +2681,10 @@ public final class ActivityThread extends ClientTransactionHandler
                     handleUnstableProviderDied((IBinder)msg.obj, false);
                     break;
                 case REQUEST_ASSIST_CONTEXT_EXTRAS:
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                            "handleRequestAssistContextExtras");
                     handleRequestAssistContextExtras((RequestAssistContextExtras)msg.obj);
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case TRANSLUCENT_CONVERSION_COMPLETE:
                     handleTranslucentConversionComplete((IBinder)msg.obj, msg.arg1 == 1);
@@ -3047,6 +3098,19 @@ public final class ActivityThread extends ClientTransactionHandler
     @UnsupportedAppUsage
     ActivityThread() {
         mResourcesManager = ResourcesManager.getInstance();
+    }
+
+    /**
+     * Creates and initialize a new system activity thread, to be used for testing. This does not
+     * call {@link #attach}, so it does not modify static state.
+     */
+    @VisibleForTesting
+    @NonNull
+    public static ActivityThread createSystemActivityThreadForTesting() {
+        final var thread = new ActivityThread();
+        thread.mSystemThread = true;
+        initializeSystemThread(thread);
+        return thread;
     }
 
     @UnsupportedAppUsage
@@ -3792,6 +3856,18 @@ public final class ActivityThread extends ClientTransactionHandler
     public final Activity getActivity(IBinder token) {
         final ActivityClientRecord activityRecord = mActivities.get(token);
         return activityRecord != null ? activityRecord.activity : null;
+    }
+
+    /**
+     * Returns the most recent created activity that's still running.
+     */
+    @Nullable
+    public Activity getLastCreatedActivity() {
+        if (mActivities.isEmpty()) {
+            return null;
+        }
+
+        return mActivities.valueAt(mActivities.size() - 1).activity;
     }
 
     @Override
@@ -6238,7 +6314,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         r.activity.mConfigChangeFlags |= configChanges;
-        r.mPreserveWindow = tmp.mPreserveWindow;
+        r.mPreserveWindow = r.activity.mWindowAdded && tmp.mPreserveWindow;
 
         r.activity.mChangingConfigurations = true;
 
@@ -6742,6 +6818,16 @@ public final class ActivityThread extends ClientTransactionHandler
             final ArrayList<String> oldPaths = new ArrayList<>();
             LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
             resApk.updateApplicationInfo(ai, oldPaths);
+        }
+        if (android.content.res.Flags.systemContextHandleAppInfoChanged() && mSystemThread) {
+            final var systemContext = getSystemContext();
+            if (systemContext.getPackageName().equals(ai.packageName)) {
+                // The system package is not tracked directly, but still needs to receive updates to
+                // its application info.
+                final ArrayList<String> oldPaths = new ArrayList<>();
+                LoadedApk.makePaths(this, systemContext.getApplicationInfo(), oldPaths);
+                systemContext.mPackageInfo.updateApplicationInfo(ai, oldPaths);
+            }
         }
 
         ResourcesImpl beforeImpl = getApplication().getResources().getImpl();
@@ -7287,6 +7373,8 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        VMDebug.setUserId(UserHandle.myUserId());
+        VMDebug.addApplication(data.appInfo.packageName);
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName,
@@ -7614,6 +7702,18 @@ public final class ActivityThread extends ClientTransactionHandler
                 }
             }
         });
+
+        // Register callback to report native memory metrics post GC cleanup
+        // Note: we do not report memory metrics of isolated processes unless
+        // their native allocations become more significant
+        if (!Process.isIsolated() && Flags.reportPostgcMemoryMetrics() &&
+            com.android.libcore.readonly.Flags.postCleanupApis()) {
+            VMRuntime.addPostCleanupCallback(new Runnable() {
+                @Override public void run() {
+                    MetricsLoggerWrapper.logPostGcMemorySnapshot();
+                }
+            });
+        }
     }
 
     @UnsupportedAppUsage
@@ -7809,9 +7909,20 @@ public final class ActivityThread extends ClientTransactionHandler
             file.getParentFile().mkdirs();
             Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
         }
+
+        if (ii.packageName != null) {
+            VMDebug.addApplication(ii.packageName);
+        }
     }
 
     private void handleFinishInstrumentationWithoutRestart() {
+        LoadedApk loadedApk = getApplication().mLoadedApk;
+        // Only remove instrumentation app if this was not a self-testing app.
+        if (mInstrumentationPackageName != null && loadedApk != null && !mInstrumentationPackageName
+                .equals(loadedApk.mPackageName)) {
+            VMDebug.removeApplication(mInstrumentationPackageName);
+        }
+
         mInstrumentation.onDestroy();
         mInstrumentationPackageName = null;
         mInstrumentationAppDir = null;
@@ -8288,12 +8399,12 @@ public final class ActivityThread extends ClientTransactionHandler
             }
             Context c = null;
             ApplicationInfo ai = info.applicationInfo;
-            if (context.getPackageName().equals(ai.packageName)) {
+            if (context != null && context.getPackageName().equals(ai.packageName)) {
                 c = context;
             } else if (mInitialApplication != null &&
                     mInitialApplication.getPackageName().equals(ai.packageName)) {
                 c = mInitialApplication;
-            } else {
+            } else if (context != null) {
                 try {
                     c = context.createPackageContext(ai.packageName,
                             Context.CONTEXT_INCLUDE_CODE);
@@ -8472,17 +8583,7 @@ public final class ActivityThread extends ClientTransactionHandler
             // we can't display an alert, we just want to die die die.
             android.ddm.DdmHandleAppName.setAppName("system_process",
                     UserHandle.myUserId());
-            try {
-                mInstrumentation = new Instrumentation();
-                mInstrumentation.basicInit(this);
-                ContextImpl context = ContextImpl.createAppContext(
-                        this, getSystemContext().mPackageInfo);
-                mInitialApplication = context.mPackageInfo.makeApplicationInner(true, null);
-                mInitialApplication.onCreate();
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        "Unable to instantiate Application():" + e.toString(), e);
-            }
+            initializeSystemThread(this);
         }
 
         ViewRootImpl.ConfigChangedCallback configChangedCallback = (Configuration globalConfig) -> {
@@ -8505,6 +8606,28 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         };
         ViewRootImpl.addConfigCallback(configChangedCallback);
+    }
+
+    /**
+     * Initializes the given system activity thread, setting up its instrumentation and initial
+     * application. This only has an effect if the given thread is a {@link #mSystemThread}.
+     *
+     * @param thread the given system activity thread to initialize.
+     */
+    private static void initializeSystemThread(@NonNull ActivityThread thread) {
+        if (!thread.mSystemThread) {
+            return;
+        }
+        try {
+            thread.mInstrumentation = new Instrumentation();
+            thread.mInstrumentation.basicInit(thread);
+            ContextImpl context = ContextImpl.createAppContext(
+                    thread, thread.getSystemContext().mPackageInfo);
+            thread.mInitialApplication = context.mPackageInfo.makeApplicationInner(true, null);
+            thread.mInitialApplication.onCreate();
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to instantiate Application():" + e, e);
+        }
     }
 
     @UnsupportedAppUsage
@@ -8843,6 +8966,11 @@ public final class ActivityThread extends ClientTransactionHandler
         } catch (RemoteException ignored) {
         }
         return false;
+    }
+
+    void addApplication(@NonNull Application app) {
+        mAllApplications.add(app);
+        VMDebug.addApplication(app.mLoadedApk.mPackageName);
     }
 
     @Override

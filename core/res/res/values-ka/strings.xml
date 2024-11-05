@@ -1406,7 +1406,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"აღმოჩენილია ანალოგური აუდიო აქსესუარი"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"მიერთებული მოწყობილობა არაა თავსებადი ამ ტელეფონთან. მეტის გასაგებად, შეეხეთ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB გამართვა შეერთებულია"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB გამართვა"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ USB გამართვის გამოსართავად"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"მონიშნეთ რათა შეწყვიტოთ USB-ის გამართვა"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"შეცდომების უსადენო გამართვა დაკავშირებულია"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"შეეხეთ შეცდომების უსადენო გამართვის გამოსართავად"</string>
@@ -1943,6 +1943,8 @@
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"გამორთული"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ნებისმიერი კალენდარი"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ზოგიერთ ხმას ადუმებს"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>
@@ -2010,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ეკრანის დაბლოკვის დაყენება"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ეკრანის დაბლოკვის დაყენება"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"კერძო სივრცის გამოსაყენებლად დააყენეთ ამ მოწყობილობაზე ეკრანის დაბლოკვა"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"კერძო სივრცის წასაშლელად დააყენეთ ეკრანის დაბლოკვა ამ მოწყობილობაზე"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"აპი მიუწვდომელია"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ამჟამად მიუწვდომელია."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> მიუწვდომელია"</string>
@@ -2128,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ზარების და შეტყობინებების მიღებისას ვიბრაცია ჩაირთვება"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ზარები და შეტყობინებები დადუმებული იქნება"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"სისტემის ცვლილებები"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"არ შემაწუხოთ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ახალი: „არ შემაწუხოთ“ რეჟიმი მალავს შეტყობინებებს"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"შეეხეთ მეტის გასაგებად და შესაცვლელად."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„არ შემაწუხოთ“ რეჟიმი შეცვლილია"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"შეეხეთ იმის სანახავად, თუ რა არის დაბლოკილი."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"შეტყობინების პარამეტრების შემოწმება"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-ზე შეტყობინებების გასაგზავნად საჭიროა თქვენ მიერ დაინსტალირებული აპებისთვის ნებართვის მინიჭება. არსებული აპებისთვის ამ ნებართვის შესაცვლელად შეეხეთ."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"შემახსენე მოგვიან."</string>
@@ -2428,6 +2426,14 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"შეტყობინებების გაგზავნა და მიღება მობილური ან Wi-Fi ქსელის გარეშე"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages-ის გახსნა"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"მუშაობის პრინციპი"</string>
+    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
+    <skip />
+    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
+    <skip />
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"მომლოდინე..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ანაბეჭდით განბლოკვის ხელახლა დაყენება"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება."</string>

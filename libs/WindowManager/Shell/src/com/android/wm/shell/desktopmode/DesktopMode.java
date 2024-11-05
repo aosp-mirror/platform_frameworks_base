@@ -36,7 +36,7 @@ public interface DesktopMode {
      * @param listener the listener to add.
      * @param callbackExecutor the executor to call the listener on.
      */
-    void addVisibleTasksListener(DesktopModeTaskRepository.VisibleTasksListener listener,
+    void addVisibleTasksListener(DesktopRepository.VisibleTasksListener listener,
             Executor callbackExecutor);
 
     /**

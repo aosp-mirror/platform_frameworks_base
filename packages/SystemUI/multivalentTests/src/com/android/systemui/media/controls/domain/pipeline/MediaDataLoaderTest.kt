@@ -29,12 +29,14 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
 import android.service.notification.StatusBarNotification
+import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.Flags.MEDIA_RESUME_PROGRESS
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.graphics.ImageLoader
 import com.android.systemui.graphics.imageLoader
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -45,12 +47,18 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 private const val KEY = "KEY"
@@ -62,6 +70,7 @@ private const val SESSION_TITLE = "title"
 private const val SESSION_EMPTY_TITLE = ""
 
 @SmallTest
+@RunWithLooper
 @RunWith(AndroidJUnit4::class)
 class MediaDataLoaderTest : SysuiTestCase() {
 
@@ -73,6 +82,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
     private val fakeFeatureFlags = kosmos.fakeFeatureFlagsClassic
     private val mediaFlags = kosmos.mediaFlags
     private val mediaControllerFactory = kosmos.fakeMediaControllerFactory
+    private val media3ActionFactory = kosmos.media3ActionFactory
     private val session = MediaSession(context, "MediaDataLoaderTestSession")
     private val metadataBuilder =
         MediaMetadata.Builder().apply {
@@ -80,20 +90,25 @@ class MediaDataLoaderTest : SysuiTestCase() {
             putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
         }
 
-    private val underTest: MediaDataLoader =
-        MediaDataLoader(
-            context,
-            testDispatcher,
-            testScope,
-            mediaControllerFactory,
-            mediaFlags,
-            kosmos.imageLoader,
-            statusBarManager
-        )
+    private lateinit var underTest: MediaDataLoader
 
     @Before
     fun setUp() {
         mediaControllerFactory.setControllerForToken(session.sessionToken, mediaController)
+        whenever(mediaController.sessionToken).thenReturn(session.sessionToken)
+        whenever(mediaController.metadata).then { metadataBuilder.build() }
+
+        underTest =
+            MediaDataLoader(
+                context,
+                testDispatcher,
+                testScope,
+                mediaControllerFactory,
+                mediaFlags,
+                kosmos.imageLoader,
+                statusBarManager,
+                kosmos.media3ActionFactory,
+            )
     }
 
     @Test
@@ -115,7 +130,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
                         0,
                         0,
                         AudioAttributes.Builder().build(),
-                        null
+                        null,
                     )
                 )
             whenever(mediaController.metadata)
@@ -126,7 +141,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
                         .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, albumArt)
                         .putLong(
                             MediaConstants.METADATA_KEY_IS_EXPLICIT,
-                            MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
+                            MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT,
                         )
                         .build()
                 )
@@ -161,12 +176,12 @@ class MediaDataLoaderTest : SysuiTestCase() {
             val extras = Bundle()
             extras.putInt(
                 MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
-                MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED,
             )
             extras.putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, 0.3)
             extras.putLong(
                 MediaConstants.METADATA_KEY_IS_EXPLICIT,
-                MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
+                MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT,
             )
 
             val description =
@@ -189,7 +204,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
                     session.sessionToken,
                     APP_NAME,
                     intent,
-                    PACKAGE_NAME
+                    PACKAGE_NAME,
                 )
             assertThat(result).isNotNull()
             assertThat(result?.appName).isEqualTo(APP_NAME)
@@ -372,9 +387,73 @@ class MediaDataLoaderTest : SysuiTestCase() {
             assertThat(result).isNotNull()
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testLoadMediaDataInBg_cancelMultipleScheduledTasks() =
+        testScope.runTest {
+            val mockImageLoader = mock<ImageLoader>()
+            val mediaDataLoader =
+                MediaDataLoader(
+                    context,
+                    testDispatcher,
+                    testScope,
+                    mediaControllerFactory,
+                    mediaFlags,
+                    mockImageLoader,
+                    statusBarManager,
+                    media3ActionFactory,
+                )
+            metadataBuilder.putString(
+                MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+                "content://album_art_uri",
+            )
+
+            testScope.launch { mediaDataLoader.loadMediaData(KEY, createMediaNotification()) }
+            testScope.launch { mediaDataLoader.loadMediaData(KEY, createMediaNotification()) }
+            testScope.launch { mediaDataLoader.loadMediaData(KEY, createMediaNotification()) }
+            testScope.advanceUntilIdle()
+
+            verify(mockImageLoader, times(1)).loadBitmap(any(), anyInt(), anyInt(), anyInt())
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testLoadMediaDataInBg_fromResumeToActive_doesNotCancelResumeToActiveTask() =
+        testScope.runTest {
+            val mockImageLoader = mock<ImageLoader>()
+            val mediaDataLoader =
+                MediaDataLoader(
+                    context,
+                    testDispatcher,
+                    testScope,
+                    mediaControllerFactory,
+                    mediaFlags,
+                    mockImageLoader,
+                    statusBarManager,
+                    media3ActionFactory,
+                )
+            metadataBuilder.putString(
+                MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+                "content://album_art_uri",
+            )
+
+            testScope.launch {
+                mediaDataLoader.loadMediaData(
+                    KEY,
+                    createMediaNotification(),
+                    isConvertingToActive = true,
+                )
+            }
+            testScope.launch { mediaDataLoader.loadMediaData(KEY, createMediaNotification()) }
+            testScope.launch { mediaDataLoader.loadMediaData(KEY, createMediaNotification()) }
+            testScope.advanceUntilIdle()
+
+            verify(mockImageLoader, times(2)).loadBitmap(any(), anyInt(), anyInt(), anyInt())
+        }
+
     private fun createMediaNotification(
         mediaSession: MediaSession? = session,
-        applicationInfo: ApplicationInfo? = null
+        applicationInfo: ApplicationInfo? = null,
     ): StatusBarNotification =
         SbnBuilder().run {
             setPkg(PACKAGE_NAME)
@@ -385,7 +464,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
                     val bundle = Bundle()
                     bundle.putParcelable(
                         Notification.EXTRA_BUILDER_APPLICATION_INFO,
-                        applicationInfo
+                        applicationInfo,
                     )
                     it.addExtras(bundle)
                 }

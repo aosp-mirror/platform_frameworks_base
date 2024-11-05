@@ -87,8 +87,8 @@ final class HdmiEarcController {
             } catch (ServiceSpecificException sse) {
                 HdmiLogger.error(
                         "Could not set eARC enabled to " + enabled + ". Error: ", sse.errorCode);
-            } catch (RemoteException re) {
-                HdmiLogger.error("Could not set eARC enabled to " + enabled + ":. Exception: ", re);
+            } catch (RemoteException | NullPointerException e) {
+                HdmiLogger.error("Could not set eARC enabled to " + enabled + ":. Exception: ", e);
             }
         }
 
@@ -96,8 +96,8 @@ final class HdmiEarcController {
         public boolean nativeIsEarcEnabled() {
             try {
                 return mEarc.isEArcEnabled();
-            } catch (RemoteException re) {
-                HdmiLogger.error("Could not read if eARC is enabled. Exception: ", re);
+            } catch (RemoteException | NullPointerException e) {
+                HdmiLogger.error("Could not read if eARC is enabled. Exception: ", e);
                 return false;
             }
         }
@@ -107,8 +107,8 @@ final class HdmiEarcController {
             mEarcCallback = callback;
             try {
                 mEarc.setCallback(callback);
-            } catch (RemoteException re) {
-                HdmiLogger.error("Could not set callback. Exception: ", re);
+            } catch (RemoteException | NullPointerException e) {
+                HdmiLogger.error("Could not set callback. Exception: ", e);
             }
         }
 
@@ -116,8 +116,8 @@ final class HdmiEarcController {
         public byte nativeGetState(int portId) {
             try {
                 return mEarc.getState(portId);
-            } catch (RemoteException re) {
-                HdmiLogger.error("Could not get eARC state. Exception: ", re);
+            } catch (RemoteException | NullPointerException e) {
+                HdmiLogger.error("Could not get eARC state. Exception: ", e);
                 return -1;
             }
         }
@@ -126,9 +126,9 @@ final class HdmiEarcController {
         public byte[] nativeGetLastReportedAudioCapabilities(int portId) {
             try {
                 return mEarc.getLastReportedAudioCapabilities(portId);
-            } catch (RemoteException re) {
+            } catch (RemoteException | NullPointerException e) {
                 HdmiLogger.error(
-                        "Could not read last reported audio capabilities. Exception: ", re);
+                        "Could not read last reported audio capabilities. Exception: ", e);
                 return null;
             }
         }

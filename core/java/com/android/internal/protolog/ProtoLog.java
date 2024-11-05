@@ -16,12 +16,14 @@
 
 package com.android.internal.protolog;
 
+import android.os.ServiceManager;
+
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * ProtoLog API - exposes static logging methods. Usage of this API is similar
@@ -68,15 +70,19 @@ public class ProtoLog {
         // directly to the generated tracing implementations.
         if (android.tracing.Flags.perfettoProtologTracing()) {
             synchronized (sInitLock) {
+                final var allGroups = new HashSet<>(Arrays.stream(groups).toList());
                 if (sProtoLogInstance != null) {
                     // The ProtoLog instance has already been initialized in this process
                     final var alreadyRegisteredGroups = sProtoLogInstance.getRegisteredGroups();
-                    final var allGroups = new ArrayList<>(alreadyRegisteredGroups);
-                    allGroups.addAll(Arrays.stream(groups).toList());
-                    groups = allGroups.toArray(new IProtoLogGroup[0]);
+                    allGroups.addAll(alreadyRegisteredGroups);
                 }
 
-                sProtoLogInstance = new PerfettoProtoLogImpl(groups);
+                try {
+                    sProtoLogInstance = new UnprocessedPerfettoProtoLogImpl(
+                            allGroups.toArray(new IProtoLogGroup[0]));
+                } catch (ServiceManager.ServiceNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } else {
             sProtoLogInstance = new LogcatOnlyProtoLogImpl();

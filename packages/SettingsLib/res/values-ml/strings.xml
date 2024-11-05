@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"മെച്ചപ്പെടുത്തിയ കണക്റ്റിവിറ്റി ഫീച്ചർ പ്രവർത്തനക്ഷമമാക്കുന്നു."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"പ്രാദേശിക ടെർമിനൽ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ഡെവലപ്പ്മെന്റ് എൻവയോൺമെന്റ്"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android-ൽ Linux ടെർമിനൽ പ്രവർത്തിപ്പിക്കുക"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP പരിശോധന"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ചെക്കിംഗ്‌രീതി സജ്ജമാക്കുക"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ഡീബഗ്ഗിംഗ്"</string>
@@ -582,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ഇപ്പോൾ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ഈ ഫോൺ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ഈ ടാബ്‌ലെറ്റ്"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ഈ കമ്പ്യൂട്ടർ (ഇന്റേണൽ)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ഡോക്ക് സ്‌പീക്കർ"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ഈ മാറ്റം ബാധകമാകുന്നതിന് നിങ്ങളുടെ ഉപകരണം റീബൂട്ട് ചെയ്യേണ്ടതുണ്ട്. ഇപ്പോൾ റീബൂട്ട് ചെയ്യുകയോ റദ്ദാക്കുകയോ ചെയ്യുക."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"വയേർഡ് ഹെഡ്ഫോൺ"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"വയേർഡ് ഹെഡ്ഫോൺ"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"വയേർഡ് ഓഡിയോ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ഓഡിയോ"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"വയേർഡ് മൈക്രോഫോൺ"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB മൈക്രോഫോൺ"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT മൈക്രോഫോൺ"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ഓണാണ്"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ഓഫാണ്"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"കാരിയർ നെറ്റ്‌വർക്ക് മാറ്റൽ"</string>

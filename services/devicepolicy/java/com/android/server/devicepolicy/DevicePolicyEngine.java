@@ -42,7 +42,6 @@ import android.app.admin.PolicyUpdateReceiver;
 import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
 import android.app.admin.UserRestrictionPolicyKey;
-import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -91,6 +90,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Class responsible for setting, resolving, and enforcing policies set by multiple management
@@ -1031,11 +1031,11 @@ final class DevicePolicyEngine {
         }
     }
 
-    private <V> void enforcePolicy(PolicyDefinition<V> policyDefinition,
+    private <V> CompletableFuture<Boolean> enforcePolicy(PolicyDefinition<V> policyDefinition,
             @Nullable PolicyValue<V> policyValue, int userId) {
         // null policyValue means remove any enforced policies, ensure callbacks handle this
         // properly
-        policyDefinition.enforcePolicy(
+        return policyDefinition.enforcePolicy(
                 policyValue == null ? null : policyValue.getValue(), mContext, userId);
     }
 
@@ -2100,17 +2100,13 @@ final class DevicePolicyEngine {
                 String tag = parser.getName();
                 switch (tag) {
                     case TAG_POLICY_KEY_ENTRY:
-                        if (Flags.dontReadPolicyDefinition()) {
-                            policyDefinition = PolicyDefinition.readFromXml(parser);
-                            if (policyDefinition != null) {
-                                policyKey = policyDefinition.getPolicyKey();
-                            }
-                        } else {
-                            policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        policyDefinition = PolicyDefinition.readFromXml(parser);
+                        if (policyDefinition != null) {
+                            policyKey = policyDefinition.getPolicyKey();
                         }
                         break;
                     case TAG_POLICY_STATE_ENTRY:
-                        if (Flags.dontReadPolicyDefinition() && policyDefinition == null) {
+                        if (policyDefinition == null) {
                             Slogf.w(TAG, "Skipping policy state - unknown policy definition");
                         } else {
                             policyState = PolicyState.readFromXml(policyDefinition, parser);

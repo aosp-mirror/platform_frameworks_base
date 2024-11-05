@@ -206,7 +206,7 @@ public class TelephonySubscriptionTrackerTest {
                 .getAllSubscriptionInfoList();
 
         doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(anyInt());
-        setPrivilegedPackagesForMock(Collections.singletonList(PACKAGE_NAME));
+        setPrivilegedPackagesForMock(Collections.singleton(PACKAGE_NAME));
     }
 
     private IntentFilter getIntentFilter() {
@@ -293,7 +293,7 @@ public class TelephonySubscriptionTrackerTest {
                 Collections.singletonMap(TEST_SUBSCRIPTION_ID_1, TEST_CARRIER_CONFIG_WRAPPER));
     }
 
-    private void setPrivilegedPackagesForMock(@NonNull List<String> privilegedPackages) {
+    private void setPrivilegedPackagesForMock(@NonNull Set<String> privilegedPackages) {
         doReturn(privilegedPackages).when(mTelephonyManager).getPackagesWithCarrierPrivileges();
     }
 
@@ -390,7 +390,7 @@ public class TelephonySubscriptionTrackerTest {
     @Test
     public void testOnSubscriptionsChangedFired_onActiveSubIdsChanged() throws Exception {
         setupReadySubIds();
-        setPrivilegedPackagesForMock(Collections.emptyList());
+        setPrivilegedPackagesForMock(Collections.emptySet());
 
         doReturn(TEST_SUBSCRIPTION_ID_2).when(mDeps).getActiveDataSubscriptionId();
         final ActiveDataSubscriptionIdListener listener = getActiveDataSubscriptionIdListener();
@@ -411,7 +411,7 @@ public class TelephonySubscriptionTrackerTest {
     public void testOnSubscriptionsChangedFired_WithReadySubidsNoPrivilegedPackages()
             throws Exception {
         setupReadySubIds();
-        setPrivilegedPackagesForMock(Collections.emptyList());
+        setPrivilegedPackagesForMock(Collections.emptySet());
 
         final OnSubscriptionsChangedListener listener = getOnSubscriptionsChangedListener();
         listener.onSubscriptionsChanged();
@@ -567,7 +567,7 @@ public class TelephonySubscriptionTrackerTest {
         verify(mCallback).onNewSnapshot(eq(buildExpectedSnapshot(TEST_PRIVILEGED_PACKAGES)));
 
         // Simulate a loss of carrier privileges
-        setPrivilegedPackagesForMock(Collections.emptyList());
+        setPrivilegedPackagesForMock(Collections.emptySet());
         listener.onSubscriptionsChanged();
         mTestLooper.dispatchAll();
 

@@ -14,11 +14,17 @@
 
 package com.android.systemui.util;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.hardware.devicestate.DeviceState;
+import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.feature.flags.Flags;
 import android.provider.Settings;
 import android.view.DisplayCutout;
 
@@ -84,9 +90,23 @@ public class Utils {
     /**
      * Returns {@code true} if the device is a foldable device
      */
-    public static boolean isDeviceFoldable(Context context) {
-        return context.getResources()
-                .getIntArray(com.android.internal.R.array.config_foldedDeviceStates).length != 0;
+    public static boolean isDeviceFoldable(Resources resources,
+            DeviceStateManager deviceStateManager) {
+        if (Flags.deviceStatePropertyMigration()) {
+            List<DeviceState> deviceStates = deviceStateManager.getSupportedDeviceStates();
+            for (int i = 0; i < deviceStates.size(); i++) {
+                DeviceState state = deviceStates.get(i);
+                if (state.hasProperty(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)
+                        || state.hasProperty(
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return resources.getIntArray(
+                    com.android.internal.R.array.config_foldedDeviceStates).length != 0;
+        }
     }
 
     /**

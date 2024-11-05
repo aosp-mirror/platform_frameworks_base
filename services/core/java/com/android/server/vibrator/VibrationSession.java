@@ -39,24 +39,70 @@ import java.util.Objects;
  */
 interface VibrationSession {
 
+    /** Returns the session creation time from {@link android.os.SystemClock#uptimeMillis()}. */
+    long getCreateUptimeMillis();
+
+    /** Return true if vibration session plays a repeating vibration. */
+    boolean isRepeating();
+
     /** Returns data about the client app that triggered this vibration session. */
     CallerInfo getCallerInfo();
+
+    /** Returns the binder token from the client app attached to this vibration session. */
+    IBinder getCallerToken();
 
     /** Returns debug data for logging and metric reports. */
     DebugInfo getDebugInfo();
 
-    /**
-     * Links this session to the app process death with given callback to handle it.
-     *
-     * <p>This can be used by the service to end the vibration session when the app process dies.
-     */
-    void linkToDeath(Runnable callback);
+    /** Links this session to the app process death, returning false if link failed. */
+    boolean linkToDeath();
 
     /** Removes link to the app process death. */
     void unlinkToDeath();
 
-    /** Notify the session end was requested, which might be acted upon asynchronously. */
-    void notifyEnded();
+    /** Returns true if this session was requested to end by {@link #requestEnd}. */
+    boolean wasEndRequested();
+
+    /**
+     * Request the end of this session, which might be acted upon asynchronously.
+     *
+     * <p>This is the same as {@link #requestEnd(Status, CallerInfo, boolean)}, with no
+     * {@link CallerInfo} and with {@code immediate} flag set to false.
+     */
+    default void requestEnd(@NonNull Status status) {
+        requestEnd(status, /* endedBy= */ null, /* immediate= */ false);
+    }
+
+    /**
+     * Notify the session end was requested, which might be acted upon asynchronously.
+     *
+     * <p>Only the first end signal will be used to end a session, but subsequent calls with
+     * {@code immediate} flag set to true can still force it to take effect urgently.
+     *
+     * @param status the end status.
+     * @param endedBy the {@link CallerInfo} of the session that requested this session to end.
+     * @param immediate indicates whether cancellation should abort urgently and skip cleanup steps.
+     */
+    void requestEnd(@NonNull Status status, @Nullable CallerInfo endedBy, boolean immediate);
+
+    /**
+     * Notify a vibrator has completed the last command during the playback of given vibration.
+     *
+     * <p>This will be called by the vibrator hardware callback indicating the last vibrate call is
+     * complete (e.g. on(), perform(), compose()). This does not mean the vibration is complete,
+     * since its playback might have one or more interactions with the vibrator hardware.
+     */
+    void notifyVibratorCallback(int vibratorId, long vibrationId);
+
+    /**
+     * Notify all synced vibrators have completed the last synchronized command during the playback
+     * of given vibration.
+     *
+     * <p>This will be called by the vibrator manager hardware callback indicating the last
+     * synchronized vibrate call is complete. This does not mean the vibration is complete, since
+     * its playback might have one or more interactions with the vibrator hardware.
+     */
+    void notifySyncedVibratorsCallback(long vibrationId);
 
     /**
      * Session status with reference to values from vibratormanagerservice.proto for logging.
@@ -119,7 +165,7 @@ interface VibrationSession {
         public final String reason;
 
         CallerInfo(@NonNull VibrationAttributes attrs, int uid, int deviceId, String opPkg,
-                String reason) {
+                @Nullable String reason) {
             Objects.requireNonNull(attrs);
             this.attrs = attrs;
             this.uid = uid;

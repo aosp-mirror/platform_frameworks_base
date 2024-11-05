@@ -38,5 +38,8 @@ message CommunalHubState {
 
         // Serial number of the user associated with the widget.
         int32 user_serial_number = 4;
+
+        // The vertical span of the widget
+        int32 span_y = 5;
     }
 }

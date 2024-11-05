@@ -1,0 +1,148 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_ravenwood_test {
+    name: "RavenwoodBivalentInstTest_self_inst",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    exclude_srcs: [
+        "test/**/*_nonself.java",
+    ],
+
+    static_libs: [
+        "RavenwoodBivalentInstTest_self_inst_device_R",
+
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+
+        "junit",
+        "truth",
+    ],
+    resource_apk: "RavenwoodBivalentInstTest_self_inst_device",
+    auto_gen_config: true,
+}
+
+android_ravenwood_test {
+    name: "RavenwoodBivalentInstTest_nonself_inst",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    exclude_srcs: [
+        "test/**/*_self.java",
+    ],
+
+    static_libs: [
+        "RavenwoodBivalentInstTestTarget_R",
+        "RavenwoodBivalentInstTest_nonself_inst_device_R",
+
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+
+        "junit",
+        "truth",
+    ],
+    resource_apk: "RavenwoodBivalentInstTestTarget",
+    inst_resource_apk: "RavenwoodBivalentInstTest_nonself_inst_device",
+    auto_gen_config: true,
+}
+
+// We have 3 R.javas from the 3 packages (2 test apks below, and 1 target APK)
+// RavenwoodBivalentInstTest needs to use all of them, but we can't add all the
+// {.aapt.srcjar}'s together because that'd cause
+// "duplicate declaration of androidx.test.core.R$string."
+// So we build them as separate libraries, and include them as static_libs.
+java_library {
+    name: "RavenwoodBivalentInstTestTarget_R",
+    srcs: [
+        ":RavenwoodBivalentInstTestTarget{.aapt.srcjar}",
+    ],
+}
+
+java_library {
+    name: "RavenwoodBivalentInstTest_self_inst_device_R",
+    srcs: [
+        ":RavenwoodBivalentInstTest_self_inst_device{.aapt.srcjar}",
+    ],
+}
+
+java_library {
+    name: "RavenwoodBivalentInstTest_nonself_inst_device_R",
+    srcs: [
+        ":RavenwoodBivalentInstTest_nonself_inst_device{.aapt.srcjar}",
+    ],
+}
+
+android_test {
+    name: "RavenwoodBivalentInstTest_self_inst_device",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    exclude_srcs: [
+        "test/**/*_nonself.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+
+        "ravenwood-junit",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+    use_resource_processor: false,
+    manifest: "AndroidManifest-self-inst.xml",
+    test_config: "AndroidTest-self-inst.xml",
+    optimize: {
+        enabled: false,
+    },
+}
+
+android_test {
+    name: "RavenwoodBivalentInstTest_nonself_inst_device",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    exclude_srcs: [
+        "test/**/*_self.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+
+        "ravenwood-junit",
+    ],
+    data: [
+        ":RavenwoodBivalentInstTestTarget",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+    use_resource_processor: false,
+    manifest: "AndroidManifest-nonself-inst.xml",
+    test_config: "AndroidTest-nonself-inst.xml",
+    instrumentation_for: "RavenwoodBivalentInstTestTarget",
+    optimize: {
+        enabled: false,
+    },
+}

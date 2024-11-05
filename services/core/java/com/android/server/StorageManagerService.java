@@ -219,7 +219,7 @@ class StorageManagerService extends IStorageManager.Stub
     public static final int FAILED_MOUNT_RESET_TIMEOUT_SECONDS = 10;
 
     /** Extended timeout for the system server watchdog. */
-    private static final int SLOW_OPERATION_WATCHDOG_TIMEOUT_MS = 20 * 1000;
+    private static final int SLOW_OPERATION_WATCHDOG_TIMEOUT_MS = 30 * 1000;
 
     /** Extended timeout for the system server watchdog for vold#partition operation. */
     private static final int PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS = 3 * 60 * 1000;
@@ -2751,7 +2751,8 @@ class StorageManagerService extends IStorageManager.Stub
         boolean smartIdleMaintEnabled = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
             "smart_idle_maint_enabled",
-            DEFAULT_SMART_IDLE_MAINT_ENABLED);
+                DEFAULT_SMART_IDLE_MAINT_ENABLED)
+                && !SystemProperties.getBoolean("ro.boot.zufs_provisioned", false);
         if (smartIdleMaintEnabled) {
             mLifetimePercentThreshold = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
@@ -3251,7 +3252,7 @@ class StorageManagerService extends IStorageManager.Stub
         if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
             throw new SecurityException("no permission to commit checkpoint changes");
         }
-
+        extendWatchdogTimeout("vold#commitChanges might be slow");
         mVold.commitChanges();
     }
 

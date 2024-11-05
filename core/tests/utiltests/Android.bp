@@ -61,7 +61,7 @@ android_ravenwood_test {
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "frameworks-base-testutils",
-        "servicestests-utils",
+        "servicestests-utils-ravenwood",
     ],
     srcs: [
         "src/android/util/IRemoteMemoryIntArray.aidl",

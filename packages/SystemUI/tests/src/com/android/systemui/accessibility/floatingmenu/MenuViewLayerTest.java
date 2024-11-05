@@ -174,6 +174,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         mMenuAnimationController = mMenuView.getMenuAnimationController();
 
         doNothing().when(mSpyContext).startActivity(any());
+        doNothing().when(mSpyContext).startActivityAsUser(any(), any());
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
 
         mLastAccessibilityButtonTargets =

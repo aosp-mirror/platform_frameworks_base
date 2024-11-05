@@ -44,6 +44,10 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.DisabledOnRavenwood;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.ActivityStatsTechSpecificInfo;
@@ -65,6 +69,7 @@ import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
+import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.BatteryStatsImpl.DualTimer;
 
 import org.junit.Rule;
@@ -86,9 +91,16 @@ import java.util.function.IntConsumer;
 public class BatteryStatsNoteTest {
 
     @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
-            .setProvideMainThread(true)
-            .build();
+    public final RavenwoodRule mRavenwood =
+            new RavenwoodRule.Builder()
+                    .setProvideMainThread(true)
+                    .setSystemPropertyImmutable(
+                            "persist.sys.com.android.server.power.feature.flags."
+                                    + "framework_wakelock_info-override",
+                            null)
+                    .build();
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final String TAG = BatteryStatsNoteTest.class.getSimpleName();
 
@@ -103,6 +115,54 @@ public class BatteryStatsNoteTest {
 
     @Mock
     NetworkStatsManager mNetworkStatsManager;
+
+    @DisabledOnRavenwood
+    @EnableFlags(Flags.FLAG_BATTERY_STATS_SCREEN_STATE_EVENT)
+    @Test
+    public void testScreenStateEvent_screenStateEventFlagOn_eventsRecorded() throws Exception {
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClock());
+        bi.forceRecordAllHistory();
+
+        bi.noteScreenStateLocked(0, Display.STATE_ON, Display.STATE_REASON_DEFAULT_POLICY,
+                0, 0, 0);
+        bi.noteScreenStateLocked(2, Display.STATE_DOZE_SUSPEND, Display.STATE_REASON_DRAW_WAKE_LOCK,
+                1, 1, 1);
+
+        BatteryStatsHistoryIterator iterator =
+                bi.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
+        BatteryStats.HistoryItem item =
+                iterateAndFind(iterator, HistoryItem.EVENT_DISPLAY_STATE_CHANGED);
+        assertThat(item).isNotNull();
+        assertThat(item.eventTag).isNotNull();
+        assertThat(item.eventTag.string).isEqualTo("display=0 state=ON reason=DEFAULT_POLICY");
+        assertThat(item.eventTag.uid).isEqualTo(Process.INVALID_UID);
+
+        item = iterateAndFind(iterator, HistoryItem.EVENT_DISPLAY_STATE_CHANGED);
+        assertThat(item).isNotNull();
+        assertThat(item.eventTag).isNotNull();
+        assertThat(item.eventTag.string)
+                .isEqualTo("display=2 state=DOZE_SUSPEND reason=DRAW_WAKE_LOCK");
+        assertThat(item.eventTag.uid).isEqualTo(Process.INVALID_UID);
+
+        // Last check to make sure that we did not record any extra event.
+        assertThat(iterateAndFind(iterator, HistoryItem.EVENT_DISPLAY_STATE_CHANGED)).isNull();
+    }
+
+    @DisableFlags(Flags.FLAG_BATTERY_STATS_SCREEN_STATE_EVENT)
+    @Test
+    public void testScreenStateEvent_screenStateEventFlagOff_eventsNotRecorded() throws Exception {
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClock());
+        bi.forceRecordAllHistory();
+
+        bi.noteScreenStateLocked(0, Display.STATE_ON, Display.STATE_REASON_DEFAULT_POLICY,
+                0, 0, 0);
+        bi.noteScreenStateLocked(2, Display.STATE_DOZE_SUSPEND, Display.STATE_REASON_DRAW_WAKE_LOCK,
+                1, 1, 1);
+
+        BatteryStatsHistoryIterator iterator =
+                bi.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
+        assertThat(iterateAndFind(iterator, HistoryItem.EVENT_DISPLAY_STATE_CHANGED)).isNull();
+    }
 
     /**
      * Test BatteryStatsImpl.Uid.noteBluetoothScanResultLocked.
@@ -137,6 +197,7 @@ public class BatteryStatsNoteTest {
      * Test BatteryStatsImpl.Uid.noteStartWakeLocked.
      */
     @Test
+    @EnableFlags(com.android.server.power.feature.flags.Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
     public void testNoteStartWakeLocked() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -167,6 +228,7 @@ public class BatteryStatsNoteTest {
      * Test BatteryStatsImpl.Uid.noteStartWakeLocked for an isolated uid.
      */
     @Test
+    @EnableFlags(com.android.server.power.feature.flags.Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
     public void testNoteStartWakeLocked_isolatedUid() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
@@ -209,6 +271,7 @@ public class BatteryStatsNoteTest {
      * isolated uid is removed from batterystats before the wakelock has been stopped.
      */
     @Test
+    @EnableFlags(com.android.server.power.feature.flags.Flags.FLAG_FRAMEWORK_WAKELOCK_INFO)
     public void testNoteStartWakeLocked_isolatedUidRace() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
@@ -285,20 +348,15 @@ public class BatteryStatsNoteTest {
         final BatteryStatsHistoryIterator iterator =
                 bi.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
 
-        BatteryStats.HistoryItem item;
+        BatteryStats.HistoryItem item =
+                iterateAndFind(iterator, HistoryItem.EVENT_LONG_WAKE_LOCK_START);
 
-        while ((item = iterator.next()) != null) {
-            if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_START) break;
-        }
-        assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_START);
+        assertThat(item).isNotNull();
         assertThat(item.eventTag).isNotNull();
         assertThat(item.eventTag.string).isEqualTo(historyName);
         assertThat(item.eventTag.uid).isEqualTo(UID);
 
-        while ((item = iterator.next()) != null) {
-            if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH) break;
-        }
-        assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH);
+        item = iterateAndFind(iterator, HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH);
         assertThat(item.eventTag).isNotNull();
         assertThat(item.eventTag.string).isEqualTo(historyName);
         assertThat(item.eventTag.uid).isEqualTo(UID);
@@ -343,20 +401,15 @@ public class BatteryStatsNoteTest {
         final BatteryStatsHistoryIterator iterator =
                 bi.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
 
-        BatteryStats.HistoryItem item;
-
-        while ((item = iterator.next()) != null) {
-            if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_START) break;
-        }
-        assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_START);
+        BatteryStats.HistoryItem item =
+                iterateAndFind(iterator, HistoryItem.EVENT_LONG_WAKE_LOCK_START);
+        assertThat(item).isNotNull();
         assertThat(item.eventTag).isNotNull();
         assertThat(item.eventTag.string).isEqualTo(historyName);
         assertThat(item.eventTag.uid).isEqualTo(UID);
 
-        while ((item = iterator.next()) != null) {
-            if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH) break;
-        }
-        assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH);
+        item = iterateAndFind(iterator, HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH);
+        assertThat(item).isNotNull();
         assertThat(item.eventTag).isNotNull();
         assertThat(item.eventTag.string).isEqualTo(historyName);
         assertThat(item.eventTag.uid).isEqualTo(UID);
@@ -2561,5 +2614,19 @@ public class BatteryStatsNoteTest {
             mBsi.noteModemControllerActivity(copy, POWER_DATA_UNAVAILABLE,
                     currentTimeMs, currentTimeMs, mNetworkStatsManager);
         }
+    }
+
+    /**
+     * Moves a given {@link BatteryStatsHistoryIterator} until a history item with the given
+     * {@code eventCode} is found and returns the history item. Returns {@code null} if no such item
+     * is found.
+     */
+    private static BatteryStats.HistoryItem iterateAndFind(
+                BatteryStatsHistoryIterator iterator, int eventCode) {
+        BatteryStats.HistoryItem item;
+        while ((item = iterator.next()) != null) {
+            if (item.eventCode == eventCode) return item;
+        }
+        return null;
     }
 }

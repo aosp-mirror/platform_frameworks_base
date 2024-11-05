@@ -18,7 +18,9 @@ package android.media;
 
 import static android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL;
 import static android.media.AudioAttributes.ALLOW_CAPTURE_BY_NONE;
+import static android.media.audio.Flags.FLAG_MUTED_BY_PORT_VOLUME_API;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -291,12 +293,24 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int MUTED_BY_VOLUME_SHAPER = (1 << 5);
+    /**
+     * @hide
+     * Flag used when muted by the track's port volume.
+     *
+     * <p>Note: this will replace the stream volume mute when using the AudioFlinger port volume
+     * APIs
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_MUTED_BY_PORT_VOLUME_API)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public static final int MUTED_BY_PORT_VOLUME = (1 << 6);
 
     /** @hide */
     @IntDef(
             flag = true,
             value = {MUTED_BY_MASTER, MUTED_BY_STREAM_VOLUME, MUTED_BY_STREAM_MUTED,
-                    MUTED_BY_APP_OPS, MUTED_BY_CLIENT_VOLUME, MUTED_BY_VOLUME_SHAPER})
+                    MUTED_BY_APP_OPS, MUTED_BY_CLIENT_VOLUME, MUTED_BY_VOLUME_SHAPER,
+                    MUTED_BY_PORT_VOLUME})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerMuteEvent {
     }
@@ -857,6 +871,9 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 }
                 if ((mMutedState & MUTED_BY_VOLUME_SHAPER) != 0) {
                     apcToString.append("volumeShaper ");
+                }
+                if ((mMutedState & MUTED_BY_PORT_VOLUME) != 0) {
+                    apcToString.append("portVolume ");
                 }
             }
             apcToString.append(" ").append(mFormatInfo);

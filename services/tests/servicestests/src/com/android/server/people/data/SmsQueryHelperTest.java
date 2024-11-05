@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.Telephony.Sms;
 import android.provider.Telephony.TextBasedSmsColumns;
@@ -59,6 +60,7 @@ public final class SmsQueryHelperTest {
     private MatrixCursor mSmsCursor;
     private EventConsumer mEventConsumer;
     private SmsQueryHelper mHelper;
+    private SmsContentProvider mSmsContentProvider;
 
     @Before
     public void setUp() {
@@ -67,7 +69,8 @@ public final class SmsQueryHelperTest {
         mSmsCursor = new MatrixCursor(SMS_COLUMNS);
 
         MockContentResolver contentResolver = new MockContentResolver();
-        contentResolver.addProvider(SMS_AUTHORITY, new SmsContentProvider());
+        mSmsContentProvider = new SmsContentProvider();
+        contentResolver.addProvider(SMS_AUTHORITY, mSmsContentProvider);
         when(mContext.getContentResolver()).thenReturn(contentResolver);
 
         mEventConsumer = new EventConsumer();
@@ -130,6 +133,12 @@ public final class SmsQueryHelperTest {
         assertEquals(110L, events.get(1).getTimestamp());
     }
 
+    @Test
+    public void testQueryWithSQLiteException() {
+        mSmsContentProvider.setThrowSQLiteException(true);
+        assertFalse(mHelper.querySince(50L));
+    }
+
     private class EventConsumer implements BiConsumer<String, Event> {
 
         private final Map<String, List<Event>> mEventMap = new ArrayMap<>();
@@ -141,11 +150,19 @@ public final class SmsQueryHelperTest {
     }
 
     private class SmsContentProvider extends MockContentProvider {
+        private boolean mThrowSQLiteException = false;
 
         @Override
         public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                 String sortOrder) {
+            if (mThrowSQLiteException) {
+                throw new SQLiteException();
+            }
             return mSmsCursor;
+        }
+
+        public void setThrowSQLiteException(boolean throwException) {
+            this.mThrowSQLiteException = throwException;
         }
     }
 }

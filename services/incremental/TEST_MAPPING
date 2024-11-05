@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "CtsPackageManagerStatsHostTestCases",
-      "options": [
-        {
-          "include-filter": "com.android.cts.packagemanager.stats.host.PackageInstallerV2StatsTests"
-        }
-      ]
+      "name": "CtsPackageManagerStatsHostTestCases_host_packageinstallerv2statstests"
     },
     {
       "name": "CtsPackageManagerIncrementalStatsHostTestCases",

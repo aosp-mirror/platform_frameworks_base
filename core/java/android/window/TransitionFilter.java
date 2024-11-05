@@ -187,6 +187,7 @@ public final class TransitionFilter implements Parcelable {
 
         /** If non-null, requires the change to specifically have or not-have a custom animation. */
         public Boolean mCustomAnimation = null;
+        public IBinder mTaskFragmentToken = null;
 
         public Requirement() {
         }
@@ -204,12 +205,19 @@ public final class TransitionFilter implements Parcelable {
             // 0: null, 1: false, 2: true
             final int customAnimRaw = in.readInt();
             mCustomAnimation = customAnimRaw == 0 ? null : Boolean.valueOf(customAnimRaw == 2);
+            mTaskFragmentToken = in.readStrongBinder();
         }
 
         /** Go through changes and find if at-least one change matches this filter */
         boolean matches(@NonNull TransitionInfo info) {
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
+
+                if (mTaskFragmentToken != null
+                        && !mTaskFragmentToken.equals(change.getTaskFragmentToken())) {
+                    continue;
+                }
+
                 if (mMustBeIndependent && !TransitionInfo.isIndependent(change, info)) {
                     // Only look at independent animating windows.
                     continue;
@@ -313,6 +321,7 @@ public final class TransitionFilter implements Parcelable {
             dest.writeStrongBinder(mLaunchCookie);
             int customAnimRaw = mCustomAnimation == null ? 0 : (mCustomAnimation ? 2 : 1);
             dest.writeInt(customAnimRaw);
+            dest.writeStrongBinder(mTaskFragmentToken);
         }
 
         @NonNull
@@ -356,6 +365,9 @@ public final class TransitionFilter implements Parcelable {
             out.append(" launchCookie=").append(mLaunchCookie);
             if (mCustomAnimation != null) {
                 out.append(" customAnim=").append(mCustomAnimation.booleanValue());
+            }
+            if (mTaskFragmentToken != null) {
+                out.append(" taskFragmentToken=").append(mTaskFragmentToken);
             }
             out.append("}");
             return out.toString();

@@ -16,6 +16,12 @@
 
 package android.nfc;
 
+import static android.nfc.cardemulation.CardEmulation.PROTOCOL_AND_TECHNOLOGY_ROUTE_DH;
+import static android.nfc.cardemulation.CardEmulation.PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE;
+import static android.nfc.cardemulation.CardEmulation.PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC;
+import static android.nfc.cardemulation.CardEmulation.routeIntToString;
+
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -23,8 +29,14 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.nfc.cardemulation.ApduServiceInfo;
+import android.nfc.cardemulation.CardEmulation;
+import android.nfc.cardemulation.CardEmulation.ProtocolAndTechnologyRoute;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
@@ -68,6 +80,66 @@ public final class NfcOemExtension {
     private boolean mCardEmulationActivated = false;
     private boolean mRfFieldActivated = false;
     private boolean mRfDiscoveryStarted = false;
+    private boolean mEeListenActivated = false;
+
+    /**
+     * Broadcast Action: Sent on NFC stack initialization when NFC OEM extensions are enabled.
+     * <p> OEM extension modules should use this intent to start their extension service </p>
+     * @hide
+     */
+    public static final String ACTION_OEM_EXTENSION_INIT = "android.nfc.action.OEM_EXTENSION_INIT";
+
+    /**
+     * Mode Type for {@link #setControllerAlwaysOnMode(int)}.
+     * Enables the controller in default mode when NFC is disabled (existing API behavior).
+     * works same as {@link NfcAdapter#setControllerAlwaysOn(boolean)}.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int ENABLE_DEFAULT = NfcAdapter.CONTROLLER_ALWAYS_ON_MODE_DEFAULT;
+
+    /**
+     * Mode Type for {@link #setControllerAlwaysOnMode(int)}.
+     * Enables the controller in transparent mode when NFC is disabled.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int ENABLE_TRANSPARENT = 2;
+
+    /**
+     * Mode Type for {@link #setControllerAlwaysOnMode(int)}.
+     * Enables the controller and initializes and enables the EE subsystem when NFC is disabled.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int ENABLE_EE = 3;
+
+    /**
+     * Mode Type for {@link #setControllerAlwaysOnMode(int)}.
+     * Disable the Controller Always On Mode.
+     * works same as {@link NfcAdapter#setControllerAlwaysOn(boolean)}.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int DISABLE = NfcAdapter.CONTROLLER_ALWAYS_ON_DISABLE;
+
+    /**
+     * Possible controller modes for {@link #setControllerAlwaysOnMode(int)}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "" }, value = {
+        ENABLE_DEFAULT,
+        ENABLE_TRANSPARENT,
+        ENABLE_EE,
+        DISABLE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ControllerMode{}
 
     /**
      * Event that Host Card Emulation is activated.
@@ -124,9 +196,8 @@ public final class NfcOemExtension {
          * ex - if tag is connected  notify cover and Nfctest app if app is in testing mode
          *
          * @param connected status of the tag true if tag is connected otherwise false
-         * @param tag Tag details
          */
-        void onTagConnected(boolean connected, @NonNull Tag tag);
+        void onTagConnected(boolean connected);
 
         /**
          * Update the Nfc Adapter State
@@ -254,6 +325,67 @@ public final class NfcOemExtension {
         * @param isDiscoveryStarted true, if RF discovery started, else RF state is Idle.
         */
         void onRfDiscoveryStarted(boolean isDiscoveryStarted);
+
+        /**
+        * Notifies the NFCEE (NFC Execution Environment) Listen has been activated.
+        *
+        * @param isActivated true, if EE Listen is ON, else EE Listen is OFF.
+        */
+        void onEeListenActivated(boolean isActivated);
+
+        /**
+         * Gets the intent to find the OEM package in the OEM App market. If the consumer returns
+         * {@code null} or a timeout occurs, the intent from the first available package will be
+         * used instead.
+         *
+         * @param packages the OEM packages name stored in the tag
+         * @param intentConsumer The {@link Consumer} to be completed.
+         *                       The {@link Consumer#accept(Object)} should be called with
+         *                       the Intent required.
+         *
+         */
+        void onGetOemAppSearchIntent(@NonNull List<String> packages,
+                                     @NonNull Consumer<Intent> intentConsumer);
+
+        /**
+         * Checks if the NDEF message contains any specific OEM package executable content
+         *
+         * @param tag        the {@link android.nfc.Tag Tag}
+         * @param message NDEF Message to read from tag
+         * @param hasOemExecutableContent The {@link Consumer} to be completed. If there is
+         *                                OEM package executable content, the
+         *                                {@link Consumer#accept(Object)} should be called with
+         *                                {@link Boolean#TRUE}, otherwise call with
+         *                                {@link Boolean#FALSE}.
+         */
+        void onNdefMessage(@NonNull Tag tag, @NonNull NdefMessage message,
+                           @NonNull Consumer<Boolean> hasOemExecutableContent);
+
+        /**
+         * Callback to indicate the app chooser activity should be launched for handling CE
+         * transaction. This is invoked for example when there are more than 1 app installed that
+         * can handle the HCE transaction. OEMs can launch the Activity based
+         * on their requirement.
+         *
+         * @param selectedAid the selected AID from APDU
+         * @param services {@link ApduServiceInfo} of the service triggering the activity
+         * @param failedComponent the component failed to be resolved
+         * @param category the category of the service
+         */
+        void onLaunchHceAppChooserActivity(@NonNull String selectedAid,
+                                           @NonNull List<ApduServiceInfo> services,
+                                           @NonNull ComponentName failedComponent,
+                                           @NonNull String category);
+
+        /**
+         * Callback to indicate tap again dialog should be launched for handling HCE transaction.
+         * This is invoked for example when a CE service needs the device to unlocked before
+         * handling the transaction. OEMs can launch the Activity based on their requirement.
+         *
+         * @param service {@link ApduServiceInfo} of the service triggering the dialog
+         * @param category the category of the service
+         */
+        void onLaunchHceTapAgainDialog(@NonNull ApduServiceInfo service, @NonNull String category);
     }
 
 
@@ -312,6 +444,7 @@ public final class NfcOemExtension {
                 callback.onCardEmulationActivated(mCardEmulationActivated);
                 callback.onRfFieldActivated(mRfFieldActivated);
                 callback.onRfDiscoveryStarted(mRfDiscoveryStarted);
+                callback.onEeListenActivated(mEeListenActivated);
             });
         }
     }
@@ -389,12 +522,179 @@ public final class NfcOemExtension {
             NfcAdapter.sService.fetchActiveNfceeList(), new ArrayList<String>());
     }
 
+    /**
+     * Sets NFC controller always on feature.
+     * <p>This API is for the NFCC internal state management. It allows to discriminate
+     * the controller function from the NFC function by keeping the NFC controller on without
+     * any NFC RF enabled if necessary.
+     * <p>This call is asynchronous, register listener {@link NfcAdapter.ControllerAlwaysOnListener}
+     * by {@link NfcAdapter#registerControllerAlwaysOnListener} to find out when the operation is
+     * complete.
+     * <p> Note: This adds more always on modes on top of existing
+     * {@link NfcAdapter#setControllerAlwaysOn(boolean)} API which can be used to set the NFCC in
+     * only {@link #ENABLE_DEFAULT} and {@link #DISABLE} modes.
+     * @param mode one of {@link ControllerMode} modes
+     * @throws UnsupportedOperationException if
+     *   <li> if FEATURE_NFC, FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
+     *   FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
+     *   are unavailable </li>
+     *   <li> if the feature is unavailable @see NfcAdapter#isNfcControllerAlwaysOnSupported() </li>
+     * @hide
+     * @see NfcAdapter#setControllerAlwaysOn(boolean)
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
+    public void setControllerAlwaysOnMode(@ControllerMode int mode) {
+        if (!NfcAdapter.sHasNfcFeature && !NfcAdapter.sHasCeFeature) {
+            throw new UnsupportedOperationException();
+        }
+        NfcAdapter.callService(() -> NfcAdapter.sService.setControllerAlwaysOn(mode));
+    }
+
+    /**
+     * Triggers NFC initialization. If OEM extension is registered
+     * (indicated via `enable_oem_extension` NFC overlay), the NFC stack initialization at bootup
+     * is delayed until the OEM extension app triggers the initialization via this call.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void triggerInitialization() {
+        NfcAdapter.callService(() -> NfcAdapter.sService.triggerInitialization());
+    }
+
+    /**
+     * Gets the last user toggle status.
+     * @return true if NFC is set to ON, false otherwise
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean hasUserEnabledNfc() {
+        return NfcAdapter.callServiceReturn(() -> NfcAdapter.sService.getSettingStatus(), false);
+    }
+
+    /**
+     * Checks if the tag is present or not.
+     * @return true if the tag is present, false otherwise
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean isTagPresent() {
+        return NfcAdapter.callServiceReturn(() -> NfcAdapter.sService.isTagPresent(), false);
+    }
+
+    /**
+     * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
+     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
+     * use {@link #resumePolling() to resume the polling.
+     * @param timeoutInMs the pause polling duration in millisecond
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void pausePolling(int timeoutInMs) {
+        NfcAdapter.callService(() -> NfcAdapter.sService.pausePolling(timeoutInMs));
+    }
+
+    /**
+     * Resumes default NFC tag reader mode polling for the current device state if polling is
+     * paused. Calling this while already in polling is a no-op.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void resumePolling() {
+        NfcAdapter.callService(() -> NfcAdapter.sService.resumePolling());
+    }
+
+    /**
+     * Set whether to enable auto routing change or not (enabled by default).
+     * If disabled, routing targets are limited to a single off-host destination.
+     *
+     * @param state status of auto routing change, true if enable, otherwise false
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setAutoChangeEnabled(boolean state) {
+        NfcAdapter.callService(() ->
+                NfcAdapter.sCardEmulationService.setAutoChangeStatus(state));
+    }
+
+    /**
+     * Check if auto routing change is enabled or not.
+     *
+     * @return true if enabled, otherwise false
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean isAutoChangeEnabled() {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sCardEmulationService.isAutoChangeEnabled(), false);
+    }
+
+    /**
+     * Get current routing status
+     *
+     * @return {@link RoutingStatus} indicating the default route, default ISO-DEP
+     * route and default off-host route.
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public RoutingStatus getRoutingStatus() {
+        List<String> status = NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sCardEmulationService.getRoutingStatus(), new ArrayList<>());
+        return new RoutingStatus(routeStringToInt(status.get(0)),
+                routeStringToInt(status.get(1)),
+                routeStringToInt(status.get(2)));
+    }
+
+    /**
+     * Overwrites NFC controller routing table, which includes Protocol Route, Technology Route,
+     * and Empty AID Route.
+     *
+     * The parameter set to
+     * {@link ProtocolAndTechnologyRoute#PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET}
+     * can be used to keep current values for that entry. At least one route should be overridden
+     * when calling this API, otherwise throw {@link IllegalArgumentException}.
+     *
+     * @param protocol ISO-DEP route destination, where the possible inputs are defined in
+     *                 {@link ProtocolAndTechnologyRoute}.
+     * @param technology Tech-A, Tech-B and Tech-F route destination, where the possible inputs
+     *                   are defined in
+     *                   {@link ProtocolAndTechnologyRoute}
+     * @param emptyAid Zero-length AID route destination, where the possible inputs are defined in
+     *                 {@link ProtocolAndTechnologyRoute}
+     * @param systemCode System Code route destination, where the possible inputs are defined in
+     *                   {@link ProtocolAndTechnologyRoute}
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public void overwriteRoutingTable(
+            @CardEmulation.ProtocolAndTechnologyRoute int protocol,
+            @CardEmulation.ProtocolAndTechnologyRoute int technology,
+            @CardEmulation.ProtocolAndTechnologyRoute int emptyAid,
+            @CardEmulation.ProtocolAndTechnologyRoute int systemCode) {
+
+        String protocolRoute = routeIntToString(protocol);
+        String technologyRoute = routeIntToString(technology);
+        String emptyAidRoute = routeIntToString(emptyAid);
+        String systemCodeRoute = routeIntToString(systemCode);
+
+        NfcAdapter.callService(() ->
+                NfcAdapter.sCardEmulationService.overwriteRoutingTable(
+                        mContext.getUser().getIdentifier(),
+                        emptyAidRoute,
+                        protocolRoute,
+                        technologyRoute,
+                        systemCodeRoute
+                ));
+    }
+
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
 
         @Override
-        public void onTagConnected(boolean connected, Tag tag) throws RemoteException {
+        public void onTagConnected(boolean connected) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
-                    handleVoid2ArgCallback(connected, tag, cb::onTagConnected, ex));
+                    handleVoidCallback(connected, cb::onTagConnected, ex));
         }
 
         @Override
@@ -419,6 +719,13 @@ public final class NfcOemExtension {
         }
 
         @Override
+        public void onEeListenActivated(boolean isActivated) throws RemoteException {
+            mEeListenActivated = isActivated;
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(isActivated, cb::onEeListenActivated, ex));
+        }
+
+        @Override
         public void onStateUpdated(int state) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(state, cb::onStateUpdated, ex));
@@ -428,25 +735,25 @@ public final class NfcOemExtension {
         public void onApplyRouting(ResultReceiver isSkipped) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper(isSkipped), cb::onApplyRouting, ex));
+                        new ReceiverWrapper<>(isSkipped), cb::onApplyRouting, ex));
         }
         @Override
         public void onNdefRead(ResultReceiver isSkipped) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper(isSkipped), cb::onNdefRead, ex));
+                        new ReceiverWrapper<>(isSkipped), cb::onNdefRead, ex));
         }
         @Override
         public void onEnable(ResultReceiver isAllowed) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper(isAllowed), cb::onEnable, ex));
+                        new ReceiverWrapper<>(isAllowed), cb::onEnable, ex));
         }
         @Override
         public void onDisable(ResultReceiver isAllowed) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper(isAllowed), cb::onDisable, ex));
+                        new ReceiverWrapper<>(isAllowed), cb::onDisable, ex));
         }
         @Override
         public void onBootStarted() throws RemoteException {
@@ -482,7 +789,7 @@ public final class NfcOemExtension {
         public void onTagDispatch(ResultReceiver isSkipped) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper(isSkipped), cb::onTagDispatch, ex));
+                        new ReceiverWrapper<>(isSkipped), cb::onTagDispatch, ex));
         }
         @Override
         public void onRoutingChanged() throws RemoteException {
@@ -499,6 +806,59 @@ public final class NfcOemExtension {
         public void onReaderOptionChanged(boolean enabled) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(enabled, cb::onReaderOptionChanged, ex));
+        }
+
+        @Override
+        public void onGetOemAppSearchIntent(List<String> packages, ResultReceiver intentConsumer)
+                throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoid2ArgCallback(packages, new ReceiverWrapper<>(intentConsumer),
+                            cb::onGetOemAppSearchIntent, ex));
+        }
+
+        @Override
+        public void onNdefMessage(Tag tag, NdefMessage message,
+                                  ResultReceiver hasOemExecutableContent) throws RemoteException {
+            mCallbackMap.forEach((cb, ex) -> {
+                synchronized (mLock) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        ex.execute(() -> cb.onNdefMessage(
+                                tag, message, new ReceiverWrapper<>(hasOemExecutableContent)));
+                    } catch (RuntimeException exception) {
+                        throw exception;
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onLaunchHceAppChooserActivity(String selectedAid,
+                                                  List<ApduServiceInfo> services,
+                                                  ComponentName failedComponent, String category)
+                throws RemoteException {
+            mCallbackMap.forEach((cb, ex) -> {
+                synchronized (mLock) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        ex.execute(() -> cb.onLaunchHceAppChooserActivity(
+                                selectedAid, services, failedComponent, category));
+                    } catch (RuntimeException exception) {
+                        throw exception;
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onLaunchHceTapAgainActivity(ApduServiceInfo service, String category)
+                throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoid2ArgCallback(service, category, cb::onLaunchHceTapAgainDialog, ex));
         }
 
         private <T> void handleVoidCallback(
@@ -584,7 +944,19 @@ public final class NfcOemExtension {
         }
     }
 
-    private class ReceiverWrapper implements Consumer<Boolean> {
+    private @CardEmulation.ProtocolAndTechnologyRoute int routeStringToInt(String route) {
+        if (route.equals("DH")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_DH;
+        } else if (route.startsWith("eSE")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE;
+        } else if (route.startsWith("SIM")) {
+            return PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC;
+        } else {
+            throw new IllegalStateException("Unexpected value: " + route);
+        }
+    }
+
+    private class ReceiverWrapper<T> implements Consumer<T> {
         private final ResultReceiver mResultReceiver;
 
         ReceiverWrapper(ResultReceiver resultReceiver) {
@@ -592,12 +964,19 @@ public final class NfcOemExtension {
         }
 
         @Override
-        public void accept(Boolean result) {
-            mResultReceiver.send(result ? 1 : 0, null);
+        public void accept(T result) {
+            if (result instanceof Boolean) {
+                mResultReceiver.send((Boolean) result ? 1 : 0, null);
+            } else if (result instanceof Intent) {
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("intent", (Intent) result);
+                mResultReceiver.send(0, bundle);
+            }
+
         }
 
         @Override
-        public Consumer<Boolean> andThen(Consumer<? super Boolean> after) {
+        public Consumer<T> andThen(Consumer<? super T> after) {
             return Consumer.super.andThen(after);
         }
     }

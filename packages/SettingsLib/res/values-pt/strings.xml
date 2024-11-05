@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Ativa o recurso \"Conectividade melhorada\"."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Ativar o app terminal que oferece acesso ao shell local"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Ambiente de desenvolvimento do Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Executar terminal Linux no Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Verificação HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Config. a verificação HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Depuração"</string>
@@ -417,8 +419,8 @@
     <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"É desativado depois de 1 dia"</string>
     <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Ativado indefinidamente"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação da janela"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duração do Animator"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala anim. de transição"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala duração Animator"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simular telas secundárias"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Não manter atividades"</string>
@@ -582,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este telefone"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Este tablet"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Este computador (interno)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Alto-falante da base"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desativado"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ativado"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"É necessário reinicializar o dispositivo para que a mudança seja aplicada. Faça isso agora ou cancele."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Fones de ouvido com fio"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Fones de ouvido com fio"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Áudio com fio"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Áudio USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Microfone com fio"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Microfone USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Microfone Bluetooth"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Ativado"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Desativado"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Alteração de rede da operadora"</string>

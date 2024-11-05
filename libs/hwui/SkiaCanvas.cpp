@@ -619,8 +619,11 @@ bool SkiaCanvas::useGainmapShader(Bitmap& bitmap) {
     // If it's an unknown colortype then it's not a bitmap-backed canvas
     if (info.colorType() == SkColorType::kUnknown_SkColorType) return true;
 
+    auto colorSpace = info.colorSpace();
+    // If we don't have a colorspace, we can't apply a gainmap
+    if (!colorSpace) return false;
     skcms_TransferFunction tfn;
-    info.colorSpace()->transferFn(&tfn);
+    colorSpace->transferFn(&tfn);
 
     auto transferType = skcms_TransferFunction_getType(&tfn);
     switch (transferType) {

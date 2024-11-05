@@ -1,70 +1,30 @@
 {
   "presubmit": [
     {
-      "name": "TeleServiceTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "TeleServiceTests"
     },
     {
-      "name": "TelecomUnitTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "TelecomUnitTests"
     },
     {
-      "name": "TelephonyProviderTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "TelephonyProviderTests"
     },
     {
-      "name": "CtsTelephony2TestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsTelephony2TestCases"
     },
     {
-      "name": "CtsTelephony3TestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsTelephony3TestCases"
     },
     {
-      "name": "CtsSimRestrictedApisTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsSimRestrictedApisTestCases"
     },
     {
-      "name": "CtsTelephonyProviderTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsTelephonyProviderTestCases"
     }
   ],
   "presubmit-large": [
     {
-      "name": "CtsTelecomTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsTelecomTestCases"
     }
   ]
 }

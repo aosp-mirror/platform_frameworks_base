@@ -1385,6 +1385,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*jpegRconfiguration*/ null,
                             /*jpegRminduration*/ null,
                             /*jpegRstallduration*/ null,
+                            /*heicUltraHDRconfiguration*/ null,
+                            /*heicUltraHDRminduration*/ null,
+                            /*heicUltraHDRstallduration*/ null,
                             /*highspeedvideoconfigurations*/ null,
                             /*inputoutputformatsmap*/ null, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1402,6 +1405,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*jpegRconfiguration*/ null,
                             /*jpegRminduration*/ null,
                             /*jpegRstallduration*/ null,
+                            /*heicUltraHDRconfiguration*/ null,
+                            /*heicUltraHDRminduration*/ null,
+                            /*heicUltraHDRstallduration*/ null,
                             highSpeedVideoConfigurations,
                             /*inputoutputformatsmap*/ null, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1419,6 +1425,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*jpegRconfiguration*/ null,
                             /*jpegRminduration*/ null,
                             /*jpegRstallduration*/ null,
+                            /*heicUltraHDRcconfiguration*/ null,
+                            /*heicUltraHDRminduration*/ null,
+                            /*heicUltraHDRstallduration*/ null,
                             /*highSpeedVideoConfigurations*/ null,
                             inputOutputFormatsMap, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1436,6 +1445,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*jpegRconfiguration*/ null,
                             /*jpegRminduration*/ null,
                             /*jpegRstallduration*/ null,
+                            /*heicUltraHDRcconfiguration*/ null,
+                            /*heicUltraHDRminduration*/ null,
+                            /*heicUltraHDRstallduration*/ null,
                             /*highSpeedVideoConfigurations*/ null,
                             /*inputOutputFormatsMap*/ null, listHighResolution, supportsPrivate[i]);
             }
@@ -1607,6 +1619,17 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.HEIC_AVAILABLE_HEIC_MIN_FRAME_DURATIONS);
         StreamConfigurationDuration[] heicStallDurations = getBase(
                 CameraCharacteristics.HEIC_AVAILABLE_HEIC_STALL_DURATIONS);
+        StreamConfiguration[] heicUltraHDRConfigurations = null;
+        StreamConfigurationDuration[] heicUltraHDRMinFrameDurations = null;
+        StreamConfigurationDuration[] heicUltraHDRStallDurations = null;
+        if (Flags.cameraHeifGainmap()) {
+            heicUltraHDRConfigurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_STREAM_CONFIGURATIONS);
+            heicUltraHDRMinFrameDurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_MIN_FRAME_DURATIONS);
+            heicUltraHDRStallDurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_STALL_DURATIONS);
+        }
         StreamConfiguration[] jpegRConfigurations = getBase(
                 CameraCharacteristics.JPEGR_AVAILABLE_JPEG_R_STREAM_CONFIGURATIONS);
         StreamConfigurationDuration[] jpegRMinFrameDurations = getBase(
@@ -1625,7 +1648,8 @@ public class CameraMetadataNative implements Parcelable {
                 dynamicDepthStallDurations, heicConfigurations,
                 heicMinFrameDurations, heicStallDurations,
                 jpegRConfigurations, jpegRMinFrameDurations, jpegRStallDurations,
-                highSpeedVideoConfigurations, inputOutputFormatsMap,
+                heicUltraHDRConfigurations, heicUltraHDRMinFrameDurations,
+                heicUltraHDRStallDurations, highSpeedVideoConfigurations, inputOutputFormatsMap,
                 listHighResolution);
     }
 
@@ -1662,6 +1686,17 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.HEIC_AVAILABLE_HEIC_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
         StreamConfigurationDuration[] heicStallDurations = getBase(
                 CameraCharacteristics.HEIC_AVAILABLE_HEIC_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfiguration[] heicUltraHDRConfigurations = null;
+        StreamConfigurationDuration[] heicUltraHDRMinFrameDurations = null;
+        StreamConfigurationDuration[] heicUltraHDRStallDurations = null;
+        if (Flags.cameraHeifGainmap()) {
+            heicUltraHDRConfigurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
+            heicUltraHDRMinFrameDurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
+            heicUltraHDRStallDurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        }
         StreamConfiguration[] jpegRConfigurations = getBase(
                 CameraCharacteristics.JPEGR_AVAILABLE_JPEG_R_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
         StreamConfigurationDuration[] jpegRMinFrameDurations = getBase(
@@ -1681,7 +1716,8 @@ public class CameraMetadataNative implements Parcelable {
                 dynamicDepthStallDurations, heicConfigurations,
                 heicMinFrameDurations, heicStallDurations,
                 jpegRConfigurations, jpegRMinFrameDurations, jpegRStallDurations,
-                highSpeedVideoConfigurations, inputOutputFormatsMap,
+                heicUltraHDRConfigurations, heicUltraHDRMinFrameDurations,
+                heicUltraHDRStallDurations, highSpeedVideoConfigurations, inputOutputFormatsMap,
                 listHighResolution, false);
     }
 
@@ -1797,57 +1833,49 @@ public class CameraMetadataNative implements Parcelable {
             return false;
         }
 
-        if (Flags.concertMode()) {
-            long[] tsArray = new long[samples.length];
-            float[] intrinsicsArray = new float[samples.length * 5];
-            for (int i = 0; i < samples.length; i++) {
-                tsArray[i] = samples[i].getTimestampNanos();
-                System.arraycopy(samples[i].getLensIntrinsics(), 0, intrinsicsArray, 5 * i, 5);
+        long[] tsArray = new long[samples.length];
+        float[] intrinsicsArray = new float[samples.length * 5];
+        for (int i = 0; i < samples.length; i++) {
+            tsArray[i] = samples[i].getTimestampNanos();
+            System.arraycopy(samples[i].getLensIntrinsics(), 0, intrinsicsArray, 5 * i, 5);
 
-            }
-            setBase(CaptureResult.STATISTICS_LENS_INTRINSIC_SAMPLES, intrinsicsArray);
-            setBase(CaptureResult.STATISTICS_LENS_INTRINSIC_TIMESTAMPS, tsArray);
-
-            return true;
-        } else {
-            return false;
         }
+        setBase(CaptureResult.STATISTICS_LENS_INTRINSIC_SAMPLES, intrinsicsArray);
+        setBase(CaptureResult.STATISTICS_LENS_INTRINSIC_TIMESTAMPS, tsArray);
+
+        return true;
     }
 
     private LensIntrinsicsSample[] getLensIntrinsicSamples() {
-        if (Flags.concertMode()) {
-            long[] timestamps = getBase(CaptureResult.STATISTICS_LENS_INTRINSIC_TIMESTAMPS);
-            float[] intrinsics = getBase(CaptureResult.STATISTICS_LENS_INTRINSIC_SAMPLES);
+        long[] timestamps = getBase(CaptureResult.STATISTICS_LENS_INTRINSIC_TIMESTAMPS);
+        float[] intrinsics = getBase(CaptureResult.STATISTICS_LENS_INTRINSIC_SAMPLES);
 
-            if (timestamps == null) {
-                if (intrinsics != null) {
-                    throw new AssertionError("timestamps is null but intrinsics is not");
-                }
-
-                return null;
+        if (timestamps == null) {
+            if (intrinsics != null) {
+                throw new AssertionError("timestamps is null but intrinsics is not");
             }
 
-            if (intrinsics == null) {
-                throw new AssertionError("timestamps is not null but intrinsics is");
-            } else if ((intrinsics.length % 5) != 0) {
-                throw new AssertionError("intrinsics are not multiple of 5");
-            }
-
-            if ((intrinsics.length / 5) != timestamps.length) {
-                throw new AssertionError(String.format(
-                        "timestamps has %d entries but intrinsics has %d", timestamps.length,
-                        intrinsics.length / 5));
-            }
-
-            LensIntrinsicsSample[] samples = new LensIntrinsicsSample[timestamps.length];
-            for (int i = 0; i < timestamps.length; i++) {
-                float[] currentIntrinsic = Arrays.copyOfRange(intrinsics, 5 * i, 5 * i + 5);
-                samples[i] = new LensIntrinsicsSample(timestamps[i], currentIntrinsic);
-            }
-            return samples;
-        } else {
             return null;
         }
+
+        if (intrinsics == null) {
+            throw new AssertionError("timestamps is not null but intrinsics is");
+        } else if ((intrinsics.length % 5) != 0) {
+            throw new AssertionError("intrinsics are not multiple of 5");
+        }
+
+        if ((intrinsics.length / 5) != timestamps.length) {
+            throw new AssertionError(String.format(
+                    "timestamps has %d entries but intrinsics has %d", timestamps.length,
+                    intrinsics.length / 5));
+        }
+
+        LensIntrinsicsSample[] samples = new LensIntrinsicsSample[timestamps.length];
+        for (int i = 0; i < timestamps.length; i++) {
+            float[] currentIntrinsic = Arrays.copyOfRange(intrinsics, 5 * i, 5 * i + 5);
+            samples[i] = new LensIntrinsicsSample(timestamps[i], currentIntrinsic);
+        }
+        return samples;
     }
 
     private Capability[] getExtendedSceneModeCapabilities() {

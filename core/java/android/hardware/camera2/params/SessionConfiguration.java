@@ -165,12 +165,10 @@ public final class SessionConfiguration implements Parcelable {
         source.readTypedList(outConfigs, OutputConfiguration.CREATOR);
         // Ignore the values for hasSessionParameters and settings because we cannot reconstruct
         // the CaptureRequest object.
-        if (Flags.featureCombinationQuery()) {
-            boolean hasSessionParameters = source.readBoolean();
-            if (hasSessionParameters) {
-                CameraMetadataNative settings = new CameraMetadataNative();
-                settings.readFromParcel(source);
-            }
+        boolean hasSessionParameters = source.readBoolean();
+        if (hasSessionParameters) {
+            CameraMetadataNative settings = new CameraMetadataNative();
+            settings.readFromParcel(source);
         }
 
         if ((inputWidth > 0) && (inputHeight > 0) && (inputFormat != -1)) {
@@ -212,14 +210,12 @@ public final class SessionConfiguration implements Parcelable {
             dest.writeBoolean(/*isMultiResolution*/ false);
         }
         dest.writeTypedList(mOutputConfigurations);
-        if (Flags.featureCombinationQuery()) {
-            if (mSessionParameters != null) {
-                dest.writeBoolean(/*hasSessionParameters*/true);
-                CameraMetadataNative metadata = mSessionParameters.getNativeCopy();
-                metadata.writeToParcel(dest, /*flags*/0);
-            } else {
-                dest.writeBoolean(/*hasSessionParameters*/false);
-            }
+        if (mSessionParameters != null) {
+            dest.writeBoolean(/*hasSessionParameters*/true);
+            CameraMetadataNative metadata = mSessionParameters.getNativeCopy();
+            metadata.writeToParcel(dest, /*flags*/0);
+        } else {
+            dest.writeBoolean(/*hasSessionParameters*/false);
         }
     }
 

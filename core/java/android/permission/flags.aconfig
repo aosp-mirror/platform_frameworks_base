@@ -53,6 +53,24 @@ flag {
 }
 
 flag {
+    name: "enhanced_confirmation_in_call_apis_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable enhanced confirmation incall apis"
+    bug: "310220212"
+}
+
+flag {
+    name: "unknown_call_package_install_blocking_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable the blocking of certain app installs during an unknown call"
+    bug: "310220212"
+}
+
+flag {
     name: "op_enable_mobile_data_by_user"
     is_exported: true
     namespace: "permissions"
@@ -206,17 +224,6 @@ flag {
 }
 
 flag {
-    name: "apex_signature_permission_allowlist_enabled"
-    is_fixed_read_only: true
-    namespace: "permissions"
-    description: "Enable reading signature permission allowlist from APEXes"
-    bug: "308573169"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "check_op_validate_package"
     namespace: "permissions"
     description: "Validate package/uid match in checkOp similar to noteOp"
@@ -243,6 +250,20 @@ flag {
 }
 
 flag {
+  name: "sync_on_op_noted_api"
+  namespace: "permissions"
+  description: "New setOnOpNotedCallback API to allow subscribing to only sync ops."
+  bug: "372910217"
+}
+
+flag {
+  name: "use_frozen_aware_remote_callback_list"
+  namespace: "permissions"
+  description: "Whether to use the new frozen-aware RemoteCallbackList API for op noted callbacks."
+  bug: "361157077"
+}
+
+flag {
     name: "wallet_role_icon_property_enabled"
     is_exported: true
     namespace: "wallet_integration"
@@ -251,9 +272,98 @@ flag {
 }
 
 flag {
-    name: "replace_body_sensors_permission_enabled"
+    name: "appop_access_tracking_logging_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enables logging of the AppOp access tracking"
+    bug: "365584286"
+}
+
+flag {
+    name: "replace_body_sensor_permission_enabled"
+    is_fixed_read_only: true
     is_exported: true
     namespace: "android_health_services"
-    description: "This flag is used to enable replacing permission BODY_SENSORS(and BODY_SENSORS_BACKGROUND) with granular health permission READ_HEART_RATE(and READ_HEALTH_DATA_IN_BACKGROUND)"
+    description: "This fixed read-only flag is used to enable replacing permission BODY_SENSORS (and BODY_SENSORS_BACKGROUND) with granular health permission READ_HEART_RATE (and READ_HEALTH_DATA_IN_BACKGROUND)"
     bug: "364638912"
+}
+
+flag {
+    name: "delay_uid_state_changes_from_capability_updates"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "If proc state is decreasing over the restriction threshold and capability is changed, delay if no new capabilities are added"
+    bug: "347891382"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "platform_skin_temperature_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "android_health_services"
+    description: "This fixed read-only flag is used to enable platform support for Skin Temperature."
+    bug: "369872443"
+}
+
+flag {
+    name: "platform_oxygen_saturation_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "android_health_services"
+    description: "This fixed read-only flag is used to enable platform support for Oxygen Saturation (SpO2)."
+    bug: "369873227"
+}
+
+flag {
+    name: "allow_host_permission_dialogs_on_virtual_devices"
+    is_exported: true
+    namespace: "permissions"
+    description: "Allow host device permission dialogs (i.e., dialogs for non device-aware permissions) to be shown on virtual devices"
+    bug: "371173672"
+}
+
+flag {
+    name: "appop_mode_caching_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enable AppOp mode caching in AppOpsManager"
+    bug: "366013082"
+}
+
+flag {
+    name: "permission_tree_apis_deprecated"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "This flag is used to deprecate permission tree related APIs"
+    bug: "376535612"
+}
+
+flag {
+    name: "enable_otp_in_text_classifiers"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables ExtServices to leverage TextClassifier for OTP detection"
+    bug: "351976749"
+}
+
+flag {
+    name: "health_connect_backup_restore_permission_enabled"
+    is_fixed_read_only: true
+    namespace: "health_connect"
+    description: "This flag protects the permission that is required to call Health Connect backup and restore apis"
+    bug: "376014879" # android_fr bug
+}
+
+flag {
+    name: "enable_aiai_proxied_text_classifiers"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables the AiAi to utilize the default OTP text classifier that is also used by ExtServices"
+    bug: "377229653"
 }

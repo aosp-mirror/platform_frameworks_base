@@ -12,3 +12,12 @@ flag {
     }
 }
 
+flag {
+    name: "screen_time_bypass"
+    namespace: "backstage_power"
+    description: "Bypass the screen time check for bucket evaluation"
+    bug: "374114769"
+    metadata {
+       purpose: PURPOSE_BUGFIX
+    }
+}

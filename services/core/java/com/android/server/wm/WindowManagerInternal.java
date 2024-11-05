@@ -859,6 +859,18 @@ public abstract class WindowManagerInternal {
     public abstract boolean isHomeSupportedOnDisplay(int displayId);
 
     /**
+     * Sets whether the relevant display content ignores fixed orientation, aspect ratio
+     * and resizability of apps.
+     *
+     * @param displayUniqueId The unique ID of the display. Note that the display may not yet be
+     *   created, but whenever it is, this property will be applied.
+     * @param displayType The type of the display, e.g. {@link Display#TYPE_VIRTUAL}.
+     * @param enabled Whether app is universal resizable on this display.
+     */
+    public abstract void setIgnoreActivitySizeRestrictionsOnDisplay(
+            @NonNull String displayUniqueId, int displayType, boolean enabled);
+
+    /**
      * Removes any settings relevant to the given display.
      *
      * <p>This may be used when a property is set for a display unique ID before the display

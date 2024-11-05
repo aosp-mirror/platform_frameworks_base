@@ -288,7 +288,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Да се разреши ли отключване от OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ПРЕДУПРЕЖДЕНИЕ: Функциите за защита на устройството няма да работят, докато следната настройка е включена."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Избиране на приложение за мнимо местоположение"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Няма зададено приложение за мнимо местоположение"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Няма зададено приложение"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Приложение за мнимо местоположение: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Мрежи"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Безжичен дисплей"</string>
@@ -357,6 +357,8 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Активира функцията за подобрена свързаност."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Актив. на прил. за терминал с достъп до локалния команден ред"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Среда на програмиране на Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Стартиране на терминала на Linux под Android"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверка с HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Проверка с HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отстраняване на грешки"</string>
@@ -582,6 +584,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Току-що"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Този телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Този таблет"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Този компютър (вграден)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Високоговорител докинг станция"</string>
@@ -684,7 +687,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Деактивирано"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Активирано"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"За да бъде приложена тази промяна, устройството ви трябва да бъде рестартирано. Рестартирайте сега или анулирайте."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Слушалки с кабел"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Слушалки с кабел"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Слушалки с кабел"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Аудиоустройство с USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Микрофон с кабел"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Микрофон с USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Микрофон с Bluetooth"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Включване"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Изключване"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Промяна на мрежата на оператора"</string>

@@ -35,7 +35,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
@@ -121,9 +120,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     private lateinit var unfoldTransitionProgressForwarder:
         Optional<UnfoldTransitionProgressForwarder>
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
-
-    @Mock
-    private lateinit var keyboardTouchpadEduStatsInteractor: KeyboardTouchpadEduStatsInteractor
 
     @Before
     fun setUp() {
@@ -293,7 +289,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             dumpManager,
             unfoldTransitionProgressForwarder,
             broadcastDispatcher,
-            keyboardTouchpadEduStatsInteractor,
         )
     }
 }

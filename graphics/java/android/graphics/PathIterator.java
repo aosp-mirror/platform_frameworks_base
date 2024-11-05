@@ -44,6 +44,8 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
     private final Path mPath;
     private final int mPathGenerationId;
     private static final int POINT_ARRAY_SIZE = 8;
+    private static final boolean IS_DALVIK = "dalvik".equalsIgnoreCase(
+            System.getProperty("java.vm.name"));
 
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(
@@ -80,9 +82,14 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
         mPath = path;
         mNativeIterator = nCreate(mPath.mNativePath);
         mPathGenerationId = mPath.getGenerationId();
-        final VMRuntime runtime = VMRuntime.getRuntime();
-        mPointsArray = (float[]) runtime.newNonMovableArray(float.class, POINT_ARRAY_SIZE);
-        mPointsAddress = runtime.addressOf(mPointsArray);
+        if (IS_DALVIK) {
+            final VMRuntime runtime = VMRuntime.getRuntime();
+            mPointsArray = (float[]) runtime.newNonMovableArray(float.class, POINT_ARRAY_SIZE);
+            mPointsAddress = runtime.addressOf(mPointsArray);
+        } else {
+            mPointsArray = new float[POINT_ARRAY_SIZE];
+            mPointsAddress = 0;
+        }
         sRegistry.registerNativeAllocation(this, mNativeIterator);
     }
 
@@ -177,7 +184,8 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
             throw new ConcurrentModificationException(
                     "Iterator cannot be used on modified Path");
         }
-        @Verb int verb = nNext(mNativeIterator, mPointsAddress);
+        @Verb int verb = IS_DALVIK
+            ? nNext(mNativeIterator, mPointsAddress) : nNextHost(mNativeIterator, mPointsArray);
         if (verb == VERB_DONE) {
             mDone = true;
         }
@@ -286,6 +294,9 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
 
     private static native long nCreate(long nativePath);
     private static native long nGetFinalizer();
+
+    /* nNextHost should be used for host runtimes, e.g. LayoutLib */
+    private static native int nNextHost(long nativeIterator, float[] points);
 
     // ------------------ Critical JNI ------------------------
 

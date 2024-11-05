@@ -880,10 +880,6 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * @hide
      */
     public static String typeToString(int type) {
-        if (Flags.enableTypeWindowControl() && type == TYPE_WINDOW_CONTROL) {
-            return "TYPE_WINDOW_CONTROL";
-        }
-
         switch (type) {
             case TYPE_APPLICATION: {
                 return "TYPE_APPLICATION";
@@ -903,8 +899,12 @@ public final class AccessibilityWindowInfo implements Parcelable {
             case TYPE_MAGNIFICATION_OVERLAY: {
                 return "TYPE_MAGNIFICATION_OVERLAY";
             }
-            default:
+            default: {
+                if (Flags.enableTypeWindowControl() && type == TYPE_WINDOW_CONTROL) {
+                    return "TYPE_WINDOW_CONTROL";
+                }
                 return "<UNKNOWN:" + type + ">";
+            }
         }
     }
 

@@ -195,7 +195,14 @@ public class RampSegmentTest {
 
     @Test
     public void testDuration() {
+        VibratorInfo infoWithSupport =
+                createVibInfo(/* hasAmplitudeControl= */ true, /* hasFrequencyControl= */ true);
+        VibratorInfo infoWithoutSupport =
+                createVibInfo(/* hasAmplitudeControl= */ false, /* hasFrequencyControl= */ false);
+
         assertEquals(10, new RampSegment(0.5f, 1, 0, 0, 10).getDuration());
+        assertEquals(10, new RampSegment(0.5f, 1, 0, 0, 10).getDuration(infoWithSupport));
+        assertEquals(10, new RampSegment(0.5f, 1, 0, 0, 10).getDuration(infoWithoutSupport));
     }
 
     @Test

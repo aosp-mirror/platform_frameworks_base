@@ -273,6 +273,7 @@ LIBANDROID {
     ASurfaceTransaction_fromJava; # introduced=34
     ASurfaceTransaction_reparent; # introduced=29
     ASurfaceTransaction_setBuffer; # introduced=29
+    ASurfaceTransaction_setBufferWithRelease; # introduced=36
     ASurfaceTransaction_setBufferAlpha; # introduced=29
     ASurfaceTransaction_setBufferDataSpace; # introduced=29
     ASurfaceTransaction_setBufferTransparency; # introduced=29
@@ -282,6 +283,7 @@ LIBANDROID {
     ASurfaceTransaction_setEnableBackPressure; # introduced=31
     ASurfaceTransaction_setFrameRate; # introduced=30
     ASurfaceTransaction_setFrameRateWithChangeStrategy; # introduced=31
+    ASurfaceTransaction_setFrameRateParams; # introduced=36
     ASurfaceTransaction_clearFrameRate; # introduced=34
     ASurfaceTransaction_setFrameTimeline; # introduced=Tiramisu
     ASurfaceTransaction_setGeometry; # introduced=29

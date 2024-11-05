@@ -23,14 +23,15 @@ import com.android.systemui.SliceBroadcastRelayHandler
 import com.android.systemui.accessibility.Magnification
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.BiometricNotificationService
+import com.android.systemui.bouncer.domain.startable.BouncerStartable
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
-import com.android.systemui.dreams.homecontrols.HomeControlsDreamStartable
+import com.android.systemui.dreams.homecontrols.system.HomeControlsDreamStartable
 import com.android.systemui.globalactions.GlobalActionsComponent
-import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialCoreStartable
+import com.android.systemui.haptics.msdl.MSDLCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyguard.KeyguardViewConfigurator
@@ -50,7 +51,6 @@ import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.ImmersiveModeConfirmation
 import com.android.systemui.statusbar.gesture.GesturePointerEventListener
 import com.android.systemui.statusbar.notification.InstantAppNotifier
-import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener
 import com.android.systemui.statusbar.policy.BatteryControllerStartable
 import com.android.systemui.stylus.StylusUsiPowerStartable
@@ -288,11 +288,6 @@ abstract class SystemUICoreStartableModule {
 
     @Binds
     @IntoMap
-    @ClassKey(ScrimController::class)
-    abstract fun bindScrimController(impl: ScrimController): CoreStartable
-
-    @Binds
-    @IntoMap
     @ClassKey(StatusBarHeadsUpChangeListener::class)
     abstract fun bindStatusBarHeadsUpChangeListener(
         impl: StatusBarHeadsUpChangeListener
@@ -310,6 +305,11 @@ abstract class SystemUICoreStartableModule {
 
     @Binds
     @IntoMap
+    @ClassKey(BouncerStartable::class)
+    abstract fun bindBouncerStartable(impl: BouncerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
     @ClassKey(KeyguardDismissBinder::class)
     abstract fun bindKeyguardDismissBinder(impl: KeyguardDismissBinder): CoreStartable
 
@@ -323,4 +323,9 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(BatteryControllerStartable::class)
     abstract fun bindsBatteryControllerStartable(impl: BatteryControllerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(MSDLCoreStartable::class)
+    abstract fun bindMSDLCoreStartable(impl: MSDLCoreStartable): CoreStartable
 }

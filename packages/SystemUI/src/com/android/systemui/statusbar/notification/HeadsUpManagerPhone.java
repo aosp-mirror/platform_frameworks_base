@@ -103,9 +103,11 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private boolean mTrackingHeadsUp;
     private final HashSet<String> mSwipedOutKeys = new HashSet<>();
     private final HashSet<NotificationEntry> mEntriesToRemoveAfterExpand = new HashSet<>();
-    private final ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
+    @VisibleForTesting
+    public final ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
             = new ArraySet<>();
-    private boolean mIsExpanded;
+    private boolean mIsShadeOrQsExpanded;
+    private boolean mIsQsExpanded;
     private int mStatusBarState;
     private AnimationStateHandler mAnimationStateHandler;
 
@@ -177,6 +179,10 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         });
         javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
                     this::onShadeOrQsExpanded);
+        if (SceneContainerFlag.isEnabled()) {
+            javaAdapter.alwaysCollectFlow(shadeInteractor.isQsExpanded(),
+                    this::onQsExpanded);
+        }
         if (NotificationThrottleHun.isEnabled()) {
             mVisualStabilityProvider.addPersistentReorderingBannedListener(
                     mOnReorderingBannedListener);
@@ -286,12 +292,17 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     }
 
     private void onShadeOrQsExpanded(Boolean isExpanded) {
-        if (isExpanded != mIsExpanded) {
-            mIsExpanded = isExpanded;
+        if (isExpanded != mIsShadeOrQsExpanded) {
+            mIsShadeOrQsExpanded = isExpanded;
             if (!SceneContainerFlag.isEnabled() && isExpanded) {
                 mHeadsUpAnimatingAway.setValue(false);
             }
         }
+    }
+
+    private void onQsExpanded(Boolean isQsExpanded) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        if (isQsExpanded != mIsQsExpanded) mIsQsExpanded = isQsExpanded;
     }
 
     /**
@@ -415,7 +426,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         }
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
-            if (isHeadsUpEntry(entry.getKey())) {
+            if (entry != null && isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
                 removeEntry(entry.getKey(), "mOnReorderingAllowedListener");
             }
@@ -477,6 +488,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         }
         updateTopHeadsUpFlow();
         updateHeadsUpFlow();
+        if (NotificationThrottleHun.isEnabled()) {
+            if (headsUpEntry.mEntry != null) {
+                if (mEntriesToRemoveWhenReorderingAllowed.contains(headsUpEntry.mEntry)) {
+                    mEntriesToRemoveWhenReorderingAllowed.remove(headsUpEntry.mEntry);
+                }
+            }
+        }
     }
 
     private void updateTopHeadsUpFlow() {
@@ -489,7 +507,10 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Override
     protected boolean shouldHeadsUpBecomePinned(NotificationEntry entry) {
-        boolean pin = mStatusBarState == StatusBarState.SHADE && !mIsExpanded;
+        boolean pin = mStatusBarState == StatusBarState.SHADE && !mIsShadeOrQsExpanded;
+        if (SceneContainerFlag.isEnabled()) {
+            pin |= mIsQsExpanded;
+        }
         if (mBypassController.getBypassEnabled()) {
             pin |= mStatusBarState == StatusBarState.KEYGUARD;
         }
@@ -617,11 +638,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             super.setEntry(entry, removeRunnable);
 
             if (NotificationThrottleHun.isEnabled()) {
-                if (!mVisualStabilityProvider.isReorderingAllowed()
-                        // We don't want to allow reordering while pulsing, but headsup need to
-                        // time out anyway
-                        && !entry.showingPulsing()) {
-                    mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                if (!mVisualStabilityProvider.isReorderingAllowed()) {
                     entry.setSeenInShade(true);
                 }
             }

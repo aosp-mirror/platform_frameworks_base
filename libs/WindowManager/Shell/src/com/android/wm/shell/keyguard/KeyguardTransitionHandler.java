@@ -26,8 +26,9 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.view.WindowManager.TRANSIT_SLEEP;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 
@@ -44,6 +45,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.KeyguardState;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
@@ -191,7 +193,7 @@ public class KeyguardTransitionHandler
 
         // Occlude/unocclude animations are only played if the keyguard is locked.
         if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
-            if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0) {
+            if (isKeyguardOccluding(info)) {
                 if (hasOpeningDream(info)) {
                     return startAnimation(mOccludeByDreamTransition, "occlude-by-dream",
                             transition, info, startTransaction, finishTransaction, finishCallback);
@@ -199,7 +201,7 @@ public class KeyguardTransitionHandler
                     return startAnimation(mOccludeTransition, "occlude",
                             transition, info, startTransaction, finishTransaction, finishCallback);
                 }
-            } else if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0) {
+            } else if (isKeyguardUnoccluding(info)) {
                 return startAnimation(mUnoccludeTransition, "unocclude",
                         transition, info, startTransaction, finishTransaction, finishCallback);
             }
@@ -322,6 +324,28 @@ public class KeyguardTransitionHandler
         return false;
     }
 
+    private static boolean isKeyguardOccluding(@NonNull TransitionInfo info) {
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.hasFlags(TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA)
+                    && change.getMode() == TRANSIT_TO_FRONT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isKeyguardUnoccluding(@NonNull TransitionInfo info) {
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.hasFlags(TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA)
+                    && change.getMode() == TRANSIT_TO_BACK) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void finishAnimationImmediately(IBinder transition, StartedTransition playing) {
         final IBinder fakeTransition = new Binder();
         final TransitionInfo fakeInfo = new TransitionInfo(TRANSIT_SLEEP, 0x0);
@@ -387,6 +411,19 @@ public class KeyguardTransitionHandler
         public void setLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
             mMainExecutor.execute(() ->
                     mIsLaunchingActivityOverLockscreen = isLaunchingActivityOverLockscreen);
+        }
+
+        @Override
+        public void startKeyguardTransition(boolean keyguardShowing, boolean aodShowing) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            final KeyguardState keyguardState =
+                    new KeyguardState.Builder(android.view.Display.DEFAULT_DISPLAY)
+                            .setKeyguardShowing(keyguardShowing).setAodShowing(aodShowing).build();
+            wct.addKeyguardState(keyguardState);
+            mMainExecutor.execute(() -> {
+                mTransitions.startTransition(keyguardShowing ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK,
+                        wct, KeyguardTransitionHandler.this);
+            });
         }
     }
 }

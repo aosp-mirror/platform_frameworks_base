@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Intent;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.MathUtils;
@@ -400,6 +401,9 @@ public class BaseBundle {
         if (object instanceof BiFunction<?, ?, ?>) {
             synchronized (this) {
                 object = unwrapLazyValueFromMapLocked(i, clazz, itemTypes);
+            }
+            if ((mFlags & Bundle.FLAG_VERIFY_TOKENS_PRESENT) != 0) {
+                Intent.maybeMarkAsMissingCreatorToken(object);
             }
         }
         return (clazz != null) ? clazz.cast(object) : (T) object;

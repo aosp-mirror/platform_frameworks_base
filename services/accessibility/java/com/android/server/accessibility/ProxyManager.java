@@ -214,7 +214,7 @@ public class ProxyManager {
                 mA11yInputFilter.disableFeaturesForDisplayIfInstalled(displayId);
             }
         });
-        connection.initializeServiceInterface(client);
+        connection.initializeClient(client);
     }
 
     private void registerVirtualDeviceListener() {
@@ -561,8 +561,8 @@ public class ProxyManager {
             final ProxyAccessibilityServiceConnection proxy =
                     mProxyA11yServiceConnections.valueAt(i);
             if (proxy != null && proxy.getDeviceId() == deviceId) {
-                final IBinder proxyBinder = proxy.mService;
-                final IAccessibilityServiceClient proxyInterface = proxy.mServiceInterface;
+                final IBinder proxyBinder = proxy.mClientBinder;
+                final IAccessibilityServiceClient proxyInterface = proxy.mClient;
                 if ((proxyBinder != null) && (proxyInterface != null)) {
                     interfaces.add(proxyInterface);
                 }

@@ -26,7 +26,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 class HeadsUpNotificationViewBinder
 @Inject
@@ -35,18 +36,21 @@ constructor(private val viewModel: NotificationListViewModel) {
         coroutineScope {
             launch {
                 var previousKeys = emptySet<HeadsUpRowKey>()
-                viewModel.pinnedHeadsUpRows
+                combine(viewModel.pinnedHeadsUpRowKeys, viewModel.activeHeadsUpRowKeys, ::Pair)
                     .sample(viewModel.headsUpAnimationsEnabled, ::Pair)
                     .collect { (newKeys, animationsEnabled) ->
-                        val added = newKeys - previousKeys
-                        val removed = previousKeys - newKeys
-                        previousKeys = newKeys
+                        val pinned = newKeys.first
+                        val all = newKeys.second
+                        val added = all.union(pinned) - previousKeys
+                        val removed = previousKeys - pinned
+                        previousKeys = pinned
+                        Pair(added, removed)
 
                         if (animationsEnabled) {
                             added.forEach { key ->
                                 parentView.generateHeadsUpAnimation(
                                     obtainView(key),
-                                    /* isHeadsUp = */ true
+                                    /* isHeadsUp = */ true,
                                 )
                             }
                             removed.forEach { key ->

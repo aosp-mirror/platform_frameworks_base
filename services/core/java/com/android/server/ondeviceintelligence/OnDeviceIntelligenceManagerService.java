@@ -19,6 +19,8 @@ package com.android.server.ondeviceintelligence;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.DEVICE_CONFIG_UPDATE_BUNDLE_KEY;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_LOADED_BUNDLE_KEY;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_UNLOADED_BUNDLE_KEY;
+import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_LOADED_BROADCAST_INTENT;
+import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_UNLOADED_BROADCAST_INTENT;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.REGISTER_MODEL_UPDATE_CALLBACK_BUNDLE_KEY;
 
 import static com.android.server.ondeviceintelligence.BundleUtil.sanitizeInferenceParams;
@@ -87,6 +89,7 @@ import com.android.internal.infra.ServiceConnector;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.ondeviceintelligence.callbacks.ListenableDownloadCallback;
 
 import java.io.FileDescriptor;
@@ -153,7 +156,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     @GuardedBy("mLock")
     private String[] mTemporaryBroadcastKeys;
     @GuardedBy("mLock")
-    private String mBroadcastPackageName;
+    private String mBroadcastPackageName = SYSTEM_PACKAGE;
     @GuardedBy("mLock")
     private String mTemporaryConfigNamespace;
 
@@ -194,9 +197,13 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
             mIsServiceEnabled = isServiceEnabled();
         }
+    }
 
-        //connect to remote services(if available) during boot phase.
-        if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+    @Override
+    public void onUserUnlocked(@NonNull TargetUser user) {
+        Slog.d(TAG, "onUserUnlocked: " + user.getUserHandle());
+        //connect to remote services(if available) during boot.
+        if(user.getUserHandle().equals(UserHandle.SYSTEM)) {
             try {
                 ensureRemoteInferenceServiceInitialized();
                 ensureRemoteIntelligenceServiceInitialized();
@@ -916,10 +923,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             }
         }
 
-        return new String[]{mContext.getResources().getString(
-                R.string.config_onDeviceIntelligenceModelLoadedBroadcastKey),
-                mContext.getResources().getString(
-                        R.string.config_onDeviceIntelligenceModelUnloadedBroadcastKey)};
+        return new String[]{ MODEL_LOADED_BROADCAST_INTENT, MODEL_UNLOADED_BROADCAST_INTENT };
     }
 
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)

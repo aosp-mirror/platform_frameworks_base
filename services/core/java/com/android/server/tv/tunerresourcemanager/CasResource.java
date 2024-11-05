@@ -30,7 +30,7 @@ public class CasResource {
      * Handle of the current resource. Should not be changed and should be aligned with the driver
      * level implementation.
      */
-    final int mHandle;
+    final long mHandle;
 
     private final int mSystemId;
 
@@ -50,7 +50,7 @@ public class CasResource {
         this.mAvailableSessionNum = builder.mMaxSessionNum;
     }
 
-    public int getHandle() {
+    public long getHandle() {
         return mHandle;
     }
 
@@ -146,11 +146,11 @@ public class CasResource {
      */
     public static class Builder {
 
-        private final int mHandle;
+        private final long mHandle;
         private int mSystemId;
         protected int mMaxSessionNum;
 
-        Builder(int handle, int systemId) {
+        Builder(long handle, int systemId) {
             this.mHandle = handle;
             this.mSystemId = systemId;
         }

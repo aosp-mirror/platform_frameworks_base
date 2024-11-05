@@ -73,17 +73,19 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
 
     fun initializeForBubbleBar(
         expandedViewManager: BubbleExpandedViewManager,
-        positioner: BubblePositioner
+        positioner: BubblePositioner,
+        bubbleLogger: BubbleLogger,
     ) {
         createBubbleBarExpandedView()
             .initialize(
                 expandedViewManager,
                 positioner,
+                bubbleLogger,
                 /* isOverflow= */ true,
                 /* bubbleTaskView= */ null,
                 /* mainExecutor= */ null,
                 /* backgroundExecutor= */ null,
-                /* regionSamplingProvider= */ null
+                /* regionSamplingProvider= */ null,
             )
     }
 

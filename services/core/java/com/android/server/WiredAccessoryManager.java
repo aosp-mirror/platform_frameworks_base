@@ -118,8 +118,11 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             if (mInputManager.getSwitchState(-1, InputDevice.SOURCE_ANY, SW_LINEOUT_INSERT) == 1) {
                 switchValues |= SW_LINEOUT_INSERT_BIT;
             }
-            notifyWiredAccessoryChanged(0, switchValues,
-                    SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT | SW_LINEOUT_INSERT_BIT);
+            notifyWiredAccessoryChanged(
+                    0,
+                    switchValues,
+                    SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT | SW_LINEOUT_INSERT_BIT,
+                    true /*isSynchronous*/);
         }
 
 
@@ -135,7 +138,13 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
     }
 
     @Override
-    public void notifyWiredAccessoryChanged(long whenNanos, int switchValues, int switchMask) {
+    public void notifyWiredAccessoryChanged(
+            long whenNanos, int switchValues, int switchMask) {
+        notifyWiredAccessoryChanged(whenNanos, switchValues, switchMask, false /*isSynchronous*/);
+    }
+
+    public void notifyWiredAccessoryChanged(
+            long whenNanos, int switchValues, int switchMask, boolean isSynchronous) {
         if (LOG) {
             Slog.v(TAG, "notifyWiredAccessoryChanged: when=" + whenNanos
                     + " bits=" + switchCodeToString(switchValues, switchMask)
@@ -172,8 +181,10 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                     break;
             }
 
-            updateLocked(NAME_H2W,
-                    (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT)) | headset);
+            updateLocked(
+                    NAME_H2W,
+                    (mHeadsetState & ~(BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT)) | headset,
+                    isSynchronous);
         }
     }
 
@@ -195,8 +206,9 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
      *
      * @param newName  One of the NAME_xxx variables defined above.
      * @param newState 0 or one of the BIT_xxx variables defined above.
+     * @param isSynchronous boolean to determine whether should happen sync or async
      */
-    private void updateLocked(String newName, int newState) {
+    private void updateLocked(String newName, int newState, boolean isSynchronous) {
         // Retain only relevant bits
         int headsetState = newState & SUPPORTED_HEADSETS;
         int usb_headset_anlg = headsetState & BIT_USB_HEADSET_ANLG;
@@ -234,12 +246,15 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             return;
         }
 
-        mWakeLock.acquire();
-
-        Log.i(TAG, "MSG_NEW_DEVICE_STATE");
-        Message msg = mHandler.obtainMessage(MSG_NEW_DEVICE_STATE, headsetState,
-                mHeadsetState, "");
-        mHandler.sendMessage(msg);
+        if (isSynchronous) {
+            setDevicesState(headsetState, mHeadsetState, "");
+        } else {
+            mWakeLock.acquire();
+            Log.i(TAG, "MSG_NEW_DEVICE_STATE");
+            Message msg = mHandler.obtainMessage(MSG_NEW_DEVICE_STATE, headsetState,
+                    mHeadsetState, "");
+            mHandler.sendMessage(msg);
+        }
 
         mHeadsetState = headsetState;
     }
@@ -439,7 +454,10 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             for (int i = 0; i < mUEventInfo.size(); ++i) {
                 UEventInfo uei = mUEventInfo.get(i);
                 if (devPath.equals(uei.getDevPath())) {
-                    updateLocked(name, uei.computeNewHeadsetState(mHeadsetState, state));
+                    updateLocked(
+                            name,
+                            uei.computeNewHeadsetState(mHeadsetState, state),
+                            false /*isSynchronous*/);
                     return;
                 }
             }
@@ -550,7 +568,10 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             synchronized (mLock) {
                 int mask = maskAndState.first;
                 int state = maskAndState.second;
-                updateLocked(name, mHeadsetState & ~(mask & ~state) | (mask & state));
+                updateLocked(
+                        name,
+                        mHeadsetState & ~(mask & ~state) | (mask & state),
+                        false /*isSynchronous*/);
                 return;
             }
         }

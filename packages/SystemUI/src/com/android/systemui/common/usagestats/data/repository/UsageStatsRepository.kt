@@ -19,7 +19,7 @@ package com.android.systemui.common.usagestats.data.repository
 import android.app.usage.UsageEvents
 import android.app.usage.UsageEventsQuery
 import android.app.usage.UsageStatsManager
-import com.android.app.tracing.coroutines.withContext
+import com.android.app.tracing.coroutines.withContextTraced as withContext
 import com.android.systemui.common.usagestats.data.model.UsageStatsQuery
 import com.android.systemui.common.usagestats.shared.model.ActivityEventModel
 import com.android.systemui.common.usagestats.shared.model.ActivityEventModel.Lifecycle

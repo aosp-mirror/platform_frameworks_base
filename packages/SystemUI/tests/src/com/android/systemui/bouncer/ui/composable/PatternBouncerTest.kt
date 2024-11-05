@@ -25,9 +25,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.ui.viewmodel.patternBouncerViewModelFactory
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.motion.createSysUiComposeMotionTestRule
 import com.android.systemui.testKosmos
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.takeWhile
@@ -55,6 +57,7 @@ class PatternBouncerTest : SysuiTestCase() {
         kosmos.patternBouncerViewModelFactory.create(
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
             onIntentionalUserInput = {},
+            bouncerHapticPlayer = kosmos.bouncerHapticPlayer,
         )
 
     @Before
@@ -69,17 +72,17 @@ class PatternBouncerTest : SysuiTestCase() {
 
     @Test
     fun entryAnimation() =
-        motionTestRule.runTest {
+        motionTestRule.runTest(timeout = 30.seconds) {
             val motion =
                 recordMotion(
                     content = { play -> if (play) PatternBouncerUnderTest() },
                     ComposeRecordingSpec.until(
                         recordBefore = false,
-                        checkDone = { motionTestValueOfNode(MotionTestKeys.entryCompleted) }
+                        checkDone = { motionTestValueOfNode(MotionTestKeys.entryCompleted) },
                     ) {
                         feature(MotionTestKeys.dotAppearFadeIn, floatArray)
                         feature(MotionTestKeys.dotAppearMoveUp, floatArray)
-                    }
+                    },
                 )
 
             assertThat(motion).timeSeriesMatchesGolden()
@@ -87,7 +90,7 @@ class PatternBouncerTest : SysuiTestCase() {
 
     @Test
     fun animateFailure() =
-        motionTestRule.runTest {
+        motionTestRule.runTest(timeout = 30.seconds) {
             val failureAnimationMotionControl =
                 MotionControl(
                     delayReadyToPlay = {
@@ -100,7 +103,7 @@ class PatternBouncerTest : SysuiTestCase() {
                         viewModel.onDragEnd()
                         // Failure animation starts when animateFailure flips to true...
                         viewModel.animateFailure.takeWhile { !it }.collect {}
-                    }
+                    },
                 ) {
                     // ... and ends when the composable flips it back to false.
                     viewModel.animateFailure.takeWhile { it }.collect {}
@@ -111,7 +114,7 @@ class PatternBouncerTest : SysuiTestCase() {
                     content = { PatternBouncerUnderTest() },
                     ComposeRecordingSpec(failureAnimationMotionControl) {
                         feature(MotionTestKeys.dotScaling, floatArray)
-                    }
+                    },
                 )
             assertThat(motion).timeSeriesMatchesGolden()
         }

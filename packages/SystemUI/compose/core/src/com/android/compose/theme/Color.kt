@@ -17,6 +17,8 @@
 package com.android.compose.theme
 
 import android.annotation.AttrRes
+import android.annotation.ColorInt
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
@@ -26,5 +28,13 @@ import androidx.compose.ui.platform.LocalContext
 @Composable
 @ReadOnlyComposable
 fun colorAttr(@AttrRes attribute: Int): Color {
-    return AndroidColorScheme.getColor(LocalContext.current, attribute)
+    return colorAttr(LocalContext.current, attribute)
+}
+
+/** Return the [Color] from the given [attribute]. */
+fun colorAttr(context: Context, @AttrRes attr: Int): Color {
+    val ta = context.obtainStyledAttributes(intArrayOf(attr))
+    @ColorInt val color = ta.getColor(0, 0)
+    ta.recycle()
+    return Color(color)
 }

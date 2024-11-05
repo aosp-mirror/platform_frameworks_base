@@ -33,6 +33,7 @@ class FakeUserTracker(
     private var _userHandle: UserHandle = UserHandle.of(_userId),
     private var _userInfo: UserInfo = mock(),
     private var _userProfiles: List<UserInfo> = emptyList(),
+    private var _isUserSwitching: Boolean = false,
     userContentResolverProvider: () -> ContentResolver = { MockContentResolver() },
     userContext: Context = mock(),
     private val onCreateCurrentUserContext: (Context) -> Context = { mock() },
@@ -50,6 +51,9 @@ class FakeUserTracker(
 
     override val userProfiles: List<UserInfo>
         get() = _userProfiles
+
+    override val isUserSwitching: Boolean
+        get() = _isUserSwitching
 
     // userContentResolver is lazy because Ravenwood doesn't support MockContentResolver()
     // and we still want to allow people use this class for tests that don't use it.
@@ -86,11 +90,13 @@ class FakeUserTracker(
     }
 
     fun onUserChanging(userId: Int = _userId) {
+        _isUserSwitching = true
         val copy = callbacks.toList()
         copy.forEach { it.onUserChanging(userId, userContext) {} }
     }
 
     fun onUserChanged(userId: Int = _userId) {
+        _isUserSwitching = false
         val copy = callbacks.toList()
         copy.forEach { it.onUserChanged(userId, userContext) }
     }

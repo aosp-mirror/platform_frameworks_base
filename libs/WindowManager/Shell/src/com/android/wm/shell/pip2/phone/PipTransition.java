@@ -16,7 +16,10 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_270;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
@@ -24,15 +27,15 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_RESIZE_PIP;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.content.Context;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -49,11 +52,14 @@ import com.android.internal.util.Preconditions;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
-import com.android.wm.shell.pip2.animation.PipEnterExitAnimator;
+import com.android.wm.shell.pip2.animation.PipEnterAnimator;
+import com.android.wm.shell.pip2.animation.PipExpandAnimator;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -81,7 +87,7 @@ public class PipTransition extends PipTransitionController implements
      * The fixed start delay in ms when fading out the content overlay from bounds animation.
      * The fadeout animation is guaranteed to start after the client has drawn under the new config.
      */
-    private static final int CONTENT_OVERLAY_FADE_OUT_DELAY_MS = 400;
+    private static final int CONTENT_OVERLAY_FADE_OUT_DELAY_MS = 500;
 
     //
     // Dependencies
@@ -91,6 +97,7 @@ public class PipTransition extends PipTransitionController implements
     private final PipTaskListener mPipTaskListener;
     private final PipScheduler mPipScheduler;
     private final PipTransitionState mPipTransitionState;
+    private final PipDisplayLayoutState mPipDisplayLayoutState;
 
     //
     // Transition caches
@@ -123,6 +130,7 @@ public class PipTransition extends PipTransitionController implements
             PipTaskListener pipTaskListener,
             PipScheduler pipScheduler,
             PipTransitionState pipTransitionState,
+            PipDisplayLayoutState pipDisplayLayoutState,
             PipUiStateChangeController pipUiStateChangeController) {
         super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
                 pipBoundsAlgorithm);
@@ -133,6 +141,7 @@ public class PipTransition extends PipTransitionController implements
         mPipScheduler.setPipTransitionController(this);
         mPipTransitionState = pipTransitionState;
         mPipTransitionState.addPipTransitionStateChangedListener(this);
+        mPipDisplayLayoutState = pipDisplayLayoutState;
     }
 
     @Override
@@ -211,6 +220,7 @@ public class PipTransition extends PipTransitionController implements
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mFinishCallback = finishCallback;
         if (transition == mEnterTransition || info.getType() == TRANSIT_PIP) {
             mEnterTransition = null;
             // If we are in swipe PiP to Home transition we are ENTERING_PIP as a jumpcut transition
@@ -251,6 +261,7 @@ public class PipTransition extends PipTransitionController implements
         if (isRemovePipTransition(info)) {
             return removePipImmediately(info, startTransaction, finishTransaction, finishCallback);
         }
+        mFinishCallback = null;
         return false;
     }
 
@@ -266,21 +277,25 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
-        SurfaceControl pipLeash = pipChange.getLeash();
+        // We expect the PiP activity as a separate change in a config-at-end transition;
+        // only flings are not using config-at-end for resize bounds changes
+        TransitionInfo.Change pipActivityChange = getDeferConfigActivityChange(info,
+                pipChange.getTaskInfo().getToken());
+        if (pipActivityChange != null) {
+            // Transform calculations use PiP params by default, so make sure they are null to
+            // default to using bounds for scaling calculations instead.
+            pipChange.getTaskInfo().pictureInPictureParams = null;
+            prepareConfigAtEndActivity(startTransaction, finishTransaction, pipChange,
+                    pipActivityChange);
+        }
 
-        // Even though the final bounds and crop are applied with finishTransaction since
-        // this is a visible change, we still need to handle the app draw coming in. Snapshot
-        // covering app draw during collection will be removed by startTransaction. So we make
-        // the crop equal to the final bounds and then let the current
-        // animator scale the leash back to starting bounds.
-        // Note: animator is responsible for applying the startTx but NOT finishTx.
+        SurfaceControl pipLeash = pipChange.getLeash();
         startTransaction.setWindowCrop(pipLeash, pipChange.getEndAbsBounds().width(),
                 pipChange.getEndAbsBounds().height());
 
-        // TODO: b/275910498 Couple this routine with a new implementation of the PiP animator.
         // Classes interested in continuing the animation would subscribe to this state update
-        // getting info such as endBounds, startTx, and finishTx as an extra Bundle once
-        // animators are in place. Once done state needs to be updated to CHANGED_PIP_BOUNDS.
+        // getting info such as endBounds, startTx, and finishTx as an extra Bundle
+        // Once done state needs to be updated to CHANGED_PIP_BOUNDS via {@link PipScheduler#}.
         Bundle extra = new Bundle();
         extra.putParcelable(PIP_START_TX, startTransaction);
         extra.putParcelable(PIP_FINISH_TX, finishTransaction);
@@ -290,7 +305,6 @@ public class PipTransition extends PipTransitionController implements
             mBoundsChangeDuration = BOUNDS_CHANGE_JUMPCUT_DURATION;
         }
 
-        mFinishCallback = finishCallback;
         mPipTransitionState.setState(PipTransitionState.CHANGING_PIP_BOUNDS, extra);
         return true;
     }
@@ -303,78 +317,58 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
-        WindowContainerToken pipTaskToken = pipChange.getContainer();
-        SurfaceControl pipLeash = pipChange.getLeash();
 
-        if (pipTaskToken == null || pipLeash == null) {
+        // We expect the PiP activity as a separate change in a config-at-end transition.
+        TransitionInfo.Change pipActivityChange = getDeferConfigActivityChange(info,
+                pipChange.getTaskInfo().getToken());
+        if (pipActivityChange == null) {
             return false;
         }
 
-        SurfaceControl overlayLeash = mPipTransitionState.getSwipePipToHomeOverlay();
-        PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
-
-        Rect appBounds = mPipTransitionState.getSwipePipToHomeAppBounds();
-        Rect destinationBounds = pipChange.getEndAbsBounds();
-
-        float aspectRatio = pipChange.getTaskInfo().pictureInPictureParams.getAspectRatioFloat();
-
-        // We fake the source rect hint when the one prvided by the app is invalid for
-        // the animation with an app icon overlay.
-        Rect animationSrcRectHint = overlayLeash == null ? params.getSourceRectHint()
-                : PipUtils.getEnterPipWithOverlaySrcRectHint(appBounds, aspectRatio);
-
-        WindowContainerTransaction finishWct = new WindowContainerTransaction();
-        SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-
-        final float scale = (float) destinationBounds.width() / animationSrcRectHint.width();
-        startTransaction.setWindowCrop(pipLeash, animationSrcRectHint);
-        startTransaction.setPosition(pipLeash,
-                destinationBounds.left - animationSrcRectHint.left * scale,
-                destinationBounds.top - animationSrcRectHint.top * scale);
-        startTransaction.setScale(pipLeash, scale, scale);
-
-        if (overlayLeash != null) {
+        final SurfaceControl pipLeash = getLeash(pipChange);
+        final Rect destinationBounds = pipChange.getEndAbsBounds();
+        final SurfaceControl swipePipToHomeOverlay = mPipTransitionState.getSwipePipToHomeOverlay();
+        if (swipePipToHomeOverlay != null) {
             final int overlaySize = PipContentOverlay.PipAppIconOverlay.getOverlaySize(
                     mPipTransitionState.getSwipePipToHomeAppBounds(), destinationBounds);
-
-            // Overlay needs to be adjusted once a new draw comes in resetting surface transform.
-            tx.setScale(overlayLeash, 1f, 1f);
-            tx.setPosition(overlayLeash, (destinationBounds.width() - overlaySize) / 2f,
-                    (destinationBounds.height() - overlaySize) / 2f);
+            // It is possible we reparent the PIP activity to a new PIP task (in multi-activity
+            // apps), so we should also reparent the overlay to the final PIP task.
+            startTransaction.reparent(swipePipToHomeOverlay, pipLeash)
+                    .setLayer(swipePipToHomeOverlay, Integer.MAX_VALUE)
+                    .setScale(swipePipToHomeOverlay, 1f, 1f)
+                    .setPosition(swipePipToHomeOverlay,
+                            (destinationBounds.width() - overlaySize) / 2f,
+                            (destinationBounds.height() - overlaySize) / 2f);
         }
+
+        final int startRotation = pipChange.getStartRotation();
+        final int endRotation = mPipDisplayLayoutState.getRotation();
+        final int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0
+                : startRotation - endRotation;
+        if (delta != ROTATION_0) {
+            mPipTransitionState.setInFixedRotation(true);
+            handleBoundsEnterFixedRotation(pipChange, pipActivityChange, endRotation);
+        }
+
+        prepareConfigAtEndActivity(startTransaction, finishTransaction, pipChange,
+                pipActivityChange);
+        startTransaction.merge(finishTransaction);
+        PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
+                startTransaction, finishTransaction, destinationBounds, delta);
+        animator.setEnterStartState(pipChange);
+        animator.onEnterAnimationUpdate(1.0f /* fraction */, startTransaction);
         startTransaction.apply();
 
-        tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
-                        this::onClientDrawAtTransitionEnd);
-        finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
-
-        // Note that finishWct should be free of any actual WM state changes; we are using
-        // it for syncing with the client draw after delayed configuration changes are dispatched.
-        finishCallback.onTransitionFinished(finishWct.isEmpty() ? null : finishWct);
-        return true;
-    }
-
-    private void startOverlayFadeoutAnimation() {
-        ValueAnimator animator = ValueAnimator.ofFloat(1f, 0f);
-        animator.setDuration(CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
+        if (swipePipToHomeOverlay != null) {
+            // fadeout the overlay if needed.
+            startOverlayFadeoutAnimation(swipePipToHomeOverlay, () -> {
                 SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-                tx.remove(mPipTransitionState.getSwipePipToHomeOverlay());
+                tx.remove(swipePipToHomeOverlay);
                 tx.apply();
-
-                // We have fully completed enter-PiP animation after the overlay is gone.
-                mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
-            }
-        });
-        animator.addUpdateListener(animation -> {
-            float alpha = (float) animation.getAnimatedValue();
-            SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-            tx.setAlpha(mPipTransitionState.getSwipePipToHomeOverlay(), alpha).apply();
-        });
-        animator.start();
+            });
+        }
+        finishTransition();
+        return true;
     }
 
     private boolean startBoundsTypeEnterAnimation(@NonNull TransitionInfo info,
@@ -386,39 +380,136 @@ public class PipTransition extends PipTransitionController implements
             return false;
         }
 
-        WindowContainerToken pipTaskToken = pipChange.getContainer();
-        if (pipTaskToken == null) {
+        // We expect the PiP activity as a separate change in a config-at-end transition.
+        TransitionInfo.Change pipActivityChange = getDeferConfigActivityChange(info,
+                pipChange.getTaskInfo().getToken());
+        if (pipActivityChange == null) {
             return false;
         }
 
-        WindowContainerTransaction finishWct = new WindowContainerTransaction();
-        SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+        final Rect startBounds = pipChange.getStartAbsBounds();
+        final Rect endBounds = pipChange.getEndAbsBounds();
 
-        Rect startBounds = pipChange.getStartAbsBounds();
-        Rect endBounds = pipChange.getEndAbsBounds();
-        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
-        Preconditions.checkNotNull(pipLeash, "Leash is null for bounds transition.");
+        final PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
+        final float aspectRatio = mPipBoundsAlgorithm.getAspectRatioOrDefault(params);
+        final Rect sourceRectHint = PipBoundsAlgorithm.getValidSourceHintRect(params, startBounds,
+                endBounds);
+        final Rect adjustedSourceRectHint = sourceRectHint != null ? new Rect(sourceRectHint)
+                : PipUtils.getEnterPipWithOverlaySrcRectHint(startBounds, aspectRatio);
 
-        Rect sourceRectHint = null;
-        if (pipChange.getTaskInfo() != null
-                && pipChange.getTaskInfo().pictureInPictureParams != null) {
-            sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
+        final SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+
+        // For opening type transitions, if there is a change of mode TO_FRONT/OPEN,
+        // make sure that change has alpha of 1f, since it's init state might be set to alpha=0f
+        // by the Transitions framework to simplify Task opening transitions.
+        if (TransitionUtil.isOpeningType(info.getType())) {
+            for (TransitionInfo.Change change : info.getChanges()) {
+                if (change.getLeash() == null) continue;
+                if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
+                    startTransaction.setAlpha(change.getLeash(), 1f);
+                }
+            }
         }
 
-        PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
-                startTransaction, finishTransaction, startBounds, startBounds, endBounds,
-                sourceRectHint, PipEnterExitAnimator.BOUNDS_ENTER, Surface.ROTATION_0);
+        final TransitionInfo.Change fixedRotationChange = findFixedRotationChange(info);
+        final int startRotation = pipChange.getStartRotation();
+        final int endRotation = fixedRotationChange != null
+                ? fixedRotationChange.getEndFixedRotation() : ROTATION_UNDEFINED;
+        final int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0
+                : startRotation - endRotation;
 
-        tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
-                this::onClientDrawAtTransitionEnd);
-        finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
+        if (delta != ROTATION_0) {
+            mPipTransitionState.setInFixedRotation(true);
+            handleBoundsEnterFixedRotation(pipChange, pipActivityChange,
+                    fixedRotationChange.getEndFixedRotation());
+        }
 
-        animator.setAnimationEndCallback(() ->
-                finishCallback.onTransitionFinished(finishWct));
+        PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
+                startTransaction, finishTransaction, endBounds, delta);
+        if (sourceRectHint == null) {
+            // update the src-rect-hint in params in place, to set up initial animator transform.
+            params.getSourceRectHint().set(adjustedSourceRectHint);
+            animator.setAppIconContentOverlay(
+                    mContext, startBounds, endBounds, pipChange.getTaskInfo().topActivityInfo,
+                    mPipBoundsState.getLauncherState().getAppIconSizePx());
+        }
 
+        prepareConfigAtEndActivity(startTransaction, finishTransaction, pipChange,
+                pipActivityChange);
+        animator.setAnimationStartCallback(() -> animator.setEnterStartState(pipChange));
+        animator.setAnimationEndCallback(() -> {
+            if (animator.getContentOverlayLeash() != null) {
+                startOverlayFadeoutAnimation(animator.getContentOverlayLeash(),
+                        animator::clearAppIconOverlay);
+            }
+            finishTransition();
+        });
         animator.start();
         return true;
     }
+
+    private void startOverlayFadeoutAnimation(@NonNull SurfaceControl overlayLeash,
+            @NonNull Runnable onAnimationEnd) {
+        PipAlphaAnimator animator = new PipAlphaAnimator(mContext, overlayLeash,
+                null /* startTx */, PipAlphaAnimator.FADE_OUT);
+        animator.setDuration(CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
+        animator.setAnimationEndCallback(onAnimationEnd);
+        animator.start();
+    }
+
+    private void handleBoundsEnterFixedRotation(TransitionInfo.Change pipTaskChange,
+            TransitionInfo.Change pipActivityChange, int endRotation) {
+        final Rect endBounds = pipTaskChange.getEndAbsBounds();
+        final Rect endActivityBounds = pipActivityChange.getEndAbsBounds();
+        int startRotation = pipTaskChange.getStartRotation();
+
+        // Cache the task to activity offset to potentially restore later.
+        Point activityEndOffset = new Point(endActivityBounds.left - endBounds.left,
+                endActivityBounds.top - endBounds.top);
+
+        // If we are running a fixed rotation bounds enter PiP animation,
+        // then update the display layout rotation, and recalculate the end rotation bounds.
+        // Update the endBounds in place, so that the PiP change is up-to-date.
+        mPipDisplayLayoutState.rotateTo(endRotation);
+        float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                mPipBoundsAlgorithm.getEntryDestinationBounds());
+        mPipBoundsAlgorithm.applySnapFraction(endBounds, snapFraction);
+        mPipBoundsState.setBounds(endBounds);
+
+        // Display bounds were already updated to represent the final orientation,
+        // so we just need to readjust the origin, and perform rotation about (0, 0).
+        boolean isClockwise = (endRotation - startRotation) == -ROTATION_270;
+        Rect displayBounds = mPipDisplayLayoutState.getDisplayBounds();
+        int originTranslateX = isClockwise ? 0 : -displayBounds.width();
+        int originTranslateY = isClockwise ? -displayBounds.height() : 0;
+        endBounds.offset(originTranslateX, originTranslateY);
+
+        // Update the activity end bounds in place as well, as this is used for transform
+        // calculation later.
+        endActivityBounds.offsetTo(endBounds.left + activityEndOffset.x,
+                endBounds.top + activityEndOffset.y);
+    }
+
+    private void handleExpandFixedRotation(TransitionInfo.Change pipTaskChange, int endRotation) {
+        final Rect endBounds = pipTaskChange.getEndAbsBounds();
+        final int width = endBounds.width();
+        final int height = endBounds.height();
+        final int left = endBounds.left;
+        final int top = endBounds.top;
+        int newTop, newLeft;
+
+        if (endRotation == Surface.ROTATION_90) {
+            newLeft = top;
+            newTop = -(left + width);
+        } else {
+            newLeft = -(height + top);
+            newTop = left;
+        }
+        // Modify the endBounds, rotating and placing them potentially off-screen, so that
+        // as we translate and rotate around the origin, we place them right into the target.
+        endBounds.set(newLeft, newTop, newLeft + height, newTop + width);
+    }
+
 
     private boolean startAlphaTypeEnterAnimation(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
@@ -440,12 +531,8 @@ public class PipTransition extends PipTransitionController implements
 
         PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipLeash, startTransaction,
                 PipAlphaAnimator.FADE_IN);
-        animator.setAnimationEndCallback(() -> {
-            finishCallback.onTransitionFinished(null);
-            // This should update the pip transition state accordingly after we stop playing.
-            onClientDrawAtTransitionEnd();
-        });
-
+        // This should update the pip transition state accordingly after we stop playing.
+        animator.setAnimationEndCallback(this::finishTransition);
         animator.start();
         return true;
     }
@@ -475,38 +562,51 @@ public class PipTransition extends PipTransitionController implements
             }
         }
 
-        // for multi activity, we need to manually set the leash layer
-        if (pipChange.getTaskInfo() == null) {
-            TransitionInfo.Change parent = getChangeByToken(info, pipChange.getParent());
-            if (parent != null) {
-                startTransaction.setLayer(parent.getLeash(), Integer.MAX_VALUE - 1);
-            }
+        // The parent change if we were in a multi-activity PiP; null if single activity PiP.
+        final TransitionInfo.Change parentBeforePip = pipChange.getTaskInfo() == null
+                ? getChangeByToken(info, pipChange.getParent()) : null;
+        if (parentBeforePip != null) {
+            // For multi activity, we need to manually set the leash layer
+            startTransaction.setLayer(parentBeforePip.getLeash(), Integer.MAX_VALUE - 1);
         }
 
-        Rect startBounds = pipChange.getStartAbsBounds();
-        Rect endBounds = pipChange.getEndAbsBounds();
-        SurfaceControl pipLeash = pipChange.getLeash();
-        Preconditions.checkNotNull(pipLeash, "Leash is null for exit transition.");
+        final Rect startBounds = pipChange.getStartAbsBounds();
+        final Rect endBounds = pipChange.getEndAbsBounds();
+        final SurfaceControl pipLeash = getLeash(pipChange);
 
-        Rect sourceRectHint = null;
-        if (pipChange.getTaskInfo() != null
-                && pipChange.getTaskInfo().pictureInPictureParams != null) {
+        PictureInPictureParams params = null;
+        if (pipChange.getTaskInfo() != null) {
             // single activity
-            sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
-        } else if (mPipTaskListener.getPictureInPictureParams().hasSourceBoundsHint()) {
+            params = pipChange.getTaskInfo().pictureInPictureParams;
+        } else if (parentBeforePip != null && parentBeforePip.getTaskInfo() != null) {
             // multi activity
-            sourceRectHint = mPipTaskListener.getPictureInPictureParams().getSourceRectHint();
+            params = parentBeforePip.getTaskInfo().pictureInPictureParams;
+        }
+        final Rect sourceRectHint = PipBoundsAlgorithm.getValidSourceHintRect(params, endBounds,
+                startBounds);
+
+        final TransitionInfo.Change fixedRotationChange = findFixedRotationChange(info);
+        final int startRotation = pipChange.getStartRotation();
+        final int endRotation = fixedRotationChange != null
+                ? fixedRotationChange.getEndFixedRotation() : ROTATION_UNDEFINED;
+        final int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0
+                : endRotation - startRotation;
+
+        if (delta != ROTATION_0) {
+            handleExpandFixedRotation(pipChange, endRotation);
         }
 
-        PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
+        PipExpandAnimator animator = new PipExpandAnimator(mContext, pipLeash,
                 startTransaction, finishTransaction, endBounds, startBounds, endBounds,
-                sourceRectHint, PipEnterExitAnimator.BOUNDS_EXIT, Surface.ROTATION_0);
-
+                sourceRectHint, delta);
         animator.setAnimationEndCallback(() -> {
-            mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
-            finishCallback.onTransitionFinished(null);
+            if (parentBeforePip != null) {
+                // TODO b/377362511: Animate local leash instead to also handle letterbox case.
+                // For multi-activity, set the crop to be null
+                finishTransaction.setCrop(pipLeash, null);
+            }
+            finishTransition();
         });
-
         animator.start();
         return true;
     }
@@ -530,6 +630,19 @@ public class PipTransition extends PipTransitionController implements
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getTaskInfo() != null
                     && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED) {
+                return change;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private TransitionInfo.Change getDeferConfigActivityChange(TransitionInfo info,
+            @NonNull WindowContainerToken parent) {
+        for (TransitionInfo.Change change : info.getChanges()) {
+            if (change.getTaskInfo() == null
+                    && change.hasFlags(TransitionInfo.FLAG_CONFIG_AT_END)
+                    && change.getParent() != null && change.getParent().equals(parent)) {
                 return change;
             }
         }
@@ -610,37 +723,68 @@ public class PipTransition extends PipTransitionController implements
                 && pipChange.getMode() == TRANSIT_TO_BACK;
         boolean isPipClosed = info.getType() == TRANSIT_CLOSE
                 && pipChange.getMode() == TRANSIT_CLOSE;
-        // PiP is being removed if the pinned task is either moved to back or closed.
-        return isPipMovedToBack || isPipClosed;
+        // If PiP is dismissed by user (i.e. via dismiss button in PiP menu)
+        boolean isPipDismissed = info.getType() == TRANSIT_REMOVE_PIP
+                && pipChange.getMode() == TRANSIT_TO_BACK;
+        // PiP is being removed if the pinned task is either moved to back, closed, or dismissed.
+        return isPipMovedToBack || isPipClosed || isPipDismissed;
+    }
+
+    private void prepareConfigAtEndActivity(@NonNull SurfaceControl.Transaction startTx,
+            @NonNull SurfaceControl.Transaction finishTx,
+            @NonNull TransitionInfo.Change pipChange,
+            @NonNull TransitionInfo.Change pipActivityChange) {
+        PointF initActivityScale = new PointF();
+        PointF initActivityPos = new PointF();
+        PipUtils.calcEndTransform(pipActivityChange, pipChange, initActivityScale,
+                initActivityPos);
+        if (pipActivityChange.getLeash() != null) {
+            startTx.setCrop(pipActivityChange.getLeash(), null);
+            startTx.setScale(pipActivityChange.getLeash(), initActivityScale.x,
+                    initActivityScale.y);
+            startTx.setPosition(pipActivityChange.getLeash(), initActivityPos.x,
+                    initActivityPos.y);
+
+            finishTx.setCrop(pipActivityChange.getLeash(), null);
+            finishTx.setScale(pipActivityChange.getLeash(), initActivityScale.x,
+                    initActivityScale.y);
+            finishTx.setPosition(pipActivityChange.getLeash(), initActivityPos.x,
+                    initActivityPos.y);
+        }
+    }
+
+    @NonNull
+    private SurfaceControl getLeash(TransitionInfo.Change change) {
+        SurfaceControl leash = change.getLeash();
+        Preconditions.checkNotNull(leash, "Leash is null for change=" + change);
+        return leash;
     }
 
     //
     // Miscellaneous callbacks and listeners
     //
 
-    private void onClientDrawAtTransitionEnd() {
-        if (mPipTransitionState.getSwipePipToHomeOverlay() != null) {
-            startOverlayFadeoutAnimation();
-        } else if (mPipTransitionState.getState() == PipTransitionState.ENTERING_PIP) {
-            // If we were entering PiP (i.e. playing the animation) with a valid srcRectHint,
-            // and then we get a signal on client finishing its draw after the transition
-            // has ended, then we have fully entered PiP.
-            mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
-        }
-    }
-
     @Override
-    public void finishTransition(@Nullable SurfaceControl.Transaction tx) {
-        WindowContainerTransaction wct = null;
-        if (tx != null && mPipTransitionState.mPipTaskToken != null) {
-            // Outside callers can only provide a transaction to be applied with the final draw.
-            // So no actual WM changes can be applied for this transition after this point.
-            wct = new WindowContainerTransaction();
-            wct.setBoundsChangeTransaction(mPipTransitionState.mPipTaskToken, tx);
-        }
+    public void finishTransition() {
         if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(wct);
+            mFinishCallback.onTransitionFinished(null /* finishWct */);
+            mFinishCallback = null;
         }
+
+        final int currentState = mPipTransitionState.getState();
+        int nextState = PipTransitionState.UNDEFINED;
+        switch (currentState) {
+            case PipTransitionState.ENTERING_PIP:
+                nextState = PipTransitionState.ENTERED_PIP;
+                break;
+            case PipTransitionState.CHANGING_PIP_BOUNDS:
+                nextState = PipTransitionState.CHANGED_PIP_BOUNDS;
+                break;
+            case PipTransitionState.EXITING_PIP:
+                nextState = PipTransitionState.EXITED_PIP;
+                break;
+        }
+        mPipTransitionState.setState(nextState);
     }
 
     @Override
