@@ -197,8 +197,8 @@ class ViewHierarchyAnimator {
          * @param includeFadeIn true if the animator should also fade in the view and child views.
          * @param fadeInInterpolator the interpolator to use when fading in the view. Unused if
          *   [includeFadeIn] is false.
-         * @param onAnimationEnd an optional runnable that will be run once the animation
-         *   finishes successfully. Will not be run if the animation is cancelled.
+         * @param onAnimationEnd an optional runnable that will be run once the animation finishes,
+         *   regardless of whether the animation is cancelled or finishes successfully.
          */
         @JvmOverloads
         fun animateAddition(
@@ -399,8 +399,8 @@ class ViewHierarchyAnimator {
          * added on the side(s) of the [destination], the translation of those margins can be
          * included by specifying [includeMargins].
          *
-         * @param onAnimationEnd an optional runnable that will be run once the animation finishes
-         *    successfully. Will not be run if the animation is cancelled.
+         * @param onAnimationEnd an optional runnable that will be run once the animation finishes,
+         *   regardless of whether the animation is cancelled or finishes successfully.
          */
         @JvmOverloads
         fun animateRemoval(
@@ -1070,9 +1070,10 @@ class ViewHierarchyAnimator {
                             // listener.
                             recursivelyRemoveListener(view)
                         }
-                        if (!cancelled) {
-                            onAnimationEnd?.run()
-                        }
+                        // Run the end runnable regardless of whether the animation was cancelled or
+                        // not - this ensures critical actions (like removing a window) always occur
+                        // (see b/344049884).
+                        onAnimationEnd?.run()
                     }
 
                     override fun onAnimationCancel(animation: Animator) {

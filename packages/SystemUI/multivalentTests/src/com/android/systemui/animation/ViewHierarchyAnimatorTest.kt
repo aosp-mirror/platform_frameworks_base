@@ -777,7 +777,7 @@ class ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun animateAddition_runnableDoesNotRunWhenAnimationCancelled() {
+    fun animateAddition_runnableRunsWhenAnimationCancelled() {
         var runnableRun = false
         val onAnimationEndRunnable = { runnableRun = true }
 
@@ -791,7 +791,7 @@ class ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         cancelAnimation(rootView)
 
-        assertEquals(false, runnableRun)
+        assertEquals(true, runnableRun)
     }
 
     @Test
@@ -1370,7 +1370,7 @@ class ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun animateRemoval_runnableDoesNotRunWhenAnimationCancelled() {
+    fun animateRemoval_runnableRunsWhenAnimationCancelled() {
         var runnableRun = false
         val onAnimationEndRunnable = { runnableRun = true }
 
@@ -1381,7 +1381,7 @@ class ViewHierarchyAnimatorTest : SysuiTestCase() {
         ViewHierarchyAnimator.animateRemoval(removedView, onAnimationEnd = onAnimationEndRunnable)
         cancelAnimation(removedView)
 
-        assertEquals(false, runnableRun)
+        assertEquals(true, runnableRun)
     }
 
     @Test
