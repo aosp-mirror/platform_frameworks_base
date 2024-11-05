@@ -28,4 +28,6 @@ class FakeDeviceBasedSatelliteRepository() : DeviceBasedSatelliteRepository {
     override val signalStrength = MutableStateFlow(0)
 
     override val isSatelliteAllowedForCurrentLocation = MutableStateFlow(false)
+
+    override var isOpportunisticSatelliteIconEnabled: Boolean = true
 }

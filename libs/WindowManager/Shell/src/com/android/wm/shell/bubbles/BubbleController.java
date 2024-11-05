@@ -1632,6 +1632,7 @@ public class BubbleController implements ConfigurationChangeListener,
         if (!isShowingAsBubbleBar()) {
             callback = b -> {
                 if (mStackView != null) {
+                    b.setSuppressFlyout(true);
                     mStackView.addBubble(b);
                     mStackView.setSelectedBubble(b);
                 } else {

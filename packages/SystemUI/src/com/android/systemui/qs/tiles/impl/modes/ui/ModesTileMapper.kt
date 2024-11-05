@@ -30,14 +30,12 @@ import javax.inject.Inject
 
 class ModesTileMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    val theme: Resources.Theme,
-) : QSTileDataToStateMapper<ModesTileModel> {
+constructor(@Main private val resources: Resources, val theme: Resources.Theme) :
+    QSTileDataToStateMapper<ModesTileModel> {
     override fun map(config: QSTileConfig, data: ModesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             iconRes = data.iconResId
-            icon = { data.icon }
+            icon = data.icon
             activationState =
                 if (data.isActivated) {
                     QSTileState.ActivationState.ACTIVE
@@ -47,10 +45,7 @@ constructor(
             secondaryLabel = getModesStatus(data, resources)
             contentDescription = "$label. $secondaryLabel"
             supportedActions =
-                setOf(
-                    QSTileState.UserAction.CLICK,
-                    QSTileState.UserAction.LONG_CLICK,
-                )
+                setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             expandedAccessibilityClass = Button::class
         }

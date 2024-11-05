@@ -18,18 +18,11 @@ package com.android.systemui.common.data
 
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.data.repository.PackageChangeRepositoryImpl
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
-import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
 import dagger.Binds
 import dagger.Module
 
 @Module
 abstract class CommonDataLayerModule {
-    @Binds
-    abstract fun bindConfigurationRepository(
-        impl: ConfigurationRepositoryImpl
-    ): ConfigurationRepository
-
     @Binds
     abstract fun bindPackageChangeRepository(
         impl: PackageChangeRepositoryImpl

@@ -152,7 +152,10 @@ class SnapshotController {
                 if (mOpenActivities.isEmpty()) {
                     return false;
                 }
-                if (Flags.alwaysCaptureActivitySnapshot()) {
+                // TODO (b/362183912) always capture activity snapshot will cause performance
+                //  regression, remove flag after ramp up
+                if (!Flags.deferPredictiveAnimationIfNoSnapshot()
+                        && Flags.alwaysCaptureActivitySnapshot()) {
                     return true;
                 }
                 for (int i = mOpenActivities.size() - 1; i >= 0; --i) {

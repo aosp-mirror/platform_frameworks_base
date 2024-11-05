@@ -59,34 +59,24 @@ class ModesTileMapperTest : SysuiTestCase() {
     @Test
     fun inactiveState() {
         val icon = TestStubDrawable("res123").asIcon()
-        val model =
-            ModesTileModel(
-                isActivated = false,
-                activeModes = emptyList(),
-                icon = icon,
-            )
+        val model = ModesTileModel(isActivated = false, activeModes = emptyList(), icon = icon)
 
         val state = underTest.map(config, model)
 
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.INACTIVE)
-        assertThat(state.icon()).isEqualTo(icon)
+        assertThat(state.icon).isEqualTo(icon)
         assertThat(state.secondaryLabel).isEqualTo("No active modes")
     }
 
     @Test
     fun activeState_oneMode() {
         val icon = TestStubDrawable("res123").asIcon()
-        val model =
-            ModesTileModel(
-                isActivated = true,
-                activeModes = listOf("DND"),
-                icon = icon,
-            )
+        val model = ModesTileModel(isActivated = true, activeModes = listOf("DND"), icon = icon)
 
         val state = underTest.map(config, model)
 
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.ACTIVE)
-        assertThat(state.icon()).isEqualTo(icon)
+        assertThat(state.icon).isEqualTo(icon)
         assertThat(state.secondaryLabel).isEqualTo("DND is active")
     }
 
@@ -103,7 +93,7 @@ class ModesTileMapperTest : SysuiTestCase() {
         val state = underTest.map(config, model)
 
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.ACTIVE)
-        assertThat(state.icon()).isEqualTo(icon)
+        assertThat(state.icon).isEqualTo(icon)
         assertThat(state.secondaryLabel).isEqualTo("3 modes are active")
     }
 
@@ -115,12 +105,12 @@ class ModesTileMapperTest : SysuiTestCase() {
                 isActivated = false,
                 activeModes = emptyList(),
                 icon = icon,
-                iconResId = 123
+                iconResId = 123,
             )
 
         val state = underTest.map(config, model)
 
-        assertThat(state.icon()).isEqualTo(icon)
+        assertThat(state.icon).isEqualTo(icon)
         assertThat(state.iconRes).isEqualTo(123)
     }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.data.model
 
 import android.app.ActivityTaskManager.RootTaskInfo
+import com.android.systemui.screenshot.policy.childTasksTopDown
 
 /** Information about the tasks on a display. */
 data class DisplayContentModel(
@@ -27,3 +28,5 @@ data class DisplayContentModel(
     /** A list of root tasks on the display, ordered from top to bottom along the z-axis */
     val rootTasks: List<RootTaskInfo>,
 )
+
+fun DisplayContentModel.allTasks() = rootTasks.asSequence().flatMap { it.childTasksTopDown() }

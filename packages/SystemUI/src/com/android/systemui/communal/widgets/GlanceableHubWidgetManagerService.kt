@@ -22,6 +22,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteCallbackList
+import android.os.RemoteException
 import android.os.UserHandle
 import android.widget.RemoteViews
 import androidx.lifecycle.LifecycleService
@@ -98,7 +99,15 @@ constructor(
 
         val job =
             widgetRepository.communalWidgets
-                .onEach { widgets -> listener.onWidgetsUpdated(widgets) }
+                .onEach { widgets ->
+                    try {
+                        listener.onWidgetsUpdated(widgets)
+                    } catch (e: RemoteException) {
+                        logger.e({ "Error pushing widget update: $str1" }) {
+                            str1 = e.localizedMessage
+                        }
+                    }
+                }
                 .launchIn(lifecycleScope)
         widgetListenersRegistry.register(listener, job)
     }
@@ -171,19 +180,41 @@ constructor(
     private fun createListener(listener: IAppWidgetHostListener): AppWidgetHostListener {
         return object : AppWidgetHostListener {
             override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
-                listener.onUpdateProviderInfo(appWidget)
+                try {
+                    listener.onUpdateProviderInfo(appWidget)
+                } catch (e: RemoteException) {
+                    logger.e({ "Error pushing on update provider info: $str1" }) {
+                        str1 = e.localizedMessage
+                    }
+                }
             }
 
             override fun updateAppWidget(views: RemoteViews?) {
-                listener.updateAppWidget(views)
+                try {
+                    listener.updateAppWidget(views)
+                } catch (e: RemoteException) {
+                    logger.e({ "Error updating app widget: $str1" }) { str1 = e.localizedMessage }
+                }
             }
 
             override fun updateAppWidgetDeferred(packageName: String?, appWidgetId: Int) {
-                listener.updateAppWidgetDeferred(packageName, appWidgetId)
+                try {
+                    listener.updateAppWidgetDeferred(packageName, appWidgetId)
+                } catch (e: RemoteException) {
+                    logger.e({ "Error updating app widget deferred: $str1" }) {
+                        str1 = e.localizedMessage
+                    }
+                }
             }
 
             override fun onViewDataChanged(viewId: Int) {
-                listener.onViewDataChanged(viewId)
+                try {
+                    listener.onViewDataChanged(viewId)
+                } catch (e: RemoteException) {
+                    logger.e({ "Error pushing on view data changed: $str1" }) {
+                        str1 = e.localizedMessage
+                    }
+                }
             }
         }
     }
