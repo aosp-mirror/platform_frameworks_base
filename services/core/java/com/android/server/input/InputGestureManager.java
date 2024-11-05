@@ -362,6 +362,22 @@ final class InputGestureManager {
     }
 
     @Nullable
+    public InputGestureData getCustomGestureForTouchpadGesture(@UserIdInt int userId,
+            int touchpadGestureType) {
+        if (touchpadGestureType == InputGestureData.TOUCHPAD_GESTURE_TYPE_UNKNOWN) {
+            return null;
+        }
+        synchronized (mGestureLock) {
+            Map<InputGestureData.Trigger, InputGestureData> customGestures =
+                    mCustomInputGestures.get(userId);
+            if (customGestures == null) {
+                return null;
+            }
+            return customGestures.get(InputGestureData.createTouchpadTrigger(touchpadGestureType));
+        }
+    }
+
+    @Nullable
     public InputGestureData getSystemShortcutForKeyEvent(KeyEvent event) {
         final int keyCode = event.getKeyCode();
         if (keyCode == KeyEvent.KEYCODE_UNKNOWN) {
