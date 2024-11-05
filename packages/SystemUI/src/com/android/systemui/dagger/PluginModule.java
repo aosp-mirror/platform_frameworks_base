@@ -16,10 +16,8 @@
 
 package com.android.systemui.dagger;
 
-import android.content.Context;
 
 import com.android.systemui.classifier.FalsingManagerProxy;
-import com.android.systemui.dagger.qualifiers.Default;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.globalactions.GlobalActionsImpl;
 import com.android.systemui.plugins.ActivityStarter;
@@ -29,8 +27,9 @@ import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore;
+import com.android.systemui.statusbar.data.repository.SysuiDarkIconDispatcherStore;
 import com.android.systemui.statusbar.phone.ActivityStarterImpl;
-import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
@@ -53,20 +52,16 @@ public abstract class PluginModule {
     /** */
     @Provides
     @SysUISingleton
-    @Default
-    static DarkIconDispatcherImpl darkIconDispatcherImpl(
-            DarkIconDispatcherImpl.Factory factory, Context context) {
-        return factory.create(context.getDisplayId(), context);
+    static DarkIconDispatcher provideDarkIconDispatcher(DarkIconDispatcherStore store) {
+        return store.getDefaultDisplay();
     }
 
-    /** */
-    @Binds
-    abstract DarkIconDispatcher provideDarkIconDispatcher(
-            @Default DarkIconDispatcherImpl controllerImpl);
-
-    @Binds
-    abstract SysuiDarkIconDispatcher provideSysuiDarkIconDispatcher(
-            @Default DarkIconDispatcherImpl controllerImpl);
+    @Provides
+    @SysUISingleton
+    static SysuiDarkIconDispatcher provideSysuiDarkIconDispatcher(
+            SysuiDarkIconDispatcherStore store) {
+        return store.getDefaultDisplay();
+    }
 
     /** */
     @Binds

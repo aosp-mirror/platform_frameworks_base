@@ -29,6 +29,7 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.shade.mockNotificationShadeWindowViewController
 import com.android.systemui.shade.mockShadeSurface
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
+import com.android.systemui.statusbar.data.repository.lightBarControllerStore
 import com.android.systemui.statusbar.data.repository.privacyDotWindowControllerStore
 import com.android.systemui.statusbar.data.repository.statusBarModeRepository
 import com.android.systemui.statusbar.mockNotificationRemoteInputManager
@@ -79,5 +80,6 @@ val Kosmos.multiDisplayStatusBarStarter by
             statusBarWindowControllerStore,
             statusBarInitializerStore,
             privacyDotWindowControllerStore,
+            lightBarControllerStore,
         )
     }

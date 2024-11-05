@@ -31,3 +31,7 @@ val Kosmos.multiDisplayDarkIconDispatcherStore by
             displayWindowPropertiesRepository = displayWindowPropertiesRepository,
         )
     }
+
+val Kosmos.fakeDarkIconDispatcherStore by Kosmos.Fixture { FakeDarkIconDispatcherStore() }
+
+var Kosmos.darkIconDispatcherStore by Kosmos.Fixture { fakeDarkIconDispatcherStore }
