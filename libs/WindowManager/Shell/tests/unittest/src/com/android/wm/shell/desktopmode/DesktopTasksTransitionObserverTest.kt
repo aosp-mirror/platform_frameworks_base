@@ -76,6 +76,7 @@ class DesktopTasksTransitionObserverTest {
     private val context = mock<Context>()
     private val shellTaskOrganizer = mock<ShellTaskOrganizer>()
     private val taskRepository = mock<DesktopRepository>()
+    private val mixedHandler = mock<DesktopMixedTransitionHandler>()
 
     private lateinit var transitionObserver: DesktopTasksTransitionObserver
     private lateinit var shellInit: ShellInit
@@ -87,7 +88,7 @@ class DesktopTasksTransitionObserverTest {
 
         transitionObserver =
             DesktopTasksTransitionObserver(
-                context, taskRepository, transitions, shellTaskOrganizer, shellInit
+                context, taskRepository, transitions, shellTaskOrganizer, mixedHandler, shellInit
             )
     }
 
@@ -106,6 +107,7 @@ class DesktopTasksTransitionObserverTest {
         )
 
         verify(taskRepository).minimizeTask(task.displayId, task.taskId)
+        verify(mixedHandler).addPendingMixedTransition(any())
     }
 
     @Test
