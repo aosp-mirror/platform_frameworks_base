@@ -166,9 +166,13 @@ fun StatusBarRoot(
                     // TODO(b/369337701): implement notification icons for all displays.
                     //  Currently if we try to bind for all displays, there is a crash, because the
                     //  same notification icon view can't have multiple parents.
-                    if (context.displayId == Display.DEFAULT_DISPLAY) {
+                    val displayId = context.displayId
+                    if (displayId == Display.DEFAULT_DISPLAY) {
                         scope.launch {
-                            notificationIconsBinder.bindWhileAttached(notificationIconContainer)
+                            notificationIconsBinder.bindWhileAttached(
+                                notificationIconContainer,
+                                displayId,
+                            )
                         }
                     }
 

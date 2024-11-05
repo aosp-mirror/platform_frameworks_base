@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -27,7 +28,6 @@ import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [NotificationIconContainer] to a [NotificationIconContainerStatusBarViewModel]. */
 class NotificationIconContainerStatusBarViewBinder
@@ -39,11 +39,12 @@ constructor(
     private val failureTracker: StatusBarIconViewBindingFailureTracker,
     private val viewStore: StatusBarNotificationIconViewStore,
 ) {
-    fun bindWhileAttached(view: NotificationIconContainer): DisposableHandle {
+    fun bindWhileAttached(view: NotificationIconContainer, displayId: Int): DisposableHandle {
         return traceSection("NICStatusBar#bindWhileAttached") {
             view.repeatWhenAttached {
                 lifecycleScope.launch {
                     NotificationIconContainerViewBinder.bind(
+                        displayId = displayId,
                         view = view,
                         viewModel = viewModel,
                         configuration = configuration,

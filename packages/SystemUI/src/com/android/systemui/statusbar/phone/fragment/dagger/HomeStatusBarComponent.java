@@ -127,4 +127,8 @@ public interface HomeStatusBarComponent {
     /** */
     @DisplaySpecific
     DarkIconDispatcher getDarkIconDispatcher();
+
+    /** */
+    @DisplaySpecific
+    int getDisplayId();
 }
