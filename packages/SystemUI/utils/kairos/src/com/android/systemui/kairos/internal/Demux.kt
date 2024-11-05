@@ -16,17 +16,20 @@
 
 package com.android.systemui.kairos.internal
 
+import com.android.systemui.kairos.internal.store.ConcurrentHashMapK
+import com.android.systemui.kairos.internal.store.MapHolder
+import com.android.systemui.kairos.internal.store.MapK
+import com.android.systemui.kairos.internal.store.MutableMapK
 import com.android.systemui.kairos.internal.util.hashString
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-internal class DemuxNode<K, A>(
-    private val branchNodeByKey: ConcurrentHashMap<K, DemuxNode<K, A>.BranchNode>,
+internal class DemuxNode<W, K, A>(
+    private val branchNodeByKey: MutableMapK<W, K, DemuxNode<W, K, A>.BranchNode>,
     val lifecycle: DemuxLifecycle<K, A>,
-    private val spec: DemuxActivator<K, A>,
+    private val spec: DemuxActivator<W, K, A>,
 ) : SchedulableNode {
 
     val schedulable = Schedulable.N(this)
@@ -34,7 +37,7 @@ internal class DemuxNode<K, A>(
     inline val mutex
         get() = lifecycle.mutex
 
-    lateinit var upstreamConnection: NodeConnection<Map<K, A>>
+    lateinit var upstreamConnection: NodeConnection<MapK<W, K, A>>
 
     @Volatile private var epoch: Long = Long.MIN_VALUE
 
@@ -52,7 +55,10 @@ internal class DemuxNode<K, A>(
         mutex.withLock {
             updateEpoch(evalScope)
             for ((key, _) in upstreamResult) {
-                branchNodeByKey[key]?.let { branch -> launch { branch.schedule(evalScope) } }
+                if (key !in branchNodeByKey) continue
+                val branch = branchNodeByKey.getValue(key)
+                // TODO: launchImmediate?
+                launch { branch.schedule(evalScope) }
             }
         }
     }
@@ -75,7 +81,7 @@ internal class DemuxNode<K, A>(
     override suspend fun moveIndirectUpstreamToDirect(
         scheduler: Scheduler,
         oldIndirectDepth: Int,
-        oldIndirectSet: Set<MuxDeferredNode<*, *>>,
+        oldIndirectSet: Set<MuxDeferredNode<*, *, *>>,
         newDirectDepth: Int,
     ) {
         coroutineScope {
@@ -97,8 +103,8 @@ internal class DemuxNode<K, A>(
         scheduler: Scheduler,
         oldDepth: Int,
         newDepth: Int,
-        removals: Set<MuxDeferredNode<*, *>>,
-        additions: Set<MuxDeferredNode<*, *>>,
+        removals: Set<MuxDeferredNode<*, *, *>>,
+        additions: Set<MuxDeferredNode<*, *, *>>,
     ) {
         coroutineScope {
             mutex.withLock {
@@ -120,7 +126,7 @@ internal class DemuxNode<K, A>(
         scheduler: Scheduler,
         oldDirectDepth: Int,
         newIndirectDepth: Int,
-        newIndirectSet: Set<MuxDeferredNode<*, *>>,
+        newIndirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) {
         coroutineScope {
             mutex.withLock {
@@ -140,7 +146,7 @@ internal class DemuxNode<K, A>(
     override suspend fun removeIndirectUpstream(
         scheduler: Scheduler,
         depth: Int,
-        indirectSet: Set<MuxDeferredNode<*, *>>,
+        indirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) {
         coroutineScope {
             mutex.withLock {
@@ -245,35 +251,45 @@ internal class DemuxNode<K, A>(
     }
 }
 
-internal fun <K, A> DemuxImpl(
+internal fun <W, K, A> DemuxImpl(
+    upstream: TFlowImpl<MapK<W, K, A>>,
+    numKeys: Int?,
+    storeFactory: MutableMapK.Factory<W, K>,
+): DemuxImpl<K, A> =
+    DemuxImpl(
+        DemuxLifecycle(
+            DemuxLifecycleState.Inactive(DemuxActivator(numKeys, upstream, storeFactory))
+        )
+    )
+
+internal fun <K, A> demuxMap(
     upstream: suspend EvalScope.() -> TFlowImpl<Map<K, A>>,
     numKeys: Int?,
 ): DemuxImpl<K, A> =
-    DemuxImpl(DemuxLifecycle(DemuxLifecycleState.Inactive(DemuxActivator(numKeys, upstream))))
+    DemuxImpl(mapImpl(upstream) { MapHolder(it) }, numKeys, ConcurrentHashMapK.Factory())
 
-internal class DemuxActivator<K, A>(
+internal class DemuxActivator<W, K, A>(
     private val numKeys: Int?,
-    private val upstream: suspend EvalScope.() -> TFlowImpl<Map<K, A>>,
+    private val upstream: TFlowImpl<MapK<W, K, A>>,
+    private val storeFactory: MutableMapK.Factory<W, K>,
 ) {
     suspend fun activate(
         evalScope: EvalScope,
         lifecycle: DemuxLifecycle<K, A>,
-    ): Pair<DemuxNode<K, A>, Set<K>>? {
-        val demux = DemuxNode(ConcurrentHashMap(numKeys ?: 16), lifecycle, this)
-        return upstream
-            .invoke(evalScope)
-            .activate(evalScope, downstream = demux.schedulable)
-            ?.let { (conn, needsEval) ->
-                Pair(
-                    demux.apply { upstreamConnection = conn },
-                    if (needsEval) {
-                        demux.updateEpoch(evalScope)
-                        conn.getPushEvent(evalScope).keys
-                    } else {
-                        emptySet()
-                    },
-                )
-            }
+    ): Pair<DemuxNode<W, K, A>, Set<K>>? {
+        val demux = DemuxNode(storeFactory.create(numKeys), lifecycle, this)
+        return upstream.activate(evalScope, downstream = demux.schedulable)?.let { (conn, needsEval)
+            ->
+            Pair(
+                demux.apply { upstreamConnection = conn },
+                if (needsEval) {
+                    demux.updateEpoch(evalScope)
+                    conn.getPushEvent(evalScope).keys
+                } else {
+                    emptySet()
+                },
+            )
+        }
     }
 }
 
@@ -295,7 +311,10 @@ internal class DemuxLifecycle<K, A>(@Volatile var lifecycleState: DemuxLifecycle
 
     override fun toString(): String = "TFlowDmuxState[$hashString][$lifecycleState][$mutex]"
 
-    suspend fun activate(evalScope: EvalScope, key: K): Pair<DemuxNode<K, A>.BranchNode, Boolean>? =
+    suspend fun activate(
+        evalScope: EvalScope,
+        key: K,
+    ): Pair<DemuxNode<*, K, A>.BranchNode, Boolean>? =
         mutex.withLock {
             when (val state = lifecycleState) {
                 is DemuxLifecycleState.Dead -> null
@@ -322,11 +341,11 @@ internal class DemuxLifecycle<K, A>(@Volatile var lifecycleState: DemuxLifecycle
 }
 
 internal sealed interface DemuxLifecycleState<out K, out A> {
-    class Inactive<K, A>(val spec: DemuxActivator<K, A>) : DemuxLifecycleState<K, A> {
+    class Inactive<K, A>(val spec: DemuxActivator<*, K, A>) : DemuxLifecycleState<K, A> {
         override fun toString(): String = "Inactive"
     }
 
-    class Active<K, A>(val node: DemuxNode<K, A>) : DemuxLifecycleState<K, A> {
+    class Active<K, A>(val node: DemuxNode<*, K, A>) : DemuxLifecycleState<K, A> {
         override fun toString(): String = "Active(node=$node)"
     }
 

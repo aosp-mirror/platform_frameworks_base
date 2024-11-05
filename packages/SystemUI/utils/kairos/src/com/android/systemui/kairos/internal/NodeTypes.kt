@@ -29,7 +29,7 @@ internal sealed interface SchedulableNode {
     suspend fun moveIndirectUpstreamToDirect(
         scheduler: Scheduler,
         oldIndirectDepth: Int,
-        oldIndirectSet: Set<MuxDeferredNode<*, *>>,
+        oldIndirectSet: Set<MuxDeferredNode<*, *, *>>,
         newDirectDepth: Int,
     )
 
@@ -37,21 +37,21 @@ internal sealed interface SchedulableNode {
         scheduler: Scheduler,
         oldDepth: Int,
         newDepth: Int,
-        removals: Set<MuxDeferredNode<*, *>>,
-        additions: Set<MuxDeferredNode<*, *>>,
+        removals: Set<MuxDeferredNode<*, *, *>>,
+        additions: Set<MuxDeferredNode<*, *, *>>,
     )
 
     suspend fun moveDirectUpstreamToIndirect(
         scheduler: Scheduler,
         oldDirectDepth: Int,
         newIndirectDepth: Int,
-        newIndirectSet: Set<MuxDeferredNode<*, *>>,
+        newIndirectSet: Set<MuxDeferredNode<*, *, *>>,
     )
 
     suspend fun removeIndirectUpstream(
         scheduler: Scheduler,
         depth: Int,
-        indirectSet: Set<MuxDeferredNode<*, *>>,
+        indirectSet: Set<MuxDeferredNode<*, *, *>>,
     )
 
     suspend fun removeDirectUpstream(scheduler: Scheduler, depth: Int)

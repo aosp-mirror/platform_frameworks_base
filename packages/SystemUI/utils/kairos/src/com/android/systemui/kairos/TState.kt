@@ -36,6 +36,7 @@ import com.android.systemui.kairos.internal.map
 import com.android.systemui.kairos.internal.mapCheap
 import com.android.systemui.kairos.internal.mapImpl
 import com.android.systemui.kairos.internal.util.hashString
+import com.android.systemui.kairos.internal.zipStateMap
 import com.android.systemui.kairos.internal.zipStates
 import kotlin.reflect.KProperty
 import kotlinx.coroutines.CompletableDeferred
@@ -159,12 +160,12 @@ fun <A> Iterable<TState<A>>.combine(): TState<List<A>> {
  * @see TState.combineWith
  */
 @ExperimentalFrpApi
-fun <K : Any, A> Map<K, TState<A>>.combine(): TState<Map<K, A>> {
+fun <K, A> Map<K, TState<A>>.combine(): TState<Map<K, A>> {
     val operatorName = "combine"
     val name = operatorName
     return TStateInit(
         init(name) {
-            zipStates(
+            zipStateMap(
                 name,
                 operatorName,
                 states = mapValues { it.value.init.connect(evalScope = this) },

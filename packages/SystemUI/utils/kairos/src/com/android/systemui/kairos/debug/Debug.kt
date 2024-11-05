@@ -133,7 +133,7 @@ internal fun TStateImpl<*>.dump(infoById: MutableMap<Any, InitInfo>, edges: Muta
                             edges.add(Edge(upstream = state.upstream, downstream = state))
                             Mapped(cheap = false)
                         }
-                        is DerivedZipped<*, *> -> {
+                        is DerivedZipped<*, *, *> -> {
                             state.upstream.forEach { (key, upstream) ->
                                 edges.add(
                                     Edge(upstream = upstream, downstream = state, tag = "key=$key")

@@ -29,6 +29,7 @@ import com.android.systemui.kairos.TStateInit
 import com.android.systemui.kairos.emptyTFlow
 import com.android.systemui.kairos.groupByKey
 import com.android.systemui.kairos.init
+import com.android.systemui.kairos.internal.store.ConcurrentHashMapK
 import com.android.systemui.kairos.internal.util.mapValuesParallel
 import com.android.systemui.kairos.mapCheap
 import com.android.systemui.kairos.merge
@@ -100,7 +101,7 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
             .toTStateInternalDeferred(operatorName, initialValue.unwrapped)
     }
 
-    private fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyInternal(
+    private fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyInternal(
         storage: TState<Map<K, TFlow<V>>>
     ): TFlow<Map<K, V>> {
         val name = "mergeIncrementally"
@@ -114,21 +115,25 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
                                 .getCurrentWithEpoch(this)
                                 .first
                                 .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
+                                .asIterable()
                         },
                         getPatches = {
                             mapImpl({ init.connect(this) }) { patch ->
-                                patch.mapValuesParallel { (_, m) ->
-                                    m.map { flow -> flow.init.connect(this) }
-                                }
+                                patch
+                                    .mapValuesParallel { (_, m) ->
+                                        m.map { flow -> flow.init.connect(this) }
+                                    }
+                                    .asIterable()
                             }
                         },
+                        storeFactory = ConcurrentHashMapK.Factory(),
                     )
                     .awaitValues(),
             )
         )
     }
 
-    private fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptInternal(
+    private fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptInternal(
         storage: TState<Map<K, TFlow<V>>>
     ): TFlow<Map<K, V>> {
         val name = "mergeIncrementallyPrompt"
@@ -142,14 +147,18 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
                                 .getCurrentWithEpoch(this)
                                 .first
                                 .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
+                                .asIterable()
                         },
                         getPatches = {
                             mapImpl({ init.connect(this) }) { patch ->
-                                patch.mapValuesParallel { (_, m) ->
-                                    m.map { flow -> flow.init.connect(this) }
-                                }
+                                patch
+                                    .mapValuesParallel { (_, m) ->
+                                        m.map { flow -> flow.init.connect(this) }
+                                    }
+                                    .asIterable()
                             }
                         },
+                        storeFactory = ConcurrentHashMapK.Factory(),
                     )
                     .awaitValues(),
             )
@@ -217,14 +226,14 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
         override fun <A> TFlow<A>.holdDeferred(initialValue: FrpDeferredValue<A>): TState<A> =
             toTStateDeferredInternal(initialValue)
 
-        override fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
+        override fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
             initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
         ): TFlow<Map<K, V>> {
             val storage: TState<Map<K, TFlow<V>>> = foldMapIncrementally(initialTFlows)
             return mergeIncrementallyInternal(storage)
         }
 
-        override fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
+        override fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
             initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
         ): TFlow<Map<K, V>> {
             val storage: TState<Map<K, TFlow<V>>> = foldMapIncrementally(initialTFlows)

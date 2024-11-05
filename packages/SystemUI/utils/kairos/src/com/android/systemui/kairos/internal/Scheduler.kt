@@ -25,22 +25,23 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 internal interface Scheduler {
-    fun schedule(depth: Int, node: MuxNode<*, *, *>)
+    fun schedule(depth: Int, node: MuxNode<*, *, *, *>)
 
-    fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *>)
+    fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *, *>)
 }
 
 internal class SchedulerImpl : Scheduler {
-    val enqueued = ConcurrentHashMap<MuxNode<*, *, *>, Any>()
-    val scheduledQ = PriorityBlockingQueue<Pair<Int, MuxNode<*, *, *>>>(16, compareBy { it.first })
+    val enqueued = ConcurrentHashMap<MuxNode<*, *, *, *>, Any>()
+    val scheduledQ =
+        PriorityBlockingQueue<Pair<Int, MuxNode<*, *, *, *>>>(16, compareBy { it.first })
 
-    override fun schedule(depth: Int, node: MuxNode<*, *, *>) {
+    override fun schedule(depth: Int, node: MuxNode<*, *, *, *>) {
         if (enqueued.putIfAbsent(node, node) == null) {
             scheduledQ.add(Pair(depth, node))
         }
     }
 
-    override fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *>) {
+    override fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *, *>) {
         schedule(Int.MIN_VALUE + indirectDepth, node)
     }
 
@@ -59,7 +60,9 @@ internal class SchedulerImpl : Scheduler {
 
     private suspend inline fun drain(
         crossinline onStep:
-            suspend (runStep: suspend (visit: suspend (MuxNode<*, *, *>) -> Unit) -> Unit) -> Unit
+            suspend (
+                runStep: suspend (visit: suspend (MuxNode<*, *, *, *>) -> Unit) -> Unit
+            ) -> Unit
     ): Unit = coroutineScope {
         while (scheduledQ.isNotEmpty()) {
             val maxDepth = scheduledQ.peek()?.first ?: error("Unexpected empty scheduler")
@@ -69,7 +72,7 @@ internal class SchedulerImpl : Scheduler {
 
     private suspend inline fun runStep(
         maxDepth: Int,
-        crossinline visit: suspend (MuxNode<*, *, *>) -> Unit,
+        crossinline visit: suspend (MuxNode<*, *, *, *>) -> Unit,
     ) = coroutineScope {
         while (scheduledQ.peek()?.first?.let { it <= maxDepth } == true) {
             val (d, node) = scheduledQ.remove()

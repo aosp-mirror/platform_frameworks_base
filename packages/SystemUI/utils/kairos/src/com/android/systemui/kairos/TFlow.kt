@@ -26,6 +26,7 @@ import com.android.systemui.kairos.internal.TFlowImpl
 import com.android.systemui.kairos.internal.activated
 import com.android.systemui.kairos.internal.cached
 import com.android.systemui.kairos.internal.constInit
+import com.android.systemui.kairos.internal.demuxMap
 import com.android.systemui.kairos.internal.filterImpl
 import com.android.systemui.kairos.internal.filterJustImpl
 import com.android.systemui.kairos.internal.init
@@ -35,7 +36,7 @@ import com.android.systemui.kairos.internal.mergeNodes
 import com.android.systemui.kairos.internal.mergeNodesLeft
 import com.android.systemui.kairos.internal.neverImpl
 import com.android.systemui.kairos.internal.switchDeferredImplSingle
-import com.android.systemui.kairos.internal.switchPromptImpl
+import com.android.systemui.kairos.internal.switchPromptImplSingle
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.util.Either
 import com.android.systemui.kairos.util.Left
@@ -344,7 +345,7 @@ fun <K, A> Map<K, TFlow<A>>.merge(): TFlow<Map<K, A>> =
  */
 @ExperimentalFrpApi
 fun <K, A> TFlow<Map<K, A>>.groupByKey(numKeys: Int? = null): GroupedTFlow<K, A> =
-    GroupedTFlow(DemuxImpl({ init.connect(this) }, numKeys))
+    GroupedTFlow(demuxMap({ init.connect(this) }, numKeys))
 
 /**
  * Shorthand for `map { mapOf(extractKey(it) to it) }.groupByKey()`
@@ -417,8 +418,8 @@ class GroupedTFlow<in K, out A> internal constructor(internal val impl: DemuxImp
  * that takes effect immediately, see [switchPromptly].
  */
 @ExperimentalFrpApi
-fun <A> TState<TFlow<A>>.switch(): TFlow<A> {
-    return TFlowInit(
+fun <A> TState<TFlow<A>>.switch(): TFlow<A> =
+    TFlowInit(
         constInit(
             name = null,
             switchDeferredImplSingle(
@@ -433,7 +434,6 @@ fun <A> TState<TFlow<A>>.switch(): TFlow<A> {
             ),
         )
     )
-}
 
 /**
  * Returns a [TFlow] that switches to the [TFlow] contained within this [TState] whenever it
@@ -444,21 +444,22 @@ fun <A> TState<TFlow<A>>.switch(): TFlow<A> {
  */
 // TODO: parameter to handle coincidental emission from both old and new
 @ExperimentalFrpApi
-fun <A> TState<TFlow<A>>.switchPromptly(): TFlow<A> {
-    val switchNode =
-        switchPromptImpl(
-            getStorage = {
-                mapOf(Unit to init.connect(this).getCurrentWithEpoch(this).first.init.connect(this))
-            },
-            getPatches = {
-                val patches = init.connect(this).changes
-                mapImpl({ patches }) { newFlow -> mapOf(Unit to just(newFlow.init.connect(this))) }
-            },
+fun <A> TState<TFlow<A>>.switchPromptly(): TFlow<A> =
+    TFlowInit(
+        constInit(
+            name = null,
+            switchPromptImplSingle(
+                getStorage = {
+                    init.connect(this).getCurrentWithEpoch(this).first.init.connect(this)
+                },
+                getPatches = {
+                    mapImpl({ init.connect(this).changes }) { newFlow ->
+                        newFlow.init.connect(this)
+                    }
+                },
+            ),
         )
-    return TFlowInit(
-        constInit(name = null, mapImpl({ switchNode }) { it.getValue(Unit).getPushEvent(this) })
     )
-}
 
 /**
  * A mutable [TFlow] that provides the ability to [emit] values to the flow, handling backpressure

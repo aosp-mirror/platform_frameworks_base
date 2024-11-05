@@ -59,7 +59,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
     private val stateWrites = ConcurrentLinkedQueue<TStateSource<*>>()
     private val outputsByDispatcher =
         ConcurrentHashMap<ContinuationInterceptor, ConcurrentLinkedQueue<Output<*>>>()
-    private val muxMovers = ConcurrentLinkedQueue<MuxDeferredNode<*, *>>()
+    private val muxMovers = ConcurrentLinkedQueue<MuxDeferredNode<*, *, *>>()
     private val deactivations = ConcurrentLinkedDeque<PushNode<*>>()
     private val outputDeactivations = ConcurrentLinkedQueue<Output<*>>()
     private val transactionMutex = Mutex()
@@ -73,7 +73,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
             .add(output)
     }
 
-    override fun scheduleMuxMover(muxMover: MuxDeferredNode<*, *>) {
+    override fun scheduleMuxMover(muxMover: MuxDeferredNode<*, *, *>) {
         muxMovers.add(muxMover)
     }
 
