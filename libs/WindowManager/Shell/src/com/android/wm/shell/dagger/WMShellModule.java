@@ -779,7 +779,8 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer,
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             ReturnToDragStartAnimator returnToDragStartAnimator,
-            @DynamicOverride DesktopRepository desktopRepository) {
+            @DynamicOverride DesktopRepository desktopRepository,
+            DesktopModeEventLogger desktopModeEventLogger) {
         return new DesktopTilingDecorViewModel(
                 context,
                 displayController,
@@ -789,7 +790,8 @@ public abstract class WMShellModule {
                 shellTaskOrganizer,
                 toggleResizeDesktopTaskTransitionHandler,
                 returnToDragStartAnimator,
-                desktopRepository
+                desktopRepository,
+                desktopModeEventLogger
         );
     }
 
