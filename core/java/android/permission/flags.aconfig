@@ -340,3 +340,12 @@ flag {
     description: "This flag protects the permission that is required to call Health Connect backup and restore apis"
     bug: "376014879" # android_fr bug
 }
+
+flag {
+    name: "enable_aiai_proxied_text_classifiers"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables the AiAi to utilize the default OTP text classifier that is also used by ExtServices"
+    bug: "377229653"
+}
