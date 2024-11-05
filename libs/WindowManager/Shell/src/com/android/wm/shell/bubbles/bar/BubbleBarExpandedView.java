@@ -247,6 +247,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             public void onOpenAppSettings(Bubble bubble) {
                 mManager.collapseStack();
                 mContext.startActivityAsUser(bubble.getSettingsIntent(mContext), bubble.getUser());
+                mBubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_APP_MENU_GO_TO_SETTINGS);
             }
 
             @Override
