@@ -75,6 +75,24 @@ public final class InputRouteManager {
                 @Override
                 public void onAudioDevicesAdded(@NonNull AudioDeviceInfo[] addedDevices) {
                     applyDefaultSelectedTypeToAllPresets();
+
+                    // Activate the last hot plugged valid input device, to match the output device
+                    // behavior.
+                    @AudioDeviceType int deviceTypeToActivate = mSelectedInputDeviceType;
+                    for (AudioDeviceInfo info : addedDevices) {
+                        if (InputMediaDevice.isSupportedInputDevice(info.getType())) {
+                            deviceTypeToActivate = info.getType();
+                        }
+                    }
+
+                    // Only activate if we find a different valid input device. e.g. if none of the
+                    // addedDevices is supported input device, we don't need to activate anything.
+                    if (mSelectedInputDeviceType != deviceTypeToActivate) {
+                        mSelectedInputDeviceType = deviceTypeToActivate;
+                        AudioDeviceAttributes deviceAttributes =
+                                createInputDeviceAttributes(mSelectedInputDeviceType);
+                        setPreferredDeviceForAllPresets(deviceAttributes);
+                    }
                 }
 
                 @Override
