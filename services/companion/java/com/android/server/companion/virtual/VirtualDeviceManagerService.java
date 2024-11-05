@@ -591,7 +591,6 @@ public class VirtualDeviceManagerService extends SystemService {
             }
         }
 
-
         @Override // Binder call
         public int getDeviceIdForDisplayId(int displayId) {
             if (displayId == Display.INVALID_DISPLAY || displayId == Display.DEFAULT_DISPLAY) {
@@ -923,6 +922,22 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public int getDeviceIdForDisplayId(int displayId) {
             return mImpl.getDeviceIdForDisplayId(displayId);
+        }
+
+        @Override
+        public long getDimDurationMillisForDeviceId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice == null ? -1 : virtualDevice.getDimDurationMillis();
+            }
+        }
+
+        @Override
+        public long getScreenOffTimeoutMillisForDeviceId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice == null ? -1 : virtualDevice.getScreenOffTimeoutMillis();
+            }
         }
 
         @Override
