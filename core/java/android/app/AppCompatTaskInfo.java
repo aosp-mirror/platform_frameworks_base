@@ -167,10 +167,11 @@ public class AppCompatTaskInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if top activity is pillarboxed.
+     * @return {@code true} if the top activity bounds are letterboxed with width <= height.
      */
-    public boolean isTopActivityPillarboxed() {
-        return topActivityLetterboxWidth < topActivityLetterboxHeight;
+    public boolean isTopActivityPillarboxShaped() {
+        return isTopActivityLetterboxed()
+                && topActivityLetterboxWidth <= topActivityLetterboxHeight;
     }
 
     /**
