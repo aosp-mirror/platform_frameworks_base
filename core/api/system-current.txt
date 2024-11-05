@@ -8232,6 +8232,26 @@ package android.media.tv {
     method public void onSetMain(boolean);
   }
 
+  @FlaggedApi("android.media.tv.flags.tif_extension_standardization") public final class TvInputServiceExtensionManager {
+    method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public int registerExtensionIBinder(@NonNull String, @NonNull android.os.IBinder);
+    field public static final String IBROADCAST_TIME = "android.media.tv.extension.time.BroadcastTime";
+    field public static final String ICAM_APP_INFO_SERVICE = "android.media.tv.extension.cam.ICamAppInfoService";
+    field public static final String ICLIENT_TOKEN = "android.media.tv.extension.clienttoken.IClientToken";
+    field public static final String IDATA_SERVICE_SIGNAL_INFO = "android.media.tv.extension.teletext.IDataServiceSignalInfo";
+    field public static final String IEVENT_MONITOR = "android.media.tv.extension.event.IEventMonitor";
+    field public static final String IHDMI_SIGNAL_INTERFACE = "android.media.tv.extension.signal.IHdmiSignalInterface";
+    field public static final String IOAD_UPDATE_INTERFACE = "android.media.tv.extension.oad.IOadUpdateInterface";
+    field public static final String IRATING_INTERFACE = "android.media.tv.extension.rating.IRatingInterface";
+    field public static final String IRECORDED_CONTENTS = "android.media.tv.extension.pvr.IRecordedContents";
+    field public static final String ISCAN_INTERFACE = "android.media.tv.extension.scan.IScanInterface";
+    field public static final String ISCREEN_MODE_SETTINGS = "android.media.tv.extension.screenmode.IScreenModeSettings";
+    field public static final String ISERVICE_LIST_EDIT_LISTENER = "android.media.tv.extension.servicedb.IServiceListEditListener";
+    field public static final int REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED = 2; // 0x2
+    field public static final int REGISTER_FAIL_NAME_NOT_STANDARDIZED = 1; // 0x1
+    field public static final int REGISTER_FAIL_REMOTE_EXCEPTION = 3; // 0x3
+    field public static final int REGISTER_SUCCESS = 0; // 0x0
+  }
+
   public abstract static class TvRecordingClient.RecordingCallback {
     method public void onEvent(String, String, android.os.Bundle);
   }
