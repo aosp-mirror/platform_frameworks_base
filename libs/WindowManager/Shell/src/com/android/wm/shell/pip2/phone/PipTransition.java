@@ -325,9 +325,7 @@ public class PipTransition extends PipTransitionController implements
             return false;
         }
 
-        SurfaceControl pipLeash = pipChange.getLeash();
-        Preconditions.checkNotNull(pipLeash, "Leash is null for swipe-up transition.");
-
+        final SurfaceControl pipLeash = getLeash(pipChange);
         final Rect destinationBounds = pipChange.getEndAbsBounds();
         final SurfaceControl swipePipToHomeOverlay = mPipTransitionState.getSwipePipToHomeOverlay();
         if (swipePipToHomeOverlay != null) {
@@ -349,7 +347,7 @@ public class PipTransition extends PipTransitionController implements
                 : startRotation - endRotation;
         if (delta != ROTATION_0) {
             mPipTransitionState.setInFixedRotation(true);
-            handleBoundsTypeFixedRotation(pipChange, pipActivityChange, endRotation);
+            handleBoundsEnterFixedRotation(pipChange, pipActivityChange, endRotation);
         }
 
         prepareConfigAtEndActivity(startTransaction, finishTransaction, pipChange,
@@ -414,15 +412,15 @@ public class PipTransition extends PipTransitionController implements
         }
 
         final TransitionInfo.Change fixedRotationChange = findFixedRotationChange(info);
-        int startRotation = pipChange.getStartRotation();
-        int endRotation = fixedRotationChange != null
+        final int startRotation = pipChange.getStartRotation();
+        final int endRotation = fixedRotationChange != null
                 ? fixedRotationChange.getEndFixedRotation() : ROTATION_UNDEFINED;
         final int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0
                 : startRotation - endRotation;
 
         if (delta != ROTATION_0) {
             mPipTransitionState.setInFixedRotation(true);
-            handleBoundsTypeFixedRotation(pipChange, pipActivityChange,
+            handleBoundsEnterFixedRotation(pipChange, pipActivityChange,
                     fixedRotationChange.getEndFixedRotation());
         }
 
@@ -459,7 +457,7 @@ public class PipTransition extends PipTransitionController implements
         animator.start();
     }
 
-    private void handleBoundsTypeFixedRotation(TransitionInfo.Change pipTaskChange,
+    private void handleBoundsEnterFixedRotation(TransitionInfo.Change pipTaskChange,
             TransitionInfo.Change pipActivityChange, int endRotation) {
         final Rect endBounds = pipTaskChange.getEndAbsBounds();
         final Rect endActivityBounds = pipActivityChange.getEndAbsBounds();
@@ -490,6 +488,26 @@ public class PipTransition extends PipTransitionController implements
         // calculation later.
         endActivityBounds.offsetTo(endBounds.left + activityEndOffset.x,
                 endBounds.top + activityEndOffset.y);
+    }
+
+    private void handleExpandFixedRotation(TransitionInfo.Change pipTaskChange, int endRotation) {
+        final Rect endBounds = pipTaskChange.getEndAbsBounds();
+        final int width = endBounds.width();
+        final int height = endBounds.height();
+        final int left = endBounds.left;
+        final int top = endBounds.top;
+        int newTop, newLeft;
+
+        if (endRotation == Surface.ROTATION_90) {
+            newLeft = top;
+            newTop = -(left + width);
+        } else {
+            newLeft = -(height + top);
+            newTop = left;
+        }
+        // Modify the endBounds, rotating and placing them potentially off-screen, so that
+        // as we translate and rotate around the origin, we place them right into the target.
+        endBounds.set(newLeft, newTop, newLeft + height, newTop + width);
     }
 
 
@@ -544,33 +562,51 @@ public class PipTransition extends PipTransitionController implements
             }
         }
 
-        // for multi activity, we need to manually set the leash layer
-        if (pipChange.getTaskInfo() == null) {
-            TransitionInfo.Change parent = getChangeByToken(info, pipChange.getParent());
-            if (parent != null) {
-                startTransaction.setLayer(parent.getLeash(), Integer.MAX_VALUE - 1);
-            }
+        // The parent change if we were in a multi-activity PiP; null if single activity PiP.
+        final TransitionInfo.Change parentBeforePip = pipChange.getTaskInfo() == null
+                ? getChangeByToken(info, pipChange.getParent()) : null;
+        if (parentBeforePip != null) {
+            // For multi activity, we need to manually set the leash layer
+            startTransaction.setLayer(parentBeforePip.getLeash(), Integer.MAX_VALUE - 1);
         }
 
-        Rect startBounds = pipChange.getStartAbsBounds();
-        Rect endBounds = pipChange.getEndAbsBounds();
-        SurfaceControl pipLeash = pipChange.getLeash();
-        Preconditions.checkNotNull(pipLeash, "Leash is null for exit transition.");
+        final Rect startBounds = pipChange.getStartAbsBounds();
+        final Rect endBounds = pipChange.getEndAbsBounds();
+        final SurfaceControl pipLeash = getLeash(pipChange);
 
-        Rect sourceRectHint = null;
-        if (pipChange.getTaskInfo() != null
-                && pipChange.getTaskInfo().pictureInPictureParams != null) {
+        PictureInPictureParams params = null;
+        if (pipChange.getTaskInfo() != null) {
             // single activity
-            sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
-        } else if (mPipTaskListener.getPictureInPictureParams().hasSourceBoundsHint()) {
+            params = pipChange.getTaskInfo().pictureInPictureParams;
+        } else if (parentBeforePip != null && parentBeforePip.getTaskInfo() != null) {
             // multi activity
-            sourceRectHint = mPipTaskListener.getPictureInPictureParams().getSourceRectHint();
+            params = parentBeforePip.getTaskInfo().pictureInPictureParams;
+        }
+        final Rect sourceRectHint = PipBoundsAlgorithm.getValidSourceHintRect(params, endBounds,
+                startBounds);
+
+        final TransitionInfo.Change fixedRotationChange = findFixedRotationChange(info);
+        final int startRotation = pipChange.getStartRotation();
+        final int endRotation = fixedRotationChange != null
+                ? fixedRotationChange.getEndFixedRotation() : ROTATION_UNDEFINED;
+        final int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0
+                : endRotation - startRotation;
+
+        if (delta != ROTATION_0) {
+            handleExpandFixedRotation(pipChange, endRotation);
         }
 
         PipExpandAnimator animator = new PipExpandAnimator(mContext, pipLeash,
                 startTransaction, finishTransaction, endBounds, startBounds, endBounds,
-                sourceRectHint, Surface.ROTATION_0);
-        animator.setAnimationEndCallback(this::finishTransition);
+                sourceRectHint, delta);
+        animator.setAnimationEndCallback(() -> {
+            if (parentBeforePip != null) {
+                // TODO b/377362511: Animate local leash instead to also handle letterbox case.
+                // For multi-activity, set the crop to be null
+                finishTransaction.setCrop(pipLeash, null);
+            }
+            finishTransition();
+        });
         animator.start();
         return true;
     }
@@ -715,6 +751,13 @@ public class PipTransition extends PipTransitionController implements
             finishTx.setPosition(pipActivityChange.getLeash(), initActivityPos.x,
                     initActivityPos.y);
         }
+    }
+
+    @NonNull
+    private SurfaceControl getLeash(TransitionInfo.Change change) {
+        SurfaceControl leash = change.getLeash();
+        Preconditions.checkNotNull(leash, "Leash is null for change=" + change);
+        return leash;
     }
 
     //
