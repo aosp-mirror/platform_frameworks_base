@@ -16,6 +16,8 @@
 
 package android.media.quality;
 
+import android.media.quality.AmbientBacklightSettings;
+import android.media.quality.IAmbientBacklightCallback;
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
 import android.media.quality.ParamCapability;
@@ -45,6 +47,7 @@ interface IMediaQualityManager {
 
     void registerPictureProfileCallback(in IPictureProfileCallback cb);
     void registerSoundProfileCallback(in ISoundProfileCallback cb);
+    void registerAmbientBacklightCallback(in IAmbientBacklightCallback cb);
 
     List<ParamCapability> getParamCapabilities(in List<String> names);
 
@@ -55,4 +58,7 @@ interface IMediaQualityManager {
     boolean isSuperResolutionEnabled();
     void setAutoSoundQualityEnabled(in boolean enabled);
     boolean isAutoSoundQualityEnabled();
+
+    void setAmbientBacklightSettings(in AmbientBacklightSettings settings);
+    void setAmbientBacklightEnabled(in boolean enabled);
 }

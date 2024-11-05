@@ -31,7 +31,8 @@ import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.controls.settings.FakeControlsSettingsRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.dreams.homecontrols.shared.IOnControlsSettingsChangeListener
+import com.android.systemui.dreams.homecontrols.shared.controlsSettings
+import com.android.systemui.dreams.homecontrols.shared.model.HomeControlsComponentInfo
 import com.android.systemui.dreams.homecontrols.system.domain.interactor.controlsComponent
 import com.android.systemui.dreams.homecontrols.system.domain.interactor.controlsListingController
 import com.android.systemui.dreams.homecontrols.system.domain.interactor.homeControlsComponentInteractor
@@ -42,13 +43,10 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -56,6 +54,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -90,13 +89,13 @@ class HomeControlsRemoteServiceBinderTest : SysuiTestCase() {
     fun testRegisterSingleListener() =
         testScope.runTest {
             setup()
-            val controlsSettings by collectLastValue(addCallback())
+            val controlsSettings by collectLastValue(underTest.controlsSettings)
             runServicesUpdate()
 
             assertThat(controlsSettings)
                 .isEqualTo(
-                    CallbackArgs(
-                        panelComponent = TEST_COMPONENT,
+                    HomeControlsComponentInfo(
+                        componentName = TEST_COMPONENT,
                         allowTrivialControlsOnLockscreen = false,
                     )
                 )
@@ -106,21 +105,21 @@ class HomeControlsRemoteServiceBinderTest : SysuiTestCase() {
     fun testRegisterMultipleListeners() =
         testScope.runTest {
             setup()
-            val controlsSettings1 by collectLastValue(addCallback())
-            val controlsSettings2 by collectLastValue(addCallback())
+            val controlsSettings1 by collectLastValue(underTest.controlsSettings)
+            val controlsSettings2 by collectLastValue(underTest.controlsSettings)
             runServicesUpdate()
 
             assertThat(controlsSettings1)
                 .isEqualTo(
-                    CallbackArgs(
-                        panelComponent = TEST_COMPONENT,
+                    HomeControlsComponentInfo(
+                        componentName = TEST_COMPONENT,
                         allowTrivialControlsOnLockscreen = false,
                     )
                 )
             assertThat(controlsSettings2)
                 .isEqualTo(
-                    CallbackArgs(
-                        panelComponent = TEST_COMPONENT,
+                    HomeControlsComponentInfo(
+                        componentName = TEST_COMPONENT,
                         allowTrivialControlsOnLockscreen = false,
                     )
                 )
@@ -130,13 +129,13 @@ class HomeControlsRemoteServiceBinderTest : SysuiTestCase() {
     fun testListenerCalledWhenStateChanges() =
         testScope.runTest {
             setup()
-            val controlsSettings by collectLastValue(addCallback())
+            val controlsSettings by collectLastValue(underTest.controlsSettings)
             runServicesUpdate()
 
             assertThat(controlsSettings)
                 .isEqualTo(
-                    CallbackArgs(
-                        panelComponent = TEST_COMPONENT,
+                    HomeControlsComponentInfo(
+                        componentName = TEST_COMPONENT,
                         allowTrivialControlsOnLockscreen = false,
                     )
                 )
@@ -146,32 +145,52 @@ class HomeControlsRemoteServiceBinderTest : SysuiTestCase() {
             // Updated with null component now that we are no longer authorized.
             assertThat(controlsSettings)
                 .isEqualTo(
-                    CallbackArgs(panelComponent = null, allowTrivialControlsOnLockscreen = false)
+                    HomeControlsComponentInfo(
+                        componentName = null,
+                        allowTrivialControlsOnLockscreen = false,
+                    )
                 )
+        }
+
+    @Test
+    fun testDestroy() =
+        testScope.runTest {
+            setup()
+            val controlsSettings1 by collectLastValue(underTest.controlsSettings)
+
+            assertThat(controlsSettings1)
+                .isEqualTo(
+                    HomeControlsComponentInfo(
+                        componentName = null,
+                        allowTrivialControlsOnLockscreen = false,
+                    )
+                )
+
+            underTest.onDestroy()
+            runServicesUpdate()
+            fakeControlsSettingsRepository.setAllowActionOnTrivialControlsInLockscreen(true)
+
+            // Existing callback is not triggered if destroyed.
+            assertThat(controlsSettings1)
+                .isEqualTo(
+                    HomeControlsComponentInfo(
+                        componentName = null,
+                        allowTrivialControlsOnLockscreen = false,
+                    )
+                )
+            // New callbacks cannot be added.
+            val controlsSettings2 by collectLastValue(underTest.controlsSettings)
+            assertThat(controlsSettings2).isNull()
         }
 
     private fun TestScope.runServicesUpdate() {
         runCurrent()
-        val listings = listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = true))
+        val listings = listOf(buildControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = true))
         val callback = withArgCaptor {
             Mockito.verify(kosmos.controlsListingController).addCallback(capture())
         }
         callback.onServicesUpdated(listings)
         runCurrent()
-    }
-
-    private fun addCallback() = conflatedCallbackFlow {
-        val callback =
-            object : IOnControlsSettingsChangeListener.Stub() {
-                override fun onControlsSettingsChanged(
-                    panelComponent: ComponentName?,
-                    allowTrivialControlsOnLockscreen: Boolean,
-                ) {
-                    trySend(CallbackArgs(panelComponent, allowTrivialControlsOnLockscreen))
-                }
-            }
-        underTest.registerListenerForCurrentUser(callback)
-        awaitClose { underTest.unregisterListenerForCurrentUser(callback) }
     }
 
     private suspend fun TestScope.setup() {
@@ -182,12 +201,7 @@ class HomeControlsRemoteServiceBinderTest : SysuiTestCase() {
         runCurrent()
     }
 
-    private data class CallbackArgs(
-        val panelComponent: ComponentName?,
-        val allowTrivialControlsOnLockscreen: Boolean,
-    )
-
-    private fun ControlsServiceInfo(
+    private fun buildControlsServiceInfo(
         componentName: ComponentName,
         label: CharSequence,
         hasPanel: Boolean,
@@ -225,7 +239,7 @@ class HomeControlsRemoteServiceBinderTest : SysuiTestCase() {
             UserInfo(
                 /* id= */ PRIMARY_USER_ID,
                 /* name= */ "primary user",
-                /* flags= */ UserInfo.FLAG_PRIMARY,
+                /* flags= */ UserInfo.FLAG_MAIN,
             )
 
         private const val TEST_PACKAGE = "pkg"

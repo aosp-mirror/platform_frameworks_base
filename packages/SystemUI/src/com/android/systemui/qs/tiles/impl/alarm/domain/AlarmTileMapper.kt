@@ -45,6 +45,7 @@ constructor(
         val formatter24Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("E HH:mm")
         val formatterDateOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("E MMM d")
     }
+
     override fun map(config: QSTileConfig, data: AlarmTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             when (data) {
@@ -54,13 +55,13 @@ constructor(
                     val alarmDateTime =
                         LocalDateTime.ofInstant(
                             Instant.ofEpochMilli(data.alarmClockInfo.triggerTime),
-                            TimeZone.getDefault().toZoneId()
+                            TimeZone.getDefault().toZoneId(),
                         )
 
                     val nowDateTime =
                         LocalDateTime.ofInstant(
                             Instant.ofEpochMilli(clock.currentTimeMillis()),
-                            TimeZone.getDefault().toZoneId()
+                            TimeZone.getDefault().toZoneId(),
                         )
 
                     // Edge case: If it's 8:00:30 right now and alarm is requested for next week at
@@ -84,7 +85,7 @@ constructor(
                 }
             }
             iconRes = R.drawable.ic_alarm
-            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             contentDescription = label
             supportedActions = setOf(QSTileState.UserAction.CLICK)

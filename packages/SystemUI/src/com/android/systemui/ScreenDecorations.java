@@ -905,7 +905,18 @@ public class ScreenDecorations implements
         return lp;
     }
 
-    private WindowManager.LayoutParams getWindowLayoutBaseParams() {
+    public static WindowManager.LayoutParams getWindowLayoutBaseParams() {
+        return getWindowLayoutBaseParams(/* excludeFromScreenshots= */ true);
+    }
+
+    /**
+     * Creates the base {@link WindowManager.LayoutParams} that are used for all decoration windows.
+     *
+     * @param excludeFromScreenshots whether to set the {@link
+     *     WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY} flag.
+     */
+    public static WindowManager.LayoutParams getWindowLayoutBaseParams(
+            boolean excludeFromScreenshots) {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -921,7 +932,7 @@ public class ScreenDecorations implements
         // FLAG_SLIPPERY can only be set by trusted overlays
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
-        if (!DEBUG_SCREENSHOT_ROUNDED_CORNERS) {
+        if (!DEBUG_SCREENSHOT_ROUNDED_CORNERS && excludeFromScreenshots) {
             lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
         }
 

@@ -212,8 +212,7 @@ public class InsetsSourceControl implements Parcelable {
                 && mInitiallyVisible == that.mInitiallyVisible
                 && mSurfacePosition.equals(that.mSurfacePosition)
                 && mInsetsHint.equals(that.mInsetsHint)
-                && mSkipAnimationOnce == that.mSkipAnimationOnce
-                && Objects.equals(mImeStatsToken, that.mImeStatsToken);
+                && mSkipAnimationOnce == that.mSkipAnimationOnce;
     }
 
     @Override

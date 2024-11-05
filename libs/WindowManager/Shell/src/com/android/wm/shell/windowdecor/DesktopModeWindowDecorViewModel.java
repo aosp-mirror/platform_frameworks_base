@@ -41,7 +41,6 @@ import static com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -49,6 +48,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -103,6 +103,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
@@ -121,8 +122,6 @@ import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
-import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -445,17 +444,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     @Override
     public void setSplitScreenController(SplitScreenController splitScreenController) {
         mSplitScreenController = splitScreenController;
-        mSplitScreenController.registerSplitScreenListener(new SplitScreen.SplitScreenListener() {
-            @Override
-            public void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {
-                if (visible && stage != STAGE_TYPE_UNDEFINED) {
-                    DesktopModeWindowDecoration decor = mWindowDecorByTaskId.get(taskId);
-                    if (decor != null && DesktopModeStatus.canEnterDesktopMode(mContext)) {
-                        mDesktopTasksController.moveToSplit(decor.mTaskInfo);
-                    }
-                }
-            }
-        });
     }
 
     @Override
@@ -1289,6 +1277,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 }
                 break;
             }
+            case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
                 if (mTransitionDragActive) {
                     final DesktopModeVisualIndicator.DragStartState dragStartState =
@@ -1303,32 +1292,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         // Though this isn't a hover event, we need to update handle's hover state
                         // as it likely will change.
                         relevantDecor.updateHoverAndPressStatus(ev);
-                        DesktopModeVisualIndicator.IndicatorType resultType =
-                                mDesktopTasksController.onDragPositioningEndThroughStatusBar(
-                                        new PointF(ev.getRawX(), ev.getRawY()),
-                                        relevantDecor.mTaskInfo,
-                                        relevantDecor.mTaskSurface);
-                        // If we are entering split select, handle will no longer be visible and
-                        // should not be receiving any input.
-                        if (resultType == TO_SPLIT_LEFT_INDICATOR
-                                || resultType == TO_SPLIT_RIGHT_INDICATOR) {
-                            relevantDecor.disposeStatusBarInputLayer();
-                            // We should also dispose the other split task's input layer if
-                            // applicable.
-                            final int splitPosition = mSplitScreenController
-                                    .getSplitPosition(relevantDecor.mTaskInfo.taskId);
-                            if (splitPosition != SPLIT_POSITION_UNDEFINED) {
-                                final int oppositePosition =
-                                        splitPosition == SPLIT_POSITION_TOP_OR_LEFT
-                                                ? SPLIT_POSITION_BOTTOM_OR_RIGHT
-                                                : SPLIT_POSITION_TOP_OR_LEFT;
-                                final RunningTaskInfo oppositeTaskInfo =
-                                        mSplitScreenController.getTaskInfo(oppositePosition);
-                                if (oppositeTaskInfo != null) {
-                                    mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
-                                            .disposeStatusBarInputLayer();
-                                }
-                            }
+                        if (ev.getActionMasked() == ACTION_CANCEL) {
+                            mDesktopTasksController.onDragPositioningCancelThroughStatusBar(
+                                    relevantDecor.mTaskInfo);
+                        } else {
+                            endDragToDesktop(ev, relevantDecor);
                         }
                         mMoveToDesktopAnimator = null;
                         return;
@@ -1377,10 +1345,35 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 }
                 break;
             }
+        }
+    }
 
-            case MotionEvent.ACTION_CANCEL: {
-                mTransitionDragActive = false;
-                mMoveToDesktopAnimator = null;
+    private void endDragToDesktop(MotionEvent ev, DesktopModeWindowDecoration relevantDecor) {
+        DesktopModeVisualIndicator.IndicatorType resultType =
+                mDesktopTasksController.onDragPositioningEndThroughStatusBar(
+                        new PointF(ev.getRawX(), ev.getRawY()),
+                        relevantDecor.mTaskInfo,
+                        relevantDecor.mTaskSurface);
+        // If we are entering split select, handle will no longer be visible and
+        // should not be receiving any input.
+        if (resultType == TO_SPLIT_LEFT_INDICATOR
+                || resultType == TO_SPLIT_RIGHT_INDICATOR) {
+            relevantDecor.disposeStatusBarInputLayer();
+            // We should also dispose the other split task's input layer if
+            // applicable.
+            final int splitPosition = mSplitScreenController
+                    .getSplitPosition(relevantDecor.mTaskInfo.taskId);
+            if (splitPosition != SPLIT_POSITION_UNDEFINED) {
+                final int oppositePosition =
+                        splitPosition == SPLIT_POSITION_TOP_OR_LEFT
+                                ? SPLIT_POSITION_BOTTOM_OR_RIGHT
+                                : SPLIT_POSITION_TOP_OR_LEFT;
+                final RunningTaskInfo oppositeTaskInfo =
+                        mSplitScreenController.getTaskInfo(oppositePosition);
+                if (oppositeTaskInfo != null) {
+                    mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
+                            .disposeStatusBarInputLayer();
+                }
             }
         }
     }
@@ -1480,11 +1473,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 && isTopActivityExemptFromDesktopWindowing(mContext, taskInfo)) {
             return false;
         }
+        if (isPartOfDefaultHomePackage(taskInfo)) {
+            return false;
+        }
         return DesktopModeStatus.canEnterDesktopMode(mContext)
                 && !DesktopWallpaperActivity.isWallpaperTask(taskInfo)
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop();
+    }
+
+    private boolean isPartOfDefaultHomePackage(RunningTaskInfo taskInfo) {
+        final ComponentName currentDefaultHome =
+                mContext.getPackageManager().getHomeActivities(new ArrayList<>());
+        return currentDefaultHome != null && taskInfo.baseActivity != null
+                && currentDefaultHome.getPackageName()
+                .equals(taskInfo.baseActivity.getPackageName());
     }
 
     private void createWindowDecoration(
@@ -1570,6 +1574,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         });
         windowDecoration.setManageWindowsClickListener(() -> {
             onManageWindows(windowDecoration);
+            return Unit.INSTANCE;
+        });
+        windowDecoration.setOnChangeAspectRatioClickListener(() -> {
+            CompatUIController.launchUserAspectRatioSettings(mContext, taskInfo);
             return Unit.INSTANCE;
         });
         windowDecoration.setCaptionListeners(

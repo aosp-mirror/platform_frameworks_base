@@ -28,21 +28,26 @@ import javax.inject.Inject
 
 class IssueRecordingMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Theme,
-) : QSTileDataToStateMapper<IssueRecordingModel> {
+constructor(@Main private val resources: Resources, private val theme: Theme) :
+    QSTileDataToStateMapper<IssueRecordingModel> {
     override fun map(config: QSTileConfig, data: IssueRecordingModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            if (data.isRecording) {
-                activationState = QSTileState.ActivationState.ACTIVE
-                secondaryLabel = resources.getString(R.string.qs_record_issue_stop)
-                icon = { Icon.Resource(R.drawable.qs_record_issue_icon_on, null) }
-            } else {
-                icon = { Icon.Resource(R.drawable.qs_record_issue_icon_off, null) }
-                activationState = QSTileState.ActivationState.INACTIVE
-                secondaryLabel = resources.getString(R.string.qs_record_issue_start)
-            }
+            icon =
+                if (data.isRecording) {
+                    activationState = QSTileState.ActivationState.ACTIVE
+                    secondaryLabel = resources.getString(R.string.qs_record_issue_stop)
+                    Icon.Loaded(
+                        resources.getDrawable(R.drawable.qs_record_issue_icon_on, theme),
+                        null,
+                    )
+                } else {
+                    activationState = QSTileState.ActivationState.INACTIVE
+                    secondaryLabel = resources.getString(R.string.qs_record_issue_start)
+                    Icon.Loaded(
+                        resources.getDrawable(R.drawable.qs_record_issue_icon_off, theme),
+                        null,
+                    )
+                }
             supportedActions = setOf(QSTileState.UserAction.CLICK)
             contentDescription = "$label, $secondaryLabel"
         }
