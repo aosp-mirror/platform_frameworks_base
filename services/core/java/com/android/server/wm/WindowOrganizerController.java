@@ -813,6 +813,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             if (deferResume) {
                 mService.mTaskSupervisor.endDeferResume();
+                // Transient launching the Recents via HIERARCHY_OP_TYPE_PENDING_INTENT directly
+                // resume the Recents activity with no TRANSACT_EFFECTS_LIFECYCLE. Explicitly
+                // checks if the top resumed activity should be updated after defer-resume ended.
+                mService.mTaskSupervisor.updateTopResumedActivityIfNeeded("endWCT");
             }
             mService.continueWindowLayout();
         }

@@ -56,7 +56,6 @@ import java.util.Collections;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestCase {
-
     private static final String TAG = "AAA++VerifyTest";
 
     private static final Class[] BASE_CLS_TO_INCLUDE = {
@@ -149,6 +148,9 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
      */
     private boolean isTestClass(Class<?> loadedClass) {
         try {
+            if (loadedClass.getAnnotation(SkipSysuiVerification.class) != null) {
+                return false;
+            }
             if (Modifier.isAbstract(loadedClass.getModifiers())) {
                 logDebug(String.format("Skipping abstract class %s: not a test",
                         loadedClass.getName()));

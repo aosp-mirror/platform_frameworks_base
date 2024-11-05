@@ -352,17 +352,11 @@ public class PipTransition extends PipTransitionController implements
             handleBoundsTypeFixedRotation(pipChange, pipActivityChange, endRotation);
         }
 
-        Rect sourceRectHint = null;
-        if (pipChange.getTaskInfo() != null
-                && pipChange.getTaskInfo().pictureInPictureParams != null) {
-            sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
-        }
-
         prepareConfigAtEndActivity(startTransaction, finishTransaction, pipChange,
                 pipActivityChange);
         startTransaction.merge(finishTransaction);
         PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
-                startTransaction, finishTransaction, destinationBounds, sourceRectHint, delta);
+                startTransaction, finishTransaction, destinationBounds, delta);
         animator.setEnterStartState(pipChange);
         animator.onEnterAnimationUpdate(1.0f /* fraction */, startTransaction);
         startTransaction.apply();
@@ -433,7 +427,7 @@ public class PipTransition extends PipTransitionController implements
         }
 
         PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
-                startTransaction, finishTransaction, endBounds, adjustedSourceRectHint, delta);
+                startTransaction, finishTransaction, endBounds, delta);
         if (sourceRectHint == null) {
             // update the src-rect-hint in params in place, to set up initial animator transform.
             params.getSourceRectHint().set(adjustedSourceRectHint);

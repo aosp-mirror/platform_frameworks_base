@@ -20,16 +20,18 @@ import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FL
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
+import static com.android.hardware.input.Flags.enableCustomizableInputGestures;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
-import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
 import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
-import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
+import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.keyboardRepeatKeys;
 
 import android.Manifest;
@@ -379,6 +381,15 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if the feature flag for the touchpad three-finger tap shortcut is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadThreeFingerTapShortcutFeatureFlagEnabled() {
+        return enableCustomizableInputGestures() && touchpadThreeFingerTapShortcut();
+    }
+
+    /**
      * Returns true if the feature flag for mouse reverse vertical scrolling is enabled.
      * @hide
      */
@@ -495,6 +506,22 @@ public class InputSettings {
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Returns true if three-finger taps on the touchpad should trigger a customizable shortcut
+     * rather than a middle click.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether three-finger taps should trigger the shortcut.
+     *
+     * @hide
+     */
+    public static boolean useTouchpadThreeFingerTapShortcut(@NonNull Context context) {
+        // TODO(b/365063048): determine whether to enable the shortcut based on the settings.
+        return isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
     }
 
     /**

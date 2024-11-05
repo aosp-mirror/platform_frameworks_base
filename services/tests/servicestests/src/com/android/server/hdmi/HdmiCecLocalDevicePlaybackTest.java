@@ -2562,7 +2562,13 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
 
         // User interacted with the DUT, so the device will not go to standby.
-        skipActiveSourceLostUi(0, true, true);
+        mHdmiControlService.oneTouchPlay(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+            }
+        });
+        mTestLooper.dispatchAll();
+
         assertThat(mIsOnActiveSourceLostPopupActive).isFalse();
         assertThat(mPowerManager.isInteractive()).isTrue();
         assertThat(mNativeWrapper.getResultMessages().contains(activeSourceFromPlayback)).isTrue();

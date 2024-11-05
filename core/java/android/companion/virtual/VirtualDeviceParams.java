@@ -160,7 +160,7 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO,
             POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY, POLICY_TYPE_CLIPBOARD, POLICY_TYPE_CAMERA,
-            POLICY_TYPE_BLOCKED_ACTIVITY})
+            POLICY_TYPE_BLOCKED_ACTIVITY, POLICY_TYPE_DEFAULT_DEVICE_CAMERA_ACCESS})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface PolicyType {}
@@ -300,6 +300,21 @@ public final class VirtualDeviceParams implements Parcelable {
     // TODO(b/333443509): Link to POLICY_TYPE_ACTIVITY
     @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
     public static final int POLICY_TYPE_BLOCKED_ACTIVITY = 6;
+
+    /**
+     * Tells the virtual device framework how to handle camera access of the default device by apps
+     * running on the virtual device.
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Default device camera access will be allowed.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Default device camera access will be blocked.
+     * </ul>
+     *
+     * @see Context#DEVICE_ID_DEFAULT
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags
+            .FLAG_DEFAULT_DEVICE_CAMERA_ACCESS_POLICY)
+    public static final int POLICY_TYPE_DEFAULT_DEVICE_CAMERA_ACCESS = 7;
 
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
@@ -696,7 +711,7 @@ public final class VirtualDeviceParams implements Parcelable {
 
     @NonNull
     public static final Parcelable.Creator<VirtualDeviceParams> CREATOR =
-            new Parcelable.Creator<VirtualDeviceParams>() {
+            new Parcelable.Creator<>() {
                 public VirtualDeviceParams createFromParcel(Parcel in) {
                     return new VirtualDeviceParams(in);
                 }
@@ -1211,6 +1226,10 @@ public final class VirtualDeviceParams implements Parcelable {
 
             if (!Flags.virtualCamera()) {
                 mDevicePolicies.delete(POLICY_TYPE_CAMERA);
+            }
+
+            if (!android.companion.virtualdevice.flags.Flags.defaultDeviceCameraAccessPolicy()) {
+                mDevicePolicies.delete(POLICY_TYPE_DEFAULT_DEVICE_CAMERA_ACCESS);
             }
 
             if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {

@@ -28,7 +28,7 @@ namespace android {
 
 namespace battery {
 
-typedef battery::MultiStateCounter<int64_t> LongMultiStateCounter;
+typedef battery::MultiStateCounter<int64_t, int64_t> LongMultiStateCounter;
 
 template <>
 bool LongMultiStateCounter::delta(const int64_t &previousValue, const int64_t &newValue,
@@ -47,12 +47,6 @@ void LongMultiStateCounter::add(int64_t *value1, const int64_t &value2, const ui
         *value1 += value2;
     }
 }
-
-template <>
-std::string LongMultiStateCounter::valueToString(const int64_t &v) const {
-    return std::to_string(v);
-}
-
 } // namespace battery
 
 static inline battery::LongMultiStateCounter *asLongMultiStateCounter(const jlong nativePtr) {

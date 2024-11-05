@@ -141,6 +141,7 @@ private fun areActionsEqual(
     new: MediaData,
     old: MediaData,
 ): Boolean {
+    // TODO(b/360196209): account for actions generated from media3
     val oldState = MediaController(context, old.token!!).playbackState
     return if (
         new.semanticActions == null &&

@@ -26,6 +26,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
+import com.android.systemui.statusbar.data.repository.LightBarControllerStore
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl
@@ -55,30 +56,36 @@ import dagger.multibindings.IntoMap
  *   [com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule], etc.).
  */
 @Module(includes = [StatusBarDataLayerModule::class, SystemBarUtilsProxyImpl.Module::class])
-abstract class StatusBarModule {
+interface StatusBarModule {
 
     @Binds
     @IntoMap
     @ClassKey(OngoingCallController::class)
-    abstract fun bindOngoingCallController(impl: OngoingCallController): CoreStartable
+    fun bindOngoingCallController(impl: OngoingCallController): CoreStartable
 
     @Binds
     @IntoMap
     @ClassKey(LightBarController::class)
-    abstract fun bindLightBarController(impl: LightBarController): CoreStartable
+    fun lightBarControllerAsCoreStartable(controller: LightBarController): CoreStartable
 
     @Binds
     @IntoMap
     @ClassKey(StatusBarSignalPolicy::class)
-    abstract fun bindStatusBarSignalPolicy(impl: StatusBarSignalPolicy): CoreStartable
+    fun bindStatusBarSignalPolicy(impl: StatusBarSignalPolicy): CoreStartable
 
     @Binds
     @SysUISingleton
-    abstract fun statusBarWindowControllerFactory(
+    fun statusBarWindowControllerFactory(
         implFactory: StatusBarWindowControllerImpl.Factory
     ): StatusBarWindowController.Factory
 
     companion object {
+
+        @Provides
+        @SysUISingleton
+        fun lightBarController(store: LightBarControllerStore): LightBarController {
+            return store.defaultDisplay
+        }
 
         @Provides
         @SysUISingleton

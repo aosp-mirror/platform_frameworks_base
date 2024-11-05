@@ -898,18 +898,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             for (int j = 0; j < widgetCount; j++) {
                 Widget widget = provider.widgets.get(j);
                 if (targetWidget != null && targetWidget != widget) continue;
+                // Identify the user in the host process since the intent will be invoked by
+                // the host app.
+                final Host host = widget.host;
+                final UserHandle hostUser;
+                if (host != null && host.id != null) {
+                    hostUser = UserHandle.getUserHandleForUid(host.id.uid);
+                } else {
+                    // Fallback to the parent profile if the host is null.
+                    Slog.w(TAG, "Host is null when masking widget: " + widget.appWidgetId);
+                    hostUser = mUserManager.getProfileParent(appUserId).getUserHandle();
+                }
                 if (provider.maskedByStoppedPackage) {
                     Intent intent = createUpdateIntentLocked(provider,
                             new int[] { widget.appWidgetId });
                     views.setOnClickPendingIntent(android.R.id.background,
-                            PendingIntent.getBroadcast(mContext, widget.appWidgetId,
+                            PendingIntent.getBroadcastAsUser(mContext, widget.appWidgetId,
                                     intent, PendingIntent.FLAG_UPDATE_CURRENT
-                                            | PendingIntent.FLAG_IMMUTABLE));
+                                            | PendingIntent.FLAG_IMMUTABLE, hostUser));
                 } else if (onClickIntent != null) {
                     views.setOnClickPendingIntent(android.R.id.background,
-                            PendingIntent.getActivity(mContext, widget.appWidgetId, onClickIntent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT
-                                       | PendingIntent.FLAG_IMMUTABLE));
+                            PendingIntent.getActivityAsUser(mContext, widget.appWidgetId,
+                            onClickIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                                    | PendingIntent.FLAG_IMMUTABLE, null /* options */,
+                            hostUser));
                 }
                 if (widget.replaceWithMaskedViewsLocked(views)) {
                     scheduleNotifyUpdateAppWidgetLocked(widget, widget.getEffectiveViewsLocked());
