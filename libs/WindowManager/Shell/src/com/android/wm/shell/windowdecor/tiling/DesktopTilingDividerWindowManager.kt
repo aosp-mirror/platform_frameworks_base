@@ -23,6 +23,7 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.Binder
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.RoundedCorner
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
@@ -39,6 +40,7 @@ import android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER
 import android.view.WindowlessWindowManager
 import com.android.wm.shell.R
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger
 import java.util.function.Supplier
 
 /**
@@ -141,8 +143,9 @@ class DesktopTilingDividerWindowManager(
         t.setRelativeLayer(leash, relativeLeash, 1)
     }
 
-    override fun onDividerMoveStart(pos: Int) {
+    override fun onDividerMoveStart(pos: Int, motionEvent: MotionEvent) {
         setSlippery(false)
+        transitionHandler.onDividerHandleDragStart(motionEvent)
     }
 
     /**
@@ -161,13 +164,13 @@ class DesktopTilingDividerWindowManager(
      * Notifies the transition handler of tiling operations ending, which might result in resizing
      * WindowContainerTransactions if the sizes of the tiled tasks changed.
      */
-    override fun onDividerMovedEnd(pos: Int) {
+    override fun onDividerMovedEnd(pos: Int, motionEvent: MotionEvent) {
         setSlippery(true)
         val t = transactionSupplier.get()
         t.setPosition(leash, pos.toFloat() - maxRoundedCornerRadius, dividerBounds.top.toFloat())
         val dividerWidth = dividerBounds.width()
         dividerBounds.set(pos, dividerBounds.top, pos + dividerWidth, dividerBounds.bottom)
-        transitionHandler.onDividerHandleDragEnd(dividerBounds, t)
+        transitionHandler.onDividerHandleDragEnd(dividerBounds, t, motionEvent)
     }
 
     private fun getWindowManagerParams(): WindowManager.LayoutParams {

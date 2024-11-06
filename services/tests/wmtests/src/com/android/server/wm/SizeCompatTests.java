@@ -4812,6 +4812,23 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.isResizeable());
         assertEquals(maxAspect, aspectRatioPolicy.getMaxAspectRatio(), 0 /* delta */);
         assertNotEquals(SCREEN_ORIENTATION_UNSPECIFIED, mActivity.getOverrideOrientation());
+
+        // Activity can opt-out the resizability by component level property.
+        final ComponentName name = getUniqueComponentName(mContext.getPackageName());
+        final PackageManager pm = mContext.getPackageManager();
+        spyOn(pm);
+        final PackageManager.Property property = new PackageManager.Property("propertyName",
+                true /* value */, name.getPackageName(), name.getClassName());
+        try {
+            doReturn(property).when(pm).getPropertyAsUser(
+                    WindowManager.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
+                    name.getPackageName(), name.getClassName(), 0 /* userId */);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        final ActivityRecord optOutActivity = new ActivityBuilder(mAtm)
+                .setComponent(name).setTask(mTask).build();
+        assertFalse(optOutActivity.isUniversalResizeable());
     }
 
 

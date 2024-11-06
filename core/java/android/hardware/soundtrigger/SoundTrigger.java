@@ -1750,8 +1750,8 @@ public class SoundTrigger {
              *             internals, typically during enrollment.
              * @return the same Builder instance.
              */
-            public @NonNull Builder setData(@Nullable byte[] data) {
-                mData = data;
+            public @NonNull Builder setData(@NonNull byte[] data) {
+                mData = requireNonNull(data, "Data must not be null");
                 return this;
             }
 

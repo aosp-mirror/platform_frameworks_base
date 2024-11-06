@@ -2037,6 +2037,18 @@ class DesktopTasksController(
     }
 
     /**
+     * Cancel the drag-to-desktop transition.
+     *
+     * @param taskInfo the task being dragged.
+     */
+    fun onDragPositioningCancelThroughStatusBar(
+        taskInfo: RunningTaskInfo,
+    ) {
+        interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
+        cancelDragToDesktop(taskInfo)
+    }
+
+    /**
      * Perform checks required when drag ends under status bar area.
      *
      * @param taskInfo the task being dragged.

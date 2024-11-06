@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.shared;
+package android.telephony.satellite;
 
-parcelable GroupedRecentTaskInfo;
+/**
+ * Interface for satellite disallowed reason change callback.
+ *
+ * @hide
+ */
+oneway interface ISatelliteDisallowedReasonsCallback {
+    /**
+     * Indicates that disallowed reason of satellite has changed.
+     * @param disallowedReasons list of disallowed reasons.
+     */
+    void onSatelliteDisallowedReasonsChanged(in int[] disallowedReasons);
+}

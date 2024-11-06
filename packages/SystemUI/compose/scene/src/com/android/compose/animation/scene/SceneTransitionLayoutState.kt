@@ -764,7 +764,8 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     return@fastForEach
                 }
 
-                state.transformationSpec.transformations.fastForEach { transformation ->
+                state.transformationSpec.transformations.fastForEach { transformationWithRange ->
+                    val transformation = transformationWithRange.transformation
                     if (
                         transformation is SharedElementTransformation &&
                             transformation.elevateInContent != null

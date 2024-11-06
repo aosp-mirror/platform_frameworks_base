@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.settings
+package com.android.systemui.statusbar.notification.promoted
 
-import android.content.ContentResolver
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.shared.settings.data.repository.SystemSettingsRepository
-import com.android.systemui.shared.settings.data.repository.SystemSettingsRepositoryImpl
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import kotlinx.coroutines.CoroutineDispatcher
 
 @Module
-object SystemSettingsRepositoryModule {
-    @JvmStatic
-    @Provides
+abstract class PromotedNotificationsModule {
+    @Binds
     @SysUISingleton
-    fun provideSystemSettingsRepository(
-        contentResolver: ContentResolver,
-        @Background backgroundDispatcher: CoroutineDispatcher,
-    ): SystemSettingsRepository =
-        SystemSettingsRepositoryImpl(contentResolver, backgroundDispatcher)
+    abstract fun bindPromotedNotificationsProvider(
+        impl: PromotedNotificationsProviderImpl
+    ): PromotedNotificationsProvider
 }

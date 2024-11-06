@@ -1432,6 +1432,13 @@ public final class DisplayManagerGlobal {
                 mExecutor.execute(mCallback::onStopped);
             }
         }
+
+        @Override // Binder call
+        public void onRequestedBrightnessChanged(float brightness) {
+            if (mCallback != null) {
+                mExecutor.execute(() -> mCallback.onRequestedBrightnessChanged(brightness));
+            }
+        }
     }
 
     /**

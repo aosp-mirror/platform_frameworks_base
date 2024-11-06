@@ -15,14 +15,16 @@
  */
 package com.android.wm.shell.windowdecor.tiling
 
+import android.view.MotionEvent
+
 /** Divider move callback to whichever entity that handles the moving logic. */
 interface DividerMoveCallback {
     /** Called on the divider move start gesture. */
-    fun onDividerMoveStart(pos: Int)
+    fun onDividerMoveStart(pos: Int, motionEvent: MotionEvent)
 
     /** Called on the divider moved by dragging it. */
     fun onDividerMove(pos: Int): Boolean
 
     /** Called on divider move gesture end. */
-    fun onDividerMovedEnd(pos: Int)
+    fun onDividerMovedEnd(pos: Int, motionEvent: MotionEvent)
 }

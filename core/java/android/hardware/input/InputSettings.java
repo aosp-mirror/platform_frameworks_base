@@ -30,6 +30,7 @@ import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.keyboardRepeatKeys;
@@ -386,7 +387,7 @@ public class InputSettings {
      * @hide
      */
     public static boolean isTouchpadThreeFingerTapShortcutFeatureFlagEnabled() {
-        return enableCustomizableInputGestures() && touchpadThreeFingerTapShortcut();
+        return isCustomizableInputGesturesFeatureFlagEnabled() && touchpadThreeFingerTapShortcut();
     }
 
     /**
@@ -1131,5 +1132,19 @@ public class InputSettings {
         Settings.Secure.putIntForUser(context.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_DELAY_MS, delayTimeMillis,
                 UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether "Customizable key gestures" feature flag is enabled.
+     *
+     * <p>
+     * ‘Customizable key gestures’ is a feature which allows users to customize key based
+     * shortcuts on the physical keyboard.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isCustomizableInputGesturesFeatureFlagEnabled() {
+        return enableCustomizableInputGestures() && useKeyGestureEventHandler();
     }
 }

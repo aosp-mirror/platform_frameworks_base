@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util.settings
+package com.android.wm.shell.shared;
 
-import com.android.systemui.kosmos.Kosmos
-
-val Kosmos.userAwareSecureSettingsRepository by
-    Kosmos.Fixture { FakeUserAwareSecureSettingsRepository() }
+parcelable GroupedTaskInfo;
