@@ -1427,6 +1427,31 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    public void testUpdateOomAdj_DoOne_Service_NotPerceptible_AboveClient() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        ProcessRecord service = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        bindService(app, client, null, null, Context.BIND_NOT_PERCEPTIBLE, mock(IBinder.class));
+        bindService(service, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
+        mProcessStateController.setRunningRemoteAnimation(client, true);
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
+        setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(client, app, service);
+
+        final int expectedAdj;
+        if (Flags.addModifyRawOomAdjServiceLevel()) {
+            expectedAdj = SERVICE_ADJ;
+        } else {
+            expectedAdj = CACHED_APP_MIN_ADJ;
+        }
+        assertEquals(expectedAdj, app.mState.getSetAdj());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_DoOne_Service_NotVisible() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
@@ -2906,7 +2931,7 @@ public class MockingOomAdjusterTests {
         // Simulate binding to a service in the same process using BIND_ABOVE_CLIENT and
         // verify that its OOM adjustment level is unaffected.
         bindService(service, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         assertTrue(app.mServices.hasAboveClient());
 
         updateOomAdj(app);
@@ -2928,7 +2953,7 @@ public class MockingOomAdjusterTests {
         // Simulate binding to a service in the same process using BIND_ABOVE_CLIENT and
         // verify that its OOM adjustment level is unaffected.
         bindService(app, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         assertFalse(app.mServices.hasAboveClient());
 
         updateOomAdj(app);
@@ -2983,7 +3008,7 @@ public class MockingOomAdjusterTests {
 
         // Since sr.app is null, this service cannot be in the same process as the
         // client so we expect the BIND_ABOVE_CLIENT adjustment to take effect.
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         updateOomAdj(app);
         assertTrue(app.mServices.hasAboveClient());
         assertNotEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());

@@ -260,3 +260,13 @@ flag {
     description: "Use PROCESS_CAPABILITY_CPU_TIME to control unfreeze state."
     bug: "370817323"
 }
+
+flag {
+    name: "add_modify_raw_oom_adj_service_level"
+    namespace: "backstage_power"
+    description: "Add a SERVICE_ADJ level to the modifyRawOomAdj method"
+    bug: "374810368"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
