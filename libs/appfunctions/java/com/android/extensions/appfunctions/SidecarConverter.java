@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.appfunctions.sidecar;
+package com.android.extensions.appfunctions;
 
 import android.annotation.NonNull;
 
@@ -28,26 +28,24 @@ public final class SidecarConverter {
     private SidecarConverter() {}
 
     /**
-     * Converts sidecar's {@link com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest}
-     * into platform's {@link android.app.appfunctions.ExecuteAppFunctionRequest}
+     * Converts sidecar's {@link ExecuteAppFunctionRequest} into platform's {@link
+     * android.app.appfunctions.ExecuteAppFunctionRequest}
      *
      * @hide
      */
     @NonNull
     public static android.app.appfunctions.ExecuteAppFunctionRequest
             getPlatformExecuteAppFunctionRequest(@NonNull ExecuteAppFunctionRequest request) {
-        return new
-                android.app.appfunctions.ExecuteAppFunctionRequest.Builder(
-                request.getTargetPackageName(),
-                request.getFunctionIdentifier())
+        return new android.app.appfunctions.ExecuteAppFunctionRequest.Builder(
+                        request.getTargetPackageName(), request.getFunctionIdentifier())
                 .setExtras(request.getExtras())
                 .setParameters(request.getParameters())
                 .build();
     }
 
     /**
-     * Converts sidecar's {@link com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse}
-     * into platform's {@link android.app.appfunctions.ExecuteAppFunctionResponse}
+     * Converts sidecar's {@link ExecuteAppFunctionResponse} into platform's {@link
+     * android.app.appfunctions.ExecuteAppFunctionResponse}
      *
      * @hide
      */
@@ -59,15 +57,13 @@ public final class SidecarConverter {
                     response.getResultDocument(), response.getExtras());
         } else {
             return android.app.appfunctions.ExecuteAppFunctionResponse.newFailure(
-                    response.getResultCode(),
-                    response.getErrorMessage(),
-                    response.getExtras());
+                    response.getResultCode(), response.getErrorMessage(), response.getExtras());
         }
     }
 
     /**
-     * Converts platform's {@link android.app.appfunctions.ExecuteAppFunctionRequest}
-     * into sidecar's {@link com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest}
+     * Converts platform's {@link android.app.appfunctions.ExecuteAppFunctionRequest} into sidecar's
+     * {@link ExecuteAppFunctionRequest}
      *
      * @hide
      */
@@ -75,16 +71,15 @@ public final class SidecarConverter {
     public static ExecuteAppFunctionRequest getSidecarExecuteAppFunctionRequest(
             @NonNull android.app.appfunctions.ExecuteAppFunctionRequest request) {
         return new ExecuteAppFunctionRequest.Builder(
-                request.getTargetPackageName(),
-                request.getFunctionIdentifier())
+                        request.getTargetPackageName(), request.getFunctionIdentifier())
                 .setExtras(request.getExtras())
                 .setParameters(request.getParameters())
                 .build();
     }
 
     /**
-     * Converts platform's {@link android.app.appfunctions.ExecuteAppFunctionResponse}
-     * into sidecar's {@link com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse}
+     * Converts platform's {@link android.app.appfunctions.ExecuteAppFunctionResponse} into
+     * sidecar's {@link ExecuteAppFunctionResponse}
      *
      * @hide
      */
@@ -96,9 +91,7 @@ public final class SidecarConverter {
                     response.getResultDocument(), response.getExtras());
         } else {
             return ExecuteAppFunctionResponse.newFailure(
-                    response.getResultCode(),
-                    response.getErrorMessage(),
-                    response.getExtras());
+                    response.getResultCode(), response.getErrorMessage(), response.getExtras());
         }
     }
 }

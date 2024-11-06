@@ -16,6 +16,6 @@
   -->
 <permissions>
     <library
-        name="com.google.android.appfunctions.sidecar"
-        file="/system_ext/framework/com.google.android.appfunctions.sidecar.jar"/>
+        name="com.android.extensions.appfunctions"
+        file="/system_ext/framework/com.android.extensions.appfunctions.jar"/>
 </permissions>

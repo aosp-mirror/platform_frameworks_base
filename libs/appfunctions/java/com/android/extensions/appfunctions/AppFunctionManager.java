@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.appfunctions.sidecar;
+package com.android.extensions.appfunctions;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;

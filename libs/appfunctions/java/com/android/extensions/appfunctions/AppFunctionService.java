@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.appfunctions.sidecar;
+package com.android.extensions.appfunctions;
 
 import static android.Manifest.permission.BIND_APP_FUNCTION_SERVICE;
 
@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.util.function.Consumer;
 
