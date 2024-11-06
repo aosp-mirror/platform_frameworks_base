@@ -2997,35 +2997,35 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     @PermissionManuallyEnforced
-    public int addCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+    public int addCustomInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData inputGestureData) {
         enforceManageKeyGesturePermission();
 
         Objects.requireNonNull(inputGestureData);
-        return mKeyGestureController.addCustomInputGesture(UserHandle.getCallingUserId(),
-                inputGestureData);
+        return mKeyGestureController.addCustomInputGesture(userId, inputGestureData);
     }
 
     @Override
     @PermissionManuallyEnforced
-    public int removeCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+    public int removeCustomInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData inputGestureData) {
         enforceManageKeyGesturePermission();
 
         Objects.requireNonNull(inputGestureData);
-        return mKeyGestureController.removeCustomInputGesture(UserHandle.getCallingUserId(),
-                inputGestureData);
+        return mKeyGestureController.removeCustomInputGesture(userId, inputGestureData);
     }
 
     @Override
     @PermissionManuallyEnforced
-    public void removeAllCustomInputGestures() {
+    public void removeAllCustomInputGestures(@UserIdInt int userId) {
         enforceManageKeyGesturePermission();
 
-        mKeyGestureController.removeAllCustomInputGestures(UserHandle.getCallingUserId());
+        mKeyGestureController.removeAllCustomInputGestures(userId);
     }
 
     @Override
-    public AidlInputGestureData[] getCustomInputGestures() {
-        return mKeyGestureController.getCustomInputGestures(UserHandle.getCallingUserId());
+    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId) {
+        return mKeyGestureController.getCustomInputGestures(userId);
     }
 
     @Override
