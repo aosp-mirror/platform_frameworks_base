@@ -38,7 +38,6 @@ import android.view.IWindowManager;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
@@ -138,10 +137,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
                     mWindowMagnifierCallback,
                     mSysUiState,
                     mSecureSettings,
-                    scvhSupplier,
-                    new SfVsyncFrameCallbackProvider(),
-                    WindowManagerGlobal::getWindowSession,
-                    mViewCaptureAwareWindowManager);
+                    scvhSupplier);
         }
     }
 
