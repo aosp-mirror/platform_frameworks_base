@@ -220,10 +220,6 @@ object Flags {
     // TODO(b/293380347): Tracking Bug
     @JvmField val COLOR_FIDELITY = unreleasedFlag("color_fidelity")
 
-    // 900 - media
-    // TODO(b/254512697): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER = releasedFlag("media_tap_to_transfer")
-
     // TODO(b/254512654): Tracking Bug
     @JvmField val DREAM_MEDIA_COMPLICATION = unreleasedFlag("dream_media_complication")
 
