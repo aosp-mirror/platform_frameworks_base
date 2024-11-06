@@ -5224,6 +5224,7 @@ package android.hardware.contexthub {
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpoint {
     method @Nullable public android.hardware.contexthub.IHubEndpointLifecycleCallback getLifecycleCallback();
+    method @Nullable public android.hardware.contexthub.IHubEndpointMessageCallback getMessageCallback();
     method @Nullable public String getTag();
   }
 
@@ -5232,6 +5233,8 @@ package android.hardware.contexthub {
     method @NonNull public android.hardware.contexthub.HubEndpoint build();
     method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setLifecycleCallback(@NonNull android.hardware.contexthub.IHubEndpointLifecycleCallback);
     method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setLifecycleCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.IHubEndpointLifecycleCallback);
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setMessageCallback(@NonNull android.hardware.contexthub.IHubEndpointMessageCallback);
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setMessageCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.IHubEndpointMessageCallback);
     method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setTag(@NonNull String);
   }
 
@@ -5251,6 +5254,7 @@ package android.hardware.contexthub {
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSession implements java.lang.AutoCloseable {
     method public void close();
+    method @NonNull public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSessionResult {
@@ -5260,6 +5264,22 @@ package android.hardware.contexthub {
     method @NonNull public static android.hardware.contexthub.HubEndpointSessionResult reject(@NonNull String);
   }
 
+  @FlaggedApi("android.chre.flags.offload_api") public final class HubMessage implements android.os.Parcelable {
+    method @NonNull public static android.hardware.contexthub.HubMessage createMessage(int, @NonNull byte[]);
+    method @NonNull public static android.hardware.contexthub.HubMessage createMessage(int, @NonNull byte[], @NonNull android.hardware.contexthub.HubMessage.DeliveryParams);
+    method public int describeContents();
+    method @NonNull public byte[] getMessageBody();
+    method public int getMessageType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.contexthub.HubMessage> CREATOR;
+  }
+
+  public static class HubMessage.DeliveryParams {
+    method public boolean isResponseRequired();
+    method @NonNull public static android.hardware.contexthub.HubMessage.DeliveryParams makeBasic();
+    method @NonNull public android.hardware.contexthub.HubMessage.DeliveryParams setResponseRequired(boolean);
+  }
+
   @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointLifecycleCallback {
     method public void onSessionClosed(@NonNull android.hardware.contexthub.HubEndpointSession, int);
     method @NonNull public android.hardware.contexthub.HubEndpointSessionResult onSessionOpenRequest(@NonNull android.hardware.contexthub.HubEndpointInfo);
@@ -5267,6 +5287,10 @@ package android.hardware.contexthub {
     field public static final int REASON_CLOSE_ENDPOINT_SESSION_REQUESTED = 4; // 0x4
     field public static final int REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED = 3; // 0x3
     field public static final int REASON_UNSPECIFIED = 0; // 0x0
+  }
+
+  @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointMessageCallback {
+    method public void onMessageReceived(@NonNull android.hardware.contexthub.HubEndpointSession, @NonNull android.hardware.contexthub.HubMessage);
   }
 
 }
@@ -6335,6 +6359,8 @@ package android.hardware.location {
     field public static final int RESULT_SUCCESS = 0; // 0x0
     field public static final int TYPE_DISABLE_NANOAPP = 3; // 0x3
     field public static final int TYPE_ENABLE_NANOAPP = 2; // 0x2
+    field @FlaggedApi("android.chre.flags.offload_api") public static final int TYPE_HUB_MESSAGE_DEFAULT = 6; // 0x6
+    field @FlaggedApi("android.chre.flags.offload_api") public static final int TYPE_HUB_MESSAGE_REQUIRES_RESPONSE = 7; // 0x7
     field public static final int TYPE_LOAD_NANOAPP = 0; // 0x0
     field public static final int TYPE_QUERY_NANOAPPS = 4; // 0x4
     field public static final int TYPE_RELIABLE_MESSAGE = 5; // 0x5

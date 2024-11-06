@@ -20,14 +20,15 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.chre.flags.Flags;
+import android.hardware.location.ContextHubTransaction;
+import android.hardware.location.ContextHubTransactionHelper;
+import android.hardware.location.IContextHubTransactionCallback;
 import android.util.CloseGuard;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An object representing a communication session between two different hub endpoints.
- *
- * <p>A published enpoint can receive
  *
  * @hide
  */
@@ -38,7 +39,6 @@ public class HubEndpointSession implements AutoCloseable {
 
     private final int mId;
 
-    // TODO(b/377717509): Implement Message sending API & interface
     @NonNull private final HubEndpoint mHubEndpoint;
     @NonNull private final HubEndpointInfo mInitiator;
     @NonNull private final HubEndpointInfo mDestination;
@@ -55,6 +55,42 @@ public class HubEndpointSession implements AutoCloseable {
         mHubEndpoint = hubEndpoint;
         mDestination = destination;
         mInitiator = initiator;
+    }
+
+    /**
+     * Send a message to the peer endpoint in this session.
+     *
+     * @param message The message object constructed with {@link HubMessage#createMessage}.
+     * @return For messages that does not require a response, the transaction will immediately
+     *     complete. For messages that requires a response, the transaction will complete after
+     *     receiving the response for the message.
+     */
+    @NonNull
+    public ContextHubTransaction<Void> sendMessage(@NonNull HubMessage message) {
+        if (mIsClosed.get()) {
+            throw new IllegalStateException("Session is already closed.");
+        }
+
+        boolean isResponseRequired = message.getDeliveryParams().isResponseRequired();
+        ContextHubTransaction<Void> ret =
+                new ContextHubTransaction<>(
+                        isResponseRequired
+                                ? ContextHubTransaction.TYPE_HUB_MESSAGE_REQUIRES_RESPONSE
+                                : ContextHubTransaction.TYPE_HUB_MESSAGE_DEFAULT);
+        if (!isResponseRequired) {
+            // If the message doesn't require acknowledgement, respond with success immediately
+            // TODO(b/379162322): Improve handling of synchronous failures.
+            mHubEndpoint.sendMessage(this, message, null);
+            ret.setResponse(
+                    new ContextHubTransaction.Response<>(
+                            ContextHubTransaction.RESULT_SUCCESS, null));
+        } else {
+            IContextHubTransactionCallback callback =
+                    ContextHubTransactionHelper.createTransactionCallback(ret);
+            // Sequence number will be assigned at the service
+            mHubEndpoint.sendMessage(this, message, callback);
+        }
+        return ret;
     }
 
     /** @hide */
