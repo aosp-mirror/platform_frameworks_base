@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 final class PolicyDefinition<V> {
 
@@ -336,6 +337,13 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::noOp,
                     new PackageSetPolicySerializer());
 
+    static PolicyDefinition<Integer> MEMORY_TAGGING = new PolicyDefinition<>(
+                    new NoArgsPolicyKey(
+                            DevicePolicyIdentifiers.MEMORY_TAGGING_POLICY),
+                    new TopPriority<>(List.of(EnforcingAdmin.DPC_AUTHORITY)),
+                    PolicyEnforcerCallbacks::setMtePolicy,
+                    new IntegerPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -382,6 +390,8 @@ final class PolicyDefinition<V> {
                 PASSWORD_COMPLEXITY);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PACKAGES_SUSPENDED_POLICY,
                 PACKAGES_SUSPENDED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.MEMORY_TAGGING_POLICY,
+                MEMORY_TAGGING);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
@@ -504,7 +514,8 @@ final class PolicyDefinition<V> {
     private final int mPolicyFlags;
     // A function that accepts  policy to apply, context, userId, callback arguments, and returns
     // true if the policy has been enforced successfully.
-    private final QuadFunction<V, Context, Integer, PolicyKey, Boolean> mPolicyEnforcerCallback;
+    private final QuadFunction<V, Context, Integer, PolicyKey, CompletableFuture<Boolean>>
+            mPolicyEnforcerCallback;
     private final PolicySerializer<V> mPolicySerializer;
 
     private PolicyDefinition<V> createPolicyDefinition(PolicyKey key) {
@@ -574,7 +585,7 @@ final class PolicyDefinition<V> {
         return mResolutionMechanism.resolve(adminsPolicy);
     }
 
-    boolean enforcePolicy(@Nullable V value, Context context, int userId) {
+    CompletableFuture<Boolean> enforcePolicy(@Nullable V value, Context context, int userId) {
         return mPolicyEnforcerCallback.apply(value, context, userId, mPolicyKey);
     }
 
@@ -592,7 +603,6 @@ final class PolicyDefinition<V> {
         POLICY_DEFINITIONS.put(key.getIdentifier(), definition);
     }
 
-
     /**
      * Callers must ensure that {@code policyType} have implemented an appropriate
      * {@link Object#equals} implementation.
@@ -600,7 +610,8 @@ final class PolicyDefinition<V> {
     private PolicyDefinition(
             @NonNull  PolicyKey key,
             ResolutionMechanism<V> resolutionMechanism,
-            QuadFunction<V, Context, Integer, PolicyKey, Boolean> policyEnforcerCallback,
+            QuadFunction<V, Context, Integer, PolicyKey, CompletableFuture<Boolean>>
+                    policyEnforcerCallback,
             PolicySerializer<V> policySerializer) {
         this(key, resolutionMechanism, POLICY_FLAG_NONE, policyEnforcerCallback, policySerializer);
     }
@@ -610,10 +621,11 @@ final class PolicyDefinition<V> {
      * {@link Object#equals} and {@link Object#hashCode()} implementation.
      */
     private PolicyDefinition(
-            @NonNull  PolicyKey policyKey,
+            @NonNull PolicyKey policyKey,
             ResolutionMechanism<V> resolutionMechanism,
             int policyFlags,
-            QuadFunction<V, Context, Integer, PolicyKey, Boolean> policyEnforcerCallback,
+            QuadFunction<V, Context, Integer, PolicyKey, CompletableFuture<Boolean>>
+                    policyEnforcerCallback,
             PolicySerializer<V> policySerializer) {
         Objects.requireNonNull(policyKey);
         mPolicyKey = policyKey;

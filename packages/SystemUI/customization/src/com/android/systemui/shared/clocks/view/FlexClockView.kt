@@ -39,7 +39,7 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
     val digitLeftTopMap = mutableMapOf<Int, Point>()
     var maxSingleDigitSize = Point(-1, -1)
     val lockscreenTranslate = Point(0, 0)
-    val aodTranslate = Point(0, 0)
+    var aodTranslate = Point(0, 0)
 
     init {
         setWillNotDraw(false)
@@ -64,8 +64,7 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
             maxSingleDigitSize.y = max(maxSingleDigitSize.y, textView.measuredHeight)
         }
         val textView = digitalClockTextViewMap[R.id.HOUR_FIRST_DIGIT]!!
-        aodTranslate.x = -(maxSingleDigitSize.x * AOD_HORIZONTAL_TRANSLATE_RATIO).toInt()
-        aodTranslate.y = (maxSingleDigitSize.y * AOD_VERTICAL_TRANSLATE_RATIO).toInt()
+        aodTranslate = Point(0, 0)
         return Point(
             ((maxSingleDigitSize.x + abs(aodTranslate.x)) * 2),
             ((maxSingleDigitSize.y + abs(aodTranslate.y)) * 2),
@@ -161,9 +160,6 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
     companion object {
         val AOD_TRANSITION_DURATION = 750L
         val CHARGING_TRANSITION_DURATION = 300L
-
-        val AOD_HORIZONTAL_TRANSLATE_RATIO = 0.15F
-        val AOD_VERTICAL_TRANSLATE_RATIO = 0.075F
 
         // Use the sign of targetTranslation to control the direction of digit translation
         fun updateDirectionalTargetTranslate(id: Int, targetTranslation: Point): Point {

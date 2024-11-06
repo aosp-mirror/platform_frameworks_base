@@ -1090,8 +1090,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return true;
         }
         // Including finishing Activity if the TaskFragment is becoming invisible in the transition.
-        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this,
-                true /* ignoringKeyguard */) == null;
+        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this) == null;
     }
 
     /**
@@ -1732,6 +1731,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean startPausing(boolean userLeaving, boolean uiSleeping, ActivityRecord resuming,
             String reason) {
         if (!hasDirectChildActivities()) {
+            return false;
+        }
+        if (mResumedActivity != null && mTransitionController.isTransientLaunch(mResumedActivity)) {
+            // Even if the transient activity is occluded, defer pausing (addToStopping will still
+            // be called) it until the transient transition is done. So the current resuming
+            // activity won't need to wait for additional pause complete.
             return false;
         }
 

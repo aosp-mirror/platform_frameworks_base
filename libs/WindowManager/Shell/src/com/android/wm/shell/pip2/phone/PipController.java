@@ -376,18 +376,20 @@ public class PipController implements ConfigurationChangeListener,
     private void setLauncherKeepClearAreaHeight(boolean visible, int height) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "setLauncherKeepClearAreaHeight: visible=%b, height=%d", visible, height);
-        if (visible) {
-            Rect rect = new Rect(
-                    0, mPipDisplayLayoutState.getDisplayBounds().bottom - height,
-                    mPipDisplayLayoutState.getDisplayBounds().right,
-                    mPipDisplayLayoutState.getDisplayBounds().bottom);
-            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
-                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
-        } else {
-            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
-                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
-        }
-        mPipTouchHandler.onShelfVisibilityChanged(visible, height);
+        mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
+            if (visible) {
+                Rect rect = new Rect(
+                        0, mPipDisplayLayoutState.getDisplayBounds().bottom - height,
+                        mPipDisplayLayoutState.getDisplayBounds().right,
+                        mPipDisplayLayoutState.getDisplayBounds().bottom);
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
+            } else {
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
+            }
+            mPipTouchHandler.onShelfVisibilityChanged(visible, height);
+        });
     }
 
     @Override

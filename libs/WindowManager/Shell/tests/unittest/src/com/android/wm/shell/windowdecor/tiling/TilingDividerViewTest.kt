@@ -68,7 +68,7 @@ class TilingDividerViewTest : ShellTestCase() {
         val downMotionEvent =
             getMotionEvent(downTime, MotionEvent.ACTION_DOWN, x.toFloat(), y.toFloat())
         tilingDividerView.handleMotionEvent(viewMock, downMotionEvent)
-        verify(dividerMoveCallbackMock, times(1)).onDividerMoveStart(any())
+        verify(dividerMoveCallbackMock, times(1)).onDividerMoveStart(any(), any())
 
         whenever(dividerMoveCallbackMock.onDividerMove(any())).thenReturn(true)
         val motionEvent =
@@ -79,7 +79,7 @@ class TilingDividerViewTest : ShellTestCase() {
         val upMotionEvent =
             getMotionEvent(downTime, MotionEvent.ACTION_UP, x.toFloat(), y.toFloat())
         tilingDividerView.handleMotionEvent(viewMock, upMotionEvent)
-        verify(dividerMoveCallbackMock, times(1)).onDividerMovedEnd(any())
+        verify(dividerMoveCallbackMock, times(1)).onDividerMovedEnd(any(), any())
     }
 
     @Test
@@ -92,12 +92,12 @@ class TilingDividerViewTest : ShellTestCase() {
         val downMotionEvent =
             getMotionEvent(downTime, MotionEvent.ACTION_DOWN, x.toFloat(), y.toFloat())
         tilingDividerView.handleMotionEvent(viewMock, downMotionEvent)
-        verify(dividerMoveCallbackMock, times(1)).onDividerMoveStart(any())
+        verify(dividerMoveCallbackMock, times(1)).onDividerMoveStart(any(), any())
 
         val upMotionEvent =
             getMotionEvent(downTime, MotionEvent.ACTION_UP, x.toFloat(), y.toFloat())
         tilingDividerView.handleMotionEvent(viewMock, upMotionEvent)
-        verify(dividerMoveCallbackMock, never()).onDividerMovedEnd(any())
+        verify(dividerMoveCallbackMock, never()).onDividerMovedEnd(any(), any())
     }
 
     private fun getMotionEvent(eventTime: Long, action: Int, x: Float, y: Float): MotionEvent {

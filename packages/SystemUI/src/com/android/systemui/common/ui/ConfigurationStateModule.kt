@@ -17,9 +17,6 @@
 package com.android.systemui.common.ui
 
 import android.content.Context
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -38,23 +35,16 @@ import javax.inject.Qualifier
 @Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class GlobalConfig
 
 @Module
-interface ConfigurationModule {
+interface ConfigurationStateModule {
 
     /**
      * Deprecated: [ConfigurationState] should be injected only with the correct annotation. For
      * now, without annotation the global config associated state is provided.
      */
     @Binds
-    @Deprecated("Use the @GlobalConfig annotated one instead of this.")
     fun provideGlobalConfigurationState(
         @GlobalConfig configurationState: ConfigurationState
     ): ConfigurationState
-
-    @Binds
-    @Deprecated("Use the @GlobalConfig annotated one instead of this.")
-    fun provideDefaultConfigurationState(
-        @GlobalConfig configurationState: ConfigurationInteractor
-    ): ConfigurationInteractor
 
     companion object {
         @SysUISingleton
@@ -66,15 +56,6 @@ interface ConfigurationModule {
             @Application context: Context,
         ): ConfigurationState {
             return configStateFactory.create(context, configurationController)
-        }
-
-        @SysUISingleton
-        @Provides
-        @GlobalConfig
-        fun provideGlobalConfigurationInteractor(
-            configurationRepository: ConfigurationRepository
-        ): ConfigurationInteractor {
-            return ConfigurationInteractorImpl(configurationRepository)
         }
     }
 }

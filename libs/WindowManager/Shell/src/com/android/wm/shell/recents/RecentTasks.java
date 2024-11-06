@@ -19,7 +19,7 @@ package com.android.wm.shell.recents;
 import android.annotation.Nullable;
 import android.graphics.Color;
 
-import com.android.wm.shell.shared.GroupedRecentTaskInfo;
+import com.android.wm.shell.shared.GroupedTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public interface RecentTasks {
      * Gets the set of recent tasks.
      */
     default void getRecentTasks(int maxNum, int flags, int userId, Executor callbackExecutor,
-            Consumer<List<GroupedRecentTaskInfo>> callback) {
+            Consumer<List<GroupedTaskInfo>> callback) {
     }
 
     /**

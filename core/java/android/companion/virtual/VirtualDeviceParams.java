@@ -333,6 +333,8 @@ public final class VirtualDeviceParams implements Parcelable {
     @Nullable private final IVirtualSensorCallback mVirtualSensorCallback;
     private final int mAudioPlaybackSessionId;
     private final int mAudioRecordingSessionId;
+    private final long mDimDuration;
+    private final long mScreenOffTimeout;
 
     private VirtualDeviceParams(
             @LockState int lockState,
@@ -348,7 +350,9 @@ public final class VirtualDeviceParams implements Parcelable {
             @NonNull List<VirtualSensorConfig> virtualSensorConfigs,
             @Nullable IVirtualSensorCallback virtualSensorCallback,
             int audioPlaybackSessionId,
-            int audioRecordingSessionId) {
+            int audioRecordingSessionId,
+            long dimDuration,
+            long screenOffTimeout) {
         mLockState = lockState;
         mUsersWithMatchingAccounts =
                 new ArraySet<>(Objects.requireNonNull(usersWithMatchingAccounts));
@@ -366,6 +370,8 @@ public final class VirtualDeviceParams implements Parcelable {
         mVirtualSensorCallback = virtualSensorCallback;
         mAudioPlaybackSessionId = audioPlaybackSessionId;
         mAudioRecordingSessionId = audioRecordingSessionId;
+        mDimDuration = dimDuration;
+        mScreenOffTimeout = screenOffTimeout;
     }
 
     @SuppressWarnings("unchecked")
@@ -386,6 +392,8 @@ public final class VirtualDeviceParams implements Parcelable {
         mAudioRecordingSessionId = parcel.readInt();
         mHomeComponent = parcel.readTypedObject(ComponentName.CREATOR);
         mInputMethodComponent = parcel.readTypedObject(ComponentName.CREATOR);
+        mDimDuration = parcel.readLong();
+        mScreenOffTimeout = parcel.readLong();
     }
 
     /**
@@ -394,6 +402,26 @@ public final class VirtualDeviceParams implements Parcelable {
     @LockState
     public int getLockState() {
         return mLockState;
+    }
+
+    /**
+     * Returns the dim duration for the displays of this device.
+     *
+     * @see Builder#setDimDuration(Duration)
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+    public @NonNull Duration getDimDuration() {
+        return Duration.ofMillis(mDimDuration);
+    }
+
+    /**
+     * Returns the screen off timeout of the displays of this device.
+     *
+     * @see Builder#setDimDuration(Duration)
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+    public @NonNull Duration getScreenOffTimeout() {
+        return Duration.ofMillis(mScreenOffTimeout);
     }
 
     /**
@@ -619,6 +647,8 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeInt(mAudioRecordingSessionId);
         dest.writeTypedObject(mHomeComponent, flags);
         dest.writeTypedObject(mInputMethodComponent, flags);
+        dest.writeLong(mDimDuration);
+        dest.writeLong(mScreenOffTimeout);
     }
 
     @Override
@@ -653,7 +683,9 @@ public final class VirtualDeviceParams implements Parcelable {
                 && Objects.equals(mHomeComponent, that.mHomeComponent)
                 && Objects.equals(mInputMethodComponent, that.mInputMethodComponent)
                 && mAudioPlaybackSessionId == that.mAudioPlaybackSessionId
-                && mAudioRecordingSessionId == that.mAudioRecordingSessionId;
+                && mAudioRecordingSessionId == that.mAudioRecordingSessionId
+                && mDimDuration == that.mDimDuration
+                && mScreenOffTimeout == that.mScreenOffTimeout;
     }
 
     @Override
@@ -662,7 +694,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 mLockState, mUsersWithMatchingAccounts, mCrossTaskNavigationExemptions,
                 mDefaultNavigationPolicy, mActivityPolicyExemptions, mDefaultActivityPolicy, mName,
                 mDevicePolicies, mHomeComponent, mInputMethodComponent, mAudioPlaybackSessionId,
-                mAudioRecordingSessionId);
+                mAudioRecordingSessionId, mDimDuration, mScreenOffTimeout);
         for (int i = 0; i < mDevicePolicies.size(); i++) {
             hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
             hashCode = 31 * hashCode + mDevicePolicies.valueAt(i);
@@ -686,6 +718,8 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mInputMethodComponent=" + mInputMethodComponent
                 + " mAudioPlaybackSessionId=" + mAudioPlaybackSessionId
                 + " mAudioRecordingSessionId=" + mAudioRecordingSessionId
+                + " mDimDuration=" + mDimDuration
+                + " mScreenOffTimeout=" + mScreenOffTimeout
                 + ")";
     }
 
@@ -707,6 +741,8 @@ public final class VirtualDeviceParams implements Parcelable {
         pw.println(prefix + "mInputMethodComponent=" + mInputMethodComponent);
         pw.println(prefix + "mAudioPlaybackSessionId=" + mAudioPlaybackSessionId);
         pw.println(prefix + "mAudioRecordingSessionId=" + mAudioRecordingSessionId);
+        pw.println(prefix + "mDimDuration=" + mDimDuration);
+        pw.println(prefix + "mScreenOffTimeout=" + mScreenOffTimeout);
     }
 
     @NonNull
@@ -725,6 +761,8 @@ public final class VirtualDeviceParams implements Parcelable {
      * Builder for {@link VirtualDeviceParams}.
      */
     public static final class Builder {
+
+        private static final Duration INFINITE_TIMEOUT = Duration.ofDays(365 * 1000);
 
         private @LockState int mLockState = LOCK_STATE_DEFAULT;
         @NonNull private Set<UserHandle> mUsersWithMatchingAccounts = Collections.emptySet();
@@ -748,6 +786,8 @@ public final class VirtualDeviceParams implements Parcelable {
         @Nullable private VirtualSensorDirectChannelCallback mVirtualSensorDirectChannelCallback;
         @Nullable private ComponentName mHomeComponent;
         @Nullable private ComponentName mInputMethodComponent;
+        private Duration mDimDuration = Duration.ZERO;
+        private Duration mScreenOffTimeout = Duration.ZERO;
 
         private static class VirtualSensorCallbackDelegate extends IVirtualSensorCallback.Stub {
             @NonNull
@@ -821,6 +861,57 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull
         public Builder setLockState(@LockState int lockState) {
             mLockState = lockState;
+            return this;
+        }
+
+        /**
+         * Sets the dim duration for all trusted non-mirror displays of the device.
+         *
+         * <p>The system will reduce the display brightness for the specified duration if there
+         * has been no interaction just before the displays turn off.</p>
+         *
+         * <p>If set, the screen off timeout must also be set to a value larger than the dim
+         * duration. If left unset or set to zero, then the display brightness will not be reduced.
+         * </p>
+         *
+         * @throws IllegalArgumentException if the dim duration is negative or if the dim duration
+         *   is longer than the screen off timeout.
+         * @see android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
+         * @see android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+         * @see #setScreenOffTimeout
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+        @NonNull
+        public Builder setDimDuration(@NonNull Duration dimDuration) {
+            if (Objects.requireNonNull(dimDuration).compareTo(Duration.ZERO) < 0) {
+                throw new IllegalArgumentException("The dim duration cannot be negative");
+            }
+            mDimDuration = dimDuration;
+            return this;
+        }
+
+        /**
+         * Sets the timeout, after which all trusted non-mirror displays of the device will turn
+         * off, if there has been no interaction with the device.
+         *
+         * <p>If dim duration is set, the screen off timeout must be set to a value larger than the
+         * dim duration. If left unset or set to zero, then the displays will never be turned off
+         * due to inactivity.</p>
+         *
+         * @throws IllegalArgumentException if the screen off timeout is negative or if the dim
+         *   duration is longer than the screen off timeout.
+         * @see android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
+         * @see android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+         * @see #setDimDuration
+         * @see VirtualDeviceManager.VirtualDevice#goToSleep()
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+        @NonNull
+        public Builder setScreenOffTimeout(@NonNull Duration screenOffTimeout) {
+            if (Objects.requireNonNull(screenOffTimeout).compareTo(Duration.ZERO) < 0) {
+                throw new IllegalArgumentException("The screen off timeout cannot be negative");
+            }
+            mScreenOffTimeout = screenOffTimeout;
             return this;
         }
 
@@ -1220,6 +1311,14 @@ public final class VirtualDeviceParams implements Parcelable {
                 }
             }
 
+            if (mDimDuration.compareTo(mScreenOffTimeout) > 0) {
+                throw new IllegalArgumentException(
+                        "The dim duration cannot be greater than the screen off timeout.");
+            }
+            if (mScreenOffTimeout.compareTo(Duration.ZERO) == 0) {
+                mScreenOffTimeout = INFINITE_TIMEOUT;
+            }
+
             if (!Flags.crossDeviceClipboard()) {
                 mDevicePolicies.delete(POLICY_TYPE_CLIPBOARD);
             }
@@ -1269,7 +1368,9 @@ public final class VirtualDeviceParams implements Parcelable {
                     mVirtualSensorConfigs,
                     virtualSensorCallbackDelegate,
                     mAudioPlaybackSessionId,
-                    mAudioRecordingSessionId);
+                    mAudioRecordingSessionId,
+                    mDimDuration.toMillis(),
+                    mScreenOffTimeout.toMillis());
         }
     }
 }

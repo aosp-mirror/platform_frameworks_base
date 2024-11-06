@@ -53,6 +53,24 @@ flag {
 }
 
 flag {
+    name: "enhanced_confirmation_in_call_apis_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable enhanced confirmation incall apis"
+    bug: "310220212"
+}
+
+flag {
+    name: "unknown_call_package_install_blocking_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable the blocking of certain app installs during an unknown call"
+    bug: "310220212"
+}
+
+flag {
     name: "op_enable_mobile_data_by_user"
     is_exported: true
     namespace: "permissions"
@@ -331,4 +349,21 @@ flag {
     namespace: "permissions"
     description: "Enables ExtServices to leverage TextClassifier for OTP detection"
     bug: "351976749"
+}
+
+flag {
+    name: "health_connect_backup_restore_permission_enabled"
+    is_fixed_read_only: true
+    namespace: "health_connect"
+    description: "This flag protects the permission that is required to call Health Connect backup and restore apis"
+    bug: "376014879" # android_fr bug
+}
+
+flag {
+    name: "enable_aiai_proxied_text_classifiers"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables the AiAi to utilize the default OTP text classifier that is also used by ExtServices"
+    bug: "377229653"
 }

@@ -10153,9 +10153,7 @@ public class CarrierConfigManager {
             "satellite_roaming_esos_inactivity_timeout_sec_int";
 
     /**
-     * A string array containing the list of messaging apps that support satellite.
-     *
-     * The default value contains only "com.google.android.apps.messaging"
+     * A string array containing the list of messaging package names that support satellite.
      *
      * @hide
      */
@@ -11315,8 +11313,6 @@ public class CarrierConfigManager {
                         NetworkRegistrationInfo.SERVICE_TYPE_SMS,
                         NetworkRegistrationInfo.SERVICE_TYPE_MMS
                 });
-        sDefaults.putStringArray(KEY_SATELLITE_SUPPORTED_MSG_APPS_STRING_ARRAY, new String[]{
-                "com.google.android.apps.messaging"});
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putBoolean(KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,

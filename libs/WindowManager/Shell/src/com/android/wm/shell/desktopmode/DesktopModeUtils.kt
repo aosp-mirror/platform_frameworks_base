@@ -275,7 +275,7 @@ private fun TaskInfo.hasPortraitTopActivity(): Boolean {
         }
 
         // Then check if the activity is portrait when letterboxed
-        appCompatTaskInfo.isTopActivityLetterboxed -> appCompatTaskInfo.isTopActivityPillarboxed
+        appCompatTaskInfo.isTopActivityLetterboxed -> appCompatTaskInfo.isTopActivityPillarboxShaped
 
         // Then check if the activity is portrait
         appBounds != null -> appBounds.height() > appBounds.width()

@@ -279,4 +279,6 @@ interface IInputManager {
     void removeAllCustomInputGestures();
 
     AidlInputGestureData[] getCustomInputGestures();
+
+    AidlInputGestureData[] getAppLaunchBookmarks();
 }

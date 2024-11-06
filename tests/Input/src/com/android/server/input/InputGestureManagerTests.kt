@@ -21,6 +21,7 @@ import android.hardware.input.InputManager
 import android.hardware.input.KeyGestureEvent
 import android.platform.test.annotations.Presubmit
 import android.view.KeyEvent
+import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -42,7 +43,7 @@ class InputGestureManagerTests {
 
     @Before
     fun setup() {
-        inputGestureManager = InputGestureManager()
+        inputGestureManager = InputGestureManager(ApplicationProvider.getApplicationContext())
     }
 
     @Test
