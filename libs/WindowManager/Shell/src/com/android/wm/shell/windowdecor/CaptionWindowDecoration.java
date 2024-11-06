@@ -36,6 +36,7 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.util.Size;
@@ -174,7 +175,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     }
 
     @Override
-    void relayout(RunningTaskInfo taskInfo, boolean hasGlobalFocus) {
+    void relayout(RunningTaskInfo taskInfo, boolean hasGlobalFocus,
+            @NonNull Region displayExclusionRegion) {
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         // The crop and position of the task should only be set when a task is fluid resizing. In
         // all other cases, it is expected that the transition handler positions and crops the task
@@ -186,7 +188,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
         relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
-                shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus);
+                shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus, displayExclusionRegion);
     }
 
     @VisibleForTesting
@@ -198,7 +200,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             boolean isStatusBarVisible,
             boolean isKeyguardVisibleAndOccluded,
             InsetsState displayInsetsState,
-            boolean hasGlobalFocus) {
+            boolean hasGlobalFocus,
+            @NonNull Region globalExclusionRegion) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId = R.layout.caption_window_decor;
@@ -210,6 +213,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         relayoutParams.mSetTaskVisibilityPositionAndCrop = shouldSetTaskVisibilityPositionAndCrop;
         relayoutParams.mIsCaptionVisible = taskInfo.isFreeform()
                 || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
+        relayoutParams.mDisplayExclusionRegion.set(globalExclusionRegion);
 
         if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
             // If the app is requesting to customize the caption bar, allow input to fall
@@ -236,7 +240,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     void relayout(RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
-            boolean hasGlobalFocus) {
+            boolean hasGlobalFocus,
+            @NonNull Region globalExclusionRegion) {
         final boolean isFreeform =
                 taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
         final boolean isDragResizeable = ENABLE_WINDOWING_SCALED_RESIZING.isTrue()
@@ -249,7 +254,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
                 shouldSetTaskVisibilityPositionAndCrop, mIsStatusBarVisible,
                 mIsKeyguardVisibleAndOccluded,
-                mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus);
+                mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus,
+                globalExclusionRegion);
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
