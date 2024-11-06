@@ -40,11 +40,12 @@ constructor(
     private val failureTracker: StatusBarIconViewBindingFailureTracker,
     private val viewStore: StatusBarNotificationIconViewStore,
 ) {
-    fun bindWhileAttached(view: NotificationIconContainer): DisposableHandle {
+    fun bindWhileAttached(view: NotificationIconContainer, displayId: Int): DisposableHandle {
         return traceSection("NICStatusBar#bindWhileAttached") {
             view.repeatWhenAttached {
                 lifecycleScope.launch {
                     NotificationIconContainerViewBinder.bind(
+                        displayId = displayId,
                         view = view,
                         viewModel = viewModel,
                         configuration = configuration,
