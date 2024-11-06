@@ -44,6 +44,7 @@ import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTonalElevationEnabled
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -278,6 +279,108 @@ fun ShortcutHelperButton(
                     modifier = Modifier.wrapContentSize(Alignment.Center),
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun ShortcutHelperButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    shape: Shape = RoundedCornerShape(360.dp),
+    color: Color,
+    width: Dp,
+    height: Dp = 40.dp,
+    iconSource: IconSource = IconSource(),
+    text: String? = null,
+    contentColor: Color,
+    contentPaddingHorizontal: Dp = 16.dp,
+    contentPaddingVertical: Dp = 10.dp,
+    enabled: Boolean = true,
+) {
+    ShortcutHelperButtonSurface(
+        onClick = onClick,
+        shape = shape,
+        color = color,
+        modifier = modifier,
+        enabled = enabled,
+        width = width,
+        height = height,
+    ) {
+        Row(
+            modifier =
+                Modifier.padding(
+                    horizontal = contentPaddingHorizontal,
+                    vertical = contentPaddingVertical,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            if (iconSource.imageVector != null) {
+                Icon(
+                    tint = contentColor,
+                    imageVector = iconSource.imageVector,
+                    contentDescription =
+                        null, // TODO this probably should not be null for accessibility.
+                    modifier = Modifier.size(20.dp).wrapContentSize(Alignment.Center),
+                )
+            }
+
+            if (iconSource.imageVector != null && text != null)
+                Spacer(modifier = Modifier.weight(1f))
+
+            if (text != null) {
+                Text(
+                    text,
+                    color = contentColor,
+                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.wrapContentSize(Alignment.Center),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ShortcutHelperButtonSurface(
+    onClick: () -> Unit,
+    shape: Shape,
+    color: Color,
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
+    width: Dp,
+    height: Dp,
+    content: @Composable () -> Unit,
+) {
+    if (enabled) {
+        ClickableShortcutSurface(
+            onClick = onClick,
+            shape = shape,
+            color = color,
+            modifier = modifier.semantics { role = Role.Button }.width(width).height(height),
+            interactionsConfig =
+                InteractionsConfig(
+                    hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
+                    hoverOverlayAlpha = 0.11f,
+                    pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
+                    pressedOverlayAlpha = 0.15f,
+                    focusOutlineColor = MaterialTheme.colorScheme.secondary,
+                    focusOutlineStrokeWidth = 3.dp,
+                    focusOutlinePadding = 2.dp,
+                    surfaceCornerRadius = 28.dp,
+                    focusOutlineCornerRadius = 33.dp,
+                ),
+        ) {
+            content()
+        }
+    } else {
+        Surface(
+            shape = shape,
+            color = color.copy(0.38f),
+            modifier = modifier.semantics { role = Role.Button }.width(width).height(height),
+        ) {
+            content()
         }
     }
 }

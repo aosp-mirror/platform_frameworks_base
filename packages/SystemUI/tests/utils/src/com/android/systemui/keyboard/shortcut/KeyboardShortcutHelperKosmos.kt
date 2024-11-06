@@ -31,8 +31,11 @@ import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
+import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutCustomizationInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
+import com.android.systemui.keyboard.shortcut.ui.ShortcutCustomizationDialogStarter
+import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutCustomizationViewModel
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.kosmos.Kosmos
@@ -42,6 +45,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.settings.userTracker
+import com.android.systemui.statusbar.phone.systemUIDialogFactory
 
 var Kosmos.shortcutHelperAppCategoriesShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { AppCategoriesShortcutsSource(windowManager, testDispatcher) }
@@ -120,4 +124,27 @@ val Kosmos.shortcutHelperViewModel by
             shortcutHelperStateInteractor,
             shortcutHelperCategoriesInteractor,
         )
+    }
+
+val Kosmos.shortcutCustomizationDialogStarterFactory by
+    Kosmos.Fixture {
+        object : ShortcutCustomizationDialogStarter.Factory {
+            override fun create(): ShortcutCustomizationDialogStarter {
+                return ShortcutCustomizationDialogStarter(
+                    shortcutCustomizationViewModelFactory,
+                    systemUIDialogFactory,
+                )
+            }
+        }
+    }
+
+val Kosmos.shortcutCustomizationInteractor by Kosmos.Fixture { ShortcutCustomizationInteractor() }
+
+val Kosmos.shortcutCustomizationViewModelFactory by
+    Kosmos.Fixture {
+        object : ShortcutCustomizationViewModel.Factory {
+            override fun create(): ShortcutCustomizationViewModel {
+                return ShortcutCustomizationViewModel(shortcutCustomizationInteractor)
+            }
+        }
     }
