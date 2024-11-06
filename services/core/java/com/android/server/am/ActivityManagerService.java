@@ -337,6 +337,8 @@ import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.ProfilingServiceHelper;
+import android.os.ProfilingTrigger;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -1089,7 +1091,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void onReportFullyDrawn(long id, long timestampNanos) {
-            mProcessList.getAppStartInfoTracker().onActivityReportFullyDrawn(id, timestampNanos);
+            ApplicationStartInfo startInfo = mProcessList.getAppStartInfoTracker()
+                    .onActivityReportFullyDrawn(id, timestampNanos);
+
+            if (android.os.profiling.Flags.systemTriggeredProfilingNew()
+                    && startInfo != null
+                    && startInfo.getStartType() == ApplicationStartInfo.START_TYPE_COLD
+                    && startInfo.getPackageName() != null) {
+                ProfilingServiceHelper.getInstance().onProfilingTriggerOccurred(
+                        startInfo.getRealUid(),
+                        startInfo.getPackageName(),
+                        ProfilingTrigger.TRIGGER_TYPE_APP_COLD_START_ACTIVITY);
+            }
         }
     };
 
