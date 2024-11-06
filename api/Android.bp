@@ -73,6 +73,7 @@ combined_apis {
         "framework-bluetooth",
         "framework-configinfrastructure",
         "framework-connectivity",
+        "framework-connectivity-b",
         "framework-connectivity-t",
         "framework-devicelock",
         "framework-graphics",
