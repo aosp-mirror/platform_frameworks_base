@@ -29,6 +29,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -261,5 +263,17 @@ class PriorityNestedScrollConnectionTest {
 
         scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
         assertThat(isStarted).isEqualTo(true)
+    }
+
+    @Test
+    fun handleMultipleOnPreFlingCalls() = runTest {
+        startPriorityModePostScroll()
+
+        coroutineScope {
+            launch { scrollConnection.onPreFling(available = Velocity.Zero) }
+            launch { scrollConnection.onPreFling(available = Velocity.Zero) }
+        }
+
+        assertThat(lastStop).isEqualTo(0f)
     }
 }
