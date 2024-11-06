@@ -1725,9 +1725,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return;
         }
         Transition transit = task.mTransitionController.requestCloseTransitionIfNeeded(task);
-        if (transit == null) {
-            transit = task.mTransitionController.getCollectingTransition();
-        }
         if (transit != null) {
             transit.collectClose(task);
             if (!task.mTransitionController.useFullReadyTracking()) {
@@ -1739,7 +1736,15 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // before anything that may need it to wait (setReady(false)).
                 transit.setReady(task, true);
             }
+        } else {
+            // If we failed to create a transition, there might be already a currently collecting
+            // transition. Let's use it if possible.
+            transit = task.mTransitionController.getCollectingTransition();
+            if (transit != null) {
+                transit.collectClose(task);
+            }
         }
+
         // Consume the stopping activities immediately so activity manager won't skip killing
         // the process because it is still foreground state, i.e. RESUMED -> PAUSING set from
         // removeActivities -> finishIfPossible.
