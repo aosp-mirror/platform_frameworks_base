@@ -287,7 +287,7 @@ private fun DragHandle(dialog: Dialog) {
             Modifier.padding(top = 16.dp, bottom = 6.dp)
                 .semantics { contentDescription = dragHandleContentDescription }
                 .clickable { dialog.dismiss() },
-        color = MaterialTheme.colorScheme.outlineVariant,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         shape = MaterialTheme.shapes.extraLarge,
     ) {
         Box(Modifier.size(width = 32.dp, height = 4.dp))
