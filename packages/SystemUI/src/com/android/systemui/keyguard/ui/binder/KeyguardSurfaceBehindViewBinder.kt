@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.ui.binder
 
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSurfaceBehindViewModel
 import kotlinx.coroutines.CoroutineScope
