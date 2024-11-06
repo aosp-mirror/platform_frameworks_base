@@ -5573,20 +5573,13 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; maxTextLength: ").append(mMaxTextLength);
         builder.append("; stateDescription: ").append(mStateDescription);
         builder.append("; contentDescription: ").append(mContentDescription);
-        if (Flags.supplementalDescription()) {
-            builder.append("; supplementalDescription: ").append(mSupplementalDescription);
-        }
         builder.append("; tooltipText: ").append(mTooltipText);
         builder.append("; containerTitle: ").append(mContainerTitle);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
         builder.append("; uniqueId: ").append(mUniqueId);
         builder.append("; expandedState: ").append(getExpandedStateSymbolicName(mExpandedState));
-
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());
-        if (Flags.a11yIsRequiredApi()) {
-            builder.append("; required: ").append(isFieldRequired());
-        }
         builder.append("; focusable: ").append(isFocusable());
         builder.append("; focused: ").append(isFocused());
         builder.append("; selected: ").append(isSelected());
