@@ -115,6 +115,13 @@ public final class HubEndpointInfo implements Parcelable {
         mTag = endpointInfo.tag;
     }
 
+    /** @hide */
+    public HubEndpointInfo(String name, @Nullable String tag) {
+        mId = HubEndpointIdentifier.invalid();
+        mName = name;
+        mTag = tag;
+    }
+
     private HubEndpointInfo(Parcel in) {
         long hubId = in.readLong();
         long endpointId = in.readLong();
