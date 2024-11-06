@@ -31,13 +31,13 @@ import android.graphics.Color
 import android.os.Binder
 import android.os.UserManager
 import android.os.fakeExecutorHandler
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.testing.TestableLooper.RunWithLooper
 import android.util.ArraySet
 import android.view.View
 import android.view.accessibility.AccessibilityManager
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
@@ -45,6 +45,9 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.concurrency.fakeExecutor
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
@@ -53,9 +56,12 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory.create
+import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
+import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.NotificationEntryHelper
@@ -101,12 +107,14 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 /** Tests for [NotificationGutsManager]. */
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
-class NotificationGutsManagerTest : SysuiTestCase() {
+class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val testNotificationChannel =
         NotificationChannel(
             TEST_CHANNEL_ID,
@@ -153,6 +161,20 @@ class NotificationGutsManagerTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
 
     private lateinit var windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor
+
+    companion object {
+        private const val TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId"
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
@@ -264,6 +286,7 @@ class NotificationGutsManagerTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun testLockscreenShadeVisible_notVisible_gutsClosed() =
         testScope.runTest {
             // First, start out lockscreen or shade as visible
@@ -290,6 +313,34 @@ class NotificationGutsManagerTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
+    fun testShadeVisible_notVisible_gutsClosed() =
+        testScope.runTest {
+            // First, start with shade as visible
+            kosmos.setSceneTransition(Idle(Scenes.Shade))
+            runCurrent()
+
+            val guts: NotificationGuts = mock()
+            gutsManager.exposedGuts = guts
+
+            // WHEN the shade is no longer visible
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+            runCurrent()
+
+            // THEN the guts are closed
+            verify(guts).removeCallbacks(null)
+            verify(guts)
+                .closeControls(
+                    /* leavebehinds = */ eq(true),
+                    /* controls = */ eq(true),
+                    /* x = */ anyInt(),
+                    /* y = */ anyInt(),
+                    /* force = */ eq(true),
+                )
+        }
+
+    @Test
+    @DisableSceneContainer
     fun testLockscreenShadeVisible_notVisible_listContainerReset() =
         testScope.runTest {
             // First, start out lockscreen or shade as visible
@@ -299,6 +350,23 @@ class NotificationGutsManagerTest : SysuiTestCase() {
 
             // WHEN the lockscreen or shade is no longer visible
             windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(false)
+            runCurrent()
+
+            // THEN the list container is reset
+            verify(notificationListContainer).resetExposedMenuView(anyBoolean(), anyBoolean())
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun testShadeVisible_notVisible_listContainerReset() =
+        testScope.runTest {
+            // First, start with shade as visible
+            kosmos.setSceneTransition(Idle(Scenes.Shade))
+            runCurrent()
+            clearInvocations(notificationListContainer)
+
+            // WHEN the shade is no longer visible
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
             runCurrent()
 
             // THEN the list container is reset
@@ -576,9 +644,5 @@ class NotificationGutsManagerTest : SysuiTestCase() {
         val menuItem = menuRow.getLongpressMenuItem(mContext)
         assertNotNull(menuItem)
         return menuItem
-    }
-
-    companion object {
-        private const val TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId"
     }
 }
