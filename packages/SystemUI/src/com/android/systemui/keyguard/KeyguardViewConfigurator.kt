@@ -60,6 +60,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.NotificationShadeWindowView
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.LightRevealScrim
@@ -93,7 +94,7 @@ constructor(
     private val chipbarCoordinator: ChipbarCoordinator,
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
-    private val configuration: ConfigurationState,
+    @ShadeDisplayAware private val configuration: ConfigurationState,
     private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
     private val shadeInteractor: ShadeInteractor,
