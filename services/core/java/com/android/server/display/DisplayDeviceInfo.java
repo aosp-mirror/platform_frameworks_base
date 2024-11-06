@@ -254,6 +254,11 @@ final class DisplayDeviceInfo {
     public static final int DIFF_MODE_ID = 1 << 7;
 
     /**
+     * Diff result: The frame rate override list differs.
+     */
+    public static final int DIFF_FRAME_RATE_OVERRIDE = 1 << 8;
+
+    /**
      * Diff result: Catch-all for "everything changed"
      */
     public static final int DIFF_EVERYTHING = 0XFFFFFFFF;
@@ -517,6 +522,9 @@ final class DisplayDeviceInfo {
         if (modeId != other.modeId) {
             diff |= DIFF_MODE_ID;
         }
+        if (!Arrays.equals(frameRateOverrides, other.frameRateOverrides)) {
+            diff |= DIFF_FRAME_RATE_OVERRIDE;
+        }
         if (!Objects.equals(name, other.name)
                 || !Objects.equals(uniqueId, other.uniqueId)
                 || width != other.width
@@ -540,7 +548,6 @@ final class DisplayDeviceInfo {
                 || !Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 || ownerUid != other.ownerUid
                 || !Objects.equals(ownerPackageName, other.ownerPackageName)
-                || !Arrays.equals(frameRateOverrides, other.frameRateOverrides)
                 || !BrightnessSynchronizer.floatEquals(brightnessMinimum, other.brightnessMinimum)
                 || !BrightnessSynchronizer.floatEquals(brightnessMaximum, other.brightnessMaximum)
                 || !BrightnessSynchronizer.floatEquals(brightnessDefault,
