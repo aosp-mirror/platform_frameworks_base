@@ -780,6 +780,8 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             times(1)
         ).setAppHandleEducationTooltipCallbacks(openHandleMenuCallbackCaptor.capture(), any())
         openHandleMenuCallbackCaptor.lastValue.invoke(task.taskId)
+        bgExecutor.flushAll()
+        testShellExecutor.flushAll()
 
         verify(decor, times(1)).createHandleMenu(anyBoolean())
     }

@@ -580,8 +580,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
 
     private void openHandleMenu(int taskId) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
-        decoration.createHandleMenu(checkNumberOfOtherInstances(decoration.mTaskInfo)
-                >= MANAGE_WINDOWS_MINIMUM_INSTANCES);
+        // TODO(b/379873022): Run the instance check and the AssistContent request in
+        //  createHandleMenu on the same bg thread dispatch.
+        mBgExecutor.execute(() -> {
+            final int numOfInstances = checkNumberOfOtherInstances(decoration.mTaskInfo);
+            mMainExecutor.execute(() -> {
+                decoration.createHandleMenu(
+                        numOfInstances >= MANAGE_WINDOWS_MINIMUM_INSTANCES
+                );
+            });
+        });
     }
 
     private void onToggleSizeInteraction(
@@ -755,12 +763,20 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             return;
         }
         decoration.closeHandleMenu();
-        decoration.createManageWindowsMenu(getTaskSnapshots(decoration.mTaskInfo),
-                /* onIconClickListener= */(Integer requestedTaskId) -> {
-                    decoration.closeManageWindowsMenu();
-                    mDesktopTasksController.openInstance(decoration.mTaskInfo, requestedTaskId);
-                    return Unit.INSTANCE;
-                });
+        mBgExecutor.execute(() -> {
+            final ArrayList<Pair<Integer, TaskSnapshot>> snapshotList =
+                    getTaskSnapshots(decoration.mTaskInfo);
+            mMainExecutor.execute(() -> decoration.createManageWindowsMenu(
+                    snapshotList,
+                    /* onIconClickListener= */ (Integer requestedTaskId) -> {
+                        decoration.closeManageWindowsMenu();
+                        mDesktopTasksController.openInstance(decoration.mTaskInfo,
+                                requestedTaskId);
+                        return Unit.INSTANCE;
+                    }
+                )
+            );
+        });
     }
 
     private ArrayList<Pair<Integer, TaskSnapshot>> getTaskSnapshots(
@@ -1802,11 +1818,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         // TODO(b/336289597): Rather than returning number of instances, return a list of valid
         //  instances, then refer to the list's size and reuse the list for Manage Windows menu.
         final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
-        final IActivityManager activityManager = ActivityManager.getService();
         try {
             return activityTaskManager.getRecentTasks(Integer.MAX_VALUE,
                     ActivityManager.RECENT_WITH_EXCLUDED,
-                    activityManager.getCurrentUserId()).getList().stream().filter(
+                    info.userId).getList().stream().filter(
                             recentTaskInfo -> (recentTaskInfo.taskId != info.taskId
                                     && recentTaskInfo.baseActivity != null
                                     && recentTaskInfo.baseActivity.getPackageName()

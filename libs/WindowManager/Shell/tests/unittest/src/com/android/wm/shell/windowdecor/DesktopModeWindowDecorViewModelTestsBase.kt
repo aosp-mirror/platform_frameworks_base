@@ -281,6 +281,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
                 } else {
                     statusBars()
                 }
+                userId = context.userId
             }
     }
 
