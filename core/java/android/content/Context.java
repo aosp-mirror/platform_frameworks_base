@@ -4855,6 +4855,8 @@ public abstract class Context {
      * @see android.net.vcn.VcnManager
      * @hide
      */
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
 
     /**
