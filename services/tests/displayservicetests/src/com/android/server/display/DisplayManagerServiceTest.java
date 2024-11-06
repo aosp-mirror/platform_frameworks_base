@@ -3848,6 +3848,10 @@ public class DisplayManagerServiceTest {
         DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
         displayDeviceInfo.copyFrom(displayDevice.getDisplayDeviceInfoLocked());
         displayDeviceInfo.modeId = modeId;
+        if (modeId > 0 && modeId <= displayDeviceInfo.supportedModes.length) {
+            displayDeviceInfo.renderFrameRate =
+                displayDeviceInfo.supportedModes[modeId - 1].getRefreshRate();
+        }
         updateDisplayDeviceInfo(displayManager, displayDevice, displayDeviceInfo);
     }
 
