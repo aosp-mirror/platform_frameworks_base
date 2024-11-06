@@ -3008,6 +3008,16 @@ public class NotificationManagerService extends SystemService {
                             groupKey, REASON_APP_CANCEL, SystemClock.elapsedRealtime());
                 }
             }
+
+            @Override
+            @Nullable
+            public NotificationRecord removeAppProvidedSummaryOnClassification(String triggeringKey,
+                    @Nullable String oldGroupKey) {
+                synchronized (mNotificationLock) {
+                    return removeAppProvidedSummaryOnClassificationLocked(triggeringKey,
+                            oldGroupKey);
+                }
+            }
         });
     }
 
@@ -7151,6 +7161,50 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
+    @Nullable
+    NotificationRecord removeAppProvidedSummaryOnClassificationLocked(String triggeringKey,
+            @Nullable String oldGroupKey) {
+        NotificationRecord canceledSummary = null;
+        NotificationRecord r = mNotificationsByKey.get(triggeringKey);
+        if (r == null || oldGroupKey == null) {
+            return null;
+        }
+
+        if (r.getSbn().isAppGroup() && r.getNotification().isGroupChild()) {
+            NotificationRecord groupSummary = mSummaryByGroupKey.get(oldGroupKey);
+            // We only care about app-provided valid groups
+            if (groupSummary != null && !GroupHelper.isAggregatedGroup(groupSummary)) {
+                List<NotificationRecord> notificationsInGroup =
+                        findGroupNotificationsLocked(r.getSbn().getPackageName(),
+                            oldGroupKey, r.getUserId());
+                // Remove the app-provided summary if only the summary is left in the
+                // original group, or summary + triggering notification that will be
+                // regrouped
+                boolean isOnlySummaryLeft =
+                        (notificationsInGroup.size() <= 1)
+                            || (notificationsInGroup.size() == 2
+                            && notificationsInGroup.contains(r)
+                            && notificationsInGroup.contains(groupSummary));
+                if (isOnlySummaryLeft) {
+                    if (DBG) {
+                        Slog.i(TAG, "Removing app summary (all children bundled): "
+                                + groupSummary);
+                    }
+                    canceledSummary = groupSummary;
+                    mSummaryByGroupKey.remove(oldGroupKey);
+                    cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(),
+                            groupSummary.getSbn().getPackageName(),
+                            groupSummary.getSbn().getTag(),
+                            groupSummary.getSbn().getId(), 0, 0, false, groupSummary.getUserId(),
+                            NotificationListenerService.REASON_GROUP_OPTIMIZATION, null);
+                }
+            }
+        }
+
+        return canceledSummary;
+    }
+
+    @GuardedBy("mNotificationLock")
     private boolean hasAutoGroupSummaryLocked(NotificationRecord record) {
         final String autbundledGroupKey;
         if (notificationForceGrouping()) {
@@ -7529,6 +7583,11 @@ public class NotificationManagerService extends SystemService {
                     pw.println("\n  TimeToLive alarms:");
                     mTtlHelper.dump(pw, "    ");
                 }
+            }
+
+            if (notificationForceGrouping()) {
+                pw.println("\n  GroupHelper:");
+                mGroupHelper.dump(pw, "    ");
             }
         }
     }

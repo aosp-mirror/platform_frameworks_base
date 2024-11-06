@@ -113,6 +113,7 @@ import static android.service.notification.Condition.STATE_TRUE;
 import static android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION;
 import static android.service.notification.Flags.FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT;
 import static android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION;
 import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
@@ -2680,6 +2681,41 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(r.isCanceled).isTrue();
         waitForIdle();
         verify(mWorkerHandler, times(1)).scheduleCancelNotification(any(), eq(0));
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
+    public void testAggregateGroups_RemoveAppSummary_onClassification() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final int summaryId = 0;
+        final NotificationRecord r1 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 1, originalGroupName, false);
+        mService.addNotification(r1);
+        final NotificationRecord r2 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 2, originalGroupName, false);
+        mService.addNotification(r2);
+        final NotificationRecord summary = generateNotificationRecord(mTestNotificationChannel,
+                summaryId, originalGroupName, true);
+        mService.addNotification(summary);
+        final String originalGroupKey = summary.getGroupKey();
+        assertThat(mService.mSummaryByGroupKey).containsEntry(originalGroupKey, summary);
+
+        // Regroup first child notification
+        r1.setOverrideGroupKey("newGroup");
+        // Check that removeAppProvidedSummaryOnClassificationLocked is null
+        //  => there is still one child left in the original group
+        assertThat(mService.removeAppProvidedSummaryOnClassificationLocked(r1.getKey(),
+                originalGroupKey)).isNull();
+
+        // Regroup last child notification
+        r2.setOverrideGroupKey("newGroup");
+        // Check that removeAppProvidedSummaryOnClassificationLocked returns the original summary
+        //  and that the original app-provided summary is canceled
+        assertThat(mService.removeAppProvidedSummaryOnClassificationLocked(r2.getKey(),
+                originalGroupKey)).isEqualTo(summary);
+        waitForIdle();
+        verify(mWorkerHandler, times(1)).scheduleCancelNotification(any(), eq(summaryId));
+        assertThat(mService.mSummaryByGroupKey).doesNotContainKey(originalGroupKey);
     }
 
     @Test
