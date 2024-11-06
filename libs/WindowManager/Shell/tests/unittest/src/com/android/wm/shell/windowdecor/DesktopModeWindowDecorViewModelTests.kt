@@ -1307,6 +1307,48 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(decor).closeMaximizeMenu()
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS)
+    fun testOnTaskInfoChanged_enableShellTransitionsFlag() {
+        val task = createTask(
+            windowingMode = WINDOWING_MODE_FREEFORM
+        )
+        val taskSurface = SurfaceControl()
+        val decoration = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task, taskSurface)
+        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
+
+        decoration.mHasGlobalFocus = true
+        desktopModeWindowDecorViewModel.onTaskInfoChanged(task)
+        verify(decoration).relayout(task, true)
+
+        decoration.mHasGlobalFocus = false
+        desktopModeWindowDecorViewModel.onTaskInfoChanged(task)
+        verify(decoration).relayout(task, false)
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS)
+    fun testOnTaskInfoChanged_disableShellTransitionsFlag() {
+        val task = createTask(
+            windowingMode = WINDOWING_MODE_FREEFORM
+        )
+        val taskSurface = SurfaceControl()
+        val decoration = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task, taskSurface)
+        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
+
+        task.isFocused = true
+        desktopModeWindowDecorViewModel.onTaskInfoChanged(task)
+        verify(decoration).relayout(task, true)
+
+        task.isFocused = false
+        desktopModeWindowDecorViewModel.onTaskInfoChanged(task)
+        verify(decoration).relayout(task, false)
+    }
+
     private fun createOpenTaskDecoration(
         @WindowingMode windowingMode: Int,
         taskSurface: SurfaceControl = SurfaceControl(),
