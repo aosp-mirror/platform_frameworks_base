@@ -109,7 +109,6 @@ import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.server.LocalServices;
@@ -176,7 +175,6 @@ public class MockingOomAdjusterTests {
     private ActiveUids mActiveUids;
     private PackageManagerInternal mPackageManagerInternal;
     private ActivityManagerService mService;
-    private TestCachedAppOptimizer mTestCachedAppOptimizer;
     private OomAdjusterInjector mInjector = new OomAdjusterInjector();
 
     private int mUiTierSize;
@@ -244,11 +242,9 @@ public class MockingOomAdjusterTests {
         doNothing().when(pr).enqueueProcessChangeItemLocked(anyInt(), anyInt(), anyInt(),
                 anyBoolean());
         mActiveUids = new ActiveUids(mService, false);
-        mTestCachedAppOptimizer = new TestCachedAppOptimizer(mService);
         mProcessStateController = new ProcessStateController.Builder(mService,
                 mService.mProcessList, mActiveUids)
                 .useModernOomAdjuster(mService.mConstants.ENABLE_NEW_OOMADJ)
-                .setCachedAppOptimizer(mTestCachedAppOptimizer)
                 .setOomAdjusterInjector(mInjector)
                 .build();
         mService.mProcessStateController = mProcessStateController;
@@ -3114,13 +3110,13 @@ public class MockingOomAdjusterTests {
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP_UID, true);
 
         assertEquals(true, app.getUidRecord().isSetAllowListed());
-        assertFreezeState(app, false);
-        assertFreezeState(app2, false);
+        assertEquals(true, app.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
 
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP_UID, false);
         assertEquals(false, app.getUidRecord().isSetAllowListed());
-        assertFreezeState(app, true);
-        assertFreezeState(app2, true);
+        assertEquals(false, app.mOptRecord.shouldNotFreeze());
+        assertEquals(false, app2.mOptRecord.shouldNotFreeze());
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3142,25 +3138,25 @@ public class MockingOomAdjusterTests {
 
         assertEquals(true, app.getUidRecord().isSetAllowListed());
         assertEquals(true, app2.getUidRecord().isSetAllowListed());
-        assertFreezeState(app, false);
-        assertFreezeState(app2, false);
-        assertFreezeState(app3, false);
+        assertEquals(true, app.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app3.mOptRecord.shouldNotFreeze());
 
         // Remove app1 from allowlist.
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP_UID, false);
         assertEquals(false, app.getUidRecord().isSetAllowListed());
         assertEquals(true, app2.getUidRecord().isSetAllowListed());
-        assertFreezeState(app, true);
-        assertFreezeState(app2, false);
-        assertFreezeState(app3, false);
+        assertEquals(false, app.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
+        assertEquals(true, app3.mOptRecord.shouldNotFreeze());
 
         // Now remove app2 from allowlist.
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP2_UID, false);
         assertEquals(false, app.getUidRecord().isSetAllowListed());
         assertEquals(false, app2.getUidRecord().isSetAllowListed());
-        assertFreezeState(app, true);
-        assertFreezeState(app2, true);
-        assertFreezeState(app3, true);
+        assertEquals(false, app.mOptRecord.shouldNotFreeze());
+        assertEquals(false, app2.mOptRecord.shouldNotFreeze());
+        assertEquals(false, app3.mOptRecord.shouldNotFreeze());
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3374,14 +3370,6 @@ public class MockingOomAdjusterTests {
         assertEquals(expectedCached, state.isCached());
     }
 
-    @SuppressWarnings("GuardedBy")
-    private void assertFreezeState(ProcessRecord app, boolean expectedFreezeState) {
-        boolean actualFreezeState = mTestCachedAppOptimizer.mLastSetFreezeState.get(app.getPid(),
-                false);
-        assertEquals("Unexcepted freeze state for " + app.processName, expectedFreezeState,
-                actualFreezeState);
-    }
-
     private class ProcessRecordBuilder {
         @SuppressWarnings("UnusedVariable")
         int mPid;
@@ -3525,39 +3513,6 @@ public class MockingOomAdjusterTests {
             return app;
         }
     }
-    private static final class TestProcessDependencies
-            implements CachedAppOptimizer.ProcessDependencies {
-        @Override
-        public long[] getRss(int pid) {
-            return new long[]{/*totalRSS*/ 0, /*fileRSS*/ 0, /*anonRSS*/ 0, /*swap*/ 0};
-        }
-
-        @Override
-        public void performCompaction(CachedAppOptimizer.CompactProfile action, int pid) {}
-    }
-
-    private static class TestCachedAppOptimizer extends CachedAppOptimizer {
-        private SparseBooleanArray mLastSetFreezeState = new SparseBooleanArray();
-
-        TestCachedAppOptimizer(ActivityManagerService ams) {
-            super(ams, null, new TestProcessDependencies());
-        }
-
-        @Override
-        public boolean useFreezer() {
-            return true;
-        }
-
-        @Override
-        public void freezeAppAsyncLSP(ProcessRecord app) {
-            mLastSetFreezeState.put(app.getPid(), true);
-        }
-
-        @Override
-        public void unfreezeAppLSP(ProcessRecord app, @UnfreezeReason int reason) {
-            mLastSetFreezeState.put(app.getPid(), false);
-        }
-    }
 
     static class OomAdjusterInjector extends OomAdjuster.Injector {
         // Jump ahead in time by this offset amount.
@@ -3568,6 +3523,7 @@ public class MockingOomAdjusterTests {
             mTimeOffsetMillis = 0;
             mLastSetOomAdj.clear();
         }
+
 
         void jumpUptimeAheadTo(long uptimeMillis) {
             final long jumpMs = uptimeMillis - getUptimeMillis();
