@@ -5492,26 +5492,6 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
-    private static String getExpandedStateSymbolicName(int state) {
-        if (Flags.a11yExpansionStateApi()) {
-            switch (state) {
-                case EXPANDED_STATE_UNDEFINED:
-                    return "EXPANDED_STATE_UNDEFINED";
-                case EXPANDED_STATE_COLLAPSED:
-                    return "EXPANDED_STATE_COLLAPSED";
-                case EXPANDED_STATE_PARTIAL:
-                    return "EXPANDED_STATE_PARTIAL";
-                case EXPANDED_STATE_FULL:
-                    return "EXPANDED_STATE_FULL";
-                default:
-                    throw new IllegalArgumentException("Unknown expanded state: " + state);
-            }
-        } else {
-            // TODO(b/362782158) Remove when flag is removed.
-            return "";
-        }
-    }
-
     private static boolean canPerformRequestOverConnection(int connectionId,
             int windowId, long accessibilityNodeId) {
         final boolean hasWindowId = windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
@@ -5609,7 +5589,6 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; containerTitle: ").append(mContainerTitle);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
         builder.append("; uniqueId: ").append(mUniqueId);
-        builder.append("; expandedState: ").append(getExpandedStateSymbolicName(mExpandedState));
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());
         builder.append("; focusable: ").append(isFocusable());
