@@ -11337,7 +11337,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.println("  mFgsStartTempAllowList:");
             final long currentTimeNow = System.currentTimeMillis();
-            final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
+            final long tempAllowlistCurrentTime =
+                    com.android.server.deviceidle.Flags.useCpuTimeForTempAllowlist()
+                            ? SystemClock.uptimeMillis() : SystemClock.elapsedRealtime();
             mFgsStartTempAllowList.forEach((uid, entry) -> {
                 pw.print("    " + UserHandle.formatUid(uid) + ": ");
                 entry.second.dump(pw);
@@ -11345,7 +11347,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Convert entry.mExpirationTime, which is an elapsed time since boot,
                 // to a time since epoch (i.e. System.currentTimeMillis()-based time.)
                 final long expirationInCurrentTime =
-                        currentTimeNow - elapsedRealtimeNow + entry.first;
+                        currentTimeNow - tempAllowlistCurrentTime + entry.first;
                 TimeUtils.dumpTimeWithDelta(pw, expirationInCurrentTime, currentTimeNow);
                 pw.println();
             });
