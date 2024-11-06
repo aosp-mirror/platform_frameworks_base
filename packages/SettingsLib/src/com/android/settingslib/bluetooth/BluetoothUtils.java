@@ -1,6 +1,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast.UNKNOWN_VALUE_PLACEHOLDER;
+import static com.android.settingslib.flags.Flags.audioSharingHysteresisModeFix;
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
 import android.annotation.SuppressLint;
@@ -649,6 +650,13 @@ public class BluetoothUtils {
     public static boolean isAudioSharingUIAvailable(@Nullable Context context) {
         return isAudioSharingEnabled() || (context != null && isAudioSharingPreviewEnabled(
                 context.getContentResolver()));
+    }
+
+    /** Returns if the le audio sharing hysteresis mode fix is available. */
+    @WorkerThread
+    public static boolean isAudioSharingHysteresisModeFixAvailable(@Nullable Context context) {
+        return (audioSharingHysteresisModeFix() && Flags.enableLeAudioSharing())
+                || (context != null && isAudioSharingPreviewEnabled(context.getContentResolver()));
     }
 
     /** Returns if the le audio sharing is enabled. */
