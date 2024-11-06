@@ -5634,6 +5634,9 @@
        screen. -->
   <java-symbol type="bool" name="config_dragToMaximizeInDesktopMode" />
 
+  <!-- Whether showing the app handle is supported on this device -->
+  <java-symbol type="bool" name="config_enableAppHandle" />
+
   <!-- Frame rate compatibility value for Wallpaper -->
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
 
