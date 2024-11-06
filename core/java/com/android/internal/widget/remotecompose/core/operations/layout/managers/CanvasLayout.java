@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations.layout.manager
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -44,6 +46,7 @@ public class CanvasLayout extends BoxLayout {
         this(parent, componentId, animationId, 0, 0, 0, 0);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "CANVAS ["
@@ -62,11 +65,13 @@ public class CanvasLayout extends BoxLayout {
                 + mVisibility;
     }
 
+    @NonNull
     @Override
     protected String getSerializedName() {
         return "CANVAS";
     }
 
+    @NonNull
     public static String name() {
         return "CanvasLayout";
     }
@@ -75,19 +80,19 @@ public class CanvasLayout extends BoxLayout {
         return Operations.LAYOUT_CANVAS;
     }
 
-    public static void apply(WireBuffer buffer, int componentId, int animationId) {
+    public static void apply(@NonNull WireBuffer buffer, int componentId, int animationId) {
         buffer.start(Operations.LAYOUT_CANVAS);
         buffer.writeInt(componentId);
         buffer.writeInt(animationId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
         operations.add(new CanvasLayout(null, componentId, animationId));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("Canvas implementation. Encapsulate draw operations.\n\n")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
@@ -98,7 +103,7 @@ public class CanvasLayout extends BoxLayout {
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context, MeasurePass measure) {
+    public void internalLayoutMeasure(PaintContext context, @NonNull MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         float selfWidth = selfMeasure.getW() - mPaddingLeft - mPaddingRight;
         float selfHeight = selfMeasure.getH() - mPaddingTop - mPaddingBottom;
@@ -112,7 +117,7 @@ public class CanvasLayout extends BoxLayout {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mComponentId, mAnimationId);
     }
 }

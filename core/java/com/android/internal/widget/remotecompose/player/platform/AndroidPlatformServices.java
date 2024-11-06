@@ -18,6 +18,7 @@ package com.android.internal.widget.remotecompose.player.platform;
 import android.graphics.Bitmap;
 import android.graphics.Path;
 import android.graphics.PathIterator;
+import android.util.Log;
 
 import com.android.internal.widget.remotecompose.core.Platform;
 import com.android.internal.widget.remotecompose.core.operations.PathData;
@@ -27,6 +28,8 @@ import java.util.Arrays;
 
 /** Services that are needed to be provided by the platform during encoding. */
 public class AndroidPlatformServices implements Platform {
+    private static final String LOG_TAG = "RemoteCompose";
+
     @Override
     public byte[] imageToByteArray(Object image) {
         if (image instanceof Bitmap) {
@@ -65,6 +68,24 @@ public class AndroidPlatformServices implements Platform {
         }
 
         return null;
+    }
+
+    @Override
+    public void log(LogCategory category, String message) {
+        switch (category) {
+            case DEBUG:
+                Log.d(LOG_TAG, message);
+                break;
+            case INFO:
+                Log.i(LOG_TAG, message);
+                break;
+            case WARN:
+                Log.w(LOG_TAG, message);
+                break;
+            default:
+                Log.e(LOG_TAG, message);
+                break;
+        }
     }
 
     private float[] androidPathToFloatArray(Path path) {

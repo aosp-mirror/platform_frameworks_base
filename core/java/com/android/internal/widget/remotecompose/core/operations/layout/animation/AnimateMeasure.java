@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.animation;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
@@ -44,18 +46,23 @@ public class AnimateMeasure {
 
     float mP = 0f;
     float mVp = 0f;
+
+    @NonNull
     FloatAnimation mMotionEasing =
             new FloatAnimation(mMotionEasingType, mDuration / 1000f, null, 0f, Float.NaN);
+
+    @NonNull
     FloatAnimation mVisibilityEasing =
             new FloatAnimation(
                     mVisibilityEasingType, mDurationVisibilityChange / 1000f, null, 0f, Float.NaN);
+
     ParticleAnimation mParticleAnimation;
 
     public AnimateMeasure(
             long startTime,
-            Component component,
+            @NonNull Component component,
             ComponentMeasure original,
-            ComponentMeasure target,
+            @NonNull ComponentMeasure target,
             int duration,
             int durationVisibilityChange,
             AnimationSpec.ANIMATION enterAnimation,
@@ -94,9 +101,9 @@ public class AnimateMeasure {
         mVp = mVisibilityEasing.get(visibilityProgress);
     }
 
-    public PaintBundle paint = new PaintBundle();
+    @NonNull public PaintBundle paint = new PaintBundle();
 
-    public void apply(PaintContext context) {
+    public void apply(@NonNull PaintContext context) {
         update(context.getContext().currentTime);
 
         mComponent.setX(getX());
@@ -338,7 +345,7 @@ public class AnimateMeasure {
         }
     }
 
-    public void updateTarget(ComponentMeasure measure, long currentTime) {
+    public void updateTarget(@NonNull ComponentMeasure measure, long currentTime) {
         mOriginal.setX(getX());
         mOriginal.setY(getY());
         mOriginal.setW(getWidth());

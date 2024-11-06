@@ -18,6 +18,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -69,10 +72,11 @@ public class ComponentStart implements ComponentStartOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mType, mComponentId, mWidth, mHeight);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "COMPONENT_START (type "
@@ -90,8 +94,9 @@ public class ComponentStart implements ComponentStartOperation {
                 + ")";
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@Nullable String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
@@ -119,6 +124,7 @@ public class ComponentStart implements ComponentStartOperation {
     public static final int LAYOUT_ROW = 15;
     public static final int LAYOUT_COLUMN = 16;
 
+    @NonNull
     public static String typeDescription(int type) {
         switch (type) {
             case DEFAULT:
@@ -152,6 +158,7 @@ public class ComponentStart implements ComponentStartOperation {
         }
     }
 
+    @NonNull
     public static String name() {
         return "ComponentStart";
     }
@@ -161,7 +168,7 @@ public class ComponentStart implements ComponentStartOperation {
     }
 
     public static void apply(
-            WireBuffer buffer, int type, int componentId, float width, float height) {
+            @NonNull WireBuffer buffer, int type, int componentId, float width, float height) {
         buffer.start(Operations.COMPONENT_START);
         buffer.writeInt(type);
         buffer.writeInt(componentId);
@@ -173,7 +180,7 @@ public class ComponentStart implements ComponentStartOperation {
         return 1 + 4 + 4 + 4;
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int type = buffer.readInt();
         int componentId = buffer.readInt();
         float width = buffer.readFloat();
@@ -181,7 +188,7 @@ public class ComponentStart implements ComponentStartOperation {
         operations.add(new ComponentStart(type, componentId, width, height));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(
                         "Basic component encapsulating draw commands." + "This is not resizable.")

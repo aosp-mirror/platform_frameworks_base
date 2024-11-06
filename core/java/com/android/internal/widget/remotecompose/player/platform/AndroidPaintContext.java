@@ -26,6 +26,8 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.RenderEffect;
+import android.graphics.RenderNode;
 import android.graphics.RuntimeShader;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
@@ -51,6 +53,8 @@ public class AndroidPaintContext extends PaintContext {
     List<Paint> mPaintList = new ArrayList<>();
     Canvas mCanvas;
     Rect mTmpRect = new Rect(); // use in calculation of bounds
+    RenderNode mNode = null;
+    Canvas mPreviousCanvas = null;
 
     public AndroidPaintContext(RemoteContext context, Canvas canvas) {
         super(context);
@@ -119,6 +123,53 @@ public class AndroidPaintContext extends PaintContext {
     @Override
     public void scale(float scaleX, float scaleY) {
         mCanvas.scale(scaleX, scaleY);
+    }
+
+    @Override
+    public void startGraphicsLayer(int w, int h) {
+        mNode = new RenderNode("layer");
+        mNode.setPosition(0, 0, w, h);
+        mPreviousCanvas = mCanvas;
+        mCanvas = mNode.beginRecording();
+    }
+
+    @Override
+    public void setGraphicsLayer(
+            float scaleX,
+            float scaleY,
+            float rotationX,
+            float rotationY,
+            float rotationZ,
+            float shadowElevation,
+            float transformOriginX,
+            float transformOriginY,
+            float alpha,
+            int renderEffectId) {
+        if (mNode == null) {
+            return;
+        }
+        mNode.setScaleX(scaleX);
+        mNode.setScaleY(scaleY);
+        mNode.setRotationX(rotationX);
+        mNode.setRotationY(rotationY);
+        mNode.setRotationZ(rotationZ);
+        mNode.setPivotX(transformOriginX * mNode.getWidth());
+        mNode.setPivotY(transformOriginY * mNode.getHeight());
+        mNode.setAlpha(alpha);
+        if (renderEffectId == 1) {
+
+            RenderEffect effect = RenderEffect.createBlurEffect(8f, 8f, Shader.TileMode.CLAMP);
+            mNode.setRenderEffect(effect);
+        }
+    }
+
+    @Override
+    public void endGraphicsLayer() {
+        mNode.endRecording();
+        mCanvas = mPreviousCanvas;
+        mCanvas.drawRenderNode(mNode);
+        // node.discardDisplayList();
+        mNode = null;
     }
 
     @Override
@@ -241,6 +292,8 @@ public class AndroidPaintContext extends PaintContext {
             if (start != 0) {
                 textToPaint = textToPaint.substring(start);
             }
+        } else if (end > textToPaint.length()) {
+            textToPaint = textToPaint.substring(start);
         } else {
             textToPaint = textToPaint.substring(start, end);
         }

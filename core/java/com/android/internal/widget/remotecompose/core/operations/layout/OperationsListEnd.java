@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.internal.widget.remotecompose.core.operations.layout;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
+import com.android.internal.widget.remotecompose.core.Operation;
+import com.android.internal.widget.remotecompose.core.Operations;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+
+import java.util.List;
+
+public class OperationsListEnd implements Operation {
+
+    @Override
+    public void write(@NonNull WireBuffer buffer) {
+        apply(buffer);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "LIST_END";
+    }
+
+    @Override
+    public void apply(RemoteContext context) {
+        // nothing
+    }
+
+    @NonNull
+    @Override
+    public String deepToString(@Nullable String indent) {
+        return (indent != null ? indent : "") + toString();
+    }
+
+    @NonNull
+    public static String name() {
+        return "ListEnd";
+    }
+
+    public static int id() {
+        return Operations.OPERATIONS_LIST_END;
+    }
+
+    public static void apply(@NonNull WireBuffer buffer) {
+        buffer.start(id());
+    }
+
+    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
+        operations.add(new OperationsListEnd());
+    }
+
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Layout Operations", id(), name())
+                .description("End tag for list of operations.");
+    }
+}

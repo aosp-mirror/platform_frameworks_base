@@ -17,7 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
-import com.android.internal.widget.remotecompose.core.CoreDocument;
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -25,7 +26,6 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.DrawBase4;
-import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
@@ -37,7 +37,7 @@ public class RoundedClipRectModifierOperation extends DrawBase4
     public static final int OP_CODE = Operations.MODIFIER_ROUNDED_CLIP_RECT;
     public static final String CLASS_NAME = "RoundedClipRectModifierOperation";
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         Maker m = RoundedClipRectModifierOperation::new;
         read(m, buffer, operations);
     }
@@ -46,16 +46,17 @@ public class RoundedClipRectModifierOperation extends DrawBase4
         return OP_CODE;
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
     @Override
-    protected void write(WireBuffer buffer, float v1, float v2, float v3, float v4) {
+    protected void write(@NonNull WireBuffer buffer, float v1, float v2, float v3, float v4) {
         apply(buffer, v1, v2, v3, v4);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Modifier Operations", id(), "RoundedClipRectModifierOperation")
                 .description("clip with rectangle")
                 .field(
@@ -90,7 +91,7 @@ public class RoundedClipRectModifierOperation extends DrawBase4
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.roundedClipRect(mWidth, mHeight, mX1, mY1, mX2, mY2);
     }
 
@@ -101,13 +102,7 @@ public class RoundedClipRectModifierOperation extends DrawBase4
     }
 
     @Override
-    public void onClick(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {
-        // nothing
-    }
-
-    @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(
                 indent,
                 "ROUNDED_CLIP_RECT = ["
@@ -135,7 +130,11 @@ public class RoundedClipRectModifierOperation extends DrawBase4
      * @param bottomEnd bottomEnd radius
      */
     public static void apply(
-            WireBuffer buffer, float topStart, float topEnd, float bottomStart, float bottomEnd) {
+            @NonNull WireBuffer buffer,
+            float topStart,
+            float topEnd,
+            float bottomStart,
+            float bottomEnd) {
         write(buffer, OP_CODE, topStart, topEnd, bottomStart, bottomEnd);
     }
 }

@@ -17,6 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -39,6 +42,7 @@ public class HostActionOperation implements ActionOperation {
         mActionId = id;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "HostActionOperation(" + mActionId + ")";
@@ -48,20 +52,22 @@ public class HostActionOperation implements ActionOperation {
         return mActionId;
     }
 
+    @NonNull
     public String serializedName() {
         return "HOST_ACTION";
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(indent, serializedName() + " = " + mActionId);
     }
 
     @Override
     public void apply(RemoteContext context) {}
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@Nullable String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
@@ -70,21 +76,25 @@ public class HostActionOperation implements ActionOperation {
 
     @Override
     public void runAction(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+            @NonNull RemoteContext context,
+            CoreDocument document,
+            Component component,
+            float x,
+            float y) {
         context.runAction(mActionId, "");
     }
 
-    public static void apply(WireBuffer buffer, int actionId) {
+    public static void apply(@NonNull WireBuffer buffer, int actionId) {
         buffer.start(OP_CODE);
         buffer.writeInt(actionId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int actionId = buffer.readInt();
         operations.add(new HostActionOperation(actionId));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "HostAction")
                 .description("Host action. This operation represents a host action")
                 .field(INT, "ACTION_ID", "Host Action ID");

@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.LONG;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
@@ -80,10 +82,11 @@ public class Header implements RemoteComposeOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mWidth, mHeight, mDensity, mCapabilities);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "HEADER v"
@@ -102,15 +105,17 @@ public class Header implements RemoteComposeOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.header(mMajorVersion, mMinorVersion, mPatchVersion, mWidth, mHeight, mCapabilities);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return toString();
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -120,7 +125,7 @@ public class Header implements RemoteComposeOperation {
     }
 
     public static void apply(
-            WireBuffer buffer, int width, int height, float density, long capabilities) {
+            @NonNull WireBuffer buffer, int width, int height, float density, long capabilities) {
         buffer.start(OP_CODE);
         buffer.writeInt(MAJOR_VERSION); // major version number of the protocol
         buffer.writeInt(MINOR_VERSION); // minor version number of the protocol
@@ -131,7 +136,7 @@ public class Header implements RemoteComposeOperation {
         buffer.writeLong(capabilities);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int majorVersion = buffer.readInt();
         int minorVersion = buffer.readInt();
         int patchVersion = buffer.readInt();
@@ -152,7 +157,7 @@ public class Header implements RemoteComposeOperation {
         operations.add(header);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
                 .description(
                         "Document metadata, containing the version,"

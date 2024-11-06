@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -94,7 +96,7 @@ public class ColorExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         if (mMode == 4) {
             if (Float.isNaN(mHue)) {
                 mOutHue = context.getFloat(Utils.idFromNan(mHue));
@@ -118,7 +120,7 @@ public class ColorExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (mMode == 4) {
             if (Float.isNaN(mHue)) {
                 context.listensTo(Utils.idFromNan(mHue), this);
@@ -143,7 +145,7 @@ public class ColorExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         if (mMode == 4) {
             context.loadColor(
                     mId, (mAlpha << 24) | (0xFFFFFF & Utils.hsvToRgb(mOutHue, mOutSat, mOutValue)));
@@ -164,11 +166,12 @@ public class ColorExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         int mode = mMode | (mAlpha << 16);
         apply(buffer, mId, mode, mColor1, mColor2, mTween);
     }
 
+    @NonNull
     @Override
     public String toString() {
         if (mMode == 4) {
@@ -196,6 +199,7 @@ public class ColorExpression implements Operation, VariableSupport {
                 + ")";
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -215,7 +219,7 @@ public class ColorExpression implements Operation, VariableSupport {
      * @param tween
      */
     public static void apply(
-            WireBuffer buffer, int id, int mode, int color1, int color2, float tween) {
+            @NonNull WireBuffer buffer, int id, int mode, int color1, int color2, float tween) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(mode);
@@ -224,7 +228,7 @@ public class ColorExpression implements Operation, VariableSupport {
         buffer.writeFloat(tween);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int mode = buffer.readInt();
         int color1 = buffer.readInt();
@@ -234,7 +238,7 @@ public class ColorExpression implements Operation, VariableSupport {
         operations.add(new ColorExpression(id, mode, color1, color2, tween));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A Color defined by an expression")
                 .field(DocumentedOperation.INT, "id", "Id of the color")
@@ -249,6 +253,7 @@ public class ColorExpression implements Operation, VariableSupport {
                 .field(FLOAT, "tween", "32 bit ARGB color");
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();
