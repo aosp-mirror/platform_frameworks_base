@@ -47,7 +47,7 @@ package com.google.android.appfunctions.sidecar {
     field public static final int ERROR_CATEGORY_REQUEST_ERROR = 1; // 0x1
     field public static final int ERROR_CATEGORY_SYSTEM = 2; // 0x2
     field public static final int ERROR_CATEGORY_UNKNOWN = 0; // 0x0
-    field public static final String PROPERTY_RETURN_VALUE = "returnValue";
+    field public static final String PROPERTY_RETURN_VALUE = "android_app_appfunctions_returnvalue";
     field public static final int RESULT_APP_UNKNOWN_ERROR = 3000; // 0xbb8
     field public static final int RESULT_CANCELLED = 2001; // 0x7d1
     field public static final int RESULT_DENIED = 1000; // 0x3e8
