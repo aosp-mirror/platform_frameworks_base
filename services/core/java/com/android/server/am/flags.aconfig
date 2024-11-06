@@ -251,10 +251,3 @@ flag {
     description: "Add +X to the prev scores according to their positions in the process LRU list"
     bug: "359912586"
 }
-
-flag {
-    name: "use_cpu_time_capability"
-    namespace: "backstage_power"
-    description: "Use PROCESS_CAPABILITY_CPU_TIME to control unfreeze state."
-    bug: "370817323"
-}

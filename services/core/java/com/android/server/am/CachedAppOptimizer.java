@@ -101,7 +101,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-public class CachedAppOptimizer {
+public final class CachedAppOptimizer {
 
     // Flags stored in the DeviceConfig API.
     @VisibleForTesting static final String KEY_USE_COMPACTION = "use_compaction";

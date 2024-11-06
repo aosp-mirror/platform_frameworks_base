@@ -29,7 +29,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.ServiceThread;
 
 /**
@@ -45,14 +44,13 @@ public class ProcessStateController {
     private final GlobalState mGlobalState = new GlobalState();
 
     private ProcessStateController(ActivityManagerService ams, ProcessList processList,
-            ActiveUids activeUids, ServiceThread handlerThread,
-            CachedAppOptimizer cachedAppOptimizer, OomAdjuster.Injector oomAdjInjector,
+            ActiveUids activeUids, ServiceThread handlerThread, OomAdjuster.Injector oomAdjInjector,
             boolean useOomAdjusterModernImpl) {
         mOomAdjuster = useOomAdjusterModernImpl
                 ? new OomAdjusterModernImpl(ams, processList, activeUids, handlerThread,
-                mGlobalState, cachedAppOptimizer, oomAdjInjector)
+                mGlobalState, oomAdjInjector)
                 : new OomAdjuster(ams, processList, activeUids, handlerThread, mGlobalState,
-                        cachedAppOptimizer, oomAdjInjector);
+                        oomAdjInjector);
     }
 
     /**
@@ -596,7 +594,6 @@ public class ProcessStateController {
         private final ActiveUids mActiveUids;
 
         private ServiceThread mHandlerThread = null;
-        private CachedAppOptimizer mCachedAppOptimizer = null;
         private OomAdjuster.Injector mOomAdjInjector = null;
         private boolean mUseOomAdjusterModernImpl = false;
 
@@ -613,38 +610,24 @@ public class ProcessStateController {
             if (mHandlerThread == null) {
                 mHandlerThread = OomAdjuster.createAdjusterThread();
             }
-            if (mCachedAppOptimizer == null) {
-                mCachedAppOptimizer = new CachedAppOptimizer(mAms);
-            }
             if (mOomAdjInjector == null) {
                 mOomAdjInjector = new OomAdjuster.Injector();
             }
             return new ProcessStateController(mAms, mProcessList, mActiveUids, mHandlerThread,
-                    mCachedAppOptimizer, mOomAdjInjector, mUseOomAdjusterModernImpl);
+                    mOomAdjInjector, mUseOomAdjusterModernImpl);
         }
 
         /**
          * For Testing Purposes. Set what thread OomAdjuster will offload tasks on to.
          */
-        @VisibleForTesting
         public Builder setHandlerThread(ServiceThread handlerThread) {
             mHandlerThread = handlerThread;
             return this;
         }
 
         /**
-         * For Testing Purposes. Set the CachedAppOptimzer used by OomAdjuster.
-         */
-        @VisibleForTesting
-        public Builder setCachedAppOptimizer(CachedAppOptimizer cachedAppOptimizer) {
-            mCachedAppOptimizer = cachedAppOptimizer;
-            return this;
-        }
-
-        /**
          * For Testing Purposes. Set an injector for OomAdjuster.
          */
-        @VisibleForTesting
         public Builder setOomAdjusterInjector(OomAdjuster.Injector injector) {
             mOomAdjInjector = injector;
             return this;
