@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.shared;
+package com.android.systemui.statusbar.notification.promoted
 
-parcelable GroupedRecentTaskInfo;
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+
+@Module
+abstract class PromotedNotificationsModule {
+    @Binds
+    @SysUISingleton
+    abstract fun bindPromotedNotificationsProvider(
+        impl: PromotedNotificationsProviderImpl
+    ): PromotedNotificationsProvider
+}

@@ -98,7 +98,7 @@ class MultiPointerDraggableTest {
                         Modifier.multiPointerDraggable(
                             orientation = Orientation.Vertical,
                             startDragImmediately = { false },
-                            onDragStarted = { _, _, _ ->
+                            onDragStarted = { _, _ ->
                                 started = true
                                 SimpleDragController(
                                     onDrag = { dragged = true },
@@ -167,7 +167,7 @@ class MultiPointerDraggableTest {
                         orientation = Orientation.Vertical,
                         // We want to start a drag gesture immediately
                         startDragImmediately = { true },
-                        onDragStarted = { _, _, _ ->
+                        onDragStarted = { _, _ ->
                             started = true
                             SimpleDragController(
                                 onDrag = { dragged = true },
@@ -239,7 +239,7 @@ class MultiPointerDraggableTest {
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         startDragImmediately = { false },
-                        onDragStarted = { _, _, _ ->
+                        onDragStarted = { _, _ ->
                             started = true
                             SimpleDragController(
                                 onDrag = { dragged = true },
@@ -358,7 +358,7 @@ class MultiPointerDraggableTest {
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         startDragImmediately = { false },
-                        onDragStarted = { _, _, _ ->
+                        onDragStarted = { _, _ ->
                             started = true
                             SimpleDragController(
                                 onDrag = { dragged = true },
@@ -463,7 +463,7 @@ class MultiPointerDraggableTest {
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         startDragImmediately = { false },
-                        onDragStarted = { _, _, _ ->
+                        onDragStarted = { _, _ ->
                             verticalStarted = true
                             SimpleDragController(
                                 onDrag = { verticalDragged = true },
@@ -475,7 +475,7 @@ class MultiPointerDraggableTest {
                     .multiPointerDraggable(
                         orientation = Orientation.Horizontal,
                         startDragImmediately = { false },
-                        onDragStarted = { _, _, _ ->
+                        onDragStarted = { _, _ ->
                             horizontalStarted = true
                             SimpleDragController(
                                 onDrag = { horizontalDragged = true },
@@ -574,7 +574,7 @@ class MultiPointerDraggableTest {
                                     return swipeConsume
                                 }
                             },
-                        onDragStarted = { _, _, _ ->
+                        onDragStarted = { _, _ ->
                             started = true
                             SimpleDragController(
                                 onDrag = { /* do nothing */ },
@@ -668,7 +668,7 @@ class MultiPointerDraggableTest {
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         startDragImmediately = { false },
-                        onDragStarted = { _, _, _ ->
+                        onDragStarted = { _, _ ->
                             SimpleDragController(
                                 onDrag = { consumedOnDrag = it },
                                 onStop = { consumedOnDragStop = it },
@@ -739,7 +739,7 @@ class MultiPointerDraggableTest {
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
                         startDragImmediately = { false },
-                        onDragStarted = { _, _, _ ->
+                        onDragStarted = { _, _ ->
                             SimpleDragController(
                                 onDrag = { /* do nothing */ },
                                 onStop = {

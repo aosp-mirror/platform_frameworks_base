@@ -33,118 +33,118 @@
           "bottom": 0
         },
         {
-          "left": 94,
-          "top": 284,
-          "right": 206,
+          "left": 104,
+          "top": 285,
+          "right": 215,
           "bottom": 414
         },
         {
-          "left": 83,
-          "top": 251,
-          "right": 219,
+          "left": 92,
+          "top": 252,
+          "right": 227,
           "bottom": 447
         },
         {
-          "left": 70,
-          "top": 212,
-          "right": 234,
-          "bottom": 485
+          "left": 77,
+          "top": 213,
+          "right": 242,
+          "bottom": 486
         },
         {
-          "left": 57,
-          "top": 173,
-          "right": 250,
-          "bottom": 522
+          "left": 63,
+          "top": 175,
+          "right": 256,
+          "bottom": 524
         },
         {
-          "left": 46,
-          "top": 139,
-          "right": 264,
-          "bottom": 555
+          "left": 50,
+          "top": 141,
+          "right": 269,
+          "bottom": 558
         },
         {
-          "left": 36,
-          "top": 109,
-          "right": 276,
-          "bottom": 584
+          "left": 40,
+          "top": 112,
+          "right": 279,
+          "bottom": 587
         },
         {
-          "left": 28,
-          "top": 84,
-          "right": 285,
-          "bottom": 608
+          "left": 31,
+          "top": 88,
+          "right": 288,
+          "bottom": 611
         },
         {
-          "left": 21,
-          "top": 65,
-          "right": 293,
-          "bottom": 627
+          "left": 23,
+          "top": 68,
+          "right": 296,
+          "bottom": 631
         },
         {
-          "left": 16,
-          "top": 49,
-          "right": 300,
-          "bottom": 642
+          "left": 18,
+          "top": 53,
+          "right": 301,
+          "bottom": 646
         },
         {
-          "left": 12,
-          "top": 36,
-          "right": 305,
-          "bottom": 653
+          "left": 13,
+          "top": 41,
+          "right": 306,
+          "bottom": 658
         },
         {
-          "left": 9,
-          "top": 27,
-          "right": 308,
-          "bottom": 662
+          "left": 10,
+          "top": 31,
+          "right": 309,
+          "bottom": 667
         },
         {
           "left": 7,
-          "top": 20,
+          "top": 24,
           "right": 312,
-          "bottom": 669
+          "bottom": 673
         },
         {
           "left": 5,
-          "top": 14,
+          "top": 18,
           "right": 314,
-          "bottom": 675
-        },
-        {
-          "left": 4,
-          "top": 11,
-          "right": 315,
           "bottom": 678
         },
         {
-          "left": 3,
-          "top": 8,
-          "right": 316,
+          "left": 4,
+          "top": 13,
+          "right": 315,
           "bottom": 681
         },
         {
-          "left": 2,
-          "top": 5,
-          "right": 317,
+          "left": 3,
+          "top": 10,
+          "right": 316,
           "bottom": 684
+        },
+        {
+          "left": 2,
+          "top": 7,
+          "right": 317,
+          "bottom": 685
+        },
+        {
+          "left": 1,
+          "top": 5,
+          "right": 318,
+          "bottom": 687
         },
         {
           "left": 1,
           "top": 4,
           "right": 318,
-          "bottom": 685
-        },
-        {
-          "left": 1,
-          "top": 3,
-          "right": 318,
-          "bottom": 686
+          "bottom": 688
         },
         {
           "left": 0,
-          "top": 2,
+          "top": 3,
           "right": 319,
-          "bottom": 687
+          "bottom": 688
         }
       ]
     },
@@ -371,5 +371,14 @@
         0
       ]
     }
-  ]
+  ],
+  "\/\/metadata": {
+    "goldenRepoPath": "frameworks\/base\/packages\/SystemUI\/tests\/goldens\/backgroundAnimationWithoutFade_whenReturning_withSpring.json",
+    "goldenIdentifier": "backgroundAnimationWithoutFade_whenReturning_withSpring",
+    "testClassName": "TransitionAnimatorTest",
+    "testMethodName": "backgroundAnimationWithoutFade_whenReturning[true]",
+    "deviceLocalPath": "\/data\/user\/0\/com.android.systemui.tests\/files\/platform_screenshots",
+    "result": "FAILED",
+    "videoLocation": "TransitionAnimatorTest\/backgroundAnimationWithoutFade_whenReturning_withSpring.actual.mp4"
+  }
 }

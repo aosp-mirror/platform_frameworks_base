@@ -25,7 +25,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -190,14 +189,9 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 eq(appWindow.getSurfaceControl()), anyFloat(),
                 eq(Surface.FRAME_RATE_COMPATIBILITY_EXACT), eq(Surface.CHANGE_FRAME_RATE_ALWAYS));
-        if (explicitRefreshRateHints()) {
-            verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
-                    appWindow.getSurfaceControl(),
-                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-        } else {
-            verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionStrategy(
-                    any(SurfaceControl.class), anyInt());
-        }
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
+                appWindow.getSurfaceControl(),
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 
     @Test
@@ -226,14 +220,9 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 eq(appWindow.getSurfaceControl()), anyFloat(),
                 eq(Surface.FRAME_RATE_COMPATIBILITY_EXACT), eq(Surface.CHANGE_FRAME_RATE_ALWAYS));
-        if (explicitRefreshRateHints()) {
-            verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
-                    appWindow.getSurfaceControl(),
-                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-        } else {
-            verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionStrategy(
-                    any(SurfaceControl.class), anyInt());
-        }
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
+                appWindow.getSurfaceControl(),
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 
     @Test
@@ -288,14 +277,9 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 appWindow.getSurfaceControl(), 60,
                 Surface.FRAME_RATE_COMPATIBILITY_EXACT, Surface.CHANGE_FRAME_RATE_ALWAYS);
-        if (explicitRefreshRateHints()) {
-            verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
-                    appWindow.getSurfaceControl(),
-                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-        } else {
-            verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionStrategy(
-                    any(SurfaceControl.class), anyInt());
-        }
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
+                appWindow.getSurfaceControl(),
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 
     @Test
@@ -352,13 +336,8 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 appWindow.getSurfaceControl(), 60,
                 Surface.FRAME_RATE_COMPATIBILITY_DEFAULT, Surface.CHANGE_FRAME_RATE_ALWAYS);
-        if (explicitRefreshRateHints()) {
-            verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
-                    appWindow.getSurfaceControl(),
-                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-        } else {
-            verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionStrategy(
-                    any(SurfaceControl.class), anyInt());
-        }
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
+                appWindow.getSurfaceControl(),
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 }

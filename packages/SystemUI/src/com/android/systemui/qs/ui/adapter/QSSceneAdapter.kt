@@ -37,7 +37,6 @@ import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.MirrorController
-import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.kotlin.sample
@@ -207,7 +206,7 @@ constructor(
     dumpManager: DumpManager,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Application applicationScope: CoroutineScope,
-    @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
+    private val configurationInteractor: ConfigurationInteractor,
     private val asyncLayoutInflaterFactory: (Context) -> AsyncLayoutInflater,
 ) : QSContainerController, QSSceneAdapter, Dumpable {
 
@@ -220,7 +219,7 @@ constructor(
         dumpManager: DumpManager,
         @Main dispatcher: CoroutineDispatcher,
         @Application scope: CoroutineScope,
-        @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
+        configurationInteractor: ConfigurationInteractor,
     ) : this(
         qsSceneComponentFactory,
         qsImplProvider,
@@ -257,7 +256,7 @@ constructor(
             .stateIn(
                 applicationScope,
                 SharingStarted.WhileSubscribed(),
-                customizerState.value.isShowing,
+                customizerState.value.isShowing
             )
     override val customizerAnimationDuration: StateFlow<Int> =
         customizerState
