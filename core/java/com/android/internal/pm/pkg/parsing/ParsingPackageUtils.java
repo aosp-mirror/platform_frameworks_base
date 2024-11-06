@@ -541,6 +541,7 @@ public class ParsingPackageUtils {
 
         pkg.setGwpAsanMode(-1);
         pkg.setMemtagMode(-1);
+        pkg.setPageSizeAppCompatFlags(ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED);
 
         afterParseBaseApplication(pkg);
 
@@ -2182,6 +2183,13 @@ public class ParsingPackageUtils {
 
             pkg.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestApplication_gwpAsanMode, -1));
             pkg.setMemtagMode(sa.getInt(R.styleable.AndroidManifestApplication_memtagMode, -1));
+
+            if (Flags.appCompatOption16kb()) {
+                pkg.setPageSizeAppCompatFlags(
+                        sa.getInt(R.styleable.AndroidManifestApplication_pageSizeCompat,
+                                ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED));
+            }
+
             if (sa.hasValue(R.styleable.AndroidManifestApplication_nativeHeapZeroInitialized)) {
                 final boolean v = sa.getBoolean(
                         R.styleable.AndroidManifestApplication_nativeHeapZeroInitialized, false);

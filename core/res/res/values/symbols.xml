@@ -3308,6 +3308,11 @@
   <java-symbol type="string" name="language_selection_title" />
   <java-symbol type="string" name="search_language_hint" />
 
+  <!-- Strings for page size app compat dialog -->
+  <java-symbol type="string" name="page_size_compat_apk_warning" />
+  <java-symbol type="string" name="page_size_compat_elf_warning" />
+  <java-symbol type="string" name="page_size_compat_apk_and_elf_warning" />
+
   <!--  Work profile unlaunchable app alert dialog-->
   <java-symbol type="style" name="AlertDialogWithEmergencyButton"/>
   <java-symbol type="string" name="work_mode_emergency_call_button" />

@@ -804,7 +804,6 @@ public abstract class PackageManager {
         @Deprecated
         private void __metadata() {}
 
-
         //@formatter:on
         // End of generated code
 
@@ -10987,6 +10986,41 @@ public abstract class PackageManager {
     }
 
     /**
+     * Set the page compat mode override for given package
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public void setPageSizeAppCompatFlagsSettingsOverride(@NonNull String packageName,
+            boolean enabled) {
+        throw new UnsupportedOperationException(
+                "setPageSizeAppCompatFlagsSettingsOverride not implemented in subclass");
+    }
+
+    /**
+     * Check whether page size app compat mode is enabled for given package
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public boolean isPageSizeCompatEnabled(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "isPageSizeCompatEnabled not implemented in subclass");
+    }
+
+    /**
+     * Get the page size app compat warning dialog to show at app launch time
+     *
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public String getPageSizeCompatWarningMessage(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "getPageSizeCompatWarningMessage not implemented in subclass");
+    }
+
+     /**
      * Returns the harmful app warning string for the given app, or null if there is none set.
      *
      * @param packageName The full name of the desired package.
