@@ -7485,6 +7485,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setHandler(handler);
         when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
 
         // Set up notifications that will be adjusted
         final NotificationRecord r1 = spy(generateNotificationRecord(
