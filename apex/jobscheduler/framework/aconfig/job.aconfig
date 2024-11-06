@@ -45,3 +45,11 @@ flag {
     description: "Introduce a new getPendingJobReasons() API which returns reasons why a job may not have executed. Also deprecate the existing getPendingJobReason() API."
     bug: "372031023"
 }
+
+flag {
+    name: "get_pending_job_reasons_history_api"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Introduce a new getPendingJobReasonsHistory() API which returns a limited historical view of getPendingJobReasons()."
+    bug: "372031023"
+}
