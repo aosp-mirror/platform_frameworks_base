@@ -34,6 +34,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
@@ -1487,12 +1488,13 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
     @CustomInputGestureResult
+    @UserHandleAware
     public int addCustomInputGesture(@NonNull InputGestureData inputGestureData) {
         if (!enableCustomizableInputGestures()) {
             return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
         }
         try {
-            return mIm.addCustomInputGesture(inputGestureData.getAidlData());
+            return mIm.addCustomInputGesture(mContext.getUserId(), inputGestureData.getAidlData());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1509,12 +1511,14 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
     @CustomInputGestureResult
+    @UserHandleAware
     public int removeCustomInputGesture(@NonNull InputGestureData inputGestureData) {
         if (!enableCustomizableInputGestures()) {
             return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
         }
         try {
-            return mIm.removeCustomInputGesture(inputGestureData.getAidlData());
+            return mIm.removeCustomInputGesture(mContext.getUserId(),
+                    inputGestureData.getAidlData());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1525,12 +1529,13 @@ public final class InputManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @UserHandleAware
     public void removeAllCustomInputGestures() {
         if (!enableCustomizableInputGestures()) {
             return;
         }
         try {
-            mIm.removeAllCustomInputGestures();
+            mIm.removeAllCustomInputGestures(mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1540,13 +1545,14 @@ public final class InputManager {
      *
      * @hide
      */
+    @UserHandleAware
     public List<InputGestureData> getCustomInputGestures() {
         List<InputGestureData> result = new ArrayList<>();
         if (!enableCustomizableInputGestures()) {
             return result;
         }
         try {
-            for (AidlInputGestureData data : mIm.getCustomInputGestures()) {
+            for (AidlInputGestureData data : mIm.getCustomInputGestures(mContext.getUserId())) {
                 result.add(new InputGestureData(data));
             }
         } catch (RemoteException e) {
