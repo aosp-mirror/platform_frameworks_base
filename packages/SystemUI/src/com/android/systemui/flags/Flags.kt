@@ -15,7 +15,6 @@
  */
 package com.android.systemui.flags
 
-import android.provider.DeviceConfig
 import com.android.internal.annotations.Keep
 import com.android.systemui.flags.FlagsFactory.releasedFlag
 import com.android.systemui.flags.FlagsFactory.resourceBooleanFlag
@@ -250,15 +249,6 @@ object Flags {
     @JvmField
     val WM_ENABLE_SHELL_TRANSITIONS =
         sysPropBooleanFlag("persist.wm.debug.shell_transit", default = true)
-
-    // TODO(b/254513207): Tracking Bug to delete
-    @Keep
-    @JvmField
-    val WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES =
-        releasedFlag(
-            name = "enable_screen_record_enterprise_policies",
-            namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-        )
 
     // TODO(b/293252410) : Tracking Bug
     @JvmField val LOCKSCREEN_ENABLE_LANDSCAPE = unreleasedFlag("lockscreen.enable_landscape")
