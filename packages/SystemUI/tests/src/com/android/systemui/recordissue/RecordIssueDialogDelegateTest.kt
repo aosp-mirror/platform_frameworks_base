@@ -27,7 +27,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
@@ -56,7 +55,6 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -150,8 +148,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
 
     @Test
     fun screenCaptureDisabledDialog_isShown_whenFunctionalityIsDisabled() {
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES))
-            .thenReturn(true)
         whenever(devicePolicyResolver.isScreenCaptureCompletelyDisabled(any<UserHandle>()))
             .thenReturn(true)
 
@@ -167,48 +163,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                 eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER),
             )
         assertThat(screenRecordSwitch.isChecked).isFalse()
-    }
-
-    @Test
-    fun screenCapturePermissionDialog_isShown_correctly() {
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES))
-            .thenReturn(false)
-        whenever(devicePolicyResolver.isScreenCaptureCompletelyDisabled(any<UserHandle>()))
-            .thenReturn(false)
-        whenever(state.hasUserApprovedScreenRecording).thenReturn(false)
-
-        val screenRecordSwitch = dialog.requireViewById<Switch>(R.id.screenrecord_switch)
-        screenRecordSwitch.isChecked = true
-
-        bgExecutor.runAllReady()
-        mainExecutor.runAllReady()
-
-        verify(mediaProjectionMetricsLogger)
-            .notifyProjectionInitiated(
-                anyInt(),
-                eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER),
-            )
-        verify(factory, times(2)).create(any(SystemUIDialog.Delegate::class.java))
-    }
-
-    @Test
-    fun noDialogsAreShown_forScreenRecord_whenApprovalIsAlreadyGiven() {
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES))
-            .thenReturn(false)
-        whenever(devicePolicyResolver.isScreenCaptureCompletelyDisabled(any<UserHandle>()))
-            .thenReturn(false)
-
-        val screenRecordSwitch = dialog.requireViewById<Switch>(R.id.screenrecord_switch)
-        screenRecordSwitch.isChecked = true
-
-        bgExecutor.runAllReady()
-
-        verify(mediaProjectionMetricsLogger)
-            .notifyProjectionInitiated(
-                anyInt(),
-                eq(SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER),
-            )
-        verify(factory, never()).create()
     }
 
     @Test

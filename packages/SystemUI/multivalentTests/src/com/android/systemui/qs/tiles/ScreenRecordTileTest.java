@@ -23,7 +23,6 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -160,9 +159,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         ArgumentCaptor<Runnable> onStartRecordingClicked = ArgumentCaptor.forClass(Runnable.class);
-        verify(mController).createScreenRecordDialog(any(), eq(mFeatureFlags),
-                eq(mDialogTransitionAnimator), eq(mActivityStarter),
-                onStartRecordingClicked.capture());
+        verify(mController).createScreenRecordDialog(onStartRecordingClicked.capture());
 
         // When starting the recording, we collapse the shade and disable the dialog animation.
         assertNotNull(onStartRecordingClicked.getValue());
@@ -298,14 +295,13 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     public void showingDialogPrompt_logsMediaProjectionPermissionRequested() {
         when(mController.isStarting()).thenReturn(false);
         when(mController.isRecording()).thenReturn(false);
-        when(mController.createScreenRecordDialog(any(), any(), any(), any(), any()))
+        when(mController.createScreenRecordDialog(any()))
                 .thenReturn(mPermissionDialogPrompt);
 
         mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
-        verify(mController).createScreenRecordDialog(any(), eq(mFeatureFlags),
-                eq(mDialogTransitionAnimator), eq(mActivityStarter), any());
+        verify(mController).createScreenRecordDialog(any());
         var onDismissAction = ArgumentCaptor.forClass(ActivityStarter.OnDismissAction.class);
         verify(mKeyguardDismissUtil).executeWhenUnlocked(
                 onDismissAction.capture(), anyBoolean(), anyBoolean());
