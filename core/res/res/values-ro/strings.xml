@@ -1939,13 +1939,13 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Eveniment"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Somn"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Nu deranja (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gestionat de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activată"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Dezactivată"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Orice calendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dezactivează anumite sunete"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"A apărut o problemă internă pe dispozitiv, iar acesta poate fi instabil până la revenirea la setările din fabrică."</string>
@@ -2183,7 +2183,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Conexiunea Bluetooth va rămâne activată în modul Avion"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Se încarcă"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fișier}few{{file_name} + # fișiere}other{{file_name} + # de fișiere}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nu există persoane recomandate pentru permiterea accesului"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nu există persoane recomandate pentru trimitere"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicații"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Permisiunea de înregistrare nu a fost acordată aplicației, dar aceasta poate să înregistreze conținut audio prin intermediul acestui dispozitiv USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Pornire"</string>
@@ -2427,15 +2427,59 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Trimite și primește mesaje fără o rețea mobilă sau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Deschide Mesaje"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cum funcționează"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Activează opțiunea Selectează automat rețeaua"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Activează opțiunea Selectează automat rețeaua în Setări pentru ca telefonul să găsească o rețea compatibilă cu satelitul"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Activează"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Înapoi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"În așteptare..."</string>
+    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
+    <skip />
+    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
+    <skip />
+    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
+    <skip />
+    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
+    <skip />
+    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
+    <skip />
+    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
+    <skip />
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurează din nou Deblocarea cu amprenta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> nu mai poate fi recunoscută."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> și <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nu mai pot fi recunoscute."</string>
