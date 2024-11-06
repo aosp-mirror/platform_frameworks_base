@@ -1929,6 +1929,12 @@ public class NotificationManagerService extends SystemService {
                 hasSensitiveContent, lifespanMs);
     }
 
+    protected void logClassificationChannelAdjustmentReceived(boolean hasPosted, boolean isAlerting,
+                                                              int classification, int lifespanMs) {
+        FrameworkStatsLog.write(FrameworkStatsLog.NOTIFICATION_CHANNEL_CLASSIFICATION,
+                hasPosted, isAlerting, classification, lifespanMs);
+    }
+
     protected final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -6988,8 +6994,15 @@ public class NotificationManagerService extends SystemService {
                 if (newChannel == null || newChannel.getId().equals(r.getChannel().getId())) {
                     adjustments.remove(KEY_TYPE);
                 } else {
+                    // Save the app-provided type for logging.
+                    int classification = adjustments.getInt(KEY_TYPE);
                     // swap app provided type with the real thing
                     adjustments.putParcelable(KEY_TYPE, newChannel);
+                    // Note that this value of isAlerting does not fully indicate whether a notif
+                    // would make a sound or HUN on device; it is an approximation for metrics.
+                    boolean isAlerting = r.getChannel().getImportance() >= IMPORTANCE_DEFAULT;
+                    logClassificationChannelAdjustmentReceived(isPosted, isAlerting, classification,
+                            r.getLifespanMs(System.currentTimeMillis()));
                 }
             }
             r.addAdjustment(adjustment);
