@@ -1260,24 +1260,102 @@ class KeyGestureControllerTests {
         testKeyGestureInternal(test)
     }
 
-    private fun testKeyGestureInternal(test: TestData) {
-        var handleEvents = mutableListOf<KeyGestureEvent>()
+    class TouchpadTestData(
+        val name: String,
+        val touchpadGestureType: Int,
+        val expectedKeyGestureType: Int,
+        val expectedAction: Int,
+        val expectedAppLaunchData: AppLaunchData? = null,
+    ) {
+        override fun toString(): String = name
+    }
+
+    @Keep
+    private fun customTouchpadGesturesTestArguments(): Array<TouchpadTestData> {
+        return arrayOf(
+            TouchpadTestData(
+                "3 Finger Tap -> Go Home",
+                InputGestureData.TOUCHPAD_GESTURE_TYPE_THREE_FINGER_TAP,
+                KeyGestureEvent.KEY_GESTURE_TYPE_HOME,
+                KeyGestureEvent.ACTION_GESTURE_COMPLETE
+            ),
+            TouchpadTestData(
+                "3 Finger Tap -> Launch app",
+                InputGestureData.TOUCHPAD_GESTURE_TYPE_THREE_FINGER_TAP,
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                AppLaunchData.createLaunchDataForComponent("com.test", "com.test.BookmarkTest")
+            ),
+        )
+    }
+
+    @Test
+    @Parameters(method = "customTouchpadGesturesTestArguments")
+    fun testCustomTouchpadGesture(test: TouchpadTestData) {
+        setupKeyGestureController()
+        val builder = InputGestureData.Builder()
+            .setKeyGestureType(test.expectedKeyGestureType)
+            .setTrigger(InputGestureData.createTouchpadTrigger(test.touchpadGestureType))
+        if (test.expectedAppLaunchData != null) {
+            builder.setAppLaunchData(test.expectedAppLaunchData)
+        }
+        val inputGestureData = builder.build()
+
+        keyGestureController.addCustomInputGesture(0, inputGestureData.aidlData)
+
+        val handledEvents = mutableListOf<KeyGestureEvent>()
         val handler = KeyGestureHandler { event, _ ->
-            handleEvents.add(KeyGestureEvent(event))
+            handledEvents.add(KeyGestureEvent(event))
             true
         }
         keyGestureController.registerKeyGestureHandler(handler, 0)
-        handleEvents.clear()
+        handledEvents.clear()
+
+        keyGestureController.handleTouchpadGesture(test.touchpadGestureType)
+
+        assertEquals(
+            "Test: $test doesn't produce correct number of key gesture events",
+            1,
+            handledEvents.size
+        )
+        val event = handledEvents[0]
+        assertEquals(
+            "Test: $test doesn't produce correct key gesture type",
+            test.expectedKeyGestureType,
+            event.keyGestureType
+        )
+        assertEquals(
+            "Test: $test doesn't produce correct key gesture action",
+            test.expectedAction,
+            event.action
+        )
+        assertEquals(
+            "Test: $test doesn't produce correct app launch data",
+            test.expectedAppLaunchData,
+            event.appLaunchData
+        )
+
+        keyGestureController.unregisterKeyGestureHandler(handler, 0)
+    }
+
+    private fun testKeyGestureInternal(test: TestData) {
+        val handledEvents = mutableListOf<KeyGestureEvent>()
+        val handler = KeyGestureHandler { event, _ ->
+            handledEvents.add(KeyGestureEvent(event))
+            true
+        }
+        keyGestureController.registerKeyGestureHandler(handler, 0)
+        handledEvents.clear()
 
         sendKeys(test.keys)
 
         assertEquals(
             "Test: $test doesn't produce correct number of key gesture events",
             test.expectedActions.size,
-            handleEvents.size
+            handledEvents.size
         )
-        for (i in handleEvents.indices) {
-            val event = handleEvents[i]
+        for (i in handledEvents.indices) {
+            val event = handledEvents[i]
             assertArrayEquals(
                 "Test: $test doesn't produce correct key gesture keycodes",
                 test.expectedKeys,
@@ -1309,16 +1387,16 @@ class KeyGestureControllerTests {
     }
 
     private fun testKeyGestureNotProduced(testName: String, testKeys: IntArray) {
-        var handleEvents = mutableListOf<KeyGestureEvent>()
+        var handledEvents = mutableListOf<KeyGestureEvent>()
         val handler = KeyGestureHandler { event, _ ->
-            handleEvents.add(KeyGestureEvent(event))
+            handledEvents.add(KeyGestureEvent(event))
             true
         }
         keyGestureController.registerKeyGestureHandler(handler, 0)
-        handleEvents.clear()
+        handledEvents.clear()
 
         sendKeys(testKeys)
-        assertEquals("Test: $testName should not produce Key gesture", 0, handleEvents.size)
+        assertEquals("Test: $testName should not produce Key gesture", 0, handledEvents.size)
     }
 
     private fun sendKeys(testKeys: IntArray, assertNotSentToApps: Boolean = false) {

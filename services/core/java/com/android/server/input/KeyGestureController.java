@@ -847,6 +847,13 @@ final class KeyGestureController {
                 /* appLaunchData = */null);
     }
 
+    private void handleTouchpadGesture(@KeyGestureEvent.KeyGestureType int keyGestureType,
+            @Nullable AppLaunchData appLaunchData) {
+        handleKeyGesture(KeyCharacterMap.VIRTUAL_KEYBOARD, new int[0], /* modifierState= */0,
+                keyGestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                Display.DEFAULT_DISPLAY, /* focusedToken = */null, /* flags = */0, appLaunchData);
+    }
+
     @VisibleForTesting
     boolean handleKeyGesture(int deviceId, int[] keycodes, int modifierState,
             @KeyGestureEvent.KeyGestureType int gestureType, int action, int displayId,
@@ -897,11 +904,18 @@ final class KeyGestureController {
         handleKeyGesture(event, null /*focusedToken*/);
     }
 
-    public void handleTouchpadThreeFingerTap() {
-        // TODO(b/365063048): trigger a custom shortcut based on the three-finger tap.
-        if (DEBUG) {
-            Slog.d(TAG, "Three-finger touchpad tap occurred");
+    public void handleTouchpadGesture(int touchpadGestureType) {
+        // Handle custom shortcuts
+        InputGestureData customGesture;
+        synchronized (mUserLock) {
+            customGesture = mInputGestureManager.getCustomGestureForTouchpadGesture(mCurrentUserId,
+                    touchpadGestureType);
         }
+        if (customGesture == null) {
+            return;
+        }
+        handleTouchpadGesture(customGesture.getAction().keyGestureType(),
+                customGesture.getAction().appLaunchData());
     }
 
     @MainThread
@@ -1214,6 +1228,7 @@ final class KeyGestureController {
     public void dump(IndentingPrintWriter ipw) {
         ipw.println("KeyGestureController:");
         ipw.increaseIndent();
+        ipw.println("mCurrentUserId = " + mCurrentUserId);
         ipw.println("mSystemPid = " + mSystemPid);
         ipw.println("mPendingMetaAction = " + mPendingMetaAction);
         ipw.println("mPendingCapsLockToggle = " + mPendingCapsLockToggle);
