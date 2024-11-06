@@ -23877,12 +23877,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         draw(canvas);
                     }
-                }
 
-                // For VRR to vote the preferred frame rate
-                if (sToolkitSetFrameRateReadOnlyFlagValue
-                        && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
-                    votePreferredFrameRate();
+                    // For VRR to vote the preferred frame rate
+                    if (sToolkitSetFrameRateReadOnlyFlagValue
+                            && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                        votePreferredFrameRate();
+                    }
                 }
             } finally {
                 renderNode.endRecording();
