@@ -376,3 +376,12 @@ flag {
     description: "Enables SQlite for recording discrete and historical AppOp accesses"
     bug: "377584611"
 }
+
+flag {
+    name: "ranging_permission_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "uwb"
+    description: "This fixed read-only flag is used to enable new ranging permission for all ranging use cases."
+    bug: "370977414"
+}
