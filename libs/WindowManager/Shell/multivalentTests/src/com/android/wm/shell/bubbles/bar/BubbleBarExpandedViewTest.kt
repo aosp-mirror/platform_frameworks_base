@@ -337,7 +337,7 @@ class BubbleBarExpandedViewTest {
             override fun hideCurrentInputMethod() {
             }
 
-            override fun updateBubbleBarLocation(location: BubbleBarLocation) {
+            override fun updateBubbleBarLocation(location: BubbleBarLocation, source: Int) {
             }
         }
     }

@@ -2395,7 +2395,8 @@ public class BubblesTest extends SysuiTestCase {
 
         FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
-        mBubbleController.setBubbleBarLocation(BubbleBarLocation.LEFT);
+        mBubbleController.setBubbleBarLocation(BubbleBarLocation.LEFT,
+                BubbleBarLocation.UpdateSource.DRAG_EXP_VIEW);
         assertThat(bubbleStateListener.mLastUpdate).isNotNull();
         assertThat(bubbleStateListener.mLastUpdate.bubbleBarLocation).isEqualTo(
                 BubbleBarLocation.LEFT);
@@ -2408,7 +2409,8 @@ public class BubblesTest extends SysuiTestCase {
 
         FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
-        mBubbleController.setBubbleBarLocation(BubbleBarLocation.LEFT);
+        mBubbleController.setBubbleBarLocation(BubbleBarLocation.LEFT,
+                BubbleBarLocation.UpdateSource.DRAG_EXP_VIEW);
         assertThat(bubbleStateListener.mStateChangeCalls).isEqualTo(0);
     }
 
@@ -2531,6 +2533,78 @@ public class BubblesTest extends SysuiTestCase {
         // Dismiss via user gesture, log an event
         mBubbleController.removeAllBubbles(Bubbles.DISMISS_USER_GESTURE);
         verify(mBubbleLogger).log(BubbleLogger.Event.BUBBLE_BAR_DISMISSED_DRAG_BAR);
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_dragBarLeft() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        mPositioner.setBubbleBarLocation(BubbleBarLocation.RIGHT);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        assertBarMode();
+
+        mBubbleController.setBubbleBarLocation(BubbleBarLocation.LEFT,
+                BubbleBarLocation.UpdateSource.DRAG_BAR);
+
+        verify(mBubbleLogger).log(BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_BAR);
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_dragBarRight() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        mPositioner.setBubbleBarLocation(BubbleBarLocation.LEFT);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        assertBarMode();
+
+        mBubbleController.setBubbleBarLocation(BubbleBarLocation.RIGHT,
+                BubbleBarLocation.UpdateSource.DRAG_BAR);
+
+        verify(mBubbleLogger).log(BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_BAR);
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_dragBubbleLeft() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        mPositioner.setBubbleBarLocation(BubbleBarLocation.RIGHT);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        assertBarMode();
+
+        mBubbleController.setBubbleBarLocation(BubbleBarLocation.LEFT,
+                BubbleBarLocation.UpdateSource.DRAG_BUBBLE);
+
+        verify(mBubbleLogger).log(BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_BUBBLE);
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_dragBubbleRight() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        mPositioner.setBubbleBarLocation(BubbleBarLocation.LEFT);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        assertBarMode();
+
+        mBubbleController.setBubbleBarLocation(BubbleBarLocation.RIGHT,
+                BubbleBarLocation.UpdateSource.DRAG_BUBBLE);
+
+        verify(mBubbleLogger).log(BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_BUBBLE);
     }
 
     @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
