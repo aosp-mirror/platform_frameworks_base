@@ -34,9 +34,9 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
-import com.android.systemui.Flags.notificationShadeBlur
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionChangeEvent
@@ -50,10 +50,14 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.WallpaperController
+import com.android.systemui.window.domain.interactor.WindowRootViewBlurInteractor
+import com.android.systemui.window.flag.WindowBlurFlag
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.sign
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * Responsible for blurring the notification shade window, and applying a zoom effect to the
@@ -73,6 +77,8 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
+    private val windowRootViewBlurInteractor: WindowRootViewBlurInteractor,
+    @Application private val applicationScope: CoroutineScope,
     dumpManager: DumpManager,
     configurationController: ConfigurationController,
 ) : ShadeExpansionListener, Dumpable {
@@ -162,6 +168,8 @@ constructor(
             shadeAnimation.finishIfRunning()
         }
 
+    private var zoomOutCalculatedFromShadeRadius: Float = 0.0f
+
     /** We're unlocking, and should not blur as the panel expansion changes. */
     var blursDisabledForUnlock: Boolean = false
         set(value) {
@@ -216,7 +224,7 @@ constructor(
         val zoomOut = blurRadiusToZoomOut(blurRadius = shadeRadius)
         // Make blur be 0 if it is necessary to stop blur effect.
         if (scrimsVisible) {
-            if (!notificationShadeBlur()) {
+            if (!WindowBlurFlag.isEnabled) {
                 blur = 0
             }
         }
@@ -244,7 +252,7 @@ constructor(
     }
 
     private val shouldBlurBeOpaque: Boolean
-        get() = if (notificationShadeBlur()) false else scrimsVisible && !blursDisabledForAppLaunch
+        get() = if (WindowBlurFlag.isEnabled) false else scrimsVisible && !blursDisabledForAppLaunch
 
     /** Callback that updates the window blur value and is called only once per frame. */
     @VisibleForTesting
@@ -363,6 +371,26 @@ constructor(
                 }
             }
         )
+        initBlurListeners()
+    }
+
+    private fun initBlurListeners() {
+        if (!WindowBlurFlag.isEnabled) return
+
+        applicationScope.launch {
+            Log.d(TAG, "Starting coroutines for window root view blur")
+            windowRootViewBlurInteractor.onBlurAppliedEvent.collect { appliedBlurRadius ->
+                if (updateScheduled) {
+                    // Process the blur applied event only if we scheduled the update
+                    Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", appliedBlurRadius)
+                    updateScheduled = false
+                    onBlurApplied(appliedBlurRadius, zoomOutCalculatedFromShadeRadius)
+                } else {
+                    // Try scheduling an update now, maybe our blur request will be scheduled now.
+                    scheduleUpdate()
+                }
+            }
+        }
     }
 
     private fun updateResources() {
@@ -480,11 +508,17 @@ constructor(
     }
 
     private fun scheduleUpdate() {
+        val (blur, zoomOutFromShadeRadius) = computeBlurAndZoomOut()
+        zoomOutCalculatedFromShadeRadius = zoomOutFromShadeRadius
+        if (WindowBlurFlag.isEnabled) {
+            updateScheduled =
+                windowRootViewBlurInteractor.requestBlurForShade(blur, shouldBlurBeOpaque)
+            return
+        }
         if (updateScheduled) {
             return
         }
         updateScheduled = true
-        val (blur, _) = computeBlurAndZoomOut()
         blurUtils.prepareBlur(root.viewRootImpl, blur)
         choreographer.postFrameCallback(updateBlurCallback)
     }
