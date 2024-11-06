@@ -807,7 +807,7 @@
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"सञ्जाल अवस्थाका पर्यवेक्षणका लागि सुन्नुहोस्"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"सञ्जाल अवस्थाका पर्यवेक्षण सुन्नका लागि एपलाई अनुमति दिन्छ।सामान्य एपलाई चाँहिदै नचाँहिन सक्छ।"</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"इनपुट डिभाइस क्यालिब्रेसन परिवर्तन गर्नुहोस्"</string>
-    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"एपलाई टच स्क्रीनको प्यारामिटरहरू क्यालिब्रेसन परिमार्जन गर्न अनुमति दिन्छ। साधारण एपहरूको लागि कहिल्यै आवश्यक पर्दैन।"</string>
+    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"एपलाई टच स्क्रिनको प्यारामिटरहरू क्यालिब्रेसन परिमार्जन गर्न अनुमति दिन्छ। साधारण एपहरूको लागि कहिल्यै आवश्यक पर्दैन।"</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"DRM प्रमाणपत्रको पहुँच"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"DRM प्रमाणपत्रहरू प्रावधान र प्रयोग गर्ने निवेदनको अनुमति दिन्छ। साधारण एपहरूको लागि कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"Android Beam स्थानान्तरण अवस्था प्राप्त गर्नुहोस्"</string>
@@ -1938,13 +1938,13 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"शनिवार"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"कार्यक्रम"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"शयन"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Do Not Disturb (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले व्यवस्थापन गरेको"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"अन छ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"अफ छ"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> देखि <xliff:g id="END">%2$s</xliff:g> सम्म"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"कुनै पनि पात्रो"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ले केही ध्वनिहरू म्युट गर्दै छ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ, र तपाईंले फ्याक्ट्री डाटा रिसेट नगर्दासम्म यो अस्थिर रहन्छ।"</string>
@@ -2426,15 +2426,59 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"मोबाइल वा Wi-Fi नेटवर्कविनै म्यासेजहरू पठाउनुहोस् र प्राप्त गर्नुहोस्"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages खोल्नुहोस्"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यसले काम गर्ने तरिका"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"स्वतः नेटवर्क चयन गर्नुहोस्\" अन गर्नुहोस्"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"तपाईंको फोनले स्याटलाइटसँग काम गर्ने नेटवर्क भेट्टाउन सकोस् भन्नका लागि सेटिङमा गई \"स्वतः नेटवर्क चयन गर्नुहोस्\" अन गर्नुहोस्"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"अन गर्नुहोस्"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"पछाडि जानुहोस्"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"विचाराधीन..."</string>
+    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
+    <skip />
+    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
+    <skip />
+    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
+    <skip />
+    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
+    <skip />
+    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
+    <skip />
+    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
+    <skip />
+    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
+    <skip />
+    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
+    <skip />
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फिंगरप्रिन्ट अनलक फेरि सेटअप गर्नुहोस्"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> अब पहिचान गर्न सकिँदैन।"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> र <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> अब पहिचान गर्न सकिँदैन।"</string>
