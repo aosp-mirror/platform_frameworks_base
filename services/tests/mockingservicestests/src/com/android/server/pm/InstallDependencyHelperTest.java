@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -34,6 +35,8 @@ import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.FileUtils;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.OutcomeReceiver;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -71,13 +74,17 @@ public class InstallDependencyHelperTest {
     private static final String PUSH_FILE_DIR = "/data/local/tmp/tests/smockingservicestest/pm/";
     private static final String TEST_APP_USING_SDK1_AND_SDK2 = "HelloWorldUsingSdk1And2.apk";
 
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+
     @Mock private SharedLibrariesImpl mSharedLibraries;
+    @Mock private Context mContext;
+    @Mock private Computer mComputer;
     private InstallDependencyHelper mInstallDependencyHelper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mInstallDependencyHelper = new InstallDependencyHelper(mSharedLibraries);
+        mInstallDependencyHelper = new InstallDependencyHelper(mContext, mSharedLibraries);
     }
 
     @Test
@@ -88,7 +95,8 @@ public class InstallDependencyHelperTest {
 
         PackageLite pkg = getPackageLite(TEST_APP_USING_SDK1_AND_SDK2);
         CallbackHelper callback = new CallbackHelper(/*expectSuccess=*/ false);
-        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, callback);
+        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, mComputer,
+                0, mHandler, callback);
         callback.assertFailure();
 
         assertThat(callback.error).hasMessageThat().contains("xyz");
@@ -104,11 +112,12 @@ public class InstallDependencyHelperTest {
                 .thenReturn(missingDependency);
 
         CallbackHelper callback = new CallbackHelper(/*expectSuccess=*/ false);
-        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, callback);
+        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, mComputer,
+                0, mHandler, callback);
         callback.assertFailure();
 
         assertThat(callback.error).hasMessageThat().contains(
-                "Failed to bind to Dependency Installer");
+                "Dependency Installer Service not found");
     }
 
 
@@ -121,7 +130,8 @@ public class InstallDependencyHelperTest {
                 .thenReturn(missingDependency);
 
         CallbackHelper callback = new CallbackHelper(/*expectSuccess=*/ true);
-        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, callback);
+        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, mComputer,
+                0, mHandler, callback);
         callback.assertSuccess();
     }
 
