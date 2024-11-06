@@ -261,3 +261,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "use_cpu_time_capability"
+    namespace: "backstage_power"
+    description: "Use PROCESS_CAPABILITY_CPU_TIME to control unfreeze state."
+    bug: "370817323"
+}
