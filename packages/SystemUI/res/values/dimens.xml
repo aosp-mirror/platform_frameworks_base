@@ -368,6 +368,9 @@
     <!-- The vertical space between items in the alert selections in the inline settings -->
     <dimen name="notification_guts_option_vertical_padding">16dp</dimen>
 
+    <!-- Extra space for guts bundle feedback button -->
+    <dimen name="notification_guts_bundle_feedback_size">48dp</dimen>
+
     <dimen name="notification_importance_toggle_size">48dp</dimen>
     <dimen name="notification_importance_button_separation">8dp</dimen>
     <dimen name="notification_importance_drawable_padding">8dp</dimen>
