@@ -34,4 +34,5 @@ per-file *TransitionTracer.java = file:platform/development:/tools/winscope/OWNE
 
 # Files related to activity security
 per-file ActivityStarter.java = file:/ACTIVITY_SECURITY_OWNERS
+per-file ActivityStartController.java = file:/ACTIVITY_SECURITY_OWNERS
 per-file ActivityTaskManagerService.java = file:/ACTIVITY_SECURITY_OWNERS
