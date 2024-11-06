@@ -351,8 +351,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
-        mDarkIconManager = mDarkIconManagerFactory.create(
-                view.findViewById(R.id.statusIcons), StatusBarLocation.HOME);
+        mDarkIconManager =
+                mDarkIconManagerFactory.create(
+                        view.findViewById(R.id.statusIcons),
+                        StatusBarLocation.HOME,
+                        mHomeStatusBarComponent.getDarkIconDispatcher());
         mDarkIconManager.setShouldLog(true);
         updateBlockedIcons();
         mStatusBarIconController.addIconGroup(mDarkIconManager);
@@ -939,7 +942,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (mCarrierConfigTracker.getShowOperatorNameInStatusBarConfig(subId)) {
             View view = mStatusBar.findViewById(R.id.operator_name);
             mOperatorNameViewController =
-                    mOperatorNameViewControllerFactory.create((OperatorNameView) view);
+                    mOperatorNameViewControllerFactory.create(
+                            (OperatorNameView) view,
+                            mHomeStatusBarComponent.getDarkIconDispatcher());
             mOperatorNameViewController.init();
             // This view should not be visible on lock-screen
             if (mKeyguardStateController.isShowing()) {
