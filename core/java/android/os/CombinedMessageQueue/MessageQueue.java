@@ -431,13 +431,26 @@ public final class MessageQueue {
         // Update the file descriptor record if the listener changed the set of
         // events to watch and the listener itself hasn't been updated since.
         if (newWatchedEvents != oldWatchedEvents) {
-            synchronized (this) {
-                int index = mFileDescriptorRecords.indexOfKey(fd);
-                if (index >= 0 && mFileDescriptorRecords.valueAt(index) == record
-                        && record.mSeq == seq) {
-                    record.mEvents = newWatchedEvents;
-                    if (newWatchedEvents == 0) {
-                        mFileDescriptorRecords.removeAt(index);
+            if (mUseConcurrent) {
+                synchronized (mFileDescriptorRecordsLock) {
+                    int index = mFileDescriptorRecords.indexOfKey(fd);
+                    if (index >= 0 && mFileDescriptorRecords.valueAt(index) == record
+                            && record.mSeq == seq) {
+                        record.mEvents = newWatchedEvents;
+                        if (newWatchedEvents == 0) {
+                            mFileDescriptorRecords.removeAt(index);
+                        }
+                    }
+                }
+            } else {
+                synchronized (this) {
+                    int index = mFileDescriptorRecords.indexOfKey(fd);
+                    if (index >= 0 && mFileDescriptorRecords.valueAt(index) == record
+                            && record.mSeq == seq) {
+                        record.mEvents = newWatchedEvents;
+                        if (newWatchedEvents == 0) {
+                            mFileDescriptorRecords.removeAt(index);
+                        }
                     }
                 }
             }
