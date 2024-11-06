@@ -25,7 +25,6 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.UserActionResult.ShowOverlay
@@ -201,8 +200,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
             val userActions by collectLastValue(underTest.actions)
             val downDestination =
                 userActions?.get(
-                    Swipe(
-                        SwipeDirection.Down,
+                    Swipe.Down(
                         fromSource = Edge.Top.takeIf { downFromEdge },
                         pointerCount = if (downWithTwoPointers) 2 else 1,
                     )
@@ -292,8 +290,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
             val downDestination =
                 userActions?.get(
-                    Swipe(
-                        SwipeDirection.Down,
+                    Swipe.Down(
                         fromSource = Edge.Top.takeIf { downFromEdge },
                         pointerCount = if (downWithTwoPointers) 2 else 1,
                     )
@@ -310,8 +307,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
             val downFromTopRightDestination =
                 userActions?.get(
-                    Swipe(
-                        SwipeDirection.Down,
+                    Swipe.Down(
                         fromSource = SceneContainerEdge.TopRight,
                         pointerCount = if (downWithTwoPointers) 2 else 1,
                     )
