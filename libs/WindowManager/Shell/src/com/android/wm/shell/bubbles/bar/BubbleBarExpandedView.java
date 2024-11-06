@@ -241,6 +241,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
                 if (mListener != null) {
                     mListener.onUnBubbleConversation(bubble.getKey());
                 }
+                mBubbleLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_APP_MENU_OPT_OUT);
             }
 
             @Override

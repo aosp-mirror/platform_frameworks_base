@@ -242,6 +242,18 @@ class BubbleBarExpandedViewTest {
         assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
     }
 
+    @Test
+    fun testEventLogging_unBubbleConversation() {
+        getInstrumentation().runOnMainSync { bubbleExpandedView.handleView.performClick() }
+        val menuItem = bubbleExpandedView.menuView()
+            .actionViewWithText(context.getString(R.string.bubbles_dont_bubble_conversation))
+        getInstrumentation().runOnMainSync { menuItem.performClick() }
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.logs[0].eventId)
+            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_APP_MENU_OPT_OUT.id)
+        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
+    }
+
     private fun BubbleBarExpandedView.menuView(): BubbleBarMenuView {
         return findViewByPredicate { it is BubbleBarMenuView }
     }
