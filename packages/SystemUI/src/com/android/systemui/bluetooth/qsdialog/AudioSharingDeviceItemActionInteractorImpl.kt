@@ -27,7 +27,6 @@ import com.android.settingslib.bluetooth.HearingAidProfile
 import com.android.settingslib.bluetooth.LeAudioProfile
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.flags.Flags.audioSharingQsDialogImprovement
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -69,7 +68,7 @@ constructor(
                 }
                 deviceItem.type ==
                     DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
-                    if (audioSharingQsDialogImprovement()) {
+                    if (audioSharingInteractor.qsDialogImprovementAvailable()) {
                         withContext(mainDispatcher) {
                             delegateFactory
                                 .create(deviceItem.cachedBluetoothDevice)
