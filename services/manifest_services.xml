@@ -4,4 +4,9 @@
         <version>2</version>
         <fqname>IAltitudeService/default</fqname>
     </hal>
+    <hal format="aidl">
+        <name>android.frameworks.devicestate</name>
+        <version>1</version>
+        <fqname>IDeviceStateService/default</fqname>
+    </hal>
 </manifest>
