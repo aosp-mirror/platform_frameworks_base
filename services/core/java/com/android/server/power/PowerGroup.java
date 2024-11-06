@@ -42,6 +42,8 @@ import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
+import com.android.server.LocalServices;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.power.feature.PowerManagerFlags;
 
 /**
@@ -55,6 +57,11 @@ import com.android.server.power.feature.PowerManagerFlags;
 public class PowerGroup {
     private static final String TAG = PowerGroup.class.getSimpleName();
     private static final boolean DEBUG = false;
+
+    /**
+     * Indicates that the default dim/sleep timeouts should be used.
+     */
+    private static final long INVALID_TIMEOUT = -1;
 
     @VisibleForTesting
     final DisplayPowerRequest mDisplayPowerRequest = new DisplayPowerRequest();
@@ -91,6 +98,9 @@ public class PowerGroup {
     private @PowerManager.GoToSleepReason int mLastSleepReason =
             PowerManager.GO_TO_SLEEP_REASON_UNKNOWN;
 
+    private final long mDimDuration;
+    private final long mScreenOffTimeout;
+
     PowerGroup(int groupId, PowerGroupListener wakefulnessListener, Notifier notifier,
             DisplayManagerInternal displayManagerInternal, int wakefulness, boolean ready,
             boolean supportsSandman, long eventTime, PowerManagerFlags featureFlags) {
@@ -104,6 +114,30 @@ public class PowerGroup {
         mLastWakeTime = eventTime;
         mLastSleepTime = eventTime;
         mFeatureFlags = featureFlags;
+
+        long dimDuration = INVALID_TIMEOUT;
+        long screenOffTimeout = INVALID_TIMEOUT;
+        if (android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()
+                && mGroupId != Display.DEFAULT_DISPLAY_GROUP) {
+            VirtualDeviceManagerInternal vdm =
+                    LocalServices.getService(VirtualDeviceManagerInternal.class);
+            if (vdm != null) {
+                int[] displayIds = mDisplayManagerInternal.getDisplayIdsForGroup(mGroupId);
+                if (displayIds != null && displayIds.length > 0) {
+                    int deviceId = vdm.getDeviceIdForDisplayId(displayIds[0]);
+                    if (vdm.isValidVirtualDeviceId(deviceId)) {
+                        dimDuration = vdm.getDimDurationMillisForDeviceId(deviceId);
+                        screenOffTimeout = vdm.getScreenOffTimeoutMillisForDeviceId(deviceId);
+                        if (dimDuration > 0 && dimDuration > screenOffTimeout) {
+                            // If the dim duration is set, cap it to the screen off timeout.
+                            dimDuration = screenOffTimeout;
+                        }
+                    }
+                }
+            }
+        }
+        mDimDuration = dimDuration;
+        mScreenOffTimeout = screenOffTimeout;
     }
 
     PowerGroup(int wakefulness, PowerGroupListener wakefulnessListener, Notifier notifier,
@@ -119,6 +153,16 @@ public class PowerGroup {
         mLastWakeTime = eventTime;
         mLastSleepTime = eventTime;
         mFeatureFlags = featureFlags;
+        mDimDuration = INVALID_TIMEOUT;
+        mScreenOffTimeout = INVALID_TIMEOUT;
+    }
+
+    long getScreenOffTimeoutOverrideLocked(long defaultScreenOffTimeout) {
+        return mScreenOffTimeout == INVALID_TIMEOUT ? defaultScreenOffTimeout : mScreenOffTimeout;
+    }
+
+    long getScreenDimDurationOverrideLocked(long defaultScreenDimDuration) {
+        return mDimDuration == INVALID_TIMEOUT ? defaultScreenDimDuration : mDimDuration;
     }
 
     long getLastWakeTimeLocked() {

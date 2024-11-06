@@ -34,12 +34,11 @@ import com.android.compose.animation.scene.transformation.DrawScale
 import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
 import com.android.compose.animation.scene.transformation.OverscrollTranslate
-import com.android.compose.animation.scene.transformation.PropertyTransformation
-import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
+import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.animation.scene.transformation.Translate
 
 internal fun transitionsImpl(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -158,7 +157,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
 }
 
 internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
-    val transformations = mutableListOf<Transformation>()
+    val transformations = mutableListOf<TransformationWithRange<*>>()
     private var range: TransformationRange? = null
     protected var reversed = false
     override var distance: UserActionDistance? = null
@@ -174,19 +173,13 @@ internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
         range = null
     }
 
-    protected fun transformation(transformation: PropertyTransformation<*>) {
-        val transformation =
-            if (range != null) {
-                RangedPropertyTransformation(transformation, range!!)
-            } else {
-                transformation
-            }
-
+    protected fun transformation(transformation: Transformation) {
+        val transformationWithRange = TransformationWithRange(transformation, range)
         transformations.add(
             if (reversed) {
-                transformation.reversed()
+                transformationWithRange.reversed()
             } else {
-                transformation
+                transformationWithRange
             }
         )
     }
@@ -264,7 +257,7 @@ internal class TransitionBuilderImpl(override val transition: TransitionState.Tr
                 "(${transition.toContent.debugName})"
         }
 
-        transformations.add(SharedElementTransformation(matcher, enabled, elevateInContent))
+        transformation(SharedElementTransformation(matcher, enabled, elevateInContent))
     }
 
     override fun timestampRange(

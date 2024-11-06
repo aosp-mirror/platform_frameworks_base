@@ -2894,10 +2894,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         private boolean mIncludeInvisibleAndFinishing;
         private boolean mIgnoringKeyguard;
 
-        ActivityRecord getOpaqueActivity(
-                @NonNull WindowContainer<?> container, boolean ignoringKeyguard) {
+        ActivityRecord getOpaqueActivity(@NonNull WindowContainer<?> container) {
             mIncludeInvisibleAndFinishing = true;
-            mIgnoringKeyguard = ignoringKeyguard;
+            mIgnoringKeyguard = true;
             return container.getActivity(this,
                     true /* traverseTopToBottom */, null /* boundary */);
         }

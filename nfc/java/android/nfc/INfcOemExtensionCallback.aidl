@@ -46,6 +46,7 @@ interface INfcOemExtensionCallback {
    void onCardEmulationActivated(boolean isActivated);
    void onRfFieldActivated(boolean isActivated);
    void onRfDiscoveryStarted(boolean isDiscoveryStarted);
+   void onEeListenActivated(boolean isActivated);
    void onGetOemAppSearchIntent(in List<String> firstPackage, in ResultReceiver intentConsumer);
    void onNdefMessage(in Tag tag, in NdefMessage message, in ResultReceiver hasOemExecutableContent);
    void onLaunchHceAppChooserActivity(in String selectedAid, in List<ApduServiceInfo> services, in ComponentName failedComponent, in String category);

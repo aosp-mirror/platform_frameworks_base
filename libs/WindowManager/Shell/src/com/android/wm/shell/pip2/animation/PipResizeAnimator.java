@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
+import com.android.wm.shell.shared.animation.Interpolators;
 
 /**
  * Animator that handles any resize related animation for PIP.
@@ -128,6 +129,7 @@ public class PipResizeAnimator extends ValueAnimator {
         mRectEvaluator = new RectEvaluator(mAnimatedRect);
 
         setObjectValues(startBounds, endBounds);
+        setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         addListener(mAnimatorListener);
         addUpdateListener(mAnimatorUpdateListener);
         setEvaluator(mRectEvaluator);

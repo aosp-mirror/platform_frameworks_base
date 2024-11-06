@@ -83,3 +83,15 @@ flag {
     bug: "364035303"
 }
 
+flag {
+    name: "system_context_handle_app_info_changed"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for allowing system context to handle application info changes"
+    bug: "362420029"
+    # This flag is read at boot time.
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

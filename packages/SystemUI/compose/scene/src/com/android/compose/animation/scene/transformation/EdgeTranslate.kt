@@ -33,37 +33,37 @@ internal class EdgeTranslate(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: Offset,
+        idleValue: Offset,
     ): Offset {
         val sceneSize =
             content.targetSize()
                 ?: error("Content ${content.debugName} does not have a target size")
-        val elementSize = element.targetSize(content) ?: return value
+        val elementSize = element.targetSize(content) ?: return idleValue
 
         return when (edge.resolve(layoutDirection)) {
             Edge.Resolved.Top ->
                 if (startsOutsideLayoutBounds) {
-                    Offset(value.x, -elementSize.height.toFloat())
+                    Offset(idleValue.x, -elementSize.height.toFloat())
                 } else {
-                    Offset(value.x, 0f)
+                    Offset(idleValue.x, 0f)
                 }
             Edge.Resolved.Left ->
                 if (startsOutsideLayoutBounds) {
-                    Offset(-elementSize.width.toFloat(), value.y)
+                    Offset(-elementSize.width.toFloat(), idleValue.y)
                 } else {
-                    Offset(0f, value.y)
+                    Offset(0f, idleValue.y)
                 }
             Edge.Resolved.Bottom ->
                 if (startsOutsideLayoutBounds) {
-                    Offset(value.x, sceneSize.height.toFloat())
+                    Offset(idleValue.x, sceneSize.height.toFloat())
                 } else {
-                    Offset(value.x, (sceneSize.height - elementSize.height).toFloat())
+                    Offset(idleValue.x, (sceneSize.height - elementSize.height).toFloat())
                 }
             Edge.Resolved.Right ->
                 if (startsOutsideLayoutBounds) {
-                    Offset(sceneSize.width.toFloat(), value.y)
+                    Offset(sceneSize.width.toFloat(), idleValue.y)
                 } else {
-                    Offset((sceneSize.width - elementSize.width).toFloat(), value.y)
+                    Offset((sceneSize.width - elementSize.width).toFloat(), idleValue.y)
                 }
         }
     }

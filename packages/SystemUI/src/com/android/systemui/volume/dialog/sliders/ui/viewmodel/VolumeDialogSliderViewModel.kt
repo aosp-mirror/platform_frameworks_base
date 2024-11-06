@@ -22,7 +22,6 @@ import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInteractor
-import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +52,7 @@ private const val VOLUME_UPDATE_GRACE_PERIOD = 1000
 class VolumeDialogSliderViewModel
 @AssistedInject
 constructor(
-    @Assisted private val interactor: VolumeDialogSliderInteractor,
+    private val interactor: VolumeDialogSliderInteractor,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
     @VolumeDialog private val coroutineScope: CoroutineScope,
     private val systemClock: SystemClock,
@@ -90,11 +89,11 @@ constructor(
 
     private fun getTimestampMillis(): Long = systemClock.uptimeMillis()
 
+    private data class VolumeUpdate(val newVolumeLevel: Int, val timestampMillis: Long)
+
     @AssistedFactory
     interface Factory {
 
-        fun create(interactor: VolumeDialogSliderInteractor): VolumeDialogSliderViewModel
+        fun create(): VolumeDialogSliderViewModel
     }
-
-    private data class VolumeUpdate(val newVolumeLevel: Int, val timestampMillis: Long)
 }

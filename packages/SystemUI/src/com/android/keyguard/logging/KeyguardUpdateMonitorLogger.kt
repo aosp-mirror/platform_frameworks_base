@@ -582,6 +582,18 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         logBuffer.log(TAG, DEBUG, { int1 = userId }, { "userUnlocked userId: $int1" })
     }
 
+    fun logUserStorageUnlocked(userId: Int, result: Boolean) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = userId
+                bool1 = result
+            },
+            { "Invoked UserManager#isUserUnlocked $int1, result: $bool1" },
+        )
+    }
+
     fun logUserStopped(userId: Int, isUnlocked: Boolean) {
         logBuffer.log(
             TAG,

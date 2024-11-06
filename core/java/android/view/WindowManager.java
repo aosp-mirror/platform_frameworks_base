@@ -1426,6 +1426,31 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE";
 
     /**
+     * Activity-level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * that specifies whether this activity can declare or request
+     * {@link android.R.attr#screenOrientation fixed orientation},
+     * {@link android.R.attr#minAspectRatio max aspect ratio},
+     * {@link android.R.attr#maxAspectRatio min aspect ratio}
+     * {@link android.R.attr#resizeableActivity unresizable} on large screen devices with the
+     * ignore orientation request display setting enabled since Android 16 (API level 36) or higher.
+     *
+     * <p>The default value is {@code false}.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;activity&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+     *     android:value="true"/&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     * @hide
+     */
+    // TODO(b/357141415): Make this public API.
+    String PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY =
+            "android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY";
+
+    /**
      * @hide
      */
     public static final String PARCEL_KEY_SHORTCUTS_ARRAY = "shortcuts_array";

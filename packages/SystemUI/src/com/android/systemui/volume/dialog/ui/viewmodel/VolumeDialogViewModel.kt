@@ -18,16 +18,19 @@ package com.android.systemui.volume.dialog.ui.viewmodel
 
 import android.content.Context
 import com.android.systemui.res.R
+import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogStateModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import com.android.systemui.volume.dialog.shared.model.streamLabel
-import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInteractor
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSlidersInteractor
+import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
 /** Provides a state for the Volume Dialog. */
@@ -38,18 +41,21 @@ constructor(
     private val context: Context,
     dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
     volumeDialogSlidersInteractor: VolumeDialogSlidersInteractor,
-    private val volumeDialogSliderInteractorFactory: VolumeDialogSliderInteractor.Factory,
+    volumeDialogStateInteractor: VolumeDialogStateInteractor,
 ) {
 
     val dialogVisibilityModel: Flow<VolumeDialogVisibilityModel> =
         dialogVisibilityInteractor.dialogVisibility
     val dialogTitle: Flow<String> =
-        volumeDialogSlidersInteractor.sliders.flatMapLatest { slidersModel ->
-            val interactor = volumeDialogSliderInteractorFactory.create(slidersModel.slider)
-            interactor.slider.map { sliderModel ->
-                context.getString(R.string.volume_dialog_title, sliderModel.streamLabel(context))
+        combine(
+                volumeDialogStateInteractor.volumeDialogState,
+                volumeDialogSlidersInteractor.sliders.map { it.slider },
+            ) { state: VolumeDialogStateModel, sliderType: VolumeDialogSliderType ->
+                state.streamModels[sliderType.audioStream]?.let { model ->
+                    context.getString(R.string.volume_dialog_title, model.streamLabel(context))
+                }
             }
-        }
+            .filterNotNull()
 
     @AssistedFactory
     interface Factory {

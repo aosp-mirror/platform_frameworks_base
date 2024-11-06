@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -77,7 +77,7 @@ object KeyguardInteractorFactory {
                 repository = repository,
                 powerInteractor = powerInteractor,
                 bouncerRepository = bouncerRepository,
-                configurationInteractor = ConfigurationInteractorImpl(configurationRepository),
+                configurationInteractor = ConfigurationInteractor(configurationRepository),
                 shadeRepository = shadeRepository,
                 keyguardTransitionInteractor = keyguardTransitionInteractor,
                 sceneInteractorProvider = { sceneInteractor },
