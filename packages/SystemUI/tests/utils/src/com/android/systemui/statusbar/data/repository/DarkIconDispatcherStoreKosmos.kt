@@ -35,3 +35,7 @@ val Kosmos.multiDisplayDarkIconDispatcherStore by
 val Kosmos.fakeDarkIconDispatcherStore by Kosmos.Fixture { FakeDarkIconDispatcherStore() }
 
 var Kosmos.darkIconDispatcherStore by Kosmos.Fixture { fakeDarkIconDispatcherStore }
+
+val Kosmos.fakeSysUiDarkIconDispatcherStore by Kosmos.Fixture { FakeSysUiDarkIconDispatcherStore() }
+
+var Kosmos.sysUiDarkIconDispatcherStore by Kosmos.Fixture { fakeSysUiDarkIconDispatcherStore }
