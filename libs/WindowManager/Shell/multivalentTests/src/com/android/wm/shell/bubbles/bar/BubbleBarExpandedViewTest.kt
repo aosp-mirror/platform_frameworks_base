@@ -47,6 +47,7 @@ import com.android.wm.shell.shared.handles.RegionSamplingHelper
 import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import java.util.Collections
 import java.util.concurrent.Executor
@@ -147,6 +148,7 @@ class BubbleBarExpandedViewTest {
     @After
     fun tearDown() {
         testableRegionSamplingHelper?.stopAndDestroy()
+        getInstrumentation().waitForIdleSync()
     }
 
     @Test
@@ -218,14 +220,50 @@ class BubbleBarExpandedViewTest {
     @Test
     fun testEventLogging_dismissBubbleViaAppMenu() {
         getInstrumentation().runOnMainSync { bubbleExpandedView.handleView.performClick() }
-        val dismissMenuItem =
-            bubbleExpandedView.findViewWithTag<View>(BubbleBarMenuView.DISMISS_ACTION_TAG)
+        val dismissMenuItem = bubbleExpandedView.menuView()
+            .actionViewWithText(context.getString(R.string.bubble_dismiss_text))
         assertThat(dismissMenuItem).isNotNull()
         getInstrumentation().runOnMainSync { dismissMenuItem.performClick() }
         assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
         assertThat(uiEventLoggerFake.logs[0].eventId)
             .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU.id)
         assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
+    }
+
+    @Test
+    fun testEventLogging_openAppSettings() {
+        getInstrumentation().runOnMainSync { bubbleExpandedView.handleView.performClick() }
+        val appMenuItem = bubbleExpandedView.menuView()
+            .actionViewWithText(context.getString(R.string.bubbles_app_settings, bubble.appName))
+        getInstrumentation().runOnMainSync { appMenuItem.performClick() }
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.logs[0].eventId)
+            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_APP_MENU_GO_TO_SETTINGS.id)
+        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
+    }
+
+    @Test
+    fun testEventLogging_unBubbleConversation() {
+        getInstrumentation().runOnMainSync { bubbleExpandedView.handleView.performClick() }
+        val menuItem = bubbleExpandedView.menuView()
+            .actionViewWithText(context.getString(R.string.bubbles_dont_bubble_conversation))
+        getInstrumentation().runOnMainSync { menuItem.performClick() }
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.logs[0].eventId)
+            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_APP_MENU_OPT_OUT.id)
+        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
+    }
+
+    private fun BubbleBarExpandedView.menuView(): BubbleBarMenuView {
+        return findViewByPredicate { it is BubbleBarMenuView }
+    }
+
+    private fun BubbleBarMenuView.actionViewWithText(text: CharSequence): View {
+        val views = ArrayList<View>()
+        findViewsWithText(views, text, View.FIND_VIEWS_WITH_TEXT)
+        assertWithMessage("Expecting a single action with text '$text'").that(views).hasSize(1)
+        // findViewsWithText returns the TextView, but the click listener is on the parent container
+        return views.first().parent as View
     }
 
     private inner class FakeBubbleTaskViewFactory : BubbleTaskViewFactory {
