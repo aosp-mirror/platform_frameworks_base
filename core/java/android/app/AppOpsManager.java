@@ -63,6 +63,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.PackageTagsList;
 import android.os.Parcel;
@@ -78,12 +79,14 @@ import android.permission.PermissionGroupUsage;
 import android.permission.PermissionUsageHelper;
 import android.permission.flags.Flags;
 import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.Pools;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
@@ -7797,6 +7800,116 @@ public class AppOpsManager {
         }
     }
 
+    private static final String APP_OP_MODE_CACHING_API = "getAppOpMode";
+    private static final String APP_OP_MODE_CACHING_NAME = "appOpModeCache";
+    private static final int APP_OP_MODE_CACHING_SIZE = 2048;
+
+    private static final IpcDataCache.QueryHandler<AppOpModeQuery, Integer> sGetAppOpModeQuery =
+            new IpcDataCache.QueryHandler<>() {
+                @Override
+                public Integer apply(AppOpModeQuery query) {
+                    IAppOpsService service = getService();
+                    try {
+                        return service.checkOperationRawForDevice(query.op, query.uid,
+                                query.packageName, query.attributionTag, query.virtualDeviceId);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+
+                @Override
+                public boolean shouldBypassCache(@NonNull AppOpModeQuery query) {
+                    // If the flag to enable the new caching behavior is off, bypass the cache.
+                    return !Flags.appopModeCachingEnabled();
+                }
+            };
+
+    // A LRU cache on binder clients that caches AppOp mode by uid, packageName, virtualDeviceId
+    // and attributionTag.
+    private static final IpcDataCache<AppOpModeQuery, Integer> sAppOpModeCache =
+            new IpcDataCache<>(APP_OP_MODE_CACHING_SIZE, IpcDataCache.MODULE_SYSTEM,
+                    APP_OP_MODE_CACHING_API, APP_OP_MODE_CACHING_NAME, sGetAppOpModeQuery);
+
+    // Ops that we don't want to cache due to:
+    // 1) Discrepancy of attributionTag support in checkOp and noteOp that determines if a package
+    //    can bypass user restriction of an op: b/240617242. COARSE_LOCATION and FINE_LOCATION are
+    //    the only two ops that are impacted.
+    private static final SparseBooleanArray OPS_WITHOUT_CACHING = new SparseBooleanArray();
+    static {
+        OPS_WITHOUT_CACHING.put(OP_COARSE_LOCATION, true);
+        OPS_WITHOUT_CACHING.put(OP_FINE_LOCATION, true);
+    }
+
+    private static boolean isAppOpModeCachingEnabled(int opCode) {
+        if (!Flags.appopModeCachingEnabled()) {
+            return false;
+        }
+        return !OPS_WITHOUT_CACHING.get(opCode, false);
+    }
+
+    /**
+     * @hide
+     */
+    public static void invalidateAppOpModeCache() {
+        if (Flags.appopModeCachingEnabled()) {
+            IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM, APP_OP_MODE_CACHING_API);
+        }
+    }
+
+    /**
+     * Bypass AppOpModeCache in the local process
+     *
+     * @hide
+     */
+    public static void disableAppOpModeCache() {
+        if (Flags.appopModeCachingEnabled()) {
+            sAppOpModeCache.disableLocal();
+        }
+    }
+
+    private static final class AppOpModeQuery {
+        final int op;
+        final int uid;
+        final String packageName;
+        final int virtualDeviceId;
+        final String attributionTag;
+        final String methodName;
+
+        AppOpModeQuery(int op, int uid, @Nullable String packageName, int virtualDeviceId,
+                @Nullable String attributionTag, @Nullable String methodName) {
+            this.op = op;
+            this.uid = uid;
+            this.packageName = packageName;
+            this.virtualDeviceId = virtualDeviceId;
+            this.attributionTag = attributionTag;
+            this.methodName = methodName;
+        }
+
+        @Override
+        public String toString() {
+            return TextUtils.formatSimple("AppOpModeQuery(op=%d, uid=%d, packageName=%s, "
+                            + "virtualDeviceId=%d, attributionTag=%s, methodName=%s", op, uid,
+                    packageName, virtualDeviceId, attributionTag, methodName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(op, uid, packageName, virtualDeviceId, attributionTag);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (this == o) return true;
+            if (o == null) return false;
+            if (this.getClass() != o.getClass()) return false;
+
+            AppOpModeQuery other = (AppOpModeQuery) o;
+            return op == other.op && uid == other.uid && Objects.equals(packageName,
+                    other.packageName) && virtualDeviceId == other.virtualDeviceId
+                    && Objects.equals(attributionTag, other.attributionTag);
+        }
+    }
+
     AppOpsManager(Context context, IAppOpsService service) {
         mContext = context;
         mService = service;
@@ -8851,12 +8964,16 @@ public class AppOpsManager {
     private int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName,
             int virtualDeviceId) {
         try {
-            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
-                return mService.checkOperationRaw(op, uid, packageName, null);
+            int mode;
+            if (isAppOpModeCachingEnabled(op)) {
+                mode = sAppOpModeCache.query(
+                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, null,
+                                "unsafeCheckOpRawNoThrow"));
             } else {
-                return mService.checkOperationRawForDevice(
+                mode = mService.checkOperationRawForDevice(
                         op, uid, packageName, null, virtualDeviceId);
             }
+            return mode;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9041,7 +9158,7 @@ public class AppOpsManager {
             SyncNotedAppOp syncOp;
             if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
                 syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
-                    collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
+                        collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
             } else {
                 syncOp = mService.noteOperationForDevice(op, uid, packageName, attributionTag,
                     virtualDeviceId, collectionMode == COLLECT_ASYNC, message,
@@ -9284,8 +9401,21 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public int checkOp(int op, int uid, String packageName) {
         try {
-            int mode = mService.checkOperationForDevice(op, uid, packageName,
-                Context.DEVICE_ID_DEFAULT);
+            int mode;
+            if (isAppOpModeCachingEnabled(op)) {
+                mode = sAppOpModeCache.query(
+                        new AppOpModeQuery(op, uid, packageName, Context.DEVICE_ID_DEFAULT, null,
+                                "checkOp"));
+                if (mode == MODE_FOREGROUND) {
+                    // We only cache raw mode. If the mode is FOREGROUND, we need another binder
+                    // call to fetch translated value based on the process state.
+                    mode = mService.checkOperationForDevice(op, uid, packageName,
+                            Context.DEVICE_ID_DEFAULT);
+                }
+            } else {
+                mode = mService.checkOperationForDevice(op, uid, packageName,
+                        Context.DEVICE_ID_DEFAULT);
+            }
             if (mode == MODE_ERRORED) {
                 throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
             }
@@ -9324,13 +9454,19 @@ public class AppOpsManager {
     private int checkOpNoThrow(int op, int uid, String packageName, int virtualDeviceId) {
         try {
             int mode;
-            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
-                mode = mService.checkOperation(op, uid, packageName);
+            if (isAppOpModeCachingEnabled(op)) {
+                mode = sAppOpModeCache.query(
+                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, null,
+                                "checkOpNoThrow"));
+                if (mode == MODE_FOREGROUND) {
+                    // We only cache raw mode. If the mode is FOREGROUND, we need another binder
+                    // call to fetch translated value based on the process state.
+                    mode = mService.checkOperationForDevice(op, uid, packageName, virtualDeviceId);
+                }
             } else {
                 mode = mService.checkOperationForDevice(op, uid, packageName, virtualDeviceId);
             }
-
-            return mode == AppOpsManager.MODE_FOREGROUND ? AppOpsManager.MODE_ALLOWED : mode;
+            return mode;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

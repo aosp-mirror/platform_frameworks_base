@@ -23,6 +23,8 @@ import android.media.Image.Plane;
 import android.util.Log;
 import android.util.Size;
 
+import com.android.internal.camera.flags.Flags;
+
 import libcore.io.Memory;
 
 import java.nio.ByteBuffer;
@@ -44,6 +46,11 @@ class ImageUtils {
      * are used.
      */
     public static int getNumPlanesForFormat(int format) {
+        if (Flags.cameraHeifGainmap()) {
+            if (format == ImageFormat.HEIC_ULTRAHDR) {
+                return 1;
+            }
+        }
         switch (format) {
             case ImageFormat.YV12:
             case ImageFormat.YUV_420_888:
@@ -229,6 +236,11 @@ class ImageUtils {
     public static int getEstimatedNativeAllocBytes(int width, int height, int format,
             int numImages) {
         double estimatedBytePerPixel;
+        if (Flags.cameraHeifGainmap()) {
+            if (format == ImageFormat.HEIC_ULTRAHDR) {
+                estimatedBytePerPixel = 0.3;
+            }
+        }
         switch (format) {
             // 10x compression from RGB_888
             case ImageFormat.JPEG:
@@ -283,6 +295,11 @@ class ImageUtils {
     }
 
     private static Size getEffectivePlaneSizeForImage(Image image, int planeIdx) {
+        if (Flags.cameraHeifGainmap()) {
+            if (image.getFormat() == ImageFormat.HEIC_ULTRAHDR){
+                return new Size(image.getWidth(), image.getHeight());
+            }
+        }
         switch (image.getFormat()) {
             case ImageFormat.YCBCR_P010:
             case ImageFormat.YV12:

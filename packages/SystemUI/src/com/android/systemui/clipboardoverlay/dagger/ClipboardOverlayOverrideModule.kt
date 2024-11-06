@@ -15,18 +15,26 @@
  */
 package com.android.systemui.clipboardoverlay.dagger
 
+import com.android.systemui.clipboardoverlay.ClipboardIndicationProvider
+import com.android.systemui.clipboardoverlay.ClipboardIndicationProviderImpl
 import com.android.systemui.clipboardoverlay.ClipboardOverlaySuppressionController
 import com.android.systemui.clipboardoverlay.ClipboardOverlaySuppressionControllerImpl
 import dagger.Binds
 import dagger.Module
 
-/** Dagger Module for code in the clipboard overlay package. */
+/** Dagger Module to provide default implementations which could be overridden. */
 @Module
-interface ClipboardOverlaySuppressionModule {
+interface ClipboardOverlayOverrideModule {
 
     /** Provides implementation for [ClipboardOverlaySuppressionController]. */
     @Binds
     fun provideClipboardOverlaySuppressionController(
         clipboardOverlaySuppressionControllerImpl: ClipboardOverlaySuppressionControllerImpl
     ): ClipboardOverlaySuppressionController
+
+    /** Provides implementation for [ClipboardIndicationProvider]. */
+    @Binds
+    fun provideClipboardIndicationProvider(
+        clipboardIndicationProviderImpl: ClipboardIndicationProviderImpl
+    ): ClipboardIndicationProvider
 }

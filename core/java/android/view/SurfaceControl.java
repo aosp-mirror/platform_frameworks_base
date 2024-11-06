@@ -312,6 +312,7 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeNotifyShutdown();
     private static native void nativeSetLuts(long transactionObj, long nativeObject,
             float[] buffers, int[] slots, int[] dimensions, int[] sizes, int[] samplingKeys);
+    private static native void nativeEnableDebugLogCallPoints(long transactionObj);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -4605,7 +4606,6 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * TODO(b/366484871): To be removed once we have some logging in native
          * This is called when BlastBufferQueue.mergeWithNextTransaction() is called from java, and
          * for the purposes of logging that path.
          */
@@ -4616,6 +4616,7 @@ public final class SurfaceControl implements Parcelable {
                 if (mCalls != null) {
                     mCalls.clear();
                 }
+                nativeEnableDebugLogCallPoints(mNativeObject);
             }
         }
 

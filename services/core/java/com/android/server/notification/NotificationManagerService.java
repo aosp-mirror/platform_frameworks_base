@@ -82,6 +82,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BA
 import static android.app.NotificationManager.zenModeFromInterruptionFilter;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
@@ -162,8 +164,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static com.android.server.notification.Flags.expireBitmaps;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_ANIM_BUFFER;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
@@ -7770,10 +7770,11 @@ public class NotificationManagerService extends SystemService {
         // Make Notification silent
         r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
 
-        // Repost
+        // Repost as the original app (even if it was posted by a delegate originally
+        // because the delegate may now be revoked)
         enqueueNotificationInternal(r.getSbn().getPackageName(),
-                r.getSbn().getOpPkg(), r.getSbn().getUid(),
-                r.getSbn().getInitialPid(), r.getSbn().getTag(),
+                r.getSbn().getPackageName(), r.getSbn().getUid(),
+                MY_PID, r.getSbn().getTag(),
                 r.getSbn().getId(), r.getNotification(),
                 r.getSbn().getUserId(), /* postSilently= */ true,
                 /* byForegroundService= */ false,
@@ -8012,7 +8013,6 @@ public class NotificationManagerService extends SystemService {
         r.setPkgAllowedAsConvo(mMsgPkgsAllowedAsConvos.contains(pkg));
         boolean isImportanceFixed = mPermissionHelper.isPermissionFixed(pkg, userId);
         r.setImportanceFixed(isImportanceFixed);
-
         if (notification.isFgsOrUij()) {
             if (((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0
                         || !channel.isUserVisibleTaskShown())

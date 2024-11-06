@@ -286,7 +286,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 // we need to ignore all the incoming TaskInfo until the education
                 // completes. If we come from a double tap we follow the normal flow.
                 final boolean topActivityPillarboxed =
-                        taskInfo.appCompatTaskInfo.isTopActivityPillarboxed();
+                        taskInfo.appCompatTaskInfo.isTopActivityPillarboxShaped();
                 final boolean isFirstTimeHorizontalReachabilityEdu = topActivityPillarboxed
                         && !mCompatUIConfiguration.hasSeenHorizontalReachabilityEducation(taskInfo);
                 final boolean isFirstTimeVerticalReachabilityEdu = !topActivityPillarboxed

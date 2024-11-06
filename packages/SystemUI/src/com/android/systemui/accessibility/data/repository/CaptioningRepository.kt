@@ -63,6 +63,7 @@ constructor(
     private val captioningManager: StateFlow<CaptioningManager?> =
         userRepository.selectedUser
             .map { userScopedCaptioningManagerProvider.forUser(it.userInfo.userHandle) }
+            .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), null)
 
     override val captioningModel: StateFlow<CaptioningModel?> =

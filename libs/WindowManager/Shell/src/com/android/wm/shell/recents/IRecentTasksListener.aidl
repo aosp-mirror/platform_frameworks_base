@@ -18,6 +18,8 @@ package com.android.wm.shell.recents;
 
 import android.app.ActivityManager.RunningTaskInfo;
 
+import com.android.wm.shell.shared.GroupedTaskInfo;
+
 /**
  * Listener interface that Launcher attaches to SystemUI to get split-screen callbacks.
  */
@@ -44,8 +46,8 @@ oneway interface IRecentTasksListener {
     void onRunningTaskChanged(in RunningTaskInfo taskInfo);
 
     /** A task has moved to front. */
-    oneway void onTaskMovedToFront(in RunningTaskInfo taskInfo);
+    void onTaskMovedToFront(in GroupedTaskInfo[] visibleTasks);
 
     /** A task info has changed. */
-    oneway void onTaskInfoChanged(in RunningTaskInfo taskInfo);
+    void onTaskInfoChanged(in RunningTaskInfo taskInfo);
 }

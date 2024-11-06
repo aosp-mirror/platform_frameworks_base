@@ -194,13 +194,3 @@ flag {
   description: "Enables sound uri with vibration source in notification channel"
   bug: "351975435"
 }
-
-flag {
-  name: "notification_nls_rebind"
-  namespace: "systemui"
-  description: "Check for NLS service intent filter when rebinding services"
-  bug: "347674739"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}

@@ -447,6 +447,37 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
+    fun startAnimation_pendingTransition_noLaunchChange_returnsFalse() {
+        val wct = WindowContainerTransaction()
+        val launchingTask = createTask(WINDOWING_MODE_FREEFORM)
+        val nonLaunchTaskChange = createChange(createTask(WINDOWING_MODE_FREEFORM))
+        val transition = Binder()
+        whenever(transitions.startTransition(eq(TRANSIT_OPEN), eq(wct), anyOrNull()))
+            .thenReturn(transition)
+        mixedHandler.addPendingMixedTransition(
+            PendingMixedTransition.Launch(
+                transition = transition,
+                launchingTask = launchingTask.taskId,
+                minimizingTask = null,
+                exitingImmersiveTask = null,
+            )
+        )
+
+        val started = mixedHandler.startAnimation(
+            transition,
+            createTransitionInfo(
+                TRANSIT_OPEN,
+                listOf(nonLaunchTaskChange)
+            ),
+            SurfaceControl.Transaction(),
+            SurfaceControl.Transaction(),
+        ) { }
+
+        assertFalse("Should not start animation without launching desktop task", started)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
     fun addPendingAndAnimateLaunchTransition_noMinimizeChange_doesNotReparentMinimizeChange() {
         val wct = WindowContainerTransaction()
         val launchingTask = createTask(WINDOWING_MODE_FREEFORM)

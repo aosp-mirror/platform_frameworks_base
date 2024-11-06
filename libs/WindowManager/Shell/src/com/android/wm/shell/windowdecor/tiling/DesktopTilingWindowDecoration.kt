@@ -25,6 +25,7 @@ import android.graphics.Rect
 import android.os.IBinder
 import android.os.UserHandle
 import android.util.Slog
+import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.WindowManager.TRANSIT_CHANGE
@@ -44,6 +45,8 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
@@ -70,6 +73,7 @@ class DesktopTilingWindowDecoration(
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val returnToDragStartAnimator: ReturnToDragStartAnimator,
     private val taskRepository: DesktopRepository,
+    private val desktopModeEventLogger: DesktopModeEventLogger,
     private val transactionSupplier: Supplier<Transaction> = Supplier { Transaction() },
 ) :
     Transitions.TransitionHandler,
@@ -218,6 +222,25 @@ class DesktopTilingWindowDecoration(
         return tilingManager
     }
 
+    fun onDividerHandleDragStart(motionEvent: MotionEvent) {
+        val leftTiledTask = leftTaskResizingHelper ?: return
+        val rightTiledTask = rightTaskResizingHelper ?: return
+
+        desktopModeEventLogger.logTaskResizingStarted(
+            ResizeTrigger.TILING_DIVIDER,
+            motionEvent,
+            leftTiledTask.taskInfo,
+            displayController
+        )
+
+        desktopModeEventLogger.logTaskResizingStarted(
+            ResizeTrigger.TILING_DIVIDER,
+            motionEvent,
+            rightTiledTask.taskInfo,
+            displayController
+        )
+    }
+
     fun onDividerHandleMoved(dividerBounds: Rect, t: SurfaceControl.Transaction): Boolean {
         val leftTiledTask = leftTaskResizingHelper ?: return false
         val rightTiledTask = rightTaskResizingHelper ?: return false
@@ -266,9 +289,31 @@ class DesktopTilingWindowDecoration(
         return true
     }
 
-    fun onDividerHandleDragEnd(dividerBounds: Rect, t: SurfaceControl.Transaction) {
+    fun onDividerHandleDragEnd(
+        dividerBounds: Rect,
+        t: SurfaceControl.Transaction,
+        motionEvent: MotionEvent,
+    ) {
         val leftTiledTask = leftTaskResizingHelper ?: return
         val rightTiledTask = rightTaskResizingHelper ?: return
+
+        desktopModeEventLogger.logTaskResizingEnded(
+            ResizeTrigger.TILING_DIVIDER,
+            motionEvent,
+            leftTiledTask.taskInfo,
+            leftTiledTask.newBounds.height(),
+            leftTiledTask.newBounds.width(),
+            displayController
+        )
+
+        desktopModeEventLogger.logTaskResizingEnded(
+            ResizeTrigger.TILING_DIVIDER,
+            motionEvent,
+            rightTiledTask.taskInfo,
+            rightTiledTask.newBounds.height(),
+            rightTiledTask.newBounds.width(),
+            displayController
+        )
 
         if (leftTiledTask.newBounds == leftTiledTask.bounds) {
             leftTiledTask.hideVeil()

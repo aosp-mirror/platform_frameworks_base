@@ -26,6 +26,16 @@ flag {
 }
 
 flag {
+   name: "user_encrypted_source"
+   namespace: "systemui"
+   description: "Get rid of the local cache and rely on UserManager.isUserUnlocked directly to determine whether user CE storage is encrypted."
+   bug: "333656491"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "modes_ui_dialog_paging"
    namespace: "systemui"
    description: "Add pagination to the Modes dialog in quick settings."
@@ -1578,6 +1588,13 @@ flag {
 }
 
 flag {
+   name: "show_clipboard_indication"
+   namespace: "systemui"
+   description: "Show indication text under the clipboard overlay when copied something"
+   bug: "361199935"
+}
+
+flag {
    name: "media_projection_dialog_behind_lockscreen"
    namespace: "systemui"
    description: "Ensure MediaProjection Dialog appears behind the lockscreen"
@@ -1725,11 +1742,4 @@ flag {
     namespace: "systemui"
     description: "An implementation of shortcut customizations through shortcut helper."
     bug: "365064144"
-}
-
-flag {
-   name: "touchpad_three_finger_tap_customization"
-   namespace: "systemui"
-   description: "Customize touchpad three finger tap"
-   bug: "365063048"
 }

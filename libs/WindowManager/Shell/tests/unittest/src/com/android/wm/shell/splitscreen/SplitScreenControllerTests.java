@@ -217,7 +217,6 @@ public class SplitScreenControllerTests extends ShellTestCase {
         // Put the same component to the top running task
         ActivityManager.RunningTaskInfo topRunningTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
         doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask(any());
 
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
@@ -238,7 +237,6 @@ public class SplitScreenControllerTests extends ShellTestCase {
         // Put the same component to the top running task
         ActivityManager.RunningTaskInfo topRunningTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
         doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask(any());
         // Put the same component into a task in the background
         ActivityManager.RecentTaskInfo sameTaskInfo = new ActivityManager.RecentTaskInfo();

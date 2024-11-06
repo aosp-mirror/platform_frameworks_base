@@ -21,6 +21,7 @@ package {
 
 phony {
     name: "frameworks-base-overlays",
+    product_specific: true,
     required: [
         "DisplayCutoutEmulationCornerOverlay",
         "DisplayCutoutEmulationDoubleOverlay",
