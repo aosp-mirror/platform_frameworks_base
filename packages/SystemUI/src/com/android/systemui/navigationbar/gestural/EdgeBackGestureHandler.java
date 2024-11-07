@@ -1191,11 +1191,13 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void pilferPointers() {
-        // Capture inputs
-        mInputMonitor.pilferPointers();
-        // Notify FalsingManager that an intentional gesture has occurred.
-        mFalsingManager.isFalseTouch(BACK_GESTURE);
-        mInputEventReceiver.setBatchingEnabled(true);
+        if (mInputMonitor != null) {
+            // Capture inputs
+            mInputMonitor.pilferPointers();
+            // Notify FalsingManager that an intentional gesture has occurred.
+            mFalsingManager.isFalseTouch(BACK_GESTURE);
+            mInputEventReceiver.setBatchingEnabled(true);
+        }
     }
 
     private boolean isButtonPressFromTrackpad(MotionEvent ev) {
