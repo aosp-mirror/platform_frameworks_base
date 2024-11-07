@@ -93,6 +93,10 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.media.quality">
+        <permission name="android.permission.OBSERVE_PICTURE_PROFILES"/>
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.mtp">
         <permission name="android.permission.ACCESS_MTP"/>
         <permission name="android.permission.MANAGE_USB"/>
@@ -262,6 +266,8 @@ applications that come with the platform
         <!-- BLUETOOTH_PRIVILEGED is needed for test only -->
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.BIND_APPWIDGET"/>
+        <!-- Needed for CTS tests only -->
+        <permission name="android.permission.OBSERVE_PICTURE_PROFILES"/>
         <permission name="android.permission.CHANGE_APP_IDLE_STATE"/>
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>

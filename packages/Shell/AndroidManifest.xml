@@ -369,6 +369,9 @@
     <!-- Permission needed for CTS test - UnsupportedErrorDialogTests -->
     <uses-permission android:name="android.permission.RESET_APP_ERRORS" />
 
+    <!-- Permission needed tests -->
+    <uses-permission android:name="android.permission.OBSERVE_PICTURE_PROFILES" />
+
     <!-- Permission needed for CTS test - CtsSystemUiTestCases:PipNotificationTests -->
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
 

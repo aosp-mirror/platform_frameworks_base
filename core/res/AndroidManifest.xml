@@ -1080,6 +1080,52 @@
     <permission android:name="android.permission.SATELLITE_COMMUNICATION"
                 android:protectionLevel="role|signature|privileged" />
 
+    <!-- ================================== -->
+    <!-- Permissions associated with picture and sound profiles  -->
+    <!-- ================================== -->
+    <eat-comment />
+
+    <!-- @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
+         Allows an app to apply a {@link MediaQualityManager.PictureProfile} to a layer via
+         {@link MediaCodec.PARAMETER_KEY_PICTURE_PROFILE} and, additionally, system apps via
+         {@link SurfaceControl.Transaction#setPictureProfileHandle}.
+         -->
+    <permission android:name="android.permission.APPLY_PICTURE_PROFILE"
+        android:protectionLevel="normal"
+        android:featureFlag="android.media.tv.flags.apply_picture_profiles"/>
+
+    <!-- @hide
+         Allows MediaQualityService to observe any {@link MediaQualityManager.PictureProfile}
+         applied to any layer in the system by apps via
+         {@link MediaCodec.PARAMETER_KEY_PICTURE_PROFILE} and by system apps via
+         {@link SurfaceControl.Transaction#setPictureProfileHandle}.
+         -->
+    <permission android:name="android.permission.OBSERVE_PICTURE_PROFILES"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.media.tv.flags.apply_picture_profiles"/>
+
+    <!--
+        @SystemApi
+        @FlaggedApi("android.media.tv.flags.media_quality_fw")
+        Allows an application to access its picture profile from the media quality database.
+        <p> Protection level: signature|privileged|vendor privileged
+        @hide
+    -->
+    <permission android:name="android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE"
+                android:protectionLevel="signature|privileged|vendorPrivileged"
+                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
+
+    <!--
+        @SystemApi
+        @FlaggedApi("android.media.tv.flags.media_quality_fw")
+        Allows an application to access its sound profile from the media quality database.
+        <p> Protection level: signature|privileged|vendor privileged
+        @hide
+    -->
+    <permission android:name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE"
+                android:protectionLevel="signature|privileged|vendorPrivileged"
+                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing external storage                             -->
     <!-- ====================================================================== -->
@@ -8565,27 +8611,6 @@
     <permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE"
                 android:protectionLevel="signature"/>
 
-    <!--
-        @SystemApi
-        @FlaggedApi("android.media.tv.flags.media_quality_fw")
-        Allows an application to access its picture profile from the media quality database.
-        <p> Protection level: signature|privileged|vendor privileged
-        @hide
-    -->
-    <permission android:name="android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE"
-                android:protectionLevel="signature|privileged|vendorPrivileged"
-                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
-
-    <!--
-        @SystemApi
-        @FlaggedApi("android.media.tv.flags.media_quality_fw")
-        Allows an application to access its sound profile from the media quality database.
-        <p> Protection level: signature|privileged|vendor privileged
-        @hide
-    -->
-    <permission android:name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE"
-                android:protectionLevel="signature|privileged|vendorPrivileged"
-                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
     <!-- @SystemApi
         @FlaggedApi("android.content.pm.verification_service")
         Allows app to be the verification agent to verify packages.
