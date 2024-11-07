@@ -4969,6 +4969,27 @@
     <permission android:name="android.permission.PROVIDE_REMOTE_CREDENTIALS"
                 android:protectionLevel="signature|privileged|role" />
 
+    <!-- @FlaggedApi(com.android.settingslib.flags.Flags.FLAG_SETTINGS_CATALYST)
+         Allows an application to access the Settings Preference services to read settings exposed
+         by the system Settings app and system apps that contribute settings surfaced by the
+         Settings app.
+         <p>This allows the calling application to read settings values through the host
+         application, agnostic of underlying storage. -->
+    <permission android:name="android.permission.READ_SYSTEM_PREFERENCES"
+        android:protectionLevel="signature|privileged|role"
+        android:featureFlag="com.android.settingslib.flags.settings_catalyst" />
+
+    <!-- @FlaggedApi(com.android.settingslib.flags.Flags.FLAG_SETTINGS_CATALYST)
+         Allows an application to access the Settings Preference services to write settings
+         values exposed by the system Settings app and system apps that contribute settings surfaced
+         in the Settings app.
+         <p>This allows the calling application to write settings values
+         through the host application, agnostic of underlying storage.
+         <p>Protection Level: signature|privileged|appop - appop to be added in followup -->
+    <permission android:name="android.permission.WRITE_SYSTEM_PREFERENCES"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="com.android.settingslib.flags.settings_catalyst" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
