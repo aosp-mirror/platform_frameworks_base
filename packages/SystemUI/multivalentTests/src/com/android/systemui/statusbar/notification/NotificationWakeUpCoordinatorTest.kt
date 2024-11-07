@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.notification
 
+import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
@@ -26,11 +26,17 @@ import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.domain.interactor.pulseExpansionInteractor
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.setSceneTransition
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ShadeViewController.Companion.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -41,9 +47,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,16 +58,21 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyFloat
-import org.mockito.Mockito.clearInvocations
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
+class NotificationWakeUpCoordinatorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
@@ -103,6 +111,18 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
 
     private fun setDozeAmount(dozeAmount: Float) {
         statusBarStateCallback.onDozeAmountChanged(dozeAmount, dozeAmount)
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before
@@ -178,6 +198,7 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun setDozeToZeroWhenCommunalShowingWillFullyHideNotifications() =
         testScope.runTest {
             val transitionState =
@@ -192,6 +213,17 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableSceneContainer
+    fun setDozeToZeroWhenCommunalShowingWillFullyHideNotifications_withSceneContainer() =
+        testScope.runTest {
+            kosmos.setSceneTransition(Idle(Scenes.Communal))
+            setDozeAmount(0f)
+            verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
+            assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
+        }
+
+    @Test
+    @DisableSceneContainer
     fun closingCommunalWillShowNotifications() =
         testScope.runTest {
             val transitionState =
@@ -206,6 +238,20 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
 
             transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Blank)
             runCurrent()
+            verifyStackScrollerDozeAndHideAmount(dozeAmount = 0f, hideAmount = 0f)
+            assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun closingCommunalWillShowNotifications_withSceneContainer() =
+        testScope.runTest {
+            kosmos.setSceneTransition(Idle(Scenes.Communal))
+            setDozeAmount(0f)
+            verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
+            assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
+
+            kosmos.setSceneTransition(Idle(CommunalScenes.Blank))
             verifyStackScrollerDozeAndHideAmount(dozeAmount = 0f, hideAmount = 0f)
             assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
         }
