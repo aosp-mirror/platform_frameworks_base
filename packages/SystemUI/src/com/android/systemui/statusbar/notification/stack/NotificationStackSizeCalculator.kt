@@ -35,16 +35,14 @@ import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Compile
 import com.android.systemui.util.children
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.properties.Delegates.notNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 private const val TAG = "NotifStackSizeCalc"
 private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)
@@ -94,9 +92,7 @@ constructor(
      */
     private var saveSpaceOnLockscreen = false
 
-    /**
-     * True when the lock screen notification minimalism feature setting is enabled
-     */
+    /** True when the lock screen notification minimalism feature setting is enabled */
     private var minimalismSettingEnabled = false
 
     init {
@@ -216,7 +212,7 @@ constructor(
                     canStackFitInSpace(
                         heightResult,
                         notifSpace = notifSpace,
-                        shelfSpace = shelfSpace
+                        shelfSpace = shelfSpace,
                     ) == FitResult.FIT
             }
 
@@ -246,7 +242,7 @@ constructor(
                         canStackFitInSpace(
                             heightResult,
                             notifSpace = notifSpace,
-                            shelfSpace = shelfSpace
+                            shelfSpace = shelfSpace,
                         ) != FitResult.NO_FIT
                 }
             log { "\t--- maxNotifications=$maxNotifications" }
@@ -294,7 +290,7 @@ constructor(
     fun computeHeight(
         stack: NotificationStackScrollLayout,
         maxNotifs: Int,
-        shelfHeight: Float
+        shelfHeight: Float,
     ): Float {
         log { "\n" }
         log { "computeHeight ---" }
@@ -328,7 +324,7 @@ constructor(
     private enum class FitResult {
         FIT,
         FIT_IF_SAVE_SPACE,
-        NO_FIT
+        NO_FIT,
     }
 
     data class SpaceNeeded(
@@ -336,7 +332,7 @@ constructor(
         val whenEnoughSpace: Float,
 
         // Float height of space needed when showing collapsed layout for FSI HUNs.
-        val whenSavingSpace: Float
+        val whenSavingSpace: Float,
     )
 
     private data class StackHeight(
@@ -352,7 +348,7 @@ constructor(
         val shelfHeightWithSpaceBefore: Float,
 
         /** Whether the stack should actually be forced into the shelf before this height. */
-        val shouldForceIntoShelf: Boolean
+        val shouldForceIntoShelf: Boolean,
     )
 
     private suspend fun trackLockScreenNotificationMinimalismSettingChanges() {
@@ -404,7 +400,7 @@ constructor(
                             stack,
                             previous = currentNotification,
                             current = children[firstViewInShelfIndex],
-                            currentIndex = firstViewInShelfIndex
+                            currentIndex = firstViewInShelfIndex,
                         )
                     spaceBeforeShelf + shelfHeight
                 }
@@ -425,7 +421,7 @@ constructor(
                     notifsHeight = notifications,
                     notifsHeightSavingSpace = notifsWithCollapsedHun,
                     shelfHeightWithSpaceBefore = shelfWithSpaceBefore,
-                    shouldForceIntoShelf = counter?.shouldForceIntoShelf() ?: false
+                    shouldForceIntoShelf = counter?.shouldForceIntoShelf() ?: false,
                 )
             )
         }
@@ -490,8 +486,10 @@ constructor(
 
     fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("NotificationStackSizeCalculator saveSpaceOnLockscreen=$saveSpaceOnLockscreen")
-        pw.println("NotificationStackSizeCalculator " +
-                "limitLockScreenToOneImportant=$limitLockScreenToOneImportant")
+        pw.println(
+            "NotificationStackSizeCalculator " +
+                "limitLockScreenToOneImportant=$limitLockScreenToOneImportant"
+        )
     }
 
     private fun ExpandableView.isShowable(onLockscreen: Boolean): Boolean {
@@ -514,7 +512,7 @@ constructor(
         stack: NotificationStackScrollLayout,
         previous: ExpandableView?,
         current: ExpandableView?,
-        currentIndex: Int
+        currentIndex: Int,
     ): Float {
         if (currentIndex == 0) {
             return 0f
@@ -566,11 +564,7 @@ constructor(
         takeWhile(predicate).count() - 1
 
     /** Counts the number of notifications for each type of bucket */
-    data class BucketTypeCounter(
-        var ongoing: Int = 0,
-        var important: Int = 0,
-        var other: Int = 0,
-    ) {
+    data class BucketTypeCounter(var ongoing: Int = 0, var important: Int = 0, var other: Int = 0) {
         fun incrementForBucket(@PriorityBucket bucket: Int?) {
             when (bucket) {
                 BUCKET_MEDIA_CONTROLS,

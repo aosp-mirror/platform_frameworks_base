@@ -21,10 +21,10 @@ import android.service.notification.StatusBarNotification
 import android.view.View.VISIBLE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -80,7 +80,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 testableResources.resources,
                 ResourcesSplitShadeStateController(),
                 seenNotificationsInteractor = seenNotificationsInteractor,
-                scope = kosmos.testScope,
+                scope = testScope,
             )
     }
 
@@ -93,7 +93,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 rows,
                 spaceForNotifications = 0f,
                 spaceForShelf = 0f,
-                shelfHeight = 0f
+                shelfHeight = 0f,
             )
 
         assertThat(maxNotifications).isEqualTo(0)
@@ -109,7 +109,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 rows,
                 spaceForNotifications = Float.MAX_VALUE,
                 spaceForShelf = Float.MAX_VALUE,
-                shelfHeight
+                shelfHeight,
             )
 
         assertThat(maxNotifications).isEqualTo(numberOfRows)
@@ -145,7 +145,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 listOf(row),
                 /* spaceForNotifications= */ 5f,
                 /* spaceForShelf= */ 0f,
-                /* shelfHeight= */ 0f
+                /* shelfHeight= */ 0f,
             )
 
         assertThat(maxNotifications).isEqualTo(1)
@@ -156,11 +156,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         setGapHeight(gapHeight)
         val shelfHeight = shelfHeight + dividerHeight
         val spaceForNotifications =
-            listOf(
-                    rowHeight + dividerHeight,
-                    gapHeight + rowHeight + dividerHeight,
-                )
-                .sum()
+            listOf(rowHeight + dividerHeight, gapHeight + rowHeight + dividerHeight).sum()
         val spaceForShelf = gapHeight + dividerHeight + shelfHeight
         val rows =
             listOf(createMockRow(rowHeight), createMockRow(rowHeight), createMockRow(rowHeight))
@@ -170,7 +166,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 rows,
                 spaceForNotifications + 1,
                 spaceForShelf,
-                shelfHeight
+                shelfHeight,
             )
 
         assertThat(maxNotifications).isEqualTo(2)
@@ -181,12 +177,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         // Each row in separate section.
         setGapHeight(gapHeight)
 
-        val notifSpace =
-            listOf(
-                    rowHeight,
-                    dividerHeight + gapHeight + rowHeight,
-                )
-                .sum()
+        val notifSpace = listOf(rowHeight, dividerHeight + gapHeight + rowHeight).sum()
 
         val shelfSpace = dividerHeight + gapHeight + shelfHeight
         val spaceUsed = notifSpace + shelfSpace
@@ -217,7 +208,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 rows,
                 spaceForNotifications + 1,
                 spaceForShelf,
-                shelfHeight
+                shelfHeight,
             )
         assertThat(maxNotifications).isEqualTo(1)
 
@@ -260,7 +251,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 visibleIndex = 0,
                 previousView = null,
                 stack = stackLayout,
-                onLockscreen = true
+                onLockscreen = true,
             )
         assertThat(space.whenEnoughSpace).isEqualTo(10f)
     }
@@ -280,7 +271,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 visibleIndex = 0,
                 previousView = null,
                 stack = stackLayout,
-                onLockscreen = true
+                onLockscreen = true,
             )
         assertThat(space.whenEnoughSpace).isEqualTo(5)
     }
@@ -299,7 +290,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 visibleIndex = 0,
                 previousView = null,
                 stack = stackLayout,
-                onLockscreen = true
+                onLockscreen = true,
             )
         assertThat(space.whenSavingSpace).isEqualTo(5)
     }
@@ -319,7 +310,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 visibleIndex = 0,
                 previousView = null,
                 stack = stackLayout,
-                onLockscreen = true
+                onLockscreen = true,
             )
         assertThat(space.whenSavingSpace).isEqualTo(5)
     }
@@ -338,7 +329,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 visibleIndex = 0,
                 previousView = null,
                 stack = stackLayout,
-                onLockscreen = false
+                onLockscreen = false,
             )
         assertThat(space.whenEnoughSpace).isEqualTo(rowHeight)
         assertThat(space.whenSavingSpace).isEqualTo(rowHeight)
@@ -348,14 +339,14 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         rows: List<ExpandableView>,
         spaceForNotifications: Float,
         spaceForShelf: Float,
-        shelfHeight: Float = this.shelfHeight
+        shelfHeight: Float = this.shelfHeight,
     ): Int {
         setupChildren(rows)
         return sizeCalculator.computeMaxKeyguardNotifications(
             stackLayout,
             spaceForNotifications,
             spaceForShelf,
-            shelfHeight
+            shelfHeight,
         )
     }
 
