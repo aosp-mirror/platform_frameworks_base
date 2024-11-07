@@ -46,17 +46,23 @@ class DesktopTestHelpers {
                     .build()
         }
 
-        /** Create a task that has windowing mode set to [WINDOWING_MODE_FULLSCREEN] */
+        /** Create a task builder that has windowing mode set to [WINDOWING_MODE_FULLSCREEN] */
         @JvmStatic
         @JvmOverloads
-        fun createFullscreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
+        fun createFullscreenTaskBuilder(displayId: Int = DEFAULT_DISPLAY): TestRunningTaskInfoBuilder {
             return TestRunningTaskInfoBuilder()
                 .setDisplayId(displayId)
                 .setToken(MockToken().token())
                 .setActivityType(ACTIVITY_TYPE_STANDARD)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
                 .setLastActiveTime(100)
-                .build()
+        }
+
+        /** Create a task that has windowing mode set to [WINDOWING_MODE_FULLSCREEN] */
+        @JvmStatic
+        @JvmOverloads
+        fun createFullscreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
+            return createFullscreenTaskBuilder(displayId).build()
         }
 
         /** Create a task that has windowing mode set to [WINDOWING_MODE_MULTI_WINDOW] */
@@ -83,6 +89,16 @@ class DesktopTestHelpers {
                     .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
                     .setLastActiveTime(100)
                     .build()
+        }
+
+        /** Create a new System Modal task, i.e. a task with a single transparent activity. */
+        @JvmStatic
+        @JvmOverloads
+        fun createSystemModalTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
+            return createFullscreenTaskBuilder(displayId)
+                .setTopActivityTransparent(true)
+                .setNumActivities(1)
+                .build()
         }
     }
 }

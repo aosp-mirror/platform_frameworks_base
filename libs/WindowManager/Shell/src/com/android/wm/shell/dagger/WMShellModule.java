@@ -17,6 +17,7 @@
 package com.android.wm.shell.dagger;
 
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 import static android.window.DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS;
 
@@ -94,6 +95,7 @@ import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator;
 import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
+import com.android.wm.shell.desktopmode.compatui.SystemModalsTransitionHandler;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.AppToWebEducationController;
@@ -950,6 +952,26 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static Optional<SystemModalsTransitionHandler> provideSystemModalsTransitionHandler(
+            Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellAnimationThread ShellExecutor animExecutor,
+            ShellInit shellInit,
+            Transitions transitions,
+            @DynamicOverride DesktopRepository desktopRepository) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)
+                || !ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
+                || !Flags.enableDesktopSystemDialogsTransitions()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new SystemModalsTransitionHandler(
+                        context, mainExecutor, animExecutor, shellInit, transitions,
+                        desktopRepository));
+    }
+
+    @WMSingleton
+    @Provides
     static EnterDesktopTaskTransitionHandler provideEnterDesktopModeTaskTransitionHandler(
             Transitions transitions,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
@@ -1303,7 +1325,8 @@ public abstract class WMShellModule {
             @NonNull LetterboxCommandHandler letterboxCommandHandler,
             Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
             Optional<DesktopDisplayEventHandler> desktopDisplayEventHandler,
-            Optional<DesktopModeKeyGestureHandler> desktopModeKeyGestureHandler) {
+            Optional<DesktopModeKeyGestureHandler> desktopModeKeyGestureHandler,
+            Optional<SystemModalsTransitionHandler> systemModalsTransitionHandler) {
         return new Object();
     }
 
