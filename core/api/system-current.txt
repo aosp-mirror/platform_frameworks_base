@@ -8111,6 +8111,16 @@ package android.media.musicrecognition {
 
 }
 
+package android.media.quality {
+
+  public static final class PictureProfile.Builder {
+    method @NonNull public android.media.quality.PictureProfile.Builder setInputId(@NonNull String);
+    method @NonNull public android.media.quality.PictureProfile.Builder setPackageName(@NonNull String);
+    method @NonNull public android.media.quality.PictureProfile.Builder setProfileType(int);
+  }
+
+}
+
 package android.media.session {
 
   public final class MediaSessionManager {

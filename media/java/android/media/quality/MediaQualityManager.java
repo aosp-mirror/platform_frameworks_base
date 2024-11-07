@@ -37,7 +37,6 @@ import java.util.concurrent.Executor;
 /**
  * Central system API to the overall media quality, which arbitrates interaction between
  * applications and media quality service.
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 @SystemService(Context.MEDIA_QUALITY_SERVICE)

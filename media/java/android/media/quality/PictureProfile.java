@@ -18,11 +18,12 @@ package android.media.quality;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.media.tv.TvInputInfo;
 import android.media.tv.flags.Flags;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,7 +34,6 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Profile for picture quality.
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class PictureProfile implements Parcelable {
@@ -47,7 +47,7 @@ public final class PictureProfile implements Parcelable {
     @NonNull
     private final String mPackageName;
     @NonNull
-    private final Bundle mParams;
+    private final PersistableBundle mParams;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -59,14 +59,14 @@ public final class PictureProfile implements Parcelable {
     /**
      * System profile type.
      *
-     * <p>A profile of system type is managed by the system, and readable to the package define in
+     * <p>A profile of system type is managed by the system, and readable to the package returned by
      * {@link #getPackageName()}.
      */
     public static final int TYPE_SYSTEM = 1;
     /**
      * Application profile type.
      *
-     * <p>A profile of application type is managed by the package define in
+     * <p>A profile of application type is managed by the package returned by
      * {@link #getPackageName()}.
      */
     public static final int TYPE_APPLICATION = 2;
@@ -125,7 +125,7 @@ public final class PictureProfile implements Parcelable {
         mName = in.readString();
         mInputId = in.readString();
         mPackageName = in.readString();
-        mParams = in.readBundle();
+        mParams = in.readPersistableBundle();
     }
 
     @Override
@@ -135,7 +135,7 @@ public final class PictureProfile implements Parcelable {
         dest.writeString(mName);
         dest.writeString(mInputId);
         dest.writeString(mPackageName);
-        dest.writeBundle(mParams);
+        dest.writePersistableBundle(mParams);
     }
 
     @Override
@@ -168,7 +168,7 @@ public final class PictureProfile implements Parcelable {
             @NonNull String name,
             @Nullable String inputId,
             @NonNull String packageName,
-            @NonNull Bundle params) {
+            @NonNull PersistableBundle params) {
         this.mId = id;
         this.mType = type;
         this.mName = name;
@@ -251,13 +251,12 @@ public final class PictureProfile implements Parcelable {
      * {@link MediaQualityContract.PictureQuality}.
      */
     @NonNull
-    public Bundle getParameters() {
-        return new Bundle(mParams);
+    public PersistableBundle getParameters() {
+        return new PersistableBundle(mParams);
     }
 
     /**
      * A builder for {@link PictureProfile}.
-     * @hide
      */
     public static final class Builder {
         @Nullable
@@ -270,7 +269,7 @@ public final class PictureProfile implements Parcelable {
         @NonNull
         private String mPackageName;
         @NonNull
-        private Bundle mParams;
+        private PersistableBundle mParams;
 
         /**
          * Creates a new Builder.
@@ -291,7 +290,18 @@ public final class PictureProfile implements Parcelable {
             mParams = p.getParameters();
         }
 
-        /* @hide using by MediaQualityService */
+        /**
+         * Sets profile type.
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+        @NonNull
+        public Builder setProfileType(@ProfileType int value) {
+            mType = value;
+            return this;
+        }
 
         /**
          * Only used by system to assign the ID.
@@ -304,24 +314,13 @@ public final class PictureProfile implements Parcelable {
         }
 
         /**
-         * Sets profile type.
-         *
-         * @hide @SystemApi
-         */
-        @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
-        @NonNull
-        public Builder setProfileType(@ProfileType int value) {
-            mType = value;
-            return this;
-        }
-
-        /**
          * Sets input ID.
          *
          * @see PictureProfile#getInputId()
          *
-         * @hide @SystemApi
+         * @hide
          */
+        @SystemApi
         @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
         @NonNull
         public Builder setInputId(@NonNull String value) {
@@ -334,8 +333,9 @@ public final class PictureProfile implements Parcelable {
          *
          * @see PictureProfile#getPackageName()
          *
-         * @hide @SystemApi
+         * @hide
          */
+        @SystemApi
         @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
         @NonNull
         public Builder setPackageName(@NonNull String value) {
@@ -349,8 +349,8 @@ public final class PictureProfile implements Parcelable {
          * @see PictureProfile#getParameters()
          */
         @NonNull
-        public Builder setParameters(@NonNull Bundle params) {
-            mParams = new Bundle(params);
+        public Builder setParameters(@NonNull PersistableBundle params) {
+            mParams = new PersistableBundle(params);
             return this;
         }
 
