@@ -33,7 +33,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting

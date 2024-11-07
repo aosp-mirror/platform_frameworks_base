@@ -20,7 +20,7 @@ package com.android.systemui.keyguard.ui.binder
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.common.ui.view.LongPressHandlingView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached

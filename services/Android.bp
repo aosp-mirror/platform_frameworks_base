@@ -242,6 +242,7 @@ java_library {
         "services.wifi",
         "service-blobstore",
         "service-jobscheduler",
+        "service-connectivity-b-pre-jarjar", // Move it to mainline module
         "android.hidl.base-V1.0-java",
     ],
 
