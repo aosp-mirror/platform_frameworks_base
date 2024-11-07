@@ -962,6 +962,10 @@
     <!-- Permission required for ExecutableMethodFileOffsetsTest -->
     <uses-permission android:name="android.permission.DYNAMIC_INSTRUMENTATION" />
 
+    <!-- Permissions required for CTS test - SettingsPreferenceServiceClientTest -->
+    <uses-permission android:name="android.permission.READ_SYSTEM_PREFERENCES" />
+    <uses-permission android:name="android.permission.WRITE_SYSTEM_PREFERENCES" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
