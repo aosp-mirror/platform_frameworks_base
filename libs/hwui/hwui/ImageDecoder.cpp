@@ -27,8 +27,8 @@
 #include <SkColorSpace.h>
 #include <SkColorType.h>
 #include <SkEncodedOrigin.h>
-#include <SkImageInfo.h>
 #include <SkGainmapInfo.h>
+#include <SkImageInfo.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkPngChunkReader.h>
@@ -42,6 +42,8 @@
 #include <utils/Trace.h>
 
 #include <memory>
+
+#include "modules/skcms/src/skcms_public.h"
 
 using namespace android;
 

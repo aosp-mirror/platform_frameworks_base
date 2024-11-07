@@ -51,6 +51,7 @@ public class BatteryUsageStatsProvider {
     private final CpuScalingPolicies mCpuScalingPolicies;
     private final int mAccumulatedBatteryUsageStatsSpanSize;
     private final Clock mClock;
+    private final MonotonicClock mMonotonicClock;
     private final Object mLock = new Object();
     private List<PowerCalculator> mPowerCalculators;
     private UserPowerCalculator mUserPowerCalculator;
@@ -67,7 +68,7 @@ public class BatteryUsageStatsProvider {
             @NonNull PowerAttributor powerAttributor,
             @NonNull PowerProfile powerProfile, @NonNull CpuScalingPolicies cpuScalingPolicies,
             @NonNull PowerStatsStore powerStatsStore, int accumulatedBatteryUsageStatsSpanSize,
-            @NonNull Clock clock) {
+            @NonNull Clock clock, @NonNull MonotonicClock monotonicClock) {
         mContext = context;
         mPowerAttributor = powerAttributor;
         mPowerStatsStore = powerStatsStore;
@@ -75,6 +76,7 @@ public class BatteryUsageStatsProvider {
         mCpuScalingPolicies = cpuScalingPolicies;
         mAccumulatedBatteryUsageStatsSpanSize = accumulatedBatteryUsageStatsSpanSize;
         mClock = clock;
+        mMonotonicClock = monotonicClock;
         mUserPowerCalculator = new UserPowerCalculator();
 
         mPowerStatsStore.addSectionReader(new BatteryUsageStatsSection.Reader());
@@ -213,7 +215,7 @@ public class BatteryUsageStatsProvider {
         powerStatsSpan.addTimeFrame(accumulatedStats.startMonotonicTime,
                 accumulatedStats.startWallClockTime,
                 accumulatedStats.endMonotonicTime - accumulatedStats.startMonotonicTime);
-        stats.commitMonotonicClock();
+        mMonotonicClock.write();
         mPowerStatsStore.storePowerStatsSpanAsync(powerStatsSpan,
                 accumulatedStats.builder::discard);
     }
@@ -308,23 +310,29 @@ public class BatteryUsageStatsProvider {
 
     private void updateAccumulatedBatteryUsageStats(AccumulatedBatteryUsageStats accumulatedStats,
             BatteryStatsImpl stats, BatteryUsageStatsQuery query) {
-        // TODO(b/366493365): add the current batteryusagestats directly into
-        //  `accumulatedStats.builder` to avoid allocating a second CursorWindow
-        BatteryUsageStats.Builder remainingBatteryUsageStats = computeBatteryUsageStats(stats,
-                query, accumulatedStats.endMonotonicTime, query.getMonotonicEndTime(),
-                mClock.currentTimeMillis());
+        long startMonotonicTime = accumulatedStats.endMonotonicTime;
+        if (startMonotonicTime == MonotonicClock.UNDEFINED) {
+            startMonotonicTime = stats.getMonotonicStartTime();
+        }
+        long endWallClockTime = mClock.currentTimeMillis();
+        long endMonotonicTime = mMonotonicClock.monotonicTime();
 
         if (accumulatedStats.builder == null) {
-            accumulatedStats.builder = remainingBatteryUsageStats;
+            accumulatedStats.builder = new BatteryUsageStats.Builder(
+                    stats.getCustomEnergyConsumerNames(), false, true, true, true, 0);
             accumulatedStats.startWallClockTime = stats.getStartClockTime();
-            accumulatedStats.startMonotonicTime = stats.getMonotonicStartTime();
-            accumulatedStats.endMonotonicTime = accumulatedStats.startMonotonicTime
-                    + accumulatedStats.builder.getStatsDuration();
-        } else {
-            accumulatedStats.builder.add(remainingBatteryUsageStats.build());
-            accumulatedStats.endMonotonicTime += remainingBatteryUsageStats.getStatsDuration();
-            remainingBatteryUsageStats.discard();
+            accumulatedStats.builder.setStatsStartTimestamp(accumulatedStats.startWallClockTime);
         }
+
+        accumulatedStats.endMonotonicTime = endMonotonicTime;
+
+        accumulatedStats.builder.setStatsEndTimestamp(endWallClockTime);
+        accumulatedStats.builder.setStatsDuration(endWallClockTime - startMonotonicTime);
+
+        mPowerAttributor.estimatePowerConsumption(accumulatedStats.builder, stats.getHistory(),
+                startMonotonicTime, MonotonicClock.UNDEFINED);
+
+        populateGeneralInfo(accumulatedStats.builder, stats);
     }
 
     private BatteryUsageStats.Builder computeBatteryUsageStats(BatteryStatsImpl stats,

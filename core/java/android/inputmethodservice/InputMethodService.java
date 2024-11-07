@@ -55,7 +55,6 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_OTHER;
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
-import static android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API;
 import static android.view.inputmethod.Flags.ctrlShiftShortcut;
 import static android.view.inputmethod.Flags.predictiveBackIme;
 
@@ -4390,39 +4389,6 @@ public class InputMethodService extends AbstractInputMethodService {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public final boolean isImeNavigationBarShownForTesting() {
         return mNavigationBarController.isShown();
-    }
-
-    /**
-     * Called when the requested visibility of a custom IME Switcher button changes.
-     *
-     * <p>When the system provides an IME navigation bar, it may decide to show an IME Switcher
-     * button inside this bar. However, the IME can request hiding the bar provided by the system
-     * with {@code getWindowInsetsController().hide(captionBar())} (the IME navigation bar provides
-     * {@link Type#captionBar() captionBar} insets to the IME window). If the request is successful,
-     * then it becomes the IME's responsibility to provide a custom IME Switcher button in its
-     * input view, with equivalent functionality.</p>
-     *
-     * <p>This custom button is only requested to be visible when the system provides the IME
-     * navigation bar, both the bar and the IME Switcher button inside it should be visible,
-     * but the IME successfully requested to hide the bar. This does not depend on the current
-     * visibility of the IME. It could be called with {@code true} while the IME is hidden, in
-     * which case the IME should prepare to show the button as soon as the IME itself is shown.</p>
-     *
-     * <p>This is only called when the requested visibility changes. The default value is
-     * {@code false} and as such, this will not be called initially if the resulting value is
-     * {@code false}.</p>
-     *
-     * <p>This can be called at any time after {@link #onCreate}, even if the IME is not currently
-     * visible. However, this is not guaranteed to be called before the IME is shown, as it depends
-     * on when the IME requested hiding the IME navigation bar. If the request is sent during
-     * the showing flow (e.g. during {@link #onStartInputView}), this will be called shortly after
-     * {@link #onWindowShown}, but before the first IME frame is drawn.</p>
-     *
-     * @param visible whether the button is requested visible or not.
-     */
-    @FlaggedApi(FLAG_IME_SWITCHER_REVAMP_API)
-    public void onCustomImeSwitcherButtonRequestedVisible(boolean visible) {
-        // Intentionally empty
     }
 
     /**

@@ -397,7 +397,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL)
+    @EnableFlags(Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
     @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     public void testToggleTalkbackPress() {
         testShortcutInternal("Meta + Alt + T -> Toggle talkback",
@@ -745,7 +745,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @EnableFlags(com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL)
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
     public void testKeyGestureToggleTalkback() {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));

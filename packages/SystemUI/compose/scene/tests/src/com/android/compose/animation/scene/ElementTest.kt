@@ -869,10 +869,7 @@ class ElementTest {
                 state = state,
                 modifier = Modifier.size(layoutWidth, layoutHeight),
             ) {
-                scene(
-                    SceneA,
-                    userActions = mapOf(Swipe(SwipeDirection.Down, pointerCount = 2) to SceneB),
-                ) {
+                scene(SceneA, userActions = mapOf(Swipe.Down(pointerCount = 2) to SceneB)) {
                     Box(
                         Modifier
                             // A scrollable that does not consume the scroll gesture

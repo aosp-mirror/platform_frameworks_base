@@ -31,9 +31,12 @@ import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AppCompatCallbacks;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
 import android.app.UiAutomation;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
@@ -42,6 +45,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process_ravenwood;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig_host;
 import android.system.ErrnoException;
@@ -51,6 +55,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.hoststubgen.hosthelper.HostTestUtils;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.RuntimeInit;
 import com.android.ravenwood.RavenwoodRuntimeNative;
 import com.android.ravenwood.RavenwoodRuntimeState;
@@ -58,6 +63,7 @@ import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.RavenwoodRuntimeException;
 import com.android.ravenwood.common.SneakyThrow;
 import com.android.server.LocalServices;
+import com.android.server.compat.PlatformCompat;
 
 import org.junit.runner.Description;
 
@@ -86,6 +92,7 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
+    private static final String LIBRAVENWOOD_INITIALIZER_NAME = "ravenwood_initializer";
     private static final String RAVENWOOD_NATIVE_SYSPROP_NAME = "ravenwood_sysprop";
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
     private static final String RAVENWOOD_BUILD_PROP =
@@ -139,23 +146,61 @@ public class RavenwoodRuntimeEnvironmentController {
         return res;
     }
 
+    private static final Object sInitializationLock = new Object();
+
+    @GuardedBy("sInitializationLock")
+    private static boolean sInitialized = false;
+
+    @GuardedBy("sInitializationLock")
+    private static Throwable sExceptionFromGlobalInit;
+
     private static RavenwoodAwareTestRunner sRunner;
     private static RavenwoodSystemProperties sProps;
-    private static boolean sInitialized = false;
 
     /**
      * Initialize the global environment.
      */
     public static void globalInitOnce() {
-        if (sInitialized) {
-            return;
+        synchronized (sInitializationLock) {
+            if (!sInitialized) {
+                // globalInitOnce() is called from class initializer, which cause
+                // this method to be called recursively,
+                sInitialized = true;
+
+                // This is the first call.
+                try {
+                    globalInitInner();
+                } catch (Throwable th) {
+                    Log.e(TAG, "globalInit() failed", th);
+
+                    sExceptionFromGlobalInit = th;
+                    throw th;
+                }
+            } else {
+                // Subsequent calls. If the first call threw, just throw the same error, to prevent
+                // the test from running.
+                if (sExceptionFromGlobalInit != null) {
+                    Log.e(TAG, "globalInit() failed re-throwing the same exception",
+                            sExceptionFromGlobalInit);
+
+                    SneakyThrow.sneakyThrow(sExceptionFromGlobalInit);
+                }
+            }
         }
-        sInitialized = true;
+    }
+
+    private static void globalInitInner() {
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "globalInit() called here...", new RuntimeException("NOT A CRASH"));
+        }
+
+        // Some process-wide initialization. (maybe redirect stdout/stderr)
+        RavenwoodCommonUtils.loadJniLibrary(LIBRAVENWOOD_INITIALIZER_NAME);
 
         // We haven't initialized liblog yet, so directly write to System.out here.
-        RavenwoodCommonUtils.log(TAG, "globalInit()");
+        RavenwoodCommonUtils.log(TAG, "globalInitInner()");
 
-        // Load libravenwood_sysprop first
+        // Load libravenwood_sysprop before other libraries that may use SystemProperties.
         var libProp = RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_SYSPROP_NAME);
         System.load(libProp);
         RavenwoodRuntimeNative.reloadNativeLibrary(libProp);
@@ -294,6 +339,8 @@ public class RavenwoodRuntimeEnvironmentController {
 
         RavenwoodSystemServer.init(config);
 
+        initializeCompatIds(config);
+
         if (ENABLE_TIMEOUT_STACKS) {
             sPendingTimeout = sTimeoutExecutor.schedule(
                     RavenwoodRuntimeEnvironmentController::dumpStacks,
@@ -307,6 +354,31 @@ public class RavenwoodRuntimeEnvironmentController {
     public static void reinit() {
         var config = sRunner.mState.getConfig();
         Binder.restoreCallingIdentity(packBinderIdentityToken(false, config.mUid, config.mPid));
+    }
+
+    private static void initializeCompatIds(RavenwoodConfig config) {
+        // Set up compat-IDs for the app side.
+        // TODO: Inside the system server, all the compat-IDs should be enabled,
+        // Due to the `AppCompatCallbacks.install(new long[0], new long[0])` call in
+        // SystemServer.
+
+        // Compat framework only uses the package name and the target SDK level.
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.packageName = config.mTargetPackageName;
+        appInfo.targetSdkVersion = config.mTargetSdkLevel;
+
+        PlatformCompat platformCompat = null;
+        try {
+            platformCompat = (PlatformCompat) ServiceManager.getServiceOrThrow(
+                    Context.PLATFORM_COMPAT_SERVICE);
+        } catch (ServiceNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        var disabledChanges = platformCompat.getDisabledChanges(appInfo);
+        var loggableChanges = platformCompat.getLoggableChanges(appInfo);
+
+        AppCompatCallbacks.install(disabledChanges, loggableChanges);
     }
 
     /**

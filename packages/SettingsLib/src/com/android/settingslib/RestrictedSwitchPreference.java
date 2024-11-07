@@ -45,8 +45,9 @@ import androidx.preference.SwitchPreferenceCompat;
  * Version of SwitchPreferenceCompat that can be disabled by a device admin
  * using a user restriction.
  */
-public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
-    RestrictedPreferenceHelper mHelper;
+public class RestrictedSwitchPreference extends SwitchPreferenceCompat implements
+        RestrictedPreferenceHelperProvider {
+    private final RestrictedPreferenceHelper mHelper;
     AppOpsManager mAppOpsManager;
     boolean mUseAdditionalSummary = false;
     CharSequence mRestrictedSwitchSummary;
@@ -96,6 +97,11 @@ public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
 
     public RestrictedSwitchPreference(Context context) {
         this(context, null);
+    }
+
+    @Override
+    public @NonNull RestrictedPreferenceHelper getRestrictedPreferenceHelper() {
+        return mHelper;
     }
 
     @VisibleForTesting

@@ -115,7 +115,7 @@ interface PreferenceScreenCreator : PreferenceScreenMetadata, PreferenceScreenPr
     fun isFlagEnabled(context: Context): Boolean = true
 
     val preferenceBindingFactory: PreferenceBindingFactory
-        get() = DefaultPreferenceBindingFactory
+        get() = PreferenceBindingFactory.defaultFactory
 
     override fun createPreferenceScreen(factory: PreferenceScreenFactory) =
         factory.getOrCreatePreferenceScreen().apply {

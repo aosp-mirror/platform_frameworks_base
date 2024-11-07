@@ -22,7 +22,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /** States pertaining to calculating colors for icons in dark mode. */
-class DarkIconInteractor @Inject constructor(repository: DarkIconRepository) {
+class DarkIconInteractor @Inject constructor(private val repository: DarkIconRepository) {
     /** Dark-mode state for tinting icons. */
-    val darkState: Flow<DarkState> = repository.darkState.map { DarkState(it.areas, it.tint) }
+    fun darkState(displayId: Int): Flow<DarkState> =
+        repository.darkState(displayId).map { DarkState(it.areas, it.tint) }
 }

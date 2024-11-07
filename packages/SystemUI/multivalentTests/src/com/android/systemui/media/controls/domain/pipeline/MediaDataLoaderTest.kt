@@ -82,7 +82,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
     private val fakeFeatureFlags = kosmos.fakeFeatureFlagsClassic
     private val mediaFlags = kosmos.mediaFlags
     private val mediaControllerFactory = kosmos.fakeMediaControllerFactory
-    private val media3ActionFactory = kosmos.media3ActionFactory
+    private lateinit var media3ActionFactory: Media3ActionFactory
     private val session = MediaSession(context, "MediaDataLoaderTestSession")
     private val metadataBuilder =
         MediaMetadata.Builder().apply {
@@ -94,6 +94,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        media3ActionFactory = kosmos.media3ActionFactory
         mediaControllerFactory.setControllerForToken(session.sessionToken, mediaController)
         whenever(mediaController.sessionToken).thenReturn(session.sessionToken)
         whenever(mediaController.metadata).then { metadataBuilder.build() }
@@ -311,7 +312,6 @@ class MediaDataLoaderTest : SysuiTestCase() {
                     }
                     build()
                 }
-
             val result = underTest.loadMediaData(KEY, mediaNotification)
 
             assertThat(result).isNotNull()

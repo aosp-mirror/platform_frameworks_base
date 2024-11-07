@@ -474,6 +474,10 @@ public class NotificationManagerService extends SystemService {
             Adjustment.KEY_TYPE
     };
 
+    static final Integer[] DEFAULT_ALLOWED_ADJUSTMENT_KEY_TYPES = new Integer[] {
+            TYPE_PROMOTION
+    };
+
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
             RoleManager.ROLE_DIALER,
             RoleManager.ROLE_EMERGENCY
@@ -1929,6 +1933,12 @@ public class NotificationManagerService extends SystemService {
                 hasSensitiveContent, lifespanMs);
     }
 
+    protected void logClassificationChannelAdjustmentReceived(boolean hasPosted, boolean isAlerting,
+                                                              int classification, int lifespanMs) {
+        FrameworkStatsLog.write(FrameworkStatsLog.NOTIFICATION_CHANNEL_CLASSIFICATION,
+                hasPosted, isAlerting, classification, lifespanMs);
+    }
+
     protected final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -2996,6 +3006,16 @@ public class NotificationManagerService extends SystemService {
                             false, childrenFlagChecker,
                             NotificationManagerService::wasChildOfForceRegroupedGroupChecker,
                             groupKey, REASON_APP_CANCEL, SystemClock.elapsedRealtime());
+                }
+            }
+
+            @Override
+            @Nullable
+            public NotificationRecord removeAppProvidedSummaryOnClassification(String triggeringKey,
+                    @Nullable String oldGroupKey) {
+                synchronized (mNotificationLock) {
+                    return removeAppProvidedSummaryOnClassificationLocked(triggeringKey,
+                            oldGroupKey);
                 }
             }
         });
@@ -4186,6 +4206,22 @@ public class NotificationManagerService extends SystemService {
                 return new ArrayList(mAssistants.mNasUnsupported.getOrDefault(
                         UserHandle.getUserId(Binder.getCallingUid()), new HashSet<>()));
             }
+        }
+
+        @Override
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public @NonNull int[] getAllowedAdjustmentKeyTypes() {
+            checkCallerIsSystemOrSystemUiOrShell();
+            return mAssistants.getAllowedAdjustmentKeyTypes();
+        }
+
+        @Override
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public void setAssistantAdjustmentKeyTypeState(int type, boolean enabled) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            mAssistants.setAssistantAdjustmentKeyTypeState(type, enabled);
+
+            handleSavePolicyFile();
         }
 
         @Override
@@ -6977,19 +7013,30 @@ public class NotificationManagerService extends SystemService {
                 if (!mAssistants.isAdjustmentAllowed(potentialKey)) {
                     toRemove.add(potentialKey);
                 }
+                if (notificationClassification() && adjustments.containsKey(KEY_TYPE)) {
+                    if (!mAssistants.isAdjustmentKeyTypeAllowed(adjustments.getInt(KEY_TYPE))) {
+                        toRemove.add(potentialKey);
+                    }
+                }
             }
             for (String removeKey : toRemove) {
                 adjustments.remove(removeKey);
             }
-            if (android.service.notification.Flags.notificationClassification()
-                    && adjustments.containsKey(KEY_TYPE)) {
+            if (notificationClassification() && adjustments.containsKey(KEY_TYPE)) {
                 final NotificationChannel newChannel = getClassificationChannelLocked(r,
                         adjustments);
                 if (newChannel == null || newChannel.getId().equals(r.getChannel().getId())) {
                     adjustments.remove(KEY_TYPE);
                 } else {
+                    // Save the app-provided type for logging.
+                    int classification = adjustments.getInt(KEY_TYPE);
                     // swap app provided type with the real thing
                     adjustments.putParcelable(KEY_TYPE, newChannel);
+                    // Note that this value of isAlerting does not fully indicate whether a notif
+                    // would make a sound or HUN on device; it is an approximation for metrics.
+                    boolean isAlerting = r.getChannel().getImportance() >= IMPORTANCE_DEFAULT;
+                    logClassificationChannelAdjustmentReceived(isPosted, isAlerting, classification,
+                            r.getLifespanMs(System.currentTimeMillis()));
                 }
             }
             r.addAdjustment(adjustment);
@@ -7111,6 +7158,50 @@ public class NotificationManagerService extends SystemService {
                     false, r.getUserId(),
                     NotificationListenerService.REASON_GROUP_OPTIMIZATION, null);
         }
+    }
+
+    @GuardedBy("mNotificationLock")
+    @Nullable
+    NotificationRecord removeAppProvidedSummaryOnClassificationLocked(String triggeringKey,
+            @Nullable String oldGroupKey) {
+        NotificationRecord canceledSummary = null;
+        NotificationRecord r = mNotificationsByKey.get(triggeringKey);
+        if (r == null || oldGroupKey == null) {
+            return null;
+        }
+
+        if (r.getSbn().isAppGroup() && r.getNotification().isGroupChild()) {
+            NotificationRecord groupSummary = mSummaryByGroupKey.get(oldGroupKey);
+            // We only care about app-provided valid groups
+            if (groupSummary != null && !GroupHelper.isAggregatedGroup(groupSummary)) {
+                List<NotificationRecord> notificationsInGroup =
+                        findGroupNotificationsLocked(r.getSbn().getPackageName(),
+                            oldGroupKey, r.getUserId());
+                // Remove the app-provided summary if only the summary is left in the
+                // original group, or summary + triggering notification that will be
+                // regrouped
+                boolean isOnlySummaryLeft =
+                        (notificationsInGroup.size() <= 1)
+                            || (notificationsInGroup.size() == 2
+                            && notificationsInGroup.contains(r)
+                            && notificationsInGroup.contains(groupSummary));
+                if (isOnlySummaryLeft) {
+                    if (DBG) {
+                        Slog.i(TAG, "Removing app summary (all children bundled): "
+                                + groupSummary);
+                    }
+                    canceledSummary = groupSummary;
+                    mSummaryByGroupKey.remove(oldGroupKey);
+                    cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(),
+                            groupSummary.getSbn().getPackageName(),
+                            groupSummary.getSbn().getTag(),
+                            groupSummary.getSbn().getId(), 0, 0, false, groupSummary.getUserId(),
+                            NotificationListenerService.REASON_GROUP_OPTIMIZATION, null);
+                }
+            }
+        }
+
+        return canceledSummary;
     }
 
     @GuardedBy("mNotificationLock")
@@ -7492,6 +7583,11 @@ public class NotificationManagerService extends SystemService {
                     pw.println("\n  TimeToLive alarms:");
                     mTtlHelper.dump(pw, "    ");
                 }
+            }
+
+            if (notificationForceGrouping()) {
+                pw.println("\n  GroupHelper:");
+                mGroupHelper.dump(pw, "    ");
             }
         }
     }
@@ -11552,9 +11648,13 @@ public class NotificationManagerService extends SystemService {
 
         private static final String ATT_TYPES = "types";
         private static final String ATT_DENIED = "denied_adjustments";
+        private static final String ATT_ENABLED_TYPES = "enabled_key_types";
         private static final String ATT_NAS_UNSUPPORTED = "unsupported_adjustments";
 
         private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
+        private Set<Integer> mAllowedAdjustmentKeyTypes = new ArraySet<>();
 
         @GuardedBy("mLock")
         private Set<String> mAllowedAdjustments = new ArraySet<>();
@@ -11639,6 +11739,8 @@ public class NotificationManagerService extends SystemService {
                 for (int i = 0; i < DEFAULT_ALLOWED_ADJUSTMENTS.length; i++) {
                     mAllowedAdjustments.add(DEFAULT_ALLOWED_ADJUSTMENTS[i]);
                 }
+            } else {
+                mAllowedAdjustmentKeyTypes.addAll(List.of(DEFAULT_ALLOWED_ADJUSTMENT_KEY_TYPES));
             }
         }
 
@@ -11722,6 +11824,42 @@ public class NotificationManagerService extends SystemService {
                             && !mDeniedAdjustments.contains(type);
                 } else {
                     return mAllowedAdjustments.contains(type);
+                }
+            }
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        protected @NonNull boolean isAdjustmentKeyTypeAllowed(@Adjustment.Types int type) {
+            synchronized (mLock) {
+                if (notificationClassification()) {
+                    return mAllowedAdjustmentKeyTypes.contains(type);
+                }
+            }
+            return false;
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        protected @NonNull int[] getAllowedAdjustmentKeyTypes() {
+            synchronized (mLock) {
+                if (notificationClassification()) {
+                    return mAllowedAdjustmentKeyTypes.stream()
+                            .mapToInt(Integer::intValue).toArray();
+                }
+            }
+            return new int[]{};
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public void setAssistantAdjustmentKeyTypeState(@Adjustment.Types int type,
+                boolean enabled) {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            synchronized (mLock) {
+                if (enabled) {
+                    mAllowedAdjustmentKeyTypes.add(type);
+                } else {
+                    mAllowedAdjustmentKeyTypes.remove(type);
                 }
             }
         }
@@ -12165,27 +12303,46 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected void writeExtraXmlTags(TypedXmlSerializer out) throws IOException {
-            if (!android.service.notification.Flags.notificationClassification()) {
+            if (!notificationClassification()) {
                 return;
             }
             synchronized (mLock) {
                 out.startTag(null, ATT_DENIED);
                 out.attribute(null, ATT_TYPES, TextUtils.join(",", mDeniedAdjustments));
                 out.endTag(null, ATT_DENIED);
+                out.startTag(null, ATT_ENABLED_TYPES);
+                out.attribute(null, ATT_TYPES,
+                        TextUtils.join(",", mAllowedAdjustmentKeyTypes));
+                out.endTag(null, ATT_ENABLED_TYPES);
             }
         }
 
         @Override
         protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {
-            if (!android.service.notification.Flags.notificationClassification()) {
+            if (!notificationClassification()) {
                 return;
             }
             if (ATT_DENIED.equals(tag)) {
-                final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
+                final String keys = XmlUtils.readStringAttribute(parser, ATT_TYPES);
                 synchronized (mLock) {
                     mDeniedAdjustments.clear();
+                    if (!TextUtils.isEmpty(keys)) {
+                        mDeniedAdjustments.addAll(Arrays.asList(keys.split(",")));
+                    }
+                }
+            } else if (ATT_ENABLED_TYPES.equals(tag)) {
+                final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
+                synchronized (mLock) {
+                    mAllowedAdjustmentKeyTypes.clear();
                     if (!TextUtils.isEmpty(types)) {
-                        mDeniedAdjustments.addAll(Arrays.asList(types.split(",")));
+                        List<String> typeList = Arrays.asList(types.split(","));
+                        for (String type : typeList) {
+                            try {
+                                mAllowedAdjustmentKeyTypes.add(Integer.parseInt(type));
+                            } catch (NumberFormatException e) {
+                                Slog.wtf(TAG, "Bad type specified", e);
+                            }
+                        }
                     }
                 }
             }

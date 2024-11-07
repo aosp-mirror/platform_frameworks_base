@@ -276,6 +276,16 @@ flag {
 }
 
 flag {
+    name: "suspend_packages_coexistence"
+    namespace: "enterprise"
+    description: "Migrate setPackagesSuspended for unmanaged mode"
+    bug: "335624297"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "backup_connected_apps_settings"
     namespace: "enterprise"
     description: "backup and restore connected work and personal apps user settings across devices"

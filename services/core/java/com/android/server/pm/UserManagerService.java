@@ -21,6 +21,7 @@ import static android.content.Intent.ACTION_SCREEN_ON;
 import static android.content.Intent.EXTRA_USER_ID;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.LauncherUserInfo.PRIVATE_SPACE_ENTRYPOINT_HIDDEN;
 import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
 import static android.content.pm.PackageManager.FEATURE_EMBEDDED;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
@@ -32,6 +33,7 @@ import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
 import static android.os.UserManager.USER_OPERATION_ERROR_USER_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
+import static android.provider.Settings.Secure.HIDE_PRIVATESPACE_ENTRY_POINT;
 
 import static com.android.internal.app.SetScreenLockDialogActivity.EXTRA_ORIGIN_USER_ID;
 import static com.android.internal.app.SetScreenLockDialogActivity.LAUNCH_REASON_DISABLE_QUIET_MODE;
@@ -7946,11 +7948,25 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if (userInfo != null) {
                 final UserTypeDetails userDetails = getUserTypeDetails(userInfo);
-                final LauncherUserInfo uiInfo = new LauncherUserInfo.Builder(
-                        userDetails.getName(),
-                        userInfo.serialNumber)
-                        .build();
-                return uiInfo;
+
+                if (Flags.addLauncherUserConfig()) {
+                    Bundle config = new Bundle();
+                    if (userInfo.isPrivateProfile()) {
+                        try {
+                            int parentId = getProfileParentIdUnchecked(userId);
+                            config.putBoolean(PRIVATE_SPACE_ENTRYPOINT_HIDDEN,
+                                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                                            HIDE_PRIVATESPACE_ENTRY_POINT, parentId) == 1);
+                        } catch (Settings.SettingNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    return new LauncherUserInfo.Builder(userDetails.getName(),
+                            userInfo.serialNumber, config).build();
+                }
+
+                return new LauncherUserInfo.Builder(userDetails.getName(),
+                        userInfo.serialNumber).build();
             } else {
                 return null;
             }

@@ -351,8 +351,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
-        mDarkIconManager = mDarkIconManagerFactory.create(
-                view.findViewById(R.id.statusIcons), StatusBarLocation.HOME);
+        mDarkIconManager =
+                mDarkIconManagerFactory.create(
+                        view.findViewById(R.id.statusIcons),
+                        StatusBarLocation.HOME,
+                        mHomeStatusBarComponent.getDarkIconDispatcher());
         mDarkIconManager.setShouldLog(true);
         updateBlockedIcons();
         mStatusBarIconController.addIconGroup(mDarkIconManager);
@@ -496,11 +499,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         NotificationIconContainer notificationIcons =
                 notificationIconArea.requireViewById(R.id.notificationIcons);
         mNotificationIconAreaInner = notificationIcons;
-        if (getContext().getDisplayId() == Display.DEFAULT_DISPLAY) {
+        int displayId = mHomeStatusBarComponent.getDisplayId();
+        if (displayId == Display.DEFAULT_DISPLAY) {
             //TODO(b/369337701): implement notification icons for all displays.
             // Currently if we try to bind for all displays, there is a crash, because the same
             // notification icon view can't have multiple parents.
-            mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons);
+            mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons, displayId);
         }
 
         if (!StatusBarSimpleFragment.isEnabled()) {
@@ -939,7 +943,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (mCarrierConfigTracker.getShowOperatorNameInStatusBarConfig(subId)) {
             View view = mStatusBar.findViewById(R.id.operator_name);
             mOperatorNameViewController =
-                    mOperatorNameViewControllerFactory.create((OperatorNameView) view);
+                    mOperatorNameViewControllerFactory.create(
+                            (OperatorNameView) view,
+                            mHomeStatusBarComponent.getDarkIconDispatcher());
             mOperatorNameViewController.init();
             // This view should not be visible on lock-screen
             if (mKeyguardStateController.isShowing()) {

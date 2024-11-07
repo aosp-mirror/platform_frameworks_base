@@ -133,7 +133,7 @@ public class LightBarControllerImpl implements
     public LightBarControllerImpl(
             @Assisted int displayId,
             @Assisted CoroutineScope coroutineScope,
-            DarkIconDispatcher darkIconDispatcher,
+            @Assisted DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController,
             NavigationModeController navModeController,
             @Assisted StatusBarModePerDisplayRepository statusBarModeRepository,
@@ -487,6 +487,7 @@ public class LightBarControllerImpl implements
         LightBarControllerImpl create(
                 int displayId,
                 CoroutineScope coroutineScope,
+                DarkIconDispatcher darkIconDispatcher,
                 StatusBarModePerDisplayRepository statusBarModePerDisplayRepository);
     }
 }

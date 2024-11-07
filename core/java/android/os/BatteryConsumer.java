@@ -1064,7 +1064,9 @@ public abstract class BatteryConsumer {
          * @param componentId    The ID of the power component, e.g.
          *                       {@link BatteryConsumer#POWER_COMPONENT_CPU}.
          * @param componentPower Amount of consumed power in mAh.
+         * @deprecated use {@link #addConsumedPower}
          */
+        @Deprecated
         @NonNull
         public T setConsumedPower(@PowerComponentId int componentId, double componentPower) {
             return setConsumedPower(componentId, componentPower, POWER_MODEL_POWER_PROFILE);
@@ -1076,7 +1078,9 @@ public abstract class BatteryConsumer {
          * @param componentId    The ID of the power component, e.g.
          *                       {@link BatteryConsumer#POWER_COMPONENT_CPU}.
          * @param componentPower Amount of consumed power in mAh.
+         * @deprecated use {@link #addConsumedPower}
          */
+        @Deprecated
         @SuppressWarnings("unchecked")
         @NonNull
         public T setConsumedPower(@PowerComponentId int componentId, double componentPower,
@@ -1104,6 +1108,21 @@ public abstract class BatteryConsumer {
 
         @SuppressWarnings("unchecked")
         @NonNull
+        public T addConsumedPower(@PowerComponentId int componentId, double componentPower) {
+            mPowerComponentsBuilder.addConsumedPower(getKey(componentId, PROCESS_STATE_UNSPECIFIED),
+                    componentPower, POWER_MODEL_UNDEFINED);
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
+        public T addConsumedPower(Key key, double componentPower) {
+            mPowerComponentsBuilder.addConsumedPower(key, componentPower, POWER_MODEL_UNDEFINED);
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
         public T addConsumedPower(Key key, double componentPower, @PowerModel int powerModel) {
             mPowerComponentsBuilder.addConsumedPower(key, componentPower, powerModel);
             return (T) this;
@@ -1115,7 +1134,9 @@ public abstract class BatteryConsumer {
          * @param componentId              The ID of the power component, e.g.
          *                                 {@link UidBatteryConsumer#POWER_COMPONENT_CPU}.
          * @param componentUsageTimeMillis Amount of time in microseconds.
+         * @deprecated use {@link #addUsageDurationMillis}
          */
+        @Deprecated
         @SuppressWarnings("unchecked")
         @NonNull
         public T setUsageDurationMillis(@PowerComponentId int componentId,
@@ -1126,10 +1147,19 @@ public abstract class BatteryConsumer {
             return (T) this;
         }
 
+        @Deprecated
         @SuppressWarnings("unchecked")
         @NonNull
         public T setUsageDurationMillis(Key key, long componentUsageTimeMillis) {
             mPowerComponentsBuilder.setUsageDurationMillis(key, componentUsageTimeMillis);
+            return (T) this;
+        }
+
+        @NonNull
+        public T addUsageDurationMillis(@PowerComponentId int componentId,
+                long componentUsageTimeMillis) {
+            mPowerComponentsBuilder.addUsageDurationMillis(
+                    getKey(componentId, PROCESS_STATE_UNSPECIFIED), componentUsageTimeMillis);
             return (T) this;
         }
 

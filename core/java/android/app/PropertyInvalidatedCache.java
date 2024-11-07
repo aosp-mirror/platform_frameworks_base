@@ -717,11 +717,9 @@ public class PropertyInvalidatedCache<Query, Result> {
         // The shared memory.
         private volatile NonceStore mStore;
 
-        // The index of the nonce in shared memory.
+        // The index of the nonce in shared memory.  This changes from INVALID only when the local
+        // object is completely initialized.
         private volatile int mHandle = NonceStore.INVALID_NONCE_INDEX;
-
-        // True if the string has been stored, ever.
-        private volatile boolean mRecorded = false;
 
         // A short name that is saved in shared memory.  This is the portion of the property name
         // that follows the prefix.
@@ -736,48 +734,63 @@ public class PropertyInvalidatedCache<Query, Result> {
             }
         }
 
+        // Initialize the mStore and mHandle variables.  This function does nothing if the
+        // variables are already initialized.  Synchronization ensures that initialization happens
+        // no more than once.  The function returns the new value of mHandle.
+        //
+        // If the "update" boolean is true, then the property is registered with the nonce store
+        // before the associated handle is fetched.
+        private int initialize(boolean update) {
+            synchronized (mLock) {
+                int handle = mHandle;
+                if (handle == NonceStore.INVALID_NONCE_INDEX) {
+                    if (mStore == null) {
+                        mStore = NonceStore.getInstance();
+                        if (mStore == null) {
+                            return NonceStore.INVALID_NONCE_INDEX;
+                        }
+                    }
+                    if (update) {
+                        mStore.storeName(mShortName);
+                    }
+                    handle = mStore.getHandleForName(mShortName);
+                    if (handle == NonceStore.INVALID_NONCE_INDEX) {
+                        return NonceStore.INVALID_NONCE_INDEX;
+                    }
+                    // The handle must be valid.
+                    mHandle = handle;
+                }
+                return handle;
+            }
+        }
+
         // Fetch the nonce from shared memory.  If the shared memory is not available, return
         // UNSET.  If the shared memory is available but the nonce name is not known (it may not
         // have been invalidated by the server yet), return UNSET.
         @Override
         long getNonceInternal() {
-            if (mHandle == NonceStore.INVALID_NONCE_INDEX) {
-                if (mStore == null) {
-                    mStore = NonceStore.getInstance();
-                    if (mStore == null) {
-                        return NONCE_UNSET;
-                    }
-                }
-                mHandle = mStore.getHandleForName(mShortName);
-                if (mHandle == NonceStore.INVALID_NONCE_INDEX) {
+            int handle = mHandle;
+            if (handle == NonceStore.INVALID_NONCE_INDEX) {
+                handle = initialize(false);
+                if (handle == NonceStore.INVALID_NONCE_INDEX) {
                     return NONCE_UNSET;
                 }
             }
-            return mStore.getNonce(mHandle);
+            return mStore.getNonce(handle);
         }
 
-        // Set the nonce in shared mmory.  If the shared memory is not available, throw an
-        // exception.  Otherwise, if the nonce name has never been recorded, record it now and
-        // fetch the handle for the name.  If the handle cannot be created, throw an exception.
+        // Set the nonce in shared memory.  If the shared memory is not available or if the nonce
+        // cannot be registered in shared memory, throw an exception.
         @Override
         void setNonceInternal(long value) {
-            if (mHandle == NonceStore.INVALID_NONCE_INDEX || !mRecorded) {
-                if (mStore == null) {
-                    mStore = NonceStore.getInstance();
-                    if (mStore == null) {
-                        throw new IllegalStateException("setNonce: shared memory not ready");
-                    }
-                }
-                // Always store the name before fetching the handle.  storeName() is idempotent
-                // but does take a little time, so this code calls it just once.
-                mStore.storeName(mShortName);
-                mRecorded = true;
-                mHandle = mStore.getHandleForName(mShortName);
-                if (mHandle == NonceStore.INVALID_NONCE_INDEX) {
-                    throw new IllegalStateException("setNonce: shared memory store failed");
+            int handle = mHandle;
+            if (handle == NonceStore.INVALID_NONCE_INDEX) {
+                handle = initialize(true);
+                if (handle == NonceStore.INVALID_NONCE_INDEX) {
+                    throw new IllegalStateException("unable to assign nonce handle: " + mName);
                 }
             }
-            mStore.setNonce(mHandle, value);
+            mStore.setNonce(handle, value);
         }
     }
 

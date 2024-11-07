@@ -35,6 +35,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.PowerExemptionManager;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
@@ -44,6 +45,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -185,13 +187,17 @@ public class CompanionExemptionProcessor {
             try {
                 final List<AssociationInfo> associations =
                         mAssociationStore.getActiveAssociationsByUser(userId);
+                Set<Pair<String, Integer>> exemptedPackages = new HashSet<>();
                 for (AssociationInfo a : associations) {
                     try {
                         int uid = pm.getPackageUidAsUser(a.getPackageName(), userId);
-                        updateAutoRevokeExemption(a.getPackageName(), uid, true);
+                        exemptedPackages.add(new Pair<>(a.getPackageName(), uid));
                     } catch (PackageManager.NameNotFoundException e) {
                         Slog.w(TAG, "Unknown companion package: " + a.getPackageName(), e);
                     }
+                }
+                for (Pair<String, Integer> exemptedPackage : exemptedPackages) {
+                    updateAutoRevokeExemption(exemptedPackage.first, exemptedPackage.second, true);
                 }
             } finally {
                 pref.edit().putBoolean(PREF_KEY_AUTO_REVOKE_GRANTS_DONE, true).apply();
