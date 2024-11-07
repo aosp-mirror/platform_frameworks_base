@@ -165,3 +165,10 @@ flag {
      description: "Control ApplicationStartInfo component field and API"
      bug: "362537357"
 }
+
+flag {
+    name: "jank_perceptible_narrow"
+    namespace: "system_performance"
+    description: "Narrow the scope of Jank Perceptible"
+    bug: "304837972"
+}
