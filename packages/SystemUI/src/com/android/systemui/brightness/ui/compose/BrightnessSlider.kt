@@ -24,6 +24,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +32,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -61,6 +61,7 @@ import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.qs.ui.compose.borderOnFocus
 import com.android.systemui.res.R
 import com.android.systemui.utils.PolicyRestriction
 
@@ -102,11 +103,12 @@ private fun BrightnessSlider(
             null
         }
 
-    val overriddenByAppState by if (Flags.showToastWhenAppControlBrightness()) {
-        viewModel.brightnessOverriddenByWindow.collectAsStateWithLifecycle()
-    } else {
-        mutableStateOf(false)
-    }
+    val overriddenByAppState =
+        if (Flags.showToastWhenAppControlBrightness()) {
+            viewModel.brightnessOverriddenByWindow.collectAsStateWithLifecycle().value
+        } else {
+            false
+        }
 
     PlatformSlider(
         value = animatedValue,
@@ -160,7 +162,7 @@ private fun BrightnessSlider(
                 if (interaction is DragInteraction.Start && overriddenByAppState) {
                     viewModel.showToast(
                         context,
-                        R.string.quick_settings_brightness_unable_adjust_msg
+                        R.string.quick_settings_brightness_unable_adjust_msg,
                     )
                 }
             }
@@ -213,7 +215,11 @@ fun BrightnessSliderContainer(
                 coroutineScope.launch { viewModel.onDrag(Drag.Stopped(GammaBrightness(it))) }
             },
             modifier =
-                Modifier.then(if (viewModel.showMirror) Modifier.drawInOverlay() else Modifier)
+                Modifier.borderOnFocus(
+                        color = MaterialTheme.colorScheme.secondary,
+                        cornerSize = CornerSize(32.dp),
+                    )
+                    .then(if (viewModel.showMirror) Modifier.drawInOverlay() else Modifier)
                     .sliderBackground(containerColor)
                     .fillMaxWidth(),
             formatter = viewModel::formatValue,

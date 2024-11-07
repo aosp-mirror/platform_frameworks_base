@@ -18,10 +18,13 @@ package com.android.systemui.qs.panels.ui.compose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
@@ -32,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -41,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.modifiers.padding
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.panels.dagger.PaginatedBaseLayoutType
@@ -48,6 +51,7 @@ import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.InterPageSpacing
 import com.android.systemui.qs.panels.ui.viewmodel.PaginatedGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
+import com.android.systemui.qs.ui.compose.borderOnFocus
 import com.android.systemui.res.R
 import javax.inject.Inject
 
@@ -89,9 +93,24 @@ constructor(
         }
 
         Column {
+            val contentPaddingValue =
+                if (pages.size > 1) {
+                    InterPageSpacing
+                } else {
+                    0.dp
+                }
+            val contentPadding = PaddingValues(horizontal = contentPaddingValue)
+
+            /* Use negative padding equal with value equal to content padding. That way, each page
+             * layout extends to the sides, but the content is as if there was no padding. That
+             * way, the clipping bounds of the HorizontalPager extend beyond the tiles in each page.
+             */
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.sysuiResTag("qs_pager"),
+                modifier =
+                    Modifier.sysuiResTag("qs_pager")
+                        .padding(horizontal = { -contentPaddingValue.roundToPx() }),
+                contentPadding = contentPadding,
                 pageSpacing = if (pages.size > 1) InterPageSpacing else 0.dp,
                 beyondViewportPageCount = 1,
                 verticalAlignment = Alignment.Top,
@@ -114,7 +133,13 @@ constructor(
                 CompositionLocalProvider(value = LocalContentColor provides Color.White) {
                     IconButton(
                         onClick = editModeStart,
-                        modifier = Modifier.align(Alignment.CenterEnd),
+                        shape = RoundedCornerShape(CornerSize(28.dp)),
+                        modifier =
+                            Modifier.align(Alignment.CenterEnd)
+                                .borderOnFocus(
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    cornerSize = CornerSize(FooterHeight / 2),
+                                ),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
