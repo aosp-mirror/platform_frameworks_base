@@ -19307,31 +19307,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void addCreatorToken(@Nullable Intent intent, String creatorPackage) {
         if (!preventIntentRedirect()) return;
 
-        if (intent == null || intent.getExtraIntentKeys() == null) return;
-        for (String key : intent.getExtraIntentKeys()) {
-            try {
-                Intent extraIntent = intent.getParcelableExtra(key, Intent.class);
-                if (extraIntent == null) {
-                    Slog.w(TAG, "The key {" + key
-                            + "} does not correspond to an intent in the extra bundle.");
-                    continue;
-                }
-                IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent,
-                        creatorPackage);
-                if (creatorToken != null) {
-                    extraIntent.setCreatorToken(creatorToken);
-                    Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
-                            + creatorPackage + "; intent: " + intent);
-                    FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED,
-                            creatorToken.getCreatorUid());
-                }
-            } catch (Exception e) {
-                Slog.wtf(TAG,
-                        "Something went wrong when trying to add creator token for embedded "
-                                + "intents of intent: ."
-                                + intent, e);
+        if (intent == null) return;
+        intent.forEachNestedCreatorToken(extraIntent -> {
+            IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent, creatorPackage);
+            if (creatorToken != null) {
+                extraIntent.setCreatorToken(creatorToken);
+                // TODO remove Slog.wtf once proven FrameworkStatsLog works. b/375396329
+                Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
+                        + creatorPackage + "; intent: " + intent);
+                FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED,
+                        creatorToken.getCreatorUid());
             }
-        }
+        });
     }
 
     private IntentCreatorToken createIntentCreatorToken(Intent intent, String creatorPackage) {

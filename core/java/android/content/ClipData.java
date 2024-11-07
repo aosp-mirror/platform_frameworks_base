@@ -398,6 +398,7 @@ public class ClipData implements Parcelable {
          * Retrieve the raw Intent contained in this Item.
          */
         public Intent getIntent() {
+            Intent.maybeMarkAsMissingCreatorToken(mIntent);
             return mIntent;
         }
 
