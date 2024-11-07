@@ -72,6 +72,10 @@ class FakeUserRepository @Inject constructor() : UserRepository {
     override val isSecondaryUserLogoutEnabled: StateFlow<Boolean> =
         _isSecondaryUserLogoutEnabled.asStateFlow()
 
+    private val _isLogoutToSystemUserEnabled = MutableStateFlow<Boolean>(false)
+    override val isLogoutToSystemUserEnabled: StateFlow<Boolean> =
+        _isLogoutToSystemUserEnabled.asStateFlow()
+
     override var mainUserId: Int = MAIN_USER_ID
     override var lastSelectedNonGuestUserId: Int = mainUserId
 
@@ -121,6 +125,17 @@ class FakeUserRepository @Inject constructor() : UserRepository {
 
     override suspend fun logOutSecondaryUser() {
         logOutSecondaryUserCallCount++
+    }
+
+    fun setLogoutToSystemUserEnabled(logoutEnabled: Boolean) {
+        _isLogoutToSystemUserEnabled.value = logoutEnabled
+    }
+
+    var logOutToSystemUserCallCount: Int = 0
+        private set
+
+    override suspend fun logOutToSystemUser() {
+        logOutToSystemUserCallCount++
     }
 
     fun setUserInfos(infos: List<UserInfo>) {

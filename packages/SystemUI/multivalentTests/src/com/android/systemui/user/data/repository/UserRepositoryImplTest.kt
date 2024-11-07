@@ -19,6 +19,7 @@ package com.android.systemui.user.data.repository
 
 import android.app.admin.devicePolicyManager
 import android.content.pm.UserInfo
+import android.internal.statusbar.fakeStatusBarService
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
@@ -61,6 +62,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
     private val globalSettings = kosmos.fakeGlobalSettings
     private val broadcastDispatcher = kosmos.broadcastDispatcher
     private val devicePolicyManager = kosmos.devicePolicyManager
+    private val statusBarService = kosmos.fakeStatusBarService
 
     @Mock private lateinit var manager: UserManager
 
@@ -323,6 +325,8 @@ class UserRepositoryImplTest : SysuiTestCase() {
             tracker = tracker,
             broadcastDispatcher = broadcastDispatcher,
             devicePolicyManager = devicePolicyManager,
+            resources = context.resources,
+            statusBarService = statusBarService,
         )
     }
 
