@@ -96,6 +96,7 @@ package android.nfc {
     method public void onDisableRequested(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisableStarted();
     method public void onEeListenActivated(boolean);
+    method public void onEeUpdated();
     method public void onEnableFinished(int);
     method public void onEnableRequested(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onEnableStarted();
