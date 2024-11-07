@@ -85,7 +85,6 @@ class OperatorNameViewControllerTest : SysuiTestCase() {
 
         underTest =
             OperatorNameViewController.Factory(
-                    darkIconDispatcher,
                     tunerService,
                     telephonyManager,
                     keyguardUpdateMonitor,
@@ -94,7 +93,7 @@ class OperatorNameViewControllerTest : SysuiTestCase() {
                     subscriptionManagerProxy,
                     javaAdapter,
                 )
-                .create(view)
+                .create(view, darkIconDispatcher)
     }
 
     @Test

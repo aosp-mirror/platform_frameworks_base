@@ -17,6 +17,8 @@
 package com.android.server.input;
 
 import static android.hardware.input.InputGestureData.createKeyTrigger;
+
+import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
@@ -209,12 +211,12 @@ final class InputGestureManager {
                     KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY
             ));
         }
-        if (keyboardA11yShortcutControl()) {
-            systemShortcuts.add(createKeyGesture(
-                    KeyEvent.KEYCODE_T,
+        if (enableTalkbackAndMagnifierKeyGestures()) {
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_T,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK
-            ));
+                    KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
+        }
+        if (keyboardA11yShortcutControl()) {
             if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()) {
                 systemShortcuts.add(createKeyGesture(
                         KeyEvent.KEYCODE_3,
@@ -358,6 +360,22 @@ final class InputGestureManager {
             }
             int modifierState = event.getMetaState() & KEY_GESTURE_META_MASK;
             return customGestures.get(InputGestureData.createKeyTrigger(keyCode, modifierState));
+        }
+    }
+
+    @Nullable
+    public InputGestureData getCustomGestureForTouchpadGesture(@UserIdInt int userId,
+            int touchpadGestureType) {
+        if (touchpadGestureType == InputGestureData.TOUCHPAD_GESTURE_TYPE_UNKNOWN) {
+            return null;
+        }
+        synchronized (mGestureLock) {
+            Map<InputGestureData.Trigger, InputGestureData> customGestures =
+                    mCustomInputGestures.get(userId);
+            if (customGestures == null) {
+                return null;
+            }
+            return customGestures.get(InputGestureData.createTouchpadTrigger(touchpadGestureType));
         }
     }
 

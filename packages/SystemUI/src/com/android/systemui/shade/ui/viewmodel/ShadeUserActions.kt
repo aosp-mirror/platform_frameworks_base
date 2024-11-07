@@ -18,7 +18,6 @@ package com.android.systemui.shade.ui.viewmodel
 
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.Overlays
@@ -35,7 +34,7 @@ fun singleShadeActions(
     return arrayOf(
         // Swiping down, not from the edge, always goes to shade.
         Swipe.Down to shadeUserActionResult,
-        swipeDown(pointerCount = 2) to shadeUserActionResult,
+        Swipe.Down(pointerCount = 2) to shadeUserActionResult,
 
         // Swiping down from the top edge.
         swipeDownFromTop(pointerCount = 1) to
@@ -54,7 +53,7 @@ fun splitShadeActions(): Array<Pair<UserAction, UserActionResult>> {
     return arrayOf(
         // Swiping down, not from the edge, always goes to shade.
         Swipe.Down to shadeUserActionResult,
-        swipeDown(pointerCount = 2) to shadeUserActionResult,
+        Swipe.Down(pointerCount = 2) to shadeUserActionResult,
         // Swiping down from the top edge goes to QS.
         swipeDownFromTop(pointerCount = 1) to shadeUserActionResult,
         swipeDownFromTop(pointerCount = 2) to shadeUserActionResult,
@@ -69,15 +68,10 @@ fun dualShadeActions(): Array<Pair<UserAction, UserActionResult>> {
         UserActionResult.ShowOverlay(Overlays.QuickSettingsShade, isIrreversible = true)
     return arrayOf(
         Swipe.Down to notifShadeUserActionResult,
-        Swipe(direction = SwipeDirection.Down, fromSource = SceneContainerEdge.TopRight) to
-            qsShadeuserActionResult,
+        Swipe.Down(fromSource = SceneContainerEdge.TopRight) to qsShadeuserActionResult,
     )
 }
 
 private fun swipeDownFromTop(pointerCount: Int): Swipe {
-    return Swipe(SwipeDirection.Down, fromSource = Edge.Top, pointerCount = pointerCount)
-}
-
-private fun swipeDown(pointerCount: Int): Swipe {
-    return Swipe(SwipeDirection.Down, pointerCount = pointerCount)
+    return Swipe.Down(fromSource = Edge.Top, pointerCount = pointerCount)
 }

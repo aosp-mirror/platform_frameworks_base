@@ -715,6 +715,9 @@
     <uses-permission android:name="android.permission.UWB_PRIVILEGED" />
     <uses-permission android:name="android.permission.UWB_RANGING" />
 
+    <!-- Permission required for CTS test - CtsRangingTestCases -->
+    <uses-permission android:name="android.permission.RANGING" />
+
     <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
 

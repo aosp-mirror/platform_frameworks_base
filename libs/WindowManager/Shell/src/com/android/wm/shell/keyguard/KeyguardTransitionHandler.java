@@ -26,6 +26,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -52,6 +53,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -71,6 +73,9 @@ import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
 public class KeyguardTransitionHandler
         implements Transitions.TransitionHandler, KeyguardChangeListener,
         TaskStackListenerCallback {
+    private static final boolean ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS =
+            Flags.ensureKeyguardDoesTransitionStarting();
+
     private static final String TAG = "KeyguardTransition";
 
     private final Transitions mTransitions;
@@ -325,6 +330,10 @@ public class KeyguardTransitionHandler
     }
 
     private static boolean isKeyguardOccluding(@NonNull TransitionInfo info) {
+        if (!ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            return (info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0;
+        }
+
         for (int i = 0; i < info.getChanges().size(); i++) {
             TransitionInfo.Change change = info.getChanges().get(i);
             if (change.hasFlags(TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA)
@@ -336,6 +345,10 @@ public class KeyguardTransitionHandler
     }
 
     private static boolean isKeyguardUnoccluding(@NonNull TransitionInfo info) {
+        if (!ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            return (info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0;
+        }
+
         for (int i = 0; i < info.getChanges().size(); i++) {
             TransitionInfo.Change change = info.getChanges().get(i);
             if (change.hasFlags(TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA)

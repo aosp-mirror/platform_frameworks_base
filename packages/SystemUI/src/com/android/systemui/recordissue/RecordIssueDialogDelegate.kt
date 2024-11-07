@@ -35,7 +35,6 @@ import androidx.annotation.WorkerThread
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
@@ -132,10 +131,9 @@ constructor(
     @WorkerThread
     private fun onScreenRecordSwitchClicked() {
         if (
-            flags.isEnabled(WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES) &&
-                devicePolicyResolver
-                    .get()
-                    .isScreenCaptureCompletelyDisabled(UserHandle.of(userTracker.userId))
+            devicePolicyResolver
+                .get()
+                .isScreenCaptureCompletelyDisabled(UserHandle.of(userTracker.userId))
         ) {
             mainExecutor.execute {
                 screenCaptureDisabledDialogDelegate.createSysUIDialog().show()

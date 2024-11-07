@@ -22,14 +22,16 @@ import android.content.Context;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
 /** Top level preference that can be disabled by a device admin using a user restriction. */
-public class RestrictedTopLevelPreference extends Preference {
-    private RestrictedPreferenceHelper mHelper;
+public class RestrictedTopLevelPreference extends Preference implements
+        RestrictedPreferenceHelperProvider {
+    private final RestrictedPreferenceHelper mHelper;
 
     public RestrictedTopLevelPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -48,6 +50,11 @@ public class RestrictedTopLevelPreference extends Preference {
 
     public RestrictedTopLevelPreference(Context context) {
         this(context, /* attrs= */ null);
+    }
+
+    @Override
+    public @NonNull RestrictedPreferenceHelper getRestrictedPreferenceHelper() {
+        return mHelper;
     }
 
     @Override

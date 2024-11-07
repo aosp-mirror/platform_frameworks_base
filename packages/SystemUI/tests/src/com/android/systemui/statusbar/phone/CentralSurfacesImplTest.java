@@ -510,7 +510,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         }
         mShadeController.setNotificationPresenter(mNotificationPresenter);
 
-        when(mOperatorNameViewControllerFactory.create(any()))
+        when(mOperatorNameViewControllerFactory.create(any(), any()))
                 .thenReturn(mOperatorNameViewController);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mUserTracker.getUserHandle()).thenReturn(

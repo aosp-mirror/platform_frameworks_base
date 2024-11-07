@@ -493,6 +493,22 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testZenOn_RepeatCallers_CallTypesBlocked() {
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[]{PKG_O});
+        // Any call allowed but no repeat callers
+        mZenModeHelper.mConsolidatedPolicy = new Policy(PRIORITY_CATEGORY_CALLS,
+                PRIORITY_SENDERS_ANY, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
+
+        verifyApplyRestrictions(true, true,
+                AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
+        verifyApplyRestrictions(true, true,
+                AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST);
+    }
+
+
+    @Test
     public void testZenOn_StarredCallers_CallTypesBlocked() {
         mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[]{PKG_O});
@@ -501,7 +517,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 | PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
                 | PRIORITY_CATEGORY_CONVERSATIONS | PRIORITY_CATEGORY_CALLS
                 | PRIORITY_CATEGORY_ALARMS | PRIORITY_CATEGORY_EVENTS | PRIORITY_CATEGORY_REMINDERS
-                | PRIORITY_CATEGORY_SYSTEM,
+                | PRIORITY_CATEGORY_SYSTEM | PRIORITY_CATEGORY_REPEAT_CALLERS,
                 PRIORITY_SENDERS_STARRED,
                 PRIORITY_SENDERS_ANY, 0, CONVERSATION_SENDERS_ANYONE);
         mZenModeHelper.applyRestrictions();

@@ -1184,9 +1184,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mKeyguardStateController = mock(KeyguardStateController.class);
         mOperatorNameViewController = mock(OperatorNameViewController.class);
         mOperatorNameViewControllerFactory = mock(OperatorNameViewController.Factory.class);
-        when(mOperatorNameViewControllerFactory.create(any()))
+        when(mOperatorNameViewControllerFactory.create(any(), any()))
                 .thenReturn(mOperatorNameViewController);
-        when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
+        when(mIconManagerFactory.create(any(), any(), any())).thenReturn(mIconManager);
         mSecureSettings = mock(SecureSettings.class);
 
         mShadeExpansionStateManager = new ShadeExpansionStateManager();

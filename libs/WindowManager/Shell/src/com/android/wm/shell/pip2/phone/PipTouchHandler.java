@@ -875,7 +875,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             mMovementWithinDismiss = touchState.getDownTouchPosition().y
                     >= mPipBoundsState.getMovementBounds().bottom;
             mMotionHelper.setSpringingToTouch(false);
-            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.mPinnedTaskLeash);
+            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.getPinnedTaskLeash());
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it

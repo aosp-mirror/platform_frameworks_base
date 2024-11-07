@@ -398,6 +398,7 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.NFC),
                 new RegularPermission(Manifest.permission.TRANSMIT_IR),
                 new RegularPermission(Manifest.permission.UWB_RANGING),
+                new RegularPermission(Manifest.permission.RANGING),
                 new UsbDevicePermission(),
                 new UsbAccessoryPermission(),
             }, false),

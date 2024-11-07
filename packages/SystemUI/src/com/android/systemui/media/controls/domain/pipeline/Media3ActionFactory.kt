@@ -28,6 +28,7 @@ import androidx.annotation.WorkerThread
 import androidx.media.utils.MediaConstants
 import androidx.media3.common.Player
 import androidx.media3.session.CommandButton
+import androidx.media3.session.MediaController as Media3Controller
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionToken
 import com.android.systemui.dagger.SysUISingleton
@@ -82,10 +83,19 @@ constructor(
         // Build button info
         val buttons = suspendCancellableCoroutine { continuation ->
             // Media3Controller methods must always be called from a specific looper
-            handler.post {
-                val result = getMedia3Actions(packageName, m3controller, token)
-                m3controller.release()
-                continuation.resumeWith(Result.success(result))
+            val runnable = Runnable {
+                try {
+                    val result = getMedia3Actions(packageName, m3controller, token)
+                    continuation.resumeWith(Result.success(result))
+                } finally {
+                    m3controller.release()
+                }
+            }
+            handler.post(runnable)
+            continuation.invokeOnCancellation {
+                // Ensure controller is released, even if loading was cancelled partway through
+                handler.post(m3controller::release)
+                handler.removeCallbacks(runnable)
             }
         }
         return buttons
@@ -95,7 +105,7 @@ constructor(
     @WorkerThread
     private fun getMedia3Actions(
         packageName: String,
-        m3controller: androidx.media3.session.MediaController,
+        m3controller: Media3Controller,
         token: SessionToken,
     ): MediaButton? {
         Assert.isNotMainThread()
@@ -197,7 +207,7 @@ constructor(
      * @return A [MediaAction] representing the first supported command, or null if not supported
      */
     private fun getStandardAction(
-        controller: androidx.media3.session.MediaController,
+        controller: Media3Controller,
         token: SessionToken,
         vararg commands: @Player.Command Int,
     ): MediaAction? {
@@ -304,37 +314,40 @@ constructor(
         bgScope.launch {
             val controller = controllerFactory.create(token, looper)
             handler.post {
-                when (command) {
-                    Player.COMMAND_PLAY_PAUSE -> {
-                        if (controller.isPlaying) controller.pause() else controller.play()
-                    }
-
-                    Player.COMMAND_SEEK_TO_PREVIOUS -> controller.seekToPrevious()
-                    Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM ->
-                        controller.seekToPreviousMediaItem()
-
-                    Player.COMMAND_SEEK_TO_NEXT -> controller.seekToNext()
-                    Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> controller.seekToNextMediaItem()
-                    Player.COMMAND_INVALID -> {
-                        if (
-                            customAction != null &&
-                                customAction!!.sessionCommand != null &&
-                                controller.isSessionCommandAvailable(
-                                    customAction!!.sessionCommand!!
-                                )
-                        ) {
-                            controller.sendCustomCommand(
-                                customAction!!.sessionCommand!!,
-                                customAction!!.extras,
-                            )
-                        } else {
-                            logger.logMedia3UnsupportedCommand("$command, action $customAction")
+                try {
+                    when (command) {
+                        Player.COMMAND_PLAY_PAUSE -> {
+                            if (controller.isPlaying) controller.pause() else controller.play()
                         }
-                    }
 
-                    else -> logger.logMedia3UnsupportedCommand(command.toString())
+                        Player.COMMAND_SEEK_TO_PREVIOUS -> controller.seekToPrevious()
+                        Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM ->
+                            controller.seekToPreviousMediaItem()
+
+                        Player.COMMAND_SEEK_TO_NEXT -> controller.seekToNext()
+                        Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> controller.seekToNextMediaItem()
+                        Player.COMMAND_INVALID -> {
+                            if (customAction?.sessionCommand != null) {
+                                val sessionCommand = customAction.sessionCommand!!
+                                if (controller.isSessionCommandAvailable(sessionCommand)) {
+                                    controller.sendCustomCommand(
+                                        sessionCommand,
+                                        customAction.extras,
+                                    )
+                                } else {
+                                    logger.logMedia3UnsupportedCommand(
+                                        "$sessionCommand, action $customAction"
+                                    )
+                                }
+                            } else {
+                                logger.logMedia3UnsupportedCommand("$command, action $customAction")
+                            }
+                        }
+                        else -> logger.logMedia3UnsupportedCommand(command.toString())
+                    }
+                } finally {
+                    controller.release()
                 }
-                controller.release()
             }
         }
     }

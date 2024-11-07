@@ -785,7 +785,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private void handleFlingTransition(SurfaceControl.Transaction startTx,
             SurfaceControl.Transaction finishTx, Rect destinationBounds) {
-        startTx.setPosition(mPipTransitionState.mPinnedTaskLeash,
+        startTx.setPosition(mPipTransitionState.getPinnedTaskLeash(),
                 destinationBounds.left, destinationBounds.top);
         startTx.apply();
 
@@ -799,7 +799,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private void startResizeAnimation(SurfaceControl.Transaction startTx,
             SurfaceControl.Transaction finishTx, Rect destinationBounds, int duration) {
-        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+        SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
         Preconditions.checkState(pipLeash != null,
                 "No leash cached by mPipTransitionState=" + mPipTransitionState);
 

@@ -207,6 +207,9 @@ class PriorityNestedScrollConnection(
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
+        // Note: This method may be called multiple times. Due to NestedScrollDispatcher, the order
+        // of method calls (pre/post scroll/fling) cannot be guaranteed.
+        if (isStopping) return Velocity.Zero
         val controller = currentController ?: return Velocity.Zero
 
         // If in priority mode and can stop on pre-fling phase, stop the scroll.
@@ -219,6 +222,9 @@ class PriorityNestedScrollConnection(
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        // Note: This method may be called multiple times. Due to NestedScrollDispatcher, the order
+        // of method calls (pre/post scroll/fling) cannot be guaranteed.
+        if (isStopping) return Velocity.Zero
         val availableFloat = available.toFloat()
         val controller = currentController
 
@@ -315,6 +321,7 @@ class PriorityNestedScrollConnection(
      * @return The consumed velocity.
      */
     suspend fun stop(velocity: Float): Velocity {
+        if (isStopping) return Velocity.Zero
         val controller = requireController(isStopping = false)
         return coroutineScope {
             try {

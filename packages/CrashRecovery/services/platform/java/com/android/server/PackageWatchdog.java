@@ -300,6 +300,31 @@ public class PackageWatchdog {
         sPackageWatchdog = this;
     }
 
+    /**
+     * Creating this temp constructor to match module constructor.
+     * Note: To be only used in tests.
+     * Creates a PackageWatchdog that allows injecting dependencies,
+     * except for connectivity module connector.
+     */
+    @VisibleForTesting
+    PackageWatchdog(Context context, AtomicFile policyFile, Handler shortTaskHandler,
+            Handler longTaskHandler, ExplicitHealthCheckController controller,
+            SystemClock clock) {
+        mContext = context;
+        mPolicyFile = policyFile;
+        mShortTaskHandler = shortTaskHandler;
+        mLongTaskHandler = longTaskHandler;
+        mHealthCheckController = controller;
+        mConnectivityModuleConnector = ConnectivityModuleConnector.getInstance();
+        mSystemClock = clock;
+        mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
+        mBootThreshold = new BootThreshold(DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
+                DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS);
+
+        loadFromFile();
+        sPackageWatchdog = this;
+    }
+
     /** Creates or gets singleton instance of PackageWatchdog. */
     public static  @NonNull PackageWatchdog getInstance(@NonNull Context context) {
         synchronized (sPackageWatchdogLock) {

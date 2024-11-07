@@ -16,6 +16,7 @@
 
 package androidx.window.extensions.area;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_EMULATED_ONLY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
@@ -569,7 +570,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     private boolean isDeviceFolded() {
         if (Flags.deviceStatePropertyApi()) {
             return mCurrentDeviceState.hasProperty(
-                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY);
+                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)
+                    && !mCurrentDeviceState.hasProperty(PROPERTY_EMULATED_ONLY);
         } else {
             return ArrayUtils.contains(mFoldedDeviceStates, mCurrentDeviceState.getIdentifier());
         }

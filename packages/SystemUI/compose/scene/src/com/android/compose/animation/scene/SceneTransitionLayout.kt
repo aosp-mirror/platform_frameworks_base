@@ -405,7 +405,8 @@ data object Back : UserAction() {
 }
 
 /** The user swiped on the container. */
-data class Swipe(
+data class Swipe
+private constructor(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
     val pointersType: PointerType? = null,
@@ -418,6 +419,42 @@ data class Swipe(
         val Down = Swipe(SwipeDirection.Down)
         val Start = Swipe(SwipeDirection.Start)
         val End = Swipe(SwipeDirection.End)
+
+        fun Left(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Left, pointerCount, pointersType, fromSource)
+
+        fun Up(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Up, pointerCount, pointersType, fromSource)
+
+        fun Right(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Right, pointerCount, pointersType, fromSource)
+
+        fun Down(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Down, pointerCount, pointersType, fromSource)
+
+        fun Start(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Start, pointerCount, pointersType, fromSource)
+
+        fun End(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.End, pointerCount, pointersType, fromSource)
     }
 
     override fun resolve(layoutDirection: LayoutDirection): UserAction.Resolved {

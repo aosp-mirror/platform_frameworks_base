@@ -73,7 +73,7 @@ constructor(
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val columns by viewModel.columns
+        val columns = viewModel.columns
         val rows = viewModel.rows
 
         val pages =

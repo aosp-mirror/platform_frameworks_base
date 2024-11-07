@@ -420,17 +420,37 @@ public final class DataSpace {
     public static final int DATASPACE_HEIF = 4100;
 
     /**
-     * ISO/IEC TBD
+     * Ultra HDR
      *
-     * JPEG image with embedded recovery map following the Jpeg/R specification.
+     * JPEG image with embedded HDR gain map following the Ultra HDR specification and
+     * starting with Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM V}
+     * ISO/CD 21496‐1
      *
-     * <p>This value must always remain aligned with the public ImageFormat Jpeg/R definition and is
-     * valid with formats:
-     *    HAL_PIXEL_FORMAT_BLOB: JPEG image encoded by Jpeg/R encoder according to ISO/IEC TBD.
-     * The image contains a standard SDR JPEG and a recovery map. Jpeg/R decoders can use the
-     * map to recover the input image.</p>
+     * <p>This value is valid with formats:</p>
+     * <ul>
+     *    <li>HAL_PIXEL_FORMAT_BLOB: JPEG image encoded by Jpeg/R encoder according to
+     *    ISO/CD 21496‐1</li>
+     * </ul>
+     * <p>
+     * The image contains a standard SDR JPEG and a gain map. Ultra HDR decoders can use the
+     * gain map to boost the brightness of the rendered image.</p>
      */
      public static final int DATASPACE_JPEG_R = 4101;
+
+    /**
+     * ISO/IEC 23008-12:2024
+     *
+     * High Efficiency Image File Format (HEIF) with embedded HDR gain map
+     *
+     * <p>This value is valid with formats:</p>
+     * <ul>
+     *    <li>HAL_PIXEL_FORMAT_BLOB: A HEIC image encoded by HEVC encoder
+     *    according to ISO/IEC 23008-12:2024 that includes an HDR gain map and
+     *    metadata according to ISO/CD 21496‐1.</li>
+     * </ul>
+     */
+    @FlaggedApi(com.android.internal.camera.flags.Flags.FLAG_CAMERA_HEIF_GAINMAP)
+    public static final int DATASPACE_HEIF_ULTRAHDR = 4102;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -660,6 +680,7 @@ public final class DataSpace {
         DATASPACE_DEPTH,
         DATASPACE_DYNAMIC_DEPTH,
         DATASPACE_HEIF,
+        DATASPACE_HEIF_ULTRAHDR,
         DATASPACE_JPEG_R,
         DATASPACE_UNKNOWN,
         DATASPACE_SCRGB_LINEAR,

@@ -19,6 +19,7 @@ package com.android.systemui.qs.composefragment.dagger
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.util.Utils
 import dagger.Module
 import dagger.Provides
@@ -34,7 +35,7 @@ interface QSFragmentComposeModule {
         @SysUISingleton
         @Named(QS_USING_MEDIA_PLAYER)
         fun providesUsingMedia(@Application context: Context): Boolean {
-            return Utils.useQsMediaPlayer(context)
+            return QSComposeFragment.isEnabled && Utils.useQsMediaPlayer(context)
         }
     }
 }

@@ -101,10 +101,7 @@ class DraggableHandlerTest {
             scene(
                 key = SceneC,
                 userActions =
-                    mapOf(
-                        Swipe.Up to SceneB,
-                        Swipe(SwipeDirection.Up, fromSource = Edge.Bottom) to SceneA,
-                    ),
+                    mapOf(Swipe.Up to SceneB, Swipe.Up(fromSource = Edge.Bottom) to SceneA),
             ) {
                 Text("SceneC")
             }
@@ -1231,7 +1228,7 @@ class DraggableHandlerTest {
         assertTransition(
             currentScene = SceneC,
             fromScene = SceneC,
-            // userAction: Swipe(SwipeDirection.Up, fromSource = Edge.Bottom) to SceneA
+            // userAction: Swipe.Up(fromSource = Edge.Bottom) to SceneA
             toScene = SceneA,
             progress = 0.1f,
         )
