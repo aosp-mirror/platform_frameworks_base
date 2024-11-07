@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +62,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.modifiers.size
 import com.android.compose.modifiers.thenIf
+import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
@@ -194,26 +194,35 @@ fun SmallTileContent(
                 is Icon.Resource -> context.getDrawable(icon.res)
             }
         }
-    if (loadedDrawable !is Animatable) {
-        Icon(icon = icon, tint = animatedColor, modifier = iconModifier)
-    } else if (icon is Icon.Resource) {
-        val image = AnimatedImageVector.animatedVectorResource(id = icon.res)
+    if (loadedDrawable is Animatable) {
         val painter =
-            key(icon) {
-                if (animateToEnd) {
-                    rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = true)
-                } else {
-                    var atEnd by remember(icon.res) { mutableStateOf(false) }
-                    LaunchedEffect(key1 = icon.res) { atEnd = true }
-                    rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = atEnd)
+            when (icon) {
+                is Icon.Resource -> {
+                    val image = AnimatedImageVector.animatedVectorResource(id = icon.res)
+                    key(icon) {
+                        if (animateToEnd) {
+                            rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = true)
+                        } else {
+                            var atEnd by remember(icon.res) { mutableStateOf(false) }
+                            LaunchedEffect(key1 = icon.res) { atEnd = true }
+                            rememberAnimatedVectorPainter(
+                                animatedImageVector = image,
+                                atEnd = atEnd,
+                            )
+                        }
+                    }
                 }
+                is Icon.Loaded -> rememberDrawablePainter(loadedDrawable)
             }
+
         Image(
             painter = painter,
             contentDescription = icon.contentDescription?.load(),
             colorFilter = ColorFilter.tint(color = animatedColor),
             modifier = iconModifier,
         )
+    } else {
+        Icon(icon = icon, tint = animatedColor, modifier = iconModifier)
     }
 }
 
