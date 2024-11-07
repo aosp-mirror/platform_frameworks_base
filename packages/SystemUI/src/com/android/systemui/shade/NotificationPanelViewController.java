@@ -63,6 +63,8 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Trace;
@@ -137,6 +139,7 @@ import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
@@ -182,7 +185,6 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
@@ -190,6 +192,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -1152,6 +1155,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 }, mMainDispatcher);
         }
 
+        if (com.android.systemui.Flags.bouncerUiRevamp()) {
+            collectFlow(mView, mKeyguardInteractor.primaryBouncerShowing,
+                    this::handleBouncerShowingChanged);
+        }
+
         // Ensures that flags are updated when an activity launches
         collectFlow(mView,
                 mShadeAnimationInteractor.isLaunchingActivity(),
@@ -1199,6 +1207,22 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 R.dimen.gone_to_dreaming_transition_lockscreen_translation_y);
         // TODO (b/265193930): remove this and make QsController listen to NotificationPanelViews
         mQsController.loadDimens();
+    }
+
+    private void handleBouncerShowingChanged(Boolean isBouncerShowing) {
+        if (!com.android.systemui.Flags.bouncerUiRevamp()) return;
+
+        if (isBouncerShowing && isExpanded()) {
+            // Blur the shade much lesser than the background surface so that the surface is
+            // distinguishable from the background.
+            float shadeBlurEffect = PrimaryBouncerTransition.MAX_BACKGROUND_BLUR_RADIUS / 3;
+            mView.setRenderEffect(RenderEffect.createBlurEffect(
+                    shadeBlurEffect,
+                    shadeBlurEffect,
+                    Shader.TileMode.MIRROR));
+        } else {
+            mView.setRenderEffect(null);
+        }
     }
 
     private void updateViewControllers(
