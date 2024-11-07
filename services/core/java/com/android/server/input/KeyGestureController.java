@@ -1021,13 +1021,16 @@ final class KeyGestureController {
     }
 
     @BinderThread
-    public void removeAllCustomInputGestures(@UserIdInt int userId) {
-        mInputGestureManager.removeAllCustomInputGestures(userId);
+    public void removeAllCustomInputGestures(@UserIdInt int userId,
+            @Nullable InputGestureData.Filter filter) {
+        mInputGestureManager.removeAllCustomInputGestures(userId, filter);
     }
 
     @BinderThread
-    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId) {
-        List<InputGestureData> customGestures = mInputGestureManager.getCustomInputGestures(userId);
+    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId,
+            @Nullable InputGestureData.Filter filter) {
+        List<InputGestureData> customGestures = mInputGestureManager.getCustomInputGestures(userId,
+                filter);
         AidlInputGestureData[] result = new AidlInputGestureData[customGestures.size()];
         for (int i = 0; i < customGestures.size(); i++) {
             result[i] = customGestures.get(i).getAidlData();
