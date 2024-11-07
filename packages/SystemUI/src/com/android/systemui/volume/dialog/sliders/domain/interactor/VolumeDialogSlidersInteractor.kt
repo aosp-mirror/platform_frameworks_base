@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.flow.stateIn
 
 private const val DEFAULT_STREAM = AudioManager.STREAM_MUSIC
@@ -54,13 +55,17 @@ constructor(
         volumeDialogStateInteractor.volumeDialogState
             .filter { it.streamModels.isNotEmpty() }
             .map { stateModel ->
-                stateModel.streamModels.values
-                    .filter { streamModel -> shouldShowSliders(stateModel, streamModel) }
-                    .sortedWith(streamsSorter)
+                val sliderTypes =
+                    stateModel.streamModels.values
+                        .filter { streamModel -> shouldShowSliders(stateModel, streamModel) }
+                        .sortedWith(streamsSorter)
+                        .map { model -> model.toType() }
+                LinkedHashSet(sliderTypes)
             }
-            .map { models ->
-                val sliderTypes: List<VolumeDialogSliderType> =
-                    models.map { model -> model.toType() }
+            .runningReduce { sliderTypes, newSliderTypes ->
+                newSliderTypes.apply { addAll(sliderTypes) }
+            }
+            .map { sliderTypes ->
                 VolumeDialogSlidersModel(
                     slider = sliderTypes.first(),
                     floatingSliders = sliderTypes.drop(1),
