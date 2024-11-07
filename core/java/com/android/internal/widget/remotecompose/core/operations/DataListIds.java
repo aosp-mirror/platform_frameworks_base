@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -49,16 +51,17 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation {
     public void registerListening(RemoteContext context) {}
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mIds);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "map[" + Utils.idString(mId) + "]  \"" + Arrays.toString(mIds) + "\"";
     }
 
-    public static void apply(WireBuffer buffer, int id, int[] ids) {
+    public static void apply(@NonNull WireBuffer buffer, int id, @NonNull int[] ids) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(ids.length);
@@ -67,7 +70,7 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
         if (len > MAX_LIST) {
@@ -81,7 +84,7 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation {
         operations.add(data);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("a list of id's")
                 .field(DocumentedOperation.INT, "id", "id the array")
@@ -89,13 +92,14 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation {
                 .field(INT_ARRAY, "ids[n]", "length", "ids of other variables");
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.addCollection(mId, this);
     }
 

@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 import java.util.Arrays;
 
 /** The base communication buffer capable of encoding and decoding various types */
@@ -184,11 +186,13 @@ public class WireBuffer {
         return b;
     }
 
+    @NonNull
     public String readUTF8() {
         byte[] stringBuffer = readBuffer();
         return new String(stringBuffer);
     }
 
+    @NonNull
     public String readUTF8(int maxSize) {
         byte[] stringBuffer = readBuffer(maxSize);
         return new String(stringBuffer);
@@ -250,7 +254,7 @@ public class WireBuffer {
         writeLong(Double.doubleToRawLongBits(value));
     }
 
-    public void writeBuffer(byte[] b) {
+    public void writeBuffer(@NonNull byte[] b) {
         resize(b.length + 4);
         writeInt(b.length);
         for (int i = 0; i < b.length; i++) {
@@ -259,7 +263,7 @@ public class WireBuffer {
         mSize += b.length;
     }
 
-    public void writeUTF8(String content) {
+    public void writeUTF8(@NonNull String content) {
         byte[] buffer = content.getBytes();
         writeBuffer(buffer);
     }

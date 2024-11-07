@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.Nullable;
+
 /** Base interface for RemoteCompose operations */
 public interface Operation {
 
@@ -29,5 +31,6 @@ public interface Operation {
     void apply(RemoteContext context);
 
     /** Debug utility to display an operation + indentation */
+    @Nullable
     String deepToString(String indent);
 }

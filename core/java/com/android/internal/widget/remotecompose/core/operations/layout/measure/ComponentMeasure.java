@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.measure;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 
 /** Encapsulate the result of a measure pass for a component */
@@ -80,7 +82,7 @@ public class ComponentMeasure {
         this(id, x, y, w, h, Component.Visibility.VISIBLE);
     }
 
-    public ComponentMeasure(Component component) {
+    public ComponentMeasure(@NonNull Component component) {
         this(
                 component.getComponentId(),
                 component.getX(),
@@ -90,7 +92,7 @@ public class ComponentMeasure {
                 component.mVisibility);
     }
 
-    public void copyFrom(ComponentMeasure m) {
+    public void copyFrom(@NonNull ComponentMeasure m) {
         mX = m.mX;
         mY = m.mY;
         mW = m.mW;
@@ -98,7 +100,7 @@ public class ComponentMeasure {
         mVisibility = m.mVisibility;
     }
 
-    public boolean same(ComponentMeasure m) {
+    public boolean same(@NonNull ComponentMeasure m) {
         return mX == m.mX && mY == m.mY && mW == m.mW && mH == m.mH && mVisibility == m.mVisibility;
     }
 }

@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
@@ -38,6 +40,7 @@ public class CanvasContent extends Component implements ComponentStartOperation 
         super(parent, componentId, animationId, x, y, width, height);
     }
 
+    @NonNull
     public static String name() {
         return "CanvasContent";
     }
@@ -46,29 +49,30 @@ public class CanvasContent extends Component implements ComponentStartOperation 
         return Operations.LAYOUT_CANVAS_CONTENT;
     }
 
+    @NonNull
     @Override
     protected String getSerializedName() {
         return "CANVAS_CONTENT";
     }
 
-    public static void apply(WireBuffer buffer, int componentId) {
+    public static void apply(@NonNull WireBuffer buffer, int componentId) {
         buffer.start(Operations.LAYOUT_CANVAS_CONTENT);
         buffer.writeInt(componentId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         operations.add(new CanvasContent(componentId, 0, 0, 0, 0, null, -1));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")
                 .description("Container for canvas commands.");
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mComponentId);
     }
 }

@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -54,7 +56,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         mOutputLeft = Float.isNaN(mLeft) ? context.getFloat(Utils.idFromNan(mLeft)) : mLeft;
         mOutputTop = Float.isNaN(mTop) ? context.getFloat(Utils.idFromNan(mTop)) : mTop;
         mOutputRight = Float.isNaN(mRight) ? context.getFloat(Utils.idFromNan(mRight)) : mRight;
@@ -62,7 +64,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (Float.isNaN(mLeft)) {
             context.listensTo(Utils.idFromNan(mLeft), this);
         }
@@ -78,10 +80,11 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mLeft, mTop, mRight, mBottom, mDescriptionId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DrawBitmap (desc="
@@ -97,7 +100,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
                 + ";";
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         float sLeft = buffer.readFloat();
         float srcTop = buffer.readFloat();
@@ -109,6 +112,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
         operations.add(op);
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -118,7 +122,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int id,
             float left,
             float top,
@@ -134,7 +138,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
         buffer.writeInt(descriptionId);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap")
                 .field(INT, "id", "id of float")
@@ -146,7 +150,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.drawBitmap(mId, mOutputLeft, mOutputTop, mOutputRight, mOutputBottom);
     }
 }

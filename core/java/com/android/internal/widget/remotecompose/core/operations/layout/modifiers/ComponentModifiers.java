@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
@@ -22,29 +24,34 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
+import com.android.internal.widget.remotecompose.core.operations.layout.ClickHandler;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.TouchHandler;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.ArrayList;
 
 /** Maintain a list of modifiers */
-public class ComponentModifiers extends PaintOperation implements DecoratorComponent {
-    ArrayList<ModifierOperation> mList = new ArrayList<>();
+public class ComponentModifiers extends PaintOperation
+        implements DecoratorComponent, ClickHandler, TouchHandler {
+    @NonNull ArrayList<ModifierOperation> mList = new ArrayList<>();
 
+    @NonNull
     public ArrayList<ModifierOperation> getList() {
         return mList;
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         super.apply(context);
         for (ModifierOperation op : mList) {
             op.apply(context);
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         String str = "ComponentModifiers \n";
@@ -59,7 +66,7 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
         // nothing
     }
 
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(indent, "MODIFIERS");
         for (ModifierOperation m : mList) {
             m.serializeToString(indent + 1, serializer);
@@ -75,7 +82,7 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         float tx = 0f;
         float ty = 0f;
         for (ModifierOperation op : mList) {
@@ -127,8 +134,38 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
     public void onClick(
             RemoteContext context, CoreDocument document, Component component, float x, float y) {
         for (ModifierOperation op : mList) {
-            if (op instanceof DecoratorComponent) {
-                ((DecoratorComponent) op).onClick(context, document, component, x, y);
+            if (op instanceof ClickHandler) {
+                ((ClickHandler) op).onClick(context, document, component, x, y);
+            }
+        }
+    }
+
+    @Override
+    public void onTouchDown(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        for (ModifierOperation op : mList) {
+            if (op instanceof TouchHandler) {
+                ((TouchHandler) op).onTouchDown(context, document, component, x, y);
+            }
+        }
+    }
+
+    @Override
+    public void onTouchUp(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        for (ModifierOperation op : mList) {
+            if (op instanceof TouchHandler) {
+                ((TouchHandler) op).onTouchUp(context, document, component, x, y);
+            }
+        }
+    }
+
+    @Override
+    public void onTouchCancel(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        for (ModifierOperation op : mList) {
+            if (op instanceof TouchHandler) {
+                ((TouchHandler) op).onTouchCancel(context, document, component, x, y);
             }
         }
     }

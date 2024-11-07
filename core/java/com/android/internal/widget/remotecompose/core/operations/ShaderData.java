@@ -22,6 +22,9 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.UTF8;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -43,17 +46,17 @@ public class ShaderData implements Operation, VariableSupport {
     private static final String CLASS_NAME = "ShaderData";
     int mShaderTextId; // the actual text of a shader
     int mShaderID; // allows shaders to be referenced by number
-    HashMap<String, float[]> mUniformRawFloatMap = null;
-    HashMap<String, float[]> mUniformFloatMap = null;
-    HashMap<String, int[]> mUniformIntMap = null;
-    HashMap<String, Integer> mUniformBitmapMap = null;
+    @Nullable HashMap<String, float[]> mUniformRawFloatMap = null;
+    @Nullable HashMap<String, float[]> mUniformFloatMap = null;
+    @Nullable HashMap<String, int[]> mUniformIntMap = null;
+    @Nullable HashMap<String, Integer> mUniformBitmapMap = null;
 
     public ShaderData(
             int shaderID,
             int shaderTextId,
-            HashMap<String, float[]> floatMap,
-            HashMap<String, int[]> intMap,
-            HashMap<String, Integer> bitmapMap) {
+            @Nullable HashMap<String, float[]> floatMap,
+            @Nullable HashMap<String, int[]> intMap,
+            @Nullable HashMap<String, Integer> bitmapMap) {
         mShaderID = shaderID;
         mShaderTextId = shaderTextId;
         if (floatMap != null) {
@@ -89,6 +92,7 @@ public class ShaderData implements Operation, VariableSupport {
      *
      * @return Names of all uniform floats or empty array
      */
+    @NonNull
     public String[] getUniformFloatNames() {
         if (mUniformFloatMap == null) return new String[0];
         return mUniformFloatMap.keySet().toArray(new String[0]);
@@ -109,6 +113,7 @@ public class ShaderData implements Operation, VariableSupport {
      *
      * @return Name of all integer uniforms
      */
+    @NonNull
     public String[] getUniformIntegerNames() {
         if (mUniformIntMap == null) return new String[0];
         return mUniformIntMap.keySet().toArray(new String[0]);
@@ -129,6 +134,7 @@ public class ShaderData implements Operation, VariableSupport {
      *
      * @return Name of all bitmap uniforms
      */
+    @NonNull
     public String[] getUniformBitmapNames() {
         if (mUniformBitmapMap == null) return new String[0];
         return mUniformBitmapMap.keySet().toArray(new String[0]);
@@ -145,7 +151,7 @@ public class ShaderData implements Operation, VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mShaderID,
@@ -155,13 +161,14 @@ public class ShaderData implements Operation, VariableSupport {
                 mUniformBitmapMap);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "SHADER DATA " + mShaderID;
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         for (String name : mUniformRawFloatMap.keySet()) {
             float[] value = mUniformRawFloatMap.get(name);
             float[] out = null;
@@ -178,7 +185,7 @@ public class ShaderData implements Operation, VariableSupport {
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         for (String name : mUniformRawFloatMap.keySet()) {
             float[] value = mUniformRawFloatMap.get(name);
             for (float v : value) {
@@ -189,6 +196,7 @@ public class ShaderData implements Operation, VariableSupport {
         }
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -208,12 +216,12 @@ public class ShaderData implements Operation, VariableSupport {
      * @param bitmapMap the map of bitmap uniforms
      */
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int shaderID,
             int shaderTextId,
-            HashMap<String, float[]> floatMap,
-            HashMap<String, int[]> intMap,
-            HashMap<String, Integer> bitmapMap) {
+            @Nullable HashMap<String, float[]> floatMap,
+            @Nullable HashMap<String, int[]> intMap,
+            @Nullable HashMap<String, Integer> bitmapMap) {
         buffer.start(OP_CODE);
         buffer.writeInt(shaderID);
 
@@ -256,7 +264,7 @@ public class ShaderData implements Operation, VariableSupport {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int shaderID = buffer.readInt();
         int shaderTextId = buffer.readInt();
         HashMap<String, float[]> floatMap = null;
@@ -308,7 +316,7 @@ public class ShaderData implements Operation, VariableSupport {
         operations.add(new ShaderData(shaderID, shaderTextId, floatMap, intMap, bitmapMap));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Shader")
                 .field(DocumentedOperation.INT, "shaderID", "id of shader")
@@ -326,10 +334,11 @@ public class ShaderData implements Operation, VariableSupport {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.loadShader(mShaderID, this);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();

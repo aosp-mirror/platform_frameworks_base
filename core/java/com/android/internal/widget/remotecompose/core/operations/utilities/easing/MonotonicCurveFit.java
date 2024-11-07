@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
+import android.annotation.NonNull;
+
 import java.util.Arrays;
 
 /** This performs a spline interpolation in multiple dimensions */
@@ -32,7 +34,7 @@ public class MonotonicCurveFit {
      * @param time the point along the curve
      * @param y the parameter at those points
      */
-    public MonotonicCurveFit(double[] time, double[][] y) {
+    public MonotonicCurveFit(@NonNull double[] time, @NonNull double[][] y) {
         final int n = time.length;
         final int dim = y[0].length;
         mSlopeTemp = new double[dim];
@@ -331,7 +333,8 @@ public class MonotonicCurveFit {
     }
 
     /** This builds a monotonic spline to be used as a wave function */
-    public static MonotonicCurveFit buildWave(String configString) {
+    @NonNull
+    public static MonotonicCurveFit buildWave(@NonNull String configString) {
         // done this way for efficiency
         String str = configString;
         double[] values = new double[str.length() / 2];
@@ -350,7 +353,8 @@ public class MonotonicCurveFit {
         return buildWave(Arrays.copyOf(values, count));
     }
 
-    private static MonotonicCurveFit buildWave(double[] values) {
+    @NonNull
+    private static MonotonicCurveFit buildWave(@NonNull double[] values) {
         int length = values.length * 3 - 2;
         int len = values.length - 1;
         double gap = 1.0 / len;

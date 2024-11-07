@@ -271,4 +271,24 @@ public abstract class PaintContext {
     public void needsRepaint() {
         mNeedsRepaint = true;
     }
+
+    public abstract void startGraphicsLayer(int w, int h);
+
+    public abstract void setGraphicsLayer(
+            float scaleX,
+            float scaleY,
+            float rotationX,
+            float rotationY,
+            float rotationZ,
+            float shadowElevation,
+            float transformOriginX,
+            float transformOriginY,
+            float alpha,
+            int renderEffectId);
+
+    public abstract void endGraphicsLayer();
+
+    public boolean isVisualDebug() {
+        return mContext.isVisualDebug();
+    }
 }

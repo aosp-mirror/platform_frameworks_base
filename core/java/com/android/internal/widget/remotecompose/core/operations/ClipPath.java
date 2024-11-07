@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -57,16 +59,17 @@ public class ClipPath extends PaintOperation {
     public static final int UNDEFINED = PATH_CLIP_UNDEFINED;
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ClipPath " + mId + ";";
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int pack = buffer.readInt();
         int id = pack & 0xFFFFF;
         int regionOp = pack >> 24;
@@ -74,6 +77,7 @@ public class ClipPath extends PaintOperation {
         operations.add(op);
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -82,19 +86,19 @@ public class ClipPath extends PaintOperation {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, int id) {
+    public static void apply(@NonNull WireBuffer buffer, int id) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Intersect the current clip with the path")
                 .field(DocumentedOperation.INT, "id", "id of the path");
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.clipPath(mId, mRegionOp);
     }
 }

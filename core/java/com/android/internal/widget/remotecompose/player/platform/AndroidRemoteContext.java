@@ -20,6 +20,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.TouchListener;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
@@ -143,9 +144,9 @@ class AndroidRemoteContext extends RemoteContext {
     }
 
     @Override
-    public void runNamedAction(int id) {
+    public void runNamedAction(int id, Object value) {
         String text = getText(id);
-        mDocument.runNamedAction(text);
+        mDocument.runNamedAction(text, value);
     }
 
     /**
@@ -197,6 +198,11 @@ class AndroidRemoteContext extends RemoteContext {
     @Override
     public void loadFloat(int id, float value) {
         mRemoteComposeState.updateFloat(id, value);
+    }
+
+    @Override
+    public void overrideFloat(int id, float value) {
+        mRemoteComposeState.overrideFloat(id, value);
     }
 
     @Override
@@ -268,6 +274,11 @@ class AndroidRemoteContext extends RemoteContext {
         return (ShaderData) mRemoteComposeState.getFromId(id);
     }
 
+    @Override
+    public void addTouchListener(TouchListener touchExpression) {
+        mDocument.addTouchListener(touchExpression);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,5 +295,9 @@ class AndroidRemoteContext extends RemoteContext {
         String contentDescription = (String) mRemoteComposeState.getFromId(contentDescriptionId);
         String metadata = (String) mRemoteComposeState.getFromId(metadataId);
         mDocument.addClickArea(id, contentDescription, left, top, right, bottom, metadata);
+    }
+
+    public void hapticEffect(int type) {
+        mDocument.haptic(type);
     }
 }

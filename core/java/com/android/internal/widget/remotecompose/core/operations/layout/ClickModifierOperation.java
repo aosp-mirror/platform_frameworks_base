@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -37,7 +40,7 @@ import java.util.List;
 
 /** Represents a click modifier + actions */
 public class ClickModifierOperation extends PaintOperation
-        implements ModifierOperation, DecoratorComponent {
+        implements ModifierOperation, DecoratorComponent, ClickHandler {
     private static final int OP_CODE = Operations.MODIFIER_CLICK;
 
     long mAnimateRippleStart = 0;
@@ -48,9 +51,9 @@ public class ClickModifierOperation extends PaintOperation
     float mWidth = 0;
     float mHeight = 0;
 
-    public float[] locationInWindow = new float[2];
+    @NonNull public float[] locationInWindow = new float[2];
 
-    PaintBundle mPaint = new PaintBundle();
+    @NonNull PaintBundle mPaint = new PaintBundle();
 
     public void animateRipple(float x, float y) {
         mAnimateRippleStart = System.currentTimeMillis();
@@ -58,17 +61,19 @@ public class ClickModifierOperation extends PaintOperation
         mAnimateRippleY = y;
     }
 
-    public ArrayList<Operation> mList = new ArrayList<>();
+    @NonNull public ArrayList<Operation> mList = new ArrayList<>();
 
+    @NonNull
     public ArrayList<Operation> getList() {
         return mList;
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ClickModifier";
@@ -83,13 +88,14 @@ public class ClickModifierOperation extends PaintOperation
         }
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@Nullable String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         if (mAnimateRippleStart == 0) {
             return;
         }
@@ -137,7 +143,7 @@ public class ClickModifierOperation extends PaintOperation
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(indent, "CLICK_MODIFIER");
         for (Operation o : mList) {
             if (o instanceof ActionOperation) {
@@ -148,7 +154,11 @@ public class ClickModifierOperation extends PaintOperation
 
     @Override
     public void onClick(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+            RemoteContext context,
+            CoreDocument document,
+            @NonNull Component component,
+            float x,
+            float y) {
         if (!component.isVisible()) {
             return;
         }
@@ -163,19 +173,20 @@ public class ClickModifierOperation extends PaintOperation
         }
     }
 
+    @NonNull
     public static String name() {
         return "ClickModifier";
     }
 
-    public static void apply(WireBuffer buffer) {
+    public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(OP_CODE);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new ClickModifierOperation());
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, name())
                 .description(
                         "Click modifier. This operation contains"
