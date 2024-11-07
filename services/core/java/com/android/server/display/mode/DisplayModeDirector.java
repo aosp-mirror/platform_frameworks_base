@@ -2077,8 +2077,8 @@ public class DisplayModeDirector {
             mDeviceConfigDisplaySettings.startListening();
 
             mInjector.registerDisplayListener(this, mHandler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                            | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
+                    DisplayManager.EVENT_FLAG_DISPLAY_CHANGED,
+                    DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS);
         }
 
         private void setLoggingEnabled(boolean loggingEnabled) {
@@ -2878,8 +2878,8 @@ public class DisplayModeDirector {
             }
             mDisplayManagerInternal = mInjector.getDisplayManagerInternal();
             mInjector.registerDisplayListener(this, mHandler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
-                    | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
+                    DisplayManager.EVENT_FLAG_DISPLAY_REMOVED,
+                    DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS);
         }
 
         /**
@@ -3108,6 +3108,9 @@ public class DisplayModeDirector {
         void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
                 Handler handler, long flags);
 
+        void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
+                Handler handler, long flags, long privateFlags);
+
         Display getDisplay(int displayId);
 
         Display[] getDisplays();
@@ -3172,6 +3175,12 @@ public class DisplayModeDirector {
         public void registerDisplayListener(DisplayManager.DisplayListener listener,
                 Handler handler, long flags) {
             getDisplayManager().registerDisplayListener(listener, handler, flags);
+        }
+
+        @Override
+        public void registerDisplayListener(DisplayManager.DisplayListener listener,
+                Handler handler, long flags, long privateFlags) {
+            getDisplayManager().registerDisplayListener(listener, handler, flags, privateFlags);
         }
 
         @Override

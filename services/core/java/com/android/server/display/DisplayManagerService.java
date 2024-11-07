@@ -25,7 +25,7 @@ import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.Manifest.permission.RESTRICT_DISPLAY_MODES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
-import static android.hardware.display.DisplayManager.EventFlag;
+import static android.hardware.display.DisplayManagerGlobal.InternalEventFlag;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
@@ -1390,16 +1390,16 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void registerCallbackInternal(IDisplayManagerCallback callback, int callingPid,
-            int callingUid, @EventFlag long eventFlagsMask) {
+            int callingUid, @InternalEventFlag long internalEventFlagsMask) {
         synchronized (mSyncRoot) {
             CallbackRecord record = mCallbacks.get(callingPid);
 
             if (record != null) {
-                record.updateEventFlagsMask(eventFlagsMask);
+                record.updateEventFlagsMask(internalEventFlagsMask);
                 return;
             }
 
-            record = new CallbackRecord(callingPid, callingUid, callback, eventFlagsMask);
+            record = new CallbackRecord(callingPid, callingUid, callback, internalEventFlagsMask);
             try {
                 IBinder binder = callback.asBinder();
                 binder.linkToDeath(record, 0);
@@ -4009,7 +4009,7 @@ public final class DisplayManagerService extends SystemService {
         public final int mPid;
         public final int mUid;
         private final IDisplayManagerCallback mCallback;
-        private @DisplayManager.EventFlag AtomicLong mEventFlagsMask;
+        private @InternalEventFlag AtomicLong mInternalEventFlagsMask;
         private final String mPackageName;
 
         public boolean mWifiDisplayScanRequested;
@@ -4030,11 +4030,11 @@ public final class DisplayManagerService extends SystemService {
         private boolean mFrozen;
 
         CallbackRecord(int pid, int uid, @NonNull IDisplayManagerCallback callback,
-                @EventFlag long eventFlagsMask) {
+                @InternalEventFlag long internalEventFlagsMask) {
             mPid = pid;
             mUid = uid;
             mCallback = callback;
-            mEventFlagsMask = new AtomicLong(eventFlagsMask);
+            mInternalEventFlagsMask = new AtomicLong(internalEventFlagsMask);
             mCached = false;
             mFrozen = false;
 
@@ -4056,8 +4056,8 @@ public final class DisplayManagerService extends SystemService {
             mPackageName = packageNames == null ? null : packageNames[0];
         }
 
-        public void updateEventFlagsMask(@EventFlag long eventFlag) {
-            mEventFlagsMask.set(eventFlag);
+        public void updateEventFlagsMask(@InternalEventFlag long internalEventFlag) {
+            mInternalEventFlagsMask.set(internalEventFlag);
         }
 
         /**
@@ -4121,13 +4121,13 @@ public final class DisplayManagerService extends SystemService {
             if (!shouldSendEvent(event)) {
                 if (extraLogging(mPackageName)) {
                     Slog.i(TAG,
-                            "Not sending displayEvent: " + event + " due to flag:"
-                                    + mEventFlagsMask);
+                            "Not sending displayEvent: " + event + " due to mask:"
+                                    + mInternalEventFlagsMask);
                 }
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
                     Trace.instant(Trace.TRACE_TAG_POWER,
-                            "notifyDisplayEventAsync#notSendingEvent=" + event + ",mEventsFlag="
-                                    + mEventFlagsMask);
+                            "notifyDisplayEventAsync#notSendingEvent=" + event
+                                    + ",mInternalEventFlagsMask=" + mInternalEventFlagsMask);
                 }
                 // The client is not interested in this event, so do nothing.
                 return true;
@@ -4173,22 +4173,29 @@ public final class DisplayManagerService extends SystemService {
          * Return true if the client is interested in this event.
          */
         private boolean shouldSendEvent(@DisplayEvent int event) {
-            final long flag = mEventFlagsMask.get();
+            final long mask = mInternalEventFlagsMask.get();
             switch (event) {
                 case DisplayManagerGlobal.EVENT_DISPLAY_ADDED:
-                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0;
+                    return (mask & DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_CHANGED:
-                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0;
+                    return (mask & DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED:
-                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0;
+                    return (mask
+                            & DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED)
+                            != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_REMOVED:
-                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0;
+                    return (mask & DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED) != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:
-                    return (flag & DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED) != 0;
+                    return (mask
+                            & DisplayManagerGlobal
+                            .INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED)
+                            != 0;
                 case DisplayManagerGlobal.EVENT_DISPLAY_CONNECTED:
                     // fallthrough
                 case DisplayManagerGlobal.EVENT_DISPLAY_DISCONNECTED:
-                    return (flag & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0;
+                    return (mask
+                            & DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED)
+                            != 0;
                 default:
                     // This should never happen.
                     Slog.e(TAG, "Unknown display event " + event);
@@ -4374,15 +4381,16 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public void registerCallback(IDisplayManagerCallback callback) {
-            registerCallbackWithEventMask(callback, DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                    | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                    | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
+            registerCallbackWithEventMask(callback,
+                    DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+                    | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+                    | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED);
         }
 
         @Override // Binder call
         @SuppressLint("AndroidFrameworkRequiresPermission") // Permission only required sometimes
         public void registerCallbackWithEventMask(IDisplayManagerCallback callback,
-                @EventFlag long eventFlagsMask) {
+                @InternalEventFlag long internalEventFlagsMask) {
             if (callback == null) {
                 throw new IllegalArgumentException("listener must not be null");
             }
@@ -4391,7 +4399,9 @@ public final class DisplayManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
 
             if (mFlags.isConnectedDisplayManagementEnabled()) {
-                if ((eventFlagsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                if ((internalEventFlagsMask
+                        & DisplayManagerGlobal
+                        .INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
                     mContext.enforceCallingOrSelfPermission(MANAGE_DISPLAYS,
                             "Permission required to get signals about connection events.");
                 }
@@ -4399,7 +4409,7 @@ public final class DisplayManagerService extends SystemService {
 
             final long token = Binder.clearCallingIdentity();
             try {
-                registerCallbackInternal(callback, callingPid, callingUid, eventFlagsMask);
+                registerCallbackInternal(callback, callingPid, callingUid, internalEventFlagsMask);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
