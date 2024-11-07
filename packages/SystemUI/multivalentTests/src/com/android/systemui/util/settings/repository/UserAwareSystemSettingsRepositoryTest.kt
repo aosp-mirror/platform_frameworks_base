@@ -18,14 +18,14 @@ package com.android.systemui.util.settings.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
+import com.android.systemui.util.settings.data.repository.userAwareSystemSettingsRepository
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class UserAwareSecureSettingsRepositoryTest : UserAwareSettingsRepositoryTestBase() {
+class UserAwareSystemSettingsRepositoryTest : UserAwareSettingsRepositoryTestBase() {
 
     override fun getKosmosUserAwareSettingsRepository(): UserAwareSettingsRepository {
-        return kosmos.userAwareSecureSettingsRepository
+        return kosmos.userAwareSystemSettingsRepository
     }
 }
