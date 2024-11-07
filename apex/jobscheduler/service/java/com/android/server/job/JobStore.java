@@ -269,7 +269,9 @@ public final class JobStore {
                         convertRtcBoundsToElapsed(utcTimes, elapsedNow);
                 JobStatus newJob = new JobStatus(job,
                         elapsedRuntimes.first, elapsedRuntimes.second,
-                        0, 0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime(),
+                        0 /* numFailures */, 0 /* numAbandonedFailures */,
+                        0 /* numSystemStops */, job.getLastSuccessfulRunTime(),
+                        job.getLastFailedRunTime(),
                         job.getCumulativeExecutionTimeMs());
                 newJob.prepareLocked();
                 toAdd.add(newJob);
