@@ -464,7 +464,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         final RunningTaskInfo oldTaskInfo = decoration.mTaskInfo;
 
         if (taskInfo.displayId != oldTaskInfo.displayId
-                && !Flags.enableHandleInputFix()) {
+                && !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             removeTaskFromEventReceiver(oldTaskInfo.displayId);
             incrementEventReceiverTasks(taskInfo.displayId);
         }
@@ -533,7 +533,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         decoration.close();
         final int displayId = taskInfo.displayId;
         if (mEventReceiversByDisplay.contains(displayId)
-                && !Flags.enableHandleInputFix()) {
+                && !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             removeTaskFromEventReceiver(displayId);
         }
         // Remove the decoration from the cache last because WindowDecoration#close could still
@@ -1228,7 +1228,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         relevantDecor.updateHoverAndPressStatus(ev);
         final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            if (!mTransitionDragActive && !Flags.enableHandleInputFix()) {
+            if (!mTransitionDragActive && !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
                 relevantDecor.closeHandleMenuIfNeeded(ev);
             }
         }
@@ -1271,7 +1271,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 }
                 final boolean shouldStartTransitionDrag =
                         relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)
-                                || Flags.enableHandleInputFix();
+                                || DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue();
                 if (dragFromStatusBarAllowed && shouldStartTransitionDrag) {
                     mTransitionDragActive = true;
                 }
@@ -1582,7 +1582,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */,
                 mFocusTransitionObserver.hasGlobalFocus(taskInfo));
-        if (!Flags.enableHandleInputFix()) {
+        if (!DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             incrementEventReceiverTasks(taskInfo.displayId);
         }
     }
@@ -1743,7 +1743,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         && Flags.enableDesktopWindowingImmersiveHandleHiding()) {
                     decor.onInsetsStateChanged(insetsState);
                 }
-                if (!Flags.enableHandleInputFix()) {
+                if (!DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
                     // If status bar inset is visible, top task is not in immersive mode.
                     // This value is only needed when the App Handle input is being handled
                     // through the global input monitor (hence the flag check) to ignore gestures
