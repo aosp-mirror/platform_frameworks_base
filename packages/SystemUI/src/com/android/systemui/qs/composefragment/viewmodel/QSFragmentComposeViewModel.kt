@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.asIndenting
+import com.android.systemui.util.kotlin.emitOnStart
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
@@ -277,6 +278,24 @@ constructor(
     private val mediaSuddenlyAppearingInLandscape: Boolean
         get() = !qqsMediaInRow && qsMediaInRow
 
+    private val collapsedLandscapeMedia by
+        hydrator.hydratedStateOf(
+            traceName = "collapsedLandscapeMedia",
+            initialValue = resources.getBoolean(R.bool.config_quickSettingsMediaLandscapeCollapsed),
+            source =
+                configurationInteractor.onAnyConfigurationChange.emitOnStart().map {
+                    resources.getBoolean(R.bool.config_quickSettingsMediaLandscapeCollapsed)
+                },
+        )
+
+    private val qqsMediaExpansion: Float
+        get() =
+            if (qqsMediaInRow && collapsedLandscapeMedia) {
+                MediaHostState.COLLAPSED
+            } else {
+                MediaHostState.EXPANDED
+            }
+
     private var qsBounds by mutableStateOf(Rect())
 
     private val constrainedSquishinessFraction: Float
@@ -378,6 +397,7 @@ constructor(
         initMediaHosts() // init regardless of using media (same as current QS).
         coroutineScope {
             launch { hydrateSquishinessInteractor() }
+            launch { hydrateQqsMediaExpansion() }
             launch { hydrator.activate() }
             launch { containerViewModel.activate() }
             launch { qqsMediaInRowViewModel.activate() }
@@ -388,7 +408,7 @@ constructor(
 
     private fun initMediaHosts() {
         qqsMediaHost.apply {
-            expansion = MediaHostState.EXPANDED
+            expansion = qqsMediaExpansion
             showsOnlyActiveMedia = true
             init(MediaHierarchyManager.LOCATION_QQS)
         }
@@ -402,6 +422,10 @@ constructor(
     private suspend fun hydrateSquishinessInteractor() {
         snapshotFlow { constrainedSquishinessFraction }
             .collect { squishinessInteractor.setSquishinessValue(it) }
+    }
+
+    private suspend fun hydrateQqsMediaExpansion() {
+        snapshotFlow { qqsMediaExpansion }.collect { qqsMediaHost.expansion = it }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -447,6 +471,8 @@ constructor(
                 println("qqsMediaInRow", qqsMediaInRow)
                 println("qsMediaVisible", qsMediaVisible)
                 println("qsMediaInRow", qsMediaInRow)
+                println("collapsedLandscapeMedia", collapsedLandscapeMedia)
+                println("qqsMediaExpansion", qqsMediaExpansion)
             }
         }
     }

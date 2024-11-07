@@ -21,6 +21,7 @@ import android.content.res.mainResources
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.media.controls.ui.controller.mediaHostStatesManager
 import com.android.systemui.qs.composefragment.dagger.usingMediaInComposeFragment
 import com.android.systemui.shade.data.repository.shadeRepository
@@ -56,4 +57,5 @@ fun Kosmos.setConfigurationForMediaInRow(mediaInRow: Boolean) {
         }
     mainResources.configuration.updateFrom(config)
     fakeConfigurationRepository.onConfigurationChange(config)
+    runCurrent()
 }
