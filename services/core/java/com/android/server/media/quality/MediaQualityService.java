@@ -59,15 +59,15 @@ public class MediaQualityService extends SystemService {
             return pp;
         }
         @Override
-        public void updatePictureProfile(long id, PictureProfile pp) {
+        public void updatePictureProfile(String id, PictureProfile pp) {
             // TODO: implement
         }
         @Override
-        public void removePictureProfile(long id) {
+        public void removePictureProfile(String id) {
             // TODO: implement
         }
         @Override
-        public PictureProfile getPictureProfileById(long id) {
+        public PictureProfile getPictureProfile(int type, String name) {
             return null;
         }
         @Override
@@ -79,7 +79,7 @@ public class MediaQualityService extends SystemService {
             return new ArrayList<>();
         }
         @Override
-        public List<PictureProfile> getAllPictureProfiles() {
+        public List<String> getPictureProfilePackageNames() {
             return new ArrayList<>();
         }
 
@@ -89,15 +89,15 @@ public class MediaQualityService extends SystemService {
             return pp;
         }
         @Override
-        public void updateSoundProfile(long id, SoundProfile pp) {
+        public void updateSoundProfile(String id, SoundProfile pp) {
             // TODO: implement
         }
         @Override
-        public void removeSoundProfile(long id) {
+        public void removeSoundProfile(String id) {
             // TODO: implement
         }
         @Override
-        public SoundProfile getSoundProfileById(long id) {
+        public SoundProfile getSoundProfileById(String id) {
             return null;
         }
         @Override
@@ -109,7 +109,7 @@ public class MediaQualityService extends SystemService {
             return new ArrayList<>();
         }
         @Override
-        public List<SoundProfile> getAllSoundProfiles() {
+        public List<String> getSoundProfilePackageNames() {
             return new ArrayList<>();
         }
 
@@ -138,6 +138,14 @@ public class MediaQualityService extends SystemService {
             return new ArrayList<>();
         }
 
+        @Override
+        public List<String> getPictureProfileAllowList() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public void setPictureProfileAllowList(List<String> packages) {
+        }
 
         @Override
         public boolean isSupported() {
