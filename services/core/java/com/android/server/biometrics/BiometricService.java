@@ -288,11 +288,13 @@ public class BiometricService extends SystemService {
          * @param handler The handler to run {@link #onChange} on, or null if none.
          */
         public SettingObserver(Context context, Handler handler,
-                List<BiometricService.EnabledOnKeyguardCallback> callbacks) {
+                List<BiometricService.EnabledOnKeyguardCallback> callbacks,
+                UserManager userManager, FingerprintManager fingerprintManager,
+                FaceManager faceManager) {
             super(handler);
             mContentResolver = context.getContentResolver();
             mCallbacks = callbacks;
-            mUserManager = context.getSystemService(UserManager.class);
+            mUserManager = userManager;
 
             final boolean hasFingerprint = context.getPackageManager()
                     .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
@@ -304,7 +306,7 @@ public class BiometricService extends SystemService {
                     Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.Q
                     && hasFace && !hasFingerprint;
 
-            addBiometricListenersForMandatoryBiometrics(context);
+            addBiometricListenersForMandatoryBiometrics(context, fingerprintManager, faceManager);
             updateContentObserver();
         }
 
@@ -431,11 +433,21 @@ public class BiometricService extends SystemService {
 
         public boolean getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(int userId) {
             if (!mMandatoryBiometricsEnabled.containsKey(userId)) {
+                Slog.d(TAG, "update mb toggle for user " + userId);
                 updateMandatoryBiometricsForAllProfiles(userId);
             }
             if (!mMandatoryBiometricsRequirementsSatisfied.containsKey(userId)) {
+                Slog.d(TAG, "update mb reqs for user " + userId);
                 updateMandatoryBiometricsRequirementsForAllProfiles(userId);
             }
+
+            Slog.d(TAG, mMandatoryBiometricsEnabled.getOrDefault(userId,
+                    DEFAULT_MANDATORY_BIOMETRICS_STATUS)
+                    + " " + mMandatoryBiometricsRequirementsSatisfied.getOrDefault(userId,
+                    DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS)
+                    + " " + getEnabledForApps(userId)
+                    + " " + (mFingerprintEnrolledForUser.getOrDefault(userId, false /* default */)
+                    || mFaceEnrolledForUser.getOrDefault(userId, false /* default */)));
             return mMandatoryBiometricsEnabled.getOrDefault(userId,
                     DEFAULT_MANDATORY_BIOMETRICS_STATUS)
                     && mMandatoryBiometricsRequirementsSatisfied.getOrDefault(userId,
@@ -456,11 +468,23 @@ public class BiometricService extends SystemService {
 
         private void updateMandatoryBiometricsForAllProfiles(int userId) {
             int effectiveUserId = userId;
-            if (mUserManager.getMainUser() != null) {
-                effectiveUserId = mUserManager.getMainUser().getIdentifier();
+            final UserInfo parentProfile = mUserManager.getProfileParent(userId);
+
+            if (parentProfile != null) {
+                effectiveUserId = parentProfile.id;
             }
-            for (int profileUserId: mUserManager.getEnabledProfileIds(effectiveUserId)) {
-                mMandatoryBiometricsEnabled.put(profileUserId,
+
+            final int[] enabledProfileIds = mUserManager.getEnabledProfileIds(effectiveUserId);
+            if (enabledProfileIds != null) {
+                for (int profileUserId : enabledProfileIds) {
+                    mMandatoryBiometricsEnabled.put(profileUserId,
+                            Settings.Secure.getIntForUser(
+                                    mContentResolver, Settings.Secure.MANDATORY_BIOMETRICS,
+                                    DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0,
+                                    effectiveUserId) != 0);
+                }
+            } else {
+                mMandatoryBiometricsEnabled.put(userId,
                         Settings.Secure.getIntForUser(
                                 mContentResolver, Settings.Secure.MANDATORY_BIOMETRICS,
                                 DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0,
@@ -470,11 +494,24 @@ public class BiometricService extends SystemService {
 
         private void updateMandatoryBiometricsRequirementsForAllProfiles(int userId) {
             int effectiveUserId = userId;
-            if (mUserManager.getMainUser() != null) {
-                effectiveUserId = mUserManager.getMainUser().getIdentifier();
+            final UserInfo parentProfile = mUserManager.getProfileParent(userId);
+
+            if (parentProfile != null) {
+                effectiveUserId = parentProfile.id;
             }
-            for (int profileUserId: mUserManager.getEnabledProfileIds(effectiveUserId)) {
-                mMandatoryBiometricsRequirementsSatisfied.put(profileUserId,
+
+            final int[] enabledProfileIds = mUserManager.getEnabledProfileIds(effectiveUserId);
+            if (enabledProfileIds != null) {
+                for (int profileUserId : enabledProfileIds) {
+                    mMandatoryBiometricsRequirementsSatisfied.put(profileUserId,
+                            Settings.Secure.getIntForUser(mContentResolver,
+                                    Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
+                                    DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS
+                                            ? 1 : 0,
+                                    effectiveUserId) != 0);
+                }
+            } else {
+                mMandatoryBiometricsRequirementsSatisfied.put(userId,
                         Settings.Secure.getIntForUser(mContentResolver,
                                 Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
                                 DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS ? 1 : 0,
@@ -482,10 +519,8 @@ public class BiometricService extends SystemService {
             }
         }
 
-        private void addBiometricListenersForMandatoryBiometrics(Context context) {
-            final FingerprintManager fingerprintManager = context.getSystemService(
-                    FingerprintManager.class);
-            final FaceManager faceManager = context.getSystemService(FaceManager.class);
+        private void addBiometricListenersForMandatoryBiometrics(Context context,
+                FingerprintManager fingerprintManager, FaceManager faceManager) {
             if (fingerprintManager != null) {
                 fingerprintManager.addAuthenticatorsRegisteredCallback(
                         new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
@@ -1169,7 +1204,9 @@ public class BiometricService extends SystemService {
          */
         public SettingObserver getSettingObserver(Context context, Handler handler,
                 List<EnabledOnKeyguardCallback> callbacks) {
-            return new SettingObserver(context, handler, callbacks);
+            return new SettingObserver(context, handler, callbacks, context.getSystemService(
+                    UserManager.class), context.getSystemService(FingerprintManager.class),
+                    context.getSystemService(FaceManager.class));
         }
 
         /**
