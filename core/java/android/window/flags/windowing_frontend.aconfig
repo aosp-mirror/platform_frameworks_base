@@ -76,6 +76,14 @@ flag {
 }
 
 flag {
+  name: "disable_opt_out_edge_to_edge"
+  namespace: "windowing_frontend"
+  description: "Deprecate and disable windowOptOutEdgeToEdgeEnforcement"
+  bug: "377864165"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "keyguard_going_away_timeout"
   namespace: "windowing_frontend"
   description: "Allow a maximum of 10 seconds with keyguardGoingAway=true before force-resetting"
