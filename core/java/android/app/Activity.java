@@ -30,6 +30,7 @@ import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 
 import static java.lang.Character.MIN_VALUE;
 
+import android.Manifest;
 import android.annotation.AnimRes;
 import android.annotation.CallSuper;
 import android.annotation.CallbackExecutor;
@@ -3191,6 +3192,16 @@ public class Activity extends ContextThemeWrapper
      */
     public int getMaxNumPictureInPictureActions() {
         return ActivityTaskManager.getMaxNumPictureInPictureActions(this);
+    }
+
+    private boolean isImplicitEnterPipProhibited() {
+        PackageManager pm = getPackageManager();
+        if (android.app.Flags.enableTvImplicitEnterPipRestriction()) {
+            return pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                    && pm.checkPermission(Manifest.permission.TV_IMPLICIT_ENTER_PIP,
+                    getPackageName()) == PackageManager.PERMISSION_DENIED;
+        }
+        return false;
     }
 
     /**
@@ -9192,6 +9203,8 @@ public class Activity extends ContextThemeWrapper
         }
         dispatchActivityPreResumed();
 
+        mCanEnterPictureInPicture = true;
+
         mFragments.execPendingActions();
 
         mLastNonConfigurationInstances = null;
@@ -9243,6 +9256,11 @@ public class Activity extends ContextThemeWrapper
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performPause:"
                     + mComponent.getClassName());
         }
+
+        if (isImplicitEnterPipProhibited()) {
+            mCanEnterPictureInPicture = false;
+        }
+
         dispatchActivityPrePaused();
         mDoReportFullyDrawn = false;
         mFragments.dispatchPause();
@@ -9265,6 +9283,10 @@ public class Activity extends ContextThemeWrapper
 
     final void performUserLeaving() {
         onUserInteraction();
+
+        if (isImplicitEnterPipProhibited()) {
+            mCanEnterPictureInPicture = false;
+        }
         onUserLeaveHint();
     }
 
