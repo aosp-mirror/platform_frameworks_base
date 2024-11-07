@@ -17,6 +17,7 @@
 package com.android.wm.shell.recents
 
 import android.app.ActivityManager
+import android.app.TaskInfo
 import android.graphics.Rect
 import android.os.Parcel
 import android.testing.AndroidTestingRunner
@@ -24,11 +25,10 @@ import android.window.IWindowContainerToken
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.shared.GroupedRecentTaskInfo
-import com.android.wm.shell.shared.GroupedRecentTaskInfo.CREATOR
-import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_FREEFORM
-import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_SINGLE
-import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_SPLIT
+import com.android.wm.shell.shared.GroupedTaskInfo
+import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FREEFORM
+import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN
+import com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50
 import com.google.common.truth.Correspondence
@@ -39,15 +39,15 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
 /**
- * Tests for [GroupedRecentTaskInfo]
+ * Tests for [GroupedTaskInfo]
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class GroupedRecentTaskInfoTest : ShellTestCase() {
+class GroupedTaskInfoTest : ShellTestCase() {
 
     @Test
     fun testSingleTask_hasCorrectType() {
-        assertThat(singleTaskGroupInfo().type).isEqualTo(TYPE_SINGLE)
+        assertThat(singleTaskGroupInfo().type).isEqualTo(TYPE_FULLSCREEN)
     }
 
     @Test
@@ -117,8 +117,9 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         recentTaskInfo.writeToParcel(parcel, 0)
         parcel.setDataPosition(0)
         // Read the object back from the parcel
-        val recentTaskInfoParcel = CREATOR.createFromParcel(parcel)
-        assertThat(recentTaskInfoParcel.type).isEqualTo(TYPE_SINGLE)
+        val recentTaskInfoParcel: GroupedTaskInfo =
+            GroupedTaskInfo.CREATOR.createFromParcel(parcel)
+        assertThat(recentTaskInfoParcel.type).isEqualTo(TYPE_FULLSCREEN)
         assertThat(recentTaskInfoParcel.taskInfo1.taskId).isEqualTo(1)
         assertThat(recentTaskInfoParcel.taskInfo2).isNull()
     }
@@ -130,7 +131,8 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         recentTaskInfo.writeToParcel(parcel, 0)
         parcel.setDataPosition(0)
         // Read the object back from the parcel
-        val recentTaskInfoParcel = CREATOR.createFromParcel(parcel)
+        val recentTaskInfoParcel: GroupedTaskInfo =
+            GroupedTaskInfo.CREATOR.createFromParcel(parcel)
         assertThat(recentTaskInfoParcel.type).isEqualTo(TYPE_SPLIT)
         assertThat(recentTaskInfoParcel.taskInfo1.taskId).isEqualTo(1)
         assertThat(recentTaskInfoParcel.taskInfo2).isNotNull()
@@ -146,11 +148,12 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         recentTaskInfo.writeToParcel(parcel, 0)
         parcel.setDataPosition(0)
         // Read the object back from the parcel
-        val recentTaskInfoParcel = CREATOR.createFromParcel(parcel)
+        val recentTaskInfoParcel: GroupedTaskInfo =
+            GroupedTaskInfo.CREATOR.createFromParcel(parcel)
         assertThat(recentTaskInfoParcel.type).isEqualTo(TYPE_FREEFORM)
         assertThat(recentTaskInfoParcel.taskInfoList).hasSize(3)
         // Only compare task ids
-        val taskIdComparator = Correspondence.transforming<ActivityManager.RecentTaskInfo, Int>(
+        val taskIdComparator = Correspondence.transforming<TaskInfo, Int>(
             { it?.taskId }, "has taskId of"
         )
         assertThat(recentTaskInfoParcel.taskInfoList).comparingElementsUsing(taskIdComparator)
@@ -167,7 +170,8 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         parcel.setDataPosition(0)
 
         // Read the object back from the parcel
-        val recentTaskInfoParcel = CREATOR.createFromParcel(parcel)
+        val recentTaskInfoParcel: GroupedTaskInfo =
+            GroupedTaskInfo.CREATOR.createFromParcel(parcel)
         assertThat(recentTaskInfoParcel.type).isEqualTo(TYPE_FREEFORM)
         assertThat(recentTaskInfoParcel.minimizedTaskIds).isEqualTo(arrayOf(2).toIntArray())
     }
@@ -177,24 +181,24 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         token = WindowContainerToken(mock(IWindowContainerToken::class.java))
     }
 
-    private fun singleTaskGroupInfo(): GroupedRecentTaskInfo {
+    private fun singleTaskGroupInfo(): GroupedTaskInfo {
         val task = createTaskInfo(id = 1)
-        return GroupedRecentTaskInfo.forSingleTask(task)
+        return GroupedTaskInfo.forFullscreenTasks(task)
     }
 
-    private fun splitTasksGroupInfo(): GroupedRecentTaskInfo {
+    private fun splitTasksGroupInfo(): GroupedTaskInfo {
         val task1 = createTaskInfo(id = 1)
         val task2 = createTaskInfo(id = 2)
         val splitBounds = SplitBounds(Rect(), Rect(), 1, 2, SNAP_TO_2_50_50)
-        return GroupedRecentTaskInfo.forSplitTasks(task1, task2, splitBounds)
+        return GroupedTaskInfo.forSplitTasks(task1, task2, splitBounds)
     }
 
     private fun freeformTasksGroupInfo(
         freeformTaskIds: Array<Int>,
         minimizedTaskIds: Array<Int> = emptyArray()
-    ): GroupedRecentTaskInfo {
-        return GroupedRecentTaskInfo.forFreeformTasks(
-            freeformTaskIds.map { createTaskInfo(it) }.toTypedArray(),
+    ): GroupedTaskInfo {
+        return GroupedTaskInfo.forFreeformTasks(
+            freeformTaskIds.map { createTaskInfo(it) }.toList(),
             minimizedTaskIds.toSet())
     }
 }

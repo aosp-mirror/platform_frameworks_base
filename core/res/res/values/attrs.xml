@@ -4418,6 +4418,10 @@
     <declare-styleable name="InputMethod_Subtype">
         <!-- The name of the subtype. -->
         <attr name="label" />
+        <!-- The layout label of the subtype.
+             {@link android.view.inputmethod.InputMethodSubtype#getLayoutDisplayName} returns the
+             value specified in this attribute. -->
+        <attr name="layoutLabel" format="reference" />
         <!-- The icon of the subtype. -->
         <attr name="icon" />
         <!-- The locale of the subtype. This string should be a locale (for example en_US and fr_FR)

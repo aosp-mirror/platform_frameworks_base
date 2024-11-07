@@ -68,6 +68,7 @@ import java.util.Set;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class AppCompatOverridesService {
     private static final String TAG = "AppCompatOverridesService";
 

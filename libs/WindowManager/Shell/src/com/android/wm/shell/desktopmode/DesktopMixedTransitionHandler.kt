@@ -205,6 +205,11 @@ class DesktopMixedTransitionHandler(
         finishTransaction: SurfaceControl.Transaction,
         finishCallback: TransitionFinishCallback,
     ): Boolean {
+        val launchChange = findDesktopTaskChange(info, pending.launchingTask)
+        if (launchChange == null) {
+            logV("No launch Change, returning")
+            return false
+        }
         // Check if there's also an immersive change during this launch.
         val immersiveExitChange = pending.exitingImmersiveTask?.let { exitingTask ->
             findDesktopTaskChange(info, exitingTask)
@@ -212,8 +217,6 @@ class DesktopMixedTransitionHandler(
         val minimizeChange = pending.minimizingTask?.let { minimizingTask ->
             findDesktopTaskChange(info, minimizingTask)
         }
-        val launchChange = findDesktopTaskChange(info, pending.launchingTask)
-            ?: error("Should have pending launching task change")
 
         var subAnimationCount = -1
         var combinedWct: WindowContainerTransaction? = null

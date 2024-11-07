@@ -118,7 +118,7 @@ public class PipScheduler {
     public void removePipAfterAnimation() {
         SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         PipAlphaAnimator animator = new PipAlphaAnimator(mContext,
-                mPipTransitionState.mPinnedTaskLeash, tx, PipAlphaAnimator.FADE_OUT);
+                mPipTransitionState.getPinnedTaskLeash(), tx, PipAlphaAnimator.FADE_OUT);
         animator.setAnimationEndCallback(this::scheduleRemovePipImmediately);
         animator.start();
     }
@@ -203,7 +203,7 @@ public class PipScheduler {
                     "%s: Attempted to user resize PIP to empty bounds, aborting.", TAG);
             return;
         }
-        SurfaceControl leash = mPipTransitionState.mPinnedTaskLeash;
+        SurfaceControl leash = mPipTransitionState.getPinnedTaskLeash();
         final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
 
         Matrix transformTensor = new Matrix();

@@ -27,6 +27,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * This class contains all the possible override allowed states.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class OverrideAllowedState implements Parcelable {
     @IntDef({
             ALLOWED,

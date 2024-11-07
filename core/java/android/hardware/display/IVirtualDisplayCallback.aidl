@@ -38,4 +38,9 @@ oneway interface IVirtualDisplayCallback {
      * of the application to release() the virtual display.
      */
     void onStopped();
+
+    /**
+     * Called when the virtual display's requested brightness has changed.
+     */
+    void onRequestedBrightnessChanged(float brightness);
 }

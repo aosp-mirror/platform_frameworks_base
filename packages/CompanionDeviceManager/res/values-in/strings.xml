@@ -40,7 +40,7 @@
     <string name="summary_generic" msgid="1761976003668044801">"Aplikasi ini akan dapat menyinkronkan info, seperti nama penelepon, antara ponsel dan perangkat yang dipilih"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Izinkan"</string>
     <string name="consent_no" msgid="2640796915611404382">"Jangan izinkan"</string>
-    <string name="consent_cancel" msgid="5655005528379285841">"Batalkan"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Batal"</string>
     <string name="consent_back" msgid="2560683030046918882">"Kembali"</string>
     <string name="permission_expand" msgid="893185038020887411">"Luaskan <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_collapse" msgid="3320833884220844084">"Ciutkan <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>

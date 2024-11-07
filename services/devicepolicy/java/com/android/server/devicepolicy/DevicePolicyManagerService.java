@@ -3480,7 +3480,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @GuardedBy("getLockObject()")
     private boolean maybeMigrateSuspendedPackagesLocked(String backupId) {
         Slog.i(LOG_TAG, "Migrating suspended packages to policy engine");
-        if (!Flags.unmanagedModeMigration()) {
+        if (!Flags.suspendPackagesCoexistence()) {
             return false;
         }
         if (mOwners.isSuspendedPackagesMigrated()) {
@@ -3548,6 +3548,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         Slog.i(LOG_TAG, "Marking ResetPasswordWithToken migration complete");
         mOwners.markResetPasswordWithTokenMigrated();
+        return true;
+    }
+
+
+
+    @GuardedBy("getLockObject()")
+    private boolean maybeMigrateMemoryTaggingLocked(String backupId) {
+        if (!Flags.setMtePolicyCoexistence()) {
+            Slog.i(LOG_TAG, "Memory Tagging not migrated because coexistence "
+                    + "support is disabled.");
+            return false;
+        }
+        if (mOwners.isMemoryTaggingMigrated()) {
+            // TODO: Remove log after Flags.setMtePolicyCoexistence full rollout.
+            Slog.v(LOG_TAG, "Memory Tagging was previously migrated to policy engine.");
+            return false;
+        }
+
+        Slog.i(LOG_TAG, "Migrating Memory Tagging to policy engine");
+
+        // Create backup if none exists
+        mDevicePolicyEngine.createBackup(backupId);
+        try {
+            iterateThroughDpcAdminsLocked((admin, enforcingAdmin) -> {
+                if (admin.mtePolicy != 0) {
+                    Slog.i(LOG_TAG, "Setting Memory Tagging policy");
+                    mDevicePolicyEngine.setGlobalPolicy(
+                            PolicyDefinition.MEMORY_TAGGING,
+                            enforcingAdmin,
+                            new IntegerPolicyValue(admin.mtePolicy),
+                            true /* No need to re-set system properties */);
+                }
+            });
+        } catch (Exception e) {
+            Slog.wtf(LOG_TAG,
+                    "Failed to migrate Memory Tagging to policy engine", e);
+        }
+
+        Slog.i(LOG_TAG, "Marking Memory Tagging migration complete");
+        mOwners.markMemoryTaggingMigrated();
         return true;
     }
 
@@ -13052,7 +13092,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public String[] setPackagesSuspended(ComponentName who, String callerPackage,
             String[] packageNames, boolean suspended) {
-        if (!Flags.unmanagedModeMigration()) {
+        if (!Flags.suspendPackagesCoexistence()) {
             return setPackagesSuspendedPreCoexistence(who, callerPackage, packageNames, suspended);
         }
 
@@ -13142,7 +13182,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isPackageSuspended(ComponentName who, String callerPackage, String packageName) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
 
-        if (Flags.unmanagedModeMigration()) {
+        if (Flags.suspendPackagesCoexistence()) {
             enforcePermission(
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
                     caller.getPackageName(),
@@ -23332,49 +23372,83 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         }
 
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller)
-                        || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        if (Flags.setMtePolicyCoexistence()) {
+            enforcePermission(MANAGE_DEVICE_POLICY_MTE, caller.getPackageName(),
+                    UserHandle.USER_ALL);
+        } else {
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller)
+                    || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        }
+
         synchronized (getLockObject()) {
-            ActiveAdmin admin =
-                        getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
-
-            if (admin != null) {
-                final String memtagProperty = "arm64.memtag.bootctl";
-                if (flags == DevicePolicyManager.MTE_ENABLED) {
-                    mInjector.systemPropertiesSet(memtagProperty, "memtag");
-                } else if (flags == DevicePolicyManager.MTE_DISABLED) {
-                    mInjector.systemPropertiesSet(memtagProperty, "memtag-off");
-                } else if (flags == DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
-                    if (admin.mtePolicy != DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
-                        mInjector.systemPropertiesSet(memtagProperty, "default");
-                    }
+            if (Flags.setMtePolicyCoexistence()) {
+                final EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(null,
+                        MANAGE_DEVICE_POLICY_MTE, callerPackageName, caller.getUserId());
+                if (flags != DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+                    mDevicePolicyEngine.setGlobalPolicy(
+                            PolicyDefinition.MEMORY_TAGGING,
+                            admin,
+                            new IntegerPolicyValue(flags));
+                } else {
+                    mDevicePolicyEngine.removeGlobalPolicy(
+                            PolicyDefinition.MEMORY_TAGGING,
+                            admin);
                 }
-                admin.mtePolicy = flags;
-                saveSettingsLocked(caller.getUserId());
-
-                DevicePolicyEventLogger.createEvent(DevicePolicyEnums.SET_MTE_POLICY)
-                        .setInt(flags)
-                        .setAdmin(caller.getPackageName())
-                        .write();
+            } else {
+                ActiveAdmin admin =
+                        getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+                if (admin != null) {
+                    final String memtagProperty = "arm64.memtag.bootctl";
+                    if (flags == DevicePolicyManager.MTE_ENABLED) {
+                        mInjector.systemPropertiesSet(memtagProperty, "memtag");
+                    } else if (flags == DevicePolicyManager.MTE_DISABLED) {
+                        mInjector.systemPropertiesSet(memtagProperty, "memtag-off");
+                    } else if (flags == DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+                        if (admin.mtePolicy != DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+                            mInjector.systemPropertiesSet(memtagProperty, "default");
+                        }
+                    }
+                    admin.mtePolicy = flags;
+                    saveSettingsLocked(caller.getUserId());
+                }
             }
+
+            DevicePolicyEventLogger.createEvent(DevicePolicyEnums.SET_MTE_POLICY)
+                    .setInt(flags)
+                    .setAdmin(caller.getPackageName())
+                    .write();
         }
     }
 
     @Override
     public int getMtePolicy(String callerPackageName) {
         final CallerIdentity caller = getCallerIdentity(callerPackageName);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller)
-                        || isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        || isSystemUid(caller));
+        if (Flags.setMtePolicyCoexistence()) {
+            enforcePermission(MANAGE_DEVICE_POLICY_MTE, caller.getPackageName(),
+                    UserHandle.USER_ALL);
+        } else {
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller)
+                    || isProfileOwnerOfOrganizationOwnedDevice(caller)
+                    || isSystemUid(caller));
+        }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin =
+            if (Flags.setMtePolicyCoexistence()) {
+                final EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(null,
+                        MANAGE_DEVICE_POLICY_MTE, callerPackageName, caller.getUserId());
+                final Integer policyFromAdmin = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
+                        PolicyDefinition.MEMORY_TAGGING, admin);
+                return (policyFromAdmin != null ? policyFromAdmin
+                        : DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY);
+            } else {
+                ActiveAdmin admin =
                         getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
-            return admin != null
-                    ? admin.mtePolicy
-                    : DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
+                return admin != null
+                        ? admin.mtePolicy
+                        : DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
+            }
         }
     }
 
@@ -23721,19 +23795,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         maybeMigrateSecurityLoggingPolicyLocked();
         // ID format: <sdk-int>.<auto_increment_id>.<descriptions>'
         String unmanagedBackupId = "35.1.unmanaged-mode";
-        boolean unmanagedMigrated = false;
-        unmanagedMigrated =
-                unmanagedMigrated | maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
-        unmanagedMigrated =
-                unmanagedMigrated | maybeMigrateSuspendedPackagesLocked(unmanagedBackupId);
+        boolean unmanagedMigrated = maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
         if (unmanagedMigrated) {
             Slogf.i(LOG_TAG, "Backup made: " + unmanagedBackupId);
         }
 
         String supervisionBackupId = "36.2.supervision-support";
         boolean supervisionMigrated = maybeMigrateResetPasswordTokenLocked(supervisionBackupId);
+        supervisionMigrated |= maybeMigrateSuspendedPackagesLocked(supervisionBackupId);
         if (supervisionMigrated) {
             Slogf.i(LOG_TAG, "Backup made: " + supervisionBackupId);
+        }
+
+        String memoryTaggingBackupId = "36.3.memory-tagging";
+        boolean memoryTaggingMigrated = maybeMigrateMemoryTaggingLocked(memoryTaggingBackupId);
+        if (memoryTaggingMigrated) {
+            Slogf.i(LOG_TAG, "Backup made: " + memoryTaggingBackupId);
         }
 
         // Additional migration steps should repeat the pattern above with a new backupId.

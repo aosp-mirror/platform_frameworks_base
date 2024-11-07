@@ -1,4 +1,3 @@
-android.car.Car
 android.content.AsyncTaskLoader$LoadTask
 android.media.MediaCodecInfo$CodecCapabilities$FeatureList
 android.net.ConnectivityThread$Singleton

@@ -118,9 +118,7 @@ constructor(
                 getUserForHandlingNotesTaking(entryPoint)
             }
         activityContext.startActivityAsUser(
-            Intent(Intent.ACTION_MANAGE_DEFAULT_APP).apply {
-                putExtra(Intent.EXTRA_ROLE_NAME, ROLE_NOTES)
-            },
+            createNotesRoleHolderSettingsIntent(),
             user
         )
     }
@@ -399,6 +397,10 @@ constructor(
          * @see com.android.launcher3.icons.IconCache.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
          */
         const val EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE = "extra_shortcut_badge_override_package"
+
+        /** Returns notes role holder settings intent. */
+        fun createNotesRoleHolderSettingsIntent() = Intent(Intent.ACTION_MANAGE_DEFAULT_APP).
+            putExtra(Intent.EXTRA_ROLE_NAME, ROLE_NOTES)
     }
 }
 

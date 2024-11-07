@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer
+#pragma once
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
-import javax.inject.Inject
+#include <SkBitmap.h>
+#include <SkColorSpace.h>
+#include <SkColorType.h>
+#include <cutils/compiler.h>
+#include <hwui/Bitmap.h>
 
-/** Flags related to media tap-to-transfer. */
-@SysUISingleton
-class MediaTttFlags @Inject constructor(private val featureFlags: FeatureFlags) {
-    /** */
-    fun isMediaTttEnabled(): Boolean = featureFlags.isEnabled(Flags.MEDIA_TAP_TO_TRANSFER)
-}
+namespace android {
+namespace uirenderer {
+
+ANDROID_API void logBitmapDecode(const SkImageInfo& info, bool hasGainmap);
+
+ANDROID_API void logBitmapDecode(const Bitmap& bitmap);
+
+}  // namespace uirenderer
+}  // namespace android

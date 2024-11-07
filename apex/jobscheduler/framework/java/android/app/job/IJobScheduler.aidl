@@ -39,6 +39,7 @@ interface IJobScheduler {
     ParceledListSlice<JobInfo> getAllPendingJobsInNamespace(String namespace);
     JobInfo getPendingJob(String namespace, int jobId);
     int getPendingJobReason(String namespace, int jobId);
+    int[] getPendingJobReasons(String namespace, int jobId);
     boolean canRunUserInitiatedJobs(String packageName);
     boolean hasRunUserInitiatedJobsPermission(String packageName, int userId);
     List<JobInfo> getStartedJobs();

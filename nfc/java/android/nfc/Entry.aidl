@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.nfc;
 
-package com.android.wm.shell.shared;
-
-parcelable GroupedRecentTaskInfo;
+parcelable Entry;

@@ -26,6 +26,16 @@ flag {
 }
 
 flag {
+   name: "user_encrypted_source"
+   namespace: "systemui"
+   description: "Get rid of the local cache and rely on UserManager.isUserUnlocked directly to determine whether user CE storage is encrypted."
+   bug: "333656491"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "modes_ui_dialog_paging"
    namespace: "systemui"
    description: "Add pagination to the Modes dialog in quick settings."
@@ -1575,6 +1585,13 @@ flag {
    namespace: "systemui"
    description: "Allow override the conditions to suppress the clipboard overlay"
    bug: "358473717"
+}
+
+flag {
+   name: "show_clipboard_indication"
+   namespace: "systemui"
+   description: "Show indication text under the clipboard overlay when copied something"
+   bug: "361199935"
 }
 
 flag {

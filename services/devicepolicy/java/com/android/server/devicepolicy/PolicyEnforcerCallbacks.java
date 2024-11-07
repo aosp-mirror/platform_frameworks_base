@@ -47,6 +47,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.permission.AdminPermissionControlParams;
 import android.permission.PermissionControllerManager;
@@ -210,6 +211,7 @@ final class PolicyEnforcerCallbacks {
     private static class BlockingCallback {
         private final CountDownLatch mLatch = new CountDownLatch(1);
         private final AtomicReference<Boolean> mValue = new AtomicReference<>();
+
         public void trigger(Boolean value) {
             mValue.set(value);
             mLatch.countDown();
@@ -434,5 +436,44 @@ final class PolicyEnforcerCallbacks {
             DevicePolicyManagerService.updateUsbDataSignal(context, enabled);
             return AndroidFuture.completedFuture(true);
         });
+    }
+
+    static CompletableFuture<Boolean> setMtePolicy(
+            @Nullable Integer mtePolicy, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        if (mtePolicy == null) {
+            mtePolicy = DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
+        }
+        final Set<Integer> allowedModes =
+                Set.of(
+                        DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY,
+                        DevicePolicyManager.MTE_DISABLED,
+                        DevicePolicyManager.MTE_ENABLED);
+        if (!allowedModes.contains(mtePolicy)) {
+            Slog.wtf(LOG_TAG, "MTE policy is not a known one: " + mtePolicy);
+            return AndroidFuture.completedFuture(false);
+        }
+
+        final String mteDpmSystemProperty =
+                "ro.arm64.memtag.bootctl_device_policy_manager";
+        final String mteSettingsSystemProperty =
+                "ro.arm64.memtag.bootctl_settings_toggle";
+        final String mteControlProperty = "arm64.memtag.bootctl";
+
+        final boolean isAvailable = SystemProperties.getBoolean(mteDpmSystemProperty,
+                SystemProperties.getBoolean(mteSettingsSystemProperty, false));
+        if (!isAvailable) {
+            return AndroidFuture.completedFuture(false);
+        }
+
+        if (mtePolicy == DevicePolicyManager.MTE_ENABLED) {
+            SystemProperties.set(mteControlProperty, "memtag");
+        } else if (mtePolicy == DevicePolicyManager.MTE_DISABLED) {
+            SystemProperties.set(mteControlProperty, "memtag-off");
+        } else if (mtePolicy == DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+            SystemProperties.set(mteControlProperty, "default");
+        }
+
+        return AndroidFuture.completedFuture(true);
     }
 }

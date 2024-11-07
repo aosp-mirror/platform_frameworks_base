@@ -38,7 +38,6 @@ class DefaultClockProvider(
     val ctx: Context,
     val layoutInflater: LayoutInflater,
     val resources: Resources,
-    private val hasStepClockAnimation: Boolean = false,
     private val migratedClocks: Boolean = false,
     private val isClockReactiveVariantsEnabled: Boolean = false,
 ) : ClockProvider {
@@ -75,7 +74,6 @@ class DefaultClockProvider(
                 layoutInflater,
                 resources,
                 settings,
-                hasStepClockAnimation,
                 migratedClocks,
                 messageBuffers,
             )
