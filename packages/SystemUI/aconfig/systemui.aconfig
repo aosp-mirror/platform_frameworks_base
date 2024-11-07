@@ -414,6 +414,17 @@ flag {
 }
 
 flag {
+    name: "status_bar_auto_start_screen_record_chip"
+    namespace: "systemui"
+    description: "When screen recording, use the specified start time to update the screen record "
+        "chip state instead of waiting for an official 'recording started' signal"
+    bug: "366448907"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
     description: "Use repositories as the source of truth for call notifications shown as a chip in"
