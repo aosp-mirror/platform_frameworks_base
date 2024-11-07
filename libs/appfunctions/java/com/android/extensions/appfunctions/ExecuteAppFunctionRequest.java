@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.appfunctions.sidecar;
+package com.android.extensions.appfunctions;
 
 import android.annotation.NonNull;
 import android.app.appsearch.GenericDocument;
@@ -91,8 +91,8 @@ public final class ExecuteAppFunctionRequest {
      * Returns the function parameters. The key is the parameter name, and the value is the
      * parameter value.
      *
-     * <p>The bundle may have missing parameters. Developers are advised to implement defensive
-     * handling measures.
+     * <p>The {@link GenericDocument} may have missing parameters. Developers are advised to
+     * implement defensive handling measures.
      *
      * <p>Similar to {@link #getFunctionIdentifier()} the parameters required by a function can be
      * obtained by querying AppSearch for the corresponding {@code AppFunctionStaticMetadata}. This

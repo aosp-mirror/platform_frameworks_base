@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.google.android.appfunctions.sidecar.tests
+package com.android.extensions.appfunctions.tests
 
 import android.app.appfunctions.ExecuteAppFunctionRequest
 import android.app.appfunctions.ExecuteAppFunctionResponse
 import android.app.appsearch.GenericDocument
 import android.os.Bundle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.appfunctions.sidecar.SidecarConverter
+import com.android.extensions.appfunctions.SidecarConverter
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,7 +60,7 @@ class SidecarConverterTest {
                 .setPropertyLong("testLong", 23)
                 .build()
         val sidecarRequest =
-            com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest.Builder(
+            com.android.extensions.appfunctions.ExecuteAppFunctionRequest.Builder(
                 "targetPkg",
                 "targetFunctionId"
             )
@@ -129,8 +129,11 @@ class SidecarConverterTest {
             GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "")
                 .setPropertyBoolean(ExecuteAppFunctionResponse.PROPERTY_RETURN_VALUE, true)
                 .build()
-        val sidecarResponse = com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse
-            .newSuccess(resultGd, null)
+        val sidecarResponse =
+            com.android.extensions.appfunctions.ExecuteAppFunctionResponse.newSuccess(
+                resultGd,
+                null
+            )
 
         val platformResponse = SidecarConverter.getPlatformExecuteAppFunctionResponse(
             sidecarResponse
@@ -151,7 +154,7 @@ class SidecarConverterTest {
     fun getPlatformExecuteAppFunctionResponse_errorResponse_sameContents() {
         val emptyGd = GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "").build()
         val sidecarResponse =
-            com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse.newFailure(
+            com.android.extensions.appfunctions.ExecuteAppFunctionResponse.newFailure(
                 ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
                 null,
                 null
