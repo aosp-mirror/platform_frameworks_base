@@ -49,6 +49,8 @@ import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_CONTACTS;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_STARRED;
 import static android.app.NotificationManager.Policy.STATE_PRIORITY_CHANNELS_BLOCKED;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
@@ -84,8 +86,6 @@ import static com.android.os.dnd.DNDProtoEnums.PEOPLE_STARRED;
 import static com.android.os.dnd.DNDProtoEnums.ROOT_CONFIG;
 import static com.android.os.dnd.DNDProtoEnums.STATE_ALLOW;
 import static com.android.os.dnd.DNDProtoEnums.STATE_DISALLOW;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static com.android.server.notification.ZenModeEventLogger.ACTIVE_RULE_TYPE_MANUAL;
 import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
@@ -102,6 +102,7 @@ import static junit.framework.TestCase.fail;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -200,6 +201,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.xmlpull.v1.XmlPullParserException;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -218,9 +222,6 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
@@ -5332,6 +5333,22 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mDeviceEffectsApplier).apply(eq(effects), eq(ORIGIN_APP));
+        assertTrue(mZenModeHelper.hasDeviceEffectsApplier());
+    }
+
+    @Test
+    public void testHasDeviceEffectsApplier_returnsFalseIfNotSet() {
+        assertFalse(mZenModeHelper.hasDeviceEffectsApplier());
+    }
+
+    @Test
+    @EnableFlags(FLAG_MODES_API)
+    public void testSettingDeviceEffects_throwsExceptionIfAlreadySet() {
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier));
     }
 
     @Test

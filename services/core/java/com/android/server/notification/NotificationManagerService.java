@@ -82,6 +82,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BA
 import static android.app.NotificationManager.zenModeFromInterruptionFilter;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
@@ -162,8 +164,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static com.android.server.notification.Flags.expireBitmaps;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_ANIM_BUFFER;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
@@ -3069,7 +3069,7 @@ public class NotificationManagerService extends SystemService {
             migrateDefaultNAS();
             maybeShowInitialReviewPermissionsNotification();
 
-            if (android.app.Flags.modesApi()) {
+            if (android.app.Flags.modesApi() && !mZenModeHelper.hasDeviceEffectsApplier()) {
                 // Cannot be done earlier, as some services aren't ready until this point.
                 mZenModeHelper.setDeviceEffectsApplier(
                         new DefaultDeviceEffectsApplier(getContext()));

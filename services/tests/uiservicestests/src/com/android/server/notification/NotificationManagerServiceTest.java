@@ -43,8 +43,8 @@ import static android.app.Notification.FLAG_PROMOTED_ONGOING;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.VISIBILITY_PRIVATE;
-import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.DEFAULT_CHANNEL_ID;
+import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.PROMOTIONS_ID;
 import static android.app.NotificationChannel.RECS_ID;
 import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
@@ -78,7 +78,6 @@ import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -336,11 +335,11 @@ import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import com.google.android.collect.Lists;
-import com.google.common.collect.ImmutableList;
-
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
+import com.google.android.collect.Lists;
+import com.google.common.collect.ImmutableList;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -360,13 +359,15 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -374,9 +375,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -490,7 +488,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private final NotificationChannel mParentChannel =
             new NotificationChannel(PARENT_CHANNEL_ID, "parentName", IMPORTANCE_DEFAULT);
     private final NotificationChannel mConversationChannel =
-            new NotificationChannel(CONVERSATION_CHANNEL_ID, "conversationName", IMPORTANCE_DEFAULT);
+            new NotificationChannel(
+                    CONVERSATION_CHANNEL_ID, "conversationName", IMPORTANCE_DEFAULT);
 
     private static final String PARENT_CHANNEL_ID = "parentChannelId";
     private static final String CONVERSATION_CHANNEL_ID = "conversationChannelId";
@@ -4262,8 +4261,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     new NotificationChannel("foo", "foo", IMPORTANCE_HIGH));
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
-        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, "testTvExtenderChannelOverride_onTv", 0,
-                generateNotificationRecord(null, tv).getNotification(), mUserId);
+        mBinderService.enqueueNotificationWithTag(
+                mPkg,
+                mPkg,
+                "testTvExtenderChannelOverride_onTv",
+                0,
+                generateNotificationRecord(null, tv).getNotification(),
+                mUserId);
         verify(mPreferencesHelper, times(1)).getConversationNotificationChannel(
                 anyString(), anyInt(), eq("foo"), eq(null), anyBoolean(), anyBoolean());
     }
@@ -4277,8 +4281,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel);
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
-        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, "testTvExtenderChannelOverride_notOnTv",
-                0, generateNotificationRecord(null, tv).getNotification(), mUserId);
+        mBinderService.enqueueNotificationWithTag(
+                mPkg,
+                mPkg,
+                "testTvExtenderChannelOverride_notOnTv",
+                0,
+                generateNotificationRecord(null, tv).getNotification(),
+                mUserId);
         verify(mPreferencesHelper, times(1)).getConversationNotificationChannel(
                 anyString(), anyInt(), eq(mTestNotificationChannel.getId()), eq(null),
                 anyBoolean(), anyBoolean());
@@ -7653,9 +7662,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.MessagingStyle("").addMessage(message2));
-        NotificationRecord recordB = new NotificationRecord(mContext, new StatusBarNotification(mPkg,
-                mPkg, 0, "tag", mUid, 0, nbB.build(), UserHandle.getUserHandleForUid(mUid), null, 0),
-                c);
+        NotificationRecord recordB =
+                new NotificationRecord(
+                        mContext,
+                        new StatusBarNotification(
+                                mPkg,
+                                mPkg,
+                                0,
+                                "tag",
+                                mUid,
+                                0,
+                                nbB.build(),
+                                UserHandle.getUserHandleForUid(mUid),
+                                null,
+                                0),
+                        c);
 
         // Update means we drop access to first
         reset(mUgmInternal);
@@ -15356,8 +15377,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
             StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
                     i, null, false).getSbn();
-            mBinderService.enqueueNotificationWithTag(mPkg, mPkg, "testCannotPostNonUijWhenOverLimit",
-                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+            mBinderService.enqueueNotificationWithTag(
+                    mPkg,
+                    mPkg,
+                    "testCannotPostNonUijWhenOverLimit",
+                    sbn.getId(),
+                    sbn.getNotification(),
+                    sbn.getUserId());
             waitForIdle();
         }
 
@@ -16087,6 +16113,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         initNMS(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mInternalService.setDeviceEffectsApplier(mock(DeviceEffectsApplier.class));
+
+        mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START, mMainLooper);
         // No exception!
     }
 
