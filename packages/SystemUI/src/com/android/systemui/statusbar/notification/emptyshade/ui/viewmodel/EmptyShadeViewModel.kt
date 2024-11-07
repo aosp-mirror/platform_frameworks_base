@@ -26,7 +26,6 @@ import com.android.systemui.shared.notifications.domain.interactor.NotificationS
 import com.android.systemui.statusbar.notification.NotificationActivityStarter.SettingsIntent
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterMessageViewModel
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.util.kotlin.FlowDumperImpl
@@ -35,7 +34,6 @@ import dagger.assisted.AssistedInject
 import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
@@ -57,9 +55,7 @@ constructor(
     dumpManager: DumpManager,
 ) : FlowDumperImpl(dumpManager) {
     val areNotificationsHiddenInShade: Flow<Boolean> by lazy {
-        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
-            flowOf(false)
-        } else if (ModesEmptyShadeFix.isEnabled) {
+        if (ModesEmptyShadeFix.isEnabled) {
             zenModeInteractor.areNotificationsHiddenInShade
                 .dumpWhileCollecting("areNotificationsHiddenInShade")
                 .flowOn(bgDispatcher)
@@ -70,15 +66,10 @@ constructor(
         }
     }
 
-    val hasFilteredOutSeenNotifications: StateFlow<Boolean> by lazy {
-        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
-            MutableStateFlow(false)
-        } else {
-            seenNotificationsInteractor.hasFilteredOutSeenNotifications.dumpValue(
-                "hasFilteredOutSeenNotifications"
-            )
-        }
-    }
+    val hasFilteredOutSeenNotifications: StateFlow<Boolean> =
+        seenNotificationsInteractor.hasFilteredOutSeenNotifications.dumpValue(
+            "hasFilteredOutSeenNotifications"
+        )
 
     val text: Flow<String> by lazy {
         if (ModesEmptyShadeFix.isUnexpectedlyInLegacyMode()) {

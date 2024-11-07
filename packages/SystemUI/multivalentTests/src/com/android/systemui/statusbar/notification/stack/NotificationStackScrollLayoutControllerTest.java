@@ -25,14 +25,10 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -45,7 +41,6 @@ import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewTreeObserver;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -57,15 +52,12 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
-import com.android.systemui.keyguard.shared.model.KeyguardState;
-import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
@@ -78,23 +70,18 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
-import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
-import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -106,11 +93,8 @@ import com.android.systemui.statusbar.notification.stack.ui.viewbinder.Notificat
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallpapers.domain.interactor.WallpaperInteractor;
@@ -145,16 +129,13 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private Provider<IStatusBarService> mStatusBarService;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private TunerService mTunerService;
-    @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private DynamicPrivacyController mDynamicPrivacyController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
-    @Mock private ZenModeController mZenModeController;
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private SysuiStatusBarStateController mSysuiStatusBarStateController;
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private PowerInteractor mPowerInteractor;
-    @Mock private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Mock private WallpaperInteractor mWallpaperInteractor;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private MetricsLogger mMetricsLogger;
@@ -164,12 +145,10 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private GroupExpansionManager mGroupExpansionManager;
-    @Mock private SectionHeaderController mSilentHeaderController;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NotifCollection mNotifCollection;
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
-    @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private VisibilityLocationProviderDelegator mVisibilityLocationProviderDelegator;
     @Mock private ShadeController mShadeController;
     @Mock private Provider<WindowRootView> mWindowRootView;
@@ -192,9 +171,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
-
-    private final SeenNotificationsInteractor mSeenNotificationsInteractor =
-            mKosmos.getSeenNotificationsInteractor();
 
     private NotificationStackScrollLayoutController mController;
 
@@ -276,114 +252,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
         mController.mConfigurationListener.onDensityOrFontScaleChanged();
         verify(mNotificationStackScrollLayout).reinflateViews();
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_notificationsVisible_zenHiding() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
-        initController(/* viewIsAttached= */ true);
-
-        setupShowEmptyShadeViewState(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* notifVisibleInShade= */ true);
-
-        setupShowEmptyShadeViewState(false);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ false,
-                /* notifVisibleInShade= */ true);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_notificationsHidden_zenNotHiding() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        initController(/* viewIsAttached= */ true);
-
-        setupShowEmptyShadeViewState(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* notifVisibleInShade= */ false);
-
-        setupShowEmptyShadeViewState(false);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ false,
-                /* notifVisibleInShade= */ false);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_splitShadeMode_alwaysShowEmptyView() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        initController(/* viewIsAttached= */ true);
-
-        verify(mSysuiStatusBarStateController).addCallback(
-                mStateListenerArgumentCaptor.capture(), anyInt());
-        StatusBarStateController.StateListener stateListener =
-                mStateListenerArgumentCaptor.getValue();
-        stateListener.onStateChanged(SHADE);
-        mController.getView().removeAllViews();
-
-        mController.setQsFullScreen(false);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* notifVisibleInShade= */ false);
-
-        mController.setQsFullScreen(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* notifVisibleInShade= */ false);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_bouncerShowing_hideEmptyView() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        initController(/* viewIsAttached= */ true);
-
-        when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(true);
-
-        setupShowEmptyShadeViewState(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-
-        // THEN the PrimaryBouncerInteractor value is used. Since the bouncer is showing, we
-        // hide the empty view.
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ false,
-                /* areNotificationsHiddenInShade= */ false);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateEmptyShadeView_bouncerNotShowing_showEmptyView() {
-        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
-        initController(/* viewIsAttached= */ true);
-
-        when(mPrimaryBouncerInteractor.isBouncerShowing()).thenReturn(false);
-
-        setupShowEmptyShadeViewState(true);
-        reset(mNotificationStackScrollLayout);
-        mController.updateShowEmptyShadeView();
-
-        // THEN the PrimaryBouncerInteractor value is used. Since the bouncer isn't showing, we
-        // can show the empty view.
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(
-                /* visible= */ true,
-                /* areNotificationsHiddenInShade= */ false);
     }
 
     @Test
@@ -788,31 +656,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testUpdateFooter_remoteInput() {
-        ArgumentCaptor<RemoteInputController.Callback> callbackCaptor =
-                ArgumentCaptor.forClass(RemoteInputController.Callback.class);
-        doNothing().when(mRemoteInputManager).addControllerCallback(callbackCaptor.capture());
-        when(mRemoteInputManager.isRemoteInputActive()).thenReturn(false);
-        initController(/* viewIsAttached= */ true);
-        verify(mNotificationStackScrollLayout).setIsRemoteInputActive(false);
-        RemoteInputController.Callback callback = callbackCaptor.getValue();
-        callback.onRemoteInputActive(true);
-        verify(mNotificationStackScrollLayout).setIsRemoteInputActive(true);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void testSetNotifStats_updatesHasFilteredOutSeenNotifications() {
-        initController(/* viewIsAttached= */ true);
-        mSeenNotificationsInteractor.setHasFilteredOutSeenNotifications(true);
-        mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
-        verify(mNotificationStackScrollLayout).setHasFilteredOutSeenNotifications(true);
-        verify(mNotificationStackScrollLayout).updateFooter();
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(anyBoolean(), anyBoolean());
-    }
-
-    @Test
     public void testAttach_updatesViewStatusBarState() {
         // GIVEN: Controller is attached
         initController(/* viewIsAttached= */ true);
@@ -841,98 +684,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
         // THEN: NSSL is updated with the current state
         verify(mNotificationStackScrollLayout).setStatusBarState(KEYGUARD);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void updateImportantForAccessibility_noChild_onKeyGuard_notImportantForA11y() {
-        // GIVEN: Controller is attached, active notifications is empty,
-        // and mNotificationStackScrollLayout.onKeyguard() is true
-        initController(/* viewIsAttached= */ true);
-        when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(true);
-        mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
-
-        // THEN: mNotificationStackScrollLayout should not be important for A11y
-        verify(mNotificationStackScrollLayout)
-                .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void updateImportantForAccessibility_hasChild_onKeyGuard_importantForA11y() {
-        // GIVEN: Controller is attached, active notifications is not empty,
-        // and mNotificationStackScrollLayout.onKeyguard() is true
-        initController(/* viewIsAttached= */ true);
-        when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(true);
-        mController.getNotifStackController().setNotifStats(
-                new NotifStats(
-                        /* numActiveNotifs = */ 1,
-                        /* hasNonClearableAlertingNotifs = */ false,
-                        /* hasClearableAlertingNotifs = */ false,
-                        /* hasNonClearableSilentNotifs = */ false,
-                        /* hasClearableSilentNotifs = */ false)
-        );
-
-        // THEN: mNotificationStackScrollLayout should be important for A11y
-        verify(mNotificationStackScrollLayout)
-                .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void updateImportantForAccessibility_hasChild_notOnKeyGuard_importantForA11y() {
-        // GIVEN: Controller is attached, active notifications is not empty,
-        // and mNotificationStackScrollLayout.onKeyguard() is false
-        initController(/* viewIsAttached= */ true);
-        when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(false);
-        mController.getNotifStackController().setNotifStats(
-                new NotifStats(
-                        /* numActiveNotifs = */ 1,
-                        /* hasNonClearableAlertingNotifs = */ false,
-                        /* hasClearableAlertingNotifs = */ false,
-                        /* hasNonClearableSilentNotifs = */ false,
-                        /* hasClearableSilentNotifs = */ false)
-        );
-
-        // THEN: mNotificationStackScrollLayout should be important for A11y
-        verify(mNotificationStackScrollLayout)
-                .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void updateImportantForAccessibility_noChild_notOnKeyGuard_importantForA11y() {
-        // GIVEN: Controller is attached, active notifications is empty,
-        // and mNotificationStackScrollLayout.onKeyguard() is false
-        initController(/* viewIsAttached= */ true);
-        when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(false);
-        mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
-
-        // THEN: mNotificationStackScrollLayout should be important for A11y
-        verify(mNotificationStackScrollLayout)
-                .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void updateEmptyShadeView_onKeyguardTransitionToAod_hidesView() {
-        initController(/* viewIsAttached= */ true);
-        mController.onKeyguardTransitionChanged(
-                new TransitionStep(
-                        /* from= */ KeyguardState.GONE,
-                        /* to= */ KeyguardState.AOD));
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(eq(false), anyBoolean());
-    }
-
-    @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
-    public void updateEmptyShadeView_onKeyguardOccludedTransitionToAod_hidesView() {
-        initController(/* viewIsAttached= */ true);
-        mController.onKeyguardTransitionChanged(
-                new TransitionStep(
-                        /* from= */ KeyguardState.OCCLUDED,
-                        /* to= */ KeyguardState.AOD));
-        verify(mNotificationStackScrollLayout).updateEmptyShadeView(eq(false), anyBoolean());
     }
 
     @Test
@@ -996,24 +747,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         return argThat(new LogMatcher(category, type));
     }
 
-    private void setupShowEmptyShadeViewState(boolean toShow) {
-        if (toShow) {
-            mController.onKeyguardTransitionChanged(
-                    new TransitionStep(
-                            /* from= */ KeyguardState.LOCKSCREEN,
-                            /* to= */ KeyguardState.GONE));
-            mController.setQsFullScreen(false);
-            mController.getView().removeAllViews();
-        } else {
-            mController.onKeyguardTransitionChanged(
-                    new TransitionStep(
-                            /* from= */ KeyguardState.GONE,
-                            /* to= */ KeyguardState.AOD));
-            mController.setQsFullScreen(true);
-            mController.getView().addContainerView(mock(ExpandableNotificationRow.class));
-        }
-    }
-
     private void initController(boolean viewIsAttached) {
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(viewIsAttached);
         ViewTreeObserver viewTreeObserver = mock(ViewTreeObserver.class);
@@ -1033,16 +766,12 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mStatusBarService,
                 mNotificationRoundnessManager,
                 mTunerService,
-                mDeviceProvisionedController,
                 mDynamicPrivacyController,
                 mConfigurationController,
                 mSysuiStatusBarStateController,
                 mKeyguardMediaController,
                 mKeyguardBypassController,
                 mPowerInteractor,
-                mPrimaryBouncerInteractor,
-                mKeyguardTransitionRepo,
-                mZenModeController,
                 mNotificationLockscreenUserManager,
                 mMetricsLogger,
                 mColorUpdateLogger,
@@ -1051,14 +780,11 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 new FalsingManagerFake(),
                 mNotificationSwipeHelperBuilder,
                 mGroupExpansionManager,
-                mSilentHeaderController,
                 mNotifPipeline,
                 mNotifCollection,
                 mLockscreenShadeTransitionController,
                 mUiEventLogger,
-                mRemoteInputManager,
                 mVisibilityLocationProviderDelegator,
-                mSeenNotificationsInteractor,
                 mViewBinder,
                 mShadeController,
                 mWindowRootView,
@@ -1076,7 +802,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     static class LogMatcher implements ArgumentMatcher<LogMaker> {
-        private int mCategory, mType;
+        private final int mCategory, mType;
 
         LogMatcher(int category, int type) {
             mCategory = category;

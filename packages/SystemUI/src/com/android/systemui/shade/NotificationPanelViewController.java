@@ -162,7 +162,6 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener;
@@ -1214,14 +1213,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private boolean hasVisibleNotifications() {
-        if (FooterViewRefactor.isEnabled()) {
-            return mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()
-                    || mMediaDataManager.hasActiveMediaOrRecommendation();
-        } else {
-            return mNotificationStackScrollLayoutController
-                    .getVisibleNotificationCount() != 0
-                    || mMediaDataManager.hasActiveMediaOrRecommendation();
-        }
+        return mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()
+                || mMediaDataManager.hasActiveMediaOrRecommendation();
     }
 
     @Override
@@ -2218,9 +2211,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @Override
     public void setBouncerShowing(boolean bouncerShowing) {
         mBouncerShowing = bouncerShowing;
-        if (!FooterViewRefactor.isEnabled()) {
-            mNotificationStackScrollLayoutController.updateShowEmptyShadeView();
-        }
         updateVisibility();
     }
 

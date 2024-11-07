@@ -35,7 +35,6 @@ import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView;
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -463,26 +462,23 @@ public class StackScrollAlgorithm {
                 if (v == ambientState.getShelf()) {
                     continue;
                 }
-                if (FooterViewRefactor.isEnabled()) {
-                    if (v instanceof EmptyShadeView) {
-                        emptyShadeVisible = true;
-                    }
-                    if (v instanceof FooterView footerView) {
-                        if (emptyShadeVisible || notGoneIndex == 0) {
-                            // if the empty shade is visible or the footer is the first visible
-                            // view, we're in a transitory state so let's leave the footer alone.
-                            if (Flags.notificationsFooterVisibilityFix()
-                                    && !SceneContainerFlag.isEnabled()) {
-                                // ...except for the hidden state, to prevent it from flashing on
-                                // the screen (this piece is copied from updateChild, and is not
-                                // necessary in flexiglass).
-                                if (footerView.shouldBeHidden()
-                                        || !ambientState.isShadeExpanded()) {
-                                    footerView.getViewState().hidden = true;
-                                }
+                if (v instanceof EmptyShadeView) {
+                    emptyShadeVisible = true;
+                }
+                if (v instanceof FooterView footerView) {
+                    if (emptyShadeVisible || notGoneIndex == 0) {
+                        // if the empty shade is visible or the footer is the first visible
+                        // view, we're in a transitory state so let's leave the footer alone.
+                        if (Flags.notificationsFooterVisibilityFix()
+                                && !SceneContainerFlag.isEnabled()) {
+                            // ...except for the hidden state, to prevent it from flashing on
+                            // the screen (this piece is copied from updateChild, and is not
+                            // necessary in flexiglass).
+                            if (footerView.shouldBeHidden() || !ambientState.isShadeExpanded()) {
+                                footerView.getViewState().hidden = true;
                             }
-                            continue;
                         }
+                        continue;
                     }
                 }
 
@@ -699,44 +695,28 @@ public class StackScrollAlgorithm {
                 viewEnd, /* hunMax */ ambientState.getMaxHeadsUpTranslation()
         );
         if (view instanceof FooterView) {
-            if (FooterViewRefactor.isEnabled()) {
-                if (SceneContainerFlag.isEnabled()) {
-                    final float footerEnd =
-                            stackTop + viewState.getYTranslation() + view.getIntrinsicHeight();
-                    final boolean noSpaceForFooter = footerEnd > ambientState.getStackCutoff();
-                    ((FooterView.FooterViewState) viewState).hideContent =
-                            noSpaceForFooter || (ambientState.isClearAllInProgress()
-                                    && !hasNonClearableNotifs(algorithmState));
-                } else {
-                    // TODO(b/333445519): shouldBeHidden should reflect whether the shade is closed
-                    //  already, so we shouldn't need to use ambientState here. However,
-                    //  currently it doesn't get updated quickly enough and can cause the footer to
-                    //  flash when closing the shade. As such, we temporarily also check the
-                    //  ambientState directly.
-                    if (((FooterView) view).shouldBeHidden() || !ambientState.isShadeExpanded()) {
-                        viewState.hidden = true;
-                    } else {
-                        final float footerEnd = algorithmState.mCurrentExpandedYPosition
-                                + view.getIntrinsicHeight();
-                        final boolean noSpaceForFooter =
-                                footerEnd > ambientState.getStackEndHeight();
-                        ((FooterView.FooterViewState) viewState).hideContent =
-                                noSpaceForFooter || (ambientState.isClearAllInProgress()
-                                        && !hasNonClearableNotifs(algorithmState));
-                    }
-                }
+            if (SceneContainerFlag.isEnabled()) {
+                final float footerEnd =
+                        stackTop + viewState.getYTranslation() + view.getIntrinsicHeight();
+                final boolean noSpaceForFooter = footerEnd > ambientState.getStackCutoff();
+                ((FooterView.FooterViewState) viewState).hideContent =
+                        noSpaceForFooter || (ambientState.isClearAllInProgress()
+                                && !hasNonClearableNotifs(algorithmState));
             } else {
-                final boolean shadeClosed = !ambientState.isShadeExpanded();
-                final boolean isShelfShowing = algorithmState.firstViewInShelf != null;
-                if (shadeClosed) {
+                // TODO(b/333445519): shouldBeHidden should reflect whether the shade is closed
+                //  already, so we shouldn't need to use ambientState here. However,
+                //  currently it doesn't get updated quickly enough and can cause the footer to
+                //  flash when closing the shade. As such, we temporarily also check the
+                //  ambientState directly.
+                if (((FooterView) view).shouldBeHidden() || !ambientState.isShadeExpanded()) {
                     viewState.hidden = true;
                 } else {
                     final float footerEnd = algorithmState.mCurrentExpandedYPosition
                             + view.getIntrinsicHeight();
-                    final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
+                    final boolean noSpaceForFooter =
+                            footerEnd > ambientState.getStackEndHeight();
                     ((FooterView.FooterViewState) viewState).hideContent =
-                            isShelfShowing || noSpaceForFooter
-                                    || (ambientState.isClearAllInProgress()
+                            noSpaceForFooter || (ambientState.isClearAllInProgress()
                                     && !hasNonClearableNotifs(algorithmState));
                 }
             }

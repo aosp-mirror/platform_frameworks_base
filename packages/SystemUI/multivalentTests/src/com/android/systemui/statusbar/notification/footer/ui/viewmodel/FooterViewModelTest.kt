@@ -40,7 +40,6 @@ import com.android.systemui.shared.settings.data.repository.fakeSecureSettingsRe
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter
 import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
@@ -57,7 +56,6 @@ import platform.test.runner.parameterized.Parameters
 
 @RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
-@EnableFlags(FooterViewRefactor.FLAG_NAME)
 class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {

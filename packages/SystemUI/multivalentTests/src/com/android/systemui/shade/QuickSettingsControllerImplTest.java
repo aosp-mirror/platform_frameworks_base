@@ -53,7 +53,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -365,7 +364,6 @@ public class QuickSettingsControllerImplTest extends QuickSettingsControllerImpl
     }
 
     @Test
-    @EnableFlags(FooterViewRefactor.FLAG_NAME)
     public void updateExpansion_partiallyExpanded_fullscreenFalse() {
         // WHEN QS are only partially expanded
         mQsController.setExpanded(true);

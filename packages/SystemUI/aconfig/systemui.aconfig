@@ -133,14 +133,6 @@ flag {
 }
 
 flag {
-    name: "notifications_footer_view_refactor"
-    namespace: "systemui"
-    description: "Enables the refactored version of the footer view in the notification shade "
-        "(containing the \"Clear all\" button). Should not bring any behavior changes"
-    bug: "293167744"
-}
-
-flag {
     name: "notifications_icon_container_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the notification icon container in StatusBar, "

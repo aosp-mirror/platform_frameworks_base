@@ -33,7 +33,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.settings.data.repository.fakeSecureSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -48,7 +47,6 @@ import platform.test.runner.parameterized.Parameters
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
-@EnableFlags(FooterViewRefactor.FLAG_NAME)
 class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope

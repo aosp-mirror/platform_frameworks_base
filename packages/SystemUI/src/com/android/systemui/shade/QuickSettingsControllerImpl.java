@@ -86,7 +86,6 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -96,8 +95,8 @@ import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
@@ -1022,12 +1021,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     }
 
     void updateQsState() {
-        if (!FooterViewRefactor.isEnabled()) {
-            // Update full screen state; note that this will be true if the QS panel is only
-            // partially expanded, and that is fixed with the footer view refactor.
-            setQsFullScreen(/* qsFullScreen = */ getExpanded() && !mSplitShadeEnabled);
-        }
-
         if (mQsStateUpdateListener != null) {
             mQsStateUpdateListener.onQsStateUpdated(getExpanded(), mStackScrollerOverscrolling);
         }
@@ -1094,10 +1087,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         // Update the light bar
         mLightBarController.setQsExpanded(mFullyExpanded);
 
-        if (FooterViewRefactor.isEnabled()) {
-            // Update full screen state
-            setQsFullScreen(/* qsFullScreen = */ mFullyExpanded && !mSplitShadeEnabled);
-        }
+        // Update full screen state
+        setQsFullScreen(/* qsFullScreen = */ mFullyExpanded && !mSplitShadeEnabled);
     }
 
     float getLockscreenShadeDragProgress() {
@@ -2268,10 +2259,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                     setExpansionHeight(qsHeight);
                 }
 
-                boolean hasNotifications = FooterViewRefactor.isEnabled()
-                        ? mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()
-                        : mNotificationStackScrollLayoutController.getVisibleNotificationCount()
-                                != 0;
+                boolean hasNotifications =
+                        mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue();
                 if (!hasNotifications && !mMediaDataManager.hasActiveMediaOrRecommendation()) {
                     // No notifications are visible, let's animate to the height of qs instead
                     if (isQsFragmentCreated()) {
