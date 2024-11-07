@@ -16,21 +16,30 @@
 
 package android.platform.test.ravenwood;
 
-import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_SYSPROP;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.getRavenwoodRuntimePath;
 
-import com.android.ravenwood.common.RavenwoodCommonUtils;
+import android.util.Log;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class RavenwoodSystemProperties {
     private static final String TAG = "RavenwoodSystemProperties";
 
+    /** We pull in propeties from this file. */
+    private static final String RAVENWOOD_BUILD_PROP = "ravenwood-data/ravenwood-build.prop";
+
+    /** This is the actual build.prop we use to build the device (contents depends on lunch). */
+    private static final String DEVICE_BUILD_PROP = "ravenwood-data/build.prop";
+
+    /** The default values. */
     private static final Map<String, String> sDefaultValues = new HashMap<>();
 
     private static final String[] PARTITIONS = {
@@ -43,52 +52,54 @@ public class RavenwoodSystemProperties {
             "vendor_dlkm",
     };
 
-    /**
-     * More info about property file loading: system/core/init/property_service.cpp
-     * In the following logic, the only partition we would need to consider is "system",
-     * since we only read from system-build.prop
-     */
-    static void initialize(String propFile) {
-        // Load all properties from build.prop
+    private static Map<String, String> readProperties(String propFile) {
+        // Use an ordered map just for cleaner dump log.
+        final Map<String, String> ret = new LinkedHashMap<>();
         try {
             Files.readAllLines(Path.of(propFile)).stream()
                     .map(String::trim)
                     .filter(s -> !s.startsWith("#"))
                     .map(s -> s.split("\\s*=\\s*", 2))
                     .filter(a -> a.length == 2)
-                    .forEach(a -> sDefaultValues.put(a[0], a[1]));
+                    .forEach(a -> ret.put(a[0], a[1]));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return ret;
+    }
 
-        // If ro.product.${name} is not set, derive from ro.product.${partition}.${name}
-        // If ro.product.cpu.abilist* is not set, derive from ro.${partition}.product.cpu.abilist*
-        for (var entry : Set.copyOf(sDefaultValues.entrySet())) {
-            final String key;
-            if (entry.getKey().startsWith("ro.product.system.")) {
-                var name = entry.getKey().substring(18);
-                key = "ro.product." + name;
+    /**
+     * Load default sysprops from {@link #RAVENWOOD_BUILD_PROP}. We also pull in
+     * certain properties from the acutual device's build.prop {@link #DEVICE_BUILD_PROP} too.
+     *
+     * More info about property file loading: system/core/init/property_service.cpp
+     * In the following logic, the only partition we would need to consider is "system",
+     * since we only read from system-build.prop
+     */
+    static void initialize() {
+        var path = getRavenwoodRuntimePath();
+        var ravenwoodProps = readProperties(path + RAVENWOOD_BUILD_PROP);
+        var deviceProps = readProperties(path + DEVICE_BUILD_PROP);
 
-            } else if (entry.getKey().startsWith("ro.system.product.cpu.abilist")) {
-                var name = entry.getKey().substring(22);
-                key = "ro.product.cpu." + name;
+        Log.i(TAG, "Default system properties:");
+        ravenwoodProps.forEach((key, origValue) -> {
+            final String value;
+
+            // If a value starts with "$$$", then this is a reference to the device-side value.
+            if (origValue.startsWith("$$$")) {
+                var deviceKey = origValue.substring(3);
+                var deviceValue = deviceProps.get(deviceKey);
+                if (deviceValue == null) {
+                    throw new RuntimeException("Failed to initialize system properties. Key '"
+                             + deviceKey + "' doesn't exist in the device side build.prop");
+                }
+                value = deviceValue;
             } else {
-                continue;
+                value = origValue;
             }
-            if (!sDefaultValues.containsKey(key)) {
-                sDefaultValues.put(key, entry.getValue());
-            }
-        }
-
-        // Some other custom values
-        sDefaultValues.put("ro.board.first_api_level", "1");
-        sDefaultValues.put("ro.product.first_api_level", "1");
-        sDefaultValues.put("ro.soc.manufacturer", "Android");
-        sDefaultValues.put("ro.soc.model", "Ravenwood");
-        sDefaultValues.put(RAVENWOOD_SYSPROP, "1");
-
-        // Log all values
-        sDefaultValues.forEach((key, value) -> RavenwoodCommonUtils.log(TAG, key + "=" + value));
+            Log.i(TAG, key + "=" + value);
+            sDefaultValues.put(key, value);
+        });
 
         // Copy ro.product.* and ro.build.* to all partitions, just in case
         // We don't want to log these because these are just a lot of duplicate values
@@ -102,6 +113,13 @@ public class RavenwoodSystemProperties {
                         sDefaultValues.put(newKey, entry.getValue());
                     }
                 }
+            }
+        }
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            // Dump all properties for local debugging.
+            Log.v(TAG, "All system properties:");
+            for (var key : sDefaultValues.keySet().stream().sorted().toList()) {
+                Log.v(TAG, "" + key + "=" + sDefaultValues.get(key));
             }
         }
     }
