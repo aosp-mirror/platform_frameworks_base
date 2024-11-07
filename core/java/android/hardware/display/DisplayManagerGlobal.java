@@ -18,6 +18,7 @@ package android.hardware.display;
 
 
 import static android.hardware.display.DisplayManager.EventFlag;
+import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
@@ -1280,6 +1281,31 @@ public final class DisplayManagerGlobal {
     public float getDefaultDozeBrightness(int displayId) {
         try {
             return mDm.getDefaultDozeBrightness(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see DisplayManager#getDisplayTopology
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    @Nullable
+    public DisplayTopology getDisplayTopology() {
+        try {
+            return mDm.getDisplayTopology();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see DisplayManager#setDisplayTopology
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    public void setDisplayTopology(DisplayTopology topology) {
+        try {
+            mDm.setDisplayTopology(topology);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

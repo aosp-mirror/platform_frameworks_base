@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.hardware.display.DisplayTopology;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -33,7 +34,7 @@ import java.util.function.BooleanSupplier;
 class DisplayTopologyCoordinator {
 
     @GuardedBy("mLock")
-    private final DisplayTopology mTopology;
+    private DisplayTopology mTopology;
 
     /**
      * Check if extended displays are enabled. If not, a topology is not needed.
@@ -76,6 +77,21 @@ class DisplayTopologyCoordinator {
     }
 
     /**
+     * @return A deep copy of the topology.
+     */
+    DisplayTopology getTopology() {
+        synchronized (mLock) {
+            return mTopology;
+        }
+    }
+
+    void setTopology(DisplayTopology topology) {
+        synchronized (mLock) {
+            mTopology = topology;
+        }
+    }
+
+    /**
      * Print the object's state and debug information into the given stream.
      * @param pw The stream to dump information to.
      */
@@ -108,6 +124,7 @@ class DisplayTopologyCoordinator {
                 && info.displayGroupId == Display.DEFAULT_DISPLAY_GROUP;
     }
 
+    @VisibleForTesting
     static class Injector {
         DisplayTopology getTopology() {
             return new DisplayTopology();
