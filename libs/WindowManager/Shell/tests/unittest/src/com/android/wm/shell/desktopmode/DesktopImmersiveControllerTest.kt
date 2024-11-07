@@ -89,10 +89,12 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             (invocation.getArgument(0) as Rect).set(STABLE_BOUNDS)
         }
         controller = DesktopImmersiveController(
+            shellInit = mock(),
             transitions = mockTransitions,
             desktopRepository = desktopRepository,
             displayController = mockDisplayController,
             shellTaskOrganizer = mockShellTaskOrganizer,
+            shellCommandHandler = mock(),
             transactionSupplier = transactionSupplier,
         )
     }

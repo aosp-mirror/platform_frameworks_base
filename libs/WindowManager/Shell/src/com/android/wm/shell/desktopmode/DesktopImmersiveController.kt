@@ -34,10 +34,13 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.sysui.ShellCommandHandler
+import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.android.wm.shell.transition.Transitions.TransitionObserver
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
+import java.io.PrintWriter
 
 /**
  * A controller to move tasks in/out of desktop's full immersive state where the task
@@ -45,23 +48,29 @@ import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
  * be transient below the status bar like in fullscreen immersive mode.
  */
 class DesktopImmersiveController(
+    shellInit: ShellInit,
     private val transitions: Transitions,
     private val desktopRepository: DesktopRepository,
     private val displayController: DisplayController,
     private val shellTaskOrganizer: ShellTaskOrganizer,
+    private val shellCommandHandler: ShellCommandHandler,
     private val transactionSupplier: () -> SurfaceControl.Transaction,
 ) : TransitionHandler, TransitionObserver {
 
     constructor(
+        shellInit: ShellInit,
         transitions: Transitions,
         desktopRepository: DesktopRepository,
         displayController: DisplayController,
         shellTaskOrganizer: ShellTaskOrganizer,
+        shellCommandHandler: ShellCommandHandler,
     ) : this(
+        shellInit,
         transitions,
         desktopRepository,
         displayController,
         shellTaskOrganizer,
+        shellCommandHandler,
         { SurfaceControl.Transaction() }
     )
 
@@ -78,6 +87,14 @@ class DesktopImmersiveController(
 
     /** A listener to invoke on animation changes during entry/exit. */
     var onTaskResizeAnimationListener: OnTaskResizeAnimationListener? = null
+
+    init {
+        shellInit.addInitCallback({ onInit() }, this)
+    }
+
+    fun onInit() {
+        shellCommandHandler.addDumpCallback(this::dump, this)
+    }
 
     /** Starts a transition to enter full immersive state inside the desktop. */
     fun moveTaskToImmersive(taskInfo: RunningTaskInfo) {
@@ -448,6 +465,13 @@ class DesktopImmersiveController(
 
     private fun TransitionInfo.hasTaskChange(taskId: Int): Boolean =
         changes.any { c -> c.taskInfo?.taskId == taskId }
+
+    private fun dump(pw: PrintWriter, prefix: String) {
+        val innerPrefix = "$prefix  "
+        pw.println("${prefix}DesktopImmersiveController")
+        pw.println(innerPrefix + "state=" + state)
+        pw.println(innerPrefix + "pendingExternalExitTransitions=" + pendingExternalExitTransitions)
+    }
 
     /** The state of the currently running transition. */
     private data class TransitionState(
