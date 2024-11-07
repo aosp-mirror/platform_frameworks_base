@@ -20,7 +20,6 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
 
 import java.util.List;
 
@@ -31,9 +30,6 @@ public interface OnAfterRenderListListener {
      *
      * @param entries The current list of top-level entries. Note that this is a live view into the
      * current list and will change whenever the pipeline is rerun.
-     * @param controller An object for setting state on the shade.
      */
-    void onAfterRenderList(
-            @NonNull List<ListEntry> entries,
-            @NonNull NotifStackController controller);
+    void onAfterRenderList(@NonNull List<ListEntry> entries);
 }

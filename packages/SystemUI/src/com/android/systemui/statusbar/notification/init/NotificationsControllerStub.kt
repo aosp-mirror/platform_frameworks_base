@@ -21,7 +21,6 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import javax.inject.Inject
 
@@ -35,7 +34,6 @@ constructor(private val notificationListener: NotificationListener) : Notificati
     override fun initialize(
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
-        stackController: NotifStackController,
         notificationActivityStarter: NotificationActivityStarter,
     ) {
         // Always connect the listener even if notification-handling is disabled. Being a listener

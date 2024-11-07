@@ -28,8 +28,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController
-import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.data.model.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -43,7 +42,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 
 @SmallTest
@@ -61,7 +59,6 @@ class StackCoordinatorTest : SysuiTestCase() {
     private val sensitiveNotificationProtectionController:
         SensitiveNotificationProtectionController =
         mock()
-    private val stackController: NotifStackController = mock()
     private val section: NotifSection = mock()
     private val row: ExpandableNotificationRow = mock()
 
@@ -87,25 +84,23 @@ class StackCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testSetRenderedListOnInteractor() {
-        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        afterRenderListListener.onAfterRenderList(listOf(entry))
         verify(renderListInteractor).setRenderedList(eq(listOf(entry)))
     }
 
     @Test
     fun testSetNotificationStats_clearableAlerting() {
         whenever(section.bucket).thenReturn(BUCKET_ALERTING)
-        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        afterRenderListListener.onAfterRenderList(listOf(entry))
         verify(activeNotificationsInteractor)
             .setNotifStats(
                 NotifStats(
-                    1,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
                     hasClearableSilentNotifs = false,
                 )
             )
-        verifyNoMoreInteractions(stackController)
     }
 
     @Test
@@ -113,35 +108,31 @@ class StackCoordinatorTest : SysuiTestCase() {
     fun testSetNotificationStats_isSensitiveStateActive_nonClearableAlerting() {
         whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
         whenever(section.bucket).thenReturn(BUCKET_ALERTING)
-        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        afterRenderListListener.onAfterRenderList(listOf(entry))
         verify(activeNotificationsInteractor)
             .setNotifStats(
                 NotifStats(
-                    1,
                     hasNonClearableAlertingNotifs = true,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,
                     hasClearableSilentNotifs = false,
                 )
             )
-        verifyNoMoreInteractions(stackController)
     }
 
     @Test
     fun testSetNotificationStats_clearableSilent() {
         whenever(section.bucket).thenReturn(BUCKET_SILENT)
-        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        afterRenderListListener.onAfterRenderList(listOf(entry))
         verify(activeNotificationsInteractor)
             .setNotifStats(
                 NotifStats(
-                    1,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,
                     hasClearableSilentNotifs = true,
                 )
             )
-        verifyNoMoreInteractions(stackController)
     }
 
     @Test
@@ -149,35 +140,31 @@ class StackCoordinatorTest : SysuiTestCase() {
     fun testSetNotificationStats_isSensitiveStateActive_nonClearableSilent() {
         whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
         whenever(section.bucket).thenReturn(BUCKET_SILENT)
-        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        afterRenderListListener.onAfterRenderList(listOf(entry))
         verify(activeNotificationsInteractor)
             .setNotifStats(
                 NotifStats(
-                    1,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = true,
                     hasClearableSilentNotifs = false,
                 )
             )
-        verifyNoMoreInteractions(stackController)
     }
 
     @Test
     fun testSetNotificationStats_nonClearableRedacted() {
         entry.setSensitive(true, true)
         whenever(section.bucket).thenReturn(BUCKET_ALERTING)
-        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        afterRenderListListener.onAfterRenderList(listOf(entry))
         verify(activeNotificationsInteractor)
             .setNotifStats(
                 NotifStats(
-                    1,
                     hasNonClearableAlertingNotifs = true,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,
                     hasClearableSilentNotifs = false,
                 )
             )
-        verifyNoMoreInteractions(stackController)
     }
 }

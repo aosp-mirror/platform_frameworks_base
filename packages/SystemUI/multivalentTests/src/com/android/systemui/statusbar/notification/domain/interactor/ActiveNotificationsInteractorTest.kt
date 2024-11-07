@@ -26,7 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
-import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.data.model.NotifStats
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
@@ -275,7 +275,6 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
@@ -293,7 +292,6 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,
@@ -311,7 +309,6 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 0,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,
@@ -329,7 +326,6 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,
@@ -347,7 +343,6 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = true,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = true,
@@ -365,7 +360,6 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
@@ -383,7 +377,6 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = true,
@@ -401,7 +394,6 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,

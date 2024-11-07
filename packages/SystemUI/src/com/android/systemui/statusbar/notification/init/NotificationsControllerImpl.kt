@@ -34,7 +34,6 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
@@ -76,7 +75,6 @@ constructor(
     override fun initialize(
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
-        stackController: NotifStackController,
         notificationActivityStarter: NotificationActivityStarter,
     ) {
         notificationListener.registerAsSystemService()
@@ -101,7 +99,7 @@ constructor(
 
         notifPipelineInitializer
             .get()
-            .initialize(notificationListener, notificationRowBinder, listContainer, stackController)
+            .initialize(notificationListener, notificationRowBinder, listContainer)
 
         targetSdkResolver.initialize(notifPipeline.get())
         notificationsMediaManager.setUpWithPresenter(presenter)

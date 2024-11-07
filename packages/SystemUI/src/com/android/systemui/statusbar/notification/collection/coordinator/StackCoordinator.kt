@@ -23,8 +23,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController
-import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.data.model.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
@@ -51,8 +50,7 @@ internal constructor(
         groupExpansionManagerImpl.attach(pipeline)
     }
 
-    // TODO: b/293167744 - Remove controller param.
-    private fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
+    private fun onAfterRenderList(entries: List<ListEntry>) =
         traceSection("StackCoordinator.onAfterRenderList") {
             val notifStats = calculateNotifStats(entries)
             activeNotificationsInteractor.setNotifStats(notifStats)
@@ -84,7 +82,6 @@ internal constructor(
             }
         }
         return NotifStats(
-            numActiveNotifs = entries.size,
             hasNonClearableAlertingNotifs = hasNonClearableAlertingNotifs,
             hasClearableAlertingNotifs = hasClearableAlertingNotifs,
             hasNonClearableSilentNotifs = hasNonClearableSilentNotifs,

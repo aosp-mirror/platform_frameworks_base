@@ -37,7 +37,7 @@ import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.shared.settings.data.repository.fakeSecureSettingsRepository
-import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.data.model.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter
@@ -115,7 +115,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
@@ -133,7 +132,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = false,
                     hasNonClearableSilentNotifs = false,
@@ -151,7 +149,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
@@ -183,7 +180,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             // AND there are clearable notifications
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,
@@ -217,7 +213,6 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             // AND there are clearable notifications
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
-                    numActiveNotifs = 2,
                     hasNonClearableAlertingNotifs = false,
                     hasClearableAlertingNotifs = true,
                     hasNonClearableSilentNotifs = false,

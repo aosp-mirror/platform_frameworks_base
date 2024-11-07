@@ -103,9 +103,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Di
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
-import com.android.systemui.statusbar.notification.collection.render.DefaultNotifStackController;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpNotificationViewControllerEmptyImpl;
@@ -211,9 +209,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     private final NotificationListContainerImpl mNotificationListContainer =
             new NotificationListContainerImpl();
-    // TODO: b/293167744 - Remove this.
-    private final NotifStackController mNotifStackController =
-            new DefaultNotifStackController();
 
     @VisibleForTesting
     final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
@@ -1467,10 +1462,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public NotificationListContainer getNotificationListContainer() {
         return mNotificationListContainer;
-    }
-
-    public NotifStackController getNotifStackController() {
-        return mNotifStackController;
     }
 
     public void resetCheckSnoozeLeavebehind() {
