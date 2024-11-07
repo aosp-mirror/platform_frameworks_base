@@ -19,6 +19,8 @@ package com.android.systemui.qs.composefragment.dagger
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.Utils
@@ -37,6 +39,15 @@ interface QSFragmentComposeModule {
         @Named(QS_USING_MEDIA_PLAYER)
         fun providesUsingMedia(@ShadeDisplayAware context: Context): Boolean {
             return QSComposeFragment.isEnabled && Utils.useQsMediaPlayer(context)
+        }
+
+        @Provides
+        @SysUISingleton
+        @QSFragmentComposeLog
+        fun providesQSFragmentComposeViewModelTableLog(
+            factory: TableLogBufferFactory
+        ): TableLogBuffer {
+            return factory.create("QSFragmentComposeViewModel", 200)
         }
     }
 }
