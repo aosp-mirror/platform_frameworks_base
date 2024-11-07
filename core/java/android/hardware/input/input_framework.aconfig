@@ -141,7 +141,7 @@ flag {
 flag {
   name: "keyboard_a11y_shortcut_control"
   namespace: "input"
-  description: "Adds shortcuts to toggle and control a11y features"
+  description: "Adds shortcuts to toggle and control a11y keyboard features"
   bug: "373458181"
 }
 
@@ -164,4 +164,11 @@ flag {
   namespace: "input"
   description: "Turns three-finger touchpad taps into a customizable shortcut."
   bug: "365063048"
+}
+
+flag {
+  name: "enable_talkback_and_magnifier_key_gestures"
+  namespace: "input"
+  description: "Adds key gestures for talkback and magnifier"
+  bug: "375277034"
 }

@@ -21,7 +21,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -89,12 +88,8 @@ class QuickSettingsShadeOverlayActionsViewModelTest : SysuiTestCase() {
             underTest.activateIn(this)
 
             assertThat(
-                    (actions?.get(
-                            Swipe(
-                                direction = SwipeDirection.Down,
-                                fromSource = SceneContainerEdge.TopLeft,
-                            )
-                        ) as? UserActionResult.ReplaceByOverlay)
+                    (actions?.get(Swipe.Down(fromSource = SceneContainerEdge.TopLeft))
+                            as? UserActionResult.ReplaceByOverlay)
                         ?.overlay
                 )
                 .isEqualTo(Overlays.NotificationsShade)

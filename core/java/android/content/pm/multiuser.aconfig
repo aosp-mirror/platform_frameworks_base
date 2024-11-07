@@ -543,3 +543,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "add_launcher_user_config"
+    namespace: "profile_experiences"
+    description: "Add support for LauncherUserInfo configs"
+    bug: "346553745"
+}

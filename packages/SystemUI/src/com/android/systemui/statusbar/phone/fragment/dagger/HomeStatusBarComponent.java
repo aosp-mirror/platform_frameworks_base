@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.phone.fragment.dagger;
 
 import com.android.systemui.battery.BatteryMeterViewController;
+import com.android.systemui.dagger.qualifiers.DisplaySpecific;
 import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.LegacyLightsOutNotifController;
@@ -121,4 +123,12 @@ public interface HomeStatusBarComponent {
 
     /** */
     StatusBarBoundsProvider getBoundsProvider();
+
+    /** */
+    @DisplaySpecific
+    DarkIconDispatcher getDarkIconDispatcher();
+
+    /** */
+    @DisplaySpecific
+    int getDisplayId();
 }

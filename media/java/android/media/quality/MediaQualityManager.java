@@ -34,7 +34,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
- * Expose TV setting APIs for the application to use
+ * Central system API to the overall media quality, which arbitrates interaction between
+ * applications and media quality service.
  * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
@@ -177,6 +178,7 @@ public final class MediaQualityManager {
      * Gets picture profile by given profile ID.
      * @return the corresponding picture profile if available; {@code null} if the ID doesn't
      *         exist or the profile is not accessible to the caller.
+     * @hide
      */
     public PictureProfile getPictureProfileById(long profileId) {
         try {
@@ -187,7 +189,10 @@ public final class MediaQualityManager {
     }
 
 
-    /** @SystemApi gets profiles that available to the given package */
+    /**
+     * @SystemApi gets profiles that available to the given package
+     * @hide
+     */
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public List<PictureProfile> getPictureProfilesByPackage(String packageName) {
         try {
@@ -197,7 +202,10 @@ public final class MediaQualityManager {
         }
     }
 
-    /** Gets profiles that available to the caller package */
+    /**
+     * Gets profiles that available to the caller.
+     */
+    @NonNull
     public List<PictureProfile> getAvailablePictureProfiles() {
         try {
             return mService.getAvailablePictureProfiles();
@@ -206,7 +214,10 @@ public final class MediaQualityManager {
         }
     }
 
-    /** @SystemApi all stored picture profiles of all packages */
+    /**
+     * @SystemApi all stored picture profiles of all packages
+     * @hide
+     */
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public List<PictureProfile> getAllPictureProfiles() {
         try {
@@ -221,6 +232,7 @@ public final class MediaQualityManager {
      * Creates a picture profile and store it in the system.
      *
      * @return the stored profile with an assigned profile ID.
+     * @hide
      */
     public PictureProfile createPictureProfile(PictureProfile pp) {
         try {
@@ -233,6 +245,7 @@ public final class MediaQualityManager {
 
     /**
      * Updates an existing picture profile and store it in the system.
+     * @hide
      */
     public void updatePictureProfile(long profileId, PictureProfile pp) {
         try {
@@ -245,6 +258,7 @@ public final class MediaQualityManager {
 
     /**
      * Removes a picture profile from the system.
+     * @hide
      */
     public void removePictureProfile(long profileId) {
         try {
@@ -291,6 +305,7 @@ public final class MediaQualityManager {
      * Gets sound profile by given profile ID.
      * @return the corresponding sound profile if available; {@code null} if the ID doesn't
      *         exist or the profile is not accessible to the caller.
+     * @hide
      */
     public SoundProfile getSoundProfileById(long profileId) {
         try {
@@ -301,7 +316,10 @@ public final class MediaQualityManager {
     }
 
 
-    /** @SystemApi gets profiles that available to the given package */
+    /**
+     * @SystemApi gets profiles that available to the given package
+     * @hide
+     */
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<SoundProfile> getSoundProfilesByPackage(String packageName) {
         try {
@@ -311,7 +329,10 @@ public final class MediaQualityManager {
         }
     }
 
-    /** Gets profiles that available to the caller package */
+    /**
+     * Gets profiles that available to the caller package
+     * @hide
+     */
     public List<SoundProfile> getAvailableSoundProfiles() {
         try {
             return mService.getAvailableSoundProfiles();
@@ -320,7 +341,10 @@ public final class MediaQualityManager {
         }
     }
 
-    /** @SystemApi all stored sound profiles of all packages */
+    /**
+     * @SystemApi all stored sound profiles of all packages
+     * @hide
+     */
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<SoundProfile> getAllSoundProfiles() {
         try {
@@ -335,6 +359,7 @@ public final class MediaQualityManager {
      * Creates a sound profile and store it in the system.
      *
      * @return the stored profile with an assigned profile ID.
+     * @hide
      */
     public SoundProfile createSoundProfile(SoundProfile sp) {
         try {
@@ -347,6 +372,7 @@ public final class MediaQualityManager {
 
     /**
      * Updates an existing sound profile and store it in the system.
+     * @hide
      */
     public void updateSoundProfile(long profileId, SoundProfile sp) {
         try {
@@ -359,6 +385,7 @@ public final class MediaQualityManager {
 
     /**
      * Removes a sound profile from the system.
+     * @hide
      */
     public void removeSoundProfile(long profileId) {
         try {
@@ -370,6 +397,7 @@ public final class MediaQualityManager {
 
     /**
      * Gets capability information of the given parameters.
+     * @hide
      */
     public List<ParamCapability> getParamCapabilities(List<String> names) {
         try {
@@ -396,6 +424,7 @@ public final class MediaQualityManager {
      * different use cases.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public void setAutoPictureQualityEnabled(boolean enabled) {
@@ -408,6 +437,7 @@ public final class MediaQualityManager {
 
     /**
      * Returns {@code true} if auto picture quality is enabled; {@code false} otherwise.
+     * @hide
      */
     public boolean isAutoPictureQualityEnabled() {
         try {
@@ -422,6 +452,7 @@ public final class MediaQualityManager {
      * <p>Super resolution is a feature to improve resolution.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public void setSuperResolutionEnabled(boolean enabled) {
@@ -434,6 +465,7 @@ public final class MediaQualityManager {
 
     /**
      * Returns {@code true} if super resolution is enabled; {@code false} otherwise.
+     * @hide
      */
     public boolean isSuperResolutionEnabled() {
         try {
@@ -449,6 +481,7 @@ public final class MediaQualityManager {
      * different use cases.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public void setAutoSoundQualityEnabled(boolean enabled) {
@@ -461,6 +494,7 @@ public final class MediaQualityManager {
 
     /**
      * Returns {@code true} if auto sound quality is enabled; {@code false} otherwise.
+     * @hide
      */
     public boolean isAutoSoundQualityEnabled() {
         try {
@@ -507,6 +541,7 @@ public final class MediaQualityManager {
      * Set the ambient backlight settings.
      *
      * @param settings The settings to use for the backlight detector.
+     * @hide
      */
     public void setAmbientBacklightSettings(
             @NonNull AmbientBacklightSettings settings) {
@@ -522,6 +557,7 @@ public final class MediaQualityManager {
      * Enables or disables the ambient backlight detection.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
+     * @hide
      */
     public void setAmbientBacklightEnabled(boolean enabled) {
         try {
@@ -700,6 +736,7 @@ public final class MediaQualityManager {
     public abstract static class AmbientBacklightCallback {
         /**
          * Called when new ambient backlight event is emitted.
+         * @hide
          */
         public void onAmbientBacklightEvent(AmbientBacklightEvent event) {
         }

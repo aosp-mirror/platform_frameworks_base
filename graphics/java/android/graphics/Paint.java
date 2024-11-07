@@ -19,7 +19,7 @@ package android.graphics;
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
 import static com.android.text.flags.Flags.FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API;
-
+import static com.android.text.flags.Flags.FLAG_VERTICAL_TEXT_LAYOUT;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
@@ -35,6 +35,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
+import android.graphics.text.TextRunShaper;
 import android.os.Build;
 import android.os.LocaleList;
 import android.text.GraphicsOperations;
@@ -269,7 +270,24 @@ public class Paint {
     public static final int EMBEDDED_BITMAP_TEXT_FLAG = 0x400;
     /** @hide bit mask for the flag forcing freetype's autohinter on for text */
     public static final int AUTO_HINTING_TEXT_FLAG = 0x800;
-    /** @hide bit mask for the flag enabling vertical rendering for text */
+
+    /**
+     * A flat that controls text to be written in vertical orientation
+     *
+     * <p>
+     * This flag is used for telling the underlying text layout engine that the text is for vertical
+     * direction. By enabling this flag, text measurement, drawing and shaping APIs works for
+     * vertical text layout. For example, {@link Canvas#drawText(String, float, float, Paint)} draws
+     * text from top to bottom. {@link Paint#measureText(String)} returns vertical advances instead
+     * of horizontal advances. {@link TextRunShaper} shapes text vertically and report glyph IDs for
+     * vertical layout.
+     *
+     * <p>
+     * Do not set this flag for making {@link android.text.Layout}. The {@link android.text.Layout}
+     * class and its subclasses are designed for horizontal text only and does not work for vertical
+     * text.
+     */
+    @FlaggedApi(FLAG_VERTICAL_TEXT_LAYOUT)
     public static final int VERTICAL_TEXT_FLAG = 0x1000;
 
     /**

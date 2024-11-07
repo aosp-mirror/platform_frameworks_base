@@ -5647,7 +5647,6 @@
   <java-symbol type="drawable" name="ic_zen_mode_type_schedule_calendar" />
   <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
   <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
-  <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
   <java-symbol type="drawable" name="ic_zen_mode_type_special_dnd" />
 
   <!-- System notification for background user sound -->

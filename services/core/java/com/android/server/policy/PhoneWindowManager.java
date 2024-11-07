@@ -84,6 +84,7 @@ import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
 import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
+import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
@@ -183,6 +184,7 @@ import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.service.SensorPrivacyToggleSourceProto;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -3612,7 +3614,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_T:
-                if (keyboardA11yShortcutControl()) {
+                if (enableTalkbackAndMagnifierKeyGestures()) {
                     if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
                         mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
                                 TalkbackShortcutController.ShortcutSource.KEYBOARD);
@@ -4112,7 +4114,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         return mDefaultDisplayPolicy.isAwake() && mAccessibilityShortcutController
                                 .isAccessibilityShortcutAvailable(false);
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
-                        return keyboardA11yShortcutControl();
+                        return enableTalkbackAndMagnifierKeyGestures();
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
                         return InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
                                 && keyboardA11yShortcutControl();
@@ -4345,7 +4347,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
-                if (keyboardA11yShortcutControl()) {
+                if (enableTalkbackAndMagnifierKeyGestures()) {
                     if (complete) {
                         mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
                                 TalkbackShortcutController.ShortcutSource.KEYBOARD);
@@ -4535,8 +4537,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE,
                     SensorPrivacyManager.Sensors.MICROPHONE);
 
-            mSensorPrivacyManager.setSensorPrivacy(SensorPrivacyManager.Sensors.MICROPHONE,
-                    !isEnabled);
+            mSensorPrivacyManager.setSensorPrivacy(SensorPrivacyToggleSourceProto.OTHER,
+                    SensorPrivacyManager.Sensors.MICROPHONE, !isEnabled, mCurrentUserId);
 
             int toastTextResId;
             if (isEnabled) {

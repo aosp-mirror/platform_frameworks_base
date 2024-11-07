@@ -475,7 +475,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ខ្វាក់ពណ៌ក្រហម (ក្រហម​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ខ្វាក់ពណ៌ខៀវ (ខៀវ​លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ការ​កែតម្រូវ​ពណ៌"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ការ​កែតម្រូវ​ពណ៌អាចមានប្រយោជន៍ នៅពេលអ្នកចង់៖&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលពណ៌កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;លុបពណ៌ចេញ ដើម្បីជួយឱ្យអ្នកផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ការ​កែតម្រូវ​ពណ៌អាចមានប្រយោជន៍ នៅពេលអ្នកចង់៖&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលពណ៌កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;ដកពណ៌ចេញ ដើម្បីជួយឱ្យអ្នកផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - កំពុងផ្អាកការសាកថ្ម ដើម្បីការពារថ្ម"</string>

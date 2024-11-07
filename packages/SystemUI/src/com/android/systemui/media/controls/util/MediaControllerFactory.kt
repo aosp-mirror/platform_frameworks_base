@@ -35,7 +35,12 @@ open class MediaControllerFactory @Inject constructor(private val context: Conte
         return MediaController(context, token)
     }
 
-    /** Creates a new [Media3Controller] from a [SessionToken] */
+    /**
+     * Creates a new [Media3Controller] from the media3 [SessionToken].
+     *
+     * @param token The token for the session
+     * @param looper The looper that will be used for this controller's operations
+     */
     open suspend fun create(token: SessionToken, looper: Looper): Media3Controller {
         return Media3Controller.Builder(context, token)
             .setApplicationLooper(looper)

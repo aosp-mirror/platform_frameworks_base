@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.pip2.animation;
 
+import static android.view.Surface.ROTATION_90;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.RectEvaluator;
@@ -73,6 +75,7 @@ public class PipExpandAnimator extends ValueAnimator {
                 mAnimationStartCallback.run();
             }
             if (mStartTransaction != null) {
+                onExpandAnimationUpdate(mStartTransaction, 0f);
                 mStartTransaction.apply();
             }
         }
@@ -81,13 +84,7 @@ public class PipExpandAnimator extends ValueAnimator {
         public void onAnimationEnd(Animator animation) {
             super.onAnimationEnd(animation);
             if (mFinishTransaction != null) {
-                // finishTransaction might override some state (eg. corner radii) so we want to
-                // manually set the state to the end of the animation
-                mPipSurfaceTransactionHelper.scaleAndCrop(mFinishTransaction, mLeash,
-                                mSourceRectHint, mBaseBounds, mAnimatedRect, getInsets(1f),
-                                false /* isInPipDirection */, 1f)
-                        .round(mFinishTransaction, mLeash, false /* applyCornerRadius */)
-                        .shadow(mFinishTransaction, mLeash, false /* applyCornerRadius */);
+                onExpandAnimationUpdate(mFinishTransaction, 1f);
             }
             if (mAnimationEndCallback != null) {
                 mAnimationEndCallback.run();
@@ -102,14 +99,7 @@ public class PipExpandAnimator extends ValueAnimator {
                     final SurfaceControl.Transaction tx =
                             mSurfaceControlTransactionFactory.getTransaction();
                     final float fraction = getAnimatedFraction();
-
-                    // TODO (b/350801661): implement fixed rotation
-                    Rect insets = getInsets(fraction);
-                    mPipSurfaceTransactionHelper.scaleAndCrop(tx, mLeash, mSourceRectHint,
-                                    mBaseBounds, mAnimatedRect,
-                                    insets, false /* isInPipDirection */, fraction)
-                            .round(tx, mLeash, false /* applyCornerRadius */)
-                            .shadow(tx, mLeash, false /* applyCornerRadius */);
+                    onExpandAnimationUpdate(tx, fraction);
                     tx.apply();
                 }
             };
@@ -165,6 +155,32 @@ public class PipExpandAnimator extends ValueAnimator {
 
     public void setAnimationEndCallback(@NonNull Runnable runnable) {
         mAnimationEndCallback = runnable;
+    }
+
+    private void onExpandAnimationUpdate(SurfaceControl.Transaction tx, float fraction) {
+        Rect insets = getInsets(fraction);
+        if (mRotation == Surface.ROTATION_0) {
+            mPipSurfaceTransactionHelper.scaleAndCrop(tx, mLeash, mSourceRectHint, mBaseBounds,
+                    mAnimatedRect, insets, false /* isInPipDirection */, fraction);
+        } else {
+            // Fixed rotation case.
+            Rect start = mStartBounds;
+            Rect end = mEndBounds;
+            float degrees, x, y;
+            x = fraction * (end.left - start.left) + start.left;
+            y = fraction * (end.top - start.top) + start.top;
+
+            if (mRotation == ROTATION_90) {
+                degrees = 90 * fraction;
+            } else {
+                degrees = -90 * fraction;
+            }
+            mPipSurfaceTransactionHelper.rotateAndScaleWithCrop(tx, mLeash, mBaseBounds,
+                    mAnimatedRect, insets, degrees, x, y,
+                    true /* isExpanding */, mRotation == ROTATION_90);
+        }
+        mPipSurfaceTransactionHelper.round(tx, mLeash, false /* applyCornerRadius */)
+                .shadow(tx, mLeash, false /* applyShadowRadius */);
     }
 
     private Rect getInsets(float fraction) {

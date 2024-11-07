@@ -96,6 +96,16 @@ flag {
 }
 
 flag {
+    name: "enable_accessible_custom_headers"
+    namespace: "lse_desktop_experience"
+    description: "Enables a11y-friendly custom header input handling"
+    bug: "339302584"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_app_header_with_task_density"
     namespace: "lse_desktop_experience"
     description: "Matches the App Header density to that of the app window, instead of SysUI's"

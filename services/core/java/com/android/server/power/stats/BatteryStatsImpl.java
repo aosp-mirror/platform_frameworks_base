@@ -5155,10 +5155,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
             Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
             uidStats.noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
-
-            mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
-                    uidStats.mProcessState, true /* acquired */,
-                    getPowerManagerWakeLockLevel(type));
+            if (!mPowerManagerFlags.isMoveWscLoggingToNotifierEnabled()) {
+                mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
+                        uidStats.mProcessState, true /* acquired */,
+                        getPowerManagerWakeLockLevel(type));
+            }
             if (mPowerManagerFlags.isFrameworkWakelockInfoEnabled()) {
                 mFrameworkEvents.noteStartWakeLock(
                         mapIsolatedUid(uid), name, getPowerManagerWakeLockLevel(type), uptimeMs);
@@ -5205,9 +5206,11 @@ public class BatteryStatsImpl extends BatteryStats {
             Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
             uidStats.noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
 
-            mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
-                    uidStats.mProcessState, false/* acquired */,
-                    getPowerManagerWakeLockLevel(type));
+            if (!mPowerManagerFlags.isMoveWscLoggingToNotifierEnabled()) {
+                mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
+                        uidStats.mProcessState, false/* acquired */,
+                        getPowerManagerWakeLockLevel(type));
+            }
             if (mPowerManagerFlags.isFrameworkWakelockInfoEnabled()) {
                 mFrameworkEvents.noteStopWakeLock(
                         mapIsolatedUid(uid), name, getPowerManagerWakeLockLevel(type), uptimeMs);

@@ -28,14 +28,5 @@ import com.android.systemui.res.R
 @MainThread
 fun contentDescForNotification(c: Context, n: Notification): CharSequence {
     val appName = n.loadHeaderAppName(c) ?: ""
-    val title = n.extras?.getCharSequence(Notification.EXTRA_TITLE)
-    val text = n.extras?.getCharSequence(Notification.EXTRA_TEXT)
-    val ticker = n.tickerText
-
-    // Some apps just put the app name into the title
-    val titleOrText = if (TextUtils.equals(title, appName)) text else title
-    val desc =
-        if (!TextUtils.isEmpty(titleOrText)) titleOrText
-        else if (!TextUtils.isEmpty(ticker)) ticker else ""
-    return c.getString(R.string.accessibility_desc_notification_icon, appName, desc)
+    return c.getString(R.string.accessibility_desc_notification_icon, appName, "")
 }

@@ -45,10 +45,15 @@ interface PreferenceBindingFactory {
 
     /** Returns the [PreferenceBinding] associated with the [PreferenceMetadata]. */
     fun getPreferenceBinding(metadata: PreferenceMetadata): PreferenceBinding?
+
+    companion object {
+        /** Default preference binding factory. */
+        @JvmStatic var defaultFactory: PreferenceBindingFactory = DefaultPreferenceBindingFactory()
+    }
 }
 
 /** Default [PreferenceBindingFactory]. */
-object DefaultPreferenceBindingFactory : PreferenceBindingFactory {
+open class DefaultPreferenceBindingFactory : PreferenceBindingFactory {
 
     override fun getPreferenceBinding(metadata: PreferenceMetadata) =
         metadata as? PreferenceBinding
@@ -66,5 +71,6 @@ class KeyedPreferenceBindingFactory(private val bindings: Map<String, Preference
     PreferenceBindingFactory {
 
     override fun getPreferenceBinding(metadata: PreferenceMetadata) =
-        bindings[metadata.key] ?: DefaultPreferenceBindingFactory.getPreferenceBinding(metadata)
+        bindings[metadata.key]
+            ?: PreferenceBindingFactory.defaultFactory.getPreferenceBinding(metadata)
 }

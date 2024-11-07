@@ -31,6 +31,7 @@ import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -41,14 +42,14 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -59,6 +60,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -75,7 +77,6 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.viewinterop.AndroidView
@@ -97,6 +98,7 @@ import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.Dumpable
+import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -107,6 +109,7 @@ import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.composefragment.SceneKeys.QuickQuickSettings
 import com.android.systemui.qs.composefragment.SceneKeys.QuickSettings
 import com.android.systemui.qs.composefragment.SceneKeys.toIdleSceneKey
+import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.composefragment.ui.NotificationScrimClipParams
 import com.android.systemui.qs.composefragment.ui.notificationScrimClip
 import com.android.systemui.qs.composefragment.ui.quickQuickSettingsToQuickSettings
@@ -115,8 +118,8 @@ import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.QuickQuickSettings
+import com.android.systemui.qs.panels.ui.compose.TileGrid
 import com.android.systemui.qs.shared.ui.ElementKeys
-import com.android.systemui.qs.ui.composable.QuickSettingsLayout
 import com.android.systemui.qs.ui.composable.QuickSettingsShade
 import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.res.R
@@ -195,6 +198,7 @@ constructor(
         val context = inflater.context
         val composeView =
             ComposeView(context).apply {
+                id = R.id.quick_settings_container
                 repeatWhenAttached {
                     repeatOnLifecycle(Lifecycle.State.CREATED) {
                         setViewTreeOnBackPressedDispatcherOwner(
@@ -239,7 +243,6 @@ constructor(
                 visible = viewModel.isQsVisible,
                 modifier =
                     Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
-                        .windowInsetsPadding(WindowInsets.navigationBars)
                         // Clipping before translation to match QSContainerImpl.onDraw
                         .offset {
                             IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
@@ -299,7 +302,7 @@ constructor(
                 transitions =
                     transitions {
                         from(QuickQuickSettings, QuickSettings) {
-                            quickQuickSettingsToQuickSettings(viewModel::inFirstPage::get)
+                            quickQuickSettingsToQuickSettings(viewModel::animateTilesExpansion::get)
                         }
                     },
             )
@@ -596,8 +599,21 @@ constructor(
                         }
                         .padding(top = { qqsPadding }, bottom = { bottomPadding })
             ) {
+                val Tiles =
+                    @Composable {
+                        QuickQuickSettings(
+                            viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel
+                        )
+                    }
+                val Media =
+                    @Composable {
+                        if (viewModel.qqsMediaVisible) {
+                            MediaObject(mediaHost = viewModel.qqsMediaHost)
+                        }
+                    }
+
                 if (viewModel.isQsEnabled) {
-                    Column(
+                    Box(
                         modifier =
                             Modifier.collapseExpandSemanticAction(
                                     stringResource(
@@ -608,16 +624,13 @@ constructor(
                                     horizontal = {
                                         QuickSettingsShade.Dimensions.Padding.roundToPx()
                                     }
-                                ),
-                        verticalArrangement =
-                            spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical)),
+                                )
                     ) {
-                        QuickQuickSettings(
-                            viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel
+                        QuickQuickSettingsLayout(
+                            tiles = Tiles,
+                            media = Media,
+                            mediaInRow = viewModel.qqsMediaInRow,
                         )
-                        if (viewModel.qqsMediaVisible) {
-                            MediaObject(mediaHost = viewModel.qqsMediaHost)
-                        }
                     }
                 }
             }
@@ -657,23 +670,58 @@ constructor(
                                 .verticalScroll(scrollState)
                                 .sysuiResTag(ResIdTags.qsScroll)
                     ) {
+                        val containerViewModel = viewModel.containerViewModel
                         Spacer(
                             modifier = Modifier.height { qqsPadding + qsExtraPadding.roundToPx() }
                         )
-                        QuickSettingsLayout(
-                            viewModel = viewModel.containerViewModel,
-                            modifier = Modifier.sysuiResTag(ResIdTags.quickSettingsPanel),
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        if (viewModel.qsMediaVisible) {
-                            MediaObject(
-                                mediaHost = viewModel.qsMediaHost,
-                                modifier =
-                                    Modifier.padding(
-                                        horizontal = {
-                                            QuickSettingsShade.Dimensions.Padding.roundToPx()
-                                        }
-                                    ),
+                        val BrightnessSlider =
+                            @Composable {
+                                BrightnessSliderContainer(
+                                    viewModel = containerViewModel.brightnessSliderViewModel,
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .height(
+                                                QuickSettingsShade.Dimensions.BrightnessSliderHeight
+                                            ),
+                                )
+                            }
+                        val TileGrid =
+                            @Composable {
+                                Box {
+                                    GridAnchor()
+                                    TileGrid(
+                                        viewModel = containerViewModel.tileGridViewModel,
+                                        modifier =
+                                            Modifier.fillMaxWidth()
+                                                .heightIn(
+                                                    max =
+                                                        QuickSettingsShade.Dimensions.GridMaxHeight
+                                                ),
+                                        containerViewModel.editModeViewModel::startEditing,
+                                    )
+                                }
+                            }
+                        val Media =
+                            @Composable {
+                                if (viewModel.qsMediaVisible) {
+                                    MediaObject(mediaHost = viewModel.qsMediaHost)
+                                }
+                            }
+                        Box(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .sysuiResTag(ResIdTags.quickSettingsPanel)
+                                    .padding(
+                                        top = QuickSettingsShade.Dimensions.Padding,
+                                        start = QuickSettingsShade.Dimensions.Padding,
+                                        end = QuickSettingsShade.Dimensions.Padding,
+                                    )
+                        ) {
+                            QuickSettingsLayout(
+                                brightness = BrightnessSlider,
+                                tiles = TileGrid,
+                                media = Media,
+                                mediaInRow = viewModel.qsMediaInRow,
                             )
                         }
                     }
@@ -954,6 +1002,63 @@ private fun MediaObject(mediaHost: MediaHost, modifier: Modifier = Modifier) {
             },
             onReset = {},
         )
+    }
+}
+
+@Composable
+@VisibleForTesting
+fun QuickQuickSettingsLayout(
+    tiles: @Composable () -> Unit,
+    media: @Composable () -> Unit,
+    mediaInRow: Boolean,
+) {
+    if (mediaInRow) {
+        Row(
+            horizontalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical)),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(modifier = Modifier.weight(1f)) { tiles() }
+            Box(modifier = Modifier.weight(1f)) { media() }
+        }
+    } else {
+        Column(verticalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical))) {
+            tiles()
+            media()
+        }
+    }
+}
+
+@Composable
+@VisibleForTesting
+fun QuickSettingsLayout(
+    brightness: @Composable () -> Unit,
+    tiles: @Composable () -> Unit,
+    media: @Composable () -> Unit,
+    mediaInRow: Boolean,
+) {
+    if (mediaInRow) {
+        Column(
+            verticalArrangement = spacedBy(QuickSettingsShade.Dimensions.Padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            brightness()
+            Row(
+                horizontalArrangement = spacedBy(QuickSettingsShade.Dimensions.Padding),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(modifier = Modifier.weight(1f)) { tiles() }
+                Box(modifier = Modifier.weight(1f)) { media() }
+            }
+        }
+    } else {
+        Column(
+            verticalArrangement = spacedBy(QuickSettingsShade.Dimensions.Padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            brightness()
+            tiles()
+            media()
+        }
     }
 }
 

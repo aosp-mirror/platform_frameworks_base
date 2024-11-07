@@ -128,10 +128,10 @@ class SwipeToSceneTest {
                     if (swipesEnabled())
                         mapOf(
                             Swipe.Down to SceneA,
-                            Swipe(SwipeDirection.Down, pointerCount = 2) to SceneB,
-                            Swipe(SwipeDirection.Down, pointersType = PointerType.Mouse) to SceneD,
-                            Swipe(SwipeDirection.Right, fromSource = Edge.Left) to SceneB,
-                            Swipe(SwipeDirection.Down, fromSource = Edge.Top) to SceneB,
+                            Swipe.Down(pointerCount = 2) to SceneB,
+                            Swipe.Down(pointersType = PointerType.Mouse) to SceneD,
+                            Swipe.Down(fromSource = Edge.Top) to SceneB,
+                            Swipe.Right(fromSource = Edge.Left) to SceneB,
                         )
                     else emptyMap(),
             ) {

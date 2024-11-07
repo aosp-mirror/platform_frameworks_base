@@ -3667,6 +3667,14 @@ public final class InputMethodManager {
     }
 
     /**
+     * Returns the ImeOnBackInvokedDispatcher.
+     * @hide
+     */
+    public ImeOnBackInvokedDispatcher getImeOnBackInvokedDispatcher() {
+        return mImeDispatcher;
+    }
+
+    /**
      * Check the next served view if needs to start input.
      */
     @GuardedBy("mH")

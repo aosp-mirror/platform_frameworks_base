@@ -16,7 +16,6 @@
 package com.android.wm.shell.bubbles.bar;
 
 import android.annotation.ColorInt;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -42,8 +41,6 @@ import java.util.ArrayList;
  * Bubble bar expanded view menu
  */
 public class BubbleBarMenuView extends LinearLayout {
-
-    public static final Object DISMISS_ACTION_TAG = new Object();
 
     private ViewGroup mBubbleSectionView;
     private ViewGroup mActionsSectionView;
@@ -123,9 +120,6 @@ public class BubbleBarMenuView extends LinearLayout {
                     R.layout.bubble_bar_menu_item, mActionsSectionView, false);
             itemView.update(action.mIcon, action.mTitle, action.mTint);
             itemView.setOnClickListener(action.mOnClick);
-            if (action.mTag != null) {
-                itemView.setTag(action.mTag);
-            }
             mActionsSectionView.addView(itemView);
         }
     }
@@ -166,8 +160,6 @@ public class BubbleBarMenuView extends LinearLayout {
         private Icon mIcon;
         private @ColorInt int mTint;
         private String mTitle;
-        @Nullable
-        private Object mTag;
         private OnClickListener mOnClick;
 
         MenuAction(Icon icon, String title, OnClickListener onClick) {
@@ -178,15 +170,6 @@ public class BubbleBarMenuView extends LinearLayout {
             this.mIcon = icon;
             this.mTitle = title;
             this.mTint = tint;
-            this.mOnClick = onClick;
-        }
-
-        MenuAction(Icon icon, String title, @ColorInt int tint, @Nullable Object tag,
-                OnClickListener onClick) {
-            this.mIcon = icon;
-            this.mTitle = title;
-            this.mTint = tint;
-            this.mTag = tag;
             this.mOnClick = onClick;
         }
     }

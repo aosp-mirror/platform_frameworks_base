@@ -268,7 +268,8 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
             // skip changes that we didn't wrap
             if (!leashMap.containsKey(change.getLeash())) continue;
             // Only make the update if we are closing Desktop tasks.
-            if (change.getTaskInfo().isFreeform() && isClosingMode(change.getMode())) {
+            if (change.getTaskInfo() != null && change.getTaskInfo().isFreeform()
+                    && isClosingMode(change.getMode())) {
                 startTransaction.setAlpha(leashMap.get(launcherChange.getLeash()), 0f);
                 return;
             }
