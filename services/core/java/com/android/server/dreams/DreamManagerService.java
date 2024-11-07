@@ -64,15 +64,12 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
-import android.text.TextUtils;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.DumpUtils;
@@ -89,7 +86,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -159,10 +155,6 @@ public final class DreamManagerService extends SystemService {
     private ComponentName mDreamOverlayServiceName;
 
     private final AmbientDisplayConfiguration mDozeConfig;
-
-    /** Stores {@link PerUserPackageMonitor} to monitor dream uninstalls. */
-    private final SparseArray<PackageMonitor> mPackageMonitors = new SparseArray<>();
-
     private final ActivityInterceptorCallback mActivityInterceptorCallback =
             new ActivityInterceptorCallback() {
                 @Nullable
@@ -223,15 +215,6 @@ public final class DreamManagerService extends SystemService {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             updateWhenToDreamSettings();
-        }
-    }
-
-    private final class PerUserPackageMonitor extends PackageMonitor {
-        @Override
-        public void onPackageRemoved(String packageName, int uid) {
-            super.onPackageRemoved(packageName, uid);
-            final int userId = getChangingUserId();
-            updateDreamOnPackageRemoved(packageName, userId);
         }
     }
 
@@ -346,33 +329,6 @@ public final class DreamManagerService extends SystemService {
             writePulseGestureEnabled();
             synchronized (mLock) {
                 stopDreamLocked(false /*immediate*/, "user switched");
-            }
-        });
-    }
-
-    @Override
-    public void onUserStarting(@NonNull TargetUser user) {
-        super.onUserStarting(user);
-        mHandler.post(() -> {
-            final int userId = user.getUserIdentifier();
-            if (!mPackageMonitors.contains(userId)) {
-                final PackageMonitor monitor = new PerUserPackageMonitor();
-                monitor.register(mContext, UserHandle.of(userId), mHandler);
-                mPackageMonitors.put(userId, monitor);
-            } else {
-                Slog.w(TAG, "Package monitor already registered for " + userId);
-            }
-        });
-    }
-
-    @Override
-    public void onUserStopping(@NonNull TargetUser user) {
-        super.onUserStopping(user);
-        mHandler.post(() -> {
-            final PackageMonitor monitor = mPackageMonitors.removeReturnOld(
-                    user.getUserIdentifier());
-            if (monitor != null) {
-                monitor.unregister();
             }
         });
     }
@@ -706,22 +662,6 @@ public final class DreamManagerService extends SystemService {
             }
         }
         return validComponents.toArray(new ComponentName[validComponents.size()]);
-    }
-
-    private void updateDreamOnPackageRemoved(String packageName, int userId) {
-        final ComponentName[] componentNames = componentsFromString(
-                Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                        Settings.Secure.SCREENSAVER_COMPONENTS,
-                        userId));
-        if (componentNames != null) {
-            // Filter out any components in the removed package.
-            final ComponentName[] filteredComponents = Arrays.stream(componentNames).filter(
-                    (componentName -> !TextUtils.equals(componentName.getPackageName(),
-                            packageName))).toArray(ComponentName[]::new);
-            if (filteredComponents.length != componentNames.length) {
-                setDreamComponentsForUser(userId, filteredComponents);
-            }
-        }
     }
 
     private void setDreamComponentsForUser(int userId, ComponentName[] componentNames) {
