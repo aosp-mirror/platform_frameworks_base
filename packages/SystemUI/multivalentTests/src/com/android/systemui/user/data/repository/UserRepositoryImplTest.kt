@@ -17,6 +17,7 @@
 
 package com.android.systemui.user.data.repository
 
+import android.app.admin.devicePolicyManager
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
@@ -24,6 +25,7 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
@@ -57,6 +59,8 @@ class UserRepositoryImplTest : SysuiTestCase() {
     private val testDispatcher = kosmos.testDispatcher
     private val testScope = kosmos.testScope
     private val globalSettings = kosmos.fakeGlobalSettings
+    private val broadcastDispatcher = kosmos.broadcastDispatcher
+    private val devicePolicyManager = kosmos.devicePolicyManager
 
     @Mock private lateinit var manager: UserManager
 
@@ -317,6 +321,8 @@ class UserRepositoryImplTest : SysuiTestCase() {
             backgroundDispatcher = testDispatcher,
             globalSettings = globalSettings,
             tracker = tracker,
+            broadcastDispatcher = broadcastDispatcher,
+            devicePolicyManager = devicePolicyManager,
         )
     }
 
