@@ -229,6 +229,7 @@ package android {
     field public static final String MANAGE_ROTATION_RESOLVER = "android.permission.MANAGE_ROTATION_RESOLVER";
     field public static final String MANAGE_SAFETY_CENTER = "android.permission.MANAGE_SAFETY_CENTER";
     field public static final String MANAGE_SEARCH_UI = "android.permission.MANAGE_SEARCH_UI";
+    field @FlaggedApi("android.security.secure_lockdown") public static final String MANAGE_SECURE_LOCK_DEVICE = "android.permission.MANAGE_SECURE_LOCK_DEVICE";
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final String MANAGE_SMARTSPACE = "android.permission.MANAGE_SMARTSPACE";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
