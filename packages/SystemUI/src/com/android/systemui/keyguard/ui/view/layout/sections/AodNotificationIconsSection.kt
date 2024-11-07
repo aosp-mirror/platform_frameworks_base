@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
@@ -47,7 +48,7 @@ class AodNotificationIconsSection
 @Inject
 constructor(
     private val context: Context,
-    private val configurationState: ConfigurationState,
+    @ShadeDisplayAware private val configurationState: ConfigurationState,
     private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
@@ -70,7 +71,7 @@ constructor(
                     resources.getDimensionPixelSize(R.dimen.below_clock_padding_start_icons),
                     0,
                     0,
-                    0
+                    0,
                 )
                 setVisibility(View.INVISIBLE)
             }
@@ -113,18 +114,18 @@ constructor(
                 START,
                 PARENT_ID,
                 START,
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal),
             )
             connect(
                 nicId,
                 END,
                 PARENT_ID,
                 END,
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal),
             )
             constrainHeight(
                 nicId,
-                context.resources.getDimensionPixelSize(R.dimen.notification_shelf_height)
+                context.resources.getDimensionPixelSize(R.dimen.notification_shelf_height),
             )
         }
     }

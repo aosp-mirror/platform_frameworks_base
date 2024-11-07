@@ -2422,7 +2422,7 @@ public class ZenModeHelper {
                 || (mSuppressedEffects & SUPPRESSED_EFFECT_NOTIFICATIONS) != 0;
         // call restrictions
         final boolean muteCalls = zenAlarmsOnly
-                || (zenPriorityOnly && !(allowCalls || allowRepeatCallers))
+                || (zenPriorityOnly && (!allowCalls || !allowRepeatCallers))
                 || (mSuppressedEffects & SUPPRESSED_EFFECT_CALLS) != 0;
         // alarm restrictions
         final boolean muteAlarms = zenPriorityOnly && !allowAlarms;

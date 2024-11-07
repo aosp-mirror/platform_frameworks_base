@@ -53,6 +53,7 @@ public class TestableLooper {
     private static final Field MESSAGE_QUEUE_MESSAGES_FIELD;
     private static final Field MESSAGE_NEXT_FIELD;
     private static final Field MESSAGE_WHEN_FIELD;
+    private static Field MESSAGE_QUEUE_USE_CONCURRENT_FIELD = null;
 
     private Looper mLooper;
     private MessageQueue mQueue;
@@ -62,6 +63,14 @@ public class TestableLooper {
     private TestLooperManager mQueueWrapper;
 
     static {
+        try {
+            MESSAGE_QUEUE_USE_CONCURRENT_FIELD =
+                    MessageQueue.class.getDeclaredField("mUseConcurrent");
+            MESSAGE_QUEUE_USE_CONCURRENT_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException ignored) {
+            // Ignore - maybe this is not CombinedMessageQueue?
+        }
+
         try {
             MESSAGE_QUEUE_MESSAGES_FIELD = MessageQueue.class.getDeclaredField("mMessages");
             MESSAGE_QUEUE_MESSAGES_FIELD.setAccessible(true);
@@ -146,6 +155,15 @@ public class TestableLooper {
         mLooper = l;
         mQueue = mLooper.getQueue();
         mHandler = new Handler(mLooper);
+
+        // If we are using CombinedMessageQueue, we need to disable concurrent mode for testing.
+        if (MESSAGE_QUEUE_USE_CONCURRENT_FIELD != null) {
+            try {
+                MESSAGE_QUEUE_USE_CONCURRENT_FIELD.set(mQueue, false);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**

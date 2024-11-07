@@ -896,7 +896,8 @@ public class RescueParty {
         int systemUserId = UserHandle.SYSTEM.getIdentifier();
         int[] userIds = { systemUserId };
         try {
-            for (File file : FileUtils.listFilesOrEmpty(Environment.getDataSystemDeDirectory())) {
+            for (File file : FileUtils.listFilesOrEmpty(
+                    Environment.getDataSystemDeviceProtectedDirectory())) {
                 try {
                     final int userId = Integer.parseInt(file.getName());
                     if (userId != systemUserId) {

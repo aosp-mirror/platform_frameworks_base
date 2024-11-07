@@ -1614,9 +1614,16 @@ public class AppOpsManager {
     /** @hide Access to read skin temperature. */
     public static final int OP_READ_SKIN_TEMPERATURE = AppOpEnums.APP_OP_READ_SKIN_TEMPERATURE;
 
+    /**
+     * Allows an app to range with nearby devices using any ranging technology available.
+     *
+     * @hide
+     */
+    public static final int OP_RANGING = AppOpEnums.APP_OP_RANGING;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 151;
+    public static final int _NUM_OP = 152;
 
     /**
      * All app ops represented as strings.
@@ -1771,6 +1778,7 @@ public class AppOpsManager {
             OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS,
             OPSTR_READ_HEART_RATE,
             OPSTR_READ_SKIN_TEMPERATURE,
+            OPSTR_RANGING,
     })
     public @interface AppOpString {}
 
@@ -2518,6 +2526,11 @@ public class AppOpsManager {
     @FlaggedApi(Flags.FLAG_PLATFORM_SKIN_TEMPERATURE_ENABLED)
     public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
 
+    /** @hide Access to ranging */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_RANGING_PERMISSION_ENABLED)
+    public static final String OPSTR_RANGING = "android:ranging";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2589,6 +2602,7 @@ public class AppOpsManager {
             OP_BLUETOOTH_ADVERTISE,
             OP_UWB_RANGING,
             OP_NEARBY_WIFI_DEVICES,
+            Flags.rangingPermissionEnabled() ? OP_RANGING : OP_NONE,
             // Notifications
             OP_POST_NOTIFICATION,
             // Health
@@ -3110,6 +3124,10 @@ public class AppOpsManager {
             "READ_SKIN_TEMPERATURE").setPermission(
                 Flags.platformSkinTemperatureEnabled()
                     ? HealthPermissions.READ_SKIN_TEMPERATURE : null)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RANGING, OPSTR_RANGING, "RANGING")
+            .setPermission(Flags.rangingPermissionEnabled()?
+                Manifest.permission.RANGING : null)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
     };
 

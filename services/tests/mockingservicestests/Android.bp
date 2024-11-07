@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 java_defaults {
-    name: "FrameworkMockingServicesTests-jni-defaults",
+    name: "FrameworksMockingServicesTests-jni-defaults",
     jni_libs: [
         "libmockingservicestestjni",
     ],
@@ -30,7 +30,7 @@ package {
 android_test {
     name: "FrameworksMockingServicesTests",
     defaults: [
-        "FrameworkMockingServicesTests-jni-defaults",
+        "FrameworksMockingServicesTests-jni-defaults",
         "modules-utils-testable-device-config-defaults",
     ],
 
@@ -77,7 +77,10 @@ android_test {
         "flag-junit",
         "am_flags_lib",
         "device_policy_aconfig_flags_lib",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": ["service-crashrecovery.impl"],
+        default: [],
+    }),
 
     libs: [
         "android.test.mock.stubs.system",

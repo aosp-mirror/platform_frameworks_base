@@ -420,6 +420,8 @@ class OwnersData {
             if (Flags.unmanagedModeMigration()) {
                 out.attributeBoolean(null, ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED,
                         mRequiredPasswordComplexityMigrated);
+            }
+            if (Flags.suspendPackagesCoexistence()) {
                 out.attributeBoolean(null, ATTR_SUSPENDED_PACKAGES_MIGRATED,
                         mSuspendedPackagesMigrated);
 
@@ -499,7 +501,7 @@ class OwnersData {
                     mRequiredPasswordComplexityMigrated = Flags.unmanagedModeMigration()
                             && parser.getAttributeBoolean(null,
                                     ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED, false);
-                    mSuspendedPackagesMigrated = Flags.unmanagedModeMigration()
+                    mSuspendedPackagesMigrated = Flags.suspendPackagesCoexistence()
                             && parser.getAttributeBoolean(null,
                                     ATTR_SUSPENDED_PACKAGES_MIGRATED, false);
                     mResetPasswordWithTokenMigrated = Flags.resetPasswordWithTokenCoexistence()

@@ -112,8 +112,7 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"要錄製畫面嗎？"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"錄製單一應用程式"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"錄製整個畫面"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"錄製整個畫面：%s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"錄製整個畫面時，系統會錄下畫面上的所有內容。因此，請謹慎處理密碼、付款資料、訊息、相片和影音內容等資訊。"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"當你錄製應用程式畫面時，系統會錄下該應用程式顯示或播放的所有內容。因此，請謹慎處理密碼、付款資料、訊息、相片和影音內容等資訊。"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"錄製畫面"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"目前正在錄製「<xliff:g id="APP_NAME">%1$s</xliff:g>」的畫面"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"停止錄製"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"正在分享畫面"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"正在分享內容"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"停止分享？"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"要停止分享嗎？"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"目前正在與「<xliff:g id="HOST_APP_NAME">%1$s</xliff:g>」分享整個畫面"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"目前正在與某個應用程式分享整個畫面"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"目前正在分享「<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>」的畫面"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"目前正在分享應用程式畫面"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"目前正在與應用程式分享內容"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"停止分享"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"正在投放畫面"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"停止投放？"</string>
@@ -523,10 +519,8 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"螢幕鎖定小工具"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"即使平板電腦已鎖定，所有人仍可查看螢幕鎖定畫面上的小工具。"</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"取消選取小工具"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"調低"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"調高"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"螢幕鎖定小工具"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"如要使用小工具開啟應用程式，需先驗證身分。請留意，即使平板電腦已鎖定，所有人都還是能查看小工具。某些小工具可能不適用於螢幕鎖定畫面，新增到此可能會有安全疑慮。"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"我知道了"</string>
@@ -583,10 +577,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"記錄"</string>
-    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
-    <skip />
-    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
-    <skip />
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"通知設定"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"通知記錄"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"最新"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"靜音"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
@@ -597,7 +589,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"沒有通知"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"沒有新通知"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"通知緩和設定已開啟"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
+    <skip />
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"如果一次收到過多通知，裝置就會自動降低音量並減少通知數量，持續時間最多 2 分鐘。"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"關閉"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"解鎖即可查看舊通知"</string>
@@ -705,6 +698,8 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"固定"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"頭部追蹤"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"輕觸即可變更鈴聲模式"</string>
+    <!-- no translation found for volume_ringer_mode (6867838048430807128) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"靜音"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"取消靜音"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"震動"</string>
@@ -1415,15 +1410,12 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"目前的應用程式"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"無障礙"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"鍵盤快速鍵"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"自訂鍵盤快速鍵"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"搜尋快速鍵"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"找不到相符的搜尋結果"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收合圖示"</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"自訂"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"完成"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"展開圖示"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"或"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"拖曳控點"</string>
@@ -1485,6 +1477,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"由應用程式提供"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"螢幕"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"不明"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"重設設定方塊"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"要將設定方塊的順序和大小恢復預設值嗎？"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"要重設所有設定方塊嗎？"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"所有快速設定方塊都會恢復裝置的原始設定"</string>
 </resources>

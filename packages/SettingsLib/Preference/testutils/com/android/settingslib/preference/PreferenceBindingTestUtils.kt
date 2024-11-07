@@ -25,7 +25,7 @@ import com.android.settingslib.metadata.PreferenceMetadata
 /** Creates [Preference] widget and binds with metadata. */
 @VisibleForTesting
 fun <P : Preference> PreferenceMetadata.createAndBindWidget(context: Context): P {
-    val binding = DefaultPreferenceBindingFactory.getPreferenceBinding(this)
+    val binding = PreferenceBindingFactory.defaultFactory.getPreferenceBinding(this)!!
     return (binding.createWidget(context) as P).also {
         if (this is PersistentPreference<*>) {
             storage(context)?.let { keyValueStore ->

@@ -158,6 +158,7 @@ public:
     SkSamplingOptions sampling() const {
         return SkSamplingOptions(this->filterMode());
     }
+    bool isVerticalText() const { return mVerticalText; }
 
     void setVariationOverride(minikin::VariationSettings&& varSettings) {
         mFontVariationOverride = std::move(varSettings);
@@ -202,6 +203,7 @@ private:
     bool mUnderline = false;
     bool mDevKern = false;
     minikin::RunFlag mRunFlag = minikin::RunFlag::NONE;
+    bool mVerticalText = false;
 };
 
 }  // namespace android

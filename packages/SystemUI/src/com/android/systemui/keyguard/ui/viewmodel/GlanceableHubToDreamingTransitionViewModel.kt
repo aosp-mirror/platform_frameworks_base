@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -41,7 +42,7 @@ class GlanceableHubToDreamingTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
@@ -50,9 +51,7 @@ constructor(
                 duration = FROM_GLANCEABLE_HUB_DURATION,
                 edge = Edge.create(from = Scenes.Communal, to = DREAMING),
             )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = GLANCEABLE_HUB, to = DREAMING),
-            )
+            .setupWithoutSceneContainer(edge = Edge.create(from = GLANCEABLE_HUB, to = DREAMING))
 
     val dreamOverlayAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
@@ -66,7 +65,7 @@ constructor(
         configurationInteractor
             .directionalDimensionPixelSize(
                 LayoutDirection.LTR,
-                R.dimen.hub_to_dreaming_transition_dream_overlay_translation_x
+                R.dimen.hub_to_dreaming_transition_dream_overlay_translation_x,
             )
             .flatMapLatest { translatePx: Int ->
                 transitionAnimation.sharedFlow(
@@ -74,7 +73,7 @@ constructor(
                     onStep = { value -> -translatePx + value * translatePx },
                     interpolator = Interpolators.EMPHASIZED,
                     onCancel = { -translatePx.toFloat() },
-                    name = "GLANCEABLE_HUB->LOCKSCREEN: dreamOverlayTranslationX"
+                    name = "GLANCEABLE_HUB->LOCKSCREEN: dreamOverlayTranslationX",
                 )
             }
 

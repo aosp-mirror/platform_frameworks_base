@@ -460,10 +460,10 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final ArraySet<JobStatus> mChangedJobList = new ArraySet<>();
 
     /**
-     * Cached pending job reasons. Mapping from UID -> namespace -> job ID -> reason.
+     * Cached pending job reasons. Mapping from UID -> namespace -> job ID -> reasons.
      */
-    @GuardedBy("mPendingJobReasonCache") // Use its own lock to avoid blocking JS processing
-    private final SparseArrayMap<String, SparseIntArray> mPendingJobReasonCache =
+    @GuardedBy("mPendingJobReasonsCache") // Use its own lock to avoid blocking JS processing
+    private final SparseArrayMap<String, SparseArray<int[]>> mPendingJobReasonsCache =
             new SparseArrayMap<>();
 
     /**
@@ -2021,139 +2021,123 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    @JobScheduler.PendingJobReason
-    private int getPendingJobReason(int uid, String namespace, int jobId) {
-        int reason;
+    @NonNull
+    private int[] getPendingJobReasons(int uid, String namespace, int jobId) {
+        int[] reasons;
         // Some apps may attempt to query this frequently, so cache the reason under a separate lock
         // so that the rest of JS processing isn't negatively impacted.
-        synchronized (mPendingJobReasonCache) {
-            SparseIntArray jobIdToReason = mPendingJobReasonCache.get(uid, namespace);
-            if (jobIdToReason != null) {
-                reason = jobIdToReason.get(jobId, JobScheduler.PENDING_JOB_REASON_UNDEFINED);
-                if (reason != JobScheduler.PENDING_JOB_REASON_UNDEFINED) {
-                    return reason;
+        synchronized (mPendingJobReasonsCache) {
+            SparseArray<int[]> jobIdToReasons = mPendingJobReasonsCache.get(uid, namespace);
+            if (jobIdToReasons != null) {
+                reasons = jobIdToReasons.get(jobId);
+                if (reasons != null) {
+                    return reasons;
                 }
             }
         }
         synchronized (mLock) {
-            reason = getPendingJobReasonLocked(uid, namespace, jobId);
+            reasons = getPendingJobReasonsLocked(uid, namespace, jobId);
             if (DEBUG) {
-                Slog.v(TAG, "getPendingJobReason("
-                        + uid + "," + namespace + "," + jobId + ")=" + reason);
+                Slog.v(TAG, "getPendingJobReasons("
+                        + uid + "," + namespace + "," + jobId + ")=" + Arrays.toString(reasons));
             }
         }
-        synchronized (mPendingJobReasonCache) {
-            SparseIntArray jobIdToReason = mPendingJobReasonCache.get(uid, namespace);
-            if (jobIdToReason == null) {
-                jobIdToReason = new SparseIntArray();
-                mPendingJobReasonCache.add(uid, namespace, jobIdToReason);
+        synchronized (mPendingJobReasonsCache) {
+            SparseArray<int[]> jobIdToReasons = mPendingJobReasonsCache.get(uid, namespace);
+            if (jobIdToReasons == null) {
+                jobIdToReasons = new SparseArray<>();
+                mPendingJobReasonsCache.add(uid, namespace, jobIdToReasons);
             }
-            jobIdToReason.put(jobId, reason);
+            jobIdToReasons.put(jobId, reasons);
         }
-        return reason;
+        return reasons;
     }
 
     @VisibleForTesting
     @JobScheduler.PendingJobReason
     int getPendingJobReason(JobStatus job) {
-        return getPendingJobReason(job.getUid(), job.getNamespace(), job.getJobId());
+        // keep original method to enable unit testing with flags
+        return getPendingJobReasons(job.getUid(), job.getNamespace(), job.getJobId())[0];
     }
 
-    @JobScheduler.PendingJobReason
-    @GuardedBy("mLock")
-    private int getPendingJobReasonLocked(int uid, String namespace, int jobId) {
-        // Very similar code to isReadyToBeExecutedLocked.
+    @VisibleForTesting
+    @NonNull
+    int[] getPendingJobReasons(JobStatus job) {
+        return getPendingJobReasons(job.getUid(), job.getNamespace(), job.getJobId());
+    }
 
-        JobStatus job = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+    @GuardedBy("mLock")
+    @NonNull
+    private int[] getPendingJobReasonsLocked(int uid, String namespace, int jobId) {
+        // Very similar code to isReadyToBeExecutedLocked.
+        final JobStatus job = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
         if (job == null) {
             // Job doesn't exist.
-            return JobScheduler.PENDING_JOB_REASON_INVALID_JOB_ID;
+            return new int[] { JobScheduler.PENDING_JOB_REASON_INVALID_JOB_ID };
         }
-
         if (isCurrentlyRunningLocked(job)) {
-            return JobScheduler.PENDING_JOB_REASON_EXECUTING;
+            return new int[] { JobScheduler.PENDING_JOB_REASON_EXECUTING };
         }
 
+        final String debugPrefix = "getPendingJobReasonsLocked: " + job.toShortString();
         final boolean jobReady = job.isReady();
-
         if (DEBUG) {
-            Slog.v(TAG, "getPendingJobReasonLocked: " + job.toShortString()
-                    + " ready=" + jobReady);
+            Slog.v(TAG, debugPrefix + " ready=" + jobReady);
         }
-
         if (!jobReady) {
-            return job.getPendingJobReason();
+            return job.getPendingJobReasons();
         }
 
         final boolean userStarted = areUsersStartedLocked(job);
-
         if (DEBUG) {
-            Slog.v(TAG, "getPendingJobReasonLocked: " + job.toShortString()
-                    + " userStarted=" + userStarted);
+            Slog.v(TAG, debugPrefix + " userStarted=" + userStarted);
         }
         if (!userStarted) {
-            return JobScheduler.PENDING_JOB_REASON_USER;
+            return new int[] { JobScheduler.PENDING_JOB_REASON_USER };
         }
 
         final boolean backingUp = mBackingUpUids.get(job.getSourceUid());
         if (DEBUG) {
-            Slog.v(TAG, "getPendingJobReasonLocked: " + job.toShortString()
-                    + " backingUp=" + backingUp);
+            Slog.v(TAG, debugPrefix + " backingUp=" + backingUp);
         }
-
         if (backingUp) {
             // TODO: Should we make a special reason for this?
-            return JobScheduler.PENDING_JOB_REASON_APP;
+            return new int[] { JobScheduler.PENDING_JOB_REASON_APP };
         }
 
-        JobRestriction restriction = checkIfRestricted(job);
+        final JobRestriction restriction = checkIfRestricted(job);
         if (DEBUG) {
-            Slog.v(TAG, "getPendingJobReasonLocked: " + job.toShortString()
-                    + " restriction=" + restriction);
+            Slog.v(TAG, debugPrefix + " restriction=" + restriction);
         }
         if (restriction != null) {
-            return restriction.getPendingReason();
+            // Currently this will return _DEVICE_STATE because of thermal reasons.
+            // TODO (b/372031023): does it make sense to move this along with the
+            //  pendingJobReasons() call above and also get the pending reasons from
+            //  all of the restriction controllers?
+            return new int[] { restriction.getPendingReason() };
         }
 
-        // The following can be a little more expensive (especially jobActive, since we need to
-        // go through the array of all potentially active jobs), so we are doing them
-        // later...  but still before checking with the package manager!
+        // The following can be a little more expensive, so we are doing it later,
+        // but still before checking with the package manager!
         final boolean jobPending = mPendingJobQueue.contains(job);
-
-
         if (DEBUG) {
-            Slog.v(TAG, "getPendingJobReasonLocked: " + job.toShortString()
-                    + " pending=" + jobPending);
+            Slog.v(TAG, debugPrefix + " pending=" + jobPending);
         }
-
         if (jobPending) {
-            // We haven't started the job for some reason. Presumably, there are too many jobs
-            // running.
-            return JobScheduler.PENDING_JOB_REASON_DEVICE_STATE;
-        }
-
-        final boolean jobActive = mConcurrencyManager.isJobRunningLocked(job);
-
-        if (DEBUG) {
-            Slog.v(TAG, "getPendingJobReasonLocked: " + job.toShortString()
-                    + " active=" + jobActive);
-        }
-        if (jobActive) {
-            return JobScheduler.PENDING_JOB_REASON_UNDEFINED;
+            // We haven't started the job - presumably, there are too many jobs running.
+            return new int[] { JobScheduler.PENDING_JOB_REASON_DEVICE_STATE };
         }
 
         // Validate that the defined package+service is still present & viable.
         final boolean componentUsable = isComponentUsable(job);
-
         if (DEBUG) {
-            Slog.v(TAG, "getPendingJobReasonLocked: " + job.toShortString()
-                    + " componentUsable=" + componentUsable);
+            Slog.v(TAG, debugPrefix + " componentUsable=" + componentUsable);
         }
         if (!componentUsable) {
-            return JobScheduler.PENDING_JOB_REASON_APP;
+            return new int[] { JobScheduler.PENDING_JOB_REASON_APP };
         }
 
-        return JobScheduler.PENDING_JOB_REASON_UNDEFINED;
+        return new int[] { JobScheduler.PENDING_JOB_REASON_UNDEFINED };
     }
 
     private JobInfo getPendingJob(int uid, @Nullable String namespace, int jobId) {
@@ -2195,15 +2179,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // The app process will be killed soon. There's no point keeping its jobs in
                 // the pending queue to try and start them.
                 if (mPendingJobQueue.remove(job)) {
-                    synchronized (mPendingJobReasonCache) {
-                        SparseIntArray jobIdToReason = mPendingJobReasonCache.get(
+                    synchronized (mPendingJobReasonsCache) {
+                        SparseArray<int[]> jobIdToReason = mPendingJobReasonsCache.get(
                                 job.getUid(), job.getNamespace());
                         if (jobIdToReason == null) {
-                            jobIdToReason = new SparseIntArray();
-                            mPendingJobReasonCache.add(job.getUid(), job.getNamespace(),
+                            jobIdToReason = new SparseArray<>();
+                            mPendingJobReasonsCache.add(job.getUid(), job.getNamespace(),
                                     jobIdToReason);
                         }
-                        jobIdToReason.put(job.getJobId(), JobScheduler.PENDING_JOB_REASON_USER);
+                        jobIdToReason.put(job.getJobId(),
+                                            new int[] { JobScheduler.PENDING_JOB_REASON_USER });
                     }
                 }
             }
@@ -2229,8 +2214,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         synchronized (mLock) {
             mJobs.removeJobsOfUnlistedUsers(umi.getUserIds());
         }
-        synchronized (mPendingJobReasonCache) {
-            mPendingJobReasonCache.clear();
+        synchronized (mPendingJobReasonsCache) {
+            mPendingJobReasonsCache.clear();
         }
     }
 
@@ -2875,7 +2860,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         final boolean update = lastJob != null;
         mJobs.add(jobStatus);
         // Clear potentially cached INVALID_JOB_ID reason.
-        resetPendingJobReasonCache(jobStatus);
+        resetPendingJobReasonsCache(jobStatus);
         if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
@@ -2897,9 +2882,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Deal with any remaining work items in the old job.
         jobStatus.stopTrackingJobLocked(incomingJob);
 
-        synchronized (mPendingJobReasonCache) {
-            SparseIntArray reasonCache =
-                    mPendingJobReasonCache.get(jobStatus.getUid(), jobStatus.getNamespace());
+        synchronized (mPendingJobReasonsCache) {
+            SparseArray<int[]> reasonCache =
+                    mPendingJobReasonsCache.get(jobStatus.getUid(), jobStatus.getNamespace());
             if (reasonCache != null) {
                 reasonCache.delete(jobStatus.getJobId());
             }
@@ -2927,11 +2912,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         return removed;
     }
 
-    /** Remove the pending job reason for this job from the cache. */
-    void resetPendingJobReasonCache(@NonNull JobStatus jobStatus) {
-        synchronized (mPendingJobReasonCache) {
-            final SparseIntArray reasons =
-                    mPendingJobReasonCache.get(jobStatus.getUid(), jobStatus.getNamespace());
+    /** Remove the pending job reasons for this job from the cache. */
+    void resetPendingJobReasonsCache(@NonNull JobStatus jobStatus) {
+        synchronized (mPendingJobReasonsCache) {
+            final SparseArray<int[]> reasons =
+                    mPendingJobReasonsCache.get(jobStatus.getUid(), jobStatus.getNamespace());
             if (reasons != null) {
                 reasons.delete(jobStatus.getJobId());
             }
@@ -3313,18 +3298,18 @@ public class JobSchedulerService extends com.android.server.SystemService
     public void onControllerStateChanged(@Nullable ArraySet<JobStatus> changedJobs) {
         if (changedJobs == null) {
             mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
-            synchronized (mPendingJobReasonCache) {
-                mPendingJobReasonCache.clear();
+            synchronized (mPendingJobReasonsCache) {
+                mPendingJobReasonsCache.clear();
             }
         } else if (changedJobs.size() > 0) {
             synchronized (mLock) {
                 mChangedJobList.addAll(changedJobs);
             }
             mHandler.obtainMessage(MSG_CHECK_CHANGED_JOB_LIST).sendToTarget();
-            synchronized (mPendingJobReasonCache) {
+            synchronized (mPendingJobReasonsCache) {
                 for (int i = changedJobs.size() - 1; i >= 0; --i) {
                     final JobStatus job = changedJobs.valueAt(i);
-                    resetPendingJobReasonCache(job);
+                    resetPendingJobReasonsCache(job);
                 }
             }
         }
@@ -3893,23 +3878,21 @@ public class JobSchedulerService extends com.android.server.SystemService
             // Update the pending reason for any jobs that aren't going to be run.
             final int numRunnableJobs = runnableJobs.size();
             if (numRunnableJobs > 0 && numRunnableJobs != jobsToRun.size()) {
-                synchronized (mPendingJobReasonCache) {
+                synchronized (mPendingJobReasonsCache) {
                     for (int i = 0; i < numRunnableJobs; ++i) {
                         final JobStatus job = runnableJobs.get(i);
                         if (jobsToRun.contains(job)) {
-                            // We're running this job. Skip updating the pending reason.
-                            continue;
+                            continue; // we're running this job - skip updating the pending reason.
                         }
-                        SparseIntArray reasons =
-                                mPendingJobReasonCache.get(job.getUid(), job.getNamespace());
+                        SparseArray<int[]> reasons =
+                                mPendingJobReasonsCache.get(job.getUid(), job.getNamespace());
                         if (reasons == null) {
-                            reasons = new SparseIntArray();
-                            mPendingJobReasonCache.add(job.getUid(), job.getNamespace(), reasons);
+                            reasons = new SparseArray<>();
+                            mPendingJobReasonsCache.add(job.getUid(), job.getNamespace(), reasons);
                         }
-                        // We're force batching these jobs, so consider it an optimization
-                        // policy reason.
-                        reasons.put(job.getJobId(),
-                                JobScheduler.PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION);
+                        // we're force batching these jobs - note it as optimization.
+                        reasons.put(job.getJobId(), new int[]
+                                    { JobScheduler.PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION });
                     }
                 }
             }
@@ -5123,12 +5106,16 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public int getPendingJobReason(String namespace, int jobId) throws RemoteException {
-            final int uid = Binder.getCallingUid();
+            return getPendingJobReasons(validateNamespace(namespace), jobId)[0];
+        }
 
+        @Override
+        public int[] getPendingJobReasons(String namespace, int jobId) throws RemoteException {
+            final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
-                return JobSchedulerService.this.getPendingJobReason(
-                        uid, validateNamespace(namespace), jobId);
+                return JobSchedulerService.this.getPendingJobReasons(
+                                                    uid, validateNamespace(namespace), jobId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -5866,6 +5853,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print(android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND,
                     android.app.job.Flags.ignoreImportantWhileForeground());
+            pw.println();
+            pw.print(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API,
+                    android.app.job.Flags.getPendingJobReasonsApi());
             pw.println();
             pw.decreaseIndent();
             pw.println();

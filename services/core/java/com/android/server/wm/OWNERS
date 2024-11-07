@@ -35,4 +35,5 @@ per-file *WindowTracing* = file:platform/development:/tools/winscope/OWNERS
 
 # Files related to activity security
 per-file ActivityStarter.java = file:/ACTIVITY_SECURITY_OWNERS
+per-file ActivityStartController.java = file:/ACTIVITY_SECURITY_OWNERS
 per-file ActivityTaskManagerService.java = file:/ACTIVITY_SECURITY_OWNERS

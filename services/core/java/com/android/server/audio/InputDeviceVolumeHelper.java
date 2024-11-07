@@ -23,10 +23,10 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
-import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.UserHandle;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.SparseIntArray;
 
 import java.util.HashSet;
@@ -48,7 +48,7 @@ import java.util.Set;
     // A map between device internal type (e.g. AudioSystem.DEVICE_IN_BUILTIN_MIC) to its input gain
     // index.
     private final SparseIntArray mInputGainIndexMap;
-    private final Set<Integer> mSupportedDeviceTypes;
+    private final Set<Integer> mSupportedDeviceTypes = new HashSet<>();
 
     InputDeviceVolumeHelper(
             SettingsAdapter settings,
@@ -60,20 +60,16 @@ import java.util.Set;
 
         IntArray internalDeviceTypes = new IntArray();
         int status = AudioSystem.getSupportedDeviceTypes(GET_DEVICES_INPUTS, internalDeviceTypes);
-        mInputGainIndexMap =
-                new SparseIntArray(
-                        status == AudioManager.SUCCESS
-                                ? internalDeviceTypes.size()
-                                : AudioSystem.DEVICE_IN_ALL_SET.size());
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, "AudioSystem.getSupportedDeviceTypes(GET_DEVICES_INPUTS) failed. status:"
+                    + status);
+        }
 
-        if (status == AudioManager.SUCCESS) {
-            Set<Integer> supportedDeviceTypes = new HashSet<>();
-            for (int i = 0; i < internalDeviceTypes.size(); i++) {
-                supportedDeviceTypes.add(internalDeviceTypes.get(i));
-            }
-            mSupportedDeviceTypes = supportedDeviceTypes;
-        } else {
-            mSupportedDeviceTypes = AudioSystem.DEVICE_IN_ALL_SET;
+        // Note that in a rare case, if AudioSystem.getSupportedDeviceTypes call fails, both
+        // mInputGainIndexMap and mSupportedDeviceTypes will be empty.
+        mInputGainIndexMap = new SparseIntArray(internalDeviceTypes.size());
+        for (int i = 0; i < internalDeviceTypes.size(); i++) {
+            mSupportedDeviceTypes.add(internalDeviceTypes.get(i));
         }
 
         readSettings();
