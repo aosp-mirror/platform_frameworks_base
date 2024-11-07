@@ -1743,3 +1743,13 @@ flag {
     description: "An implementation of shortcut customizations through shortcut helper."
     bug: "365064144"
 }
+
+flag {
+    name: "stoppable_fgs_system_app"
+    namespace: "systemui"
+    description: "System app with foreground service can opt in to be stoppable."
+    bug: "376564917"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
