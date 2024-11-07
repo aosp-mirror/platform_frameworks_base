@@ -522,7 +522,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 @Override
                 public boolean isKeyGestureSupported(int gestureType) {
                     return switch (gestureType) {
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION -> true;
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK -> true;
                         default -> false;
                     };
                 }
@@ -684,6 +685,34 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         switch (gestureType) {
             case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION:
                 targetName = MAGNIFICATION_CONTROLLER_NAME;
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK:
+                targetName = mContext.getString(R.string.config_defaultSelectToSpeakService);
+                if (targetName.isEmpty()) {
+                    return false;
+                }
+
+                final ComponentName targetServiceComponent = TextUtils.isEmpty(targetName)
+                        ? null : ComponentName.unflattenFromString(targetName);
+                AccessibilityServiceInfo accessibilityServiceInfo;
+                synchronized (mLock) {
+                    AccessibilityUserState userState = getCurrentUserStateLocked();
+                    accessibilityServiceInfo =
+                            userState.getInstalledServiceInfoLocked(targetServiceComponent);
+                }
+                if (accessibilityServiceInfo == null) {
+                    return false;
+                }
+
+                // Skip enabling if a warning dialog is required for the feature.
+                // TODO(b/377752960): Explore better options to instead show the warning dialog
+                //  in this scenario.
+                if (isAccessibilityServiceWarningRequired(accessibilityServiceInfo)) {
+                    Slog.w(LOG_TAG,
+                            "Accessibility warning is required before this service can be "
+                                    + "activated automatically via KEY_GESTURE shortcut.");
+                    return false;
+                }
                 break;
             default:
                 return false;
