@@ -17,11 +17,9 @@
   -->
 
 <resources>
-    <style name="Theme" parent="Theme.MaterialComponents.Light">
+    <style name="Theme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">#34a853</item>
-        <item name="android:windowActionBar">true</item>
-        <item name="android:windowNoTitle">false</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <item name="toolbarStyle">@style/Widget.AppCompat.Toolbar</item>
     </style>
 
     <style name="LoadTestCardView" parent="Widget.MaterialComponents.CardView">

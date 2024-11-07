@@ -31,22 +31,19 @@ public class BatteryConsumerData {
     public static final String UID_BATTERY_CONSUMER_ID_PREFIX = "APP|";
     public static final String AGGREGATE_BATTERY_CONSUMER_ID = "SYS|";
 
-    enum EntryType {
+    public enum EntryType {
         UID_TOTAL_POWER,
-        UID_POWER_PROFILE,
-        UID_POWER_PROFILE_PROCESS_STATE,
-        UID_POWER_ENERGY_CONSUMPTION,
-        UID_POWER_ENERGY_PROCESS_STATE,
-        UID_POWER_CUSTOM,
+        UID_POWER,
+        UID_POWER_PROCESS_STATE,
         UID_DURATION,
         DEVICE_TOTAL_POWER,
-        DEVICE_POWER_MODELED,
+        DEVICE_POWER,
         DEVICE_POWER_ENERGY_CONSUMPTION,
         DEVICE_POWER_CUSTOM,
         DEVICE_DURATION,
     }
 
-    enum ConsumerType {
+    public enum ConsumerType {
         UID_BATTERY_CONSUMER,
         DEVICE_POWER_COMPONENT,
     }
@@ -62,28 +59,23 @@ public class BatteryConsumerData {
     private final List<Entry> mEntries = new ArrayList<>();
 
     public BatteryConsumerData(Context context,
-            List<BatteryUsageStats> batteryUsageStatsList, String batteryConsumerId) {
+            BatteryUsageStats batteryUsageStats, String batteryConsumerId) {
         switch (getConsumerType(batteryConsumerId)) {
             case UID_BATTERY_CONSUMER:
-                populateForUidBatteryConsumer(context, batteryUsageStatsList, batteryConsumerId);
+                populateForUidBatteryConsumer(context, batteryUsageStats, batteryConsumerId);
                 break;
             case DEVICE_POWER_COMPONENT:
-                populateForAggregateBatteryConsumer(context, batteryUsageStatsList);
+                populateForAggregateBatteryConsumer(context, batteryUsageStats);
                 break;
         }
     }
 
-    private void populateForUidBatteryConsumer(
-            Context context, List<BatteryUsageStats> batteryUsageStatsList,
+    private void populateForUidBatteryConsumer(Context context, BatteryUsageStats batteryUsageStats,
             String batteryConsumerId) {
-        BatteryUsageStats batteryUsageStats = batteryUsageStatsList.get(0);
-        BatteryUsageStats modeledBatteryUsageStats = batteryUsageStatsList.get(1);
         BatteryConsumer requestedBatteryConsumer = getRequestedBatteryConsumer(batteryUsageStats,
                 batteryConsumerId);
-        BatteryConsumer requestedModeledBatteryConsumer = getRequestedBatteryConsumer(
-                modeledBatteryUsageStats, batteryConsumerId);
 
-        if (requestedBatteryConsumer == null || requestedModeledBatteryConsumer == null) {
+        if (requestedBatteryConsumer == null) {
             mBatteryConsumerInfo = null;
             return;
         }
@@ -92,66 +84,34 @@ public class BatteryConsumerData {
                 batteryUsageStats, batteryConsumerId, context.getPackageManager());
 
         double[] totalPowerByComponentMah = new double[BatteryConsumer.POWER_COMPONENT_COUNT];
-        double[] totalModeledPowerByComponentMah =
-                new double[BatteryConsumer.POWER_COMPONENT_COUNT];
         long[] totalDurationByComponentMs = new long[BatteryConsumer.POWER_COMPONENT_COUNT];
-        final int customComponentCount =
-                requestedBatteryConsumer.getCustomPowerComponentCount();
+        final int customComponentCount = requestedBatteryConsumer.getCustomPowerComponentCount();
         double[] totalCustomPowerByComponentMah = new double[customComponentCount];
 
         computeTotalPower(batteryUsageStats, totalPowerByComponentMah);
-        computeTotalPower(modeledBatteryUsageStats, totalModeledPowerByComponentMah);
         computeTotalPowerForCustomComponent(batteryUsageStats, totalCustomPowerByComponentMah);
         computeTotalDuration(batteryUsageStats, totalDurationByComponentMs);
 
-        if (isPowerProfileModelsOnly(requestedBatteryConsumer)) {
-            addEntry("Consumed", EntryType.UID_TOTAL_POWER,
-                    requestedBatteryConsumer.getConsumedPower(),
-                    batteryUsageStats.getAggregateBatteryConsumer(
-                            BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
-                            .getConsumedPower());
-        } else {
-            addEntry("Consumed (PowerStats)", EntryType.UID_TOTAL_POWER,
-                    requestedBatteryConsumer.getConsumedPower(),
-                    batteryUsageStats.getAggregateBatteryConsumer(
-                            BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
-                            .getConsumedPower());
-            addEntry("Consumed (PowerProfile)", EntryType.UID_TOTAL_POWER,
-                    requestedModeledBatteryConsumer.getConsumedPower(),
-                    modeledBatteryUsageStats.getAggregateBatteryConsumer(
-                            BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
-                            .getConsumedPower());
-        }
+        addEntry("Consumed", EntryType.UID_TOTAL_POWER,
+                requestedBatteryConsumer.getConsumedPower(),
+                batteryUsageStats.getAggregateBatteryConsumer(
+                                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                        .getConsumedPower());
 
         for (int component = 0; component < BatteryConsumer.POWER_COMPONENT_COUNT; component++) {
             final String metricTitle = getPowerMetricTitle(component);
-            final int powerModel = requestedBatteryConsumer.getPowerModel(component);
-            if (powerModel == BatteryConsumer.POWER_MODEL_POWER_PROFILE
-                    || powerModel == BatteryConsumer.POWER_MODEL_UNDEFINED) {
-                addEntry(metricTitle, EntryType.UID_POWER_PROFILE,
-                        requestedBatteryConsumer.getConsumedPower(component),
-                        totalPowerByComponentMah[component]);
-                addProcessStateEntries(metricTitle, EntryType.UID_POWER_PROFILE_PROCESS_STATE,
-                        requestedBatteryConsumer, component);
-            } else {
-                addEntry(metricTitle + " (PowerStats)", EntryType.UID_POWER_ENERGY_CONSUMPTION,
-                        requestedBatteryConsumer.getConsumedPower(component),
-                        totalPowerByComponentMah[component]);
-                addProcessStateEntries(metricTitle, EntryType.UID_POWER_ENERGY_PROCESS_STATE,
-                        requestedBatteryConsumer, component);
-                addEntry(metricTitle + " (PowerProfile)", EntryType.UID_POWER_PROFILE,
-                        requestedModeledBatteryConsumer.getConsumedPower(component),
-                        totalModeledPowerByComponentMah[component]);
-                addProcessStateEntries(metricTitle, EntryType.UID_POWER_PROFILE_PROCESS_STATE,
-                        requestedModeledBatteryConsumer, component);
-            }
+            addEntry(metricTitle, EntryType.UID_POWER,
+                    requestedBatteryConsumer.getConsumedPower(component),
+                    totalPowerByComponentMah[component]);
+            addProcessStateEntries(metricTitle, EntryType.UID_POWER_PROCESS_STATE,
+                    requestedBatteryConsumer, component);
         }
 
         for (int component = 0; component < customComponentCount; component++) {
             final String name = requestedBatteryConsumer.getCustomPowerComponentName(
                     BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + component);
-            addEntry(name + " (PowerStats)", EntryType.UID_POWER_CUSTOM,
-                    requestedBatteryConsumer.getConsumedPowerForCustomComponent(
+            addEntry(name, EntryType.UID_POWER,
+                    requestedBatteryConsumer.getConsumedPower(
                             BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + component),
                     totalCustomPowerByComponentMah[component]
             );
@@ -200,10 +160,7 @@ public class BatteryConsumerData {
     }
 
     private void populateForAggregateBatteryConsumer(Context context,
-            List<BatteryUsageStats> batteryUsageStatsList) {
-        BatteryUsageStats batteryUsageStats = batteryUsageStatsList.get(0);
-        BatteryUsageStats modeledBatteryUsageStats = batteryUsageStatsList.get(1);
-
+            BatteryUsageStats batteryUsageStats) {
         final BatteryConsumer deviceBatteryConsumer =
                 batteryUsageStats.getAggregateBatteryConsumer(
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
@@ -211,46 +168,18 @@ public class BatteryConsumerData {
                 batteryUsageStats.getAggregateBatteryConsumer(
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
 
-        BatteryConsumer modeledDeviceBatteryConsumer =
-                modeledBatteryUsageStats.getAggregateBatteryConsumer(
-                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
-        BatteryConsumer modeledAppsBatteryConsumer =
-                modeledBatteryUsageStats.getAggregateBatteryConsumer(
-                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
-
-        if (isPowerProfileModelsOnly(deviceBatteryConsumer)) {
-            addEntry("Consumed", EntryType.DEVICE_TOTAL_POWER,
-                    deviceBatteryConsumer.getConsumedPower(),
-                    appsBatteryConsumer.getConsumedPower());
-        } else {
-            addEntry("Consumed (PowerStats)", EntryType.DEVICE_TOTAL_POWER,
-                    deviceBatteryConsumer.getConsumedPower(),
-                    appsBatteryConsumer.getConsumedPower());
-            addEntry("Consumed (PowerProfile)", EntryType.DEVICE_TOTAL_POWER,
-                    modeledDeviceBatteryConsumer.getConsumedPower(),
-                    modeledAppsBatteryConsumer.getConsumedPower());
-        }
+        addEntry("Consumed", EntryType.DEVICE_TOTAL_POWER,
+                deviceBatteryConsumer.getConsumedPower(),
+                appsBatteryConsumer.getConsumedPower());
 
         mBatteryConsumerInfo = BatteryConsumerInfoHelper.makeBatteryConsumerInfo(batteryUsageStats,
                 AGGREGATE_BATTERY_CONSUMER_ID, context.getPackageManager());
 
-
         for (int component = 0; component < BatteryConsumer.POWER_COMPONENT_COUNT; component++) {
             final String metricTitle = getPowerMetricTitle(component);
-            final int powerModel = deviceBatteryConsumer.getPowerModel(component);
-            if (powerModel == BatteryConsumer.POWER_MODEL_POWER_PROFILE
-                    || powerModel == BatteryConsumer.POWER_MODEL_UNDEFINED) {
-                addEntry(metricTitle, EntryType.DEVICE_POWER_MODELED,
-                        deviceBatteryConsumer.getConsumedPower(component),
-                        appsBatteryConsumer.getConsumedPower(component));
-            } else {
-                addEntry(metricTitle + " (PowerStats)", EntryType.DEVICE_POWER_ENERGY_CONSUMPTION,
-                        deviceBatteryConsumer.getConsumedPower(component),
-                        appsBatteryConsumer.getConsumedPower(component));
-                addEntry(metricTitle + " (PowerProfile)", EntryType.DEVICE_POWER_MODELED,
-                        modeledDeviceBatteryConsumer.getConsumedPower(component),
-                        modeledAppsBatteryConsumer.getConsumedPower(component));
-            }
+            addEntry(metricTitle, EntryType.DEVICE_POWER,
+                    deviceBatteryConsumer.getConsumedPower(component),
+                    appsBatteryConsumer.getConsumedPower(component));
         }
 
         final int customComponentCount =
@@ -258,10 +187,10 @@ public class BatteryConsumerData {
         for (int component = 0; component < customComponentCount; component++) {
             final String name = deviceBatteryConsumer.getCustomPowerComponentName(
                     BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + component);
-            addEntry(name + " (PowerStats)", EntryType.DEVICE_POWER_CUSTOM,
-                    deviceBatteryConsumer.getConsumedPowerForCustomComponent(
+            addEntry(name, EntryType.DEVICE_POWER_CUSTOM,
+                    deviceBatteryConsumer.getConsumedPower(
                             BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + component),
-                    appsBatteryConsumer.getConsumedPowerForCustomComponent(
+                    appsBatteryConsumer.getConsumedPower(
                             BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + component));
         }
 
@@ -270,17 +199,6 @@ public class BatteryConsumerData {
             addEntry(metricTitle, EntryType.DEVICE_DURATION,
                     deviceBatteryConsumer.getUsageDurationMillis(component), 0);
         }
-    }
-
-    private boolean isPowerProfileModelsOnly(BatteryConsumer batteryConsumer) {
-        for (int component = 0; component < BatteryConsumer.POWER_COMPONENT_COUNT; component++) {
-            final int powerModel = batteryConsumer.getPowerModel(component);
-            if (powerModel != BatteryConsumer.POWER_MODEL_POWER_PROFILE
-                    && powerModel != BatteryConsumer.POWER_MODEL_UNDEFINED) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private BatteryConsumer getRequestedBatteryConsumer(BatteryUsageStats batteryUsageStats,

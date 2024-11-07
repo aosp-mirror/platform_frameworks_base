@@ -63,7 +63,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private View mCardView;
     private View mEmptyView;
-    private List<BatteryUsageStats> mBatteryUsageStats;
+    private BatteryUsageStats mBatteryUsageStats;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,7 +122,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     }
 
     private static class BatteryUsageStatsLoader extends
-            AsyncLoaderCompat<List<BatteryUsageStats>> {
+            AsyncLoaderCompat<BatteryUsageStats> {
         private final BatteryStatsManager mBatteryStatsManager;
         private final boolean mForceFreshStats;
 
@@ -133,51 +133,42 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         }
 
         @Override
-        public List<BatteryUsageStats> loadInBackground() {
+        public BatteryUsageStats loadInBackground() {
             final int maxStatsAgeMs = mForceFreshStats ? 0 : BATTERY_STATS_REFRESH_RATE_MILLIS;
             final BatteryUsageStatsQuery queryDefault =
                     new BatteryUsageStatsQuery.Builder()
-                            .includePowerModels()
                             .includeProcessStateData()
                             .setMaxStatsAgeMs(maxStatsAgeMs)
                             .build();
-            final BatteryUsageStatsQuery queryPowerProfileModeledOnly =
-                    new BatteryUsageStatsQuery.Builder()
-                            .powerProfileModeledOnly()
-                            .includePowerModels()
-                            .includeProcessStateData()
-                            .setMaxStatsAgeMs(maxStatsAgeMs)
-                            .build();
-            return mBatteryStatsManager.getBatteryUsageStats(
-                    List.of(queryDefault, queryPowerProfileModeledOnly));
+            return mBatteryStatsManager.getBatteryUsageStats(queryDefault);
         }
 
         @Override
-        protected void onDiscardResult(List<BatteryUsageStats> result) {
+        protected void onDiscardResult(BatteryUsageStats result) {
         }
     }
 
     private class BatteryUsageStatsLoaderCallbacks
-            implements LoaderCallbacks<List<BatteryUsageStats>> {
+            implements LoaderCallbacks<BatteryUsageStats> {
         @NonNull
         @Override
-        public Loader<List<BatteryUsageStats>> onCreateLoader(int id, Bundle args) {
+        public Loader<BatteryUsageStats> onCreateLoader(int id, Bundle args) {
             return new BatteryUsageStatsLoader(BatteryStatsViewerActivity.this,
                     args.getBoolean(FORCE_FRESH_STATS));
         }
 
         @Override
-        public void onLoadFinished(@NonNull Loader<List<BatteryUsageStats>> loader,
-                List<BatteryUsageStats> batteryUsageStats) {
+        public void onLoadFinished(@NonNull Loader<BatteryUsageStats> loader,
+                BatteryUsageStats batteryUsageStats) {
             onBatteryUsageStatsLoaded(batteryUsageStats);
         }
 
         @Override
-        public void onLoaderReset(@NonNull Loader<List<BatteryUsageStats>> loader) {
+        public void onLoaderReset(@NonNull Loader<BatteryUsageStats> loader) {
         }
     }
 
-    private void onBatteryUsageStatsLoaded(List<BatteryUsageStats> batteryUsageStats) {
+    private void onBatteryUsageStatsLoaded(BatteryUsageStats batteryUsageStats) {
         mBatteryUsageStats = batteryUsageStats;
         onBatteryStatsDataLoaded();
     }
@@ -285,40 +276,19 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
                     break;
-                case UID_POWER_PROFILE:
+                case UID_POWER:
                     setTitleIconAndBackground(viewHolder, entry.title,
                             R.drawable.gm_calculate_24,
                             R.color.battery_consumer_bg_power_profile);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
                     break;
-                case UID_POWER_PROFILE_PROCESS_STATE:
+                case UID_POWER_PROCESS_STATE:
                     setTitleIconAndBackground(viewHolder, "    " + entry.title,
                             R.drawable.gm_calculate_24,
                             R.color.battery_consumer_bg_power_profile);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     viewHolder.value2TextView.setVisibility(View.INVISIBLE);
-                    break;
-                case UID_POWER_ENERGY_CONSUMPTION:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setProportionText(viewHolder.value2TextView, entry);
-                    break;
-                case UID_POWER_ENERGY_PROCESS_STATE:
-                    setTitleIconAndBackground(viewHolder, "    " + entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    viewHolder.value2TextView.setVisibility(View.INVISIBLE);
-                    break;
-                case UID_POWER_CUSTOM:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setProportionText(viewHolder.value2TextView, entry);
                     break;
                 case UID_DURATION:
                     setTitleIconAndBackground(viewHolder, entry.title,
@@ -332,24 +302,10 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setPowerText(viewHolder.value2TextView, entry.value2);
                     break;
-                case DEVICE_POWER_MODELED:
+                case DEVICE_POWER:
                     setTitleIconAndBackground(viewHolder, entry.title,
                             R.drawable.gm_calculate_24,
                             R.color.battery_consumer_bg_power_profile);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setPowerText(viewHolder.value2TextView, entry.value2);
-                    break;
-                case DEVICE_POWER_ENERGY_CONSUMPTION:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setPowerText(viewHolder.value2TextView, entry.value2);
-                    break;
-                case DEVICE_POWER_CUSTOM:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setPowerText(viewHolder.value2TextView, entry.value2);
                     break;
