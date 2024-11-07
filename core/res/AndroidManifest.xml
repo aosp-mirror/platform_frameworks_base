@@ -2632,10 +2632,19 @@
 
     <!-- @SystemApi Allows access to perform vendor effects in the vibrator.
          <p>Protection level: signature
-         @FlaggedApi("android.os.vibrator.vendor_vibration_effects")
+         @FlaggedApi(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
          @hide
     -->
     <permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.os.vibrator.vendor_vibration_effects" />
+
+    <!-- @SystemApi Allows access to start a vendor vibration session.
+         <p>Protection level: signature
+        @FlaggedApi(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+        @hide
+    -->
+    <permission android:name="android.permission.START_VIBRATION_SESSIONS"
         android:protectionLevel="signature|privileged"
         android:featureFlag="android.os.vibrator.vendor_vibration_effects" />
 
