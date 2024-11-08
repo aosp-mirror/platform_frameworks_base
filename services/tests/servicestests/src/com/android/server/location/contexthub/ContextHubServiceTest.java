@@ -65,7 +65,7 @@ public class ContextHubServiceTest {
                 new Pair<>(Arrays.asList(mMockContextHubInfo), Arrays.asList(""));
         when(mMockContextHubInfo.getId()).thenReturn(CONTEXT_HUB_ID);
         when(mMockContextHubInfo.toString()).thenReturn(CONTEXT_HUB_STRING);
-        when(mMockContextHubWrapper.getHubs()).thenReturn(hubInfo);
+        when(mMockContextHubWrapper.getContextHubs()).thenReturn(hubInfo);
 
         when(mMockContextHubWrapper.supportsLocationSettingNotifications()).thenReturn(true);
         when(mMockContextHubWrapper.supportsWifiSettingNotifications()).thenReturn(true);

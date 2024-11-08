@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.managers;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
@@ -27,7 +29,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 /** Base class for layout managers -- resizable components. */
 public abstract class LayoutManager extends LayoutComponent implements Measurable {
 
-    Size mCachedWrapSize = new Size(0f, 0f);
+    @NonNull Size mCachedWrapSize = new Size(0f, 0f);
 
     public LayoutManager(
             Component parent,
@@ -62,6 +64,38 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         // nothing here
     }
 
+    protected boolean childrenHaveHorizontalWeights() {
+        for (Component c : mChildrenComponents) {
+            if (c instanceof LayoutManager) {
+                LayoutManager m = (LayoutManager) c;
+                if (m.getWidthModifier() != null && m.getWidthModifier().hasWeight()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected boolean childrenHaveVerticalWeights() {
+        for (Component c : mChildrenComponents) {
+            if (c instanceof LayoutManager) {
+                LayoutManager m = (LayoutManager) c;
+                if (m.getHeightModifier() != null && m.getHeightModifier().hasWeight()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isInHorizontalFill() {
+        return mWidthModifier.isFill();
+    }
+
+    public boolean isInVerticalFill() {
+        return mHeightModifier.isFill();
+    }
+
     /** Base implementation of the measure resolution */
     @Override
     public void measure(
@@ -70,7 +104,7 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
             float maxWidth,
             float minHeight,
             float maxHeight,
-            MeasurePass measure) {
+            @NonNull MeasurePass measure) {
         boolean hasWrap = true;
         float measuredWidth =
                 Math.min(maxWidth, computeModifierDefinedWidth() - mMarginLeft - mMarginRight);
@@ -87,7 +121,7 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         } else {
             hasWrap = false;
         }
-        if (mWidthModifier.isFill()) {
+        if (isInHorizontalFill()) {
             measuredWidth = insetMaxWidth;
         } else if (mWidthModifier.hasWeight()) {
             measuredWidth = Math.max(measuredWidth, computeModifierDefinedWidth());
@@ -95,7 +129,7 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
             measuredWidth = Math.max(measuredWidth, minWidth);
             measuredWidth = Math.min(measuredWidth, insetMaxWidth);
         }
-        if (mHeightModifier.isFill()) {
+        if (isInVerticalFill()) {
             measuredHeight = insetMaxHeight;
         } else if (mHeightModifier.hasWeight()) {
             measuredHeight = Math.max(measuredHeight, computeModifierDefinedHeight());
@@ -136,7 +170,7 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
 
     /** basic layout of internal components */
     @Override
-    public void layout(RemoteContext context, MeasurePass measure) {
+    public void layout(@NonNull RemoteContext context, @NonNull MeasurePass measure) {
         super.layout(context, measure);
         ComponentMeasure self = measure.get(this);
 
@@ -153,7 +187,7 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
      * @param context
      * @param measure
      */
-    public void selfLayout(RemoteContext context, MeasurePass measure) {
+    public void selfLayout(@NonNull RemoteContext context, @NonNull MeasurePass measure) {
         super.layout(context, measure);
         ComponentMeasure self = measure.get(this);
 

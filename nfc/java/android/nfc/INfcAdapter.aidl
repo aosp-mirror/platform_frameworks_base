@@ -119,4 +119,5 @@ interface INfcAdapter
     boolean getSettingStatus();
     boolean isTagPresent();
     List<Entry> getRoutingTableEntryList();
+    void indicateDataMigration(boolean inProgress, String pkg);
 }

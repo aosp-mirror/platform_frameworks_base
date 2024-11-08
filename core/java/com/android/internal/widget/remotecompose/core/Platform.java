@@ -15,15 +15,29 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.Nullable;
+
 /** Services that are needed to be provided by the platform during encoding. */
 public interface Platform {
+    @Nullable
     byte[] imageToByteArray(Object image);
 
     int getImageWidth(Object image);
 
     int getImageHeight(Object image);
 
+    @Nullable
     float[] pathToFloatArray(Object path);
+
+    enum LogCategory {
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR,
+        TODO,
+    }
+
+    void log(LogCategory category, String message);
 
     Platform None =
             new Platform() {
@@ -46,5 +60,8 @@ public interface Platform {
                 public float[] pathToFloatArray(Object path) {
                     throw new UnsupportedOperationException();
                 }
+
+                @Override
+                public void log(LogCategory category, String message) {}
             };
 }

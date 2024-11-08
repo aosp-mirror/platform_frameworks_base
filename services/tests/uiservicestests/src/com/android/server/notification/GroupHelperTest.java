@@ -2291,7 +2291,9 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
     public void testMoveAggregateGroups_updateChannel_multipleChannels_regroupOnClassifEnabled() {
         final String pkg = "package";
         final String expectedGroupKey_alerting = GroupHelper.getFullAggregateGroupKey(pkg,
@@ -2366,7 +2368,9 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
     public void testMoveSections_notificationBundled() {
         final List<NotificationRecord> notificationList = new ArrayList<>();
         final String pkg = "package";
@@ -2436,7 +2440,9 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
     public void testCacheAndCancelAppSummary_notificationBundled() {
         // check that the original app summary is canceled & cached on classification regrouping
         final List<NotificationRecord> notificationList = new ArrayList<>();
@@ -2495,6 +2501,7 @@ public class GroupHelperTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_CLASSIFICATION,
             FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
             FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
     public void testSingletonGroupsRegrouped_notificationBundledBeforeDelayTimeout() {
@@ -2569,6 +2576,7 @@ public class GroupHelperTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_CLASSIFICATION,
             FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
             FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
     public void testSingletonGroupsRegrouped_notificationBundledAfterDelayTimeout() {

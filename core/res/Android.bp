@@ -158,6 +158,7 @@ android_app {
     flags_packages: [
         "android.app.appfunctions.flags-aconfig",
         "android.app.contextualsearch.flags-aconfig",
+        "android.app.flags-aconfig",
         "android.appwidget.flags-aconfig",
         "android.content.pm.flags-aconfig",
         "android.provider.flags-aconfig",
@@ -172,6 +173,7 @@ android_app {
         "com.android.hardware.input.input-aconfig",
         "aconfig_trade_in_mode_flags",
         "ranging_aconfig_flags",
+        "aconfig_settingslib_flags",
     ],
 }
 

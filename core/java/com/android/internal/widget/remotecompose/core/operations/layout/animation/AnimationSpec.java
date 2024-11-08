@@ -17,6 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout.animati
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -92,6 +95,7 @@ public class AnimationSpec implements Operation {
         return mExitAnimation;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ANIMATION_SPEC (" + mMotionDuration + " ms)";
@@ -109,7 +113,7 @@ public class AnimationSpec implements Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mAnimationId,
@@ -126,11 +130,13 @@ public class AnimationSpec implements Operation {
         // nothing here
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@Nullable String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
+    @NonNull
     public static String name() {
         return "AnimationSpec";
     }
@@ -139,10 +145,11 @@ public class AnimationSpec implements Operation {
         return Operations.ANIMATION_SPEC;
     }
 
-    public static int animationToInt(ANIMATION animation) {
+    public static int animationToInt(@NonNull ANIMATION animation) {
         return animation.ordinal();
     }
 
+    @NonNull
     public static ANIMATION intToAnimation(int value) {
         switch (value) {
             case 0:
@@ -167,14 +174,14 @@ public class AnimationSpec implements Operation {
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int animationId,
             int motionDuration,
             int motionEasingType,
             int visibilityDuration,
             int visibilityEasingType,
-            ANIMATION enterAnimation,
-            ANIMATION exitAnimation) {
+            @NonNull ANIMATION enterAnimation,
+            @NonNull ANIMATION exitAnimation) {
         buffer.start(Operations.ANIMATION_SPEC);
         buffer.writeInt(animationId);
         buffer.writeInt(motionDuration);
@@ -185,7 +192,7 @@ public class AnimationSpec implements Operation {
         buffer.writeInt(animationToInt(exitAnimation));
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int animationId = buffer.readInt();
         int motionDuration = buffer.readInt();
         int motionEasingType = buffer.readInt();
@@ -205,7 +212,7 @@ public class AnimationSpec implements Operation {
         operations.add(op);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("define the animation")
                 .field(INT, "animationId", "")

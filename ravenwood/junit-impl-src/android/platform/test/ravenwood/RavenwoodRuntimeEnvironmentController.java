@@ -22,7 +22,6 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_INST_R
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
-import static com.android.ravenwood.common.RavenwoodCommonUtils.getRavenwoodRuntimePath;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,8 +94,6 @@ public class RavenwoodRuntimeEnvironmentController {
     private static final String LIBRAVENWOOD_INITIALIZER_NAME = "ravenwood_initializer";
     private static final String RAVENWOOD_NATIVE_SYSPROP_NAME = "ravenwood_sysprop";
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
-    private static final String RAVENWOOD_BUILD_PROP =
-            getRavenwoodRuntimePath() + "ravenwood-data/build.prop";
 
     /**
      * When enabled, attempt to dump all thread stacks just before we hit the
@@ -209,7 +206,7 @@ public class RavenwoodRuntimeEnvironmentController {
         System.load(RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_RUNTIME_NAME));
 
         // Do the basic set up for the android sysprops.
-        RavenwoodSystemProperties.initialize(RAVENWOOD_BUILD_PROP);
+        RavenwoodSystemProperties.initialize();
         setSystemProperties(null);
 
         // Do this after loading RAVENWOOD_NATIVE_RUNTIME_NAME (which backs Os.setenv()),

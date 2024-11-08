@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.measure;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 
 import java.util.HashMap;
@@ -24,13 +26,13 @@ import java.util.HashMap;
  * array vs the current hashmap
  */
 public class MeasurePass {
-    HashMap<Integer, ComponentMeasure> mList = new HashMap<>();
+    @NonNull HashMap<Integer, ComponentMeasure> mList = new HashMap<>();
 
     public void clear() {
         mList.clear();
     }
 
-    public void add(ComponentMeasure measure) throws Exception {
+    public void add(@NonNull ComponentMeasure measure) throws Exception {
         if (measure.mId == -1) {
             throw new Exception("Component has no id!");
         }
@@ -41,7 +43,7 @@ public class MeasurePass {
         return mList.containsKey(id);
     }
 
-    public ComponentMeasure get(Component c) {
+    public ComponentMeasure get(@NonNull Component c) {
         if (!mList.containsKey(c.getComponentId())) {
             ComponentMeasure measure =
                     new ComponentMeasure(

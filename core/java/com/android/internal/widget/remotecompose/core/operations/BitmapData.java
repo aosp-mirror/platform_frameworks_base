@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -58,15 +60,17 @@ public class BitmapData implements Operation, SerializableToString {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mImageId, mImageWidth, mImageHeight, mBitmap);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BITMAP DATA " + mImageId;
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -75,7 +79,12 @@ public class BitmapData implements Operation, SerializableToString {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, int imageId, int width, int height, byte[] bitmap) {
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            int imageId,
+            int width,
+            int height,
+            @NonNull byte[] bitmap) {
         buffer.start(OP_CODE);
         buffer.writeInt(imageId);
         buffer.writeInt(width);
@@ -83,7 +92,7 @@ public class BitmapData implements Operation, SerializableToString {
         buffer.writeBuffer(bitmap);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int imageId = buffer.readInt();
         int width = buffer.readInt();
         int height = buffer.readInt();
@@ -97,7 +106,7 @@ public class BitmapData implements Operation, SerializableToString {
         operations.add(new BitmapData(imageId, width, height, bitmap));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Bitmap data")
                 .field(DocumentedOperation.INT, "id", "id of bitmap data")
@@ -107,17 +116,18 @@ public class BitmapData implements Operation, SerializableToString {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.loadBitmap(mImageId, mImageWidth, mImageHeight, mBitmap);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(
                 indent,
                 CLASS_NAME + " id " + mImageId + " (" + mImageWidth + "x" + mImageHeight + ")");

@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.UTF8;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -47,10 +49,11 @@ public class NamedVariable implements Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mVarId, mVarType, mVarName);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "VariableName["
@@ -61,6 +64,7 @@ public class NamedVariable implements Operation {
                 + mVarType;
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -77,21 +81,22 @@ public class NamedVariable implements Operation {
      * @param varType The type of variable
      * @param text String
      */
-    public static void apply(WireBuffer buffer, int varId, int varType, String text) {
+    public static void apply(
+            @NonNull WireBuffer buffer, int varId, int varType, @NonNull String text) {
         buffer.start(Operations.NAMED_VARIABLE);
         buffer.writeInt(varId);
         buffer.writeInt(varType);
         buffer.writeUTF8(text);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int varId = buffer.readInt();
         int varType = buffer.readInt();
         String text = buffer.readUTF8(MAX_STRING_SIZE);
         operations.add(new NamedVariable(varId, varType, text));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Add a string name for an ID")
                 .field(DocumentedOperation.INT, "varId", "id to label")
@@ -100,10 +105,11 @@ public class NamedVariable implements Operation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.loadVariableName(mVarName, mVarId, mVarType);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();

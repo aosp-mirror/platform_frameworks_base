@@ -35,6 +35,7 @@ import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
 import android.hardware.location.ContextHubTransaction;
+import android.hardware.location.HubInfo;
 import android.hardware.location.IContextHubCallback;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
@@ -57,6 +58,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
 import android.util.proto.ProtoOutputStream;
@@ -134,6 +136,9 @@ public class ContextHubService extends IContextHubService.Stub {
     private Map<Integer, ContextHubInfo> mContextHubIdToInfoMap;
     private List<String> mSupportedContextHubPerms;
     private List<ContextHubInfo> mContextHubInfoList;
+
+    @Nullable private final HubInfoRegistry mHubInfoRegistry;
+
     private final RemoteCallbackList<IContextHubCallback> mCallbacksList =
             new RemoteCallbackList<>();
 
@@ -309,10 +314,21 @@ public class ContextHubService extends IContextHubService.Stub {
         mContext = context;
         long startTimeNs = SystemClock.elapsedRealtimeNanos();
         mContextHubWrapper = contextHubWrapper;
+
         if (!initContextHubServiceState(startTimeNs)) {
             Log.e(TAG, "Failed to initialize the Context Hub Service");
+            mHubInfoRegistry = null;
             return;
         }
+
+        if (Flags.offloadApi()) {
+            mHubInfoRegistry = new HubInfoRegistry(mContextHubWrapper);
+            Log.i(TAG, "Enabling generic offload API");
+        } else {
+            mHubInfoRegistry = null;
+            Log.i(TAG, "Disabling generic offload API");
+        }
+
         initDefaultClientMap();
 
         initLocationSettingNotifications();
@@ -427,7 +443,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
         Pair<List<ContextHubInfo>, List<String>> hubInfo;
         try {
-            hubInfo = mContextHubWrapper.getHubs();
+            hubInfo = mContextHubWrapper.getContextHubs();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException while getting Context Hub info", e);
             hubInfo = new Pair<>(Collections.emptyList(), Collections.emptyList());
@@ -711,6 +727,16 @@ public class ContextHubService extends IContextHubService.Stub {
         super.getContextHubs_enforcePermission();
 
         return mContextHubInfoList;
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public List<HubInfo> getHubs() throws RemoteException {
+        super.getHubs_enforcePermission();
+        if (mHubInfoRegistry == null) {
+            return Collections.emptyList();
+        }
+        return mHubInfoRegistry.getHubs();
     }
 
     /**
@@ -1417,6 +1443,8 @@ public class ContextHubService extends IContextHubService.Stub {
             }
         }
 
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        pw = ipw;
         pw.println("Dumping ContextHub Service");
 
         pw.println("");
@@ -1428,6 +1456,11 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("Supported permissions: "
                 + Arrays.toString(mSupportedContextHubPerms.toArray()));
         pw.println("");
+
+        if (mHubInfoRegistry != null) {
+            mHubInfoRegistry.dump(ipw);
+        }
+
         pw.println("=================== NANOAPPS ====================");
         // Dump nanoAppHash
         mNanoAppStateManager.foreachNanoAppInstanceInfo(pw::println);

@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.types;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.LONG;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -47,7 +49,7 @@ public class LongConstant implements Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mValue);
     }
 
@@ -56,11 +58,13 @@ public class LongConstant implements Operation {
         context.putObject(mId, this);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return toString();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "LongConstant[" + mId + "] = " + mValue + "";
@@ -73,20 +77,20 @@ public class LongConstant implements Operation {
      * @param id
      * @param value
      */
-    public static void apply(WireBuffer buffer, int id, long value) {
+    public static void apply(@NonNull WireBuffer buffer, int id, long value) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeLong(value);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
 
         long value = buffer.readLong();
         operations.add(new LongConstant(id, value));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, "LongConstant")
                 .description("A boolean and its associated id")
                 .field(DocumentedOperation.INT, "id", "id of Int")

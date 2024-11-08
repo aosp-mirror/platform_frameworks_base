@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.operations.utilities.ArrayAccess;
 import com.android.internal.widget.remotecompose.core.operations.utilities.CollectionsAccess;
 import com.android.internal.widget.remotecompose.core.operations.utilities.DataMap;
@@ -50,10 +53,11 @@ public class RemoteComposeState implements CollectionsAccess {
 
     private final boolean[] mDataOverride = new boolean[MAX_DATA];
     private final boolean[] mIntegerOverride = new boolean[MAX_DATA];
+    private final boolean[] mFloatOverride = new boolean[MAX_DATA];
 
     private int mNextId = START_ID;
-    private int[] mIdMaps = new int[] {START_ID, NanMap.START_VAR, NanMap.START_ARRAY};
-    private RemoteContext mRemoteContext = null;
+    @NonNull private int[] mIdMaps = new int[] {START_ID, NanMap.START_VAR, NanMap.START_ARRAY};
+    @Nullable private RemoteContext mRemoteContext = null;
 
     /**
      * Get Object based on id. The system will cache things like bitmaps Paths etc. They can be
@@ -62,6 +66,7 @@ public class RemoteComposeState implements CollectionsAccess {
      * @param id
      * @return
      */
+    @Nullable
     public Object getFromId(int id) {
         return mIntDataMap.get(id);
     }
@@ -158,10 +163,28 @@ public class RemoteComposeState implements CollectionsAccess {
 
     /** Insert an float item in the cache */
     public void updateFloat(int id, float value) {
+        if (!mFloatOverride[id]) {
+            float previous = mFloatMap.get(id);
+            if (previous != value) {
+                mFloatMap.put(id, value);
+                mIntegerMap.put(id, (int) value);
+                updateListeners(id);
+            }
+        }
+    }
+
+    /**
+     * Adds a float Override.
+     *
+     * @param id
+     * @param value the new value
+     */
+    public void overrideFloat(int id, float value) {
         float previous = mFloatMap.get(id);
         if (previous != value) {
             mFloatMap.put(id, value);
             mIntegerMap.put(id, (int) value);
+            mFloatOverride[id] = true;
             updateListeners(id);
         }
     }
@@ -294,6 +317,16 @@ public class RemoteComposeState implements CollectionsAccess {
     }
 
     /**
+     * Clear the float override
+     *
+     * @param id the float id to clear
+     */
+    public void clearFloatOverride(int id) {
+        mFloatOverride[id] = false;
+        updateListeners(id);
+    }
+
+    /**
      * Method to determine if a cached value has been written to the documents WireBuffer based on
      * its id.
      */
@@ -322,7 +355,8 @@ public class RemoteComposeState implements CollectionsAccess {
     }
 
     /**
-     * Get the next available id
+     * Get the next available id 0 is normal (float,int,String,color) 1 is VARIABLES 2 is
+     * collections
      *
      * @return
      */
@@ -342,8 +376,8 @@ public class RemoteComposeState implements CollectionsAccess {
         mNextId = id;
     }
 
-    IntMap<ArrayList<VariableSupport>> mVarListeners = new IntMap<>();
-    ArrayList<VariableSupport> mAllVarListeners = new ArrayList<>();
+    @NonNull IntMap<ArrayList<VariableSupport>> mVarListeners = new IntMap<>();
+    @NonNull ArrayList<VariableSupport> mAllVarListeners = new ArrayList<>();
 
     private void add(int id, VariableSupport variableSupport) {
         ArrayList<VariableSupport> v = mVarListeners.get(id);

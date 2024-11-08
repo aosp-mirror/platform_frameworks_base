@@ -251,3 +251,13 @@ flag {
     description: "Add +X to the prev scores according to their positions in the process LRU list"
     bug: "359912586"
 }
+
+flag {
+    name: "phantom_processes_fix"
+    namespace: "backstage_power"
+    description: "Make sure setProcessGroupForPhantomProcessOfApp deals with phantom processes properly"
+    bug: "375058190"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

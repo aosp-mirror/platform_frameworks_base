@@ -1101,7 +1101,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProfilingServiceHelper.getInstance().onProfilingTriggerOccurred(
                         startInfo.getRealUid(),
                         startInfo.getPackageName(),
-                        ProfilingTrigger.TRIGGER_TYPE_APP_COLD_START_ACTIVITY);
+                        ProfilingTrigger.TRIGGER_TYPE_APP_FULLY_DRAWN);
             }
         }
     };

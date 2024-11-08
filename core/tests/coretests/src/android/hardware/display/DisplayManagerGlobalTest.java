@@ -55,9 +55,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class DisplayManagerGlobalTest {
 
-    private static final long ALL_DISPLAY_EVENTS = DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-            | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-            | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
+    private static final long ALL_DISPLAY_EVENTS =
+            DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
 
     @Mock
     private IDisplayManager mDisplayManager;
@@ -127,19 +128,22 @@ public class DisplayManagerGlobalTest {
 
         int displayId = 1;
         mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
-                ALL_DISPLAY_EVENTS & ~DisplayManager.EVENT_FLAG_DISPLAY_ADDED, null);
+                ALL_DISPLAY_EVENTS
+                        & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED, null);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_ADDED);
         waitForHandler();
         Mockito.verifyZeroInteractions(mListener);
 
         mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
-                ALL_DISPLAY_EVENTS & ~DisplayManager.EVENT_FLAG_DISPLAY_CHANGED, null);
+                ALL_DISPLAY_EVENTS
+                        & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED, null);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         waitForHandler();
         Mockito.verifyZeroInteractions(mListener);
 
         mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
-                ALL_DISPLAY_EVENTS & ~DisplayManager.EVENT_FLAG_DISPLAY_REMOVED, null);
+                ALL_DISPLAY_EVENTS
+                        & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED, null);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         waitForHandler();
         Mockito.verifyZeroInteractions(mListener);
@@ -162,22 +166,25 @@ public class DisplayManagerGlobalTest {
     public void testDisplayManagerGlobalRegistersWithDisplayManager_WhenThereAreListeners()
             throws RemoteException {
         mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
-                DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS, null);
+                DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED,
+                null);
         InOrder inOrder = Mockito.inOrder(mDisplayManager);
 
         inOrder.verify(mDisplayManager)
                 .registerCallbackWithEventMask(mCallbackCaptor.capture(),
-                        eq(DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+                        eq(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED));
 
         mDisplayManagerGlobal.registerNativeChoreographerForRefreshRateCallbacks();
         inOrder.verify(mDisplayManager)
                 .registerCallbackWithEventMask(mCallbackCaptor.capture(),
-                        eq(ALL_DISPLAY_EVENTS | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+                        eq(ALL_DISPLAY_EVENTS
+                                | DisplayManagerGlobal
+                                .INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED));
 
         mDisplayManagerGlobal.unregisterNativeChoreographerForRefreshRateCallbacks();
         inOrder.verify(mDisplayManager)
                 .registerCallbackWithEventMask(mCallbackCaptor.capture(),
-                        eq(DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+                        eq(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED));
 
         mDisplayManagerGlobal.unregisterDisplayListener(mListener);
         inOrder.verify(mDisplayManager)
@@ -196,10 +203,12 @@ public class DisplayManagerGlobalTest {
 
         // One listener listens on add/remove, and the other one listens on change.
         mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
-                DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED, null /* packageName */);
+                DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
+                null /* packageName */);
         mDisplayManagerGlobal.registerDisplayListener(mListener2, mHandler,
-                DisplayManager.EVENT_FLAG_DISPLAY_CHANGED, null /* packageName */);
+                DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
+                null /* packageName */);
 
         mDisplayManagerGlobal.handleDisplayChangeFromWindowManager(321);
         waitForHandler();

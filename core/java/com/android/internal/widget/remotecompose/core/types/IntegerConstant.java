@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.types;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -37,25 +39,28 @@ public class IntegerConstant implements Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mValue);
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.loadInteger(mId, mValue);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return toString();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "IntegerConstant[" + mId + "] = " + mValue + "";
     }
 
+    @NonNull
     public static String name() {
         return "IntegerConstant";
     }
@@ -71,20 +76,20 @@ public class IntegerConstant implements Operation {
      * @param textId
      * @param value
      */
-    public static void apply(WireBuffer buffer, int textId, int value) {
+    public static void apply(@NonNull WireBuffer buffer, int textId, int value) {
         buffer.start(Operations.DATA_INT);
         buffer.writeInt(textId);
         buffer.writeInt(value);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
 
         int value = buffer.readInt();
         operations.add(new IntegerConstant(id, value));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", id(), "IntegerConstant")
                 .description("A integer and its associated id")
                 .field(DocumentedOperation.INT, "id", "id of Int")

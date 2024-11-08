@@ -17,6 +17,7 @@
 package android.service.wallpaper;
 
 import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
+import static android.app.Flags.liveWallpaperContentHandling;
 import static android.app.WallpaperManager.COMMAND_FREEZE;
 import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WallpaperManager.SetWallpaperFlags;
@@ -2624,7 +2625,7 @@ public abstract class WallpaperService extends Service {
         private void doAttachEngine() {
             Trace.beginSection("WPMS.onCreateEngine");
             Engine engine;
-            if (mDescription != null) {
+            if (liveWallpaperContentHandling()) {
                 engine = onCreateEngine(mDescription);
             } else {
                 engine = onCreateEngine();
