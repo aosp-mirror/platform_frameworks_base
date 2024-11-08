@@ -39,7 +39,7 @@ public final class ExecuteAppFunctionResponse {
      *
      * <p>See {@link #getResultDocument} for more information on extracting the return value.
      */
-    public static final String PROPERTY_RETURN_VALUE = "android_app_appfunctions_returnvalue";
+    public static final String PROPERTY_RETURN_VALUE = "androidAppfunctionsReturnValue";
 
     /**
      * Returns the return value of the executed function.

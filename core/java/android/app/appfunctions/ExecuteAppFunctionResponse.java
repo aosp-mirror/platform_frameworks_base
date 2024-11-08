@@ -20,7 +20,6 @@ import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANA
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.appsearch.GenericDocument;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -65,7 +64,7 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      *
      * <p>See {@link #getResultDocument} for more information on extracting the return value.
      */
-    public static final String PROPERTY_RETURN_VALUE = "android_app_appfunctions_returnvalue";
+    public static final String PROPERTY_RETURN_VALUE = "androidAppfunctionsReturnValue";
 
     /**
      * Returns the return value of the executed function.
