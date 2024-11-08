@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class TestSystemImpl implements SystemInterface {
     private String mUserProvider = null;
@@ -36,6 +37,7 @@ public class TestSystemImpl implements SystemInterface {
     Map<String, Map<Integer, PackageInfo>> mPackages = new HashMap();
     private final int mNumRelros;
     private final boolean mIsDebuggable;
+    private Predicate<PackageInfo> mCompatibilityPredicate;
 
     public static final int PRIMARY_USER_ID = 0;
 
@@ -45,6 +47,7 @@ public class TestSystemImpl implements SystemInterface {
         mNumRelros = numRelros;
         mIsDebuggable = isDebuggable;
         mUsers.add(PRIMARY_USER_ID);
+        mCompatibilityPredicate = pi -> true;
     }
 
     public void addUser(int userId) {
@@ -126,6 +129,15 @@ public class TestSystemImpl implements SystemInterface {
         PackageInfo ret = userPackages.get(PRIMARY_USER_ID);
         if (ret == null) throw new NameNotFoundException(info.packageName);
         return ret;
+    }
+
+    @Override
+    public boolean isCompatibleImplementationPackage(PackageInfo packageInfo) {
+        return mCompatibilityPredicate.test(packageInfo);
+    }
+
+    public void setCompatibilityPredicate(Predicate<PackageInfo> predicate) {
+        mCompatibilityPredicate = predicate;
     }
 
     @Override
