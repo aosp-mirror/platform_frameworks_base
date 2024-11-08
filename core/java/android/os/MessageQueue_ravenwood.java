@@ -16,13 +16,16 @@
 
 package android.os;
 
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class MessageQueue_host {
+@RavenwoodKeepWholeClass
+class MessageQueue_ravenwood {
     private static final AtomicLong sNextId = new AtomicLong(1);
-    private static final Map<Long, MessageQueue_host> sInstances = new ConcurrentHashMap<>();
+    private static final Map<Long, MessageQueue_ravenwood> sInstances = new ConcurrentHashMap<>();
 
     private boolean mDeleted = false;
 
@@ -37,8 +40,8 @@ public class MessageQueue_host {
         }
     }
 
-    private static MessageQueue_host getInstance(long id) {
-        MessageQueue_host q = sInstances.get(id);
+    private static MessageQueue_ravenwood getInstance(long id) {
+        MessageQueue_ravenwood q = sInstances.get(id);
         if (q == null) {
             throw new RuntimeException("MessageQueue doesn't exist with id=" + id);
         }
@@ -48,7 +51,7 @@ public class MessageQueue_host {
 
     public static long nativeInit() {
         final long id = sNextId.getAndIncrement();
-        final MessageQueue_host q = new MessageQueue_host();
+        final MessageQueue_ravenwood q = new MessageQueue_ravenwood();
         sInstances.put(id, q);
         return id;
     }
