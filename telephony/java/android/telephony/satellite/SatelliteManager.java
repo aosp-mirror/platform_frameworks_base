@@ -483,43 +483,43 @@ public final class SatelliteManager {
     /**
      * Telephony framework needs to access the current location of the device to perform the
      * request. However, location in the settings is disabled by users.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_LOCATION_DISABLED = 25;
 
     /**
      * Telephony framework needs to access the current location of the device to perform the
      * request. However, Telephony fails to fetch the current location from location service.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_LOCATION_NOT_AVAILABLE = 26;
 
     /**
      * Emergency call is in progress.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS = 27;
 
     /**
      * Disabling satellite is in progress.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_DISABLE_IN_PROGRESS = 28;
 
     /**
      * Enabling satellite is in progress.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_ENABLE_IN_PROGRESS = 29;
 
     /** @hide */
@@ -715,7 +715,7 @@ public final class SatelliteManager {
     public static final int EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911 = 2;
 
     /**
-     * This intent will be broadcasted if there are any change to list of subscriber informations.
+     * This intent will be broadcasted if there are any change to list of subscriber information.
      * This intent will be sent only to the app with component defined in
      * config_satellite_carrier_roaming_esos_provisioned_class and package defined in
      * config_satellite_gateway_service_package
@@ -1349,12 +1349,16 @@ public final class SatelliteManager {
      * The satellite modem is being powered on.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_MODEM_STATE_ENABLING_SATELLITE = 8;
 
     /**
      * The satellite modem is being powered off.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_MODEM_STATE_DISABLING_SATELLITE = 9;
 
     /**
@@ -1414,6 +1418,8 @@ public final class SatelliteManager {
      * there is any incoming message.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_KEEP_ALIVE = 3;
 
     /**
@@ -1421,6 +1427,8 @@ public final class SatelliteManager {
      * is the last message to emergency service provider indicating still needs help.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP = 4;
 
     /**
@@ -1428,12 +1436,16 @@ public final class SatelliteManager {
      * is the last message to emergency service provider indicating no more help is needed.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5;
 
     /**
      * Datagram type indicating that the message to be sent or received is of type SMS.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_SMS = 6;
 
     /**
@@ -1441,6 +1453,8 @@ public final class SatelliteManager {
      * for pending incoming SMS.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_CHECK_PENDING_INCOMING_SMS = 7;
 
     /** @hide */
@@ -1461,6 +1475,8 @@ public final class SatelliteManager {
      * Satellite communication restricted by user.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER = 0;
 
     /**
