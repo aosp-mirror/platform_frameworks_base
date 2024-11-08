@@ -5071,6 +5071,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @EnforcePermission(MANAGE_ACCESSIBILITY)
     public boolean isAccessibilityServiceWarningRequired(AccessibilityServiceInfo info) {
         isAccessibilityServiceWarningRequired_enforcePermission();
+        if (info == null) {
+            Log.e(LOG_TAG, "Called isAccessibilityServiceWarningRequired with null service info");
+            return true;
+        }
+
         final ComponentName componentName = info.getComponentName();
 
         // Warning is not required if the service is already enabled.
