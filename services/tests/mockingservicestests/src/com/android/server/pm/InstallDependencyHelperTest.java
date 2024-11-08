@@ -79,12 +79,14 @@ public class InstallDependencyHelperTest {
     @Mock private SharedLibrariesImpl mSharedLibraries;
     @Mock private Context mContext;
     @Mock private Computer mComputer;
+    @Mock private PackageInstallerService mPackageInstallerService;
     private InstallDependencyHelper mInstallDependencyHelper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mInstallDependencyHelper = new InstallDependencyHelper(mContext, mSharedLibraries);
+        mInstallDependencyHelper = new InstallDependencyHelper(mContext, mSharedLibraries,
+                mPackageInstallerService);
     }
 
     @Test
