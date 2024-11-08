@@ -281,7 +281,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /** {@hide} */
-    public void enableTokenVerification() {
+    public void setIsIntentExtra() {
         mFlags |= FLAG_VERIFY_TOKENS_PRESENT;
     }
 
