@@ -21,11 +21,14 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.HapticFeedbackConstants;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 
+import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.player.platform.RemoteComposeCanvas;
 
@@ -57,11 +60,7 @@ public class RemoteComposePlayer extends FrameLayout {
      * @param debugFlags 1 to set debug on
      */
     public void setDebug(int debugFlags) {
-        if (debugFlags == 1) {
-            mInner.setDebug(true);
-        } else {
-            mInner.setDebug(false);
-        }
+        mInner.setDebug(debugFlags);
     }
 
     public RemoteComposeDocument getDocument() {
@@ -82,6 +81,14 @@ public class RemoteComposePlayer extends FrameLayout {
             mInner.setDocument(null);
         }
         mapColors();
+        mInner.setHapticEngine(
+                new CoreDocument.HapticEngine() {
+
+                    @Override
+                    public void haptic(int type) {
+                        provideHapticFeedback(type);
+                    }
+                });
     }
 
     /**
@@ -259,10 +266,37 @@ public class RemoteComposePlayer extends FrameLayout {
     /**
      * This returns a list of colors that have names in the Document.
      *
-     * @return
+     * @return the names of named Strings or null
      */
     public String[] getNamedColors() {
         return mInner.getNamedColors();
+    }
+
+    /**
+     * This returns a list of floats that have names in the Document.
+     *
+     * @return return the names of named floats in the document
+     */
+    public String[] getNamedFloats() {
+        return mInner.getNamedVariables(NamedVariable.FLOAT_TYPE);
+    }
+
+    /**
+     * This returns a list of string name that have names in the Document.
+     *
+     * @return the name of named string (not the string itself)
+     */
+    public String[] getNamedStrings() {
+        return mInner.getNamedVariables(NamedVariable.STRING_TYPE);
+    }
+
+    /**
+     * This returns a list of images that have names in the Document.
+     *
+     * @return
+     */
+    public String[] getNamedImages() {
+        return mInner.getNamedVariables(NamedVariable.IMAGE_TYPE);
     }
 
     /**
@@ -480,5 +514,33 @@ public class RemoteComposePlayer extends FrameLayout {
             int color = arr.getColor(0, -1);
             return color;
         }
+    }
+
+    private static int[] sHapticTable = {
+        HapticFeedbackConstants.NO_HAPTICS,
+        HapticFeedbackConstants.LONG_PRESS,
+        HapticFeedbackConstants.VIRTUAL_KEY,
+        HapticFeedbackConstants.KEYBOARD_TAP,
+        HapticFeedbackConstants.CLOCK_TICK,
+        HapticFeedbackConstants.CONTEXT_CLICK,
+        HapticFeedbackConstants.KEYBOARD_PRESS,
+        HapticFeedbackConstants.KEYBOARD_RELEASE,
+        HapticFeedbackConstants.VIRTUAL_KEY_RELEASE,
+        HapticFeedbackConstants.TEXT_HANDLE_MOVE,
+        HapticFeedbackConstants.GESTURE_START,
+        HapticFeedbackConstants.GESTURE_END,
+        HapticFeedbackConstants.CONFIRM,
+        HapticFeedbackConstants.REJECT,
+        HapticFeedbackConstants.TOGGLE_ON,
+        HapticFeedbackConstants.TOGGLE_OFF,
+        HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE,
+        HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE,
+        HapticFeedbackConstants.DRAG_START,
+        HapticFeedbackConstants.SEGMENT_TICK,
+        HapticFeedbackConstants.SEGMENT_FREQUENT_TICK,
+    };
+
+    private void provideHapticFeedback(int type) {
+        performHapticFeedback(sHapticTable[type % sHapticTable.length]);
     }
 }

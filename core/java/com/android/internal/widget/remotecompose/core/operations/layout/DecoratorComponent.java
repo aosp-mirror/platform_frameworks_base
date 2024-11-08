@@ -15,7 +15,6 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 
 /**
@@ -24,7 +23,4 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
  */
 public interface DecoratorComponent {
     void layout(RemoteContext context, float width, float height);
-
-    void onClick(
-            RemoteContext context, CoreDocument document, Component component, float x, float y);
 }

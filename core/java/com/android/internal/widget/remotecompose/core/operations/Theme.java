@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
@@ -49,25 +51,28 @@ public class Theme implements RemoteComposeOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mTheme);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "SET_THEME " + mTheme;
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.setTheme(mTheme);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -76,17 +81,17 @@ public class Theme implements RemoteComposeOperation {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, int theme) {
+    public static void apply(@NonNull WireBuffer buffer, int theme) {
         buffer.start(OP_CODE);
         buffer.writeInt(theme);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int theme = buffer.readInt();
         operations.add(new Theme(theme));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
                 .description("Set a theme")
                 .field(INT, "THEME", "theme id")

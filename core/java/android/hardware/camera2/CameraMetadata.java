@@ -4289,6 +4289,39 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int SYNC_FRAME_NUMBER_UNKNOWN = -2;
 
+    //
+    // Enumeration values for CaptureResult#EXTENSION_NIGHT_MODE_INDICATOR
+    //
+
+    /**
+     * <p>The camera can't accurately assess the scene's lighting to determine if a Night Mode
+     * Camera Extension capture would improve the photo. This can happen when the current
+     * camera configuration doesn't support night mode indicator detection, such as when
+     * the auto exposure mode is ON_AUTO_FLASH, ON_ALWAYS_FLASH, ON_AUTO_FLASH_REDEYE, or
+     * ON_EXTERNAL_FLASH.</p>
+     * @see CaptureResult#EXTENSION_NIGHT_MODE_INDICATOR
+     */
+    @FlaggedApi(Flags.FLAG_NIGHT_MODE_INDICATOR)
+    public static final int EXTENSION_NIGHT_MODE_INDICATOR_UNKNOWN = 0;
+
+    /**
+     * <p>The camera has detected lighting conditions that are sufficiently bright. Night
+     * Mode Camera Extensions is available but may not be able to optimize the camera
+     * settings to take a higher quality photo.</p>
+     * @see CaptureResult#EXTENSION_NIGHT_MODE_INDICATOR
+     */
+    @FlaggedApi(Flags.FLAG_NIGHT_MODE_INDICATOR)
+    public static final int EXTENSION_NIGHT_MODE_INDICATOR_OFF = 1;
+
+    /**
+     * <p>The camera has detected low-light conditions. It is recommended to use Night Mode
+     * Camera Extension to optimize the camera settings to take a high-quality photo in
+     * the dark.</p>
+     * @see CaptureResult#EXTENSION_NIGHT_MODE_INDICATOR
+     */
+    @FlaggedApi(Flags.FLAG_NIGHT_MODE_INDICATOR)
+    public static final int EXTENSION_NIGHT_MODE_INDICATOR_ON = 2;
+
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/

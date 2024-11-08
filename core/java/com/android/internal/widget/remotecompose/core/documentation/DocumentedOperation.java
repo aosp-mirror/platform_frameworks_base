@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
+import android.annotation.NonNull;
+
 import java.util.ArrayList;
 
 public class DocumentedOperation {
@@ -40,12 +42,13 @@ public class DocumentedOperation {
     boolean mWIP;
     String mTextExamples;
 
-    ArrayList<StringPair> mExamples = new ArrayList<>();
-    ArrayList<OperationField> mFields = new ArrayList<>();
-    String mVarSize = "";
+    @NonNull ArrayList<StringPair> mExamples = new ArrayList<>();
+    @NonNull ArrayList<OperationField> mFields = new ArrayList<>();
+    @NonNull String mVarSize = "";
     int mExamplesWidth = 100;
     int mExamplesHeight = 100;
 
+    @NonNull
     public static String getType(int type) {
         switch (type) {
             case INT:
@@ -85,6 +88,7 @@ public class DocumentedOperation {
         this(category, id, name, false);
     }
 
+    @NonNull
     public ArrayList<OperationField> getFields() {
         return mFields;
     }
@@ -105,6 +109,7 @@ public class DocumentedOperation {
         return mWIP;
     }
 
+    @NonNull
     public String getVarSize() {
         return mVarSize;
     }
@@ -129,6 +134,7 @@ public class DocumentedOperation {
         return mTextExamples;
     }
 
+    @NonNull
     public ArrayList<StringPair> getExamples() {
         return mExamples;
     }
@@ -141,16 +147,19 @@ public class DocumentedOperation {
         return mExamplesHeight;
     }
 
+    @NonNull
     public DocumentedOperation field(int type, String name, String description) {
         mFields.add(new OperationField(type, name, description));
         return this;
     }
 
+    @NonNull
     public DocumentedOperation field(int type, String name, String varSize, String description) {
         mFields.add(new OperationField(type, name, varSize, description));
         return this;
     }
 
+    @NonNull
     public DocumentedOperation possibleValues(String name, int value) {
         if (!mFields.isEmpty()) {
             mFields.get(mFields.size() - 1).possibleValue(name, "" + value);
@@ -158,21 +167,25 @@ public class DocumentedOperation {
         return this;
     }
 
+    @NonNull
     public DocumentedOperation description(String description) {
         mDescription = description;
         return this;
     }
 
+    @NonNull
     public DocumentedOperation examples(String examples) {
         mTextExamples = examples;
         return this;
     }
 
+    @NonNull
     public DocumentedOperation exampleImage(String name, String imagePath) {
         mExamples.add(new StringPair(name, imagePath));
         return this;
     }
 
+    @NonNull
     public DocumentedOperation examplesDimension(int width, int height) {
         mExamplesWidth = width;
         mExamplesHeight = height;

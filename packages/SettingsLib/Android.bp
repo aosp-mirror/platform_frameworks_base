@@ -61,7 +61,7 @@ android_library {
         "SettingsLibUtils",
         "SettingsLibZeroStatePreference",
         "settingslib_media_flags_lib",
-        "settingslib_flags_lib",
+        "aconfig_settingslib_flags_java_lib",
     ],
 
     plugins: ["androidx.room_room-compiler-plugin"],
@@ -105,20 +105,6 @@ aconfig_declarations {
 java_aconfig_library {
     name: "settingslib_media_flags_lib",
     aconfig_declarations: "settingslib_media_flags",
-}
-
-aconfig_declarations {
-    name: "settingslib_flags",
-    package: "com.android.settingslib.flags",
-    container: "system",
-    srcs: [
-        "aconfig/settingslib.aconfig",
-    ],
-}
-
-java_aconfig_library {
-    name: "settingslib_flags_lib",
-    aconfig_declarations: "settingslib_flags",
 }
 
 soong_config_module_type {

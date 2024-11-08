@@ -147,8 +147,9 @@ public class DisplayResolutionTracker {
                 @Override
                 public void registerDisplayListener(DisplayManager.DisplayListener listener) {
                     manager.registerDisplayListener(listener, handler,
-                            DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                                    | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED,
+                            DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+                                    | DisplayManagerGlobal
+                                            .INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
                             ActivityThread.currentPackageName());
                 }
 

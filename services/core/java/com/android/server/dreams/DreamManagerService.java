@@ -20,6 +20,7 @@ import static android.Manifest.permission.BIND_DREAM_SERVICE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.service.dreams.Flags.cleanupDreamSettingsOnUninstall;
 import static android.service.dreams.Flags.dreamHandlesBeingObscured;
 
 import static com.android.server.wm.ActivityInterceptorCallback.DREAM_MANAGER_ORDERED_ID;
@@ -353,28 +354,32 @@ public final class DreamManagerService extends SystemService {
     @Override
     public void onUserStarting(@NonNull TargetUser user) {
         super.onUserStarting(user);
-        mHandler.post(() -> {
-            final int userId = user.getUserIdentifier();
-            if (!mPackageMonitors.contains(userId)) {
-                final PackageMonitor monitor = new PerUserPackageMonitor();
-                monitor.register(mContext, UserHandle.of(userId), mHandler);
-                mPackageMonitors.put(userId, monitor);
-            } else {
-                Slog.w(TAG, "Package monitor already registered for " + userId);
-            }
-        });
+        if (cleanupDreamSettingsOnUninstall()) {
+            mHandler.post(() -> {
+                final int userId = user.getUserIdentifier();
+                if (!mPackageMonitors.contains(userId)) {
+                    final PackageMonitor monitor = new PerUserPackageMonitor();
+                    monitor.register(mContext, UserHandle.of(userId), mHandler);
+                    mPackageMonitors.put(userId, monitor);
+                } else {
+                    Slog.w(TAG, "Package monitor already registered for " + userId);
+                }
+            });
+        }
     }
 
     @Override
     public void onUserStopping(@NonNull TargetUser user) {
         super.onUserStopping(user);
-        mHandler.post(() -> {
-            final PackageMonitor monitor = mPackageMonitors.removeReturnOld(
-                    user.getUserIdentifier());
-            if (monitor != null) {
-                monitor.unregister();
-            }
-        });
+        if (cleanupDreamSettingsOnUninstall()) {
+            mHandler.post(() -> {
+                final PackageMonitor monitor = mPackageMonitors.removeReturnOld(
+                        user.getUserIdentifier());
+                if (monitor != null) {
+                    monitor.unregister();
+                }
+            });
+        }
     }
 
     private void dumpInternal(PrintWriter pw) {
@@ -715,13 +720,21 @@ public final class DreamManagerService extends SystemService {
                         userId));
         if (componentNames != null) {
             // Filter out any components in the removed package.
-            final ComponentName[] filteredComponents = Arrays.stream(componentNames).filter(
-                    (componentName -> !TextUtils.equals(componentName.getPackageName(),
-                            packageName))).toArray(ComponentName[]::new);
+            final ComponentName[] filteredComponents =
+                    Arrays.stream(componentNames)
+                            .filter((componentName -> !isSamePackage(packageName, componentName)))
+                            .toArray(ComponentName[]::new);
             if (filteredComponents.length != componentNames.length) {
                 setDreamComponentsForUser(userId, filteredComponents);
             }
         }
+    }
+
+    private static boolean isSamePackage(String packageName, ComponentName componentName) {
+        if (packageName == null || componentName == null) {
+            return false;
+        }
+        return TextUtils.equals(componentName.getPackageName(), packageName);
     }
 
     private void setDreamComponentsForUser(int userId, ComponentName[] componentNames) {
@@ -884,7 +897,10 @@ public final class DreamManagerService extends SystemService {
         }
         StringBuilder names = new StringBuilder();
         for (ComponentName componentName : componentNames) {
-            if (names.length() > 0) {
+            if (componentName == null) {
+                continue;
+            }
+            if (!names.isEmpty()) {
                 names.append(',');
             }
             names.append(componentName.flattenToString());

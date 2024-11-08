@@ -17,6 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -78,12 +81,12 @@ public class PaddingModifierOperation implements ModifierOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mLeft, mTop, mRight, mBottom);
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(
                 indent, "PADDING = [" + mLeft + ", " + mTop + ", " + mRight + ", " + mBottom + "]");
     }
@@ -91,11 +94,13 @@ public class PaddingModifierOperation implements ModifierOperation {
     @Override
     public void apply(RemoteContext context) {}
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@Nullable String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "PaddingModifierOperation("
@@ -109,6 +114,7 @@ public class PaddingModifierOperation implements ModifierOperation {
                 + ")";
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -117,7 +123,8 @@ public class PaddingModifierOperation implements ModifierOperation {
         return Operations.MODIFIER_PADDING;
     }
 
-    public static void apply(WireBuffer buffer, float left, float top, float right, float bottom) {
+    public static void apply(
+            @NonNull WireBuffer buffer, float left, float top, float right, float bottom) {
         buffer.start(Operations.MODIFIER_PADDING);
         buffer.writeFloat(left);
         buffer.writeFloat(top);
@@ -125,7 +132,7 @@ public class PaddingModifierOperation implements ModifierOperation {
         buffer.writeFloat(bottom);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float left = buffer.readFloat();
         float top = buffer.readFloat();
         float right = buffer.readFloat();
@@ -133,7 +140,7 @@ public class PaddingModifierOperation implements ModifierOperation {
         operations.add(new PaddingModifierOperation(left, top, right, bottom));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Padding Modifier")
                 .field(FLOAT, "left", "")

@@ -20,7 +20,6 @@ import android.graphics.Rect
 import android.view.View
 import com.android.app.tracing.traceSection
 import com.android.internal.util.ContrastColorUtil
-import com.android.systemui.Flags
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.NO_COLOR
@@ -36,11 +35,9 @@ object StatusBarIconViewBinder {
 
     suspend fun bindColor(view: StatusBarIconView, color: Flow<Int>) {
         color.collectTracingEach("SBIV#bindColor") { color ->
-            // Don't change the icon color if an app icon experiment is enabled.
-            if (!android.app.Flags.notificationsUseAppIcon()) {
-                view.staticDrawableColor = color
-            }
-            // Continue changing the overflow dot color
+            // Set the color for the icons
+            view.staticDrawableColor = color
+            // Set the color for the overflow dot
             view.setDecorColor(color)
         }
     }
@@ -59,14 +56,12 @@ object StatusBarIconViewBinder {
         contrastColorUtil: ContrastColorUtil,
     ) {
         iconColors.collectTracingEach("SBIV#bindIconColors") { colors ->
-            // Don't change the icon color if an app icon experiment is enabled.
-            if (!android.app.Flags.notificationsUseAppIcon()) {
-                val isPreL = java.lang.Boolean.TRUE == view.getTag(R.id.icon_is_pre_L)
-                val isColorized = !isPreL || NotificationUtils.isGrayscale(view, contrastColorUtil)
-                view.staticDrawableColor =
-                    if (isColorized) colors.staticDrawableColor(view.viewBounds) else NO_COLOR
-            }
-            // Continue changing the overflow dot color
+            // Set the icon color
+            val isPreL = java.lang.Boolean.TRUE == view.getTag(R.id.icon_is_pre_L)
+            val isColorized = !isPreL || NotificationUtils.isGrayscale(view, contrastColorUtil)
+            view.staticDrawableColor =
+                if (isColorized) colors.staticDrawableColor(view.viewBounds) else NO_COLOR
+            // Set the color for the overflow dot
             view.setDecorColor(colors.tint)
         }
     }

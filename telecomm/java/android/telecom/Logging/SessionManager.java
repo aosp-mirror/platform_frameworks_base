@@ -62,9 +62,7 @@ public class SessionManager {
 
     @VisibleForTesting
     public final ConcurrentHashMap<Integer, Session> mSessionMapper = new ConcurrentHashMap<>(64);
-    @VisibleForTesting
-    public java.lang.Runnable mCleanStaleSessions = () ->
-            cleanupStaleSessions(getSessionCleanupTimeoutMs());
+    private final java.lang.Runnable mCleanStaleSessions;
     private final Handler mSessionCleanupHandler = new Handler(Looper.getMainLooper());
 
     // Overridden in LogTest to skip query to ContentProvider
@@ -110,27 +108,37 @@ public class SessionManager {
     }
 
     public SessionManager() {
+        mCleanStaleSessions = () -> cleanupStaleSessions(getSessionCleanupTimeoutMs());
+    }
+
+    @VisibleForTesting
+    public SessionManager(java.lang.Runnable cleanStaleSessionsRunnable) {
+        mCleanStaleSessions = cleanStaleSessionsRunnable;
     }
 
     private long getSessionCleanupTimeoutMs() {
         return mSessionCleanupTimeoutMs.get();
     }
 
-    private synchronized void resetStaleSessionTimer() {
+    private void resetStaleSessionTimer() {
         if (!Flags.endSessionImprovements()) {
-            mSessionCleanupHandler.removeCallbacksAndMessages(null);
-            // Will be null in Log Testing
-            if (mCleanStaleSessions != null) {
-                mSessionCleanupHandler.postDelayed(mCleanStaleSessions,
-                        getSessionCleanupTimeoutMs());
-            }
-        } else {
-            if (mCleanStaleSessions != null
-                    && !mSessionCleanupHandler.hasCallbacks(mCleanStaleSessions)) {
+            resetStaleSessionTimerOld();
+            return;
+        }
+        // Will be null in Log Testing
+        if (mCleanStaleSessions == null) return;
+        synchronized (mSessionCleanupHandler) {
+            if (!mSessionCleanupHandler.hasCallbacks(mCleanStaleSessions)) {
                 mSessionCleanupHandler.postDelayed(mCleanStaleSessions,
                         getSessionCleanupTimeoutMs());
             }
         }
+    }
+
+    private synchronized void resetStaleSessionTimerOld() {
+        if (mCleanStaleSessions == null) return;
+        mSessionCleanupHandler.removeCallbacksAndMessages(null);
+        mSessionCleanupHandler.postDelayed(mCleanStaleSessions, getSessionCleanupTimeoutMs());
     }
 
     /**

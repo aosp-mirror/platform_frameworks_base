@@ -22,6 +22,10 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.vibrator.IVibratorManager;
+import android.os.vibrator.IVibrationSession;
+import android.os.vibrator.IVibrationSessionCallback;
+import android.os.vibrator.VendorVibrationSession;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
@@ -46,6 +50,8 @@ public class SystemVibratorManager extends VibratorManager {
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private int[] mVibratorIds;
+    @GuardedBy("mLock")
+    private int mCapabilities;
     @GuardedBy("mLock")
     private final SparseArray<Vibrator> mVibrators = new SparseArray<>();
 
@@ -82,6 +88,11 @@ public class SystemVibratorManager extends VibratorManager {
             }
             return new int[0];
         }
+    }
+
+    @Override
+    public boolean hasCapabilities(int capabilities) {
+        return (getCapabilities() & capabilities) == capabilities;
     }
 
     @NonNull
@@ -173,7 +184,7 @@ public class SystemVibratorManager extends VibratorManager {
             int inputSource, String reason, int flags, int privFlags) {
         if (mService == null) {
             Log.w(TAG, "Failed to perform haptic feedback for input device;"
-                            + " no vibrator manager service.");
+                    + " no vibrator manager service.");
             return;
         }
         Trace.traceBegin(TRACE_TAG_VIBRATOR, "performHapticFeedbackForInputDevice");
@@ -195,6 +206,50 @@ public class SystemVibratorManager extends VibratorManager {
     @Override
     public void cancel(int usageFilter) {
         cancelVibration(usageFilter);
+    }
+
+    @Override
+    public void startVendorSession(@NonNull int[] vibratorIds, @NonNull VibrationAttributes attrs,
+            @Nullable String reason, @Nullable CancellationSignal cancellationSignal,
+            @NonNull Executor executor, @NonNull VendorVibrationSession.Callback callback) {
+        Objects.requireNonNull(vibratorIds);
+        VendorVibrationSessionCallbackDelegate callbackDelegate =
+                new VendorVibrationSessionCallbackDelegate(executor, callback);
+        if (mService == null) {
+            Log.w(TAG, "Failed to start vibration session; no vibrator manager service.");
+            callbackDelegate.onFinished(VendorVibrationSession.STATUS_UNKNOWN_ERROR);
+            return;
+        }
+        try {
+            ICancellationSignal remoteCancellationSignal = mService.startVendorVibrationSession(
+                    mUid, mContext.getDeviceId(), mPackageName, vibratorIds, attrs, reason,
+                    callbackDelegate);
+            if (cancellationSignal != null) {
+                cancellationSignal.setRemote(remoteCancellationSignal);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to start vibration session.", e);
+            callbackDelegate.onFinished(VendorVibrationSession.STATUS_UNKNOWN_ERROR);
+        }
+    }
+
+    private int getCapabilities() {
+        synchronized (mLock) {
+            if (mCapabilities != 0) {
+                return mCapabilities;
+            }
+            try {
+                if (mService == null) {
+                    Log.w(TAG, "Failed to retrieve vibrator manager capabilities;"
+                            + " no vibrator manager service.");
+                } else {
+                    return mCapabilities = mService.getCapabilities();
+                }
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return 0;
+        }
     }
 
     private void cancelVibration(int usageFilter) {
@@ -228,12 +283,45 @@ public class SystemVibratorManager extends VibratorManager {
         }
     }
 
+    /** Callback for vendor vibration sessions. */
+    private static class VendorVibrationSessionCallbackDelegate extends
+            IVibrationSessionCallback.Stub {
+        private final Executor mExecutor;
+        private final VendorVibrationSession.Callback mCallback;
+
+        VendorVibrationSessionCallbackDelegate(
+                @NonNull Executor executor,
+                @NonNull VendorVibrationSession.Callback callback) {
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(callback);
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onStarted(IVibrationSession session) {
+            mExecutor.execute(() -> mCallback.onStarted(new VendorVibrationSession(session)));
+        }
+
+        @Override
+        public void onFinishing() {
+            mExecutor.execute(() -> mCallback.onFinishing());
+        }
+
+        @Override
+        public void onFinished(int status) {
+            mExecutor.execute(() -> mCallback.onFinished(status));
+        }
+    }
+
     /** Controls vibrations on a single vibrator. */
     private final class SingleVibrator extends Vibrator {
         private final VibratorInfo mVibratorInfo;
+        private final int[] mVibratorId;
 
         SingleVibrator(@NonNull VibratorInfo vibratorInfo) {
             mVibratorInfo = vibratorInfo;
+            mVibratorId = new int[]{mVibratorInfo.getId()};
         }
 
         @Override
@@ -249,6 +337,11 @@ public class SystemVibratorManager extends VibratorManager {
         @Override
         public boolean hasAmplitudeControl() {
             return mVibratorInfo.hasAmplitudeControl();
+        }
+
+        @Override
+        public boolean areVendorSessionsSupported() {
+            return SystemVibratorManager.this.hasCapabilities(IVibratorManager.CAP_START_SESSIONS);
         }
 
         @Override
@@ -368,6 +461,14 @@ public class SystemVibratorManager extends VibratorManager {
                     }
                 }
             }
+        }
+
+        @Override
+        public void startVendorSession(@NonNull VibrationAttributes attrs, String reason,
+                @Nullable CancellationSignal cancellationSignal, @NonNull Executor executor,
+                @NonNull VendorVibrationSession.Callback callback) {
+            SystemVibratorManager.this.startVendorSession(mVibratorId, attrs, reason,
+                    cancellationSignal, executor, callback);
         }
     }
 }

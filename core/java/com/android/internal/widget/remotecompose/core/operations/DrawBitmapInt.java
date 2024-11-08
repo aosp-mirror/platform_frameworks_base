@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -64,7 +66,7 @@ public class DrawBitmapInt extends PaintOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mImageId,
@@ -79,6 +81,7 @@ public class DrawBitmapInt extends PaintOperation {
                 mContentDescId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DRAW_BITMAP_INT "
@@ -103,6 +106,7 @@ public class DrawBitmapInt extends PaintOperation {
                 + ";";
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -112,7 +116,7 @@ public class DrawBitmapInt extends PaintOperation {
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int imageId,
             int srcLeft,
             int srcTop,
@@ -136,7 +140,7 @@ public class DrawBitmapInt extends PaintOperation {
         buffer.writeInt(cdId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int imageId = buffer.readInt();
         int sLeft = buffer.readInt();
         int srcTop = buffer.readInt();
@@ -155,7 +159,7 @@ public class DrawBitmapInt extends PaintOperation {
         operations.add(op);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap using integer coordinates")
                 .field(DocumentedOperation.INT, "id", "id of bitmap")
@@ -171,7 +175,7 @@ public class DrawBitmapInt extends PaintOperation {
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.drawBitmap(
                 mImageId,
                 mSrcLeft,

@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
@@ -172,10 +174,11 @@ public class RootContentBehavior implements RemoteComposeOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mScroll, mAlignment, mSizing, mMode);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ROOT_CONTENT_BEHAVIOR scroll: "
@@ -187,15 +190,17 @@ public class RootContentBehavior implements RemoteComposeOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.setRootContentBehavior(mScroll, mAlignment, mSizing, mMode);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return toString();
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -204,7 +209,8 @@ public class RootContentBehavior implements RemoteComposeOperation {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
+    public static void apply(
+            @NonNull WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
         buffer.start(OP_CODE);
         buffer.writeInt(scroll);
         buffer.writeInt(alignment);
@@ -212,7 +218,7 @@ public class RootContentBehavior implements RemoteComposeOperation {
         buffer.writeInt(mode);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int scroll = buffer.readInt();
         int alignment = buffer.readInt();
         int sizing = buffer.readInt();
@@ -222,7 +228,7 @@ public class RootContentBehavior implements RemoteComposeOperation {
         operations.add(rootContentBehavior);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
                 .description("Describes the behaviour of the root")
                 .field(DocumentedOperation.INT, "scroll", "scroll")

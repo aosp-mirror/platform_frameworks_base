@@ -1549,8 +1549,9 @@ public final class Display {
             // Although we only care about the HDR/SDR ratio changing, that can also come in the
             // form of the larger DISPLAY_CHANGED event
             mGlobal.registerDisplayListener(toRegister, executor,
-                    DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED
-                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED,
+                    DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+                            | DisplayManagerGlobal
+                                    .INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
                     ActivityThread.currentPackageName());
         }
 

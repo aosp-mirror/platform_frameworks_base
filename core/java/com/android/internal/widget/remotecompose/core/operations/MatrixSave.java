@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -29,20 +31,22 @@ public class MatrixSave extends PaintOperation {
     private static final String CLASS_NAME = "MatrixSave";
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "MatrixSave;";
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
         MatrixSave op = new MatrixSave();
         operations.add(op);
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -51,17 +55,17 @@ public class MatrixSave extends PaintOperation {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer) {
+    public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(Operations.MATRIX_SAVE);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Save the matrix and clip to a stack");
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.matrixSave();
     }
 }
