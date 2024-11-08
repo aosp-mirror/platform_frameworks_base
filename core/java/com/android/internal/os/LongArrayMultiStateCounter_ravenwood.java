@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.os.BadParcelableException;
 import android.os.Parcel;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,7 +26,52 @@ import java.util.HashMap;
 /**
  * Native implementation substitutions for the LongArrayMultiStateCounter class.
  */
-public class LongArrayMultiStateCounter_host {
+@RavenwoodKeepWholeClass
+class LongArrayMultiStateCounter_ravenwood {
+
+    static class LongArrayContainer {
+        private static final HashMap<Long, long[]> sInstances = new HashMap<>();
+        private static long sNextId = 1;
+
+        public static long native_init(int arrayLength) {
+            long[] array = new long[arrayLength];
+            long instanceId = sNextId++;
+            sInstances.put(instanceId, array);
+            return instanceId;
+        }
+
+        static long[] getInstance(long instanceId) {
+            return sInstances.get(instanceId);
+        }
+
+        public static void native_setValues(long instanceId, long[] values) {
+            System.arraycopy(values, 0, getInstance(instanceId), 0, values.length);
+        }
+
+        public static void native_getValues(long instanceId, long[] values) {
+            System.arraycopy(getInstance(instanceId), 0, values, 0, values.length);
+        }
+
+        public static boolean native_combineValues(long instanceId, long[] array, int[] indexMap) {
+            long[] values = getInstance(instanceId);
+
+            boolean nonZero = false;
+            Arrays.fill(array, 0);
+
+            for (int i = 0; i < values.length; i++) {
+                int index = indexMap[i];
+                if (index < 0 || index >= array.length) {
+                    throw new IndexOutOfBoundsException("Index " + index + " is out of bounds: [0, "
+                            + (array.length - 1) + "]");
+                }
+                if (values[i] != 0) {
+                    array[index] += values[i];
+                    nonZero = true;
+                }
+            }
+            return nonZero;
+        }
+    }
 
     /**
      * A reimplementation of {@link LongArrayMultiStateCounter}, only in
@@ -288,13 +334,13 @@ public class LongArrayMultiStateCounter_host {
 
     public static void native_setValues(long instanceId, int state, long containerInstanceId) {
         getInstance(instanceId).setValue(state,
-                LongArrayContainer_host.getInstance(containerInstanceId));
+                LongArrayContainer.getInstance(containerInstanceId));
     }
 
     public static void native_updateValues(long instanceId, long containerInstanceId,
             long timestampMs) {
         getInstance(instanceId).updateValue(
-                LongArrayContainer_host.getInstance(containerInstanceId), timestampMs);
+                LongArrayContainer.getInstance(containerInstanceId), timestampMs);
     }
 
     public static void native_setState(long instanceId, int state, long timestampMs) {
@@ -308,15 +354,15 @@ public class LongArrayMultiStateCounter_host {
     public static void native_incrementValues(long instanceId, long containerInstanceId,
             long timestampMs) {
         getInstance(instanceId).incrementValues(
-                LongArrayContainer_host.getInstance(containerInstanceId), timestampMs);
+                LongArrayContainer.getInstance(containerInstanceId), timestampMs);
     }
 
     public static void native_addCounts(long instanceId, long containerInstanceId) {
-        getInstance(instanceId).addCounts(LongArrayContainer_host.getInstance(containerInstanceId));
+        getInstance(instanceId).addCounts(LongArrayContainer.getInstance(containerInstanceId));
     }
 
     public static void native_getCounts(long instanceId, long containerInstanceId, int state) {
-        getInstance(instanceId).getValues(LongArrayContainer_host.getInstance(containerInstanceId),
+        getInstance(instanceId).getValues(LongArrayContainer.getInstance(containerInstanceId),
                 state);
     }
 
