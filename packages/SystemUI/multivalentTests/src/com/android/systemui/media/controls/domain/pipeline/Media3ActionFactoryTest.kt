@@ -38,6 +38,7 @@ import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.fakeSessionTokenFactory
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
+import com.android.systemui.util.concurrency.execution
 import com.google.common.collect.ImmutableList
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runCurrent
@@ -105,6 +106,7 @@ class Media3ActionFactoryTest : SysuiTestCase() {
                 kosmos.looper,
                 handler,
                 kosmos.testScope,
+                kosmos.execution,
             )
 
         controllerFactory.setMedia3Controller(media3Controller)
