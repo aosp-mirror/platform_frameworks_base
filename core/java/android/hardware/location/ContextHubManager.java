@@ -1267,6 +1267,9 @@ public final class ContextHubManager {
      * registration succeeds, the endpoint can receive notifications through the provided callback.
      *
      * @param hubEndpoint {@link HubEndpoint} object created by {@link HubEndpoint.Builder}
+     * @throws IllegalStateException if the registration failed, for example if too many endpoints
+     *     are registered at the service
+     * @throws UnsupportedOperationException if endpoint registration is not supported
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
