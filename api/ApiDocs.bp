@@ -129,7 +129,7 @@ droidstubs {
 droidstubs {
     name: "framework-doc-stubs",
     defaults: ["android-non-updatable-doc-stubs-defaults"],
-    srcs: [":all-modules-public-stubs-source"],
+    srcs: [":all-modules-public-stubs-source-exportable"],
     api_levels_module: "api_versions_public",
     aidl: {
         include_dirs: [
