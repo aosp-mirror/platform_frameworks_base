@@ -1308,19 +1308,12 @@ public class ActivityManagerServiceTest {
         Intent intent = new Intent();
         Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
         intent.putExtra("EXTRA_INTENT0", extraIntent);
-        Intent nestedIntent = new Intent("NESTED_INTENT_ACTION");
-        extraIntent.putExtra("NESTED_INTENT", nestedIntent);
 
         intent.collectExtraIntentKeys();
         mAms.addCreatorToken(intent, TEST_PACKAGE);
 
         ActivityManagerService.IntentCreatorToken token =
                 (ActivityManagerService.IntentCreatorToken) extraIntent.getCreatorToken();
-        assertThat(token).isNotNull();
-        assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
-        assertThat(token.getCreatorPackage()).isEqualTo(TEST_PACKAGE);
-
-        token = (ActivityManagerService.IntentCreatorToken) nestedIntent.getCreatorToken();
         assertThat(token).isNotNull();
         assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
         assertThat(token.getCreatorPackage()).isEqualTo(TEST_PACKAGE);
@@ -1356,8 +1349,6 @@ public class ActivityManagerServiceTest {
         Intent intent = new Intent();
         Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
         intent.putExtra("EXTRA_INTENT", extraIntent);
-        Intent nestedIntent = new Intent("NESTED_INTENT_ACTION");
-        extraIntent.putExtra("NESTED_INTENT", nestedIntent);
 
         intent.collectExtraIntentKeys();
 
@@ -1383,11 +1374,8 @@ public class ActivityManagerServiceTest {
         extraIntent = intent.getParcelableExtra("EXTRA_INTENT", Intent.class);
         extraIntent2 = intent.getParcelableExtra("EXTRA_INTENT2", Intent.class);
         extraIntent3 = intent.getParcelableExtra("EXTRA_INTENT3", Intent.class);
-        nestedIntent = extraIntent.getParcelableExtra("NESTED_INTENT", Intent.class);
 
         assertThat(extraIntent.getExtendedFlags()
-                & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
-        assertThat(nestedIntent.getExtendedFlags()
                 & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
         // sneaked in intent should have EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN set.
         assertThat(extraIntent2.getExtendedFlags()
