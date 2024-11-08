@@ -242,7 +242,7 @@ constructor(
 
     @Composable
     private fun Content() {
-        PlatformTheme {
+        PlatformTheme(isDarkTheme = true) {
             ProvideShortcutHelperIndication(interactionsConfig = interactionsConfig()) {
                 AnimatedVisibility(
                     visible = viewModel.isQsVisible,
