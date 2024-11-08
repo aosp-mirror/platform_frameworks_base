@@ -260,6 +260,16 @@ flag {
 }
 
 flag {
+  name: "system_ui_post_animation_end"
+  namespace: "windowing_frontend"
+  description: "Run AnimatorListener#onAnimationEnd on next frame for SystemUI"
+  bug: "300035126"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "system_ui_immersive_confirmation_dialog"
   namespace: "windowing_frontend"
   description: "Enable the implementation of the immersive confirmation dialog on system UI side by default"
