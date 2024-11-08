@@ -16,7 +16,8 @@
 
 package com.android.extensions.appfunctions;
 
-import static android.Manifest.permission.BIND_APP_FUNCTION_SERVICE;
+import static com.android.extensions.appfunctions.SidecarConverter.getPlatformAppFunctionException;
+import static com.android.extensions.appfunctions.SidecarConverter.getPlatformExecuteAppFunctionResponse;
 
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -26,8 +27,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.IBinder;
-
-import java.util.function.Consumer;
+import android.os.OutcomeReceiver;
 
 /**
  * Abstract base class to provide app functions to the system.
@@ -79,10 +79,18 @@ public abstract class AppFunctionService extends Service {
                                         platformRequest),
                                 callingPackage,
                                 cancellationSignal,
-                                (sidecarResponse) -> {
-                                    callback.accept(
-                                            SidecarConverter.getPlatformExecuteAppFunctionResponse(
-                                                    sidecarResponse));
+                                new OutcomeReceiver<>() {
+                                    @Override
+                                    public void onResult(ExecuteAppFunctionResponse result) {
+                                        callback.onResult(
+                                                getPlatformExecuteAppFunctionResponse(result));
+                                    }
+
+                                    @Override
+                                    public void onError(AppFunctionException exception) {
+                                        callback.onError(
+                                                getPlatformAppFunctionException(exception));
+                                    }
                                 });
                     });
 
@@ -115,12 +123,14 @@ public abstract class AppFunctionService extends Service {
      * @param request The function execution request.
      * @param callingPackage The package name of the app that is requesting the execution.
      * @param cancellationSignal A signal to cancel the execution.
-     * @param callback A callback to report back the result.
+     * @param callback A callback to report back the result or error.
      */
     @MainThread
     public abstract void onExecuteFunction(
             @NonNull ExecuteAppFunctionRequest request,
             @NonNull String callingPackage,
             @NonNull CancellationSignal cancellationSignal,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback);
+            @NonNull
+                    OutcomeReceiver<ExecuteAppFunctionResponse, AppFunctionException>
+                            callback);
 }
