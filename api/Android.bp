@@ -228,7 +228,7 @@ java_genrule {
     cmd: "$(location merge_zips) $(out) $(in)",
     srcs: [
         ":api-stubs-docs-non-updatable{.exportable}",
-        ":all-modules-public-stubs-source",
+        ":all-modules-public-stubs-source-exportable",
     ],
     visibility: ["//visibility:private"], // Used by make module in //development, mind
 }
