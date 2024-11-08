@@ -696,7 +696,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 TaskStackChangeListeners.getInstance().unregisterTaskStackListener(
                         mTaskStackListener);
                 DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
-                mPipOptional.ifPresent(pip -> pip.setOnIsInPipStateChangedListener(null));
+                mPipOptional.ifPresent(pip -> pip.removeOnIsInPipStateChangedListener(
+                        mOnIsInPipStateChangedListener));
 
                 try {
                     mWindowManagerService.unregisterSystemGestureExclusionListener(
@@ -720,7 +721,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         mTaskStackListener);
                 DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                         mUiThreadContext.getExecutor()::execute, mOnPropertiesChangedListener);
-                mPipOptional.ifPresent(pip -> pip.setOnIsInPipStateChangedListener(
+                mPipOptional.ifPresent(pip -> pip.addOnIsInPipStateChangedListener(
                         mOnIsInPipStateChangedListener));
                 mDesktopModeOptional.ifPresent(
                         dm -> dm.addDesktopGestureExclusionRegionListener(
