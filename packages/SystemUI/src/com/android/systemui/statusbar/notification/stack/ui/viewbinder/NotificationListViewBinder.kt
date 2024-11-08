@@ -20,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.TraceUtils.traceAsync
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.nano.MetricsProto
 import com.android.systemui.common.ui.ConfigurationState
@@ -70,7 +71,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [NotificationStackScrollLayout] to its [view model][NotificationListViewModel]. */
 class NotificationListViewBinder
