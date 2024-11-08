@@ -286,11 +286,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onTrustAgentErrorMessage(CharSequence message) { }
 
     /**
-     * Called when a value of logout enabled is change.
-     */
-    public void onLogoutEnabledChanged() { }
-
-    /**
      * Called when authenticated fingerprint biometrics are cleared.
      */
     public void onFingerprintsCleared() { }

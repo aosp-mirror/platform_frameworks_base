@@ -25,12 +25,12 @@ import com.android.systemui.brightness.shared.model.logDiffForTable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 /**
  * Converts between [GammaBrightness] and [LinearBrightness].
@@ -67,6 +67,8 @@ constructor(
                 .logDiffForTable(tableBuffer, TABLE_PREFIX_GAMMA, TABLE_COLUMN_BRIGHTNESS, null)
                 .stateIn(applicationScope, SharingStarted.WhileSubscribed(), GammaBrightness(0))
         }
+
+    val brightnessOverriddenByWindow = screenBrightnessRepository.isBrightnessOverriddenByWindow
 
     /** Sets the brightness temporarily, while the user is changing it. */
     suspend fun setTemporaryBrightness(gammaBrightness: GammaBrightness) {

@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations.layout.manager
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -87,6 +89,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                 spacedBy);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "COLUMN ["
@@ -105,14 +108,24 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                 + mVisibility;
     }
 
+    @NonNull
     @Override
     protected String getSerializedName() {
         return "COLUMN";
     }
 
     @Override
+    public boolean isInVerticalFill() {
+        return super.isInVerticalFill() || childrenHaveVerticalWeights();
+    }
+
+    @Override
     public void computeWrapSize(
-            PaintContext context, float maxWidth, float maxHeight, MeasurePass measure, Size size) {
+            PaintContext context,
+            float maxWidth,
+            float maxHeight,
+            @NonNull MeasurePass measure,
+            @NonNull Size size) {
         DebugLog.s(() -> "COMPUTE WRAP SIZE in " + this + " (" + mComponentId + ")");
         int visibleChildrens = 0;
         for (Component c : mChildrenComponents) {
@@ -137,7 +150,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
             float maxWidth,
             float minHeight,
             float maxHeight,
-            MeasurePass measure) {
+            @NonNull MeasurePass measure) {
         DebugLog.s(() -> "COMPUTE SIZE in " + this + " (" + mComponentId + ")");
         float mh = maxHeight;
         for (Component child : mChildrenComponents) {
@@ -151,7 +164,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context, MeasurePass measure) {
+    public void internalLayoutMeasure(PaintContext context, @NonNull MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         DebugLog.s(
                 () ->
@@ -302,6 +315,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         DebugLog.e();
     }
 
+    @NonNull
     public static String name() {
         return "ColumnLayout";
     }
@@ -311,7 +325,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int componentId,
             int animationId,
             int horizontalPositioning,
@@ -325,7 +339,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         buffer.writeFloat(spacedBy);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
         int horizontalPositioning = buffer.readInt();
@@ -341,7 +355,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                         spacedBy));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(
                         "Column layout implementation, positioning components one"
@@ -374,7 +388,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mComponentId,

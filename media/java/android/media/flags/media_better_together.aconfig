@@ -79,7 +79,7 @@ flag {
 
 flag {
     name: "update_client_profile_priority"
-    namespace: "media"
+    namespace: "media_solutions"
     description : "Feature flag to add updateResourcePriority api to MediaCas"
     bug: "300565729"
 }

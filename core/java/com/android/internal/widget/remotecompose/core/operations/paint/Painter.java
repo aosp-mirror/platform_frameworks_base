@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
+import android.annotation.NonNull;
+
 /** Provides a Builder pattern for a PaintBundle */
 class Painter {
     PaintBundle mPaint;
@@ -24,16 +26,19 @@ class Painter {
         return mPaint;
     }
 
+    @NonNull
     public Painter setAntiAlias(boolean aa) {
         mPaint.setAntiAlias(aa);
         return this;
     }
 
+    @NonNull
     public Painter setColor(int color) {
         mPaint.setColor(color);
         return this;
     }
 
+    @NonNull
     public Painter setColorId(int colorId) {
         mPaint.setColorId(colorId);
         return this;
@@ -44,6 +49,7 @@ class Painter {
      *
      * @param join set the paint's Join, used whenever the paint's style is Stroke or StrokeAndFill.
      */
+    @NonNull
     public Painter setStrokeJoin(int join) {
         mPaint.setStrokeJoin(join);
         return this;
@@ -56,6 +62,7 @@ class Painter {
      * @param width set the paint's stroke width, used whenever the paint's style is Stroke or
      *     StrokeAndFill.
      */
+    @NonNull
     public Painter setStrokeWidth(float width) {
         mPaint.setStrokeWidth(width);
         return this;
@@ -67,6 +74,7 @@ class Painter {
      *
      * @param style The new style to set in the paint
      */
+    @NonNull
     public Painter setStyle(int style) {
         mPaint.setStyle(style);
         return this;
@@ -78,6 +86,7 @@ class Painter {
      * @param cap set the paint's line cap style, used whenever the paint's style is Stroke or
      *     StrokeAndFill.
      */
+    @NonNull
     public Painter setStrokeCap(int cap) {
         mPaint.setStrokeCap(cap);
         return this;
@@ -90,6 +99,7 @@ class Painter {
      * @param miter set the miter limit on the paint, used whenever the paint's style is Stroke or
      *     StrokeAndFill.
      */
+    @NonNull
     public Painter setStrokeMiter(float miter) {
         mPaint.setStrokeMiter(miter);
         return this;
@@ -101,6 +111,7 @@ class Painter {
      *
      * @param alpha set the alpha component [0..1.0] of the paint's color.
      */
+    @NonNull
     public Painter setAlpha(float alpha) {
         mPaint.setAlpha((alpha > 2) ? alpha / 255f : alpha);
         return this;
@@ -112,6 +123,7 @@ class Painter {
      * @param color The ARGB source color used with the specified Porter-Duff mode
      * @param mode The porter-duff mode that is applied
      */
+    @NonNull
     public Painter setPorterDuffColorFilter(int color, int mode) {
         mPaint.setColorFilter(color, mode);
         return this;
@@ -130,6 +142,7 @@ class Painter {
      *     line.
      * @param tileMode The Shader tiling mode
      */
+    @NonNull
     public Painter setLinearGradient(
             float startX,
             float startY,
@@ -155,6 +168,7 @@ class Painter {
      *     circle.
      * @param tileMode The Shader tiling mode
      */
+    @NonNull
     public Painter setRadialGradient(
             float centerX,
             float centerY,
@@ -178,6 +192,7 @@ class Painter {
      *     may produce unexpected results. If positions is NULL, then the colors are automatically
      *     spaced evenly.
      */
+    @NonNull
     public Painter setSweepGradient(float centerX, float centerY, int[] colors, float[] positions) {
         mPaint.setSweepGradient(colors, 0, positions, centerX, centerY);
         return this;
@@ -188,6 +203,7 @@ class Painter {
      *
      * @param size set the paint's text size in pixel units.
      */
+    @NonNull
     public Painter setTextSize(float size) {
         mPaint.setTextSize(size);
         return this;
@@ -215,16 +231,19 @@ class Painter {
      * @param weight The desired weight to be drawn.
      * @param italic {@code true} if italic style is desired to be drawn. Otherwise, {@code false}
      */
+    @NonNull
     public Painter setTypeface(int fontType, int weight, boolean italic) {
         mPaint.setTextStyle(fontType, weight, italic);
         return this;
     }
 
+    @NonNull
     public Painter setFilterBitmap(boolean filter) {
         mPaint.setFilterBitmap(filter);
         return this;
     }
 
+    @NonNull
     public Painter setShader(int id) {
         mPaint.setShader(id);
         return this;

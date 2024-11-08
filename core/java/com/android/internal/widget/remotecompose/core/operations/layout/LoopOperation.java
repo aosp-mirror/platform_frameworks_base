@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -30,7 +33,7 @@ import java.util.List;
 public class LoopOperation extends PaintOperation {
     private static final int OP_CODE = Operations.LOOP_START;
 
-    public ArrayList<Operation> mList = new ArrayList<>();
+    @NonNull public ArrayList<Operation> mList = new ArrayList<>();
 
     int mIndexVariableId;
     float mUntil = 12;
@@ -49,27 +52,30 @@ public class LoopOperation extends PaintOperation {
         mIndexVariableId = indexId;
     }
 
+    @NonNull
     public ArrayList<Operation> getList() {
         return mList;
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mUntil, mFrom, mStep, mIndexVariableId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "LoopOperation";
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@Nullable String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         if (mIndexVariableId == 0) {
             for (float i = mFrom; i < mUntil; i += mStep) {
                 for (Operation op : mList) {
@@ -89,11 +95,13 @@ public class LoopOperation extends PaintOperation {
         }
     }
 
+    @NonNull
     public static String name() {
         return "Loop";
     }
 
-    public static void apply(WireBuffer buffer, float count, float from, float step, int indexId) {
+    public static void apply(
+            @NonNull WireBuffer buffer, float count, float from, float step, int indexId) {
         buffer.start(OP_CODE);
         buffer.writeFloat(count);
         buffer.writeFloat(from);
@@ -101,7 +109,7 @@ public class LoopOperation extends PaintOperation {
         buffer.writeInt(indexId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float count = buffer.readFloat();
         float from = buffer.readFloat();
         float step = buffer.readFloat();
@@ -109,7 +117,7 @@ public class LoopOperation extends PaintOperation {
         operations.add(new LoopOperation(count, from, step, indexId));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Operations", OP_CODE, name())
                 .description("Loop. This operation execute" + " a list of action in a loop");
     }

@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 /**
  * PaintOperation interface, used for operations aimed at painting (while any operation _can_ paint,
  * this make it a little more explicit)
@@ -22,7 +24,7 @@ package com.android.internal.widget.remotecompose.core;
 public abstract class PaintOperation implements Operation {
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         if (context.getMode() == RemoteContext.ContextMode.PAINT) {
             PaintContext paintContext = context.getPaintContext();
             if (paintContext != null) {
@@ -31,6 +33,7 @@ public abstract class PaintOperation implements Operation {
         }
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();

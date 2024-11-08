@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import android.annotation.NonNull;
+
 /** Implement the scaling logic for Compose Image or ImageView */
 public class ImageScaling {
 
@@ -97,6 +99,7 @@ public class ImageScaling {
         adjustDrawToType();
     }
 
+    @NonNull
     static String str(float v) {
         String s = "  " + (int) v;
         return s.substring(s.length() - 3);
@@ -210,6 +213,7 @@ public class ImageScaling {
         }
     }
 
+    @NonNull
     public static String typeToString(int type) {
         String[] typeString = {
             "none",

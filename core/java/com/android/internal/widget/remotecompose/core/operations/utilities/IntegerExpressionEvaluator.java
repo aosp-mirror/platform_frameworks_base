@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * High performance Integer expression evaluator
  *
@@ -22,7 +25,7 @@ package com.android.internal.widget.remotecompose.core.operations.utilities;
  * 0)
  */
 public class IntegerExpressionEvaluator {
-    static IntMap<String> sNames = new IntMap<>();
+    @NonNull static IntMap<String> sNames = new IntMap<>();
     public static final int OFFSET = 0x10000;
     // add, sub, mul,div,mod,min,max, shl, shr, ushr, OR, AND , XOR, COPY_SIGN
     public static final int I_ADD = OFFSET + 1;
@@ -57,7 +60,7 @@ public class IntegerExpressionEvaluator {
     public static final int I_VAR2 = OFFSET + 25;
 
     int[] mStack;
-    int[] mLocalStack = new int[128];
+    @NonNull int[] mLocalStack = new int[128];
     int[] mVar;
 
     interface Op {
@@ -68,8 +71,8 @@ public class IntegerExpressionEvaluator {
      * Evaluate an integer expression
      *
      * @param mask bits that are operators
-     * @param exp  rpn sequence of values and operators
-     * @param var  variables if the expression is a function
+     * @param exp rpn sequence of values and operators
+     * @param var variables if the expression is a function
      * @return return the results of evaluating the expression
      */
     public int eval(int mask, int[] exp, int... var) {
@@ -91,12 +94,12 @@ public class IntegerExpressionEvaluator {
      * Evaluate a integer expression
      *
      * @param mask bits that are operators
-     * @param exp  rpn sequence of values and operators
-     * @param len  the number of values in the expression
-     * @param var  variables if the expression is a function
+     * @param exp rpn sequence of values and operators
+     * @param len the number of values in the expression
+     * @param var variables if the expression is a function
      * @return return the results of evaluating the expression
      */
-    public int eval(int mask, int[] exp, int len, int... var) {
+    public int eval(int mask, @NonNull int[] exp, int len, int... var) {
         System.arraycopy(exp, 0, mLocalStack, 0, len);
         mStack = mLocalStack;
         mVar = var;
@@ -116,11 +119,11 @@ public class IntegerExpressionEvaluator {
      * Evaluate a int expression
      *
      * @param opMask bits that are operators
-     * @param exp    rpn sequence of values and operators
-     * @param var    variables if the expression is a function
+     * @param exp rpn sequence of values and operators
+     * @param var variables if the expression is a function
      * @return return the results of evaluating the expression
      */
-    public int evalDB(int opMask, int[] exp, int... var) {
+    public int evalDB(int opMask, @NonNull int[] exp, int... var) {
         mStack = exp;
         mVar = var;
         int sp = -1;
@@ -137,113 +140,172 @@ public class IntegerExpressionEvaluator {
         return mStack[sp];
     }
 
-    Op[] mOps = {
+    @NonNull Op[] mOps;
+
+    {
+        Op mADD =
+                (sp) -> { // ADD
+                    mStack[sp - 1] = mStack[sp - 1] + mStack[sp];
+                    return sp - 1;
+                };
+        Op mSUB =
+                (sp) -> { // SUB
+                    mStack[sp - 1] = mStack[sp - 1] - mStack[sp];
+                    return sp - 1;
+                };
+        Op mMUL =
+                (sp) -> { // MUL
+                    mStack[sp - 1] = mStack[sp - 1] * mStack[sp];
+                    return sp - 1;
+                };
+        Op mDIV =
+                (sp) -> { // DIV
+                    mStack[sp - 1] = mStack[sp - 1] / mStack[sp];
+                    return sp - 1;
+                };
+        Op mMOD =
+                (sp) -> { // MOD
+                    mStack[sp - 1] = mStack[sp - 1] % mStack[sp];
+                    return sp - 1;
+                };
+        Op mSHL =
+                (sp) -> { // SHL
+                    mStack[sp - 1] = mStack[sp - 1] << mStack[sp];
+                    return sp - 1;
+                };
+        Op mSHR =
+                (sp) -> { // SHR
+                    mStack[sp - 1] = mStack[sp - 1] >> mStack[sp];
+                    return sp - 1;
+                };
+        Op mUSHR =
+                (sp) -> { // USHR
+                    mStack[sp - 1] = mStack[sp - 1] >>> mStack[sp];
+                    return sp - 1;
+                };
+        Op mOR =
+                (sp) -> { // OR
+                    mStack[sp - 1] = mStack[sp - 1] | mStack[sp];
+                    return sp - 1;
+                };
+        Op mAND =
+                (sp) -> { // AND
+                    mStack[sp - 1] = mStack[sp - 1] & mStack[sp];
+                    return sp - 1;
+                };
+        Op mXOR =
+                (sp) -> { // XOR
+                    mStack[sp - 1] = mStack[sp - 1] ^ mStack[sp];
+                    return sp - 1;
+                };
+        Op mCOPY_SIGN =
+                (sp) -> { // COPY_SIGN
+                    mStack[sp - 1] = (mStack[sp - 1] ^ (mStack[sp] >> 31)) - (mStack[sp] >> 31);
+                    return sp - 1;
+                };
+        Op mMIN =
+                (sp) -> { // MIN
+                    mStack[sp - 1] = Math.min(mStack[sp - 1], mStack[sp]);
+                    return sp - 1;
+                };
+        Op mMAX =
+                (sp) -> { // MAX
+                    mStack[sp - 1] = Math.max(mStack[sp - 1], mStack[sp]);
+                    return sp - 1;
+                };
+        Op mNEG =
+                (sp) -> { // NEG
+                    mStack[sp] = -mStack[sp];
+                    return sp;
+                };
+        Op mABS =
+                (sp) -> { // ABS
+                    mStack[sp] = Math.abs(mStack[sp]);
+                    return sp;
+                };
+        Op mINCR =
+                (sp) -> { // INCR
+                    mStack[sp] = mStack[sp] + 1;
+                    return sp;
+                };
+        Op mDECR =
+                (sp) -> { // DECR
+                    mStack[sp] = mStack[sp] - 1;
+                    return sp;
+                };
+        Op mNOT =
+                (sp) -> { // NOT
+                    mStack[sp] = ~mStack[sp];
+                    return sp;
+                };
+        Op mSIGN =
+                (sp) -> { // SIGN
+                    mStack[sp] = (mStack[sp] >> 31) | (-mStack[sp] >>> 31);
+                    return sp;
+                };
+        Op mCLAMP =
+                (sp) -> { // CLAMP
+                    mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
+                    return sp - 2;
+                };
+        Op mTERNARY_CONDITIONAL =
+                (sp) -> { // TERNARY_CONDITIONAL
+                    mStack[sp - 2] = (mStack[sp] > 0) ? mStack[sp - 1] : mStack[sp - 2];
+                    return sp - 2;
+                };
+        Op mMAD =
+                (sp) -> { // MAD
+                    mStack[sp - 2] = mStack[sp] + mStack[sp - 1] * mStack[sp - 2];
+                    return sp - 2;
+                };
+        Op mFIRST_VAR =
+                (sp) -> { // FIRST_VAR
+                    mStack[sp] = mVar[0];
+                    return sp;
+                };
+        Op mSECOND_VAR =
+                (sp) -> { // SECOND_VAR
+                    mStack[sp] = mVar[1];
+                    return sp;
+                };
+        Op mTHIRD_VAR =
+                (sp) -> { // THIRD_VAR
+                    mStack[sp] = mVar[2];
+                    return sp;
+                };
+
+        Op[] ops = {
             null,
-            (sp) -> { // ADD
-                mStack[sp - 1] = mStack[sp - 1] + mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // SUB
-                mStack[sp - 1] = mStack[sp - 1] - mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // MUL
-                mStack[sp - 1] = mStack[sp - 1] * mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // DIV
-                mStack[sp - 1] = mStack[sp - 1] / mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // MOD
-                mStack[sp - 1] = mStack[sp - 1] % mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // SHL shift left
-                mStack[sp - 1] = mStack[sp - 1] << mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // SHR shift right
-                mStack[sp - 1] = mStack[sp - 1] >> mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // USHR unsigned shift right
-                mStack[sp - 1] = mStack[sp - 1] >>> mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // OR operator
-                mStack[sp - 1] = mStack[sp - 1] | mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // AND operator
-                mStack[sp - 1] = mStack[sp - 1] & mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // XOR xor operator
-                mStack[sp - 1] = mStack[sp - 1] ^ mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // COPY_SIGN copy the sing of (using bit magic)
-                mStack[sp - 1] = (mStack[sp - 1] ^ (mStack[sp] >> 31)) - (mStack[sp] >> 31);
-                return sp - 1;
-            },
-            (sp) -> { // MIN
-                mStack[sp - 1] = Math.min(mStack[sp - 1], mStack[sp]);
-                return sp - 1;
-            },
-            (sp) -> { // MAX
-                mStack[sp - 1] = Math.max(mStack[sp - 1], mStack[sp]);
-                return sp - 1;
-            },
-            (sp) -> { // NEG
-                mStack[sp] = -mStack[sp];
-                return sp;
-            },
-            (sp) -> { // ABS
-                mStack[sp] = Math.abs(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // INCR increment
-                mStack[sp] = mStack[sp] + 1;
-                return sp;
-            },
-            (sp) -> { // DECR decrement
-                mStack[sp] = mStack[sp] - 1;
-                return sp;
-            },
-            (sp) -> { // NOT Bit invert
-                mStack[sp] = ~mStack[sp];
-                return sp;
-            },
-            (sp) -> { // SIGN x<0 = -1,x==0 =  0 , x>0 = 1
-                mStack[sp] = (mStack[sp] >> 31) | (-mStack[sp] >>> 31);
-                return sp;
-            },
-            (sp) -> { // CLAMP(min,max, val)
-                mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
-                return sp - 2;
-            },
-            (sp) -> { // Ternary conditional
-                mStack[sp - 2] = (mStack[sp] > 0) ? mStack[sp - 1] : mStack[sp - 2];
-                return sp - 2;
-            },
-            (sp) -> { // MAD
-                mStack[sp - 2] = mStack[sp] + mStack[sp - 1] * mStack[sp - 2];
-                return sp - 2;
-            },
-            (sp) -> { // first var =
-                mStack[sp] = mVar[0];
-                return sp;
-            },
-            (sp) -> { // second var y?
-                mStack[sp] = mVar[1];
-                return sp;
-            },
-            (sp) -> { // 3rd var z?
-                mStack[sp] = mVar[2];
-                return sp;
-            },
-    };
+            mADD,
+            mSUB,
+            mMUL,
+            mDIV,
+            mMOD,
+            mSHL,
+            mSHR,
+            mUSHR,
+            mOR,
+            mAND,
+            mXOR,
+            mCOPY_SIGN,
+            mMIN,
+            mMAX,
+            mNEG,
+            mABS,
+            mINCR,
+            mDECR,
+            mNOT,
+            mSIGN,
+            mCLAMP,
+            mTERNARY_CONDITIONAL,
+            mMAD,
+            mFIRST_VAR,
+            mSECOND_VAR,
+            mTHIRD_VAR,
+        };
+
+        mOps = ops;
+    }
 
     static {
         int k = 0;
@@ -283,6 +345,7 @@ public class IntegerExpressionEvaluator {
      * @param f the numerical value of the function + offset
      * @return the math name of the function
      */
+    @Nullable
     public static String toMathName(int f) {
         int id = f - OFFSET;
         return sNames.get(id);
@@ -292,11 +355,12 @@ public class IntegerExpressionEvaluator {
      * Convert an expression encoded as an array of ints int to a string
      *
      * @param opMask bits that are operators
-     * @param exp    rpn sequence of values and operators
+     * @param exp rpn sequence of values and operators
      * @param labels String that represent the variable names
      * @return
      */
-    public static String toString(int opMask, int[] exp, String[] labels) {
+    @NonNull
+    public static String toString(int opMask, @NonNull int[] exp, String[] labels) {
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < exp.length; i++) {
             int v = exp[i];
@@ -324,10 +388,11 @@ public class IntegerExpressionEvaluator {
      * Convert an expression encoded as an array of ints int ot a string
      *
      * @param opMask bit mask of operators vs commands
-     * @param exp    rpn sequence of values and operators
+     * @param exp rpn sequence of values and operators
      * @return string representation of the expression
      */
-    public static String toString(int opMask, int[] exp) {
+    @NonNull
+    public static String toString(int opMask, @NonNull int[] exp) {
         StringBuilder s = new StringBuilder();
         s.append(Integer.toBinaryString(opMask));
         s.append(" : ");
@@ -355,13 +420,15 @@ public class IntegerExpressionEvaluator {
      * This creates an infix string expression
      *
      * @param opMask The bits that are operators
-     * @param exp    the array of expressions
+     * @param exp the array of expressions
      * @return infix string
      */
-    public static String toStringInfix(int opMask, int[] exp) {
+    @NonNull
+    public static String toStringInfix(int opMask, @NonNull int[] exp) {
         return toString(opMask, exp, exp.length - 1);
     }
 
+    @NonNull
     static String toString(int mask, int[] exp, int sp) {
         if (((1 << sp) & mask) != 0) {
             int id = exp[sp] - OFFSET;
@@ -412,34 +479,34 @@ public class IntegerExpressionEvaluator {
     }
 
     static final int[] NO_OF_OPS = {
-            -1, // no op
-            2,
-            2,
-            2,
-            2,
-            2, // + - * / %
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2, // <<, >> , >>> , | , &, ^, min max
-            1,
-            1,
-            1,
-            1,
-            1,
-            1, // neg, abs, ++, -- , not , sign
-            3,
-            3,
-            3, // clamp, ifElse, mad,
-            0,
-            0,
-            0 // mad, ?:,
-            // a[0],a[1],a[2]
+        -1, // no op
+        2,
+        2,
+        2,
+        2,
+        2, // + - * / %
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2, // <<, >> , >>> , | , &, ^, min max
+        1,
+        1,
+        1,
+        1,
+        1,
+        1, // neg, abs, ++, -- , not , sign
+        3,
+        3,
+        3, // clamp, ifElse, mad,
+        0,
+        0,
+        0 // mad, ?:,
+        // a[0],a[1],a[2]
     };
 
     /**
@@ -456,7 +523,7 @@ public class IntegerExpressionEvaluator {
      * is it an id or operation
      *
      * @param opMask the bits that mark elements as an operation
-     * @param i      the bit to check
+     * @param i the bit to check
      * @return true if the bit is 1
      */
     public static boolean isOperation(int opMask, int i) {

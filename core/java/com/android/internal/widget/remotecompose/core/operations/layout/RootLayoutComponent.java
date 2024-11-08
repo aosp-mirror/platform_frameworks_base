@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -34,7 +36,8 @@ import java.util.List;
 
 /** Represents the root layout component. Entry point to the component tree layout/paint. */
 public class RootLayoutComponent extends Component implements ComponentStartOperation {
-    int mCurrentId = -1;
+    private int mCurrentId = -1;
+    private boolean mHasTouchListeners = false;
 
     public RootLayoutComponent(
             int componentId,
@@ -52,6 +55,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         super(parent, componentId, -1, x, y, width, height);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ROOT "
@@ -69,7 +73,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(
                 indent,
                 "ROOT ["
@@ -89,6 +93,15 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
     }
 
     /**
+     * Set the flag to traverse the tree when touch events happen
+     *
+     * @param value true to indicate that the tree has touch listeners
+     */
+    public void setHasTouchListeners(boolean value) {
+        mHasTouchListeners = value;
+    }
+
+    /**
      * Traverse the hierarchy and assign generated ids to component without ids. Most components
      * would already have ids assigned during the document creation, but this allow us to take care
      * of any components added during the inflation.
@@ -100,7 +113,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         assignId(this);
     }
 
-    private void assignId(Component component) {
+    private void assignId(@NonNull Component component) {
         if (component.mComponentId == -1) {
             mCurrentId--;
             component.mComponentId = mCurrentId;
@@ -113,7 +126,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
     }
 
     /** This will measure then layout the tree of components */
-    public void layout(RemoteContext context) {
+    public void layout(@NonNull RemoteContext context) {
         if (!mNeedsMeasure) {
             return;
         }
@@ -134,7 +147,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         mNeedsRepaint = false;
         context.getContext().lastComponent = this;
         context.save();
@@ -152,13 +165,15 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         context.restore();
     }
 
+    @NonNull
     public String displayHierarchy() {
         StringSerializer serializer = new StringSerializer();
         displayHierarchy(this, 0, serializer);
         return serializer.toString();
     }
 
-    public void displayHierarchy(Component component, int indent, StringSerializer serializer) {
+    public void displayHierarchy(
+            @NonNull Component component, int indent, @NonNull StringSerializer serializer) {
         component.serializeToString(indent, serializer);
         for (Operation c : component.mList) {
             if (c instanceof ComponentModifiers) {
@@ -171,6 +186,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         }
     }
 
+    @NonNull
     public static String name() {
         return "RootLayout";
     }
@@ -179,17 +195,17 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         return Operations.LAYOUT_ROOT;
     }
 
-    public static void apply(WireBuffer buffer, int componentId) {
+    public static void apply(@NonNull WireBuffer buffer, int componentId) {
         buffer.start(Operations.LAYOUT_ROOT);
         buffer.writeInt(componentId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         operations.add(new RootLayoutComponent(componentId, 0, 0, 0, 0, null, -1));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")
                 .description(
@@ -199,7 +215,11 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mComponentId);
+    }
+
+    public boolean hasTouchListeners() {
+        return mHasTouchListeners;
     }
 }

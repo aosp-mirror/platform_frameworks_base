@@ -296,4 +296,35 @@ public final class InputGestureData {
     public record Action(@KeyGestureEvent.KeyGestureType int keyGestureType,
                          @Nullable AppLaunchData appLaunchData) {
     }
+
+    /** Filter definition for InputGestureData */
+    public enum Filter {
+        KEY(AidlInputGestureData.Trigger.Tag.key),
+        TOUCHPAD(AidlInputGestureData.Trigger.Tag.touchpadGesture);
+
+        @AidlInputGestureData.Trigger.Tag
+        private final int mTag;
+
+        Filter(@AidlInputGestureData.Trigger.Tag int tag) {
+            mTag = tag;
+        }
+
+        @Nullable
+        public static Filter of(@AidlInputGestureData.Trigger.Tag int tag) {
+            return switch (tag) {
+                case AidlInputGestureData.Trigger.Tag.key -> KEY;
+                case AidlInputGestureData.Trigger.Tag.touchpadGesture -> TOUCHPAD;
+                default -> null;
+            };
+        }
+
+        @AidlInputGestureData.Trigger.Tag
+        public int getTag() {
+            return mTag;
+        }
+
+        public boolean matches(@NonNull InputGestureData inputGestureData) {
+            return mTag == inputGestureData.mInputGestureData.trigger.getTag();
+        }
+    }
 }

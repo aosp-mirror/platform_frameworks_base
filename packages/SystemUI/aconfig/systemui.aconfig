@@ -414,6 +414,17 @@ flag {
 }
 
 flag {
+    name: "status_bar_auto_start_screen_record_chip"
+    namespace: "systemui"
+    description: "When screen recording, use the specified start time to update the screen record "
+        "chip state instead of waiting for an official 'recording started' signal"
+    bug: "366448907"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
     description: "Use repositories as the source of truth for call notifications shown as a chip in"
@@ -1676,6 +1687,16 @@ flag {
 }
 
 flag {
+   name: "show_toast_when_app_control_brightness"
+   namespace: "systemui"
+   description: "Showing the warning toast if the current running app window has controlled the brightness value."
+   bug: "363225340"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
   name: "home_controls_dream_hsum"
   namespace: "systemui"
   description: "Enables the home controls dream in HSUM"
@@ -1742,4 +1763,14 @@ flag {
     namespace: "systemui"
     description: "An implementation of shortcut customizations through shortcut helper."
     bug: "365064144"
+}
+
+flag {
+    name: "stoppable_fgs_system_app"
+    namespace: "systemui"
+    description: "System app with foreground service can opt in to be stoppable."
+    bug: "376564917"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

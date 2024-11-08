@@ -3017,15 +3017,16 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     @PermissionManuallyEnforced
-    public void removeAllCustomInputGestures(@UserIdInt int userId) {
+    public void removeAllCustomInputGestures(@UserIdInt int userId, int tag) {
         enforceManageKeyGesturePermission();
 
-        mKeyGestureController.removeAllCustomInputGestures(userId);
+        mKeyGestureController.removeAllCustomInputGestures(userId, InputGestureData.Filter.of(tag));
     }
 
     @Override
-    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId) {
-        return mKeyGestureController.getCustomInputGestures(userId);
+    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId, int tag) {
+        return mKeyGestureController.getCustomInputGestures(userId,
+                InputGestureData.Filter.of(tag));
     }
 
     @Override

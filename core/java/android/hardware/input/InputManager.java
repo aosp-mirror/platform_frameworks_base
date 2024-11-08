@@ -1526,16 +1526,20 @@ public final class InputManager {
 
     /** Removes all custom input gestures
      *
+     * @param filter for removing all gestures of a category. If {@code null}, all custom input
+     *               gestures will be removed
+     *
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
     @UserHandleAware
-    public void removeAllCustomInputGestures() {
+    public void removeAllCustomInputGestures(@Nullable InputGestureData.Filter filter) {
         if (!enableCustomizableInputGestures()) {
             return;
         }
         try {
-            mIm.removeAllCustomInputGestures(mContext.getUserId());
+            mIm.removeAllCustomInputGestures(mContext.getUserId(),
+                    filter == null ? -1 : filter.getTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1543,16 +1547,20 @@ public final class InputManager {
 
     /** Get all custom input gestures
      *
+     * @param filter for fetching all gestures of a category. If {@code null}, then will return
+     *               all custom input gestures
+     *
      * @hide
      */
     @UserHandleAware
-    public List<InputGestureData> getCustomInputGestures() {
+    public List<InputGestureData> getCustomInputGestures(@Nullable InputGestureData.Filter filter) {
         List<InputGestureData> result = new ArrayList<>();
         if (!enableCustomizableInputGestures()) {
             return result;
         }
         try {
-            for (AidlInputGestureData data : mIm.getCustomInputGestures(mContext.getUserId())) {
+            for (AidlInputGestureData data : mIm.getCustomInputGestures(mContext.getUserId(),
+                    filter == null ? -1 : filter.getTag())) {
                 result.add(new InputGestureData(data));
             }
         } catch (RemoteException e) {

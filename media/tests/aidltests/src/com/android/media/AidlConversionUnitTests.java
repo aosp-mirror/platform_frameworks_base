@@ -18,6 +18,7 @@ package android.media.audio.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -502,6 +503,27 @@ public final class AidlConversionUnitTests {
         assertEquals(AudioDeviceDescription.CONNECTION_HDMI_ARC,
                 port.ext.getDevice().device.type.connection);
         assertEquals(AudioDeviceType.OUT_DEVICE, port.ext.getDevice().device.type.type);
+    }
+
+    @Test
+    public void testAudioDeviceDescriptionConversion() {
+        for (int nativeDeviceType : AudioSystem.DEVICE_OUT_ALL_SET) {
+            assertNotEquals(
+                    AidlConversion.api2aidl_NativeType_AudioDeviceDescription(nativeDeviceType)
+                            .type,
+                    AudioDeviceType.NONE);
+        }
+
+        for (int nativeDeviceType : AudioSystem.DEVICE_IN_ALL_SET) {
+            if (nativeDeviceType == AudioSystem.DEVICE_IN_COMMUNICATION
+                    || nativeDeviceType == AudioSystem.DEVICE_IN_AMBIENT) {
+                continue;
+            }
+            assertNotEquals(
+                    AidlConversion.api2aidl_NativeType_AudioDeviceDescription(nativeDeviceType)
+                            .type,
+                    AudioDeviceType.NONE);
+        }
     }
 
     private static AudioFormatDescription createPcm16FormatAidl() {

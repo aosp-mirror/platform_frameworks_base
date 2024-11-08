@@ -113,16 +113,24 @@ public final class BrightnessInfo implements Parcelable {
      */
     public final int brightnessMaxReason;
 
+    /**
+     * Whether the current brightness value is overridden by the application window via
+     * {@link android.view.WindowManager.LayoutParams#screenBrightness}.
+     */
+    public final boolean isBrightnessOverrideByWindow;
+
     public BrightnessInfo(float brightness, float brightnessMinimum, float brightnessMaximum,
             @HighBrightnessMode int highBrightnessMode, float highBrightnessTransitionPoint,
             @BrightnessMaxReason int brightnessMaxReason) {
         this(brightness, brightness, brightnessMinimum, brightnessMaximum, highBrightnessMode,
-                highBrightnessTransitionPoint, brightnessMaxReason);
+                highBrightnessTransitionPoint, brightnessMaxReason,
+                false /* isBrightnessOverrideByWindow */);
     }
 
     public BrightnessInfo(float brightness, float adjustedBrightness, float brightnessMinimum,
             float brightnessMaximum, @HighBrightnessMode int highBrightnessMode,
-            float highBrightnessTransitionPoint, @BrightnessMaxReason int brightnessMaxReason) {
+            float highBrightnessTransitionPoint, @BrightnessMaxReason int brightnessMaxReason,
+            boolean isBrightnessOverrideByWindow) {
         this.brightness = brightness;
         this.adjustedBrightness = adjustedBrightness;
         this.brightnessMinimum = brightnessMinimum;
@@ -130,6 +138,7 @@ public final class BrightnessInfo implements Parcelable {
         this.highBrightnessMode = highBrightnessMode;
         this.highBrightnessTransitionPoint = highBrightnessTransitionPoint;
         this.brightnessMaxReason =  brightnessMaxReason;
+        this.isBrightnessOverrideByWindow = isBrightnessOverrideByWindow;
     }
 
     /**
@@ -178,6 +187,7 @@ public final class BrightnessInfo implements Parcelable {
         dest.writeInt(highBrightnessMode);
         dest.writeFloat(highBrightnessTransitionPoint);
         dest.writeInt(brightnessMaxReason);
+        dest.writeBoolean(isBrightnessOverrideByWindow);
     }
 
     public static final @android.annotation.NonNull Creator<BrightnessInfo> CREATOR =
@@ -201,6 +211,7 @@ public final class BrightnessInfo implements Parcelable {
         highBrightnessMode = source.readInt();
         highBrightnessTransitionPoint = source.readFloat();
         brightnessMaxReason = source.readInt();
+        isBrightnessOverrideByWindow = source.readBoolean();
     }
 
 }
