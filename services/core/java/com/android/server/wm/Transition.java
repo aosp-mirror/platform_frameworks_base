@@ -465,6 +465,31 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return false;
     }
 
+    /**
+     * This ensures that all changes for previously transient-hide containers are flagged such that
+     * they will report changes and be included in this transition.
+     */
+    void updateChangesForRestoreTransientHideTasks(Transition transientLaunchTransition) {
+        if (transientLaunchTransition.mTransientHideTasks == null) {
+            // Skip if the transient-launch transition has no transient-hide tasks
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Skipping update changes for restore transient hide tasks");
+            return;
+        }
+
+        // For each change, if it was previously transient-hidden, then we should force a flag to
+        // ensure that it is included in the next transition
+        for (int i = 0; i < mChanges.size(); i++) {
+            final WindowContainer container = mChanges.keyAt(i);
+            if (transientLaunchTransition.isInTransientHide(container)) {
+                ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Force update transient hide task for restore %d: %s", mSyncId, container);
+                final ChangeInfo info = mChanges.valueAt(i);
+                info.mRestoringTransientHide = true;
+            }
+        }
+    }
+
     /** Returns {@code true} if the task should keep visible if this is a transient transition. */
     boolean isTransientVisible(@NonNull Task task) {
         if (mTransientLaunches == null) return false;
@@ -3478,6 +3503,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // State tracking
         boolean mExistenceChanged = false;
+        // This state indicates that we are restoring transient order as a part of an
+        // end-transition. Because the visibility for transient hide containers has not actually
+        // changed, we need to ensure that hasChanged() still reports the relevant changes
+        boolean mRestoringTransientHide = false;
         // before change state
         boolean mVisible;
         int mWindowingMode;
@@ -3552,7 +3581,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     || !mContainer.getBounds().equals(mAbsoluteBounds)
                     || mRotation != mContainer.getWindowConfiguration().getRotation()
                     || mDisplayId != getDisplayId(mContainer)
-                    || (mFlags & ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP) != 0;
+                    || (mFlags & ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP) != 0
+                    // If we are restoring transient-hide containers, then we should consider them
+                    // important for the transition as well (their requested visibilities would not
+                    // have changed for the checks below to consider it).
+                    || mRestoringTransientHide;
         }
 
         @TransitionInfo.TransitionMode
@@ -3565,6 +3598,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
             final boolean nowVisible = wc.isVisibleRequested();
             if (nowVisible == mVisible) {
+                if (mRestoringTransientHide) {
+                    // The requested visibility has not changed for transient-hide containers, but
+                    // we are restoring them so we should considering them moving to front again
+                    return TRANSIT_TO_FRONT;
+                }
                 return TRANSIT_CHANGE;
             }
             if (mExistenceChanged) {

@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -522,6 +523,23 @@ class TransitionController {
             if (mPlayingTransitions.get(i).isOnDisplay(dc)) return true;
         }
         return false;
+    }
+
+    /**
+     * @return A pair of the transition and restore-behind target for the given {@param container}.
+     * @param container An ancestor of a transient-launch activity
+     */
+    @Nullable
+    Pair<Transition, Task> getTransientLaunchTransitionAndTarget(
+            @NonNull WindowContainer container) {
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            final Transition transition = mPlayingTransitions.get(i);
+            final Task restoreBehindTask = transition.getTransientLaunchRestoreTarget(container);
+            if (restoreBehindTask != null) {
+                return new Pair<>(transition, restoreBehindTask);
+            }
+        }
+        return null;
     }
 
     /** Returns {@code true} if the display contains a transient-launch transition. */
