@@ -3431,6 +3431,40 @@ public final class SatelliteManager {
         }
     }
 
+    /**
+     * Inform whether application supports NTN SMS in satellite mode.
+     *
+     * This method is used by default messaging application to inform framework whether it supports
+     * NTN SMS or not.
+     *
+     * Invoking this API will internally result in triggering
+     * {@link android.telephony.TelephonyCallback.CarrierRoamingNtnModeListener
+     * #onCarrierRoamingNtnAvailableServicesChanged(List)} and
+     * {@link android.telephony.TelephonyCallback.CarrierRoamingNtnModeListener
+     * #onCarrierRoamingNtnEligibleStateChanged(boolean)} callbacks.
+     *
+     * @param ntnSmsSupported {@code true} If application supports NTN SMS, else {@code false}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(allOf = {Manifest.permission.SATELLITE_COMMUNICATION,
+            Manifest.permission.SEND_SMS})
+    public void setNtnSmsSupported(boolean ntnSmsSupported) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setNtnSmsSupported(ntnSmsSupported);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("setNtnSmsSupported() RemoteException:" + ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
     @Nullable
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
