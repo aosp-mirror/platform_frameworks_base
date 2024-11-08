@@ -348,42 +348,53 @@ constructor(
 
     private suspend fun getSettings(): UserSwitcherSettingsModel {
         return withContext(backgroundDispatcher) {
-            val isSimpleUserSwitcher =
-                globalSettings.getInt(
-                    SETTING_SIMPLE_USER_SWITCHER,
-                    if (
-                        appContext.resources.getBoolean(
-                            com.android.internal.R.bool.config_expandLockScreenUserSwitcher
-                        )
-                    ) {
-                        1
-                    } else {
-                        0
-                    },
-                ) != 0
+            if (
+                // TODO(b/378068979): remove once login screen-specific logic
+                // is implemented at framework level.
+                appContext.resources.getBoolean(R.bool.config_userSwitchingMustGoThroughLoginScreen)
+            ) {
+                UserSwitcherSettingsModel(
+                    isSimpleUserSwitcher = false,
+                    isAddUsersFromLockscreen = false,
+                    isUserSwitcherEnabled = false,
+                )
+            } else {
+                val isSimpleUserSwitcher =
+                    globalSettings.getInt(
+                        SETTING_SIMPLE_USER_SWITCHER,
+                        if (
+                            appContext.resources.getBoolean(
+                                com.android.internal.R.bool.config_expandLockScreenUserSwitcher
+                            )
+                        ) {
+                            1
+                        } else {
+                            0
+                        },
+                    ) != 0
 
-            val isAddUsersFromLockscreen =
-                globalSettings.getInt(Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0
+                val isAddUsersFromLockscreen =
+                    globalSettings.getInt(Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0
 
-            val isUserSwitcherEnabled =
-                globalSettings.getInt(
-                    Settings.Global.USER_SWITCHER_ENABLED,
-                    if (
-                        appContext.resources.getBoolean(
-                            com.android.internal.R.bool.config_showUserSwitcherByDefault
-                        )
-                    ) {
-                        1
-                    } else {
-                        0
-                    },
-                ) != 0
-
-            UserSwitcherSettingsModel(
-                isSimpleUserSwitcher = isSimpleUserSwitcher,
-                isAddUsersFromLockscreen = isAddUsersFromLockscreen,
-                isUserSwitcherEnabled = isUserSwitcherEnabled,
-            )
+                val isUserSwitcherEnabled =
+                    globalSettings.getInt(
+                        Settings.Global.USER_SWITCHER_ENABLED,
+                        if (
+                            appContext.resources.getBoolean(
+                                com.android.internal.R.bool.config_showUserSwitcherByDefault
+                            )
+                        ) {
+                            1
+                        } else {
+                            0
+                        },
+                    ) != 0
+                UserSwitcherSettingsModel(
+                    isSimpleUserSwitcher = isSimpleUserSwitcher,
+                    isAddUsersFromLockscreen = isAddUsersFromLockscreen,
+                    isUserSwitcherEnabled = isUserSwitcherEnabled,
+                )
+            }
         }
     }
 
