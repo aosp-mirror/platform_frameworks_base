@@ -9952,11 +9952,13 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        if (!mIsDrawing) {
-            destroyHardwareRenderer();
-        } else {
-            Log.e(mTag, "Attempting to destroy the window while drawing!\n" +
-                    "  window=" + this + ", title=" + mWindowAttributes.getTitle());
+        if (!com.android.graphics.hwui.flags.Flags.removeVriSketchyDestroy()) {
+            if (!mIsDrawing) {
+                destroyHardwareRenderer();
+            } else {
+                Log.e(mTag, "Attempting to destroy the window while drawing!\n"
+                        + "  window=" + this + ", title=" + mWindowAttributes.getTitle());
+            }
         }
         mHandler.sendEmptyMessage(MSG_DIE);
         return true;
@@ -9977,9 +9979,9 @@ public final class ViewRootImpl implements ViewParent,
                 dispatchDetachedFromWindow();
             }
 
-            if (mAdded && !mFirst) {
-                destroyHardwareRenderer();
+            destroyHardwareRenderer();
 
+            if (mAdded && !mFirst) {
                 if (mView != null) {
                     int viewVisibility = mView.getVisibility();
                     boolean viewVisibilityChanged = mViewVisibility != viewVisibility;
