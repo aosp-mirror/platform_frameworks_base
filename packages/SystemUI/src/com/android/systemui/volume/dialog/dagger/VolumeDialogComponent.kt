@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.dialog.dagger
 
+import com.android.systemui.volume.dialog.dagger.module.VolumeDialogModule
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderComponent
@@ -28,7 +29,7 @@ import kotlinx.coroutines.CoroutineScope
  * [com.android.systemui.volume.dialog.VolumeDialogPlugin] and lives alongside it.
  */
 @VolumeDialogScope
-@Subcomponent(modules = [])
+@Subcomponent(modules = [VolumeDialogModule::class])
 interface VolumeDialogComponent {
 
     /**
