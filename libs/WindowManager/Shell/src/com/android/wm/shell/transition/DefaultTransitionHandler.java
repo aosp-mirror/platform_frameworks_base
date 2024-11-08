@@ -353,7 +353,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             boolean isSeamlessDisplayChange = false;
 
             if (mode == TRANSIT_CHANGE && change.hasFlags(FLAG_IS_DISPLAY)) {
-                if (info.getType() == TRANSIT_CHANGE) {
+                if (info.getType() == TRANSIT_CHANGE || isOnlyTranslucent) {
                     final int anim = getRotationAnimationHint(change, info, mDisplayController);
                     isSeamlessDisplayChange = anim == ROTATION_ANIMATION_SEAMLESS;
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
