@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.desktopmode
 
+import android.animation.AnimatorTestRule
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS
 import android.graphics.Rect
@@ -24,6 +25,7 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.Surface
 import android.view.SurfaceControl
@@ -43,6 +45,7 @@ import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.util.StubTransaction
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -64,17 +67,19 @@ import org.mockito.kotlin.whenever
  * Usage: atest WMShellUnitTests:DesktopImmersiveControllerTest
  */
 @SmallTest
+@TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class DesktopImmersiveControllerTest : ShellTestCase() {
 
     @JvmField @Rule val setFlagsRule = SetFlagsRule()
+    @JvmField @Rule val animatorTestRule = AnimatorTestRule(this)
 
     @Mock private lateinit var mockTransitions: Transitions
     private lateinit var desktopRepository: DesktopRepository
     @Mock private lateinit var mockDisplayController: DisplayController
     @Mock private lateinit var mockShellTaskOrganizer: ShellTaskOrganizer
     @Mock private lateinit var mockDisplayLayout: DisplayLayout
-    private val transactionSupplier = { SurfaceControl.Transaction() }
+    private val transactionSupplier = { StubTransaction() }
 
     private lateinit var controller: DesktopImmersiveController
 
@@ -672,6 +677,60 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
 
         assertThat(controller.isImmersiveChange(transition, change)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun externalAnimateResizeChange_doesNotCleanUpPendingTransitionState() {
+        val task = createFreeformTask()
+        val mockBinder = mock(IBinder::class.java)
+        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
+            .thenReturn(mockBinder)
+        desktopRepository.setTaskInFullImmersiveState(
+            displayId = task.displayId,
+            taskId = task.taskId,
+            immersive = true
+        )
+
+        controller.moveTaskToNonImmersive(task)
+
+        controller.animateResizeChange(
+            change = TransitionInfo.Change(task.token, SurfaceControl()).apply {
+                taskInfo = task
+            },
+            startTransaction = StubTransaction(),
+            finishTransaction = StubTransaction(),
+            finishCallback = { }
+        )
+        animatorTestRule.advanceTimeBy(DesktopImmersiveController.FULL_IMMERSIVE_ANIM_DURATION_MS)
+
+        assertThat(controller.state).isNotNull()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun startAnimation_missingChange_clearsState() {
+        val task = createFreeformTask()
+        val mockBinder = mock(IBinder::class.java)
+        whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
+            .thenReturn(mockBinder)
+        desktopRepository.setTaskInFullImmersiveState(
+            displayId = task.displayId,
+            taskId = task.taskId,
+            immersive = false
+        )
+
+        controller.moveTaskToImmersive(task)
+
+        controller.startAnimation(
+            transition = mockBinder,
+            info = createTransitionInfo(changes = emptyList()),
+            startTransaction = StubTransaction(),
+            finishTransaction = StubTransaction(),
+            finishCallback = {}
+        )
+
+        assertThat(controller.state).isNull()
     }
 
     private fun createTransitionInfo(
