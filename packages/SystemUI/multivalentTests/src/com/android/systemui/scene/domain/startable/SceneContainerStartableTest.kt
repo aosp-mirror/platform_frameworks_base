@@ -753,7 +753,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.POWER_BUTTON,
                 powerButtonLaunchGestureTriggered = false,
             )
-            transitionStateFlow.value = Transition(from = Scenes.Shade, to = Scenes.Lockscreen)
+            transitionStateFlow.value = Transition(from = Scenes.Gone, to = Scenes.Lockscreen)
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
 
             kosmos.fakePowerRepository.updateWakefulness(
