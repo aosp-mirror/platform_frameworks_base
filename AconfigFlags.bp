@@ -115,6 +115,7 @@ aconfig_declarations_group {
         "framework-jobscheduler-job.flags-aconfig-java",
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
+        "icu_exported_aconfig_flags_lib",
         "interaction_jank_monitor_flags_lib",
         "keystore2_flags_java-framework",
         "libcore_exported_aconfig_flags_lib",
@@ -159,6 +160,14 @@ java_defaults {
 java_aconfig_library {
     name: "art_exported_aconfig_flags_lib",
     aconfig_declarations: "art-aconfig-flags",
+    mode: "exported",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// ICU
+java_aconfig_library {
+    name: "icu_exported_aconfig_flags_lib",
+    aconfig_declarations: "icu_aconfig_flags",
     mode: "exported",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
