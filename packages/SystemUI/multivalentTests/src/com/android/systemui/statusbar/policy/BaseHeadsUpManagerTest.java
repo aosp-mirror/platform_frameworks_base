@@ -35,6 +35,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
@@ -49,15 +51,21 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.FakeGlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +81,10 @@ import java.util.List;
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(ParameterizedAndroidJunit4.class)
+// TODO(b/378142453): Merge this with BaseHeadsUpManagerTest.
 public class BaseHeadsUpManagerTest extends SysuiTestCase {
+    protected KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
@@ -85,6 +96,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
     @Mock private Handler mBgHandler;
     @Mock private DumpManager dumpManager;
+    @Mock private ShadeInteractor mShadeInteractor;
     private AvalancheController mAvalancheController;
 
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
@@ -108,8 +120,22 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     }
 
     private BaseHeadsUpManager createHeadsUpManager() {
-        return new TestableHeadsUpManager(mContext, mLogger, mExecutor, mGlobalSettings,
-                mSystemClock, mAccessibilityMgr, mUiEventLoggerFake, mAvalancheController);
+        return new TestableHeadsUpManager(
+                mContext,
+                mLogger,
+                mKosmos.getStatusBarStateController(),
+                mKosmos.getKeyguardBypassController(),
+                new GroupMembershipManagerImpl(),
+                mKosmos.getVisualStabilityProvider(),
+                mKosmos.getConfigurationController(),
+                mExecutor,
+                mGlobalSettings,
+                mSystemClock,
+                mAccessibilityMgr,
+                mUiEventLoggerFake,
+                new JavaAdapter(mKosmos.getTestScope()),
+                mShadeInteractor,
+                mAvalancheController);
     }
 
     private NotificationEntry createStickyEntry(int id) {
@@ -152,6 +178,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         super.SysuiSetup();
         mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake, mLogger,
                 mBgHandler);
+        when(mShadeInteractor.isAnyExpanded()).thenReturn(MutableStateFlow(true));
+        when(mKosmos.getKeyguardBypassController().getBypassEnabled()).thenReturn(false);
     }
 
     @Test
@@ -296,46 +324,6 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.onEntryRemoved(headsUpEntry);
 
         verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(notifEntry));
-    }
-
-    @Test
-    public void testShouldHeadsUpBecomePinned_hasFSI_notUnpinned_true() {
-        final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry =
-                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext);
-
-        // Add notifEntry to ANM mAlertEntries map and make it NOT unpinned
-        hum.showNotification(notifEntry);
-
-        final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = hum.getHeadsUpEntry(
-                notifEntry.getKey());
-        headsUpEntry.mWasUnpinned = false;
-
-        assertTrue(hum.shouldHeadsUpBecomePinned(notifEntry));
-    }
-
-    @Test
-    public void testShouldHeadsUpBecomePinned_wasUnpinned_false() {
-        final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry =
-                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext);
-
-        // Add notifEntry to ANM mAlertEntries map and make it unpinned
-        hum.showNotification(notifEntry);
-
-        final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = hum.getHeadsUpEntry(
-                notifEntry.getKey());
-        headsUpEntry.mWasUnpinned = true;
-
-        assertFalse(hum.shouldHeadsUpBecomePinned(notifEntry));
-    }
-
-    @Test
-    public void testShouldHeadsUpBecomePinned_noFSI_false() {
-        final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
-
-        assertFalse(hum.shouldHeadsUpBecomePinned(entry));
     }
 
 
