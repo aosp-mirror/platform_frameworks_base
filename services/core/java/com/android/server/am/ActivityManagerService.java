@@ -357,6 +357,8 @@ import android.os.WorkSource;
 import android.os.incremental.IIncrementalService;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalMetrics;
+import android.os.instrumentation.IOffsetCallback;
+import android.os.instrumentation.MethodDescriptor;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
@@ -478,6 +480,7 @@ import com.android.server.wm.WindowProcessController;
 
 import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.VMRuntime;
+
 import libcore.util.EmptyArray;
 
 import java.io.File;
@@ -502,6 +505,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -18032,6 +18036,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                         /* doit= */ true, /* evenPersistent= */ false,
                         /* uninstalling= */ false, /* packageStateStopped= */ false,
                         userId, reason, exitInfoReason);
+            }
+        }
+
+        @Override
+        public void getExecutableMethodFileOffsets(@NonNull String processName,
+                int pid, int uid, @NonNull MethodDescriptor methodDescriptor,
+                @NonNull IOffsetCallback callback) {
+            final IApplicationThread thread;
+            synchronized (ActivityManagerService.this) {
+                ProcessRecord record = mProcessList.getProcessRecordLocked(processName, uid);
+                if (record == null || record.getPid() != pid) {
+                    throw new NoSuchElementException();
+                }
+                thread = record.getThread();
+            }
+            try {
+                thread.getExecutableMethodFileOffsets(methodDescriptor, callback);
+            } catch (RemoteException e) {
+                throw new RuntimeException(
+                        "IApplicationThread.getExecutableMethodFileOffsets failed", e);
             }
         }
 

@@ -165,6 +165,10 @@ import android.os.TelephonyServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.instrumentation.ExecutableMethodFileOffsets;
+import android.os.instrumentation.IOffsetCallback;
+import android.os.instrumentation.MethodDescriptor;
+import android.os.instrumentation.MethodDescriptorParser;
 import android.permission.IPermissionManager;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
@@ -2224,6 +2228,29 @@ public final class ActivityThread extends ClientTransactionHandler
             args.arg5 = viewIds;
             args.arg6 = uiTranslationSpec;
             sendMessage(H.UPDATE_UI_TRANSLATION_STATE, args);
+        }
+
+        @Override
+        public void getExecutableMethodFileOffsets(
+                @NonNull MethodDescriptor methodDescriptor,
+                @NonNull IOffsetCallback resultCallback) {
+            Method method = MethodDescriptorParser.parseMethodDescriptor(
+                    getClass().getClassLoader(), methodDescriptor);
+            VMDebug.ExecutableMethodFileOffsets location =
+                    VMDebug.getExecutableMethodFileOffsets(method);
+            try {
+                if (location == null) {
+                    resultCallback.onResult(null);
+                    return;
+                }
+                ExecutableMethodFileOffsets ret = new ExecutableMethodFileOffsets();
+                ret.containerPath = location.getContainerPath();
+                ret.containerOffset = location.getContainerOffset();
+                ret.methodOffset = location.getMethodOffset();
+                resultCallback.onResult(ret);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
