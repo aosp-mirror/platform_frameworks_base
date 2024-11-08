@@ -42,7 +42,7 @@ import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.SessionTokenFactory
 import com.android.systemui.res.R
-import com.android.systemui.util.Assert
+import com.android.systemui.util.concurrency.Execution
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -63,6 +63,7 @@ constructor(
     @Background private val looper: Looper,
     @Background private val handler: Handler,
     @Background private val bgScope: CoroutineScope,
+    private val execution: Execution,
 ) {
 
     /**
@@ -108,7 +109,7 @@ constructor(
         m3controller: Media3Controller,
         token: SessionToken,
     ): MediaButton? {
-        Assert.isNotMainThread()
+        require(!execution.isMainThread())
 
         // First, get standard actions
         val playOrPause =
