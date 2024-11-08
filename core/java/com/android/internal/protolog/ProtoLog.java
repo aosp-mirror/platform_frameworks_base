@@ -74,23 +74,42 @@ public class ProtoLog {
         // files to extract out the log strings. Otherwise, the trace calls are replaced with calls
         // directly to the generated tracing implementations.
         if (android.tracing.Flags.perfettoProtologTracing()) {
-            synchronized (sInitLock) {
-                final var allGroups = new HashSet<>(Arrays.stream(groups).toList());
-                if (sProtoLogInstance != null) {
-                    // The ProtoLog instance has already been initialized in this process
-                    final var alreadyRegisteredGroups = sProtoLogInstance.getRegisteredGroups();
-                    allGroups.addAll(alreadyRegisteredGroups);
-                }
-
-                try {
-                    sProtoLogInstance = new UnprocessedPerfettoProtoLogImpl(
-                            allGroups.toArray(new IProtoLogGroup[0]));
-                } catch (ServiceManager.ServiceNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            initializePerfettoProtoLog(groups);
         } else {
             sProtoLogInstance = new LogcatOnlyProtoLogImpl();
+        }
+    }
+
+    private static void initializePerfettoProtoLog(IProtoLogGroup... groups) {
+        var datasource = getSharedSingleInstanceDataSource();
+
+        synchronized (sInitLock) {
+            final var allGroups = new HashSet<>(Arrays.stream(groups).toList());
+            final var previousProtoLogImpl = sProtoLogInstance;
+            if (previousProtoLogImpl != null) {
+                // The ProtoLog instance has already been initialized in this process
+                final var alreadyRegisteredGroups = previousProtoLogImpl.getRegisteredGroups();
+                allGroups.addAll(alreadyRegisteredGroups);
+            }
+
+            sProtoLogInstance = createAndEnableNewPerfettoProtoLogImpl(
+                    datasource, allGroups.toArray(new IProtoLogGroup[0]));
+            if (previousProtoLogImpl instanceof PerfettoProtoLogImpl) {
+                ((PerfettoProtoLogImpl) previousProtoLogImpl).disable();
+            }
+        }
+    }
+
+    private static PerfettoProtoLogImpl createAndEnableNewPerfettoProtoLogImpl(
+            ProtoLogDataSource datasource, IProtoLogGroup[] groups) {
+        try {
+            var unprocessedPerfettoProtoLogImpl =
+                    new UnprocessedPerfettoProtoLogImpl(datasource, groups);
+            unprocessedPerfettoProtoLogImpl.enable();
+
+            return unprocessedPerfettoProtoLogImpl;
+        } catch (ServiceManager.ServiceNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
