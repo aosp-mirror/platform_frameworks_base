@@ -22,6 +22,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -45,6 +46,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -1010,6 +1012,7 @@ public final class CardEmulation {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
     public void overrideRoutingTable(
             @NonNull Activity activity, @ProtocolAndTechnologyRoute int protocol,
@@ -1037,6 +1040,7 @@ public final class CardEmulation {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
     public void recoverRoutingTable(@NonNull Activity activity) {
         if (!activity.isResumed()) {
@@ -1055,6 +1059,97 @@ public final class CardEmulation {
     @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
     public boolean isEuiccSupported() {
         return callServiceReturn(() -> sService.isEuiccSupported(), false);
+    }
+
+    /**
+     * Setting the default subscription ID succeeded.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_SUCCESS = 0;
+
+    /**
+     * Setting the default subscription ID failed because the subscription ID is invalid.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_INVALID_SUBSCRIPTION_ID = 1;
+
+    /**
+     * Setting the default subscription ID failed because there was an internal error processing
+     * the request. For ex: NFC service died in the middle of handling the API.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_INTERNAL_ERROR = 2;
+
+    /**
+     * Setting the default subscription ID failed because this feature is not supported on the
+     * device.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED = 3;
+
+    /** @hide */
+    @IntDef(prefix = "SET_SUBSCRIPTION_ID_STATUS_",
+            value = {
+                    SET_SUBSCRIPTION_ID_STATUS_SUCCESS,
+                    SET_SUBSCRIPTION_ID_STATUS_FAILED_INVALID_SUBSCRIPTION_ID,
+                    SET_SUBSCRIPTION_ID_STATUS_FAILED_INTERNAL_ERROR,
+                    SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SetSubscriptionIdStatus {}
+
+    /**
+     * Sets the system's default NFC subscription id.
+     *
+     * <p> For devices with multiple UICC/EUICC that is configured to be NFCEE, this sets the
+     * default UICC NFCEE that will handle NFC offhost CE transactoions </p>
+     *
+     * @param subscriptionId the default NFC subscription Id to set.
+     * @return status of the operation.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     * {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public @SetSubscriptionIdStatus int setDefaultNfcSubscriptionId(int subscriptionId) {
+        return callServiceReturn(() ->
+                        sService.setDefaultNfcSubscriptionId(
+                                subscriptionId, mContext.getPackageName()),
+                SET_SUBSCRIPTION_ID_STATUS_FAILED_INTERNAL_ERROR);
+    }
+
+    /**
+     * Returns the system's default NFC subscription id.
+     *
+     * <p> For devices with multiple UICC/EUICC that is configured to be NFCEE, this returns the
+     * default UICC NFCEE that will handle NFC offhost CE transactoions </p>
+     * <p> If the device has no UICC that can serve as NFCEE, this will return
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.</p>
+     *
+     * @return the default NFC subscription Id if set,
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} otherwise.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     * {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public int getDefaultNfcSubscriptionId() {
+        return callServiceReturn(() ->
+                sService.getDefaultNfcSubscriptionId(mContext.getPackageName()),
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID);
     }
 
     /**
