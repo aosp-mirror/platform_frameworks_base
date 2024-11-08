@@ -156,6 +156,14 @@ fun Tile(
                     bounceEnd = currentBounceableInfo.bounceEnd,
                 ),
     ) { expandable ->
+        val longClick: (() -> Unit)? =
+            {
+                    hapticsViewModel?.setTileInteractionState(
+                        TileHapticsViewModel.TileInteractionState.LONG_CLICKED
+                    )
+                    tile.onLongClick(expandable)
+                }
+                .takeIf { uiState.handlesLongClick }
         TileContainer(
             onClick = {
                 tile.onClick(expandable)
@@ -166,12 +174,7 @@ fun Tile(
                     coroutineScope.launch { currentBounceableInfo.bounceable.animateBounce() }
                 }
             },
-            onLongClick = {
-                hapticsViewModel?.setTileInteractionState(
-                    TileHapticsViewModel.TileInteractionState.LONG_CLICKED
-                )
-                tile.onLongClick(expandable)
-            },
+            onLongClick = longClick,
             uiState = uiState,
             iconOnly = iconOnly,
         ) {
@@ -192,14 +195,6 @@ fun Tile(
                             tile.onSecondaryClick()
                         }
                         .takeIf { uiState.handlesSecondaryClick }
-                val longClick: (() -> Unit)? =
-                    {
-                            hapticsViewModel?.setTileInteractionState(
-                                TileHapticsViewModel.TileInteractionState.LONG_CLICKED
-                            )
-                            tile.onLongClick(expandable)
-                        }
-                        .takeIf { uiState.handlesLongClick }
                 LargeTileContent(
                     label = uiState.label,
                     secondaryLabel = uiState.secondaryLabel,
@@ -237,7 +232,7 @@ private fun TileExpandable(
 @Composable
 fun TileContainer(
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onLongClick: (() -> Unit)?,
     uiState: TileUiState,
     iconOnly: Boolean,
     content: @Composable BoxScope.() -> Unit,
@@ -281,7 +276,7 @@ fun Modifier.tilePadding(): Modifier {
 @Composable
 fun Modifier.tileCombinedClickable(
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onLongClick: (() -> Unit)?,
     uiState: TileUiState,
     iconOnly: Boolean,
 ): Modifier {
