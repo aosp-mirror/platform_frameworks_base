@@ -17,6 +17,9 @@
 package com.android.internal.protolog;
 
 import android.os.ServiceManager;
+import android.tracing.perfetto.DataSourceParams;
+import android.tracing.perfetto.InitArguments;
+import android.tracing.perfetto.Producer;
 
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
@@ -53,6 +56,8 @@ public class ProtoLog {
     public static boolean REQUIRE_PROTOLOGTOOL = true;
 
     private static IProtoLog sProtoLogInstance;
+
+    private static ProtoLogDataSource sDataSource;
 
     private static final Object sInitLock = new Object();
 
@@ -188,6 +193,32 @@ public class ProtoLog {
      */
     public static IProtoLog getSingleInstance() {
         return sProtoLogInstance;
+    }
+
+    /**
+     * Gets or creates if it doesn't exist yet the protolog datasource to use in this process.
+     * We should re-use the same datasource to avoid registering the datasource multiple times in
+     * the same process, since there is no way to unregister the datasource after registration.
+     *
+     * @return The single ProtoLog datasource instance to be shared across all ProtoLog tracing
+     *         objects.
+     */
+    public static synchronized ProtoLogDataSource getSharedSingleInstanceDataSource() {
+        if (sDataSource == null) {
+            Producer.init(InitArguments.DEFAULTS);
+            sDataSource = new ProtoLogDataSource();
+            DataSourceParams params =
+                    new DataSourceParams.Builder()
+                            .setBufferExhaustedPolicy(
+                                    DataSourceParams
+                                            .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
+                            .build();
+            // NOTE: Registering that datasource is an async operation, so there may be no data
+            // traced for some messages logged right after the construction of this class.
+            sDataSource.register(params);
+        }
+
+        return sDataSource;
     }
 
     private static void logStringMessage(LogLevel logLevel, IProtoLogGroup group,
