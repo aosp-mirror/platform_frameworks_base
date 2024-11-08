@@ -65,6 +65,7 @@ import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFI
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static com.android.window.flags.Flags.FLAG_DELEGATE_UNHANDLED_DRAGS;
+import static com.android.window.flags.Flags.FLAG_SUPPORTS_DRAG_ASSISTANT_TO_MULTIWINDOW;
 
 import static java.lang.Math.max;
 
@@ -5550,10 +5551,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flag indicating that this drag will result in the caller activity's task to be hidden for the
-     * duration of the drag, this means that the source activity will not receive drag events for
-     * the current drag gesture. Only the current voice interaction service may use this flag.
-     * @hide
+     * duration of the drag, which means that the source activity will not receive drag events for
+     * the current drag gesture. Only the current
+     * {@link android.service.voice.VoiceInteractionService} may use this flag.
      */
+    @FlaggedApi(FLAG_SUPPORTS_DRAG_ASSISTANT_TO_MULTIWINDOW)
     public static final int DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START = 1 << 14;
 
     /**
