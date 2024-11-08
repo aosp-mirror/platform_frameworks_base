@@ -1770,9 +1770,13 @@ class DesktopTasksController(
         transition: IBinder,
         taskIdToMinimize: Int,
     ) {
-        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize) ?: return
+        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize)
         desktopTasksLimiter.ifPresent {
-            it.addPendingMinimizeChange(transition, taskToMinimize.displayId, taskToMinimize.taskId)
+            it.addPendingMinimizeChange(
+                transition = transition,
+                displayId = taskToMinimize?.displayId ?: DEFAULT_DISPLAY,
+                taskId = taskIdToMinimize
+            )
         }
     }
 
