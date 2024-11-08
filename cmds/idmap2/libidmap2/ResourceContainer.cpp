@@ -17,6 +17,7 @@
 #include "idmap2/ResourceContainer.h"
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <utility>
 #include <vector>
@@ -296,7 +297,7 @@ struct ResState {
 }  // namespace
 
 struct ApkResourceContainer : public TargetResourceContainer, public OverlayResourceContainer {
-  static Result<std::unique_ptr<ApkResourceContainer>> FromPath(const std::string& path);
+  static Result<std::unique_ptr<ApkResourceContainer>> FromPath(std::string path);
 
   // inherited from TargetResourceContainer
   Result<bool> DefinesOverlayable() const override;
@@ -320,6 +321,7 @@ struct ApkResourceContainer : public TargetResourceContainer, public OverlayReso
   Result<const ResState*> GetState() const;
   ZipAssetsProvider* GetZipAssets() const;
 
+  mutable std::mutex state_lock_;
   mutable std::variant<std::unique_ptr<ZipAssetsProvider>, ResState> state_;
   std::string path_;
 };
@@ -330,16 +332,17 @@ ApkResourceContainer::ApkResourceContainer(std::unique_ptr<ZipAssetsProvider> zi
 }
 
 Result<std::unique_ptr<ApkResourceContainer>> ApkResourceContainer::FromPath(
-    const std::string& path) {
+    std::string path) {
   auto zip_assets = ZipAssetsProvider::Create(path, 0 /* flags */);
   if (zip_assets == nullptr) {
     return Error("failed to load zip assets");
   }
   return std::unique_ptr<ApkResourceContainer>(
-      new ApkResourceContainer(std::move(zip_assets), path));
+      new ApkResourceContainer(std::move(zip_assets), std::move(path)));
 }
 
 Result<const ResState*> ApkResourceContainer::GetState() const {
+  std::lock_guard lock(state_lock_);
   if (auto state = std::get_if<ResState>(&state_); state != nullptr) {
     return state;
   }
@@ -355,6 +358,7 @@ Result<const ResState*> ApkResourceContainer::GetState() const {
 }
 
 ZipAssetsProvider* ApkResourceContainer::GetZipAssets() const {
+  std::lock_guard lock(state_lock_);
   if (auto zip = std::get_if<std::unique_ptr<ZipAssetsProvider>>(&state_); zip != nullptr) {
     return zip->get();
   }
@@ -427,7 +431,7 @@ Result<std::string> ApkResourceContainer::GetResourceName(ResourceId id) const {
 
 Result<std::unique_ptr<TargetResourceContainer>> TargetResourceContainer::FromPath(
     std::string path) {
-  auto result = ApkResourceContainer::FromPath(path);
+  auto result = ApkResourceContainer::FromPath(std::move(path));
   if (!result) {
     return result.GetError();
   }
@@ -438,7 +442,7 @@ Result<std::unique_ptr<OverlayResourceContainer>> OverlayResourceContainer::From
     std::string path) {
   // Load the path as a fabricated overlay if the file magic indicates this is a fabricated overlay.
   if (android::IsFabricatedOverlay(path)) {
-    auto result = FabricatedOverlayContainer::FromPath(path);
+    auto result = FabricatedOverlayContainer::FromPath(std::move(path));
     if (!result) {
       return result.GetError();
     }
@@ -446,7 +450,7 @@ Result<std::unique_ptr<OverlayResourceContainer>> OverlayResourceContainer::From
   }
 
   // Fallback to loading the container as an APK.
-  auto result = ApkResourceContainer::FromPath(path);
+  auto result = ApkResourceContainer::FromPath(std::move(path));
   if (!result) {
     return result.GetError();
   }
