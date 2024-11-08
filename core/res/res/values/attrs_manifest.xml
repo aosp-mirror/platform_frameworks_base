@@ -2273,6 +2273,22 @@
         <attr name="enableOnBackInvokedCallback" format="boolean"/>
 
         <attr name="intentMatchingFlags"/>
+
+        <!-- Specifies the set of drawable resources that can be used in place
+             of an existing declared icon or banner for activities that appear
+             in the app launcher. The resource referenced must be an array of
+             drawable resources and can contain at most 500 items.
+             {@link android.content.pm.PackageManager#changeLauncherIconConfig}
+             @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
+        <attr name="alternateLauncherIcons" format="reference" />
+
+        <!-- Specifies the set of string resources that can be used in place
+             of an existing declared label for activities that appear
+             in the app launcher. The resource referenced must be an array of
+             string resources and can contain at most 500 items.
+             {@link android.content.pm.PackageManager#changeLauncherIconConfig}
+             @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
+        <attr name="alternateLauncherLabels" format="reference" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.
