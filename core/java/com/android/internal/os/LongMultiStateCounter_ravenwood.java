@@ -18,13 +18,15 @@ package com.android.internal.os;
 
 import android.os.BadParcelableException;
 import android.os.Parcel;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.util.HashMap;
 
 /**
  * Native implementation substitutions for the LongMultiStateCounter class.
  */
-public class LongMultiStateCounter_host {
+@RavenwoodKeepWholeClass
+class LongMultiStateCounter_ravenwood {
 
     /**
      * A reimplementation of {@link com.android.internal.os.LongMultiStateCounter}, only in
