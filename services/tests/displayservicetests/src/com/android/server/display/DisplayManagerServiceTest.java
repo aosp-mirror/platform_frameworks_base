@@ -232,6 +232,7 @@ public class DisplayManagerServiceTest {
     private static final String DISPLAY_GROUP_EVENT_ADDED = "DISPLAY_GROUP_EVENT_ADDED";
     private static final String DISPLAY_GROUP_EVENT_REMOVED = "DISPLAY_GROUP_EVENT_REMOVED";
     private static final String DISPLAY_GROUP_EVENT_CHANGED = "DISPLAY_GROUP_EVENT_CHANGED";
+    private static final String TOPOLOGY_CHANGED_EVENT = "TOPOLOGY_CHANGED_EVENT";
 
     @Rule(order = 0)
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
@@ -3691,8 +3692,7 @@ public class DisplayManagerServiceTest {
                 DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 1);
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3710,8 +3710,7 @@ public class DisplayManagerServiceTest {
     public void testGetDisplayTopology_NullIfFlagDisabled() {
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(false);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3725,8 +3724,7 @@ public class DisplayManagerServiceTest {
     @Test
     public void testGetDisplayTopology_withoutPermission_shouldThrowException() {
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3740,8 +3738,7 @@ public class DisplayManagerServiceTest {
     public void testSetDisplayTopology() {
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3754,8 +3751,7 @@ public class DisplayManagerServiceTest {
     @Test
     public void testSetDisplayTopology_withoutPermission_shouldThrowException() {
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3764,6 +3760,49 @@ public class DisplayManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> displayManagerBinderService.setDisplayTopology(new DisplayTopology()));
+    }
+
+    @Test
+    public void testShouldNotifyTopologyChanged() {
+        manageDisplaysPermission(/* granted= */ true);
+        when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        displayManagerBinderService.registerCallbackWithEventMask(callback,
+                DisplayManagerGlobal.INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED);
+        waitForIdleHandler(handler);
+
+        displayManagerBinderService.setDisplayTopology(new DisplayTopology());
+        waitForIdleHandler(handler);
+
+        assertThat(callback.receivedEvents()).containsExactly(TOPOLOGY_CHANGED_EVENT);
+    }
+
+    @Test
+    public void testShouldNotNotifyTopologyChanged_WhenClientIsNotSubscribed() {
+        manageDisplaysPermission(/* granted= */ true);
+        when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        // Only subscribe to display events, not topology events
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        displayManagerBinderService.registerCallbackWithEventMask(callback,
+                STANDARD_DISPLAY_EVENTS);
+        waitForIdleHandler(handler);
+
+        displayManagerBinderService.setDisplayTopology(new DisplayTopology());
+        waitForIdleHandler(handler);
+
+        assertThat(callback.receivedEvents()).isEmpty();
     }
 
     private void initDisplayPowerController(DisplayManagerInternal localService) {
@@ -4215,6 +4254,12 @@ public class DisplayManagerServiceTest {
         public void onDisplayGroupChanged(int groupId) {
             mReceivedEvents.add(DISPLAY_GROUP_EVENT_CHANGED);
             eventSeen(DISPLAY_GROUP_EVENT_CHANGED);
+        }
+
+        @Override
+        public void onTopologyChanged(DisplayTopology topology) {
+            mReceivedEvents.add(TOPOLOGY_CHANGED_EVENT);
+            eventSeen(TOPOLOGY_CHANGED_EVENT);
         }
 
         public void clear() {
