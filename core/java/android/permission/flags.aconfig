@@ -354,9 +354,10 @@ flag {
 flag {
     name: "health_connect_backup_restore_permission_enabled"
     is_fixed_read_only: true
-    namespace: "health_connect"
+    namespace: "health_fitness_aconfig"
     description: "This flag protects the permission that is required to call Health Connect backup and restore apis"
     bug: "376014879" # android_fr bug
+    is_exported: true
 }
 
 flag {
