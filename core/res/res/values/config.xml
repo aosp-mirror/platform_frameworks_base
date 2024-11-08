@@ -7000,6 +7000,15 @@
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
 
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for backing up HealthConnect's data and settings. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_backupHealthConnectDataAndSettingsKnownSigners"/>
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for restoring HealthConnect's data and settings. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_restoreHealthConnectDataAndSettingsKnownSigners"/>
+
     <!-- Package name of Health Connect data migrator application.  -->
     <string name="config_healthConnectMigratorPackageName"></string>
 

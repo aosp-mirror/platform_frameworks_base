@@ -46,6 +46,7 @@ package android {
     field public static final String ASSOCIATE_COMPANION_DEVICES = "android.permission.ASSOCIATE_COMPANION_DEVICES";
     field public static final String BACKGROUND_CAMERA = "android.permission.BACKGROUND_CAMERA";
     field public static final String BACKUP = "android.permission.BACKUP";
+    field @FlaggedApi("android.permission.flags.health_connect_backup_restore_permission_enabled") public static final String BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS = "android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS";
     field public static final String BATTERY_PREDICTION = "android.permission.BATTERY_PREDICTION";
     field public static final String BIND_AMBIENT_CONTEXT_DETECTION_SERVICE = "android.permission.BIND_AMBIENT_CONTEXT_DETECTION_SERVICE";
     field public static final String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
@@ -347,6 +348,7 @@ package android {
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
     field public static final String RESTART_WIFI_SUBSYSTEM = "android.permission.RESTART_WIFI_SUBSYSTEM";
+    field @FlaggedApi("android.permission.flags.health_connect_backup_restore_permission_enabled") public static final String RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS = "android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS";
     field public static final String RESTORE_RUNTIME_PERMISSIONS = "android.permission.RESTORE_RUNTIME_PERMISSIONS";
     field public static final String RESTRICTED_VR_ACCESS = "android.permission.RESTRICTED_VR_ACCESS";
     field public static final String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
