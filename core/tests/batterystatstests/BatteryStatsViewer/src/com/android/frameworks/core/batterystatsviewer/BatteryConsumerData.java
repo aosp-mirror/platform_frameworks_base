@@ -32,15 +32,12 @@ public class BatteryConsumerData {
     public static final String AGGREGATE_BATTERY_CONSUMER_ID = "SYS|";
 
     public enum EntryType {
-        UID_TOTAL_POWER,
-        UID_POWER,
-        UID_POWER_PROCESS_STATE,
-        UID_DURATION,
         DEVICE_TOTAL_POWER,
         DEVICE_POWER,
         DEVICE_POWER_ENERGY_CONSUMPTION,
         DEVICE_POWER_CUSTOM,
         DEVICE_DURATION,
+        UID,
     }
 
     public enum ConsumerType {
@@ -53,6 +50,15 @@ public class BatteryConsumerData {
         public String title;
         public double value1;
         public double value2;
+        public List<Slice> slices;
+    }
+
+    public static class Slice {
+        public int powerState;
+        public int screenState;
+        public int processState;
+        public double powerMah;
+        public long durationMs;
     }
 
     private BatteryConsumerInfoHelper.BatteryConsumerInfo mBatteryConsumerInfo;
@@ -92,71 +98,83 @@ public class BatteryConsumerData {
         computeTotalPowerForCustomComponent(batteryUsageStats, totalCustomPowerByComponentMah);
         computeTotalDuration(batteryUsageStats, totalDurationByComponentMs);
 
-        addEntry("Consumed", EntryType.UID_TOTAL_POWER,
+        Entry totalsEntry = addEntry("Consumed", EntryType.UID,
                 requestedBatteryConsumer.getConsumedPower(),
                 batteryUsageStats.getAggregateBatteryConsumer(
                                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
                         .getConsumedPower());
+        addSlices(totalsEntry, requestedBatteryConsumer, BatteryConsumer.POWER_COMPONENT_BASE);
+        for (Slice slice : totalsEntry.slices) {
+            slice.powerMah = requestedBatteryConsumer.getConsumedPower(
+                    new BatteryConsumer.Dimensions(BatteryConsumer.POWER_COMPONENT_ANY,
+                            slice.processState, slice.screenState, slice.powerState));
+        }
 
         for (int component = 0; component < BatteryConsumer.POWER_COMPONENT_COUNT; component++) {
+            if (component == BatteryConsumer.POWER_COMPONENT_BASE) {
+                continue;
+            }
             final String metricTitle = getPowerMetricTitle(component);
-            addEntry(metricTitle, EntryType.UID_POWER,
-                    requestedBatteryConsumer.getConsumedPower(component),
-                    totalPowerByComponentMah[component]);
-            addProcessStateEntries(metricTitle, EntryType.UID_POWER_PROCESS_STATE,
-                    requestedBatteryConsumer, component);
+            double consumedPower = requestedBatteryConsumer.getConsumedPower(component);
+            if (consumedPower != 0) {
+                Entry entry = addEntry(metricTitle, EntryType.UID, consumedPower,
+                        totalPowerByComponentMah[component]);
+                addSlices(entry, requestedBatteryConsumer, component);
+            }
         }
 
         for (int component = 0; component < customComponentCount; component++) {
-            final String name = requestedBatteryConsumer.getCustomPowerComponentName(
-                    BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + component);
-            addEntry(name, EntryType.UID_POWER,
-                    requestedBatteryConsumer.getConsumedPower(
-                            BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + component),
-                    totalCustomPowerByComponentMah[component]
-            );
-        }
-
-        for (int component = 0; component < BatteryConsumer.POWER_COMPONENT_COUNT; component++) {
-            final String metricTitle = getTimeMetricTitle(component);
-            addEntry(metricTitle, EntryType.UID_DURATION,
-                    requestedBatteryConsumer.getUsageDurationMillis(component),
-                    totalDurationByComponentMs[component]
-            );
+            int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + component;
+            final String name = requestedBatteryConsumer.getCustomPowerComponentName(componentId);
+            double consumedPower = requestedBatteryConsumer.getConsumedPower(componentId);
+            if (consumedPower != 0) {
+                Entry entry = addEntry(name, EntryType.UID, consumedPower,
+                        totalCustomPowerByComponentMah[component]);
+                addSlices(entry, requestedBatteryConsumer, componentId);
+            }
         }
 
         mBatteryConsumerInfo = BatteryConsumerInfoHelper.makeBatteryConsumerInfo(batteryUsageStats,
                 batteryConsumerId, context.getPackageManager());
     }
 
-    private void addProcessStateEntries(String metricTitle, EntryType entryType,
-            BatteryConsumer batteryConsumer, int component) {
+    private void addSlices(Entry entry, BatteryConsumer batteryConsumer, int component) {
         final BatteryConsumer.Key[] keys = batteryConsumer.getKeys(component);
         if (keys == null || keys.length <= 1) {
             return;
         }
 
+        boolean hasProcStateData = false;
         for (BatteryConsumer.Key key : keys) {
-            String label;
-            switch (key.processState) {
-                case BatteryConsumer.PROCESS_STATE_FOREGROUND:
-                    label = "foreground";
-                    break;
-                case BatteryConsumer.PROCESS_STATE_BACKGROUND:
-                    label = "background";
-                    break;
-                case BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE:
-                    label = "FGS";
-                    break;
-                case BatteryConsumer.PROCESS_STATE_CACHED:
-                    label = "cached";
-                    break;
-                default:
-                    continue;
+            if (key.processState != BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                hasProcStateData = true;
+                break;
             }
-            addEntry(metricTitle + " \u2022 " + label, entryType,
-                    batteryConsumer.getConsumedPower(key), 0);
         }
+
+        ArrayList<Slice> slices = new ArrayList<>();
+        for (BatteryConsumer.Key key : keys) {
+            if (hasProcStateData && key.processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                continue;
+            }
+
+            double powerMah = batteryConsumer.getConsumedPower(key);
+            long durationMs = batteryConsumer.getUsageDurationMillis(key);
+
+            if (powerMah == 0 && durationMs == 0) {
+                continue;
+            }
+
+            Slice slice = new Slice();
+            slice.powerState = key.powerState;
+            slice.screenState = key.screenState;
+            slice.processState = key.processState;
+            slice.powerMah = powerMah;
+            slice.durationMs = durationMs;
+
+            slices.add(slice);
+        }
+        entry.slices = slices;
     }
 
     private void populateForAggregateBatteryConsumer(Context context,
@@ -270,13 +288,14 @@ public class BatteryConsumerData {
         }
     }
 
-    private void addEntry(String title, EntryType entryType, double value1, double value2) {
+    private Entry addEntry(String title, EntryType entryType, double value1, double value2) {
         Entry entry = new Entry();
         entry.title = title;
         entry.entryType = entryType;
         entry.value1 = value1;
         entry.value2 = value2;
         mEntries.add(entry);
+        return entry;
     }
 
     public BatteryConsumerInfoHelper.BatteryConsumerInfo getBatteryConsumerInfo() {
