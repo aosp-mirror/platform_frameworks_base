@@ -858,10 +858,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             wpdData.mPadding, mDisplayId, wallpaper.mWhich, connection.mInfo,
                             wallpaper.getDescription());
                 } else {
+                    WallpaperDescription desc = new WallpaperDescription.Builder().setComponent(
+                            (connection.mInfo != null) ? connection.mInfo.getComponent()
+                                    : null).build();
                     connection.mService.attach(connection, mToken, TYPE_WALLPAPER, false,
                             wpdData.mWidth, wpdData.mHeight,
-                            wpdData.mPadding, mDisplayId, wallpaper.mWhich, connection.mInfo,
-                            /* description= */ null);
+                            wpdData.mPadding, mDisplayId, wallpaper.mWhich, connection.mInfo, desc);
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed attaching wallpaper on display", e);

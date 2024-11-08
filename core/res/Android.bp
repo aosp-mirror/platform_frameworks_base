@@ -172,6 +172,7 @@ android_app {
         "com.android.hardware.input.input-aconfig",
         "aconfig_trade_in_mode_flags",
         "ranging_aconfig_flags",
+        "aconfig_settingslib_flags",
     ],
 }
 

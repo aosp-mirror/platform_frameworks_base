@@ -17,6 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -43,10 +46,12 @@ public class ComponentValue implements Operation, SerializableToString {
         return OP_CODE;
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return CLASS_NAME + "(" + mType + ", " + mComponentID + ", " + mValueId + ")";
@@ -65,7 +70,7 @@ public class ComponentValue implements Operation, SerializableToString {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mType, mComponentID, mValueId);
     }
 
@@ -74,7 +79,7 @@ public class ComponentValue implements Operation, SerializableToString {
         // Nothing
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int type = buffer.readInt();
         int componentId = buffer.readInt();
         int valueId = buffer.readInt();
@@ -82,7 +87,7 @@ public class ComponentValue implements Operation, SerializableToString {
         operations.add(op);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a component-related value (eg its width, height etc.)")
                 .field(
@@ -111,20 +116,21 @@ public class ComponentValue implements Operation, SerializableToString {
      * @param componentId component id to reference
      * @param valueId remote float used to represent the component value
      */
-    public static void apply(WireBuffer buffer, int type, int componentId, int valueId) {
+    public static void apply(@NonNull WireBuffer buffer, int type, int componentId, int valueId) {
         buffer.start(OP_CODE);
         buffer.writeInt(type);
         buffer.writeInt(componentId);
         buffer.writeInt(valueId);
     }
 
+    @Nullable
     @Override
     public String deepToString(String indent) {
         return null;
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         String type = "WIDTH";
         if (mType == HEIGHT) {
             type = "HEIGHT";

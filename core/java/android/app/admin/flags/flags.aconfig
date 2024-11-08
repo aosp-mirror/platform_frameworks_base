@@ -359,3 +359,11 @@ flag {
     description: "Enables coexistence support for Setting MTE policy."
     bug: "376213673"
 }
+
+flag {
+    name: "enable_supervision_service_sync"
+    is_exported: true
+    namespace: "enterprise"
+    description: "Allows DPMS to enable or disable SupervisionService based on whether the device is being managed by the supervision role holder."
+    bug: "376213673"
+}

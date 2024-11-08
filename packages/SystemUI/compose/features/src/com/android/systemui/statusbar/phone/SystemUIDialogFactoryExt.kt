@@ -98,19 +98,20 @@ fun SystemUIDialogFactory.create(
     theme: Int = SystemUIDialog.DEFAULT_THEME,
     dismissOnDeviceLock: Boolean = SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
     @GravityInt dialogGravity: Int? = null,
+    dialogDelegate: DialogDelegate<SystemUIDialog> =
+        object : DialogDelegate<SystemUIDialog> {
+            override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+                super.onCreate(dialog, savedInstanceState)
+                dialogGravity?.let { dialog.window?.setGravity(it) }
+            }
+        },
     content: @Composable (SystemUIDialog) -> Unit,
 ): ComponentSystemUIDialog {
     return create(
         context = context,
         theme = theme,
         dismissOnDeviceLock = dismissOnDeviceLock,
-        delegate =
-            object : DialogDelegate<SystemUIDialog> {
-                override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
-                    super.onCreate(dialog, savedInstanceState)
-                    dialogGravity?.let { dialog.window?.setGravity(it) }
-                }
-            },
+        delegate = dialogDelegate,
         content = content,
     )
 }
@@ -287,7 +288,7 @@ private fun DragHandle(dialog: Dialog) {
             Modifier.padding(top = 16.dp, bottom = 6.dp)
                 .semantics { contentDescription = dragHandleContentDescription }
                 .clickable { dialog.dismiss() },
-        color = MaterialTheme.colorScheme.outlineVariant,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         shape = MaterialTheme.shapes.extraLarge,
     ) {
         Box(Modifier.size(width = 32.dp, height = 4.dp))

@@ -110,6 +110,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutM
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.ui.model.IconSource
@@ -124,6 +125,7 @@ fun ShortcutHelper(
     modifier: Modifier = Modifier,
     shortcutsUiState: ShortcutsUiState,
     useSinglePane: @Composable () -> Boolean = { shouldUseSinglePane() },
+    onCustomizationRequested: (ShortcutInfo) -> Unit = {},
 ) {
     when (shortcutsUiState) {
         is ShortcutsUiState.Active -> {
@@ -133,6 +135,7 @@ fun ShortcutHelper(
                 onSearchQueryChanged,
                 modifier,
                 onKeyboardSettingsClicked,
+                onCustomizationRequested,
             )
         }
         else -> {
@@ -148,6 +151,7 @@ private fun ActiveShortcutHelper(
     onSearchQueryChanged: (String) -> Unit,
     modifier: Modifier,
     onKeyboardSettingsClicked: () -> Unit,
+    onCustomizationRequested: (ShortcutInfo) -> Unit = {},
 ) {
     var selectedCategoryType by
         remember(shortcutsUiState.defaultSelectedCategory) {
@@ -173,6 +177,7 @@ private fun ActiveShortcutHelper(
             onCategorySelected = { selectedCategoryType = it },
             onKeyboardSettingsClicked,
             shortcutsUiState.isShortcutCustomizerFlagEnabled,
+            onCustomizationRequested,
         )
     }
 }
@@ -362,6 +367,7 @@ private fun ShortcutHelperTwoPane(
     onCategorySelected: (ShortcutCategoryType?) -> Unit,
     onKeyboardSettingsClicked: () -> Unit,
     isShortcutCustomizerFlagEnabled: Boolean,
+    onCustomizationRequested: (ShortcutInfo) -> Unit = {},
 ) {
     val selectedCategory = categories.fastFirstOrNull { it.type == selectedCategoryType }
     var isCustomizeModeEntered by remember { mutableStateOf(false) }
@@ -400,6 +406,7 @@ private fun ShortcutHelperTwoPane(
                 Modifier.fillMaxSize().padding(top = 8.dp),
                 selectedCategory,
                 isCustomizing = isCustomizing,
+                onCustomizationRequested = onCustomizationRequested,
             )
         }
     }
@@ -434,6 +441,7 @@ private fun EndSidePanel(
     modifier: Modifier,
     category: ShortcutCategoryUi?,
     isCustomizing: Boolean,
+    onCustomizationRequested: (ShortcutInfo) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     LaunchedEffect(key1 = category) { if (category != null) listState.animateScrollToItem(0) }
@@ -447,6 +455,15 @@ private fun EndSidePanel(
                 searchQuery = searchQuery,
                 subCategory = subcategory,
                 isCustomizing = isCustomizing,
+                onCustomizationRequested = { label, subCategoryLabel ->
+                    onCustomizationRequested(
+                        ShortcutInfo(
+                            label = label,
+                            subCategoryLabel = subCategoryLabel,
+                            categoryType = category.type,
+                        )
+                    )
+                },
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -476,6 +493,7 @@ private fun SubCategoryContainerDualPane(
     searchQuery: String,
     subCategory: ShortcutSubCategory,
     isCustomizing: Boolean,
+    onCustomizationRequested: (String, String) -> Unit = { _: String, _: String -> },
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -497,6 +515,7 @@ private fun SubCategoryContainerDualPane(
                     searchQuery = searchQuery,
                     shortcut = shortcut,
                     isCustomizing = isCustomizing,
+                    onCustomizationRequested = { onCustomizationRequested(it, subCategory.label) },
                 )
             }
         }
@@ -518,6 +537,7 @@ private fun Shortcut(
     searchQuery: String,
     shortcut: ShortcutModel,
     isCustomizing: Boolean = false,
+    onCustomizationRequested: (String) -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -541,7 +561,12 @@ private fun Shortcut(
             ShortcutDescriptionText(searchQuery = searchQuery, shortcut = shortcut)
         }
         Spacer(modifier = Modifier.width(24.dp))
-        ShortcutKeyCombinations(modifier = Modifier.weight(1f), shortcut = shortcut, isCustomizing)
+        ShortcutKeyCombinations(
+            modifier = Modifier.weight(1f),
+            shortcut = shortcut,
+            isCustomizing = isCustomizing,
+            onAddShortcutClicked = { onCustomizationRequested(shortcut.label) },
+        )
     }
 }
 
@@ -569,6 +594,7 @@ private fun ShortcutKeyCombinations(
     modifier: Modifier = Modifier,
     shortcut: ShortcutModel,
     isCustomizing: Boolean = false,
+    onAddShortcutClicked: () -> Unit = {},
 ) {
     FlowRow(
         modifier = modifier,
@@ -590,7 +616,7 @@ private fun ShortcutKeyCombinations(
                         color = MaterialTheme.colorScheme.outline,
                         shape = CircleShape,
                     ),
-                onClick = {},
+                onClick = { onAddShortcutClicked() },
                 color = Color.Transparent,
                 width = 32.dp,
                 height = 32.dp,

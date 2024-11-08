@@ -139,6 +139,7 @@ public final class DisplayPowerControllerTest {
     private TestLooper mTestLooper;
     private Handler mHandler;
     private DisplayPowerControllerHolder mHolder;
+    private DisplayBrightnessState mDisplayBrightnessState;
     private Sensor mProxSensor;
 
     @Mock
@@ -187,6 +188,7 @@ public final class DisplayPowerControllerTest {
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
         mHandler = new Handler(mTestLooper.getLooper());
+        mDisplayBrightnessState = DisplayBrightnessState.builder().build();
 
         // Set some settings to minimize unexpected events and have a consistent starting state
         Settings.System.putInt(mContext.getContentResolver(),
@@ -1453,10 +1455,11 @@ public final class DisplayPowerControllerTest {
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
         when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
         when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
-        when(mHolder.clamperController.clamp(any(), anyFloat(), anyBoolean(), anyInt())).thenAnswer(
-                invocation -> DisplayBrightnessState.builder()
-                        .setIsSlowChange(invocation.getArgument(2))
-                        .setBrightness(invocation.getArgument(1))
+        when(mHolder.clamperController.clamp(any(), any(), anyFloat(),
+                anyBoolean(), anyInt())).thenAnswer(
+                invocation -> DisplayBrightnessState.Builder.from(mDisplayBrightnessState)
+                        .setIsSlowChange(invocation.getArgument(3))
+                        .setBrightness(invocation.getArgument(2))
                         .setMaxBrightness(PowerManager.BRIGHTNESS_MAX)
                         .setCustomAnimationRate(transitionRate).build());
 
@@ -1477,10 +1480,11 @@ public final class DisplayPowerControllerTest {
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
         when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
         when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
-        when(mHolder.clamperController.clamp(any(), anyFloat(), anyBoolean(), anyInt())).thenAnswer(
-                invocation -> DisplayBrightnessState.builder()
-                        .setIsSlowChange(invocation.getArgument(2))
-                        .setBrightness(invocation.getArgument(1))
+        when(mHolder.clamperController.clamp(any(), any(), anyFloat(),
+                anyBoolean(), anyInt())).thenAnswer(
+                invocation -> DisplayBrightnessState.Builder.from(mDisplayBrightnessState)
+                        .setIsSlowChange(invocation.getArgument(3))
+                        .setBrightness(invocation.getArgument(2))
                         .setMaxBrightness(PowerManager.BRIGHTNESS_MAX)
                         .setCustomAnimationRate(transitionRate).build());
 
@@ -2574,10 +2578,11 @@ public final class DisplayPowerControllerTest {
         BrightnessClamperController clamperController = mock(BrightnessClamperController.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
-        when(clamperController.clamp(any(), anyFloat(), anyBoolean(), anyInt())).thenAnswer(
-                invocation -> DisplayBrightnessState.builder()
-                        .setIsSlowChange(invocation.getArgument(2))
-                        .setBrightness(invocation.getArgument(1))
+        when(clamperController.clamp(any(), any(), anyFloat(), anyBoolean(),
+                anyInt())).thenAnswer(
+                invocation -> DisplayBrightnessState.Builder.from(mDisplayBrightnessState)
+                        .setIsSlowChange(invocation.getArgument(3))
+                        .setBrightness(invocation.getArgument(2))
                         .setMaxBrightness(PowerManager.BRIGHTNESS_MAX)
                         .setCustomAnimationRate(-1).build());
 

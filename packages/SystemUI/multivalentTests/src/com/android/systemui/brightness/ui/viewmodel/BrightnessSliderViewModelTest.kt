@@ -30,6 +30,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
+import com.android.systemui.kosmos.brightnessWarningToast
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
@@ -61,6 +62,7 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
                 sliderHapticsViewModelFactory,
                 brightnessMirrorShowingInteractor,
                 supportsMirroring = true,
+                brightnessWarningToast,
             )
         }
     }

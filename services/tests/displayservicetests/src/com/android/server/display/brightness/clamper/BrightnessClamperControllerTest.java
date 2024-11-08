@@ -98,6 +98,7 @@ public class BrightnessClamperControllerTest {
     @Mock
     private DeviceConfig.Properties mMockProperties;
     private BrightnessClamperController mClamperController;
+    private DisplayBrightnessState mDisplayBrightnessState;
     private TestInjector mTestInjector;
 
     @Before
@@ -109,6 +110,7 @@ public class BrightnessClamperControllerTest {
         when(mMockDisplayDeviceData.getAmbientLightSensor()).thenReturn(mMockSensorData);
 
         mClamperController = createBrightnessClamperController();
+        mDisplayBrightnessState = DisplayBrightnessState.builder().build();
     }
 
     @Test
@@ -192,7 +194,8 @@ public class BrightnessClamperControllerTest {
     public void testClamp_AppliesModifier() {
         float initialBrightness = 0.2f;
         boolean initialSlowChange = true;
-        mClamperController.clamp(mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
+        mClamperController.clamp(mDisplayBrightnessState, mMockRequest, initialBrightness,
+                initialSlowChange, STATE_ON);
 
         verify(mMockModifier).apply(eq(mMockRequest), any());
         verify(mMockDisplayListenerModifier).apply(eq(mMockRequest), any());
@@ -204,7 +207,8 @@ public class BrightnessClamperControllerTest {
         float initialBrightness = 0.2f;
         boolean initialSlowChange = true;
         when(mMockModifier.shouldListenToLightSensor()).thenReturn(true);
-        mClamperController.clamp(mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
+        mClamperController.clamp(mDisplayBrightnessState, mMockRequest, initialBrightness,
+                initialSlowChange, STATE_ON);
 
         verify(mMockLightSensorController).restart();
     }
@@ -214,7 +218,8 @@ public class BrightnessClamperControllerTest {
         float initialBrightness = 0.2f;
         boolean initialSlowChange = true;
         clearInvocations(mMockLightSensorController);
-        mClamperController.clamp(mMockRequest, initialBrightness, initialSlowChange, STATE_OFF);
+        mClamperController.clamp(mDisplayBrightnessState, mMockRequest, initialBrightness,
+                initialSlowChange, STATE_OFF);
 
         verify(mMockLightSensorController).stop();
     }
@@ -232,8 +237,8 @@ public class BrightnessClamperControllerTest {
         mTestInjector.mCapturedChangeListener.onChanged();
         mTestHandler.flush();
 
-        DisplayBrightnessState state = mClamperController.clamp(mMockRequest, initialBrightness,
-                initialSlowChange, STATE_ON);
+        DisplayBrightnessState state = mClamperController.clamp(mDisplayBrightnessState,
+                mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
 
         assertEquals(initialBrightness, state.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(PowerManager.BRIGHTNESS_MAX, state.getMaxBrightness(), FLOAT_TOLERANCE);
@@ -256,8 +261,8 @@ public class BrightnessClamperControllerTest {
         mTestInjector.mCapturedChangeListener.onChanged();
         mTestHandler.flush();
 
-        DisplayBrightnessState state = mClamperController.clamp(mMockRequest, initialBrightness,
-                initialSlowChange, STATE_ON);
+        DisplayBrightnessState state = mClamperController.clamp(mDisplayBrightnessState,
+                mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
 
         assertEquals(clampedBrightness, state.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(clampedBrightness, state.getMaxBrightness(), FLOAT_TOLERANCE);
@@ -280,8 +285,8 @@ public class BrightnessClamperControllerTest {
         mTestInjector.mCapturedChangeListener.onChanged();
         mTestHandler.flush();
 
-        DisplayBrightnessState state = mClamperController.clamp(mMockRequest, initialBrightness,
-                initialSlowChange, STATE_ON);
+        DisplayBrightnessState state = mClamperController.clamp(mDisplayBrightnessState,
+                mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
 
         assertEquals(initialBrightness, state.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(clampedBrightness, state.getMaxBrightness(), FLOAT_TOLERANCE);
@@ -304,11 +309,11 @@ public class BrightnessClamperControllerTest {
         mTestInjector.mCapturedChangeListener.onChanged();
         mTestHandler.flush();
         // first call of clamp method
-        mClamperController.clamp(mMockRequest, initialBrightness,
+        mClamperController.clamp(mDisplayBrightnessState, mMockRequest, initialBrightness,
                 initialSlowChange, STATE_ON);
         // immediately second call of clamp method
-        DisplayBrightnessState state = mClamperController.clamp(mMockRequest, initialBrightness,
-                initialSlowChange, STATE_ON);
+        DisplayBrightnessState state = mClamperController.clamp(mDisplayBrightnessState,
+                mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
 
         assertEquals(clampedBrightness, state.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(clampedBrightness, state.getMaxBrightness(), FLOAT_TOLERANCE);
@@ -316,6 +321,22 @@ public class BrightnessClamperControllerTest {
                 state.getBrightnessReason().getModifier() & BrightnessReason.MODIFIER_THROTTLED);
         assertEquals(customAnimationRate, state.getCustomAnimationRate(), FLOAT_TOLERANCE);
         assertEquals(initialSlowChange, state.isSlowChange());
+    }
+
+    @Test
+    public void testClamp_activeClamperApplied_confirmBrightnessOverrideStateReturned() {
+        float initialBrightness = 0.8f;
+        boolean initialSlowChange = false;
+        mTestInjector.mCapturedChangeListener.onChanged();
+        mTestHandler.flush();
+
+        mDisplayBrightnessState = DisplayBrightnessState.builder().setBrightnessReason(
+                BrightnessReason.REASON_OVERRIDE).build();
+
+        DisplayBrightnessState state = mClamperController.clamp(mDisplayBrightnessState,
+                mMockRequest, initialBrightness, initialSlowChange, STATE_ON);
+
+        assertEquals(BrightnessReason.REASON_OVERRIDE, state.getBrightnessReason().getReason());
     }
 
     @Test

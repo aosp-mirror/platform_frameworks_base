@@ -112,8 +112,7 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ថត​អេក្រង់​របស់អ្នកឬ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ថត​កម្មវិធី​ទោល"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ថតអេក្រង់ទាំងមូល"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"ថតអេក្រង់ទាំងមូល៖ %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"នៅពេល​អ្នកកំពុង​ថតអេក្រង់​ទាំងមូល​របស់អ្នក អ្វីគ្រប់យ៉ាង​ដែលបង្ហាញ​នៅលើ​អេក្រង់​របស់អ្នក​ត្រូវបាន​ថត។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"នៅពេលអ្នក​កំពុង​ថតកម្មវិធី​ណាមួយ អ្វីគ្រប់យ៉ាង​ដែលបង្ហាញ ឬចាក់​នៅក្នុង​កម្មវិធីនោះ​ត្រូវបាន​ថត។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ថត​អេក្រង់"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"បច្ចុប្បន្ន អ្នកកំពុងថត <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"ឈប់ថត"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"កំពុងបង្ហាញអេក្រង់"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"កំពុងចែករំលែកខ្លឹមសារ"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ឈប់បង្ហាញអេក្រង់ឬ?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"ឈប់​ចែករំលែក​ឬ?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញអេក្រង់ទាំងមូលរបស់អ្នកតាមរយៈ <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញអេក្រង់ទាំងមូលរបស់អ្នកតាមរយៈកម្មវិធីមួយ"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញ <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"បច្ចុប្បន្ន អ្នកកំពុងបង្ហាញកម្មវិធីមួយ"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"បច្ចុប្បន្ន អ្នកកំពុងចែករំលែក​ជាមួយកម្មវិធីមួយ"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"ឈប់​បង្ហាញ"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"កំពុង​បញ្ជូន​អេក្រង់"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"ឈប់បញ្ជូនឬ?"</string>
@@ -523,10 +519,8 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"ធាតុ​ក្រាហ្វិកអេក្រង់ចាក់សោ"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"អ្នកគ្រប់គ្នាអាចមើលធាតុក្រាហ្វិកលើអេក្រង់ចាក់សោរបស់អ្នក ទោះបីជាថេប្លេតរបស់អ្នកត្រូវបានចាក់សោក៏ដោយ។"</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ដក​ការ​ជ្រើសរើសធាតុ​ក្រាហ្វិក"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"បន្ថយកម្ពស់"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"បង្កើនកម្ពស់"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ធាតុ​ក្រាហ្វិកលើអេក្រង់ចាក់សោ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ដើម្បីបើកកម្មវិធីដោយប្រើធាតុ​ក្រាហ្វិក អ្នកនឹងត្រូវផ្ទៀងផ្ទាត់ថាជាអ្នក។ ទន្ទឹមនឹងនេះ សូមចងចាំថា នរណាក៏អាចមើលធាតុក្រាហ្វិកបាន សូម្បីពេលថេប្លេតរបស់អ្នកជាប់សោក៏ដោយ។ ធាតុ​ក្រាហ្វិកមួយចំនួនប្រហែលមិនត្រូវបានរចនាឡើងសម្រាប់អេក្រង់ចាក់សោរបស់អ្នកទេ និងមិនមានសុវត្ថិភាពឡើយ បើបញ្ចូលទៅទីនេះ។"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"យល់ហើយ"</string>
@@ -583,10 +577,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"សម្អាត​ទាំងអស់"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"គ្រប់គ្រង"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ប្រវត្តិ"</string>
-    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
-    <skip />
-    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
-    <skip />
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"ការ​កំណត់​ការ​ជូនដំណឹង"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"ប្រវត្តិ​នៃការ​ជូន​ដំណឹង"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"ថ្មី"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ស្ងាត់"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ការជូនដំណឹង"</string>
@@ -597,7 +589,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ចាប់ផ្ដើម​ឥឡូវ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"គ្មាន​ការ​ជូនដំណឹង"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"គ្មាន​ការ​ជូន​ដំណឹង​​ថ្មីៗទេ"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"ការបន្ថយសំឡេងការជូនដំណឹងត្រូវបានបើក"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
+    <skip />
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"កម្រិតសំឡេង និងការជូនដំណឹងនៅលើឧបករណ៍របស់អ្នកត្រូវបានកាត់បន្ថយដោយស្វ័យប្រវត្តិរហូតដល់ 2 នាទី នៅពេលអ្នកទទួលបានការជូនដំណឹងច្រើនពេកក្នុងពេលតែមួយ។"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"បិទ"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ដោះសោដើម្បីមើលការជូនដំណឹងចាស់ៗ"</string>
@@ -705,6 +698,8 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ថេរ"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"រេតាមក្បាល"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ចុច​ដើម្បីប្ដូរ​មុខងារ​រោទ៍"</string>
+    <!-- no translation found for volume_ringer_mode (6867838048430807128) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"បិទ​សំឡេង"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"បើក​សំឡេង"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ញ័រ"</string>
@@ -814,7 +809,7 @@
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Back"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"ដកឃ្លា"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
@@ -1415,15 +1410,12 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"កម្មវិធីបច្ចុប្បន្ន"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ភាពងាយស្រួល"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ផ្លូវកាត់​ក្ដារ​ចុច"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ផ្លូវ​កាត់ការស្វែងរក"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"ប្ដូរ​ផ្លូវកាត់​ក្ដារ​ចុចតាម​បំណង"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ស្វែងរកផ្លូវ​កាត់"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"គ្មាន​លទ្ធផល​ស្វែងរក​ទេ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"រូបតំណាង \"បង្រួម\""</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"ប្ដូរ​តាម​បំណង"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"រួចរាល់"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"រូបតំណាង \"ពង្រីក\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ឬ"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ដង​អូស"</string>
@@ -1485,6 +1477,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"ផ្ដល់ជូនដោយកម្មវិធី"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"ផ្ទាំងបង្ហាញ"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"មិនស្គាល់"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"កំណត់ប្រអប់ឡើងវិញ"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"កំណត់ប្រអប់ឡើងវិញទៅទំហំ និងលំដាប់ដើមរបស់ប្រអប់ទាំងនោះឬ?"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"កំណត់ប្រអប់ទាំងអស់​ឡើងវិញឬ?"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"ប្រអប់​ការកំណត់រហ័សទាំងអស់នឹងកំណត់ឡើងវិញទៅការ​កំណត់ដើមរបស់ឧបករណ៍"</string>
 </resources>

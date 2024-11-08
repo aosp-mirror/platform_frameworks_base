@@ -15,6 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -23,7 +24,14 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
-public class ClickModifierEnd implements Operation {
+/** Represents a touch up modifier + actions */
+public class TouchUpModifierOperation extends ListActionsOperation implements TouchHandler {
+
+    private static final int OP_CODE = Operations.MODIFIER_TOUCH_UP;
+
+    public TouchUpModifierOperation() {
+        super("TOUCH_UP_MODIFIER");
+    }
 
     @Override
     public void write(WireBuffer buffer) {
@@ -32,39 +40,52 @@ public class ClickModifierEnd implements Operation {
 
     @Override
     public String toString() {
-        return "CLICK_END";
+        return "TouchUpModifier";
     }
 
     @Override
     public void apply(RemoteContext context) {
+        RootLayoutComponent root = context.getDocument().getRootLayoutComponent();
+        if (root != null) {
+            root.setHasTouchListeners(true);
+        }
+        super.apply(context);
+    }
+
+    @Override
+    public void onTouchDown(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
         // nothing
     }
 
     @Override
-    public String deepToString(String indent) {
-        return (indent != null ? indent : "") + toString();
+    public void onTouchUp(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        applyActions(context, document, component, x, y, true);
+    }
+
+    @Override
+    public void onTouchCancel(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        // nothing
     }
 
     public static String name() {
-        return "ClickModifierEnd";
-    }
-
-    public static int id() {
-        return Operations.MODIFIER_CLICK_END;
+        return "TouchUpModifier";
     }
 
     public static void apply(WireBuffer buffer) {
-        buffer.start(id());
+        buffer.start(OP_CODE);
     }
 
     public static void read(WireBuffer buffer, List<Operation> operations) {
-        operations.add(new ClickModifierEnd());
+        operations.add(new TouchUpModifierOperation());
     }
 
     public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Layout Operations", id(), name())
+        doc.operation("Modifier Operations", OP_CODE, name())
                 .description(
-                        "End tag for click modifiers. This operation marks the end"
-                                + "of a click modifier");
+                        "Touch up modifier. This operation contains"
+                                + " a list of action executed on Touch up");
     }
 }

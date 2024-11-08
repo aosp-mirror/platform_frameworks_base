@@ -155,7 +155,7 @@ public class Notification implements Parcelable
             FOREGROUND_SERVICE_IMMEDIATE,
             FOREGROUND_SERVICE_DEFERRED
     })
-    public @interface ServiceNotificationPolicy {};
+    public @interface ServiceNotificationPolicy {}
 
     /**
      * If the Notification associated with starting a foreground service has been
@@ -1754,10 +1754,6 @@ public class Notification implements Parcelable
     private Icon mSmallIcon;
     @UnsupportedAppUsage
     private Icon mLargeIcon;
-    private Icon mAppIcon;
-
-    /** Cache for whether the notification was posted by a headless system app. */
-    private Boolean mBelongsToHeadlessSystemApp = null;
 
     @UnsupportedAppUsage
     private String mChannelId;
@@ -3247,86 +3243,6 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Whether this notification was posted by a headless system app.
-     *
-     * If we don't have enough information to figure this out, this will return false. Therefore,
-     * false negatives are possible, but false positives should not be.
-     *
-     * @hide
-     */
-    public boolean belongsToHeadlessSystemApp(Context context) {
-        Trace.beginSection("Notification#belongsToHeadlessSystemApp");
-
-        try {
-            if (mBelongsToHeadlessSystemApp != null) {
-                return mBelongsToHeadlessSystemApp;
-            }
-
-            if (context == null) {
-                // Without a valid context, we don't know exactly. Let's assume it doesn't belong to
-                // a system app, but not cache the value.
-                return false;
-            }
-
-            ApplicationInfo info = getApplicationInfo(context);
-            if (info != null) {
-                if ((info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    // It's not a system app at all.
-                    mBelongsToHeadlessSystemApp = false;
-                } else {
-                    // If there's no launch intent, it's probably a headless app.
-                    final PackageManager pm = context.getPackageManager();
-                    mBelongsToHeadlessSystemApp = pm.getLaunchIntentForPackage(info.packageName)
-                            == null;
-                }
-            } else {
-                // If for some reason we don't have the app info, we don't know; best assume it's
-                // not a system app.
-                return false;
-            }
-            return mBelongsToHeadlessSystemApp;
-        } finally {
-            Trace.endSection();
-        }
-    }
-
-    /**
-     * Get the resource ID of the app icon from application info.
-     * @hide
-     */
-    public int getHeaderAppIconRes(Context context) {
-        ApplicationInfo info = getApplicationInfo(context);
-        if (info != null) {
-            return info.icon;
-        }
-        return 0;
-    }
-
-    /**
-     * Load the app icon drawable from the package manager. This could result in a binder call.
-     * @hide
-     */
-    public Drawable loadHeaderAppIcon(Context context) {
-        Trace.beginSection("Notification#loadHeaderAppIcon");
-
-        try {
-            if (context == null) {
-                Log.e(TAG, "Cannot load the app icon drawable with a null context");
-                return null;
-            }
-            final PackageManager pm = context.getPackageManager();
-            ApplicationInfo info = getApplicationInfo(context);
-            if (info == null) {
-                Log.e(TAG, "Cannot load the app icon drawable: no application info");
-                return null;
-            }
-            return pm.getApplicationIcon(info);
-        } finally {
-            Trace.endSection();
-        }
-    }
-
-    /**
      * Fetch the application info from the notification, or the context if that isn't available.
      */
     private ApplicationInfo getApplicationInfo(Context context) {
@@ -4361,55 +4277,6 @@ public class Notification implements Parcelable
     }
 
     /**
-     * The colored app icon that can replace the small icon in the notification starting in V.
-     *
-     * Before using this value, you should first check whether it's actually being used by the
-     * notification by calling {@link Notification#shouldUseAppIcon()}.
-     *
-     * @hide
-     */
-    public Icon getAppIcon() {
-        if (mAppIcon != null) {
-            return mAppIcon;
-        }
-        // If the app icon hasn't been loaded yet, check if we can load it without a context.
-        if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
-            final ApplicationInfo info = extras.getParcelable(
-                    EXTRA_BUILDER_APPLICATION_INFO,
-                    ApplicationInfo.class);
-            if (info != null) {
-                int appIconRes = info.icon;
-                if (appIconRes == 0) {
-                    Log.w(TAG, "Failed to get the app icon: no icon in application info");
-                    return null;
-                }
-                mAppIcon = Icon.createWithResource(info.packageName, appIconRes);
-                return mAppIcon;
-            } else {
-                Log.e(TAG, "Failed to get the app icon: "
-                        + "there's an EXTRA_BUILDER_APPLICATION_INFO in extras but it's null");
-            }
-        } else {
-            Log.w(TAG, "Failed to get the app icon: no application info in extras");
-        }
-        return null;
-    }
-
-    /**
-     * Whether the notification is using the app icon instead of the small icon.
-     * @hide
-     */
-    public boolean shouldUseAppIcon() {
-        if (Flags.notificationsUseAppIconInRow()) {
-            if (belongsToHeadlessSystemApp(/* context = */ null)) {
-                return false;
-            }
-            return getAppIcon() != null;
-        }
-        return false;
-    }
-
-    /**
      * The large icon shown in this notification's content view.
      * @see Builder#getLargeIcon()
      * @see Builder#setLargeIcon(Icon)
@@ -4565,19 +4432,6 @@ public class Notification implements Parcelable
 
         private static final boolean USE_ONLY_TITLE_IN_LOW_PRIORITY_SUMMARY =
                 SystemProperties.getBoolean("notifications.only_title", true);
-
-        /**
-         * The lightness difference that has to be added to the primary text color to obtain the
-         * secondary text color when the background is light.
-         */
-        private static final int LIGHTNESS_TEXT_DIFFERENCE_LIGHT = 20;
-
-        /**
-         * The lightness difference that has to be added to the primary text color to obtain the
-         * secondary text color when the background is dark.
-         * A bit less then the above value, since it looks better on dark backgrounds.
-         */
-        private static final int LIGHTNESS_TEXT_DIFFERENCE_DARK = -10;
 
         private Context mContext;
         private Notification mN;
@@ -6451,36 +6305,12 @@ public class Notification implements Parcelable
         }
 
         private void bindSmallIcon(RemoteViews contentView, StandardTemplateParams p) {
-            if (Flags.notificationsUseAppIcon()) {
-                // Override small icon with app icon
-                mN.mSmallIcon = Icon.createWithResource(mContext,
-                        mN.getHeaderAppIconRes(mContext));
-            } else if (mN.mSmallIcon == null && mN.icon != 0) {
+            if (mN.mSmallIcon == null && mN.icon != 0) {
                 mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
             }
-
-            boolean usingAppIcon = false;
-            if (Flags.notificationsUseAppIconInRow() && !mN.belongsToHeadlessSystemApp(mContext)) {
-                // Use the app icon in the view
-                int appIconRes = mN.getHeaderAppIconRes(mContext);
-                if (appIconRes != 0) {
-                    mN.mAppIcon = Icon.createWithResource(mContext, appIconRes);
-                    contentView.setImageViewIcon(R.id.icon, mN.mAppIcon);
-                    contentView.setBoolean(R.id.icon, "setShouldShowAppIcon", true);
-                    usingAppIcon = true;
-                } else {
-                    Log.w(TAG, "bindSmallIcon: could not get the app icon");
-                }
-            }
-            if (!usingAppIcon) {
-                contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
-            }
+            contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
             contentView.setInt(R.id.icon, "setImageLevel", mN.iconLevel);
-
-            // Don't change color if we're using the app icon.
-            if (!Flags.notificationsUseAppIcon() && !usingAppIcon) {
-                processSmallIconColor(mN.mSmallIcon, contentView, p);
-            }
+            processSmallIconColor(mN.mSmallIcon, contentView, p);
         }
 
         /**

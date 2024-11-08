@@ -8,8 +8,7 @@ container: "system"
 flag {
   name: "notifications_redesign_app_icons"
   namespace: "systemui"
-  description: "Notifications Redesign: Use app icons in notification rows (not to be confused with"
-    " notifications_use_app_icons, notifications_use_app_icon_in_row which are just experiments)."
+  description: "Notifications Redesign: Use app icons in notification rows"
   bug: "371174789"
 }
 
@@ -109,31 +108,6 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
-
-# vvv Prototypes for using app icons in notifications vvv
-
-flag {
-  name: "notifications_use_app_icon"
-  namespace: "systemui"
-  description: "Experiment to replace the small icon in a notification with the app icon. This includes the status bar, AOD, shelf and notification row itself."
-  bug: "335211019"
-}
-
-flag {
-  name: "notifications_use_app_icon_in_row"
-  namespace: "systemui"
-  description: "Experiment to replace the small icon in a notification row with the app icon."
-  bug: "335211019"
-}
-
-flag {
-  name: "notifications_use_monochrome_app_icon"
-  namespace: "systemui"
-  description: "Experiment to replace the notification icon in the status bar and shelf with the monochrome app icon, if available."
-  bug: "335211019"
-}
-
-# ^^^ Prototypes for using app icons in notifications ^^^
 
 flag {
   name: "notification_expansion_optional"

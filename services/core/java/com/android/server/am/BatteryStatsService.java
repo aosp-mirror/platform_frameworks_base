@@ -760,6 +760,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         public void noteWakingAlarmBatch(long elapsedMillis, int... uids) {
             noteCpuWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, elapsedMillis, uids);
         }
+
+        @Override
+        public int getOwnerUid(int uid) {
+            if (Process.isSdkSandboxUid(uid)) {
+                return Process.getAppUidForSdkSandboxUid(uid);
+            }
+            return mPowerStatsUidResolver.mapUid(uid);
+        }
     }
 
     /**

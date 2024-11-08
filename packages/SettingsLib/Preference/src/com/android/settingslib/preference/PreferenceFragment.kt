@@ -21,16 +21,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.XmlRes
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_KEY
 import com.android.settingslib.metadata.PreferenceScreenBindingKeyProvider
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.android.settingslib.preference.PreferenceScreenBindingHelper.Companion.bindRecursively
+import com.android.settingslib.widget.SettingsBasePreferenceFragment
 
 /** Fragment to display a preference screen. */
 open class PreferenceFragment :
-    PreferenceFragmentCompat(), PreferenceScreenProvider, PreferenceScreenBindingKeyProvider {
+    SettingsBasePreferenceFragment(), PreferenceScreenProvider, PreferenceScreenBindingKeyProvider {
 
     private var preferenceScreenBindingHelper: PreferenceScreenBindingHelper? = null
 

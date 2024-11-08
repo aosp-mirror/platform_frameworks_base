@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -31,7 +34,6 @@ import com.android.internal.widget.remotecompose.core.operations.layout.animatio
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Measurable;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
@@ -52,16 +54,23 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     protected int mAnimationId = -1;
     public Visibility mVisibility = Visibility.VISIBLE;
     public Visibility mScheduledVisibility = Visibility.VISIBLE;
-    public ArrayList<Operation> mList = new ArrayList<>();
+    @NonNull public ArrayList<Operation> mList = new ArrayList<>();
     public PaintOperation mPreTranslate;
     public boolean mNeedsMeasure = true;
     public boolean mNeedsRepaint = false;
-    public AnimateMeasure mAnimateMeasure;
-    public AnimationSpec mAnimationSpec = new AnimationSpec();
+    @Nullable public AnimateMeasure mAnimateMeasure;
+    @NonNull public AnimationSpec mAnimationSpec = new AnimationSpec();
     public boolean mFirstLayout = true;
-    PaintBundle mPaint = new PaintBundle();
-    protected HashSet<ComponentValue> mComponentValues = new HashSet<>();
+    @NonNull PaintBundle mPaint = new PaintBundle();
+    @NonNull protected HashSet<ComponentValue> mComponentValues = new HashSet<>();
 
+    protected float mZIndex = 0f;
+
+    public float getZIndex() {
+        return mZIndex;
+    }
+
+    @NonNull
     public ArrayList<Operation> getList() {
         return mList;
     }
@@ -115,7 +124,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
      *
      * @param context the current context
      */
-    private void updateComponentValues(RemoteContext context) {
+    private void updateComponentValues(@NonNull RemoteContext context) {
         if (DEBUG) {
             System.out.println(
                     "UPDATE COMPONENT VALUES ("
@@ -172,7 +181,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         this(parent, componentId, -1, x, y, width, height);
     }
 
-    public Component(Component component) {
+    public Component(@NonNull Component component) {
         this(
                 component.mParent,
                 component.mComponentId,
@@ -212,7 +221,10 @@ public class Component extends PaintOperation implements Measurable, Serializabl
      *
      * @param context the current context
      */
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
+        Component prev = context.lastComponent;
+        context.lastComponent = this;
+
         if (!mComponentValues.isEmpty()) {
             updateComponentValues(context);
         }
@@ -224,6 +236,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
                 o.apply(context);
             }
         }
+        context.lastComponent = prev;
     }
 
     public void addComponentValue(ComponentValue v) {
@@ -283,14 +296,14 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             float maxWidth,
             float minHeight,
             float maxHeight,
-            MeasurePass measure) {
+            @NonNull MeasurePass measure) {
         ComponentMeasure m = measure.get(this);
         m.setW(mWidth);
         m.setH(mHeight);
     }
 
     @Override
-    public void layout(RemoteContext context, MeasurePass measure) {
+    public void layout(@NonNull RemoteContext context, @NonNull MeasurePass measure) {
         ComponentMeasure m = measure.get(this);
         if (!mFirstLayout
                 && context.isAnimationEnabled()
@@ -332,7 +345,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         mFirstLayout = false;
     }
 
-    public float[] locationInWindow = new float[2];
+    @NonNull public float[] locationInWindow = new float[2];
 
     public boolean contains(float x, float y) {
         locationInWindow[0] = 0f;
@@ -353,13 +366,57 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             if (op instanceof Component) {
                 ((Component) op).onClick(context, document, x, y);
             }
-            if (op instanceof ComponentModifiers) {
-                ((ComponentModifiers) op).onClick(context, document, this, x, y);
+            if (op instanceof ClickHandler) {
+                ((ClickHandler) op).onClick(context, document, this, x, y);
             }
         }
     }
 
-    public void getLocationInWindow(float[] value) {
+    public void onTouchDown(RemoteContext context, CoreDocument document, float x, float y) {
+        if (!contains(x, y)) {
+            return;
+        }
+        for (Operation op : mList) {
+            if (op instanceof Component) {
+                ((Component) op).onTouchDown(context, document, x, y);
+            }
+            if (op instanceof TouchHandler) {
+                ((TouchHandler) op).onTouchDown(context, document, this, x, y);
+            }
+        }
+    }
+
+    public void onTouchUp(
+            RemoteContext context, CoreDocument document, float x, float y, boolean force) {
+        if (!force && !contains(x, y)) {
+            return;
+        }
+        for (Operation op : mList) {
+            if (op instanceof Component) {
+                ((Component) op).onTouchUp(context, document, x, y, force);
+            }
+            if (op instanceof TouchHandler) {
+                ((TouchHandler) op).onTouchUp(context, document, this, x, y);
+            }
+        }
+    }
+
+    public void onTouchCancel(
+            RemoteContext context, CoreDocument document, float x, float y, boolean force) {
+        if (!force && !contains(x, y)) {
+            return;
+        }
+        for (Operation op : mList) {
+            if (op instanceof Component) {
+                ((Component) op).onTouchCancel(context, document, x, y, force);
+            }
+            if (op instanceof TouchHandler) {
+                ((TouchHandler) op).onTouchCancel(context, document, this, x, y);
+            }
+        }
+    }
+
+    public void getLocationInWindow(@NonNull float[] value) {
         value[0] += mX;
         value[1] += mY;
         if (mParent != null) {
@@ -372,6 +429,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "COMPONENT(<"
@@ -393,14 +451,14 @@ public class Component extends PaintOperation implements Measurable, Serializabl
                 + ") ";
     }
 
+    @NonNull
     protected String getSerializedName() {
         return "COMPONENT";
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(
-                indent,
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
+        String content =
                 getSerializedName()
                         + " ["
                         + mComponentId
@@ -416,9 +474,9 @@ public class Component extends PaintOperation implements Measurable, Serializabl
                         + ", "
                         + mHeight
                         + "] "
-                        + mVisibility
-                //        + " [" + mNeedsMeasure + ", " + mNeedsRepaint + "]"
-        );
+                        + mVisibility;
+        //        + " [" + mNeedsMeasure + ", " + mNeedsRepaint + "]"
+        serializer.append(indent, content);
     }
 
     @Override
@@ -427,6 +485,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     }
 
     /** Returns the top-level RootLayoutComponent */
+    @NonNull
     public RootLayoutComponent getRoot() throws Exception {
         if (this instanceof RootLayoutComponent) {
             return (RootLayoutComponent) this;
@@ -441,6 +500,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         return (RootLayoutComponent) p;
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         StringBuilder builder = new StringBuilder();
@@ -477,6 +537,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         }
     }
 
+    @NonNull
     public String content() {
         StringBuilder builder = new StringBuilder();
         for (Operation op : mList) {
@@ -487,6 +548,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         return builder.toString();
     }
 
+    @NonNull
     public String textContent() {
         StringBuilder builder = new StringBuilder();
         for (Operation ignored : mList) {
@@ -499,7 +561,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         return builder.toString();
     }
 
-    public void debugBox(Component component, PaintContext context) {
+    public void debugBox(@NonNull Component component, @NonNull PaintContext context) {
         float width = component.mWidth;
         float height = component.mHeight;
 
@@ -536,13 +598,15 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         return 0f;
     }
 
-    public void paintingComponent(PaintContext context) {
+    public void paintingComponent(@NonNull PaintContext context) {
         if (mPreTranslate != null) {
             mPreTranslate.paint(context);
         }
+        Component prev = context.getContext().lastComponent;
+        context.getContext().lastComponent = this;
         context.save();
         context.translate(mX, mY);
-        if (context.isDebug()) {
+        if (context.isVisualDebug()) {
             debugBox(this, context);
         }
         for (Operation op : mList) {
@@ -554,9 +618,10 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             }
         }
         context.restore();
+        context.getContext().lastComponent = prev;
     }
 
-    public boolean applyAnimationAsNeeded(PaintContext context) {
+    public boolean applyAnimationAsNeeded(@NonNull PaintContext context) {
         if (context.isAnimationEnabled() && mAnimateMeasure != null) {
             mAnimateMeasure.apply(context);
             needsRepaint();
@@ -566,8 +631,8 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     }
 
     @Override
-    public void paint(PaintContext context) {
-        if (context.isDebug()) {
+    public void paint(@NonNull PaintContext context) {
+        if (context.isVisualDebug()) {
             context.save();
             context.translate(mX, mY);
             context.savePaint();
@@ -594,7 +659,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         paintingComponent(context);
     }
 
-    public void getComponents(ArrayList<Component> components) {
+    public void getComponents(@NonNull ArrayList<Component> components) {
         for (Operation op : mList) {
             if (op instanceof Component) {
                 components.add((Component) op);
@@ -602,7 +667,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         }
     }
 
-    public void getData(ArrayList<TextData> data) {
+    public void getData(@NonNull ArrayList<TextData> data) {
         for (Operation op : mList) {
             if (op instanceof TextData) {
                 data.add((TextData) op);
@@ -631,6 +696,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         return mNeedsRepaint;
     }
 
+    @Nullable
     public Component getComponent(int cid) {
         if (mComponentId == cid || mAnimationId == cid) {
             return this;

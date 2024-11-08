@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.yield
@@ -66,6 +67,10 @@ class FakeUserRepository @Inject constructor() : UserRepository {
             SelectedUserModel(DEFAULT_SELECTED_USER_INFO, SelectionStatus.SELECTION_COMPLETE)
         )
     override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
+
+    private val _isSecondaryUserLogoutEnabled = MutableStateFlow<Boolean>(false)
+    override val isSecondaryUserLogoutEnabled: StateFlow<Boolean> =
+        _isSecondaryUserLogoutEnabled.asStateFlow()
 
     override var mainUserId: Int = MAIN_USER_ID
     override var lastSelectedNonGuestUserId: Int = mainUserId
@@ -105,6 +110,17 @@ class FakeUserRepository @Inject constructor() : UserRepository {
 
     override fun isUserSwitcherEnabled(): Boolean {
         return _userSwitcherSettings.value.isUserSwitcherEnabled
+    }
+
+    fun setSecondaryUserLogoutEnabled(logoutEnabled: Boolean) {
+        _isSecondaryUserLogoutEnabled.value = logoutEnabled
+    }
+
+    var logOutSecondaryUserCallCount: Int = 0
+        private set
+
+    override suspend fun logOutSecondaryUser() {
+        logOutSecondaryUserCallCount++
     }
 
     fun setUserInfos(infos: List<UserInfo>) {

@@ -18,13 +18,6 @@ flag {
 }
 
 flag {
-    name: "safe_mode_timeout_config"
-    namespace: "vcn"
-    description: "Feature flag for adjustable safe mode timeout"
-    bug: "317406085"
-}
-
-flag {
     name: "fix_config_garbage_collection"
     namespace: "vcn"
     description: "Handle race condition in subscription change"

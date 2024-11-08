@@ -203,11 +203,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
         Notification n = row.getEntry().getSbn().getNotification();
-        if (n.shouldUseAppIcon()) {
-            mIcon.setTag(ImageTransformState.ICON_TAG, n.getAppIcon());
-        } else {
-            mIcon.setTag(ImageTransformState.ICON_TAG, n.getSmallIcon());
-        }
+        mIcon.setTag(ImageTransformState.ICON_TAG, n.getSmallIcon());
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.

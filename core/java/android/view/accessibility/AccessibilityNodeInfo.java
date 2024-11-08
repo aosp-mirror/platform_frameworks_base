@@ -4040,8 +4040,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Sets the view which serves as the label of the view represented by
      * this info for accessibility purposes.
      *
+     * @deprecated Use {@link #addLabeledBy(View)} or {@link #removeLabeledBy(View)} instead.
+     *
      * @param label The view that labels this node's source.
      */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    @Deprecated
     public void setLabeledBy(View label) {
         setLabeledBy(label, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
@@ -4062,9 +4066,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
+     * @deprecated Use {@link #addLabeledBy(View, int)} or {@link #removeLabeledBy(View, int)}
+     * instead.
+     *
      * @param root The root whose virtual descendant labels this node's source.
      * @param virtualDescendantId The id of the virtual descendant.
      */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    @Deprecated
     public void setLabeledBy(View root, int virtualDescendantId) {
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
@@ -4086,8 +4095,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Gets the node info which serves as the label of the view represented by
      * this info for accessibility purposes.
      *
+     * @deprecated Use {@link #getLabeledByList()} instead.
+     *
      * @return The label.
      */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    @Deprecated
     public AccessibilityNodeInfo getLabeledBy() {
         enforceSealed();
         return getNodeForAccessibilityId(mConnectionId, mWindowId, mLabeledById);

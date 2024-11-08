@@ -47,6 +47,14 @@ flag {
 }
 
 flag {
+    name: "enable_new_wired_media_route_2_info_types"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Enables the following type constant in MediaRoute2Info: LINE_ANALOG, LINE_DIGITAL, AUX_LINE"
+    bug: "301713440"
+}
+
+flag {
     name: "enable_privileged_routing_for_media_routing_control"
     is_exported: true
     namespace: "media_solutions"
@@ -71,7 +79,7 @@ flag {
 
 flag {
     name: "update_client_profile_priority"
-    namespace: "media"
+    namespace: "media_solutions"
     description : "Feature flag to add updateResourcePriority api to MediaCas"
     bug: "300565729"
 }

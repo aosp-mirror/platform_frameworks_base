@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT_ARRAY;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -48,7 +50,7 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         context.addCollection(mId, this);
         for (float value : mValues) {
             if (Utils.isVariable(value)) {
@@ -58,16 +60,17 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mValues);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DataListFloat[" + Utils.idString(mId) + "] " + Arrays.toString(mValues);
     }
 
-    public static void apply(WireBuffer buffer, int id, float[] values) {
+    public static void apply(@NonNull WireBuffer buffer, int id, @NonNull float[] values) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(values.length);
@@ -76,7 +79,7 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
         if (len > MAX_FLOAT_ARRAY) {
@@ -90,7 +93,7 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
         operations.add(data);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("a list of Floats")
                 .field(DocumentedOperation.INT, "id", "id the array (2xxxxx)")
@@ -98,13 +101,14 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
                 .field(FLOAT_ARRAY, "values", "length", "array of floats");
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.addCollection(mId, this);
     }
 

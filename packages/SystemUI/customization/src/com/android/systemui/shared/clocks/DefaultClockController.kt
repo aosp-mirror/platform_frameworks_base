@@ -55,7 +55,6 @@ class DefaultClockController(
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
     private val settings: ClockSettings?,
-    private val hasStepClockAnimation: Boolean = false,
     private val migratedClocks: Boolean = false,
     messageBuffers: ClockMessageBuffers? = null,
 ) : ClockController {
@@ -197,12 +196,11 @@ class DefaultClockController(
                 views[0].id =
                     resources.getIdentifier("lockscreen_clock_view_large", "id", ctx.packageName)
             }
-        override val config =
-            ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
+        override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
 
         init {
             view.migratedClocks = migratedClocks
-            view.hasCustomPositionUpdatedAnimation = hasStepClockAnimation
+            view.hasCustomPositionUpdatedAnimation = true
             animations = LargeClockAnimations(view, 0f, 0f)
         }
 

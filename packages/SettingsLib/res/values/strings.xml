@@ -1426,6 +1426,12 @@
     <string name="media_transfer_default_device_name">Connected device</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
+    <!-- Name of the digital audio output, i.e. S/PDIF, usually optical. [CHAR LIMIT=30] -->
+    <string name="media_transfer_digital_line_name">S/PDIF</string>
+    <!-- Name of the analog audio output. [CHAR LIMIT=30] -->
+    <string name="media_transfer_analog_line_name">Analog</string>
+    <!-- Name of the AUX audio output. [CHAR LIMIT=30] -->
+    <string name="media_transfer_aux_line_name">AUX</string>
     <!-- Sub status indicates device is not available due to an unknown error. [CHAR LIMIT=NONE] -->
     <string name="media_output_status_unknown_error">Can\’t play on this device</string>
     <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->

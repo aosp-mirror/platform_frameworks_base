@@ -20,6 +20,9 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -48,7 +51,7 @@ public class FloatExpression implements Operation, VariableSupport {
     public float[] mPreCalcValue;
     private float mLastChange = Float.NaN;
     private float mLastCalculatedValue = Float.NaN;
-    AnimatedFloatExpression mExp = new AnimatedFloatExpression();
+    @NonNull AnimatedFloatExpression mExp = new AnimatedFloatExpression();
     public static final int MAX_EXPRESSION_SIZE = 32;
 
     public FloatExpression(int id, float[] value, float[] animation) {
@@ -61,7 +64,7 @@ public class FloatExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         if (mPreCalcValue == null || mPreCalcValue.length != mSrcValue.length) {
             mPreCalcValue = new float[mSrcValue.length];
         }
@@ -107,7 +110,7 @@ public class FloatExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         for (float v : mSrcValue) {
             if (Float.isNaN(v)
                     && !AnimatedFloatExpression.isMathOperator(v)
@@ -118,7 +121,7 @@ public class FloatExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         updateVariables(context);
         float t = context.getAnimationTime();
         if (Float.isNaN(mLastChange)) {
@@ -135,10 +138,11 @@ public class FloatExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mSrcValue, mSrcAnimation);
     }
 
+    @NonNull
     @Override
     public String toString() {
         String[] labels = new String[mSrcValue.length];
@@ -161,6 +165,7 @@ public class FloatExpression implements Operation, VariableSupport {
                 + ")";
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -177,7 +182,11 @@ public class FloatExpression implements Operation, VariableSupport {
      * @param value the float expression array
      * @param animation the animation expression array
      */
-    public static void apply(WireBuffer buffer, int id, float[] value, float[] animation) {
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            int id,
+            @NonNull float[] value,
+            @Nullable float[] animation) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
 
@@ -197,7 +206,7 @@ public class FloatExpression implements Operation, VariableSupport {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
         int valueLen = len & 0xFFFF;
@@ -222,7 +231,7 @@ public class FloatExpression implements Operation, VariableSupport {
         operations.add(new FloatExpression(id, values, animation));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A Float expression")
                 .field(DocumentedOperation.INT, "id", "The id of the Color")
@@ -245,6 +254,7 @@ public class FloatExpression implements Operation, VariableSupport {
                 .field(FLOAT, "wrapValue", "> [Wrap value] ");
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();

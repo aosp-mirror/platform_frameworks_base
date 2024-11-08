@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.UTF8;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -64,10 +66,11 @@ public class DataMapIds implements Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mDataMap.mNames, mDataMap.mTypes, mDataMap.mIds);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("DataMapIds[" + Utils.idString(mId) + "] ");
@@ -84,7 +87,8 @@ public class DataMapIds implements Operation {
         return builder.toString();
     }
 
-    public static void apply(WireBuffer buffer, int id, String[] names, byte[] type, int[] ids) {
+    public static void apply(
+            @NonNull WireBuffer buffer, int id, @NonNull String[] names, byte[] type, int[] ids) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(names.length);
@@ -95,7 +99,7 @@ public class DataMapIds implements Operation {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
         if (len > MAX_MAP) {
@@ -113,7 +117,7 @@ public class DataMapIds implements Operation {
         operations.add(data);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a collection of name id pairs")
                 .field(INT, "id", "id the array")
@@ -122,13 +126,14 @@ public class DataMapIds implements Operation {
                 .field(UTF8, "id[0]", "length", "path encoded as floats");
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.putDataMap(mId, mDataMap);
     }
 }
