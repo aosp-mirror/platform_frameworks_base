@@ -353,7 +353,7 @@ public class BugreportProgressService extends Service {
     public void onDestroy() {
         mServiceHandler.getLooper().quit();
         mScreenshotHandler.getLooper().quit();
-        mBugreportSingleThreadExecutor.close();
+        mBugreportSingleThreadExecutor.shutdown();
         super.onDestroy();
     }
 
