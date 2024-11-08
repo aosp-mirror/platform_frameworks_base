@@ -205,6 +205,7 @@ import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.NativeTombstoneManagerService;
 import com.android.server.os.SchedulingPolicyService;
+import com.android.server.os.instrumentation.DynamicInstrumentationManagerService;
 import com.android.server.pdb.PersistentDataBlockService;
 import com.android.server.people.PeopleService;
 import com.android.server.permission.access.AccessCheckingService;
@@ -2889,6 +2890,13 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("startTracingServiceProxy");
         mSystemServiceManager.startService(TracingServiceProxy.class);
         t.traceEnd();
+
+        // UprobeStats DynamicInstrumentationManager
+        if (com.android.art.flags.Flags.executableMethodFileOffsets()) {
+            t.traceBegin("StartDynamicInstrumentationManager");
+            mSystemServiceManager.startService(DynamicInstrumentationManagerService.class);
+            t.traceEnd();
+        }
 
         // It is now time to start up the app processes...
 
