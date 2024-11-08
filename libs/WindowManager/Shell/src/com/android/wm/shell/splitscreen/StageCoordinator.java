@@ -55,7 +55,6 @@ import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASON_LAUNCHER;
-import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASON_MULTI_INSTANCE;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
@@ -1099,16 +1098,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     void setSideStagePosition(@SplitPosition int sideStagePosition,
             @Nullable WindowContainerTransaction wct) {
-        setSideStagePosition(sideStagePosition, true /* updateBounds */, wct);
-    }
-
-    private void setSideStagePosition(@SplitPosition int sideStagePosition, boolean updateBounds,
-            @Nullable WindowContainerTransaction wct) {
         if (mSideStagePosition == sideStagePosition) return;
         mSideStagePosition = sideStagePosition;
         sendOnStagePositionChanged();
 
-        if (mSideStage.mVisible && updateBounds) {
+        if (mSideStage.mVisible) {
             if (wct == null) {
                 // onLayoutChanged builds/applies a wct with the contents of updateWindowBounds.
                 onLayoutSizeChanged(mSplitLayout);
@@ -1199,6 +1193,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!isSplitActive()) return;
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         applyExitSplitScreen(childrenToTop, wct, exitReason);
     }
 
@@ -1598,6 +1593,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         if (present) {
             updateRecentTasksSplitPair();
+        } else if (mMainStage.getChildCount() == 0 && mSideStage.getChildCount() == 0) {
+            mRecentTasks.ifPresent(recentTasks -> {
+                // remove the split pair mapping from recentTasks, and disable further updates
+                // to splits in the recents until we enter split again.
+                recentTasks.removeSplitPair(taskId);
+            });
+            exitSplitScreen(mMainStage, EXIT_REASON_ROOT_TASK_VANISHED);
         }
 
         for (int i = mListeners.size() - 1; i >= 0; --i) {
