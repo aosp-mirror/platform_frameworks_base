@@ -3564,6 +3564,8 @@
     <string name="rear_display_accessibility_folded_animation">Foldable device being unfolded</string>
     <!-- Text for education page content description for unfolded animation. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
+    <!-- Text for a dialog telling the user that the front screen is turned on. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_unfolded_front_screen_on">Front screen turned on</string>
 
     <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the folded posture for a foldable device [CHAR LIMIT=32] -->
     <string name="quick_settings_rotation_posture_folded">folded</string>
