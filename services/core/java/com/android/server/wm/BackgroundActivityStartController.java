@@ -46,7 +46,6 @@ import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 import static com.android.window.flags.Flags.balAdditionalStartModes;
 import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
-import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
 import static com.android.window.flags.Flags.balImprovedMetrics;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
 import static com.android.window.flags.Flags.balShowToastsBlocked;
@@ -347,11 +346,7 @@ public class BackgroundActivityStartController {
             @BackgroundActivityStartMode int realCallerBackgroundActivityStartMode =
                     checkedOptions.getPendingIntentBackgroundActivityStartMode();
 
-            if (!balImproveRealCallerVisibilityCheck()) {
-                // without this fix the auto-opt ins below would violate CTS tests
-                mAutoOptInReason = null;
-                mAutoOptInCaller = false;
-            } else if (originatingPendingIntent == null) {
+            if (originatingPendingIntent == null) {
                 mAutoOptInReason = AUTO_OPT_IN_NOT_PENDING_INTENT;
                 mAutoOptInCaller = true;
             } else if (mIsCallForResult) {
@@ -598,8 +593,6 @@ public class BackgroundActivityStartController {
                         mCheckedOptions.getPendingIntentBackgroundActivityStartMode()));
             }
             // features
-            sb.append("; balImproveRealCallerVisibilityCheck: ")
-                    .append(balImproveRealCallerVisibilityCheck());
             sb.append("; balRequireOptInByPendingIntentCreator: ")
                     .append(balRequireOptInByPendingIntentCreator());
             sb.append("; balDontBringExistingBackgroundTaskStackToFg: ")
@@ -1130,23 +1123,13 @@ public class BackgroundActivityStartController {
         final boolean appSwitchAllowedOrFg = state.mAppSwitchState == APP_SWITCH_ALLOW
                 || state.mAppSwitchState == APP_SWITCH_FG_ONLY
                 || isHomeApp(state.mRealCallingUid, state.mRealCallingPackage);
-        if (balImproveRealCallerVisibilityCheck()) {
-            if (appSwitchAllowedOrFg && state.mRealCallingUidHasAnyVisibleWindow) {
-                return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
-                        /*background*/ false, "realCallingUid has visible window");
-            }
-            if (mService.mActiveUids.hasNonAppVisibleWindow(state.mRealCallingUid)) {
-                return new BalVerdict(BAL_ALLOW_NON_APP_VISIBLE_WINDOW,
-                        /*background*/ false, "realCallingUid has non-app visible window");
-            }
-        } else {
-            // don't abort if the realCallingUid has a visible window
-            // TODO(b/171459802): We should check appSwitchAllowed also
-            if (state.mRealCallingUidHasAnyVisibleWindow) {
-                return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
-                        /*background*/ false,
-                        "realCallingUid has visible (non-toast) window.");
-            }
+        if (appSwitchAllowedOrFg && state.mRealCallingUidHasAnyVisibleWindow) {
+            return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
+                    /*background*/ false, "realCallingUid has visible window");
+        }
+        if (mService.mActiveUids.hasNonAppVisibleWindow(state.mRealCallingUid)) {
+            return new BalVerdict(BAL_ALLOW_NON_APP_VISIBLE_WINDOW,
+                    /*background*/ false, "realCallingUid has non-app visible window");
         }
 
         // Don't abort if the realCallerApp or other processes of that uid are considered to be in
