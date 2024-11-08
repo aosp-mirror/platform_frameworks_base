@@ -374,8 +374,17 @@ class DesktopImmersiveController(
         // Check if this is a direct immersive enter/exit transition.
         if (transition == state?.transition) {
             val state = requireState()
-            val startBounds = info.changes.first { c -> c.taskInfo?.taskId == state.taskId }
-                .startAbsBounds
+            val immersiveChange = info.changes.firstOrNull { c ->
+                c.taskInfo?.taskId == state.taskId
+            }
+            if (immersiveChange == null) {
+                logV(
+                    "Direct move for task#%d in %s direction missing immersive change.",
+                    state.taskId, state.direction
+                )
+                return
+            }
+            val startBounds = immersiveChange.startAbsBounds
             logV("Direct move for task#%d in %s direction verified", state.taskId, state.direction)
             when (state.direction) {
                 Direction.ENTER -> {
