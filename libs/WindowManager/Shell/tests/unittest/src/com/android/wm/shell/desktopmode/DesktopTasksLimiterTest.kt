@@ -17,6 +17,7 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
+import android.graphics.Rect
 import android.os.Binder
 import android.os.Handler
 import android.platform.test.annotations.DisableFlags
@@ -24,8 +25,10 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
+import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
@@ -63,6 +66,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.any
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.eq
@@ -232,6 +236,30 @@ class DesktopTasksLimiterTest : ShellTestCase() {
                 StubTransaction() /* finishTransaction */)
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isTrue()
+    }
+
+    @Test
+    fun onTransitionReady_pendingTransition_changeTaskToBack_boundsSaved() {
+        val bounds = Rect(0, 0, 200, 200)
+        val transition = Binder()
+        val task = setUpFreeformTask()
+        desktopTasksLimiter.addPendingMinimizeChange(
+            transition, displayId = DEFAULT_DISPLAY, taskId = task.taskId)
+
+        val change = TransitionInfo.Change(task.token, mock(SurfaceControl::class.java)).apply {
+            mode = TRANSIT_TO_BACK
+            taskInfo = task
+            setStartAbsBounds(bounds)
+        }
+        desktopTasksLimiter.getTransitionObserver().onTransitionReady(
+            transition,
+            TransitionInfo(TRANSIT_OPEN, TransitionInfo.FLAG_NONE).apply { addChange(change) },
+            StubTransaction() /* startTransaction */,
+            StubTransaction() /* finishTransaction */)
+
+        assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isTrue()
+        assertThat(desktopTaskRepo.removeBoundsBeforeMinimize(taskId = task.taskId)).isEqualTo(
+            bounds)
     }
 
     @Test
