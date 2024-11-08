@@ -1641,6 +1641,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 (mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_TEMPORARY)
                         || mAutomaticBrightnessStrategy
                         .isTemporaryAutoBrightnessAdjustmentApplied();
+        float rampSpeed = 0;
         if (!mPendingScreenOff) {
             if (mSkipScreenOnBrightnessRamp) {
                 if (state == Display.STATE_ON) {
@@ -1742,7 +1743,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                             customAnimationRate, /* ignoreAnimationLimits = */true);
                 } else {
                     boolean isIncreasing = animateValue > currentBrightness;
-                    final float rampSpeed;
                     final boolean idle = mAutomaticBrightnessController != null
                             && mAutomaticBrightnessController.isInIdleMode();
                     if (isIncreasing && slowChange) {
@@ -1827,6 +1827,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 .getDisplayBrightnessStrategyName());
         mTempBrightnessEvent.setAutomaticBrightnessEnabled(
                 displayBrightnessState.getShouldUseAutoBrightness());
+        mTempBrightnessEvent.setSlowChange(slowChange);
+        mTempBrightnessEvent.setRampSpeed(rampSpeed);
         // Temporary is what we use during slider interactions. We avoid logging those so that
         // we don't spam logcat when the slider is being used.
         boolean tempToTempTransition =
