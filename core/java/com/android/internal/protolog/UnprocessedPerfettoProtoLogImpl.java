@@ -26,7 +26,7 @@ public class UnprocessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
     public UnprocessedPerfettoProtoLogImpl(
             @NonNull ProtoLogDataSource dataSource, @NonNull IProtoLogGroup[] groups)
             throws ServiceManager.ServiceNotFoundException {
-        super(dataSource, () -> {}, groups);
+        super(dataSource, (instance) -> {}, groups);
         readyToLogToLogcat();
     }
 

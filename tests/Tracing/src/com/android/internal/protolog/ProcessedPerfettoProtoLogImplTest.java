@@ -99,12 +99,11 @@ public class ProcessedPerfettoProtoLogImplTest {
     private static ProtoLogDataSource sTestDataSource;
     private static PerfettoProtoLogImpl sProtoLog;
     private static Protolog.ProtoLogViewerConfig.Builder sViewerConfigBuilder;
-    private static Runnable sCacheUpdater;
+    private static ProtoLogCacheUpdater sCacheUpdater;
 
     private static ProtoLogViewerConfigReader sReader;
 
-    public ProcessedPerfettoProtoLogImplTest() throws IOException {
-    }
+    public ProcessedPerfettoProtoLogImplTest() throws IOException { }
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -157,7 +156,7 @@ public class ProcessedPerfettoProtoLogImplTest {
                 .thenAnswer(it -> new AutoClosableProtoInputStream(
                         sViewerConfigBuilder.build().toByteArray()));
 
-        sCacheUpdater = () -> {};
+        sCacheUpdater = (instance) -> {};
         sReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
         sTestDataSource = new ProtoLogDataSource(TEST_PROTOLOG_DATASOURCE_NAME);
         DataSourceParams params =
@@ -183,7 +182,7 @@ public class ProcessedPerfettoProtoLogImplTest {
 
         sProtoLog = new ProcessedPerfettoProtoLogImpl(sTestDataSource,
                 MOCK_VIEWER_CONFIG_FILE, viewerConfigInputStreamProvider, sReader,
-                () -> sCacheUpdater.run(), TestProtoLogGroup.values(),
+                (instance) -> sCacheUpdater.update(instance), TestProtoLogGroup.values(),
                 sProtoLogConfigurationService);
         sProtoLog.enable();
     }
@@ -613,7 +612,7 @@ public class ProcessedPerfettoProtoLogImplTest {
     @Test
     public void cacheIsUpdatedWhenTracesStartAndStop() {
         final AtomicInteger cacheUpdateCallCount = new AtomicInteger(0);
-        sCacheUpdater = cacheUpdateCallCount::incrementAndGet;
+        sCacheUpdater = (instance) -> cacheUpdateCallCount.incrementAndGet();
 
         PerfettoTraceMonitor traceMonitor1 = PerfettoTraceMonitor.newBuilder()
                 .enableProtoLog(true,

@@ -56,7 +56,7 @@ public class ProtoLogImpl {
     private static TreeMap<String, IProtoLogGroup> sLogGroups;
 
     @ProtoLogToolInjected(CACHE_UPDATER)
-    private static Runnable sCacheUpdater;
+    private static ProtoLogCacheUpdater sCacheUpdater;
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
     public static void d(IProtoLogGroup group, long messageHash, int paramsMask, Object... args) {
@@ -93,7 +93,12 @@ public class ProtoLogImpl {
      * and log level.
      */
     public static boolean isEnabled(IProtoLogGroup group, LogLevel level) {
-        return getSingleInstance().isEnabled(group, level);
+        return isEnabled(getSingleInstance(), group, level);
+    }
+
+    private static boolean isEnabled(
+            IProtoLog protoLogInstance, IProtoLogGroup group, LogLevel level) {
+        return protoLogInstance.isEnabled(group, level);
     }
 
     /**
@@ -132,7 +137,7 @@ public class ProtoLogImpl {
                 sServiceInstance = createLegacyProtoLogImpl(groups);
             }
 
-            sCacheUpdater.run();
+            sCacheUpdater.update(sServiceInstance);
         }
         return sServiceInstance;
     }

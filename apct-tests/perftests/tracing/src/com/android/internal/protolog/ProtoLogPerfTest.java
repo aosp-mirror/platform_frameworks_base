@@ -117,7 +117,7 @@ public class ProtoLogPerfTest {
                 sTestDataSource,
                 MOCK_TEST_FILE_PATH,
                 () -> new AutoClosableProtoInputStream(VIEWER_CONFIG.toByteArray()),
-                () -> {},
+                (instance) -> {},
                 TestProtoLogGroup.values()
         );
     }

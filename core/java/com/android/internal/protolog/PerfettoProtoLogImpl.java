@@ -101,7 +101,7 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
     @NonNull
     protected final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     @NonNull
-    private final Runnable mCacheUpdater;
+    private final ProtoLogCacheUpdater mCacheUpdater;
 
     @NonNull
     private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
@@ -118,7 +118,7 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
 
     protected PerfettoProtoLogImpl(
             @NonNull ProtoLogDataSource dataSource,
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
         this(dataSource, cacheUpdater, groups,
                 android.tracing.Flags.clientSideProtoLogging() ?
@@ -130,7 +130,7 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
 
     protected PerfettoProtoLogImpl(
             @NonNull ProtoLogDataSource dataSource,
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups,
             @Nullable IProtoLogConfigurationService configurationService) {
         mDataSource = dataSource;
@@ -716,7 +716,7 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
         return 0;
     }
 
@@ -759,7 +759,7 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
 
         this.mTracingInstances.incrementAndGet();
 
@@ -799,7 +799,7 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
         Log.d(LOG_TAG, "Finished onTracingInstanceStop");
     }
 

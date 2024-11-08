@@ -44,7 +44,7 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
     public ProcessedPerfettoProtoLogImpl(
             @NonNull ProtoLogDataSource datasource,
             @NonNull String viewerConfigFilePath,
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
         this(datasource, viewerConfigFilePath, new ViewerConfigInputStreamProvider() {
                     @NonNull
@@ -68,7 +68,7 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
             @NonNull ProtoLogDataSource datasource,
             @NonNull String viewerConfigFilePath,
             @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
         super(datasource, cacheUpdater, groups);
 
@@ -86,7 +86,7 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
             @NonNull String viewerConfigFilePath,
             @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @NonNull ProtoLogViewerConfigReader viewerConfigReader,
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups,
             @Nullable IProtoLogConfigurationService configurationService)
             throws ServiceManager.ServiceNotFoundException {
