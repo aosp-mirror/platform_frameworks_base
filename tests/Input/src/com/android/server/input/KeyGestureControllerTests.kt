@@ -757,7 +757,31 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyEvent.KEYCODE_MINUS),
                 KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
+            ),
+            TestData(
+                "META + ALT + '-' -> Magnifier Zoom Out",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_MINUS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT,
+                intArrayOf(KeyEvent.KEYCODE_MINUS),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "META + ALT + '=' -> Magnifier Zoom In",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_EQUALS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN,
+                intArrayOf(KeyEvent.KEYCODE_EQUALS),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
         )
     }
 
@@ -770,6 +794,7 @@ class KeyGestureControllerTests {
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS,
+        com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES,
         com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
         com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS
     )
@@ -787,6 +812,7 @@ class KeyGestureControllerTests {
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS,
+        com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES,
         com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
         com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS
     )
