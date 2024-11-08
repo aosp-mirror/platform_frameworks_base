@@ -27,7 +27,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -57,7 +57,7 @@ class SettingsProxyTest : SysuiTestCase() {
     @Before
     fun setUp() {
         testScope = TestScope(testDispatcher)
-        mSettings = FakeSettingsProxy(testDispatcher)
+        mSettings = FakeSettingsProxy(testScope)
         mContentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {}
     }
 
@@ -382,15 +382,15 @@ class SettingsProxyTest : SysuiTestCase() {
         assertThat(mSettings.getFloat(TEST_SETTING, 2.5F)).isEqualTo(2.5F)
     }
 
-    private class FakeSettingsProxy(val testDispatcher: CoroutineDispatcher) : SettingsProxy {
+    private class FakeSettingsProxy(val testScope: CoroutineScope) : SettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
         private val settingToValueMap: MutableMap<String, String?> = mutableMapOf()
 
         override fun getContentResolver() = mContentResolver
 
-        override val backgroundDispatcher: CoroutineDispatcher
-            get() = testDispatcher
+        override val settingsScope: CoroutineScope
+            get() = testScope
 
         override fun getUriFor(name: String) =
             Uri.parse(StringBuilder().append("content://settings/").append(name).toString())

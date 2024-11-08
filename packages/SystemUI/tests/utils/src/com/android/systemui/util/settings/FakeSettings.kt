@@ -24,6 +24,7 @@ import android.util.Pair
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.util.settings.SettingsProxy.CurrentUserIdProvider
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -33,7 +34,7 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
     private val contentObservers = mutableMapOf<SettingsKey, MutableList<ContentObserver>>()
     private val contentObserversAllUsers = mutableMapOf<String, MutableList<ContentObserver>>()
 
-    override val backgroundDispatcher: CoroutineDispatcher
+    override val settingsScope: CoroutineScope
 
     @UserIdInt override var userId = UserHandle.USER_CURRENT
     override val currentUserProvider: CurrentUserIdProvider
@@ -43,17 +44,17 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
       by main test scope."""
     )
     constructor() {
-        backgroundDispatcher = StandardTestDispatcher(scheduler = null, name = null)
+        settingsScope = CoroutineScope(StandardTestDispatcher(scheduler = null, name = null))
         currentUserProvider = CurrentUserIdProvider { userId }
     }
 
     constructor(dispatcher: CoroutineDispatcher) {
-        backgroundDispatcher = dispatcher
+        settingsScope = CoroutineScope(dispatcher)
         currentUserProvider = CurrentUserIdProvider { userId }
     }
 
     constructor(dispatcher: CoroutineDispatcher, currentUserProvider: CurrentUserIdProvider) {
-        backgroundDispatcher = dispatcher
+        settingsScope = CoroutineScope(dispatcher)
         this.currentUserProvider = currentUserProvider
     }
 
@@ -293,8 +294,9 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         return result
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     private fun testDispatcherRunCurrent() {
-        val testDispatcher = backgroundDispatcher as? TestDispatcher
+        val testDispatcher = settingsScope.coroutineContext[CoroutineDispatcher] as? TestDispatcher
         testDispatcher?.scheduler?.runCurrent()
     }
 

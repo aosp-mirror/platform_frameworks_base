@@ -17,6 +17,7 @@
 package com.android.systemui.util.kotlin
 
 import android.os.Handler
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -85,6 +86,13 @@ class SysUICoroutinesModule {
     fun settingsBgDispatcher(@Background bgHandler: Handler): CoroutineDispatcher {
         // Handlers are guaranteed to be sequential so we use that one for now.
         return bgHandler.asCoroutineDispatcher("SettingsBg")
+    }
+
+    @Provides
+    @SysUISingleton
+    @SettingsSingleThreadBackground
+    fun settingsScope(@Background bgDispatcher: CoroutineDispatcher): CoroutineScope {
+        return CoroutineScope(bgDispatcher + newTracingContext("SettingsProxy"))
     }
 
     @Provides

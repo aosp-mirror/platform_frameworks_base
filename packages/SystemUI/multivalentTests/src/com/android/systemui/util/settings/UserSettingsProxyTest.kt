@@ -28,7 +28,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -36,7 +36,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -51,14 +50,9 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
     private var userId = MAIN_USER_ID
     private val testDispatcher = StandardTestDispatcher()
-    private var mSettings: UserSettingsProxy = FakeUserSettingsProxy({ userId }, testDispatcher)
+    private val testScope = TestScope(testDispatcher)
+    private var mSettings: UserSettingsProxy = FakeUserSettingsProxy({ userId }, testScope)
     private var mContentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {}
-    private lateinit var testScope: TestScope
-
-    @Before
-    fun setUp() {
-        testScope = TestScope(testDispatcher)
-    }
 
     @Test
     fun registerContentObserverForUser_inputString_success() =
@@ -555,7 +549,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
      */
     private class FakeUserSettingsProxy(
         override val currentUserProvider: SettingsProxy.CurrentUserIdProvider,
-        val testDispatcher: CoroutineDispatcher,
+        val testScope: CoroutineScope,
     ) : UserSettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
@@ -567,8 +561,8 @@ class UserSettingsProxyTest : SysuiTestCase() {
         override fun getUriFor(name: String) =
             Uri.parse(StringBuilder().append(URI_PREFIX).append(name).toString())
 
-        override val backgroundDispatcher: CoroutineDispatcher
-            get() = testDispatcher
+        override val settingsScope: CoroutineScope
+            get() = testScope
 
         override fun getStringForUser(name: String, userHandle: Int) =
             userIdToSettingsValueMap[userHandle]?.get(name) ?: ""
