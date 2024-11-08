@@ -56,8 +56,8 @@ class NotificationListViewModel
 constructor(
     val shelf: NotificationShelfViewModel,
     val hideListViewModel: HideListViewModel,
-    val footer: Optional<FooterViewModel>,
-    val emptyShadeViewFactory: EmptyShadeViewModel.Factory,
+    val footerViewModelFactory: FooterViewModel.Factory,
+    val emptyShadeViewModelFactory: EmptyShadeViewModel.Factory,
     val logger: Optional<NotificationLoggerViewModel>,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     notificationStackInteractor: NotificationStackInteractor,

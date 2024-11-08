@@ -31,3 +31,8 @@ val Kosmos.footerViewModel by Fixture {
         shadeInteractor = shadeInteractor,
     )
 }
+val Kosmos.footerViewModelFactory: FooterViewModel.Factory by Fixture {
+    object : FooterViewModel.Factory {
+        override fun create() = footerViewModel
+    }
+}

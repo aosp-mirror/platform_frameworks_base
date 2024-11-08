@@ -60,7 +60,6 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.data.NotificationDataLayerModule;
 import com.android.systemui.statusbar.notification.domain.NotificationDomainLayerModule;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
-import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModelModule;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
 import com.android.systemui.statusbar.notification.icon.IconManager;
@@ -109,7 +108,6 @@ import javax.inject.Provider;
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
  */
 @Module(includes = {
-        FooterViewModelModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
         NotificationDataLayerModule.class,
         NotificationDomainLayerModule.class,
