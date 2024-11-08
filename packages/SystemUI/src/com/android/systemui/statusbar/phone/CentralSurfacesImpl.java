@@ -203,7 +203,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
-import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
+import com.android.systemui.statusbar.core.StatusBarRootModernization;
 import com.android.systemui.statusbar.data.model.StatusBarMode;
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -1231,7 +1231,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         checkBarModes();
                     });
         }
-        if (!StatusBarSimpleFragment.isEnabled() && !StatusBarConnectedDisplays.isEnabled()) {
+        if (!StatusBarRootModernization.isEnabled() && !StatusBarConnectedDisplays.isEnabled()) {
             // When the flag is on, we register the fragment as a core startable and this is not
             // needed
             mStatusBarInitializer.initializeStatusBar();

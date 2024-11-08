@@ -631,9 +631,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_simple_fragment"
+    name: "status_bar_root_modernization"
     namespace: "systemui"
-    description: "Feature flag for refactoring the collapsed status bar fragment"
+    description: "Feature flag for replacing the status bar fragment with a compose root"
     bug: "364360986"
 }
 
