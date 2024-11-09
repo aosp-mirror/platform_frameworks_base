@@ -18,6 +18,7 @@ package android.nfc;
 import android.content.ComponentName;
 import android.nfc.cardemulation.ApduServiceInfo;
 import android.nfc.NdefMessage;
+import android.nfc.OemLogItems;
 import android.nfc.Tag;
 import android.os.ResultReceiver;
 
@@ -51,4 +52,5 @@ interface INfcOemExtensionCallback {
    void onNdefMessage(in Tag tag, in NdefMessage message, in ResultReceiver hasOemExecutableContent);
    void onLaunchHceAppChooserActivity(in String selectedAid, in List<ApduServiceInfo> services, in ComponentName failedComponent, in String category);
    void onLaunchHceTapAgainActivity(in ApduServiceInfo service, in String category);
+   void onLogEventNotified(in OemLogItems item);
 }
