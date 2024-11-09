@@ -8113,6 +8113,13 @@ package android.media.musicrecognition {
 
 package android.media.quality {
 
+  @FlaggedApi("android.media.tv.flags.media_quality_fw") public final class MediaQualityManager {
+    method @NonNull public java.util.List<java.lang.String> getPictureProfileAllowList();
+    method @NonNull public java.util.List<java.lang.String> getPictureProfilePackageNames();
+    method @NonNull public java.util.List<android.media.quality.PictureProfile> getPictureProfilesByPackage(@NonNull String);
+    method public void setPictureProfileAllowList(@NonNull java.util.List<java.lang.String>);
+  }
+
   public static final class PictureProfile.Builder {
     method @NonNull public android.media.quality.PictureProfile.Builder setInputId(@NonNull String);
     method @NonNull public android.media.quality.PictureProfile.Builder setPackageName(@NonNull String);

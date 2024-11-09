@@ -84,13 +84,11 @@ public final class PictureProfile implements Parcelable {
 
     /**
      * Error code for unknown errors.
-     * @hide
      */
     public static final int ERROR_UNKNOWN = 0;
 
     /**
      * Error code for missing necessary permission to handle the profiles.
-     * @hide
      */
     public static final int ERROR_NO_PERMISSION = 1;
 
@@ -99,13 +97,11 @@ public final class PictureProfile implements Parcelable {
      *
      * @see #getProfileType()
      * @see #getName()
-     * @hide
      */
     public static final int ERROR_DUPLICATE = 2;
 
     /**
      * Error code for invalid argument.
-     * @hide
      */
     public static final int ERROR_INVALID_ARGUMENT = 3;
 
@@ -114,7 +110,6 @@ public final class PictureProfile implements Parcelable {
      * list.
      *
      * @see MediaQualityManager#getPictureProfileAllowList()
-     * @hide
      */
     public static final int ERROR_NOT_ALLOWLISTED = 4;
 
@@ -291,6 +286,16 @@ public final class PictureProfile implements Parcelable {
         }
 
         /**
+         * Only used by system to assign the ID.
+         * @hide
+         */
+        @NonNull
+        public Builder setProfileId(@Nullable String id) {
+            mId = id;
+            return this;
+        }
+
+        /**
          * Sets profile type.
          *
          * @hide
@@ -300,16 +305,6 @@ public final class PictureProfile implements Parcelable {
         @NonNull
         public Builder setProfileType(@ProfileType int value) {
             mType = value;
-            return this;
-        }
-
-        /**
-         * Only used by system to assign the ID.
-         * @hide
-         */
-        @NonNull
-        public Builder setProfileId(@Nullable String id) {
-            mId = id;
             return this;
         }
 
