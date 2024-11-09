@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -286,7 +287,10 @@ private fun DragHandle(dialog: Dialog) {
     Surface(
         modifier =
             Modifier.padding(top = 16.dp, bottom = 6.dp)
-                .semantics { contentDescription = dragHandleContentDescription }
+                .semantics {
+                    contentDescription = dragHandleContentDescription
+                    hideFromAccessibility()
+                }
                 .clickable { dialog.dismiss() },
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         shape = MaterialTheme.shapes.extraLarge,

@@ -30,6 +30,7 @@ import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectedUserModel
@@ -74,6 +75,10 @@ class UserRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         tracker = FakeUserTracker()
+        context.orCreateTestableResources.addOverride(
+            R.bool.config_userSwitchingMustGoThroughLoginScreen,
+            false,
+        )
     }
 
     @Test

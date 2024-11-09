@@ -429,8 +429,9 @@ func createMergedFrameworkSystemServerExportableStubs(ctx android.LoadHookContex
 
 func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules proptools.Configurable[[]string]) {
 	props := fgProps{}
-	props.Name = proptools.StringPtr("all-modules-public-stubs-source")
-	props.Device_common_srcs = createSrcs(modules, "{.public.stubs.source}")
+	props.Name = proptools.StringPtr("all-modules-public-stubs-source-exportable")
+	transformConfigurableArray(modules, "", ".stubs.source")
+	props.Device_common_srcs = createSrcs(modules, "{.exportable}")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(android.FileGroupFactory, &props)
 }

@@ -171,7 +171,7 @@ key 143   WAKEUP
 # key 149 "KEY_PROG2"
 key 150   EXPLORER
 # key 151 "KEY_MSDOS"
-key 152   POWER
+key 152   LOCK
 # key 153 "KEY_DIRECTION"
 # key 154 "KEY_CYCLEWINDOWS"
 key 155   ENVELOPE
@@ -200,20 +200,20 @@ key 177   PAGE_UP
 key 178   PAGE_DOWN
 key 179   NUMPAD_LEFT_PAREN
 key 180   NUMPAD_RIGHT_PAREN
-# key 181 "KEY_NEW"
+key 181   NEW
 # key 182 "KEY_REDO"
-# key 183   F13
-# key 184   F14
-# key 185   F15
-# key 186   F16
-# key 187   F17
-# key 188   F18
-# key 189   F19
-# key 190   F20
-# key 191   F21
-# key 192   F22
-# key 193   F23
-# key 194   F24
+key 183   F13
+key 184   F14
+key 185   F15
+key 186   F16
+key 187   F17
+key 188   F18
+key 189   F19
+key 190   F20
+key 191   F21
+key 192   F22
+key 193   F23
+key 194   F24
 # key 195 (undefined)
 # key 196 (undefined)
 # key 197 (undefined)
@@ -225,11 +225,11 @@ key 201   MEDIA_PAUSE
 # key 203 "KEY_PROG4"
 key 204 NOTIFICATION
 # key 205 "KEY_SUSPEND"
-# key 206 "KEY_CLOSE"
+key 206   CLOSE
 key 207   MEDIA_PLAY
 key 208   MEDIA_FAST_FORWARD
 # key 209 "KEY_BASSBOOST"
-# key 210 "KEY_PRINT"
+key 210   PRINT
 # key 211 "KEY_HP"
 key 212   CAMERA
 key 213   MUSIC
@@ -328,7 +328,7 @@ key 368   LANGUAGE_SWITCH
 # key 369 "KEY_TITLE"
 key 370   CAPTIONS
 # key 371 "KEY_ANGLE"
-# key 372 "KEY_ZOOM"
+key 372   FULLSCREEN
 # key 373 "KEY_MODE"
 # key 374 "KEY_KEYBOARD"
 # key 375 "KEY_SCREEN"
@@ -425,12 +425,15 @@ key 582   VOICE_ASSIST
 # Linux KEY_ASSISTANT
 key 583   ASSIST
 key 585   EMOJI_PICKER
+key 586   DICTATE
 key 656   MACRO_1
 key 657   MACRO_2
 key 658   MACRO_3
 key 659   MACRO_4
 
 # Keys defined by HID usages
+key usage 0x010082 LOCK                      FALLBACK_USAGE_MAPPING
+key usage 0x01009B DO_NOT_DISTURB            FALLBACK_USAGE_MAPPING
 key usage 0x0c0065 SCREENSHOT                FALLBACK_USAGE_MAPPING
 key usage 0x0c0067 WINDOW                    FALLBACK_USAGE_MAPPING
 key usage 0x0c006F BRIGHTNESS_UP             FALLBACK_USAGE_MAPPING
@@ -438,12 +441,17 @@ key usage 0x0c0070 BRIGHTNESS_DOWN           FALLBACK_USAGE_MAPPING
 key usage 0x0c0079 KEYBOARD_BACKLIGHT_UP     FALLBACK_USAGE_MAPPING
 key usage 0x0c007A KEYBOARD_BACKLIGHT_DOWN   FALLBACK_USAGE_MAPPING
 key usage 0x0c007C KEYBOARD_BACKLIGHT_TOGGLE FALLBACK_USAGE_MAPPING
+key usage 0x0c00D8 DICTATE                   FALLBACK_USAGE_MAPPING
 key usage 0x0c00D9 EMOJI_PICKER              FALLBACK_USAGE_MAPPING
 key usage 0x0c0173 MEDIA_AUDIO_TRACK         FALLBACK_USAGE_MAPPING
 key usage 0x0c019C PROFILE_SWITCH            FALLBACK_USAGE_MAPPING
 key usage 0x0c019F SETTINGS                  FALLBACK_USAGE_MAPPING
 key usage 0x0c01A2 ALL_APPS                  FALLBACK_USAGE_MAPPING
+key usage 0x0c0201 NEW                       FALLBACK_USAGE_MAPPING
+key usage 0x0c0203 CLOSE                     FALLBACK_USAGE_MAPPING
+key usage 0x0c0208 PRINT                     FALLBACK_USAGE_MAPPING
 key usage 0x0c0227 REFRESH                   FALLBACK_USAGE_MAPPING
+key usage 0x0c0232 FULLSCREEN                FALLBACK_USAGE_MAPPING
 key usage 0x0c029D LANGUAGE_SWITCH           FALLBACK_USAGE_MAPPING
 key usage 0x0c029F RECENT_APPS               FALLBACK_USAGE_MAPPING
 key usage 0x0c02A2 ALL_APPS                  FALLBACK_USAGE_MAPPING

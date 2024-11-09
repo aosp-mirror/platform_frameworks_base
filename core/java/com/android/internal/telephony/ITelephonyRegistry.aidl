@@ -29,6 +29,7 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseDataConnectionState;
+import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
@@ -125,8 +126,10 @@ interface ITelephonyRegistry {
     void notifyCarrierRoamingNtnModeChanged(int subId, in boolean active);
     void notifyCarrierRoamingNtnEligibleStateChanged(int subId, in boolean eligible);
     void notifyCarrierRoamingNtnAvailableServicesChanged(int subId, in int[] availableServices);
+    void notifyCarrierRoamingNtnSignalStrengthChanged(int subId, in NtnSignalStrength ntnSignalStrength);
 
     void addSatelliteStateChangeListener(ISatelliteStateChangeListener listener, String pkg, String featureId);
     void removeSatelliteStateChangeListener(ISatelliteStateChangeListener listener, String pkg);
     void notifySatelliteStateChanged(boolean isEnabled);
+
 }

@@ -119,7 +119,6 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accounts.AccountManagerService;
-import com.android.server.adaptiveauth.AdaptiveAuthService;
 import com.android.server.adb.AdbService;
 import com.android.server.alarm.AlarmManagerService;
 import com.android.server.am.ActivityManagerService;
@@ -205,6 +204,7 @@ import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.NativeTombstoneManagerService;
 import com.android.server.os.SchedulingPolicyService;
+import com.android.server.os.instrumentation.DynamicInstrumentationManagerService;
 import com.android.server.pdb.PersistentDataBlockService;
 import com.android.server.people.PeopleService;
 import com.android.server.permission.access.AccessCheckingService;
@@ -249,6 +249,7 @@ import com.android.server.security.AttestationVerificationManagerService;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
+import com.android.server.security.adaptiveauthentication.AdaptiveAuthenticationService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
@@ -2650,8 +2651,8 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
-                t.traceBegin("StartAdaptiveAuthService");
-                mSystemServiceManager.startService(AdaptiveAuthService.class);
+                t.traceBegin("StartAdaptiveAuthenticationService");
+                mSystemServiceManager.startService(AdaptiveAuthenticationService.class);
                 t.traceEnd();
             }
 
@@ -2889,6 +2890,13 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("startTracingServiceProxy");
         mSystemServiceManager.startService(TracingServiceProxy.class);
         t.traceEnd();
+
+        // UprobeStats DynamicInstrumentationManager
+        if (com.android.art.flags.Flags.executableMethodFileOffsets()) {
+            t.traceBegin("StartDynamicInstrumentationManager");
+            mSystemServiceManager.startService(DynamicInstrumentationManagerService.class);
+            t.traceEnd();
+        }
 
         // It is now time to start up the app processes...
 

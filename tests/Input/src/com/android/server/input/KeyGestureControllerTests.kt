@@ -757,7 +757,31 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyEvent.KEYCODE_MINUS),
                 KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            )
+            ),
+            TestData(
+                "META + ALT + '-' -> Magnifier Zoom Out",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_MINUS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT,
+                intArrayOf(KeyEvent.KEYCODE_MINUS),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "META + ALT + '=' -> Magnifier Zoom In",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_EQUALS
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN,
+                intArrayOf(KeyEvent.KEYCODE_EQUALS),
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
         )
     }
 
@@ -770,6 +794,7 @@ class KeyGestureControllerTests {
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS,
+        com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES,
         com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
         com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS
     )
@@ -787,6 +812,7 @@ class KeyGestureControllerTests {
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG,
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG,
         com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS,
+        com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES,
         com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
         com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS
     )
@@ -995,11 +1021,28 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALCULATOR)
             ),
+            TestData(
+                "LOCK -> Lock Screen",
+                intArrayOf(KeyEvent.KEYCODE_LOCK),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN,
+                intArrayOf(KeyEvent.KEYCODE_LOCK),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "FULLSCREEN -> Maximizes a task to fit the screen",
+                intArrayOf(KeyEvent.KEYCODE_FULLSCREEN),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                intArrayOf(KeyEvent.KEYCODE_FULLSCREEN),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
         )
     }
 
     @Test
     @Parameters(method = "systemKeysTestArguments")
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
     fun testSystemKeys(test: TestData) {
         setupKeyGestureController()
         testKeyGestureInternal(test)
@@ -1029,6 +1072,9 @@ class KeyGestureControllerTests {
             KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY,
             KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY,
             KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL,
+            KeyEvent.KEYCODE_DO_NOT_DISTURB,
+            KeyEvent.KEYCODE_LOCK,
+            KeyEvent.KEYCODE_FULLSCREEN
         )
 
         val handler = KeyGestureHandler { _, _ -> false }

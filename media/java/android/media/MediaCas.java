@@ -1000,7 +1000,10 @@ public final class MediaCas implements AutoCloseable {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public boolean updateResourcePriority(int priority, int niceValue) {
-        return mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
+        if (mTunerResourceManager != null) {
+            return mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
+        }
+        return false;
     }
 
     /**
@@ -1017,7 +1020,9 @@ public final class MediaCas implements AutoCloseable {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public void setResourceHolderRetain(boolean resourceHolderRetain) {
-        mTunerResourceManager.setResourceHolderRetain(mClientId, resourceHolderRetain);
+        if (mTunerResourceManager != null) {
+            mTunerResourceManager.setResourceHolderRetain(mClientId, resourceHolderRetain);
+        }
     }
 
     IHwBinder getBinder() {

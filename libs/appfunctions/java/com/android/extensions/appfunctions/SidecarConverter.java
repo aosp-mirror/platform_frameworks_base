@@ -52,13 +52,21 @@ public final class SidecarConverter {
     @NonNull
     public static android.app.appfunctions.ExecuteAppFunctionResponse
             getPlatformExecuteAppFunctionResponse(@NonNull ExecuteAppFunctionResponse response) {
-        if (response.isSuccess()) {
-            return android.app.appfunctions.ExecuteAppFunctionResponse.newSuccess(
-                    response.getResultDocument(), response.getExtras());
-        } else {
-            return android.app.appfunctions.ExecuteAppFunctionResponse.newFailure(
-                    response.getResultCode(), response.getErrorMessage(), response.getExtras());
-        }
+        return new android.app.appfunctions.ExecuteAppFunctionResponse(
+                response.getResultDocument(), response.getExtras());
+    }
+
+    /**
+     * Converts sidecar's {@link AppFunctionException} into platform's {@link
+     * android.app.appfunctions.AppFunctionException}
+     *
+     * @hide
+     */
+    @NonNull
+    public static android.app.appfunctions.AppFunctionException
+            getPlatformAppFunctionException(@NonNull AppFunctionException exception) {
+        return new android.app.appfunctions.AppFunctionException(
+                exception.getErrorCode(), exception.getErrorMessage(), exception.getExtras());
     }
 
     /**
@@ -86,12 +94,19 @@ public final class SidecarConverter {
     @NonNull
     public static ExecuteAppFunctionResponse getSidecarExecuteAppFunctionResponse(
             @NonNull android.app.appfunctions.ExecuteAppFunctionResponse response) {
-        if (response.isSuccess()) {
-            return ExecuteAppFunctionResponse.newSuccess(
-                    response.getResultDocument(), response.getExtras());
-        } else {
-            return ExecuteAppFunctionResponse.newFailure(
-                    response.getResultCode(), response.getErrorMessage(), response.getExtras());
-        }
+        return new ExecuteAppFunctionResponse(response.getResultDocument(), response.getExtras());
+    }
+
+    /**
+     * Converts platform's {@link android.app.appfunctions.AppFunctionException} into
+     * sidecar's {@link AppFunctionException}
+     *
+     * @hide
+     */
+    @NonNull
+    public static AppFunctionException getSidecarAppFunctionException(
+            @NonNull android.app.appfunctions.AppFunctionException exception) {
+        return new AppFunctionException(
+                exception.getErrorCode(), exception.getErrorMessage(), exception.getExtras());
     }
 }

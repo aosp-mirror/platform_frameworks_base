@@ -22,6 +22,7 @@ import android.os.Handler
 import android.os.looper
 import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaController
+import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionToken
 import com.android.systemui.Flags
 import com.android.systemui.graphics.imageLoader
@@ -30,7 +31,11 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.shared.mediaLogger
 import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.fakeSessionTokenFactory
+import com.android.systemui.util.concurrency.execution
 import com.google.common.collect.ImmutableList
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -46,10 +51,22 @@ var Kosmos.media3ActionFactory: Media3ActionFactory by
                 mock<MediaController>().also {
                     whenever(it.customLayout).thenReturn(customLayout)
                     whenever(it.sessionExtras).thenReturn(Bundle())
+                    whenever(it.isCommandAvailable(any())).thenReturn(true)
+                    whenever(it.isSessionCommandAvailable(any<SessionCommand>())).thenReturn(true)
                 }
             fakeMediaControllerFactory.setMedia3Controller(media3Controller)
             fakeSessionTokenFactory.setMedia3SessionToken(mock<SessionToken>())
         }
+
+        val runnableCaptor = argumentCaptor<Runnable>()
+        val handler =
+            mock<Handler> {
+                on { post(runnableCaptor.capture()) } doAnswer
+                    {
+                        runnableCaptor.lastValue.run()
+                        true
+                    }
+            }
         Media3ActionFactory(
             context = applicationContext,
             imageLoader = imageLoader,
@@ -57,7 +74,8 @@ var Kosmos.media3ActionFactory: Media3ActionFactory by
             tokenFactory = fakeSessionTokenFactory,
             logger = mediaLogger,
             looper = looper,
-            handler = Handler(looper),
+            handler = handler,
             bgScope = testScope,
+            execution = execution,
         )
     }

@@ -31,7 +31,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * Provides app functions related functionalities.
@@ -115,7 +114,9 @@ public final class AppFunctionManager {
             @NonNull ExecuteAppFunctionRequest sidecarRequest,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CancellationSignal cancellationSignal,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
+            @NonNull
+                    OutcomeReceiver<ExecuteAppFunctionResponse, AppFunctionException>
+                            callback) {
         Objects.requireNonNull(sidecarRequest);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
@@ -126,10 +127,20 @@ public final class AppFunctionManager {
                 platformRequest,
                 executor,
                 cancellationSignal,
-                (platformResponse) -> {
-                    callback.accept(
-                            SidecarConverter.getSidecarExecuteAppFunctionResponse(
-                                    platformResponse));
+                new OutcomeReceiver<>() {
+                    @Override
+                    public void onResult(
+                            android.app.appfunctions.ExecuteAppFunctionResponse result) {
+                        callback.onResult(
+                                SidecarConverter.getSidecarExecuteAppFunctionResponse(result));
+                    }
+
+                    @Override
+                    public void onError(
+                            android.app.appfunctions.AppFunctionException exception) {
+                        callback.onError(
+                                SidecarConverter.getSidecarAppFunctionException(exception));
+                    }
                 });
     }
 

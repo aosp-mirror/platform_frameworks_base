@@ -30,20 +30,22 @@ import android.media.quality.SoundProfile;
  */
 interface IMediaQualityManager {
     PictureProfile createPictureProfile(in PictureProfile pp);
-    void updatePictureProfile(in long id, in PictureProfile pp);
-    void removePictureProfile(in long id);
-    PictureProfile getPictureProfileById(in long id);
+    void updatePictureProfile(in String id, in PictureProfile pp);
+    void removePictureProfile(in String id);
+    PictureProfile getPictureProfile(in int type, in String name);
     List<PictureProfile> getPictureProfilesByPackage(in String packageName);
     List<PictureProfile> getAvailablePictureProfiles();
-    List<PictureProfile> getAllPictureProfiles();
+    List<String> getPictureProfilePackageNames();
+    List<String> getPictureProfileAllowList();
+    void setPictureProfileAllowList(in List<String> packages);
 
     SoundProfile createSoundProfile(in SoundProfile pp);
-    void updateSoundProfile(in long id, in SoundProfile pp);
-    void removeSoundProfile(in long id);
-    SoundProfile getSoundProfileById(in long id);
+    void updateSoundProfile(in String id, in SoundProfile pp);
+    void removeSoundProfile(in String id);
+    SoundProfile getSoundProfileById(in String id);
     List<SoundProfile> getSoundProfilesByPackage(in String packageName);
     List<SoundProfile> getAvailableSoundProfiles();
-    List<SoundProfile> getAllSoundProfiles();
+    List<String> getSoundProfilePackageNames();
 
     void registerPictureProfileCallback(in IPictureProfileCallback cb);
     void registerSoundProfileCallback(in ISoundProfileCallback cb);

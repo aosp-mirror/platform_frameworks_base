@@ -16,7 +16,9 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.dagger.SysUISingleton
@@ -26,42 +28,40 @@ import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReaso
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus
 import com.android.systemui.flags.SystemPropertiesHelper
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.TrustInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class DeviceUnlockedInteractor
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
-    authenticationInteractor: AuthenticationInteractor,
-    deviceEntryRepository: DeviceEntryRepository,
+    private val authenticationInteractor: AuthenticationInteractor,
+    private val repository: DeviceEntryRepository,
     trustInteractor: TrustInteractor,
     faceAuthInteractor: DeviceEntryFaceAuthInteractor,
     fingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     private val powerInteractor: PowerInteractor,
     private val biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
     private val systemPropertiesHelper: SystemPropertiesHelper,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) {
+) : ExclusiveActivatable() {
 
     private val deviceUnlockSource =
         merge(
@@ -69,7 +69,7 @@ constructor(
             faceAuthInteractor.isAuthenticated
                 .filter { it }
                 .map {
-                    if (deviceEntryRepository.isBypassEnabled.value) {
+                    if (repository.isBypassEnabled.value) {
                         DeviceUnlockSource.FaceWithBypass
                     } else {
                         DeviceUnlockSource.FaceWithoutBypass
@@ -163,43 +163,59 @@ constructor(
      * proceed.
      */
     val deviceUnlockStatus: StateFlow<DeviceUnlockStatus> =
-        authenticationInteractor.authenticationMethod
-            .flatMapLatest { authMethod ->
-                if (!authMethod.isSecure) {
-                    flowOf(DeviceUnlockStatus(true, null))
-                } else if (authMethod == AuthenticationMethodModel.Sim) {
-                    // Device is locked if SIM is locked.
-                    flowOf(DeviceUnlockStatus(false, null))
-                } else {
-                    combine(
-                            powerInteractor.isAsleep,
-                            isInLockdown,
-                            keyguardTransitionInteractor
-                                .transitionValue(KeyguardState.AOD)
-                                .map { it == 1f }
-                                .distinctUntilChanged(),
-                            ::Triple,
-                        )
-                        .flatMapLatestConflated { (isAsleep, isInLockdown, isAod) ->
-                            val isForceLocked =
-                                when {
-                                    isAsleep && !isAod -> true
-                                    isInLockdown -> true
-                                    else -> false
-                                }
-                            if (isForceLocked) {
-                                flowOf(DeviceUnlockStatus(false, null))
-                            } else {
-                                deviceUnlockSource.map { DeviceUnlockStatus(true, it) }
+        repository.deviceUnlockStatus.asStateFlow()
+
+    override suspend fun onActivated(): Nothing {
+        authenticationInteractor.authenticationMethod.collectLatest { authMethod ->
+            if (!authMethod.isSecure) {
+                // Device remains unlocked as long as the authentication method is not secure.
+                Log.d(TAG, "remaining unlocked because auth method not secure")
+                repository.deviceUnlockStatus.value = DeviceUnlockStatus(true, null)
+            } else if (authMethod == AuthenticationMethodModel.Sim) {
+                // Device remains locked while SIM is locked.
+                Log.d(TAG, "remaining locked because SIM locked")
+                repository.deviceUnlockStatus.value = DeviceUnlockStatus(false, null)
+            } else {
+                try {
+                    Log.d(TAG, "started watching for lock and unlock events")
+                    coroutineScope {
+                        launch {
+                            // Unlock the device when a new unlock source is detected.
+                            deviceUnlockSource.collect {
+                                Log.d(TAG, "unlocking due to \"$it\"")
+                                repository.deviceUnlockStatus.value = DeviceUnlockStatus(true, it)
                             }
                         }
+
+                        launch {
+                            // Lock events.
+                            merge(
+                                    // Device goes to sleep.
+                                    powerInteractor.isAsleep
+                                        .distinctUntilChanged()
+                                        .filter { it }
+                                        .map { "asleep" },
+                                    // Device enters lockdown.
+                                    isInLockdown
+                                        .distinctUntilChanged()
+                                        .filter { it }
+                                        .map { "lockdown" },
+                                )
+                                .collect { reason: String ->
+                                    Log.d(TAG, "locking due to \"$reason\"")
+                                    repository.deviceUnlockStatus.value =
+                                        DeviceUnlockStatus(false, null)
+                                }
+                        }
+                    }
+                } finally {
+                    Log.d(TAG, "stopped watching for lock and unlock events")
                 }
             }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = DeviceUnlockStatus(false, null),
-            )
+        }
+
+        awaitCancellation()
+    }
 
     private fun DeviceEntryRestrictionReason?.isInLockdown(): Boolean {
         return when (this) {
@@ -226,7 +242,20 @@ constructor(
         return systemPropertiesHelper.get(SYS_BOOT_REASON_PROP) == REBOOT_MAINLINE_UPDATE
     }
 
+    /** [CoreStartable] that activates the [DeviceUnlockedInteractor]. */
+    class Activator
+    @Inject
+    constructor(
+        @Application private val applicationScope: CoroutineScope,
+        private val interactor: DeviceUnlockedInteractor,
+    ) : CoreStartable {
+        override fun start() {
+            applicationScope.launch { interactor.activate() }
+        }
+    }
+
     companion object {
+        private val TAG = "DeviceUnlockedInteractor"
         @VisibleForTesting const val SYS_BOOT_REASON_PROP = "sys.boot.reason.last"
         @VisibleForTesting const val REBOOT_MAINLINE_UPDATE = "reboot,mainline_update"
     }

@@ -104,67 +104,6 @@ class QSPreferencesRepositoryTest : SysuiTestCase() {
             }
         }
 
-    @Test
-    fun showLabels_updatesFromSharedPreferences() =
-        with(kosmos) {
-            testScope.runTest {
-                val latest by collectLastValue(underTest.showLabels)
-                assertThat(latest).isFalse()
-
-                setShowLabelsInSharedPreferences(true)
-                assertThat(latest).isTrue()
-
-                setShowLabelsInSharedPreferences(false)
-                assertThat(latest).isFalse()
-            }
-        }
-
-    @Test
-    fun showLabels_updatesFromUserChange() =
-        with(kosmos) {
-            testScope.runTest {
-                fakeUserRepository.setUserInfos(USERS)
-                val latest by collectLastValue(underTest.showLabels)
-
-                fakeUserRepository.setSelectedUserInfo(PRIMARY_USER)
-                setShowLabelsInSharedPreferences(false)
-
-                fakeUserRepository.setSelectedUserInfo(ANOTHER_USER)
-                setShowLabelsInSharedPreferences(true)
-
-                fakeUserRepository.setSelectedUserInfo(PRIMARY_USER)
-                assertThat(latest).isFalse()
-            }
-        }
-
-    @Test
-    fun setShowLabels_inSharedPreferences() {
-        underTest.setShowLabels(false)
-        assertThat(getShowLabelsFromSharedPreferences(true)).isFalse()
-
-        underTest.setShowLabels(true)
-        assertThat(getShowLabelsFromSharedPreferences(false)).isTrue()
-    }
-
-    @Test
-    fun setShowLabels_forDifferentUser() =
-        with(kosmos) {
-            testScope.runTest {
-                fakeUserRepository.setUserInfos(USERS)
-
-                fakeUserRepository.setSelectedUserInfo(PRIMARY_USER)
-                underTest.setShowLabels(false)
-                assertThat(getShowLabelsFromSharedPreferences(true)).isFalse()
-
-                fakeUserRepository.setSelectedUserInfo(ANOTHER_USER)
-                underTest.setShowLabels(true)
-                assertThat(getShowLabelsFromSharedPreferences(false)).isTrue()
-
-                fakeUserRepository.setSelectedUserInfo(PRIMARY_USER)
-                assertThat(getShowLabelsFromSharedPreferences(true)).isFalse()
-            }
-        }
-
     private fun getSharedPreferences(): SharedPreferences =
         with(kosmos) {
             return userFileManager.getSharedPreferences(

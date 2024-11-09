@@ -213,6 +213,8 @@
     <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="gpu_service" />
     <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="keystore" />
 
+    <assign-permission name="android.permission.DYNAMIC_INSTRUMENTATION" uid="uprobestats" />
+
     <split-permission name="android.permission.ACCESS_FINE_LOCATION">
         <new-permission name="android.permission.ACCESS_COARSE_LOCATION" />
     </split-permission>

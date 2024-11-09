@@ -8524,6 +8524,16 @@
                 android:protectionLevel="signature|privileged"
                 android:featureFlag="com.android.tradeinmode.flags.enable_trade_in_mode" />
 
+    <!-- @SystemApi
+        @FlaggedApi(com.android.art.flags.Flags.FLAG_EXECUTABLE_METHOD_FILE_OFFSETS)
+        Ability to read program metadata and attach dynamic instrumentation.
+        <p>Protection level: signature
+        @hide
+    -->
+    <permission android:name="android.permission.DYNAMIC_INSTRUMENTATION"
+                android:protectionLevel="signature"
+                android:featureFlag="com.android.art.flags.executable_method_file_offsets" />
+
     <!--
         @TestApi
         Signature permission reserved for testing. This should never be used to

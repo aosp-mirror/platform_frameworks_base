@@ -836,14 +836,21 @@ public abstract class WMShellModule {
     @Provides
     static Optional<DesktopImmersiveController> provideDesktopImmersiveController(
             Context context,
+            ShellInit shellInit,
             Transitions transitions,
             @DynamicOverride DesktopRepository desktopRepository,
             DisplayController displayController,
-            ShellTaskOrganizer shellTaskOrganizer) {
+            ShellTaskOrganizer shellTaskOrganizer,
+            ShellCommandHandler shellCommandHandler) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.of(
                     new DesktopImmersiveController(
-                            transitions, desktopRepository, displayController, shellTaskOrganizer));
+                            shellInit,
+                            transitions,
+                            desktopRepository,
+                            displayController,
+                            shellTaskOrganizer,
+                            shellCommandHandler));
         }
         return Optional.empty();
     }
