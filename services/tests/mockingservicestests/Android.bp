@@ -134,6 +134,7 @@ android_ravenwood_test {
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "services.core",
+        "servicestests-utils-mockito-extended",
     ],
     srcs: [
         "src/com/android/server/am/BroadcastRecordTest.java",
