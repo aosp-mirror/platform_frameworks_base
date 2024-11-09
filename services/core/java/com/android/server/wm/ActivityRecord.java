@@ -254,6 +254,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -10307,6 +10308,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void adjustPictureInPictureParamsIfNeeded(Rect windowBounds) {
         if (pictureInPictureArgs != null && pictureInPictureArgs.hasSourceBoundsHint()) {
             pictureInPictureArgs.getSourceRectHint().offset(windowBounds.left, windowBounds.top);
+        }
+
+        if (android.app.Flags.enableTvImplicitEnterPipRestriction()) {
+            PackageManager pm = mAtmService.mContext.getPackageManager();
+            if (pictureInPictureArgs.isAutoEnterEnabled()
+                    && pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                    && pm.checkPermission(Manifest.permission.TV_IMPLICIT_ENTER_PIP, packageName)
+                    == PackageManager.PERMISSION_DENIED) {
+                Log.i(TAG,
+                        "Auto-enter PiP only allowed on TV if android.permission"
+                                + ".TV_IMPLICIT_ENTER_PIP permission is held by the app.");
+                PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
+                builder.setAutoEnterEnabled(false);
+                pictureInPictureArgs.copyOnlySet(builder.build());
+            }
         }
     }
 

@@ -51,7 +51,7 @@ flag {
     is_exported: true
     namespace: "media_tv"
     description: "Enables the following type constant in MediaRoute2Info: LINE_ANALOG, LINE_DIGITAL, AUX_LINE"
-    bug: "301713440"
+    bug: "375691732"
 }
 
 flag {

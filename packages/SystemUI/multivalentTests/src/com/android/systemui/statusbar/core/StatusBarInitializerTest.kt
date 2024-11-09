@@ -23,7 +23,6 @@ import android.platform.test.annotations.EnableFlags
 import android.view.ViewGroup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
@@ -81,21 +80,21 @@ class StatusBarInitializerTest : SysuiTestCase() {
         )
 
     @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    fun simpleFragment_startsFromCoreStartable() {
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME)
+    fun flagOn_startsFromCoreStartable() {
         underTest.start()
         assertThat(underTest.initialized).isTrue()
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    fun simpleFragment_throwsIfInitializeIsCalled() {
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME)
+    fun flagOn_throwsIfInitializeIsCalled() {
         assertThrows(IllegalStateException::class.java) { underTest.initializeStatusBar() }
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    fun simpleFragment_flagEnabled_doesNotCreateFragment() {
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME)
+    fun flagOn_flagEnabled_doesNotCreateFragment() {
         underTest.start()
 
         verify(fragmentManager, never()).beginTransaction()
@@ -103,14 +102,14 @@ class StatusBarInitializerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
+    @DisableFlags(StatusBarRootModernization.FLAG_NAME)
     fun flagOff_startCalled_stillInitializes() {
         underTest.start()
         assertThat(underTest.initialized).isTrue()
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
+    @DisableFlags(StatusBarRootModernization.FLAG_NAME)
     fun flagOff_doesNotThrowIfInitializeIsCalled() {
         underTest.initializeStatusBar()
         assertThat(underTest.initialized).isTrue()

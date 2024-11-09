@@ -936,6 +936,28 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun saveBoundsBeforeMinimize_boundsSavedByTaskId() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+
+        repo.saveBoundsBeforeMinimize(taskId, bounds)
+
+        assertThat(repo.removeBoundsBeforeMinimize(taskId)).isEqualTo(bounds)
+    }
+
+    @Test
+    fun removeBoundsBeforeMinimize_returnsNullAfterBoundsRemoved() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeMinimize(taskId, bounds)
+        repo.removeBoundsBeforeMinimize(taskId)
+
+        val boundsBeforeMinimize = repo.removeBoundsBeforeMinimize(taskId)
+
+        assertThat(boundsBeforeMinimize).isNull()
+    }
+
+    @Test
     fun getExpandedTasksOrdered_returnsFreeformTasksInCorrectOrder() {
         repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 3, isVisible = true)
         repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 2, isVisible = true)

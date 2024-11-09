@@ -1,5 +1,6 @@
 package android.app.assist;
 
+import android.annotation.FlaggedApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.Intent;
@@ -15,6 +16,20 @@ import android.os.Parcelable;
  * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
  */
 public class AssistContent implements Parcelable {
+    /**
+     * Extra for a {@link Bundle} that provides contextual AppFunction's information about the
+     * content currently being viewed in the application.
+     * <p>
+     * This extra can be optionally supplied in the {@link AssistContent#getExtras()} bundle.
+     * <p>
+     * The schema of the {@link Bundle} in this extra is defined in the AppFunction SDK.
+     *
+     * @see android.app.appfunctions.AppFunctionManager
+     */
+    @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final String EXTRA_APP_FUNCTION_DATA =
+            "android.app.assist.extra.APP_FUNCTION_DATA";
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mIsAppProvidedIntent = false;
     private boolean mIsAppProvidedWebUri = false;

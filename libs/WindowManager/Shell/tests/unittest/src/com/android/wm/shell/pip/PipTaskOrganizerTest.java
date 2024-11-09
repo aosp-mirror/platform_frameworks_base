@@ -47,6 +47,7 @@ import android.window.WindowContainerToken;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.MockSurfaceControlHelper;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
@@ -61,6 +62,7 @@ import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -90,6 +92,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
     @Mock private Optional<SplitScreenController> mMockOptionalSplitScreen;
+    @Mock private Optional<DesktopRepository> mMockOptionalDesktopRepository;
+    @Mock private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
     @Mock private PipParamsChangedForwarder mMockPipParamsChangedForwarder;
     private TestShellExecutor mMainExecutor;
@@ -120,8 +124,10 @@ public class PipTaskOrganizerTest extends ShellTestCase {
                 mPipBoundsAlgorithm, mMockPhonePipMenuController, mMockPipAnimationController,
                 mMockPipSurfaceTransactionHelper, mMockPipTransitionController,
                 mMockPipParamsChangedForwarder, mMockOptionalSplitScreen,
-                Optional.empty() /* pipPerfHintControllerOptional */, mMockDisplayController,
-                mMockPipUiEventLogger, mMockShellTaskOrganizer, mMainExecutor);
+                Optional.empty() /* pipPerfHintControllerOptional */,
+                mMockOptionalDesktopRepository, mRootTaskDisplayAreaOrganizer,
+                mMockDisplayController, mMockPipUiEventLogger, mMockShellTaskOrganizer,
+                mMainExecutor);
         mMainExecutor.flushAll();
         preparePipTaskOrg();
         preparePipSurfaceTransactionHelper();

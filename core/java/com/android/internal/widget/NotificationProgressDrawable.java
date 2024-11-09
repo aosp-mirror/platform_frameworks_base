@@ -63,6 +63,7 @@ public final class NotificationProgressDrawable extends Drawable {
 
     private final ArrayList<Part> mParts = new ArrayList<>();
 
+    private final RectF mSegRectF = new RectF();
     private final Rect mPointRect = new Rect();
     private final RectF mPointRectF = new RectF();
 
@@ -198,22 +199,42 @@ public final class NotificationProgressDrawable extends Drawable {
                         mState.mSegSegGap, x + segWidth, totalWidth);
                 final float end = x + segWidth - endOffset;
 
-                // Transparent is not allowed (and also is the default in the data), so use that
-                // as a sentinel to be replaced by default
-                mStrokePaint.setColor(segment.mColor != Color.TRANSPARENT ? segment.mColor
-                        : mState.mStrokeColor);
-                mDashedStrokePaint.setColor(segment.mColor != Color.TRANSPARENT ? segment.mColor
-                        : mState.mFadedStrokeColor);
-
-                // Leave space for the rounded line cap which extends beyond start/end.
-                final float capWidth = mStrokePaint.getStrokeWidth() / 2F;
-
-                canvas.drawLine(start + capWidth, centerY, end - capWidth, centerY,
-                        segment.mDashed ? mDashedStrokePaint : mStrokePaint);
-
                 // Advance the current position to account for the segment's fraction of the total
                 // width (ignoring offset and padding)
                 x += segWidth;
+
+                // No space left to draw the segment
+                if (start > end) continue;
+
+                if (segment.mDashed) {
+                    // No caps when the segment is dashed.
+
+                    mDashedStrokePaint.setColor(segment.mColor != Color.TRANSPARENT ? segment.mColor
+                            : mState.mFadedStrokeColor);
+                    canvas.drawLine(start, centerY, end, centerY, mDashedStrokePaint);
+                } else if (end - start < mState.mStrokeWidth) {
+                    // Not enough segment length to draw the caps
+
+                    final float rad = (end - start) / 2F;
+                    final float capWidth = mStrokePaint.getStrokeWidth() / 2F;
+
+                    mFillPaint.setColor(segment.mColor != Color.TRANSPARENT ? segment.mColor
+                            : mState.mStrokeColor);
+
+                    mSegRectF.set(start, centerY - capWidth, end, centerY + capWidth);
+                    canvas.drawRoundRect(mSegRectF, rad, rad, mFillPaint);
+                } else {
+                    // Leave space for the rounded line cap which extends beyond start/end.
+                    final float capWidth = mStrokePaint.getStrokeWidth() / 2F;
+
+                    // Transparent is not allowed (and also is the default in the data), so use that
+                    // as a sentinel to be replaced by default
+                    mStrokePaint.setColor(segment.mColor != Color.TRANSPARENT ? segment.mColor
+                            : mState.mStrokeColor);
+
+                    canvas.drawLine(start + capWidth, centerY, end - capWidth, centerY,
+                            mStrokePaint);
+                }
             } else if (part instanceof Point point) {
                 final float pointWidth = 2 * pointRadius;
                 float start = x - pointRadius;
@@ -232,7 +253,7 @@ public final class NotificationProgressDrawable extends Drawable {
                 } else {
                     // TODO: b/367804171 - actually use a vector asset for the default point
                     //  rather than drawing it as a box?
-                    mPointRectF.set(mPointRect);
+                    mPointRectF.set(start, centerY - pointRadius, end, centerY + pointRadius);
                     final float inset = mState.mPointRectInset;
                     final float cornerRadius = mState.mPointRectCornerRadius;
                     mPointRectF.inset(inset, inset);

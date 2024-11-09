@@ -886,7 +886,7 @@ interface ITelephony {
     /**
     *  @return true if the ImsService to bind to for the slot id specified was set, false otherwise.
     */
-    boolean setBoundImsServiceOverride(int slotIndex, boolean isCarrierService,
+    boolean setBoundImsServiceOverride(int slotIndex, int userId, boolean isCarrierService,
             in int[] featureTypes, in String packageName);
 
     /**

@@ -979,14 +979,16 @@ static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong transactionObj,
 
 static void nativeSetInputWindowInfo(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jobject inputWindow) {
+    if (!inputWindow) {
+        jniThrowNullPointerException(env, "InputWindowHandle is null");
+        return;
+    }
+
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
-    sp<NativeInputWindowHandle> handle = android_view_InputWindowHandle_getHandle(
-            env, inputWindow);
-    handle->updateInfo();
-
+    sp<gui::WindowInfoHandle> info = android_view_InputWindowHandle_getHandle(env, inputWindow);
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->setInputWindowInfo(ctrl, *handle->getInfo());
+    transaction->setInputWindowInfo(ctrl, std::move(info));
 }
 
 static void nativeAddWindowInfosReportedListener(JNIEnv* env, jclass clazz, jlong transactionObj,

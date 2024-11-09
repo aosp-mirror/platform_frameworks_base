@@ -18,10 +18,10 @@ package {
 }
 
 java_sdk_library {
-    name: "com.google.android.appfunctions.sidecar",
+    name: "com.android.extensions.appfunctions",
     owner: "google",
     srcs: ["java/**/*.java"],
-    api_packages: ["com.google.android.appfunctions.sidecar"],
+    api_packages: ["com.android.extensions.appfunctions"],
     dex_preopt: {
         enabled: false,
     },
@@ -31,9 +31,9 @@ java_sdk_library {
 }
 
 prebuilt_etc {
-    name: "appfunctions.sidecar.xml",
+    name: "appfunctions.extension.xml",
     system_ext_specific: true,
     sub_dir: "permissions",
-    src: "appfunctions.sidecar.xml",
+    src: "appfunctions.extension.xml",
     filename_from_src: true,
 }

@@ -646,9 +646,9 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         int address = message.getSource();
         int type = message.getParams()[2];
 
-        if (!ActiveSource.of(address, path).equals(getActiveSource())) {
-            HdmiLogger.debug("Check if a new device is connected to the active path");
-            handleNewDeviceAtTheTailOfActivePath(path);
+        if (getActiveSource().logicalAddress != address && getActivePath() == path) {
+            HdmiLogger.debug("New logical address detected on the current active path.");
+            startRoutingControl(path, path, null);
         }
         startNewDeviceAction(ActiveSource.of(address, path), type);
         return Constants.HANDLED;

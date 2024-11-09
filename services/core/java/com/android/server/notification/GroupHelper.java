@@ -788,6 +788,20 @@ public class GroupHelper {
                 return;
             }
 
+            // Check if summary & child notifications are not part of the same section/bundle
+            // Needs a check here if notification was bundled while enqueued
+            if (notificationRegroupOnClassification()
+                    && android.service.notification.Flags.notificationClassification()) {
+                if (isGroupChildBundled(record, summaryByGroupKey)) {
+                    if (DEBUG) {
+                        Slog.v(TAG, "isGroupChildInDifferentBundleThanSummary: " + record);
+                    }
+                    moveNotificationsToNewSection(record.getUserId(), pkgName,
+                            List.of(new NotificationMoveOp(record, null, fullAggregateGroupKey)));
+                    return;
+                }
+            }
+
             // scenario 3: sparse/singleton groups
             if (Flags.notificationForceGroupSingletons()) {
                 try {
@@ -798,6 +812,27 @@ public class GroupHelper {
                 }
             }
         }
+    }
+
+    private static boolean isGroupChildBundled(final NotificationRecord record,
+            final Map<String, NotificationRecord> summaryByGroupKey) {
+        final StatusBarNotification sbn = record.getSbn();
+        final String groupKey = record.getSbn().getGroupKey();
+
+        if (!sbn.isAppGroup()) {
+            return false;
+        }
+
+        if (record.getNotification().isGroupSummary()) {
+            return false;
+        }
+
+        final NotificationRecord summary = summaryByGroupKey.get(groupKey);
+        if (summary == null) {
+            return false;
+        }
+
+        return NotificationChannel.SYSTEM_RESERVED_IDS.contains(record.getChannel().getId());
     }
 
     /**
@@ -1598,7 +1633,7 @@ public class GroupHelper {
         final int mSummaryId;
         private final Predicate<NotificationRecord> mSectionChecker;
 
-        public NotificationSectioner(String name, int summaryId,
+        private NotificationSectioner(String name, int summaryId,
                 Predicate<NotificationRecord> sectionChecker) {
             mName = name;
             mSummaryId = summaryId;

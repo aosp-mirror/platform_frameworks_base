@@ -4463,6 +4463,18 @@
                 android:description="@string/permdesc_hideOverlayWindows"
                 android:protectionLevel="normal" />
 
+    <!-- Allows an app to enter Picture-in-Picture mode when the user is not explicitly requesting
+        it. This includes using {@link PictureInPictureParams.Builder#setAutoEnterEnabled} as well
+        as lifecycle methods such as {@link Activity#onUserLeaveHint} and {@link Activity#onPause}
+        to enter PiP when the user leaves the app.
+        This permission should only be used for certain PiP
+        <a href="{@docRoot}training/tv/get-started/multitasking#usage-types">usage types</a>.
+        @FlaggedApi(android.app.Flags.FLAG_ENABLE_TV_IMPLICIT_ENTER_PIP_RESTRICTION)
+     -->
+    <permission android:name="android.permission.TV_IMPLICIT_ENTER_PIP"
+        android:protectionLevel="normal"
+        android:featureFlag="android.app.enable_tv_implicit_enter_pip_restriction" />
+
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->
     <!-- ================================== -->
@@ -8511,6 +8523,16 @@
     <permission android:name="android.permission.ENTER_TRADE_IN_MODE"
                 android:protectionLevel="signature|privileged"
                 android:featureFlag="com.android.tradeinmode.flags.enable_trade_in_mode" />
+
+    <!-- @SystemApi
+        @FlaggedApi(com.android.art.flags.Flags.FLAG_EXECUTABLE_METHOD_FILE_OFFSETS)
+        Ability to read program metadata and attach dynamic instrumentation.
+        <p>Protection level: signature
+        @hide
+    -->
+    <permission android:name="android.permission.DYNAMIC_INSTRUMENTATION"
+                android:protectionLevel="signature"
+                android:featureFlag="com.android.art.flags.executable_method_file_offsets" />
 
     <!--
         @TestApi

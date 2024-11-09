@@ -23,7 +23,10 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.user.data.repository.UserRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business logic to for the logout. */
 @SysUISingleton
@@ -33,11 +36,22 @@ constructor(
     private val userRepository: UserRepository,
     @Application private val applicationScope: CoroutineScope,
 ) {
-    val isLogoutEnabled: StateFlow<Boolean> = userRepository.isSecondaryUserLogoutEnabled
+
+    val isLogoutEnabled: StateFlow<Boolean> =
+        combine(
+                userRepository.isSecondaryUserLogoutEnabled,
+                userRepository.isLogoutToSystemUserEnabled,
+                Boolean::or,
+            )
+            .stateIn(applicationScope, SharingStarted.Eagerly, false)
 
     fun logOut() {
-        if (userRepository.isSecondaryUserLogoutEnabled.value) {
-            applicationScope.launch { userRepository.logOutSecondaryUser() }
+        applicationScope.launch {
+            if (userRepository.isSecondaryUserLogoutEnabled.value) {
+                userRepository.logOutSecondaryUser()
+            } else if (userRepository.isLogoutToSystemUserEnabled.value) {
+                userRepository.logOutToSystemUser()
+            }
         }
     }
 }
