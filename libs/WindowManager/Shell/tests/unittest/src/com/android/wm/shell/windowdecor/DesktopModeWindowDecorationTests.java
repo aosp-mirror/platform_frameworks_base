@@ -262,8 +262,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
         when(mMockHandleMenuFactory.create(any(), any(), anyInt(), any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(),
-                anyInt(), anyInt()))
+                anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), any(),
+                anyInt(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
         when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
@@ -1440,9 +1440,30 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
+    public void browserApp_webUriUsedForBrowserApp() {
+        // Make {@link AppToWebUtils#isBrowserApp} return true
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.handleAllWebDataURI = true;
+        resolveInfo.activityInfo = createActivityInfo();
+        when(mMockPackageManager.queryIntentActivitiesAsUser(any(), anyInt(), anyInt()))
+                .thenReturn(List.of(resolveInfo));
+
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
+        final DesktopModeWindowDecoration decor = createWindowDecoration(
+                taskInfo, TEST_URI1 /* captured link */, TEST_URI2 /* web uri */,
+                TEST_URI3 /* generic link */);
+
+        // Verify web uri used for browser applications
+        createHandleMenu(decor);
+        verifyHandleMenuCreated(TEST_URI2);
+    }
+
+
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
         verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
-                any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
+                any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 argThat(intent -> (uri == null && intent == null) || intent.getData().equals(uri)),
                 anyInt(), anyInt(), anyInt(), anyInt());
     }

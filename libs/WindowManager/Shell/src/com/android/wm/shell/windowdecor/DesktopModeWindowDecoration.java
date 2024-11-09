@@ -628,13 +628,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     @Nullable
     private Intent getBrowserLink() {
-        // Do not show browser link in browser applications
-        final ComponentName baseActivity = mTaskInfo.baseActivity;
-        if (baseActivity != null && AppToWebUtils.isBrowserApp(mContext,
-                baseActivity.getPackageName(), mUserContext.getUserId())) {
-            return null;
-        }
-
         final Uri browserLink;
         // If the captured link is available and has not expired, return the captured link.
         // Otherwise, return the generic link which is set to null if a generic link is unavailable.
@@ -649,6 +642,18 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (browserLink == null) return null;
         return AppToWebUtils.getBrowserIntent(browserLink, mContext.getPackageManager());
 
+    }
+
+    @Nullable
+    private Intent getAppLink() {
+        return mWebUri == null ? null
+                : AppToWebUtils.getAppIntent(mWebUri, mContext.getPackageManager());
+    }
+
+    private boolean isBrowserApp() {
+        final ComponentName baseActivity = mTaskInfo.baseActivity;
+        return baseActivity != null && AppToWebUtils.isBrowserApp(mContext,
+                baseActivity.getPackageName(), mUserContext.getUserId());
     }
 
     UserHandle getUser() {
@@ -1368,6 +1373,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .shouldShowChangeAspectRatioButton(mTaskInfo);
         final boolean inDesktopImmersive = mDesktopRepository
                 .isTaskInFullImmersiveState(mTaskInfo.taskId);
+        final boolean isBrowserApp = isBrowserApp();
         mHandleMenu = mHandleMenuFactory.create(
                 this,
                 mWindowManagerWrapper,
@@ -1379,7 +1385,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 supportsMultiInstance,
                 shouldShowManageWindowsButton,
                 shouldShowChangeAspectRatioButton,
-                getBrowserLink(),
+                isBrowserApp,
+                isBrowserApp ? getAppLink() : getBrowserLink(),
                 mResult.mCaptionWidth,
                 mResult.mCaptionHeight,
                 mResult.mCaptionX,
