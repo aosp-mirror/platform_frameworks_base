@@ -25,6 +25,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 
 val Kosmos.deviceUnlockedInteractor by Fixture {
     DeviceUnlockedInteractor(
@@ -36,6 +37,7 @@ val Kosmos.deviceUnlockedInteractor by Fixture {
             powerInteractor = powerInteractor,
             biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
             systemPropertiesHelper = fakeSystemPropertiesHelper,
+            userAwareSecureSettingsRepository = userAwareSecureSettingsRepository,
         )
         .apply { activateIn(testScope) }
 }

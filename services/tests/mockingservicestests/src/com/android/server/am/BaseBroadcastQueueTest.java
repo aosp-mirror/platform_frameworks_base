@@ -41,6 +41,7 @@ import android.os.TestLooperManager;
 import android.os.UserHandle;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.SparseArray;
 
@@ -97,6 +98,9 @@ public abstract class BaseBroadcastQueueTest {
             .spyStatic(ProcessList.class)
             .build();
 
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
@@ -112,6 +116,8 @@ public abstract class BaseBroadcastQueueTest {
     AlarmManagerInternal mAlarmManagerInt;
     @Mock
     ProcessList mProcessList;
+    @Mock
+    PlatformCompat mPlatformCompat;
 
     @Mock
     AppStartInfoTracker mAppStartInfoTracker;
@@ -178,6 +184,11 @@ public abstract class BaseBroadcastQueueTest {
         doReturn(false).when(mSkipPolicy).disallowBackgroundStart(any());
 
         doReturn(mAppStartInfoTracker).when(mProcessList).getAppStartInfoTracker();
+
+        doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
+                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
+        doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
+                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), anyInt());
     }
 
     public void tearDown() throws Exception {

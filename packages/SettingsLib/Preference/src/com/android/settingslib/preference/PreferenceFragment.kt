@@ -32,7 +32,7 @@ import com.android.settingslib.widget.SettingsBasePreferenceFragment
 open class PreferenceFragment :
     SettingsBasePreferenceFragment(), PreferenceScreenProvider, PreferenceScreenBindingKeyProvider {
 
-    private var preferenceScreenBindingHelper: PreferenceScreenBindingHelper? = null
+    protected var preferenceScreenBindingHelper: PreferenceScreenBindingHelper? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceScreen = createPreferenceScreen()
@@ -129,7 +129,9 @@ open class PreferenceFragment :
     }
 
     protected fun getPreferenceKeysInHierarchy(): Set<String> =
-        preferenceScreenBindingHelper?.getPreferences()?.map { it.metadata.key }?.toSet() ?: setOf()
+        preferenceScreenBindingHelper?.let {
+            mutableSetOf<String>().apply { it.forEachRecursively { add(it.metadata.key) } }
+        } ?: setOf()
 
     companion object {
         private const val TAG = "PreferenceFragment"
