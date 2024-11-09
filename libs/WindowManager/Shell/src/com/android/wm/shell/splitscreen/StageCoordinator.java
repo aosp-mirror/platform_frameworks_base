@@ -35,13 +35,11 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 
 import static com.android.wm.shell.Flags.enableFlexibleSplit;
 import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_ALIGN_CENTER;
-import static com.android.wm.shell.common.split.SplitScreenUtils.isPartiallyOffscreen;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
-import static com.android.wm.shell.shared.TransitionUtil.isOrderOnly;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_10_90;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
@@ -137,6 +135,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.split.OffscreenTouchZone;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenUtils;
@@ -321,6 +320,20 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     if (mDividerVisible) {
                         mSyncQueue.runInSync(t -> applyDividerVisibility(t));
                     }
+                }
+
+                @Override
+                public void inflateOnStageRoot(OffscreenTouchZone touchZone) {
+                    SurfaceControl topLeftLeash =
+                            mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
+                                    ? mMainStage.mRootLeash : mSideStage.mRootLeash;
+                    SurfaceControl bottomRightLeash =
+                            mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
+                                    ? mSideStage.mRootLeash : mMainStage.mRootLeash;
+                    touchZone.inflate(
+                            mContext.createConfigurationContext(mRootTaskInfo.configuration),
+                            mRootTaskInfo.configuration, mSyncQueue,
+                            touchZone.isTopLeft() ? topLeftLeash : bottomRightLeash);
                 }
             };
 
@@ -2348,6 +2361,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.setDividerInteractive(true, false, "onSplitResizeConsumed");
         }, (finishWct, t) -> {
             mSplitLayout.setDividerInteractive(true, false, "onSplitResizeFinish");
+            mSplitLayout.populateTouchZones();
         }, mainDecor, sideDecor, decorManagers);
 
         if (Flags.enableFlexibleTwoAppSplit()) {
@@ -2911,26 +2925,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         mTaskOrganizer.applyTransaction(wct);
                     }
                     continue;
-                } else if (Flags.enableFlexibleTwoAppSplit() && isOrderOnly(change)) {
-                    int focusedStageIndex = SPLIT_INDEX_UNDEFINED;
-                    if (taskInfo.token.equals(mMainStage.mRootTaskInfo.token)) {
-                        focusedStageIndex = mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
-                                ? SPLIT_INDEX_0 : SPLIT_INDEX_1;
-                    } else if (taskInfo.token.equals(mSideStage.mRootTaskInfo.token)) {
-                        focusedStageIndex = mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
-                                ? SPLIT_INDEX_1 : SPLIT_INDEX_0;
-                    }
-
-                    if (focusedStageIndex != SPLIT_INDEX_UNDEFINED) {
-                        @PersistentSnapPosition int currentSnapPosition =
-                                mSplitLayout.calculateCurrentSnapPosition();
-                        boolean offscreenTaskFocused =
-                                isPartiallyOffscreen(focusedStageIndex, currentSnapPosition);
-
-                        if (offscreenTaskFocused) {
-                            mSplitLayout.flingDividerToOtherSide(currentSnapPosition);
-                        }
-                    }
                 }
                 final StageTaskListener stage = getStageOfTask(taskInfo);
                 if (stage == null) {
