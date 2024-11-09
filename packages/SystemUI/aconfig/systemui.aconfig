@@ -16,6 +16,16 @@ flag {
 }
 
 flag {
+   name: "multiuser_wifi_picker_tracker_support"
+   namespace: "systemui"
+   description: "Adds WifiPickerTracker support for multiple users to support when HSUM is enabled."
+   bug: "371586248"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "udfps_view_performance"
    namespace: "systemui"
    description: "Decrease screen off blocking calls by waiting until the device is finished going to sleep before adding the udfps view."
@@ -631,9 +641,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_simple_fragment"
+    name: "status_bar_root_modernization"
     namespace: "systemui"
-    description: "Feature flag for refactoring the collapsed status bar fragment"
+    description: "Feature flag for replacing the status bar fragment with a compose root"
     bug: "364360986"
 }
 

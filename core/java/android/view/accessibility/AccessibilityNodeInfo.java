@@ -3866,8 +3866,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Sets the view for which the view represented by this info serves as a
      * label for accessibility purposes.
      *
+     * @deprecated Use {@link #addLabeledBy(View)} on the labeled node instead,
+     * since {@link #getLabeledByList()} and {@link #getLabeledBy()} on the
+     * labeled node are not automatically populated when this method is used.
+     *
      * @param labeled The view for which this info serves as a label.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_ANI_LABEL_FOR_APIS)
+    @Deprecated
     public void setLabelFor(View labeled) {
         setLabelFor(labeled, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
@@ -3888,9 +3894,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
+     * @deprecated Use {@link #addLabeledBy(View)} on the labeled node instead,
+     * since {@link #getLabeledByList()} and {@link #getLabeledBy()} on the
+     * labeled node are not automatically populated when this method is used.
+     *
      * @param root The root whose virtual descendant serves as a label.
      * @param virtualDescendantId The id of the virtual descendant.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_ANI_LABEL_FOR_APIS)
+    @Deprecated
     public void setLabelFor(View root, int virtualDescendantId) {
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
@@ -3902,8 +3914,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Gets the node info for which the view represented by this info serves as
      * a label for accessibility purposes.
      *
+     * @deprecated Use {@link #getLabeledByList()} on the labeled node instead,
+     * since calling {@link #addLabeledBy(View)} or {@link #addLabeledBy(View, int)}
+     * on the labeled node do not automatically provide that node from this method.
+     *
      * @return The labeled info.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_ANI_LABEL_FOR_APIS)
+    @Deprecated
     public AccessibilityNodeInfo getLabelFor() {
         enforceSealed();
         return getNodeForAccessibilityId(mConnectionId, mWindowId, mLabelForId);

@@ -30,6 +30,7 @@ import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.MediaThreshold;
+import android.telephony.satellite.NtnSignalStrength;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -695,6 +696,15 @@ public class TelephonyCallback {
     public static final int EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED = 44;
 
     /**
+     * Event for listening to carrier roaming non-terrestrial network signal strength changes.
+     *
+     * @see CarrierRoamingNtnModeListener
+     *
+     * @hide
+     */
+    public static final int EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED = 45;
+
+    /**
      * @hide
      */
     @IntDef(prefix = {"EVENT_"}, value = {
@@ -741,7 +751,8 @@ public class TelephonyCallback {
             EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED,
             EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED,
             EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED,
-            EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED
+            EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED,
+            EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1805,6 +1816,14 @@ public class TelephonyCallback {
          */
         default void onCarrierRoamingNtnAvailableServicesChanged(
                 @NetworkRegistrationInfo.ServiceType List<Integer> availableServices) {}
+
+        /**
+         * Callback invoked when carrier roaming non-terrestrial network signal strength changes.
+         *
+         * @param ntnSignalStrength non-terrestrial network signal strength.
+         */
+        default void onCarrierRoamingNtnSignalStrengthChanged(
+                @NonNull NtnSignalStrength ntnSignalStrength) {}
     }
 
     /**
@@ -2269,6 +2288,19 @@ public class TelephonyCallback {
                     .collect(Collectors.toList());
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
                     () -> listener.onCarrierRoamingNtnAvailableServicesChanged(ServiceList)));
+        }
+
+        public void onCarrierRoamingNtnSignalStrengthChanged(
+                @NonNull NtnSignalStrength ntnSignalStrength) {
+            if (!Flags.carrierRoamingNbIotNtn()) return;
+
+            CarrierRoamingNtnModeListener listener =
+                    (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onCarrierRoamingNtnSignalStrengthChanged(ntnSignalStrength)));
+
         }
     }
 }

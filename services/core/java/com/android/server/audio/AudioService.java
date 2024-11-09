@@ -9193,16 +9193,6 @@ public class AudioService extends IAudioService.Stub
             mIndexMin = MIN_STREAM_VOLUME[streamType] * 10;
             mIndexMax = MAX_STREAM_VOLUME[streamType] * 10;
 
-            final int status = AudioSystem.initStreamVolume(
-                    streamType, MIN_STREAM_VOLUME[streamType], MAX_STREAM_VOLUME[streamType]);
-            if (status != AudioSystem.AUDIO_STATUS_OK) {
-                sLifecycleLogger.enqueue(new EventLogger.StringEvent(
-                         "VSS() stream:" + streamType + " initStreamVolume=" + status)
-                        .printLog(ALOGE, TAG));
-                sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
-                        "VSS()" /*obj*/, 2 * INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
-            }
-
             updateIndexFactors();
             mIndexMinNoPerm = mIndexMin; // may be overwritten later in updateNoPermMinIndex()
 
@@ -9266,6 +9256,19 @@ public class AudioService extends IAudioService.Stub
 
                     mIndexMinNoPerm = mIndexMin;
                 }
+            }
+
+            final int status = AudioSystem.initStreamVolume(
+                    mStreamType, mIndexMin / 10, mIndexMax / 10);
+            sVolumeLogger.enqueue(new EventLogger.StringEvent(
+                    "updateIndexFactors() stream:" + mStreamType + " index min/max:"
+                            + mIndexMin / 10 + "/" + mIndexMax / 10 + " indexStepFactor:"
+                            + mIndexStepFactor).printSlog(ALOGI, TAG));
+            if (status != AudioSystem.AUDIO_STATUS_OK) {
+                sVolumeLogger.enqueue(new EventLogger.StringEvent(
+                        "Failed initStreamVolume with status=" + status).printSlog(ALOGE, TAG));
+                sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
+                        "updateIndexFactors()" /*obj*/, 2 * INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
             }
         }
 

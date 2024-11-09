@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.Flags.FLAG_PIC_ISOLATE_CACHE_BY_UID;
 import static android.app.PropertyInvalidatedCache.NONCE_UNSET;
 import static android.app.PropertyInvalidatedCache.MODULE_BLUETOOTH;
 import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
@@ -30,8 +31,9 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.app.PropertyInvalidatedCache.Args;
 import android.annotation.SuppressLint;
+import android.app.PropertyInvalidatedCache.Args;
+import android.os.Binder;
 import com.android.internal.os.ApplicationSharedMemory;
 
 import android.platform.test.annotations.IgnoreUnderRavenwood;
@@ -58,6 +60,7 @@ import org.junit.Test;
  */
 @SmallTest
 public class PropertyInvalidatedCacheTests {
+    @Rule
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
@@ -455,8 +458,9 @@ public class PropertyInvalidatedCacheTests {
     // Test the Args-style constructor.
     @Test
     public void testArgsConstructor() {
-        // Create a cache with a maximum of four entries.
-        TestCache cache = new TestCache(new Args(MODULE_TEST).api("init1").maxEntries(4),
+        // Create a cache with a maximum of four entries and non-isolated UIDs.
+        TestCache cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).isolateUids(false).api("init1"),
                 new TestQuery());
 
         cache.invalidateCache();
@@ -568,6 +572,75 @@ public class PropertyInvalidatedCacheTests {
             fail("expected bad property exception: prop=" + badKey);
         } catch (IllegalArgumentException e) {
             // Expected exception.
+        }
+    }
+
+    // Verify that a cache created with isolatedUids(true) separates out the results.
+    @RequiresFlagsEnabled(FLAG_PIC_ISOLATE_CACHE_BY_UID)
+    @Test
+    public void testIsolatedUids() {
+        TestCache cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).isolateUids(true).api("testIsolatedUids").testMode(true),
+                new TestQuery());
+        cache.invalidateCache();
+        final int uid1 = 1;
+        final int uid2 = 2;
+
+        long token = Binder.setCallingWorkSourceUid(uid1);
+        try {
+            // Populate the cache for user 1
+            assertEquals("foo5", cache.query(5));
+            assertEquals(1, cache.getRecomputeCount());
+            assertEquals("foo5", cache.query(5));
+            assertEquals(1, cache.getRecomputeCount());
+            assertEquals("foo6", cache.query(6));
+            assertEquals(2, cache.getRecomputeCount());
+
+            // Populate the cache for user 2.  User 1 values are not reused.
+            Binder.setCallingWorkSourceUid(uid2);
+            assertEquals("foo5", cache.query(5));
+            assertEquals(3, cache.getRecomputeCount());
+            assertEquals("foo5", cache.query(5));
+            assertEquals(3, cache.getRecomputeCount());
+
+            // Verify that the cache for user 1 is still populated.
+            Binder.setCallingWorkSourceUid(uid1);
+            assertEquals("foo5", cache.query(5));
+            assertEquals(3, cache.getRecomputeCount());
+
+        } finally {
+            Binder.restoreCallingWorkSource(token);
+        }
+
+        // Repeat the test with a non-isolated cache.
+        cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).isolateUids(false).api("testIsolatedUids2").testMode(true),
+                new TestQuery());
+        cache.invalidateCache();
+        token = Binder.setCallingWorkSourceUid(uid1);
+        try {
+            // Populate the cache for user 1
+            assertEquals("foo5", cache.query(5));
+            assertEquals(1, cache.getRecomputeCount());
+            assertEquals("foo5", cache.query(5));
+            assertEquals(1, cache.getRecomputeCount());
+            assertEquals("foo6", cache.query(6));
+            assertEquals(2, cache.getRecomputeCount());
+
+            // Populate the cache for user 2.  User 1 values are reused.
+            Binder.setCallingWorkSourceUid(uid2);
+            assertEquals("foo5", cache.query(5));
+            assertEquals(2, cache.getRecomputeCount());
+            assertEquals("foo5", cache.query(5));
+            assertEquals(2, cache.getRecomputeCount());
+
+            // Verify that the cache for user 1 is still populated.
+            Binder.setCallingWorkSourceUid(uid1);
+            assertEquals("foo5", cache.query(5));
+            assertEquals(2, cache.getRecomputeCount());
+
+        } finally {
+            Binder.restoreCallingWorkSource(token);
         }
     }
 }

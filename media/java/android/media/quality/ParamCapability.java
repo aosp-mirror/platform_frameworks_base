@@ -34,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
-public class ParamCapability implements Parcelable {
+public final class ParamCapability implements Parcelable {
 
     /** @hide */
     @IntDef(flag = true, prefix = { "TYPE_" }, value = {
@@ -104,6 +104,7 @@ public class ParamCapability implements Parcelable {
     @NonNull
     private final Bundle mCaps;
 
+    /** @hide */
     protected ParamCapability(Parcel in) {
         mName = in.readString();
         mIsSupported = in.readBoolean();
@@ -112,7 +113,7 @@ public class ParamCapability implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mName);
         dest.writeBoolean(mIsSupported);
         dest.writeInt(mType);
@@ -124,6 +125,7 @@ public class ParamCapability implements Parcelable {
         return 0;
     }
 
+    @NonNull
     public static final Creator<ParamCapability> CREATOR = new Creator<ParamCapability>() {
         @Override
         public ParamCapability createFromParcel(Parcel in) {

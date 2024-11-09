@@ -21,7 +21,7 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.SystemClock
-import android.platform.uiautomator_helpers.DeviceHelpers
+import android.platform.uiautomatorhelpers.DeviceHelpers
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -159,7 +159,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     ) {
         val caption = getCaptionForTheApp(wmHelper, device)
         val maximizeButton = getMaximizeButtonForTheApp(caption)
-        maximizeButton?.longClick()
+        maximizeButton.longClick()
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
 
         val buttonResId = if (toLeft) SNAP_LEFT_BUTTON else SNAP_RIGHT_BUTTON

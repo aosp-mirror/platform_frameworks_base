@@ -16,6 +16,7 @@
 
 package com.android.extensions.appfunctions.tests
 
+import android.app.appfunctions.AppFunctionException
 import android.app.appfunctions.ExecuteAppFunctionRequest
 import android.app.appfunctions.ExecuteAppFunctionResponse
 import android.app.appsearch.GenericDocument
@@ -83,44 +84,38 @@ class SidecarConverterTest {
             GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "")
                 .setPropertyBoolean(ExecuteAppFunctionResponse.PROPERTY_RETURN_VALUE, true)
                 .build()
-        val platformResponse = ExecuteAppFunctionResponse.newSuccess(resultGd, null)
+        val platformResponse = ExecuteAppFunctionResponse(resultGd)
 
         val sidecarResponse = SidecarConverter.getSidecarExecuteAppFunctionResponse(
             platformResponse
         )
 
-        assertThat(sidecarResponse.isSuccess).isTrue()
         assertThat(
             sidecarResponse.resultDocument.getProperty(
                 ExecuteAppFunctionResponse.PROPERTY_RETURN_VALUE
             )
         )
             .isEqualTo(booleanArrayOf(true))
-        assertThat(sidecarResponse.resultCode).isEqualTo(ExecuteAppFunctionResponse.RESULT_OK)
-        assertThat(sidecarResponse.errorMessage).isNull()
     }
 
     @Test
-    fun getSidecarExecuteAppFunctionResponse_errorResponse_sameContents() {
-        val emptyGd = GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "").build()
-        val platformResponse =
-            ExecuteAppFunctionResponse.newFailure(
-                ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
-                null,
-                null
+    fun getSidecarAppFunctionException_sameContents() {
+        val bundle = Bundle()
+        bundle.putString("key", "value")
+        val platformException =
+            AppFunctionException(
+                AppFunctionException.ERROR_SYSTEM_ERROR,
+                "error",
+                bundle
             )
 
-        val sidecarResponse = SidecarConverter.getSidecarExecuteAppFunctionResponse(
-            platformResponse
+        val sidecarException = SidecarConverter.getSidecarAppFunctionException(
+            platformException
         )
 
-        assertThat(sidecarResponse.isSuccess).isFalse()
-        assertThat(sidecarResponse.resultDocument.namespace).isEqualTo(emptyGd.namespace)
-        assertThat(sidecarResponse.resultDocument.id).isEqualTo(emptyGd.id)
-        assertThat(sidecarResponse.resultDocument.schemaType).isEqualTo(emptyGd.schemaType)
-        assertThat(sidecarResponse.resultCode)
-            .isEqualTo(ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR)
-        assertThat(sidecarResponse.errorMessage).isNull()
+        assertThat(sidecarException.errorCode).isEqualTo(AppFunctionException.ERROR_SYSTEM_ERROR)
+        assertThat(sidecarException.errorMessage).isEqualTo("error")
+        assertThat(sidecarException.extras.getString("key")).isEqualTo("value")
     }
 
     @Test
@@ -130,46 +125,38 @@ class SidecarConverterTest {
                 .setPropertyBoolean(ExecuteAppFunctionResponse.PROPERTY_RETURN_VALUE, true)
                 .build()
         val sidecarResponse =
-            com.android.extensions.appfunctions.ExecuteAppFunctionResponse.newSuccess(
-                resultGd,
-                null
-            )
+            com.android.extensions.appfunctions.ExecuteAppFunctionResponse(resultGd)
 
         val platformResponse = SidecarConverter.getPlatformExecuteAppFunctionResponse(
             sidecarResponse
         )
 
-        assertThat(platformResponse.isSuccess).isTrue()
         assertThat(
             platformResponse.resultDocument.getProperty(
                 ExecuteAppFunctionResponse.PROPERTY_RETURN_VALUE
             )
         )
             .isEqualTo(booleanArrayOf(true))
-        assertThat(platformResponse.resultCode).isEqualTo(ExecuteAppFunctionResponse.RESULT_OK)
-        assertThat(platformResponse.errorMessage).isNull()
     }
 
     @Test
-    fun getPlatformExecuteAppFunctionResponse_errorResponse_sameContents() {
-        val emptyGd = GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "").build()
-        val sidecarResponse =
-            com.android.extensions.appfunctions.ExecuteAppFunctionResponse.newFailure(
-                ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
-                null,
-                null
+    fun getPlatformAppFunctionException_sameContents() {
+        val bundle = Bundle()
+        bundle.putString("key", "value")
+        val sidecarException =
+            com.android.extensions.appfunctions.AppFunctionException(
+                AppFunctionException.ERROR_SYSTEM_ERROR,
+                "error",
+                bundle
             )
 
-        val platformResponse = SidecarConverter.getPlatformExecuteAppFunctionResponse(
-            sidecarResponse
+        val platformException = SidecarConverter.getPlatformAppFunctionException(
+            sidecarException
         )
 
-        assertThat(platformResponse.isSuccess).isFalse()
-        assertThat(platformResponse.resultDocument.namespace).isEqualTo(emptyGd.namespace)
-        assertThat(platformResponse.resultDocument.id).isEqualTo(emptyGd.id)
-        assertThat(platformResponse.resultDocument.schemaType).isEqualTo(emptyGd.schemaType)
-        assertThat(platformResponse.resultCode)
-            .isEqualTo(ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR)
-        assertThat(platformResponse.errorMessage).isNull()
+        assertThat(platformException.errorCode)
+            .isEqualTo(AppFunctionException.ERROR_SYSTEM_ERROR)
+        assertThat(platformException.errorMessage).isEqualTo("error")
+        assertThat(platformException.extras.getString("key")).isEqualTo("value")
     }
 }
