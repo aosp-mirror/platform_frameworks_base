@@ -1554,6 +1554,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
      * Verify that when dispatching we respect tranches of priority.
      */
     @DisableFlags(Flags.FLAG_LIMIT_PRIORITY_SCOPE)
+    @SuppressWarnings("DistinctVarargsChecker")
     @Test
     public void testPriority_flagDisabled() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
@@ -1600,6 +1601,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
     /**
      * Verify that when dispatching we respect tranches of priority.
      */
+    @SuppressWarnings("DistinctVarargsChecker")
     @Test
     public void testOrdered_withPriorities() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
@@ -1649,6 +1651,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
      * Verify that when dispatching we respect tranches of priority.
      */
     @EnableFlags(Flags.FLAG_LIMIT_PRIORITY_SCOPE)
+    @SuppressWarnings("DistinctVarargsChecker")
     @Test
     public void testPriority_changeIdDisabled() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
