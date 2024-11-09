@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
+import android.annotation.Nullable;
 
 import com.android.internal.telephony.flags.Flags;
 
@@ -40,4 +41,17 @@ public interface SatelliteCommunicationAllowedStateCallback {
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatelliteCommunicationAllowedStateChanged(boolean isAllowed);
+
+    /**
+     * Callback method invoked when the satellite access configuration changes
+     *
+     * @param satelliteAccessConfiguration The satellite access configuration associated with
+     *                                       the current location. When satellite is not allowed at
+     *                                       the current location,
+     *                                       {@code satelliteRegionalConfiguration} will be null.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    default void onSatelliteAccessConfigurationChanged(
+            @Nullable SatelliteAccessConfiguration satelliteAccessConfiguration) {};
 }

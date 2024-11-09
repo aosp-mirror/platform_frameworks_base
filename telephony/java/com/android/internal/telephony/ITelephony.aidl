@@ -2999,6 +2999,16 @@ interface ITelephony {
     void requestIsCommunicationAllowedForCurrentLocation(int subId, in ResultReceiver receiver);
 
     /**
+     * Request to get satellite access configuration for the current location.
+     *
+     * @param receiver Result receiver to get the error code of the request
+     *                 and satellite access configuration for the current location.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestSatelliteAccessConfigurationForCurrentLocation(in ResultReceiver receiver);
+
+    /**
      * Request to get the time after which the satellite will be visible.
      *
      * @param receiver Result receiver to get the error code of the request and the requested
