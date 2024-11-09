@@ -143,7 +143,8 @@ class PreferenceScreenBindingHelper(
         }
     }
 
-    fun getPreferences() = preferenceHierarchy.getAllPreferences()
+    fun forEachRecursively(action: (PreferenceHierarchyNode) -> Unit) =
+        preferenceHierarchy.forEachRecursively(action)
 
     fun onCreate() {
         for (preference in lifecycleAwarePreferences) {
@@ -191,11 +192,11 @@ class PreferenceScreenBindingHelper(
 
     companion object {
         /** Preference value is changed. */
-        private const val CHANGE_REASON_VALUE = 0
+        const val CHANGE_REASON_VALUE = 0
         /** Preference state (title/summary, enable state, etc.) is changed. */
-        private const val CHANGE_REASON_STATE = 1
+        const val CHANGE_REASON_STATE = 1
         /** Dependent preference state is changed. */
-        private const val CHANGE_REASON_DEPENDENT = 2
+        const val CHANGE_REASON_DEPENDENT = 2
 
         /** Updates preference screen that has incomplete hierarchy. */
         @JvmStatic

@@ -136,6 +136,18 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
         for (it in children) action(it)
     }
 
+    /** Traversals preference hierarchy recursively and applies given action. */
+    fun forEachRecursively(action: (PreferenceHierarchyNode) -> Unit) {
+        action(this)
+        for (child in children) {
+            if (child is PreferenceHierarchy) {
+                child.forEachRecursively(action)
+            } else {
+                action(child)
+            }
+        }
+    }
+
     /** Traversals preference hierarchy and applies given action. */
     suspend fun forEachAsync(action: suspend (PreferenceHierarchyNode) -> Unit) {
         for (it in children) action(it)
@@ -157,18 +169,7 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
 
     /** Returns all the [PreferenceHierarchyNode]s appear in the hierarchy. */
     fun getAllPreferences(): List<PreferenceHierarchyNode> =
-        mutableListOf<PreferenceHierarchyNode>().also { getAllPreferences(it) }
-
-    private fun getAllPreferences(result: MutableList<PreferenceHierarchyNode>) {
-        result.add(this)
-        for (child in children) {
-            if (child is PreferenceHierarchy) {
-                child.getAllPreferences(result)
-            } else {
-                result.add(child)
-            }
-        }
-    }
+        mutableListOf<PreferenceHierarchyNode>().apply { forEachRecursively { add(it) } }
 }
 
 /**
