@@ -2989,7 +2989,6 @@ public final class SurfaceControl implements Parcelable {
         private void apply(boolean sync, boolean oneWay) {
             applyResizedSurfaces();
             notifyReparentedSurfaces();
-            nativeApplyTransaction(mNativeObject, sync, oneWay);
 
             if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
                 SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
@@ -2998,6 +2997,7 @@ public final class SurfaceControl implements Parcelable {
             if (mCalls != null) {
                 mCalls.clear();
             }
+            nativeApplyTransaction(mNativeObject, sync, oneWay);
         }
 
         /**

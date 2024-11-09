@@ -1245,7 +1245,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public String getConnectionSummary(boolean shortSummary) {
         CharSequence summary = null;
-        if (BluetoothUtils.isAudioSharingEnabled()) {
+        if (BluetoothUtils.isAudioSharingUIAvailable(mContext)) {
             if (mBluetoothManager == null) {
                 mBluetoothManager = LocalBluetoothManager.getInstance(mContext, null);
             }

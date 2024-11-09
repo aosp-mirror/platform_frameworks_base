@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.adaptiveauth;
+package com.android.server.security.adaptiveauthentication;
 
 import static android.adaptiveauth.Flags.FLAG_ENABLE_ADAPTIVE_AUTH;
 import static android.adaptiveauth.Flags.FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS;
 import static android.security.Flags.FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
-import static com.android.server.adaptiveauth.AdaptiveAuthService.MAX_ALLOWED_FAILED_AUTH_ATTEMPTS;
+import static com.android.server.security.adaptiveauthentication.AdaptiveAuthenticationService.MAX_ALLOWED_FAILED_AUTH_ATTEMPTS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
@@ -66,12 +66,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * atest FrameworksServicesTests:AdaptiveAuthServiceTest
+ * atest FrameworksServicesTests:AdaptiveAuthenticationServiceTest
  */
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class AdaptiveAuthServiceTest {
+public class AdaptiveAuthenticationServiceTest {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -81,7 +81,7 @@ public class AdaptiveAuthServiceTest {
     private static final int REASON_UNKNOWN = 0; // BiometricRequestConstants.RequestReason
 
     private Context mContext;
-    private AdaptiveAuthService mAdaptiveAuthService;
+    private AdaptiveAuthenticationService mAdaptiveAuthenticationService;
 
     @Mock
     LockPatternUtils mLockPatternUtils;
@@ -124,8 +124,9 @@ public class AdaptiveAuthServiceTest {
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, mUserManager);
 
-        mAdaptiveAuthService = new AdaptiveAuthService(mContext, mLockPatternUtils);
-        mAdaptiveAuthService.init();
+        mAdaptiveAuthenticationService = new AdaptiveAuthenticationService(
+                mContext, mLockPatternUtils);
+        mAdaptiveAuthenticationService.init();
 
         verify(mLockSettings).registerLockSettingsStateListener(
                 mLockSettingsStateListenerCaptor.capture());
@@ -317,13 +318,13 @@ public class AdaptiveAuthServiceTest {
 
     private void verifyNotLockDevice(int expectedCntFailedAttempts, int userId) {
         assertEquals(expectedCntFailedAttempts,
-                mAdaptiveAuthService.mFailedAttemptsForUser.get(userId));
+                mAdaptiveAuthenticationService.mFailedAttemptsForUser.get(userId));
         verify(mWindowManager, never()).lockNow();
     }
 
     private void verifyLockDevice(int userId) {
         assertEquals(MAX_ALLOWED_FAILED_AUTH_ATTEMPTS,
-                mAdaptiveAuthService.mFailedAttemptsForUser.get(userId));
+                mAdaptiveAuthenticationService.mFailedAttemptsForUser.get(userId));
         verify(mLockPatternUtils).requireStrongAuth(
                 eq(SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST), eq(userId));
         // If userId is MANAGED_PROFILE_USER_ID, the StrongAuthFlag of its parent (PRIMARY_USER_ID)

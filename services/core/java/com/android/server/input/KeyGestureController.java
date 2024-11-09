@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 
+import static com.android.hardware.input.Flags.enableNew25q2Keycodes;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
 
@@ -750,6 +751,28 @@ final class KeyGestureController {
                     }
                 }
                 break;
+            case KeyEvent.KEYCODE_LOCK:
+                if (enableNew25q2Keycodes()) {
+                    if (firstDown) {
+                        handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_LOCK},
+                                /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId, focusedToken,
+                                /* flags = */0, /* appLaunchData = */null);
+                    }
+                }
+                return true;
+            case KeyEvent.KEYCODE_FULLSCREEN:
+                if (enableNew25q2Keycodes()) {
+                    if (firstDown) {
+                        handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_FULLSCREEN},
+                                /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId, focusedToken,
+                                /* flags = */0, /* appLaunchData = */null);
+                    }
+                }
+                return true;
             case KeyEvent.KEYCODE_ASSIST:
                 Slog.wtf(TAG, "KEYCODE_ASSIST should be handled in interceptKeyBeforeQueueing");
                 return true;
@@ -763,6 +786,9 @@ final class KeyGestureController {
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL:
                 Slog.wtf(TAG, "KEYCODE_STYLUS_BUTTON_* should be handled in"
                         + " interceptKeyBeforeQueueing");
+                return true;
+            case KeyEvent.KEYCODE_DO_NOT_DISTURB:
+                // TODO(b/365920375): Implement 25Q2 keycode implementation in system
                 return true;
         }
 

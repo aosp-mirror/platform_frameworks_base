@@ -530,6 +530,13 @@ public class PipTransition extends PipTransitionController {
                 if (mFixedRotationState != FIXED_ROTATION_TRANSITION
                         && mFinishTransaction != null) {
                     mFinishTransaction.merge(tx);
+                    // Set window crop and position to destination bounds to avoid flickering.
+                    if (hasValidLeash) {
+                        mFinishTransaction.setWindowCrop(leash, destinationBounds.width(),
+                                destinationBounds.height());
+                        mFinishTransaction.setPosition(leash, destinationBounds.left,
+                                destinationBounds.top);
+                    }
                 }
             } else {
                 wct = new WindowContainerTransaction();

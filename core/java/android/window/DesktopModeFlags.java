@@ -75,7 +75,8 @@ public enum DesktopModeFlags {
             Flags::enableDesktopAppLaunchAlttabTransitions, false),
     ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS(
             Flags::enableDesktopAppLaunchTransitions, false),
-    ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, false);
+    ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, false),
+    ENABLE_HANDLE_INPUT_FIX(Flags::enableHandleInputFix, true);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.

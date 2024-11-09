@@ -26,6 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * Settings for ambient backlight.
  * @hide
  */
 public class AmbientBacklightSettings implements Parcelable {

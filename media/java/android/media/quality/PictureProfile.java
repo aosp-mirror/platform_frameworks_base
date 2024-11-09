@@ -71,6 +71,53 @@ public final class PictureProfile implements Parcelable {
      */
     public static final int TYPE_APPLICATION = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "ERROR_", value = {
+            ERROR_UNKNOWN,
+            ERROR_NO_PERMISSION,
+            ERROR_DUPLICATE,
+            ERROR_INVALID_ARGUMENT,
+            ERROR_NOT_ALLOWLISTED
+    })
+    public @interface ErrorCode {}
+
+    /**
+     * Error code for unknown errors.
+     * @hide
+     */
+    public static final int ERROR_UNKNOWN = 0;
+
+    /**
+     * Error code for missing necessary permission to handle the profiles.
+     * @hide
+     */
+    public static final int ERROR_NO_PERMISSION = 1;
+
+    /**
+     * Error code for creating a profile with existing profile type and name.
+     *
+     * @see #getProfileType()
+     * @see #getName()
+     * @hide
+     */
+    public static final int ERROR_DUPLICATE = 2;
+
+    /**
+     * Error code for invalid argument.
+     * @hide
+     */
+    public static final int ERROR_INVALID_ARGUMENT = 3;
+
+    /**
+     * Error code for the case when an operation requires an allowlist but the caller is not in the
+     * list.
+     *
+     * @see MediaQualityManager#getPictureProfileAllowList()
+     * @hide
+     */
+    public static final int ERROR_NOT_ALLOWLISTED = 4;
+
 
     private PictureProfile(@NonNull Parcel in) {
         mId = in.readString();

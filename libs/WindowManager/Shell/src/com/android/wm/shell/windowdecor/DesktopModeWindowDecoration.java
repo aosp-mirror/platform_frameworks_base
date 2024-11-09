@@ -807,7 +807,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void disposeStatusBarInputLayer() {
         if (!isAppHandle(mWindowDecorViewHolder)
-                || !Flags.enableHandleInputFix()) {
+                || !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             return;
         }
         asAppHandle(mWindowDecorViewHolder).disposeStatusBarInputLayer();
@@ -951,7 +951,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             }
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
-        } else if (isAppHandle && !Flags.enableHandleInputFix()) {
+        } else if (isAppHandle && !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             // The focused decor (fullscreen/split) does not need to handle input because input in
             // the App Handle is handled by the InputMonitor in DesktopModeWindowDecorViewModel.
             // Note: This does not apply with the above flag enabled as the status bar input layer
@@ -1560,13 +1560,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     boolean checkTouchEventInFocusedCaptionHandle(MotionEvent ev) {
         if (isHandleMenuActive() || !isAppHandle(mWindowDecorViewHolder)
-                || Flags.enableHandleInputFix()) {
+                || DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             return false;
         }
         // The status bar input layer can only receive input in handle coordinates to begin with,
         // so checking coordinates is unnecessary as input is always within handle bounds.
         if (isAppHandle(mWindowDecorViewHolder)
-                && Flags.enableHandleInputFix()
+                && DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()
                 && isCaptionVisible()) {
             return true;
         }
@@ -1603,7 +1603,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @param ev the MotionEvent to compare
      */
     void checkTouchEvent(MotionEvent ev) {
-        if (mResult.mRootView == null || Flags.enableHandleInputFix()) return;
+        if (mResult.mRootView == null || DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) return;
         final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
         final View handle = caption.findViewById(R.id.caption_handle);
         final boolean inHandle = !isHandleMenuActive()
@@ -1616,7 +1616,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // If the whole handle menu can be touched directly, rely on FLAG_WATCH_OUTSIDE_TOUCH.
             // This is for the case that some of the handle menu is underneath the status bar.
             if (isAppHandle(mWindowDecorViewHolder)
-                    && !Flags.enableHandleInputFix()) {
+                    && !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
                 mHandleMenu.checkMotionEvent(ev);
                 closeHandleMenuIfNeeded(ev);
             }
@@ -1630,7 +1630,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @param ev the MotionEvent to compare against.
      */
     void updateHoverAndPressStatus(MotionEvent ev) {
-        if (mResult.mRootView == null || Flags.enableHandleInputFix()) return;
+        if (mResult.mRootView == null || DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) return;
         final View handle = mResult.mRootView.findViewById(R.id.caption_handle);
         final boolean inHandle = !isHandleMenuActive()
                 && checkTouchEventInFocusedCaptionHandle(ev);

@@ -222,7 +222,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
             mHandleView.setAccessibilityDelegate(new HandleViewAccessibilityDelegate());
         }
-        mMenuViewController = new BubbleBarMenuViewController(mContext, this);
+        mMenuViewController = new BubbleBarMenuViewController(mContext, mHandleView, this);
         mMenuViewController.setListener(new BubbleBarMenuViewController.Listener() {
             @Override
             public void onMenuVisibilityChanged(boolean visible) {

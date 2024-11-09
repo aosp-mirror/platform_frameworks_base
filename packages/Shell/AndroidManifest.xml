@@ -959,6 +959,9 @@
     <!-- Permission required for CTS test - CtsTelephonyTestCases -->
     <uses-permission android:name="android.permission.READ_BASIC_PHONE_STATE" />
 
+    <!-- Permission required for ExecutableMethodFileOffsetsTest -->
+    <uses-permission android:name="android.permission.DYNAMIC_INSTRUMENTATION" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

@@ -281,6 +281,9 @@ public class UserBackupManagerService {
     private static final int SCHEDULE_FILE_VERSION = 1;
 
     public static final String SETTINGS_PACKAGE = "com.android.providers.settings";
+
+    public static final String TELEPHONY_PROVIDER_PACKAGE = "com.android.providers.telephony";
+
     public static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
 
     // Pseudoname that we use for the Package Manager metadata "package".

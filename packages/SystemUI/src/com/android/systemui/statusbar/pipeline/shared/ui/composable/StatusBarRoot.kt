@@ -104,7 +104,7 @@ fun StatusBarRoot(
     darkIconDispatcher: DarkIconDispatcher,
     onViewCreated: (ViewGroup) -> Unit,
 ) {
-    // None of these methods are used when [StatusBarSimpleFragment] is on.
+    // None of these methods are used when [StatusBarRootModernization] is on.
     // This can be deleted once the fragment is gone
     val nopVisibilityChangeListener =
         object : StatusBarVisibilityChangeListener {

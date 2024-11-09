@@ -42,6 +42,7 @@ import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
 import static com.android.aconfig_new_storage.Flags.supportClearLocalOverridesImmediately;
+import static com.android.aconfig.flags.Flags.enableSystemAconfigdRust;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -144,7 +145,6 @@ public class SettingsToPropertiesMapper {
         "android_core_networking",
         "android_health_services",
         "android_sdk",
-        "android_stylus",
         "aoc",
         "app_widgets",
         "arc_next",
@@ -209,6 +209,7 @@ public class SettingsToPropertiesMapper {
         "pixel_continuity",
         "pixel_perf",
         "pixel_sensors",
+        "pixel_state_server",
         "pixel_system_sw_video",
         "pixel_video_sw",
         "pixel_watch",
@@ -456,9 +457,11 @@ public class SettingsToPropertiesMapper {
     static ProtoInputStream sendAconfigdRequests(ProtoOutputStream requests) {
         // connect to aconfigd socket
         LocalSocket client = new LocalSocket();
+        String socketName = enableSystemAconfigdRust()
+                    ? "aconfigd_system" : "aconfigd";
         try{
             client.connect(new LocalSocketAddress(
-                "aconfigd", LocalSocketAddress.Namespace.RESERVED));
+                socketName, LocalSocketAddress.Namespace.RESERVED));
             Slog.d(TAG, "connected to aconfigd socket");
         } catch (IOException ioe) {
             logErr("failed to connect to aconfigd socket", ioe);

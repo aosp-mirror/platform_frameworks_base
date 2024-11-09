@@ -27,6 +27,8 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
+import android.hardware.input.KeyGestureEvent;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -44,11 +46,14 @@ import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 import android.view.accessibility.AccessibilityEvent;
 
+import androidx.annotation.Nullable;
+
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.FullScreenMagnificationVibrationHelper;
+import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 import com.android.server.accessibility.magnification.MouseEventHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
@@ -187,6 +192,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private final AccessibilityManagerService mAms;
 
+    private final InputManager mInputManager;
+
     private final SparseArray<EventStreamTransformation> mEventHandler;
 
     private final SparseArray<TouchExplorer> mTouchExplorer = new SparseArray<>(0);
@@ -227,6 +234,47 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      * if a new device becomes active.
      */
     private MotionEvent mLastActiveDeviceMotionEvent = null;
+
+    private boolean mKeyGestureEventHandlerInstalled = false;
+    private InputManager.KeyGestureEventHandler mKeyGestureEventHandler =
+            new InputManager.KeyGestureEventHandler() {
+                @Override
+                public boolean handleKeyGestureEvent(
+                        @NonNull KeyGestureEvent event,
+                        @Nullable IBinder focusedToken) {
+                    final boolean complete =
+                            event.getAction() == KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                                    && !event.isCancelled();
+                    final int gestureType = event.getKeyGestureType();
+                    final int displayId = isDisplayIdValid(event.getDisplayId())
+                            ? event.getDisplayId() : Display.DEFAULT_DISPLAY;
+
+                    switch (gestureType) {
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN:
+                            if (complete) {
+                                mAms.getMagnificationController().scaleMagnificationByStep(
+                                        displayId, MagnificationController.ZOOM_DIRECTION_IN);
+                            }
+                            return true;
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT:
+                            if (complete) {
+                                mAms.getMagnificationController().scaleMagnificationByStep(
+                                        displayId, MagnificationController.ZOOM_DIRECTION_OUT);
+                            }
+                            return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public boolean isKeyGestureSupported(int gestureType) {
+                    return switch (gestureType) {
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT -> true;
+                        default -> false;
+                    };
+                }
+            };
 
     private static MotionEvent cancelMotion(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_CANCEL
@@ -287,6 +335,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         mContext = context;
         mAms = service;
         mPm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mInputManager = context.getSystemService(InputManager.class);
         mEventHandler = eventHandler;
     }
 
@@ -723,6 +772,12 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     createMagnificationGestureHandler(displayId, displayContext);
             addFirstEventHandler(displayId, magnificationGestureHandler);
             mMagnificationGestureHandler.put(displayId, magnificationGestureHandler);
+
+            if (com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures()
+                    && !mKeyGestureEventHandlerInstalled) {
+                mInputManager.registerKeyGestureEventHandler(mKeyGestureEventHandler);
+                mKeyGestureEventHandlerInstalled = true;
+            }
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
@@ -841,6 +896,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         if (mMouseKeysInterceptor != null) {
             mMouseKeysInterceptor.onDestroy();
             mMouseKeysInterceptor = null;
+        }
+
+        if (mKeyGestureEventHandlerInstalled) {
+            mInputManager.unregisterKeyGestureEventHandler(mKeyGestureEventHandler);
+            mKeyGestureEventHandlerInstalled = false;
         }
     }
 

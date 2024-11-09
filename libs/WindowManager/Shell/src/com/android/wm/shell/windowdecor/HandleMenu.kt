@@ -39,11 +39,11 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.window.DesktopModeFlags
 import android.window.SurfaceSyncGroup
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isGone
-import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -83,7 +83,7 @@ class HandleMenu(
     private val taskInfo: RunningTaskInfo = parentDecor.mTaskInfo
 
     private val isViewAboveStatusBar: Boolean
-        get() = (Flags.enableHandleInputFix() && !taskInfo.isFreeform)
+        get() = (DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue() && !taskInfo.isFreeform)
 
     private val pillElevation: Int = loadDimensionPixelSize(
         R.dimen.desktop_mode_handle_menu_pill_elevation)
@@ -201,7 +201,8 @@ class HandleMenu(
         val x = handleMenuPosition.x.toInt()
         val y = handleMenuPosition.y.toInt()
         handleMenuViewContainer =
-            if ((!taskInfo.isFreeform && Flags.enableHandleInputFix()) || forceShowSystemBars) {
+            if ((!taskInfo.isFreeform && DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue())
+                    || forceShowSystemBars) {
                 AdditionalSystemViewContainer(
                     windowManagerWrapper = windowManagerWrapper,
                     taskId = taskInfo.taskId,
@@ -237,7 +238,7 @@ class HandleMenu(
             menuX = marginMenuStart
             menuY = captionY + marginMenuTop
         } else {
-            if (Flags.enableHandleInputFix()) {
+            if (DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
                 // In a focused decor, we use global coordinates for handle menu. Therefore we
                 // need to account for other factors like split stage and menu/handle width to
                 // center the menu.
