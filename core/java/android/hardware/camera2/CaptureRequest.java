@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.impl.ExtensionKey;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -2666,6 +2665,45 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @NonNull
     public static final Key<Integer> CONTROL_AUTOFRAMING =
             new Key<Integer>("android.control.autoframing", int.class);
+
+    /**
+     * <p>Whether the application uses {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}
+     * to control zoom levels.</p>
+     * <p>If set to AUTO, the camera device detects which capture request key the application uses
+     * to do zoom, {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}. If
+     * the application doesn't set android.scaler.zoomRatio or sets it to 1.0 in the capture
+     * request, the effective zoom level is reflected in {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} in capture
+     * results. If {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} is set to values other than 1.0, the effective
+     * zoom level is reflected in {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}. AUTO is the default value
+     * for this control, and also the behavior of the OS before Android version
+     * {@link android.os.Build.VERSION_CODES#BAKLAVA BAKLAVA}.</p>
+     * <p>If set to ZOOM_RATIO, the application explicitly specifies zoom level be controlled
+     * by {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, and the effective zoom level is reflected in
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} in capture results. This addresses an ambiguity with AUTO,
+     * with which the camera device cannot know if the application is using cropRegion or
+     * zoomRatio at 1.0x.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_ZOOM_METHOD_AUTO AUTO}</li>
+     *   <li>{@link #CONTROL_ZOOM_METHOD_ZOOM_RATIO ZOOM_RATIO}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see #CONTROL_ZOOM_METHOD_AUTO
+     * @see #CONTROL_ZOOM_METHOD_ZOOM_RATIO
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_ZOOM_METHOD)
+    public static final Key<Integer> CONTROL_ZOOM_METHOD =
+            new Key<Integer>("android.control.zoomMethod", int.class);
 
     /**
      * <p>Operation mode for edge
