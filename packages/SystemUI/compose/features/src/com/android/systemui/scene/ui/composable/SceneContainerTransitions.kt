@@ -16,6 +16,7 @@ import com.android.systemui.scene.ui.composable.transitions.bouncerToLockscreenP
 import com.android.systemui.scene.ui.composable.transitions.communalToBouncerTransition
 import com.android.systemui.scene.ui.composable.transitions.communalToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.dreamToBouncerTransition
+import com.android.systemui.scene.ui.composable.transitions.dreamToCommunalTransition
 import com.android.systemui.scene.ui.composable.transitions.dreamToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.dreamToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
@@ -58,6 +59,7 @@ val SceneContainerTransitions = transitions {
 
     from(Scenes.Bouncer, to = Scenes.Gone) { bouncerToGoneTransition() }
     from(Scenes.Dream, to = Scenes.Bouncer) { dreamToBouncerTransition() }
+    from(Scenes.Dream, to = Scenes.Communal) { dreamToCommunalTransition() }
     from(Scenes.Dream, to = Scenes.Gone) { dreamToGoneTransition() }
     from(Scenes.Dream, to = Scenes.Shade) { dreamToShadeTransition() }
     from(Scenes.Gone, to = Scenes.Shade) { goneToShadeTransition() }

@@ -62,6 +62,7 @@ import com.android.systemui.scene.session.shared.SessionStorage
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -217,7 +218,9 @@ constructor(
                                 sceneInteractor.transitionState.mapNotNull { state ->
                                     when (state) {
                                         is ObservableTransitionState.Idle -> {
-                                            if (state.currentScene != Scenes.Gone) {
+                                            if (state.currentScene == Scenes.Dream) {
+                                                false to "dream is showing"
+                                            } else if (state.currentScene != Scenes.Gone) {
                                                 true to "scene is not Gone"
                                             } else if (state.currentOverlays.isNotEmpty()) {
                                                 true to "overlay is shown"
@@ -228,21 +231,30 @@ constructor(
                                         is ObservableTransitionState.Transition -> {
                                             if (state.fromContent == Scenes.Gone) {
                                                 true to "scene transitioning away from Gone"
+                                            } else if (state.fromContent == Scenes.Dream) {
+                                                true to "scene transitioning away from dream"
                                             } else {
                                                 null
                                             }
                                         }
                                     }
                                 },
+                                sceneInteractor.transitionState.map { state ->
+                                    state.isTransitioningFromOrTo(Scenes.Communal) ||
+                                        state.isIdle(Scenes.Communal)
+                                },
                                 headsUpInteractor.isHeadsUpOrAnimatingAway,
                                 occlusionInteractor.invisibleDueToOcclusion,
                                 alternateBouncerInteractor.isVisible,
                             ) {
                                 visibilityForTransitionState,
+                                isCommunalShowing,
                                 isHeadsUpOrAnimatingAway,
                                 invisibleDueToOcclusion,
                                 isAlternateBouncerVisible ->
                                 when {
+                                    isCommunalShowing ->
+                                        true to "on or transitioning to/from communal"
                                     isHeadsUpOrAnimatingAway -> true to "showing a HUN"
                                     isAlternateBouncerVisible -> true to "showing alternate bouncer"
                                     invisibleDueToOcclusion -> false to "invisible due to occlusion"
@@ -266,6 +278,7 @@ constructor(
         handleSimUnlock()
         handleDeviceUnlockStatus()
         handlePowerState()
+        handleDreamState()
         handleShadeTouchability()
     }
 
@@ -503,6 +516,31 @@ constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun handleDreamState() {
+        applicationScope.launch {
+            keyguardInteractor.isAbleToDream
+                .sample(sceneInteractor.transitionState, ::Pair)
+                .collect { (isAbleToDream, transitionState) ->
+                    if (transitionState.isIdle(Scenes.Communal)) {
+                        // The dream is automatically started underneath the hub, don't transition
+                        // to dream when this is happening as communal is still visible on top.
+                        return@collect
+                    }
+                    if (isAbleToDream) {
+                        switchToScene(
+                            targetSceneKey = Scenes.Dream,
+                            loggingReason = "dream started",
+                        )
+                    } else {
+                        switchToScene(
+                            targetSceneKey = SceneFamilies.Home,
+                            loggingReason = "dream stopped",
+                        )
+                    }
+                }
         }
     }
 
