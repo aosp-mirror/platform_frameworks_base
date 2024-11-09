@@ -385,3 +385,17 @@ flag {
     description: "This fixed read-only flag is used to enable new ranging permission for all ranging use cases."
     bug: "370977414"
 }
+
+flag {
+    name: "system_selection_toolbar_enabled"
+    namespace: "permissions"
+    description: "Enables the system selection toolbar feature."
+    bug: "363318732"
+}
+
+flag {
+    name: "use_system_selection_toolbar_in_sysui"
+    namespace: "permissions"
+    description: "Uses the SysUi process to host the SelectionToolbarRenderService."
+    bug: "363318732"
+}
