@@ -257,6 +257,10 @@ public abstract class IContextHubWrapper {
     /** Closes a previously opened endpoint */
     public void closeEndpointSession(int sessionId, byte reason) throws RemoteException {}
 
+    /** Unregisters a previously registered endpoint */
+    public void unregisterEndpoint(android.hardware.contexthub.EndpointInfo info)
+            throws RemoteException {}
+
     /**
      * @return True if this version of the Contexthub HAL supports Location setting notifications.
      */
@@ -729,6 +733,16 @@ public abstract class IContextHubWrapper {
                 return;
             }
             hub.closeEndpointSession(sessionId, reason);
+        }
+
+        @Override
+        public void unregisterEndpoint(android.hardware.contexthub.EndpointInfo info)
+                throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return;
+            }
+            hub.unregisterEndpoint(info);
         }
 
         public boolean supportsLocationSettingNotifications() {

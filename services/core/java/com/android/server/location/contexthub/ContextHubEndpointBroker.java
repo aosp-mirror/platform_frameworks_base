@@ -27,6 +27,8 @@ import android.hardware.location.IContextHubTransactionCallback;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * A class that represents a broker for the endpoint registered by the client app. This class
  * manages direct IContextHubEndpoint/IContextHubEndpointCallback API/callback calls.
@@ -54,6 +56,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
     /** The remote callback interface for this endpoint. */
     private final IContextHubEndpointCallback mContextHubEndpointCallback;
 
+    /** True if this endpoint is registered with the service. */
+    private AtomicBoolean mIsRegistered = new AtomicBoolean(true);
+
     /* package */ ContextHubEndpointBroker(
             Context context,
             IContextHubWrapper contextHubProxy,
@@ -77,6 +82,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
     public int openSession(HubEndpointInfo destination, HubServiceInfo serviceInfo)
             throws RemoteException {
         ContextHubServiceUtil.checkPermissions(mContext);
+        if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
         int sessionId = mEndpointManager.reserveSessionId();
         EndpointInfo halEndpointInfo = ContextHubServiceUtil.convertHalEndpointInfo(destination);
         try {
@@ -97,6 +103,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
     @Override
     public void closeSession(int sessionId, int reason) throws RemoteException {
         ContextHubServiceUtil.checkPermissions(mContext);
+        if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
         try {
             mContextHubProxy.closeEndpointSession(sessionId, (byte) reason);
         } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
@@ -112,8 +119,15 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
 
     @Override
     public void unregister() {
-        // TODO(b/378487799): Implement this
-
+        ContextHubServiceUtil.checkPermissions(mContext);
+        mIsRegistered.set(false);
+        try {
+            mContextHubProxy.unregisterEndpoint(mHalEndpointInfo);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while calling HAL unregisterEndpoint", e);
+        }
+        // TODO(b/378487799): Release reserved session IDs
+        mEndpointManager.unregisterEndpoint(mEndpointInfo.getIdentifier().getEndpoint());
     }
 
     @Override

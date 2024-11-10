@@ -194,6 +194,15 @@ import java.util.concurrent.ConcurrentHashMap;
         }
     }
 
+    /**
+     * Unregisters an endpoint given its ID.
+     *
+     * @param endpointId The ID of the endpoint to unregister.
+     */
+    /* package */ void unregisterEndpoint(long endpointId) {
+        mEndpointMap.remove(endpointId);
+    }
+
     /** @return an available endpoint ID */
     private long getNewEndpointId() {
         synchronized (mEndpointLock) {
