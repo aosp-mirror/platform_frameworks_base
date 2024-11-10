@@ -41,6 +41,7 @@ import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.os.vibrator.VibratorEnvelopeEffectInfo;
 import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.MathUtils;
 
@@ -1819,12 +1820,12 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * <p>You can use the following APIs to obtain these limits:
      * <ul>
-     * <li>Maximum envelope control points: {@link Vibrator#getMaxEnvelopeEffectSize()}</li>
+     * <li>Maximum envelope control points: {@link VibratorEnvelopeEffectInfo#getMaxSize()}
      * <li>Minimum control point duration:
-     * {@link Vibrator#getMinEnvelopeEffectControlPointDurationMillis()}</li>
+     * {@link VibratorEnvelopeEffectInfo#getMinControlPointDurationMillis()}
      * <li>Maximum control point duration:
-     * {@link Vibrator#getMaxEnvelopeEffectControlPointDurationMillis()}</li>
-     * <li>Maximum total effect duration: {@link Vibrator#getMaxEnvelopeEffectDurationMillis()}</li>
+     * {@link VibratorEnvelopeEffectInfo#getMaxControlPointDurationMillis()}
+     * <li>Maximum total effect duration: {@link VibratorEnvelopeEffectInfo#getMaxDurationMillis()}
      * </ul>
      *
      * @see VibrationEffect#startWaveformEnvelope()
