@@ -18,6 +18,7 @@ package android.media;
 
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
+import static android.media.codec.Flags.FLAG_APV_SUPPORT;
 
 import static com.android.media.codec.flags.Flags.FLAG_CODEC_IMPORTANCE;
 import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
@@ -157,6 +158,8 @@ import java.util.stream.Collectors;
 public final class MediaFormat {
     public static final String MIMETYPE_VIDEO_VP8 = "video/x-vnd.on2.vp8";
     public static final String MIMETYPE_VIDEO_VP9 = "video/x-vnd.on2.vp9";
+    @FlaggedApi(FLAG_APV_SUPPORT)
+    public static final String MIMETYPE_VIDEO_APV = "video/apv";
     public static final String MIMETYPE_VIDEO_AV1 = "video/av01";
     public static final String MIMETYPE_VIDEO_AVC = "video/avc";
     public static final String MIMETYPE_VIDEO_HEVC = "video/hevc";

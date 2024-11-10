@@ -71,7 +71,7 @@ object SystemFeaturesGenerator {
         println("Usage: SystemFeaturesGenerator <outputClassName> [options]")
         println(" Options:")
         println("  --readonly=true|false    Whether to encode features as build-time constants")
-        println("  --feature=\$NAME:\$VER   A feature+version pair, where \$VER can be:")
+        println("  --feature=\$NAME:\$VER     A feature+version pair, where \$VER can be:")
         println("                             * blank/empty == undefined (variable API)")
         println("                             * valid int   == enabled   (constant API)")
         println("                             * UNAVAILABLE == disabled  (constant API)")
@@ -89,6 +89,17 @@ object SystemFeaturesGenerator {
     /** Main entrypoint for build-time system feature codegen. */
     @JvmStatic
     fun main(args: Array<String>) {
+        generate(args, System.out)
+    }
+
+    /**
+     * Simple API entrypoint for build-time system feature codegen.
+     *
+     * Note: Typically this would be implemented in terms of a proper Builder-type input argument,
+     * but it's primarily used for testing as opposed to direct production usage.
+     */
+    @JvmStatic
+    fun generate(args: Array<String>, output: Appendable) {
         if (args.size < 1) {
             usage()
             return
@@ -155,7 +166,7 @@ object SystemFeaturesGenerator {
             .addFileComment("This file is auto-generated. DO NOT MODIFY.\n")
             .addFileComment("Args: ${args.joinToString(" \\\n           ")}")
             .build()
-            .writeTo(System.out)
+            .writeTo(output)
     }
 
     /*
@@ -171,12 +182,27 @@ object SystemFeaturesGenerator {
         return when (featureArgs.getOrNull(1)) {
             null, "" -> FeatureInfo(name, null, readonly = false)
             "UNAVAILABLE" -> FeatureInfo(name, null, readonly = true)
-            else -> FeatureInfo(name, featureArgs[1].toIntOrNull(), readonly = true)
+            else -> {
+                val featureVersion =
+                    featureArgs[1].toIntOrNull()
+                        ?: throw IllegalArgumentException(
+                            "Invalid feature version input for $name: ${featureArgs[1]}"
+                        )
+                FeatureInfo(name, featureArgs[1].toInt(), readonly = true)
+            }
         }
     }
 
     private fun parseFeatureName(name: String): String =
-        if (name.startsWith("FEATURE_")) name else "FEATURE_$name"
+        when {
+            name.startsWith("android") ->
+                throw IllegalArgumentException(
+                    "Invalid feature name input: \"android\"-namespaced features must be " +
+                    "provided as PackageManager.FEATURE_* suffixes, not raw feature strings."
+                )
+            name.startsWith("FEATURE_") -> name
+            else -> "FEATURE_$name"
+        }
 
     /*
      * Adds per-feature query methods to the class with the form:

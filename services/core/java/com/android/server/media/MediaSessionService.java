@@ -362,6 +362,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     + record.isActive());
                 }
                 user.pushAddressedPlayerChangedLocked();
+                mHandler.post(this::notifyGlobalPrioritySessionActiveChanged);
             } else {
                 if (!user.mPriorityStack.contains(record)) {
                     Log.w(TAG, "Unknown session updated. Ignoring.");
@@ -394,11 +395,16 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     // Currently only media1 can become global priority session.
     void setGlobalPrioritySession(MediaSessionRecord record) {
+        boolean globalPrioritySessionActiveChanged = false;
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
             if (mGlobalPrioritySession != record) {
                 Log.d(TAG, "Global priority session is changed from " + mGlobalPrioritySession
                         + " to " + record);
+                globalPrioritySessionActiveChanged =
+                        (mGlobalPrioritySession == null && record.isActive())
+                                || (mGlobalPrioritySession != null
+                                        && mGlobalPrioritySession.isActive() != record.isActive());
                 mGlobalPrioritySession = record;
                 if (user != null && user.mPriorityStack.contains(record)) {
                     // Handle the global priority session separately.
@@ -406,6 +412,30 @@ public class MediaSessionService extends SystemService implements Monitor {
                     // because it or other system components might have been the lastly played media
                     // app.
                     user.mPriorityStack.removeSession(record);
+                }
+            }
+        }
+        if (globalPrioritySessionActiveChanged) {
+            mHandler.post(this::notifyGlobalPrioritySessionActiveChanged);
+        }
+    }
+
+    /** Returns whether the global priority session is active. */
+    boolean isGlobalPrioritySessionActive() {
+        synchronized (mLock) {
+            return isGlobalPriorityActiveLocked();
+        }
+    }
+
+    private void notifyGlobalPrioritySessionActiveChanged() {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+        synchronized (mLock) {
+            boolean isGlobalPriorityActive = isGlobalPriorityActiveLocked();
+            for (Set<MediaSessionRecordImpl> records : mUserEngagedSessionsForFgs.values()) {
+                for (MediaSessionRecordImpl record : records) {
+                    record.onGlobalPrioritySessionActiveChanged(isGlobalPriorityActive);
                 }
             }
         }
@@ -646,8 +676,11 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         if (mGlobalPrioritySession == session) {
             mGlobalPrioritySession = null;
-            if (session.isActive() && user != null) {
-                user.pushAddressedPlayerChangedLocked();
+            if (session.isActive()) {
+                if (user != null) {
+                    user.pushAddressedPlayerChangedLocked();
+                }
+                mHandler.post(this::notifyGlobalPrioritySessionActiveChanged);
             }
         } else {
             if (user != null) {
