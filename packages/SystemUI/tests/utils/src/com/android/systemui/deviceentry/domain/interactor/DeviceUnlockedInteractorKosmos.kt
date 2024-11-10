@@ -19,12 +19,14 @@ package com.android.systemui.deviceentry.domain.interactor
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
 import com.android.systemui.flags.fakeSystemPropertiesHelper
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.trustInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 
 val Kosmos.deviceUnlockedInteractor by Fixture {
     DeviceUnlockedInteractor(
@@ -36,6 +38,8 @@ val Kosmos.deviceUnlockedInteractor by Fixture {
             powerInteractor = powerInteractor,
             biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
             systemPropertiesHelper = fakeSystemPropertiesHelper,
+            userAwareSecureSettingsRepository = userAwareSecureSettingsRepository,
+            keyguardInteractor = keyguardInteractor,
         )
         .apply { activateIn(testScope) }
 }

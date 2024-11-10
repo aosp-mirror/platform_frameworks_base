@@ -56,6 +56,7 @@ import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
 import com.android.systemui.res.R
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ZenModeController
@@ -128,6 +129,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var largeClockEvents: ClockFaceEvents
     @Mock private lateinit var parentView: View
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    @Mock private lateinit var userTracker: UserTracker
 
     @Mock private lateinit var zenModeController: ZenModeController
     private var zenModeControllerCallback: ZenModeController.Callback? = null
@@ -153,6 +155,7 @@ class ClockEventControllerTest : SysuiTestCase() {
             .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
         whenever(smallClockController.theme).thenReturn(ThemeConfig(true, null))
         whenever(largeClockController.theme).thenReturn(ThemeConfig(true, null))
+        whenever(userTracker.userId).thenReturn(1)
 
         zenModeRepository.addMode(MANUAL_DND_INACTIVE)
 
@@ -177,6 +180,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 withDeps.featureFlags,
                 zenModeController,
                 kosmos.zenModeInteractor,
+                userTracker,
             )
         underTest.clock = clock
 

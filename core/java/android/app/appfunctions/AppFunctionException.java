@@ -141,6 +141,7 @@ public final class AppFunctionException extends Exception implements Parcelable 
      */
     public AppFunctionException(
             @ErrorCode int errorCode, @Nullable String errorMessage, @NonNull Bundle extras) {
+        super(errorMessage);
         mErrorCode = errorCode;
         mErrorMessage = errorMessage;
         mExtras = Objects.requireNonNull(extras);

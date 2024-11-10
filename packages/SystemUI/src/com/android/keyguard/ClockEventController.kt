@@ -35,6 +35,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.customization.R
 import com.android.systemui.dagger.qualifiers.Background
@@ -62,6 +63,7 @@ import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
 import com.android.systemui.res.R as SysuiR
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
@@ -80,7 +82,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
@@ -103,6 +104,7 @@ constructor(
     private val featureFlags: FeatureFlagsClassic,
     private val zenModeController: ZenModeController,
     private val zenModeInteractor: ZenModeInteractor,
+    private val userTracker: UserTracker,
 ) {
     var loggers =
         listOf(
@@ -119,6 +121,10 @@ constructor(
             field = value
             connectClock(value)
         }
+
+    private fun is24HourFormat(userId: Int? = null): Boolean {
+        return DateFormat.is24HourFormat(context, userId ?: userTracker.userId)
+    }
 
     private fun disconnectClock(clock: ClockController?) {
         if (clock == null) {
@@ -186,7 +192,7 @@ constructor(
                 var pastVisibility: Int? = null
 
                 override fun onViewAttachedToWindow(view: View) {
-                    clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                    clock.events.onTimeFormatChanged(is24HourFormat())
                     // Match the asing for view.parent's layout classes.
                     smallClockFrame =
                         (view.parent as ViewGroup)?.also { frame ->
@@ -218,7 +224,7 @@ constructor(
         largeClockOnAttachStateChangeListener =
             object : OnAttachStateChangeListener {
                 override fun onViewAttachedToWindow(p0: View) {
-                    clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                    clock.events.onTimeFormatChanged(is24HourFormat())
                 }
 
                 override fun onViewDetachedFromWindow(p0: View) {}
@@ -358,7 +364,7 @@ constructor(
             }
 
             override fun onTimeFormatChanged(timeFormat: String?) {
-                clock?.run { events.onTimeFormatChanged(DateFormat.is24HourFormat(context)) }
+                clock?.run { events.onTimeFormatChanged(is24HourFormat()) }
             }
 
             override fun onTimeZoneChanged(timeZone: TimeZone) {
@@ -366,7 +372,7 @@ constructor(
             }
 
             override fun onUserSwitchComplete(userId: Int) {
-                clock?.run { events.onTimeFormatChanged(DateFormat.is24HourFormat(context)) }
+                clock?.run { events.onTimeFormatChanged(is24HourFormat(userId)) }
                 zenModeCallback.onNextAlarmChanged()
             }
 

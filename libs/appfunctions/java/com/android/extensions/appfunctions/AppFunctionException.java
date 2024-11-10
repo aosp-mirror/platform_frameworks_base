@@ -125,6 +125,7 @@ public final class AppFunctionException extends Exception {
 
     public AppFunctionException(
             int errorCode, @Nullable String errorMessage, @NonNull Bundle extras) {
+        super(errorMessage);
         mErrorCode = errorCode;
         mErrorMessage = errorMessage;
         mExtras = extras;
