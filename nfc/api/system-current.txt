@@ -59,6 +59,7 @@ package android.nfc {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearPreference();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public java.util.List<java.lang.String> getActiveNfceeList();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.nfc.RoutingStatus getRoutingStatus();
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public java.util.List<android.nfc.NfcRoutingTableEntry> getRoutingTable();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean hasUserEnabledNfc();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean isAutoChangeEnabled();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean isTagPresent();
@@ -91,6 +92,7 @@ package android.nfc {
     method public void onDisable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisableFinished(int);
     method public void onDisableStarted();
+    method public void onEeListenActivated(boolean);
     method public void onEnable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onEnableFinished(int);
     method public void onEnableStarted();
@@ -105,14 +107,48 @@ package android.nfc {
     method public void onRfFieldActivated(boolean);
     method public void onRoutingChanged();
     method public void onStateUpdated(int);
-    method public void onTagConnected(boolean, @NonNull android.nfc.Tag);
+    method public void onTagConnected(boolean);
     method public void onTagDispatch(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+  }
+
+  @FlaggedApi("android.nfc.nfc_oem_extension") public abstract class NfcRoutingTableEntry {
+    method public int getNfceeId();
   }
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public class RoutingStatus {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int getDefaultIsoDepRoute();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int getDefaultOffHostRoute();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int getDefaultRoute();
+  }
+
+  @FlaggedApi("android.nfc.nfc_oem_extension") public class RoutingTableAidEntry extends android.nfc.NfcRoutingTableEntry {
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public String getAid();
+  }
+
+  @FlaggedApi("android.nfc.nfc_oem_extension") public class RoutingTableProtocolEntry extends android.nfc.NfcRoutingTableEntry {
+    method @FlaggedApi("android.nfc.nfc_oem_extension") public int getProtocol();
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_ISO_DEP = 4; // 0x4
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_NDEF = 7; // 0x7
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_NFC_DEP = 5; // 0x5
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_T1T = 1; // 0x1
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_T2T = 2; // 0x2
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_T3T = 3; // 0x3
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_T5T = 6; // 0x6
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_UNDETERMINED = 0; // 0x0
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int PROTOCOL_UNSUPPORTED = -1; // 0xffffffff
+  }
+
+  @FlaggedApi("android.nfc.nfc_oem_extension") public class RoutingTableSystemCodeEntry extends android.nfc.NfcRoutingTableEntry {
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public byte[] getSystemCode();
+  }
+
+  @FlaggedApi("android.nfc.nfc_oem_extension") public class RoutingTableTechnologyEntry extends android.nfc.NfcRoutingTableEntry {
+    method @FlaggedApi("android.nfc.nfc_oem_extension") public int getTechnology();
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int TECHNOLOGY_A = 0; // 0x0
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int TECHNOLOGY_B = 1; // 0x1
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int TECHNOLOGY_F = 2; // 0x2
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int TECHNOLOGY_UNSUPPORTED = -1; // 0xffffffff
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int TECHNOLOGY_V = 3; // 0x3
   }
 
 }
