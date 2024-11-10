@@ -27,6 +27,7 @@ import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.exceptions.ExceptionMessageBuilder
 import android.tools.flicker.subject.exceptions.IncorrectRegionException
 import android.tools.flicker.subject.layers.LayerSubject
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.common.EnterPipTransition
 import org.junit.Assume
@@ -65,6 +66,8 @@ import kotlin.math.abs
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) : EnterPipTransition(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
+
     override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
 
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {
