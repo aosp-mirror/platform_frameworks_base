@@ -112,8 +112,7 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Gravar o ecrã?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Gravar uma app"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Gravar o ecrã inteiro"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Gravar o ecrã inteiro: %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Quando está a gravar o ecrã inteiro, tudo o que é apresentado no ecrã é gravado. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Quando está a gravar uma app, tudo o que é apresentado ou reproduzido nessa app é gravado. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Gravar ecrã"</string>
@@ -578,10 +577,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gerir"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Histórico"</string>
-    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
-    <skip />
-    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
-    <skip />
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"Definições de notificação"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"Histórico de notificações"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nova"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silencioso"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificações"</string>
@@ -592,7 +589,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Começar agora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Sem notificações"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Não existem novas notificações"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"O repouso das notificações está ativado"</string>
+    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
+    <skip />
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"O volume e os alertas são reduzidos automaticamente durante até 2 minutos quando recebe muitas notificações de uma vez."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Desativar"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueie e veja notificações antigas"</string>
@@ -700,6 +698,7 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Corrigido"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Posição da cabeça"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Toque para alterar o modo de campainha"</string>
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"modo de som"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"desativar som"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"reativar som"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrar"</string>
@@ -1410,15 +1409,12 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"App atual"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Acessibilidade"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Atalhos de teclado"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Atalhos de pesquisa"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personalize os atalhos de teclado"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pesquisar atalhos"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nenhum resultado da pesquisa"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ícone de reduzir"</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalizar"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Concluir"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ícone de expandir"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Indicador para arrastar"</string>
@@ -1480,6 +1476,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Disponibilizado por apps"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Ecrã"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Desconhecido"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Reponha os mosaicos"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Repor os mosaicos para a ordem e os tamanhos originais?"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"Repor todos os mosaicos?"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"Todos os mosaicos de Definições rápidas vão ser repostos para as definições originais do dispositivo"</string>
 </resources>

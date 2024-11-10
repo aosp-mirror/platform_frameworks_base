@@ -111,8 +111,8 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      * Returns the function parameters. The key is the parameter name, and the value is the
      * parameter value.
      *
-     * <p>The bundle may have missing parameters. Developers are advised to implement defensive
-     * handling measures.
+     * <p>The {@link GenericDocument} may have missing parameters. Developers are advised to
+     * implement defensive handling measures.
      *
      * @see AppFunctionManager on how to determine the expected parameters.
      */

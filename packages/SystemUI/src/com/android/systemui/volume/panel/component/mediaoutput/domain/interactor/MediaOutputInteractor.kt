@@ -20,10 +20,12 @@ import android.content.pm.PackageManager
 import android.media.VolumeProvider
 import android.media.session.MediaController
 import android.util.Log
+import androidx.annotation.WorkerThread
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSessions
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
@@ -62,6 +64,7 @@ constructor(
     @Background private val backgroundCoroutineContext: CoroutineContext,
     mediaControllerRepository: MediaControllerRepository,
     private val mediaControllerInteractor: MediaControllerInteractor,
+    private val execution: Execution,
 ) {
 
     private val activeMediaControllers: Flow<MediaControllers> =
@@ -82,9 +85,10 @@ constructor(
             .map {
                 MediaDeviceSessions(
                     local = it.local?.mediaDeviceSession(),
-                    remote = it.remote?.mediaDeviceSession()
+                    remote = it.remote?.mediaDeviceSession(),
                 )
             }
+            .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.Eagerly, MediaDeviceSessions(null, null))
 
     /** Returns the default [MediaDeviceSession] from [activeMediaDeviceSessions] */
@@ -115,55 +119,43 @@ constructor(
     val currentConnectedDevice: Flow<MediaDevice?> =
         localMediaRepository.flatMapLatest { it.currentConnectedDevice }.distinctUntilChanged()
 
-    private suspend fun getApplicationLabel(packageName: String): CharSequence? {
-        return try {
-            withContext(backgroundCoroutineContext) {
-                val appInfo =
-                    packageManager.getApplicationInfo(
-                        packageName,
-                        PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ANY_USER
-                    )
-                appInfo.loadLabel(packageManager)
-            }
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(TAG, "Unable to find info for package: $packageName")
-            null
-        }
-    }
-
     /** Finds local and remote media controllers. */
-    private fun getMediaControllers(
-        controllers: Collection<MediaController>,
-    ): MediaControllers {
-        var localController: MediaController? = null
-        var remoteController: MediaController? = null
-        val remoteMediaSessions: MutableSet<String> = mutableSetOf()
-        for (controller in controllers) {
-            val playbackInfo: MediaController.PlaybackInfo = controller.playbackInfo ?: continue
-            when (playbackInfo.playbackType) {
-                MediaController.PlaybackInfo.PLAYBACK_TYPE_REMOTE -> {
-                    // MediaController can't be local if there is a remote one for the same package
-                    if (localController?.packageName.equals(controller.packageName)) {
-                        localController = null
+    private suspend fun getMediaControllers(
+        controllers: Collection<MediaController>
+    ): MediaControllers =
+        withContext(backgroundCoroutineContext) {
+            var localController: MediaController? = null
+            var remoteController: MediaController? = null
+            val remoteMediaSessions: MutableSet<String> = mutableSetOf()
+            for (controller in controllers) {
+                val playbackInfo: MediaController.PlaybackInfo = controller.playbackInfo ?: continue
+                when (playbackInfo.playbackType) {
+                    MediaController.PlaybackInfo.PLAYBACK_TYPE_REMOTE -> {
+                        // MediaController can't be local if there is a remote one for the same
+                        // package
+                        if (localController?.packageName.equals(controller.packageName)) {
+                            localController = null
+                        }
+                        if (!remoteMediaSessions.contains(controller.packageName)) {
+                            remoteMediaSessions.add(controller.packageName)
+                            remoteController = chooseController(remoteController, controller)
+                        }
                     }
-                    if (!remoteMediaSessions.contains(controller.packageName)) {
-                        remoteMediaSessions.add(controller.packageName)
-                        remoteController = chooseController(remoteController, controller)
+                    MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL -> {
+                        if (controller.packageName in remoteMediaSessions) continue
+                        localController = chooseController(localController, controller)
                     }
-                }
-                MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL -> {
-                    if (controller.packageName in remoteMediaSessions) continue
-                    localController = chooseController(localController, controller)
                 }
             }
+            MediaControllers(local = localController, remote = remoteController)
         }
-        return MediaControllers(local = localController, remote = remoteController)
-    }
 
+    @WorkerThread
     private fun chooseController(
         currentController: MediaController?,
         newController: MediaController,
     ): MediaController {
+        require(!execution.isMainThread())
         if (currentController == null) {
             return newController
         }
@@ -175,12 +167,26 @@ constructor(
         return currentController
     }
 
-    private suspend fun MediaController.mediaDeviceSession(): MediaDeviceSession? {
+    @WorkerThread
+    private fun MediaController.mediaDeviceSession(): MediaDeviceSession? {
+        require(!execution.isMainThread())
+        val applicationLabel =
+            try {
+                packageManager
+                    .getApplicationInfo(
+                        packageName,
+                        PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ANY_USER,
+                    )
+                    .loadLabel(packageManager)
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(TAG, "Unable to find info for package: $packageName")
+                null
+            } ?: return null
         return MediaDeviceSession(
             packageName = packageName,
             sessionToken = sessionToken,
             canAdjustVolume = playbackInfo.volumeControl != VolumeProvider.VOLUME_CONTROL_FIXED,
-            appLabel = getApplicationLabel(packageName) ?: return null
+            appLabel = applicationLabel,
         )
     }
 
@@ -195,10 +201,7 @@ constructor(
             .onStart { emit(this@stateChanges) }
     }
 
-    private data class MediaControllers(
-        val local: MediaController?,
-        val remote: MediaController?,
-    )
+    private data class MediaControllers(val local: MediaController?, val remote: MediaController?)
 
     private companion object {
         const val TAG = "MediaOutputInteractor"

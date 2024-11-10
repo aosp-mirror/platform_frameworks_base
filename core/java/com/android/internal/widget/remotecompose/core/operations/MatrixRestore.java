@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -31,20 +33,22 @@ public class MatrixRestore extends PaintOperation {
     public MatrixRestore() {}
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
         MatrixRestore op = new MatrixRestore();
         operations.add(op);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "MatrixRestore";
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -53,17 +57,17 @@ public class MatrixRestore extends PaintOperation {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer) {
+    public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(OP_CODE);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Restore the matrix and clip");
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.matrixRestore();
     }
 }

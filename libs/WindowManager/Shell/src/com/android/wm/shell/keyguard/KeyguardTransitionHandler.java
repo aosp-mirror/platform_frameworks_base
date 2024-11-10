@@ -53,6 +53,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -72,6 +73,9 @@ import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
 public class KeyguardTransitionHandler
         implements Transitions.TransitionHandler, KeyguardChangeListener,
         TaskStackListenerCallback {
+    private static final boolean ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS =
+            Flags.ensureKeyguardDoesTransitionStarting();
+
     private static final String TAG = "KeyguardTransition";
 
     private final Transitions mTransitions;
@@ -194,7 +198,7 @@ public class KeyguardTransitionHandler
 
         // Occlude/unocclude animations are only played if the keyguard is locked.
         if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
-            if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0) {
+            if (isKeyguardOccluding(info)) {
                 if (hasOpeningDream(info)) {
                     return startAnimation(mOccludeByDreamTransition, "occlude-by-dream",
                             transition, info, startTransaction, finishTransaction, finishCallback);
@@ -202,7 +206,7 @@ public class KeyguardTransitionHandler
                     return startAnimation(mOccludeTransition, "occlude",
                             transition, info, startTransaction, finishTransaction, finishCallback);
                 }
-            } else if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0) {
+            } else if (isKeyguardUnoccluding(info)) {
                 return startAnimation(mUnoccludeTransition, "unocclude",
                         transition, info, startTransaction, finishTransaction, finishCallback);
             }
@@ -319,6 +323,36 @@ public class KeyguardTransitionHandler
             if (isOpeningType(change.getMode())
                     && change.getTaskInfo() != null
                     && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_DREAM) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isKeyguardOccluding(@NonNull TransitionInfo info) {
+        if (!ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            return (info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0;
+        }
+
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.hasFlags(TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA)
+                    && change.getMode() == TRANSIT_TO_FRONT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isKeyguardUnoccluding(@NonNull TransitionInfo info) {
+        if (!ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            return (info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0;
+        }
+
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.hasFlags(TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA)
+                    && change.getMode() == TRANSIT_TO_BACK) {
                 return true;
             }
         }

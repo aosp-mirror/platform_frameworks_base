@@ -51,6 +51,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
@@ -64,6 +65,7 @@ import android.view.SurfaceControl;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.brightness.BrightnessUtils;
 import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
@@ -323,7 +325,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private int mWidth;
         private int mHeight;
         private int mDensityDpi;
-        private float mRequestedRefreshRate;
+        private final float mRequestedRefreshRate;
         private Surface mSurface;
         private DisplayDeviceInfo mInfo;
         private int mDisplayState;
@@ -332,7 +334,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private Display.Mode mMode;
         private int mDisplayIdToMirror;
         private boolean mIsWindowManagerMirroring;
-        private DisplayCutout mDisplayCutout;
+        private final DisplayCutout mDisplayCutout;
+        private final float mDefaultBrightness;
+        private float mCurrentBrightness;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
@@ -349,6 +353,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mDensityDpi = virtualDisplayConfig.getDensityDpi();
             mRequestedRefreshRate = virtualDisplayConfig.getRequestedRefreshRate();
             mDisplayCutout = virtualDisplayConfig.getDisplayCutout();
+            mDefaultBrightness = virtualDisplayConfig.getDefaultBrightness();
+            mCurrentBrightness = mDefaultBrightness;
             mMode = createMode(mWidth, mHeight, getRefreshRate());
             mSurface = surface;
             mFlags = flags;
@@ -456,6 +462,12 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 } else {
                     mCallback.dispatchDisplayResumed();
                 }
+            }
+            if (android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()
+                    && BrightnessUtils.isValidBrightnessValue(brightnessState)
+                    && brightnessState != mCurrentBrightness) {
+                mCurrentBrightness = brightnessState;
+                mCallback.dispatchRequestedBrightnessChanged(mCurrentBrightness);
             }
             return null;
         }
@@ -623,6 +635,10 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                     mInfo.state = mDisplayState;
                 }
 
+                mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
+                mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
+                mInfo.brightnessDefault = mDefaultBrightness;
+
                 mInfo.ownerUid = mOwnerUid;
                 mInfo.ownerPackageName = mOwnerPackageName;
 
@@ -642,6 +658,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private static final int MSG_ON_DISPLAY_PAUSED = 0;
         private static final int MSG_ON_DISPLAY_RESUMED = 1;
         private static final int MSG_ON_DISPLAY_STOPPED = 2;
+        private static final int MSG_ON_REQUESTED_BRIGHTNESS_CHANGED = 3;
 
         private final IVirtualDisplayCallback mCallback;
 
@@ -663,6 +680,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                     case MSG_ON_DISPLAY_STOPPED:
                         mCallback.onStopped();
                         break;
+                    case MSG_ON_REQUESTED_BRIGHTNESS_CHANGED:
+                        mCallback.onRequestedBrightnessChanged((Float) msg.obj);
+                        break;
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to notify listener of virtual display event.", e);
@@ -675,6 +695,11 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
         public void dispatchDisplayResumed() {
             sendEmptyMessage(MSG_ON_DISPLAY_RESUMED);
+        }
+
+        public void dispatchRequestedBrightnessChanged(float brightness) {
+            Message msg = obtainMessage(MSG_ON_REQUESTED_BRIGHTNESS_CHANGED, brightness);
+            sendMessage(msg);
         }
 
         public void dispatchDisplayStopped() {

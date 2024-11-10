@@ -1521,8 +1521,7 @@ public class SoundTrigger {
         private final boolean mAllowMultipleTriggers;
         private final KeyphraseRecognitionExtra mKeyphrases[];
         private final byte[] mData;
-        @ModuleProperties.AudioCapabilities
-        private final int mAudioCapabilities;
+        private final @ModuleProperties.AudioCapabilities int mAudioCapabilities;
 
         /**
          * Constructor for {@link RecognitionConfig} with {@code audioCapabilities} describes a
@@ -1535,11 +1534,12 @@ public class SoundTrigger {
          * @param keyphrases List of keyphrases in the sound model.
          * @param data Opaque data for use by system applications who know about voice engine
          *             internals, typically during enrollment.
-         * @param audioCapabilities Bit field encoding of the AudioCapabilities.
+         * @param audioCapabilities Bit field encoding of the AudioCapabilities. See
+         *                          {@link ModuleProperties.AudioCapabilities} for details.
          */
         private RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
                 @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data,
-                int audioCapabilities) {
+                @ModuleProperties.AudioCapabilities int audioCapabilities) {
             this.mCaptureRequested = captureRequested;
             this.mAllowMultipleTriggers = allowMultipleTriggers;
             this.mKeyphrases = keyphrases != null ? keyphrases : new KeyphraseRecognitionExtra[0];
@@ -1617,8 +1617,11 @@ public class SoundTrigger {
             return mData;
         }
 
-        /** Bit field encoding of the AudioCapabilities supported by the firmware. */
-        public int getAudioCapabilities() {
+        /**
+         * Bit field encoding of the AudioCapabilities supported by the firmware. See
+         * {@link ModuleProperties.AudioCapabilities} for details.
+         */
+        public @ModuleProperties.AudioCapabilities int getAudioCapabilities() {
             return mAudioCapabilities;
         }
 
@@ -1702,7 +1705,7 @@ public class SoundTrigger {
             private boolean mAllowMultipleTriggers;
             @Nullable private KeyphraseRecognitionExtra[] mKeyphrases;
             @Nullable private byte[] mData;
-            private int mAudioCapabilities;
+            private @ModuleProperties.AudioCapabilities int mAudioCapabilities;
 
             /**
              * Constructs a new Builder with the default values.
@@ -1750,18 +1753,20 @@ public class SoundTrigger {
              *             internals, typically during enrollment.
              * @return the same Builder instance.
              */
-            public @NonNull Builder setData(@Nullable byte[] data) {
-                mData = data;
+            public @NonNull Builder setData(@NonNull byte[] data) {
+                mData = requireNonNull(data, "Data must not be null");
                 return this;
             }
 
             /**
              * Sets the audio capabilities field.
              * @param audioCapabilities The bit field encoding of the audio capabilities associated
-             *                          with this recognition session.
+             *                          with this recognition session. See
+             *                          {@link ModuleProperties.AudioCapabilities} for details.
              * @return the same Builder instance.
              */
-            public @NonNull Builder setAudioCapabilities(int audioCapabilities) {
+            public @NonNull Builder setAudioCapabilities(
+                @ModuleProperties.AudioCapabilities int audioCapabilities) {
                 mAudioCapabilities = audioCapabilities;
                 return this;
             }

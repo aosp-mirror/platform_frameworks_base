@@ -231,17 +231,15 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 // KCA triggered movement to wait for other transitions (e.g. due to IME changes).
                 return;
             }
-            mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
-                boolean hasUserInteracted = (mPipBoundsState.hasUserMovedPip()
-                        || mPipBoundsState.hasUserResizedPip());
-                int delta = mPipBoundsAlgorithm.getEntryDestinationBounds().top
-                        - mPipBoundsState.getBounds().top;
+            boolean hasUserInteracted = (mPipBoundsState.hasUserMovedPip()
+                    || mPipBoundsState.hasUserResizedPip());
+            int delta = mPipBoundsAlgorithm.getEntryDestinationBounds().top
+                    - mPipBoundsState.getBounds().top;
 
-                if (!mIsImeShowing && !hasUserInteracted && delta != 0) {
-                    // If the user hasn't interacted with PiP, we respect the keep clear areas
-                    mMotionHelper.animateToOffset(mPipBoundsState.getBounds(), delta);
-                }
-            });
+            if (!mIsImeShowing && !hasUserInteracted && delta != 0) {
+                // If the user hasn't interacted with PiP, we respect the keep clear areas
+                mMotionHelper.animateToOffset(mPipBoundsState.getBounds(), delta);
+            }
         };
 
         if (PipUtils.isPip2ExperimentEnabled()) {
@@ -877,7 +875,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             mMovementWithinDismiss = touchState.getDownTouchPosition().y
                     >= mPipBoundsState.getMovementBounds().bottom;
             mMotionHelper.setSpringingToTouch(false);
-            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.mPinnedTaskLeash);
+            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.getPinnedTaskLeash());
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it

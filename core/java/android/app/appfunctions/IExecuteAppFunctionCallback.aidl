@@ -17,8 +17,10 @@
 package android.app.appfunctions;
 
 import android.app.appfunctions.ExecuteAppFunctionResponse;
+import android.app.appfunctions.AppFunctionException;
 
 /** {@hide} */
 oneway interface IExecuteAppFunctionCallback {
-    void onResult(in ExecuteAppFunctionResponse result);
+    void onSuccess(in ExecuteAppFunctionResponse result);
+    void onError(in AppFunctionException exception);
 }

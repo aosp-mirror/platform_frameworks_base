@@ -21,7 +21,7 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.SystemClock
-import android.platform.uiautomator_helpers.DeviceHelpers
+import android.platform.uiautomatorhelpers.DeviceHelpers
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -132,6 +132,24 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
     }
 
+    private fun getMinimizeButtonForTheApp(caption: UiObject2?): UiObject2 {
+        return caption
+            ?.children
+            ?.find { it.resourceName.endsWith(MINIMIZE_BUTTON_VIEW) }
+            ?: error("Unable to find resource $MINIMIZE_BUTTON_VIEW\n")
+    }
+
+    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+        val caption = getCaptionForTheApp(wmHelper, device)
+        val minimizeButton = getMinimizeButtonForTheApp(caption)
+        minimizeButton.click()
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withWindowSurfaceDisappeared(innerHelper)
+            .waitForAndVerify()
+    }
+
     /** Open maximize menu and click snap resize button on the app header for the given app. */
     fun snapResizeDesktopApp(
         wmHelper: WindowManagerStateHelper,
@@ -141,7 +159,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     ) {
         val caption = getCaptionForTheApp(wmHelper, device)
         val maximizeButton = getMaximizeButtonForTheApp(caption)
-        maximizeButton?.longClick()
+        maximizeButton.longClick()
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
 
         val buttonResId = if (toLeft) SNAP_LEFT_BUTTON else SNAP_RIGHT_BUTTON
@@ -400,6 +418,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         const val DESKTOP_MODE_BUTTON: String = "desktop_button"
         const val SNAP_LEFT_BUTTON: String = "maximize_menu_snap_left_button"
         const val SNAP_RIGHT_BUTTON: String = "maximize_menu_snap_right_button"
+        const val MINIMIZE_BUTTON_VIEW: String = "minimize_window"
         val caption: BySelector
             get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
     }

@@ -303,6 +303,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private final GnssPowerStatsCollector mGnssPowerStatsCollector;
     private final CustomEnergyConsumerPowerStatsCollector mCustomEnergyConsumerPowerStatsCollector;
     private final SparseBooleanArray mPowerStatsCollectorEnabled = new SparseBooleanArray();
+    private boolean mMoveWscLoggingToNotifierEnabled = false;
+
     private ScreenPowerStatsCollector.ScreenUsageTimeRetriever mScreenUsageTimeRetriever =
             new ScreenPowerStatsCollector.ScreenUsageTimeRetriever() {
 
@@ -809,17 +811,16 @@ public class BatteryStatsImpl extends BatteryStats {
         mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter, elapsedRealtimeMs);
 
         if (u.mChildUids != null) {
-            LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
-                    getCpuTimeInFreqContainer();
+            long[] delta = getCpuTimeInFreqContainer();
             int childUidCount = u.mChildUids.size();
             for (int j = childUidCount - 1; j >= 0; --j) {
                 LongArrayMultiStateCounter cpuTimeInFreqCounter =
                         u.mChildUids.valueAt(j).cpuTimeInFreqCounter;
                 if (cpuTimeInFreqCounter != null) {
                     mKernelSingleUidTimeReader.addDelta(u.mChildUids.keyAt(j),
-                            cpuTimeInFreqCounter, elapsedRealtimeMs, deltaContainer);
-                    onBatteryCounter.addCounts(deltaContainer);
-                    onBatteryScreenOffCounter.addCounts(deltaContainer);
+                            cpuTimeInFreqCounter, elapsedRealtimeMs, delta);
+                    onBatteryCounter.addCounts(delta);
+                    onBatteryScreenOffCounter.addCounts(delta);
                 }
             }
         }
@@ -890,8 +891,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     if (childUid != null) {
                         final LongArrayMultiStateCounter counter = childUid.cpuTimeInFreqCounter;
                         if (counter != null) {
-                            final LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
-                                    getCpuTimeInFreqContainer();
+                            final long[] deltaContainer = getCpuTimeInFreqContainer();
                             mKernelSingleUidTimeReader.addDelta(uid, counter, elapsedRealtimeMs,
                                     deltaContainer);
                             onBatteryCounter.addCounts(deltaContainer);
@@ -1741,7 +1741,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private long mBatteryTimeToFullSeconds = -1;
 
-    private LongArrayMultiStateCounter.LongArrayContainer mTmpCpuTimeInFreq;
+    private long[] mTmpCpuTimeInFreq;
 
     /**
      * Times spent by the system server threads handling incoming binder requests.
@@ -5157,10 +5157,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
             Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
             uidStats.noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
-
-            mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
-                    uidStats.mProcessState, true /* acquired */,
-                    getPowerManagerWakeLockLevel(type));
+            if (!mMoveWscLoggingToNotifierEnabled) {
+                mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
+                        uidStats.mProcessState, true /* acquired */,
+                        getPowerManagerWakeLockLevel(type));
+            }
             if (mPowerManagerFlags.isFrameworkWakelockInfoEnabled()) {
                 mFrameworkEvents.noteStartWakeLock(
                         mapIsolatedUid(uid), name, getPowerManagerWakeLockLevel(type), uptimeMs);
@@ -5207,9 +5208,11 @@ public class BatteryStatsImpl extends BatteryStats {
             Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
             uidStats.noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
 
-            mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
-                    uidStats.mProcessState, false/* acquired */,
-                    getPowerManagerWakeLockLevel(type));
+            if (!mMoveWscLoggingToNotifierEnabled) {
+                mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
+                        uidStats.mProcessState, false/* acquired */,
+                        getPowerManagerWakeLockLevel(type));
+            }
             if (mPowerManagerFlags.isFrameworkWakelockInfoEnabled()) {
                 mFrameworkEvents.noteStopWakeLock(
                         mapIsolatedUid(uid), name, getPowerManagerWakeLockLevel(type), uptimeMs);
@@ -10956,9 +10959,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
                     // Set initial values to all 0. This is a child UID and we want to include
                     // the entirety of its CPU time-in-freq stats into the parent's stats.
-                    cpuTimeInFreqCounter.updateValues(
-                            new LongArrayMultiStateCounter.LongArrayContainer(cpuFreqCount),
-                            timestampMs);
+                    cpuTimeInFreqCounter.updateValues(new long[cpuFreqCount], timestampMs);
                 } else {
                     cpuTimeInFreqCounter = null;
                 }
@@ -11361,11 +11362,9 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    private LongArrayMultiStateCounter.LongArrayContainer getCpuTimeInFreqContainer() {
+    private long[] getCpuTimeInFreqContainer() {
         if (mTmpCpuTimeInFreq == null) {
-            mTmpCpuTimeInFreq =
-                    new LongArrayMultiStateCounter.LongArrayContainer(
-                            mCpuScalingPolicies.getScalingStepCount());
+            mTmpCpuTimeInFreq = new long[mCpuScalingPolicies.getScalingStepCount()];
         }
         return mTmpCpuTimeInFreq;
     }
@@ -15978,6 +15977,15 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /**
+     * Controls where the logging of the WakelockStateChanged atom occurs:
+     *   true = Notifier, false = BatteryStatsImpl.
+     */
+    public void setMoveWscLoggingToNotifierEnabled(boolean enabled) {
+        synchronized (this) {
+            mMoveWscLoggingToNotifierEnabled = enabled;
+        }
+    }
     @GuardedBy("this")
     public void systemServicesReady(Context context) {
         mConstants.startObserving(context.getContentResolver());

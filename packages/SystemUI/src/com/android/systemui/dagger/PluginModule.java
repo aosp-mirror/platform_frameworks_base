@@ -16,6 +16,7 @@
 
 package com.android.systemui.dagger;
 
+
 import com.android.systemui.classifier.FalsingManagerProxy;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.globalactions.GlobalActionsImpl;
@@ -26,18 +27,20 @@ import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore;
+import com.android.systemui.statusbar.data.repository.SysuiDarkIconDispatcherStore;
 import com.android.systemui.statusbar.phone.ActivityStarterImpl;
-import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
 
 /**
  * Module for binding Plugin implementations.
  *
- * TODO(b/166258224): Many of these should be moved closer to their implementations.
+ * <p>TODO(b/166258224): Many of these should be moved closer to their implementations.
  */
 @Module
 public abstract class PluginModule {
@@ -47,12 +50,18 @@ public abstract class PluginModule {
     abstract ActivityStarter provideActivityStarter(ActivityStarterImpl activityStarterImpl);
 
     /** */
-    @Binds
-    abstract DarkIconDispatcher provideDarkIconDispatcher(DarkIconDispatcherImpl controllerImpl);
+    @Provides
+    @SysUISingleton
+    static DarkIconDispatcher provideDarkIconDispatcher(DarkIconDispatcherStore store) {
+        return store.getDefaultDisplay();
+    }
 
-    @Binds
-    abstract SysuiDarkIconDispatcher provideSysuiDarkIconDispatcher(
-            DarkIconDispatcherImpl controllerImpl);
+    @Provides
+    @SysUISingleton
+    static SysuiDarkIconDispatcher provideSysuiDarkIconDispatcher(
+            SysuiDarkIconDispatcherStore store) {
+        return store.getDefaultDisplay();
+    }
 
     /** */
     @Binds

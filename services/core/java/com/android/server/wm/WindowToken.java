@@ -614,6 +614,12 @@ class WindowToken extends WindowContainer<WindowState> {
         final int rotation = getRelativeDisplayRotation();
         if (rotation == Surface.ROTATION_0) return mFixedRotationTransformLeash;
         if (mFixedRotationTransformLeash != null) return mFixedRotationTransformLeash;
+        if (ActivityTaskManagerService.isPip2ExperimentEnabled() && asActivityRecord() != null
+                && mTransitionController.getWindowingModeAtStart(
+                asActivityRecord()) == WINDOWING_MODE_PINNED) {
+            // PiP handles fixed rotation animation in Shell, so do not create the rotation leash.
+            return null;
+        }
 
         final SurfaceControl leash = makeSurface().setContainerLayer()
                 .setParent(getParentSurfaceControl())

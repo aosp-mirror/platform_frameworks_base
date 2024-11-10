@@ -349,3 +349,12 @@ flag {
     bug: "364760703"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "cloud_compilation_pm"
+    is_exported: true
+    namespace: "art_mainline"
+    description: "Feature flag to enable the Cloud Compilation support on the package manager side."
+    bug: "377474232"
+    is_fixed_read_only: true
+}

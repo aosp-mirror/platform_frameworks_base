@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
@@ -67,10 +69,11 @@ public class ClickArea implements RemoteComposeOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mContentDescription, mLeft, mTop, mRight, mBottom, mMetadata);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "CLICK_AREA <"
@@ -97,18 +100,20 @@ public class ClickArea implements RemoteComposeOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         if (context.getMode() != RemoteContext.ContextMode.DATA) {
             return;
         }
         context.addClickArea(mId, mContentDescription, mLeft, mTop, mRight, mBottom, mMetadata);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -118,7 +123,7 @@ public class ClickArea implements RemoteComposeOperation {
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int id,
             int contentDescription,
             float left,
@@ -136,7 +141,7 @@ public class ClickArea implements RemoteComposeOperation {
         buffer.writeInt(metadata);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int contentDescription = buffer.readInt();
         float left = buffer.readFloat();
@@ -149,7 +154,7 @@ public class ClickArea implements RemoteComposeOperation {
         operations.add(clickArea);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Define a region you can click on")
                 .field(DocumentedOperation.FLOAT, "left", "The left side of the region")

@@ -171,6 +171,7 @@ class BubbleBarLayerViewTest {
     @After
     fun tearDown() {
         PhysicsAnimatorTestUtils.tearDown()
+        getInstrumentation().waitForIdleSync()
     }
 
     private fun createBubbleController(

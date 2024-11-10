@@ -17,3 +17,13 @@ flag {
     description: "Disable wakelocks for background apps while Light Device Idle is active"
     bug: "326607666"
 }
+
+flag {
+    name: "use_cpu_time_for_temp_allowlist"
+    namespace: "backstage_power"
+    description: "Use CPU time for temporary allowlists"
+    bug: "376561328"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

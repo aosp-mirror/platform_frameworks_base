@@ -34,7 +34,7 @@ class StatusBannerPreference @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
-) : Preference(context, attrs, defStyleAttr, defStyleRes) {
+) : Preference(context, attrs, defStyleAttr, defStyleRes), GroupSectionDividerMixin {
 
     enum class BannerStatus {
         GENERIC,

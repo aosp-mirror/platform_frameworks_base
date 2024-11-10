@@ -67,6 +67,7 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
 import com.android.internal.os.LongArrayMultiStateCounter;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.server.power.feature.flags.Flags;
 
@@ -120,6 +121,7 @@ public class BatteryStatsImplTest {
             }});
 
     private final MockClock mMockClock = new MockClock();
+    private final MonotonicClock mMonotonicClock = new MonotonicClock(777666, mMockClock);
     private MockBatteryStatsImpl mBatteryStatsImpl;
     private Handler mHandler;
     private PowerStatsStore mPowerStatsStore;
@@ -160,7 +162,7 @@ public class BatteryStatsImplTest {
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerAttributor,
                 mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore, 0,
-                mMockClock);
+                mMockClock, mMonotonicClock);
     }
 
     @Test
@@ -438,10 +440,7 @@ public class BatteryStatsImplTest {
         doAnswer(invocation -> {
             LongArrayMultiStateCounter counter = invocation.getArgument(1);
             long timestampMs = invocation.getArgument(2);
-            LongArrayMultiStateCounter.LongArrayContainer container =
-                    new LongArrayMultiStateCounter.LongArrayContainer(NUM_CPU_FREQS);
-            container.setValues(cpuTimes);
-            counter.updateValues(container, timestampMs);
+            counter.updateValues(cpuTimes, timestampMs);
             return null;
         }).when(mKernelSingleUidTimeReader).addDelta(eq(testUid),
                 any(LongArrayMultiStateCounter.class), anyLong());
@@ -451,20 +450,13 @@ public class BatteryStatsImplTest {
         doAnswer(invocation -> {
             LongArrayMultiStateCounter counter = invocation.getArgument(1);
             long timestampMs = invocation.getArgument(2);
-            LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
-                    invocation.getArgument(3);
-
-            LongArrayMultiStateCounter.LongArrayContainer container =
-                    new LongArrayMultiStateCounter.LongArrayContainer(NUM_CPU_FREQS);
-            container.setValues(cpuTimes);
-            counter.updateValues(container, timestampMs);
-            if (deltaContainer != null) {
-                deltaContainer.setValues(delta);
-            }
+            long[] deltaOut = invocation.getArgument(3);
+            counter.updateValues(cpuTimes, timestampMs);
+            System.arraycopy(delta, 0, deltaOut, 0, delta.length);
             return null;
         }).when(mKernelSingleUidTimeReader).addDelta(eq(testUid),
                 any(LongArrayMultiStateCounter.class), anyLong(),
-                any(LongArrayMultiStateCounter.LongArrayContainer.class));
+                any(long[].class));
     }
 
     @Test

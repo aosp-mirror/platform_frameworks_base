@@ -31,10 +31,13 @@ import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.data.repository.statusBarConfigurationControllerStore
+import com.android.systemui.statusbar.data.repository.sysUiDarkIconDispatcherStore
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -50,16 +53,18 @@ import org.mockito.Mockito.verify
 @SmallTest
 class StatusOverlayHoverListenerTest : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
     private val viewOverlay = mock<ViewGroupOverlay>()
     private val overlayCaptor = argumentCaptor<Drawable>()
-    private val darkDispatcher = mock<SysuiDarkIconDispatcher>()
     private val darkChange: MutableStateFlow<DarkChange> = MutableStateFlow(DarkChange.EMPTY)
+    private val darkDispatcher = kosmos.sysUiDarkIconDispatcherStore.forDisplay(context.displayId)
 
     private val factory =
         StatusOverlayHoverListenerFactory(
             context.resources,
             FakeConfigurationController(),
-            darkDispatcher
+            kosmos.sysUiDarkIconDispatcherStore,
+            kosmos.statusBarConfigurationControllerStore,
         )
     private val view = TestableStatusContainer(context, viewOverlay)
 
@@ -186,7 +191,7 @@ class StatusOverlayHoverListenerTest : SysuiTestCase() {
             /* action= */ action,
             /* x= */ 0f,
             /* y= */ 0f,
-            /* metaState= */ 0
+            /* metaState= */ 0,
         )
     }
 }

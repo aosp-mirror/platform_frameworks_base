@@ -20,7 +20,6 @@ import android.media.session.MediaSession
 import android.os.Bundle
 import android.os.Handler
 import android.os.looper
-import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.media3.common.Player
@@ -39,6 +38,7 @@ import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.fakeSessionTokenFactory
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
+import com.android.systemui.util.concurrency.execution
 import com.google.common.collect.ImmutableList
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runCurrent
@@ -69,10 +69,9 @@ class Media3ActionFactoryTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val controllerFactory = kosmos.fakeMediaControllerFactory
     private val tokenFactory = kosmos.fakeSessionTokenFactory
-    private lateinit var testableLooper: TestableLooper
 
-    private var commandCaptor = argumentCaptor<SessionCommand>()
-    private var runnableCaptor = argumentCaptor<Runnable>()
+    private val commandCaptor = argumentCaptor<SessionCommand>()
+    private val runnableCaptor = argumentCaptor<Runnable>()
 
     private val legacyToken = MediaSession.Token(1, null)
     private val token = mock<SessionToken>()
@@ -97,8 +96,6 @@ class Media3ActionFactoryTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        testableLooper = TestableLooper.get(this)
-
         underTest =
             Media3ActionFactory(
                 context,
@@ -109,6 +106,7 @@ class Media3ActionFactoryTest : SysuiTestCase() {
                 kosmos.looper,
                 handler,
                 kosmos.testScope,
+                kosmos.execution,
             )
 
         controllerFactory.setMedia3Controller(media3Controller)
@@ -246,7 +244,6 @@ class Media3ActionFactoryTest : SysuiTestCase() {
             assertThat(actions.custom0!!.contentDescription).isEqualTo("$CUSTOM_ACTION_NAME 2")
             actions.custom0!!.action!!.run()
             runCurrent()
-            testableLooper.processAllMessages()
             verify(media3Controller).sendCustomCommand(commandCaptor.capture(), any<Bundle>())
             assertThat(commandCaptor.lastValue.customAction).isEqualTo("$CUSTOM_ACTION_COMMAND 2")
             verify(media3Controller).release()

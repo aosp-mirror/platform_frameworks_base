@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
@@ -64,6 +67,7 @@ import com.android.internal.widget.remotecompose.core.operations.TextLookupInt;
 import com.android.internal.widget.remotecompose.core.operations.TextMeasure;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
@@ -81,8 +85,11 @@ import com.android.internal.widget.remotecompose.core.operations.layout.managers
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BackgroundModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BorderModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ClipRectModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.GraphicsLayerModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.OffsetModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.NanMap;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
@@ -111,7 +118,7 @@ public class RemoteComposeBuffer {
     public static final int EASING_EASE_OUT_BOUNCE = FloatAnimation.EASE_OUT_BOUNCE;
     public static final int EASING_EASE_OUT_ELASTIC = FloatAnimation.EASE_OUT_ELASTIC;
     WireBuffer mBuffer = new WireBuffer();
-    Platform mPlatform = null;
+    @Nullable Platform mPlatform = null;
     RemoteComposeState mRemoteComposeState;
     private static final boolean DEBUG = false;
 
@@ -143,6 +150,7 @@ public class RemoteComposeBuffer {
         return mLastComponentId;
     }
 
+    @Nullable
     public Platform getPlatform() {
         return mPlatform;
     }
@@ -172,7 +180,11 @@ public class RemoteComposeBuffer {
      * @param capabilities bitmask indicating needed capabilities (unused for now)
      */
     public void header(
-            int width, int height, String contentDescription, float density, long capabilities) {
+            int width,
+            int height,
+            @Nullable String contentDescription,
+            float density,
+            long capabilities) {
         Header.apply(mBuffer, width, height, density, capabilities);
         int contentDescriptionId = 0;
         if (contentDescription != null) {
@@ -219,7 +231,7 @@ public class RemoteComposeBuffer {
             int dstTop,
             int dstRight,
             int dstBottom,
-            String contentDescription) {
+            @Nullable String contentDescription) {
         int imageId = mRemoteComposeState.dataGetId(image);
         if (imageId == -1) {
             imageId = mRemoteComposeState.cacheData(image);
@@ -267,7 +279,7 @@ public class RemoteComposeBuffer {
      *
      * @param text the string to inject in the buffer
      */
-    public int addText(String text) {
+    public int addText(@NonNull String text) {
         int id = mRemoteComposeState.dataGetId(text);
         if (id == -1) {
             id = mRemoteComposeState.cacheData(text);
@@ -289,12 +301,12 @@ public class RemoteComposeBuffer {
      */
     public void addClickArea(
             int id,
-            String contentDescription,
+            @Nullable String contentDescription,
             float left,
             float top,
             float right,
             float bottom,
-            String metadata) {
+            @Nullable String metadata) {
         int contentDescriptionId = 0;
         if (contentDescription != null) {
             contentDescriptionId = addText(contentDescription);
@@ -380,7 +392,7 @@ public class RemoteComposeBuffer {
             float top,
             float right,
             float bottom,
-            String contentDescription) {
+            @Nullable String contentDescription) {
         int imageId = mRemoteComposeState.dataGetId(image);
         if (imageId == -1) {
             imageId = mRemoteComposeState.cacheData(image);
@@ -411,7 +423,7 @@ public class RemoteComposeBuffer {
             float top,
             float right,
             float bottom,
-            String contentDescription) {
+            @Nullable String contentDescription) {
         int contentDescriptionId = 0;
         if (contentDescription != null) {
             contentDescriptionId = addText(contentDescription);
@@ -445,7 +457,7 @@ public class RemoteComposeBuffer {
             float dstBottom,
             int scaleType,
             float scaleFactor,
-            String contentDescription) {
+            @Nullable String contentDescription) {
         int imageId = mRemoteComposeState.dataGetId(image);
         if (imageId == -1) {
             imageId = mRemoteComposeState.cacheData(image);
@@ -500,7 +512,7 @@ public class RemoteComposeBuffer {
      * @param image drawScaledBitmap
      * @return id of the image useful with
      */
-    public int addBitmap(Object image, String name) {
+    public int addBitmap(Object image, @NonNull String name) {
         int imageId = mRemoteComposeState.dataGetId(image);
         if (imageId == -1) {
             imageId = mRemoteComposeState.cacheData(image);
@@ -521,7 +533,7 @@ public class RemoteComposeBuffer {
      * @param id of the Bitmap
      * @param name Name of the color
      */
-    public void setBitmapName(int id, String name) {
+    public void setBitmapName(int id, @NonNull String name) {
         NamedVariable.apply(mBuffer, id, NamedVariable.IMAGE_TYPE, name);
     }
 
@@ -551,7 +563,7 @@ public class RemoteComposeBuffer {
             float dstBottom,
             int scaleType,
             float scaleFactor,
-            String contentDescription) {
+            @Nullable String contentDescription) {
         int contentDescriptionId = 0;
         if (contentDescription != null) {
             contentDescriptionId = addText(contentDescription);
@@ -669,7 +681,7 @@ public class RemoteComposeBuffer {
      * @param hOffset The distance along the path to add to the text's starting position
      * @param vOffset The distance above(-) or below(+) the path to position the text
      */
-    public void addDrawTextOnPath(String text, Object path, float hOffset, float vOffset) {
+    public void addDrawTextOnPath(@NonNull String text, Object path, float hOffset, float vOffset) {
         int pathId = mRemoteComposeState.dataGetId(path);
         if (pathId == -1) { // never been seen before
             pathId = addPathData(path);
@@ -692,7 +704,7 @@ public class RemoteComposeBuffer {
      * @param rtl Draw RTTL
      */
     public void addDrawTextRun(
-            String text,
+            @NonNull String text,
             int start,
             int end,
             int contextStart,
@@ -749,7 +761,8 @@ public class RemoteComposeBuffer {
      * @param panY position text -1.0=above, 0.0=center, 1.0=below, Nan=baseline
      * @param flags 1 = RTL
      */
-    public void drawTextAnchored(String text, float x, float y, float panX, float panY, int flags) {
+    public void drawTextAnchored(
+            @NonNull String text, float x, float y, float panX, float panY, int flags) {
         int textId = addText(text);
         DrawTextAnchored.apply(mBuffer, textId, x, y, panX, panY, flags);
     }
@@ -760,7 +773,7 @@ public class RemoteComposeBuffer {
      * @param text
      * @return
      */
-    public int createTextId(String text) {
+    public int createTextId(@NonNull String text) {
         return addText(text);
     }
 
@@ -891,7 +904,7 @@ public class RemoteComposeBuffer {
      *
      * @param paint
      */
-    public void addPaint(PaintBundle paint) {
+    public void addPaint(@NonNull PaintBundle paint) {
         PaintData.apply(mBuffer, paint);
     }
 
@@ -912,7 +925,8 @@ public class RemoteComposeBuffer {
         }
     }
 
-    public static void readNextOperation(WireBuffer buffer, ArrayList<Operation> operations) {
+    public static void readNextOperation(
+            @NonNull WireBuffer buffer, ArrayList<Operation> operations) {
         int opId = buffer.readByte();
         if (DEBUG) {
             Utils.log(">> " + opId);
@@ -924,6 +938,7 @@ public class RemoteComposeBuffer {
         operation.read(buffer, operations);
     }
 
+    @NonNull
     RemoteComposeBuffer copy() {
         ArrayList<Operation> operations = new ArrayList<>();
         inflateFromBuffer(operations);
@@ -935,33 +950,38 @@ public class RemoteComposeBuffer {
         Theme.apply(mBuffer, theme);
     }
 
+    @NonNull
     static String version() {
         return "v1.0";
     }
 
-    public static RemoteComposeBuffer fromFile(String path, RemoteComposeState remoteComposeState)
-            throws IOException {
+    @NonNull
+    public static RemoteComposeBuffer fromFile(
+            @NonNull String path, RemoteComposeState remoteComposeState) throws IOException {
         RemoteComposeBuffer buffer = new RemoteComposeBuffer(remoteComposeState);
         read(new File(path), buffer);
         return buffer;
     }
 
-    public RemoteComposeBuffer fromFile(File file, RemoteComposeState remoteComposeState)
+    @NonNull
+    public RemoteComposeBuffer fromFile(@NonNull File file, RemoteComposeState remoteComposeState)
             throws IOException {
         RemoteComposeBuffer buffer = new RemoteComposeBuffer(remoteComposeState);
         read(file, buffer);
         return buffer;
     }
 
+    @NonNull
     public static RemoteComposeBuffer fromInputStream(
-            InputStream inputStream, RemoteComposeState remoteComposeState) {
+            @NonNull InputStream inputStream, RemoteComposeState remoteComposeState) {
         RemoteComposeBuffer buffer = new RemoteComposeBuffer(remoteComposeState);
         read(inputStream, buffer);
         return buffer;
     }
 
+    @NonNull
     RemoteComposeBuffer copyFromOperations(
-            ArrayList<Operation> operations, RemoteComposeBuffer buffer) {
+            @NonNull ArrayList<Operation> operations, @NonNull RemoteComposeBuffer buffer) {
 
         for (Operation operation : operations) {
             operation.write(buffer.mBuffer);
@@ -975,7 +995,7 @@ public class RemoteComposeBuffer {
      * @param buffer a RemoteComposeBuffer
      * @param file a target file
      */
-    public void write(RemoteComposeBuffer buffer, File file) {
+    public void write(@NonNull RemoteComposeBuffer buffer, @NonNull File file) {
         try {
             FileOutputStream fd = new FileOutputStream(file);
             fd.write(buffer.mBuffer.getBuffer(), 0, buffer.mBuffer.getSize());
@@ -986,12 +1006,12 @@ public class RemoteComposeBuffer {
         }
     }
 
-    static void read(File file, RemoteComposeBuffer buffer) throws IOException {
+    static void read(@NonNull File file, @NonNull RemoteComposeBuffer buffer) throws IOException {
         FileInputStream fd = new FileInputStream(file);
         read(fd, buffer);
     }
 
-    public static void read(InputStream fd, RemoteComposeBuffer buffer) {
+    public static void read(@NonNull InputStream fd, @NonNull RemoteComposeBuffer buffer) {
         try {
             byte[] bytes = readAllBytes(fd);
             buffer.reset(bytes.length);
@@ -1002,7 +1022,7 @@ public class RemoteComposeBuffer {
         }
     }
 
-    private static byte[] readAllBytes(InputStream is) throws IOException {
+    private static byte[] readAllBytes(@NonNull InputStream is) throws IOException {
         byte[] buff = new byte[32 * 1024]; // moderate size buff to start
         int red = 0;
         while (true) {
@@ -1176,9 +1196,48 @@ public class RemoteComposeBuffer {
      * @param value A RPN style float operation i.e. "4, 3, ADD" outputs 7
      * @return NaN id of the result of the calculation
      */
-    public float addAnimatedFloat(float... value) {
+    public float addAnimatedFloat(@NonNull float... value) {
         int id = mRemoteComposeState.cacheData(value);
         FloatExpression.apply(mBuffer, id, value, null);
+        return Utils.asNan(id);
+    }
+
+    /**
+     * Add a touch handle system
+     *
+     * @param value the default value
+     * @param min the minimum value
+     * @param max the maximum value
+     * @param velocityId the id for the velocity TODO support in v2
+     * @param exp The Float Expression
+     * @param touchMode the touch up handling behaviour
+     * @param touchSpec the touch up handling parameters
+     * @param easingSpec the easing parameter TODO support in v2
+     * @return id of the variable to be used controlled by touch handling
+     */
+    public float addTouchExpression(
+            float value,
+            float min,
+            float max,
+            float velocityId,
+            int touchEffects,
+            float[] exp,
+            int touchMode,
+            float[] touchSpec,
+            float[] easingSpec) {
+        int id = mRemoteComposeState.nextId();
+        TouchExpression.apply(
+                mBuffer,
+                id,
+                value,
+                min,
+                max,
+                velocityId,
+                touchEffects,
+                exp,
+                touchMode,
+                touchSpec,
+                easingSpec);
         return Utils.asNan(id);
     }
 
@@ -1189,7 +1248,7 @@ public class RemoteComposeBuffer {
      * @param animation Array of floats that represents animation
      * @return NaN id of the result of the calculation
      */
-    public float addAnimatedFloat(float[] value, float[] animation) {
+    public float addAnimatedFloat(@NonNull float[] value, float[] animation) {
         int id = mRemoteComposeState.cacheData(value);
         FloatExpression.apply(mBuffer, id, value, animation);
         return Utils.asNan(id);
@@ -1228,7 +1287,7 @@ public class RemoteComposeBuffer {
      * @param values
      * @return the id of the array, encoded as a float NaN
      */
-    public float addFloatArray(float[] values) {
+    public float addFloatArray(@NonNull float[] values) {
         int id = mRemoteComposeState.cacheData(values, NanMap.TYPE_ARRAY);
         DataListFloat.apply(mBuffer, id, values);
         return Utils.asNan(id);
@@ -1240,7 +1299,7 @@ public class RemoteComposeBuffer {
      * @param values array of floats to be individually stored
      * @return id of the list
      */
-    public float addFloatList(float[] values) {
+    public float addFloatList(@NonNull float[] values) {
         int[] listId = new int[values.length];
         for (int i = 0; i < listId.length; i++) {
             listId[i] = mRemoteComposeState.cacheFloat(values[i]);
@@ -1255,7 +1314,7 @@ public class RemoteComposeBuffer {
      * @param listId array id to be stored
      * @return id of the list
      */
-    public float addList(int[] listId) {
+    public float addList(@NonNull int[] listId) {
         int id = mRemoteComposeState.cacheData(listId, NanMap.TYPE_ARRAY);
         DataListIds.apply(mBuffer, id, listId);
         return Utils.asNan(id);
@@ -1268,7 +1327,7 @@ public class RemoteComposeBuffer {
      * @param values
      * @return the id of the map, encoded as a float NaN
      */
-    public float addFloatMap(String[] keys, float[] values) {
+    public float addFloatMap(@NonNull String[] keys, @NonNull float[] values) {
         int[] listId = new int[values.length];
         byte[] type = new byte[values.length];
         for (int i = 0; i < listId.length; i++) {
@@ -1286,7 +1345,7 @@ public class RemoteComposeBuffer {
      * @param listId
      * @return the id of the map, encoded as a float NaN
      */
-    public int addMap(String[] keys, byte[] types, int[] listId) {
+    public int addMap(@NonNull String[] keys, byte[] types, int[] listId) {
         int id = mRemoteComposeState.cacheData(listId, NanMap.TYPE_ARRAY);
         DataMapIds.apply(mBuffer, id, keys, types, listId);
         return id;
@@ -1331,7 +1390,7 @@ public class RemoteComposeBuffer {
      * @param value array of values to calculate maximum 32
      * @return the id as an integer
      */
-    public int addIntegerExpression(int mask, int[] value) {
+    public int addIntegerExpression(int mask, @NonNull int[] value) {
         int id = mRemoteComposeState.cacheData(value);
         IntegerExpression.apply(mBuffer, id, mask, value);
         return id;
@@ -1474,7 +1533,7 @@ public class RemoteComposeBuffer {
      * @param id of the color
      * @param name Name of the color
      */
-    public void setColorName(int id, String name) {
+    public void setColorName(int id, @NonNull String name) {
         NamedVariable.apply(mBuffer, id, NamedVariable.COLOR_TYPE, name);
     }
 
@@ -1484,7 +1543,7 @@ public class RemoteComposeBuffer {
      * @param id of the string
      * @param name name of the string
      */
-    public void setStringName(int id, String name) {
+    public void setStringName(int id, @NonNull String name) {
         NamedVariable.apply(mBuffer, id, NamedVariable.STRING_TYPE, name);
     }
 
@@ -1573,6 +1632,72 @@ public class RemoteComposeBuffer {
      */
     public void addModifierPadding(float left, float top, float right, float bottom) {
         PaddingModifierOperation.apply(mBuffer, left, top, right, bottom);
+    }
+
+    /**
+     * Add an offset modifier
+     *
+     * @param x x offset
+     * @param y y offset
+     */
+    public void addModifierOffset(float x, float y) {
+        OffsetModifierOperation.apply(mBuffer, x, y);
+    }
+
+    /**
+     * Add a zIndex modifier
+     *
+     * @param value z-Index value
+     */
+    public void addModifierZIndex(float value) {
+        ZIndexModifierOperation.apply(mBuffer, value);
+    }
+
+    /**
+     * Add a graphics layer
+     *
+     * @param scaleX
+     * @param scaleY
+     * @param rotationX
+     * @param rotationY
+     * @param rotationZ
+     * @param shadowElevation
+     * @param transformOriginX
+     * @param transformOriginY
+     */
+    public void addModifierGraphicsLayer(
+            float scaleX,
+            float scaleY,
+            float rotationX,
+            float rotationY,
+            float rotationZ,
+            float shadowElevation,
+            float transformOriginX,
+            float transformOriginY,
+            float alpha,
+            float cameraDistance,
+            int blendMode,
+            int spotShadowColorId,
+            int ambientShadowColorId,
+            int colorFilterId,
+            int renderEffectId) {
+        GraphicsLayerModifierOperation.apply(
+                mBuffer,
+                scaleX,
+                scaleY,
+                rotationX,
+                rotationY,
+                rotationZ,
+                shadowElevation,
+                transformOriginX,
+                transformOriginY,
+                alpha,
+                cameraDistance,
+                blendMode,
+                spotShadowColorId,
+                ambientShadowColorId,
+                colorFilterId,
+                renderEffectId);
     }
 
     /**
@@ -1721,7 +1846,8 @@ public class RemoteComposeBuffer {
             float fontSize,
             int fontStyle,
             float fontWeight,
-            String fontFamily) {
+            @Nullable String fontFamily,
+            int textAlign) {
         mLastComponentId = getComponentId(componentId);
         int fontFamilyId = -1;
         if (fontFamily != null) {
@@ -1736,6 +1862,11 @@ public class RemoteComposeBuffer {
                 fontSize,
                 fontStyle,
                 fontWeight,
-                fontFamilyId);
+                fontFamilyId,
+                textAlign);
+    }
+
+    public int createID(int type) {
+        return mRemoteComposeState.nextId(type);
     }
 }

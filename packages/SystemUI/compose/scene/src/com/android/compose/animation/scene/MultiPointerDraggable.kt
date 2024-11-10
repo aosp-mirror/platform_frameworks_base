@@ -33,6 +33,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
@@ -52,6 +53,7 @@ import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
+import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastSumBy
 import com.android.compose.ui.util.SpaceVectorConverter
 import kotlin.coroutines.cancellation.CancellationException
@@ -78,8 +80,8 @@ import kotlinx.coroutines.launch
 @Stable
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
-    startDragImmediately: (startedPosition: Offset) -> Boolean,
-    onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    startDragImmediately: (pointersInfo: PointersInfo) -> Boolean,
+    onDragStarted: (pointersInfo: PointersInfo, overSlop: Float) -> DragController,
     onFirstPointerDown: () -> Unit = {},
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     dispatcher: NestedScrollDispatcher,
@@ -97,9 +99,8 @@ internal fun Modifier.multiPointerDraggable(
 
 private data class MultiPointerDraggableElement(
     private val orientation: Orientation,
-    private val startDragImmediately: (startedPosition: Offset) -> Boolean,
-    private val onDragStarted:
-        (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    private val startDragImmediately: (pointersInfo: PointersInfo) -> Boolean,
+    private val onDragStarted: (pointersInfo: PointersInfo, overSlop: Float) -> DragController,
     private val onFirstPointerDown: () -> Unit,
     private val swipeDetector: SwipeDetector,
     private val dispatcher: NestedScrollDispatcher,
@@ -125,9 +126,8 @@ private data class MultiPointerDraggableElement(
 
 internal class MultiPointerDraggableNode(
     orientation: Orientation,
-    var startDragImmediately: (startedPosition: Offset) -> Boolean,
-    var onDragStarted:
-        (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    var startDragImmediately: (pointersInfo: PointersInfo) -> Boolean,
+    var onDragStarted: (pointersInfo: PointersInfo, overSlop: Float) -> DragController,
     var onFirstPointerDown: () -> Unit,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     private val dispatcher: NestedScrollDispatcher,
@@ -183,17 +183,22 @@ internal class MultiPointerDraggableNode(
         pointerInput.onPointerEvent(pointerEvent, pass, bounds)
     }
 
+    private var lastPointerEvent: PointerEvent? = null
     private var startedPosition: Offset? = null
     private var pointersDown: Int = 0
-    private var isMouseWheel: Boolean = false
 
-    internal fun pointersInfo(): PointersInfo {
-        return PointersInfo(
+    internal fun pointersInfo(): PointersInfo? {
+        val startedPosition = startedPosition
+        val lastPointerEvent = lastPointerEvent
+        if (startedPosition == null || lastPointerEvent == null) {
             // This may be null, i.e. when the user uses TalkBack
+            return null
+        }
+
+        return PointersInfo(
             startedPosition = startedPosition,
-            // We could have 0 pointers during fling or for other reasons.
-            pointersDown = pointersDown.coerceAtLeast(1),
-            isMouseWheel = isMouseWheel,
+            pointersDown = pointersDown,
+            lastPointerEvent = lastPointerEvent,
         )
     }
 
@@ -212,8 +217,8 @@ internal class MultiPointerDraggableNode(
                 if (pointerEvent.type == PointerEventType.Enter) continue
 
                 val changes = pointerEvent.changes
+                lastPointerEvent = pointerEvent
                 pointersDown = changes.countDown()
-                isMouseWheel = pointerEvent.type == PointerEventType.Scroll
 
                 when {
                     // There are no more pointers down.
@@ -285,8 +290,8 @@ internal class MultiPointerDraggableNode(
                     detectDragGestures(
                         orientation = orientation,
                         startDragImmediately = startDragImmediately,
-                        onDragStart = { startedPosition, overSlop, pointersDown ->
-                            onDragStarted(startedPosition, overSlop, pointersDown)
+                        onDragStart = { pointersInfo, overSlop ->
+                            onDragStarted(pointersInfo, overSlop)
                         },
                         onDrag = { controller, amount ->
                             dispatchScrollEvents(
@@ -435,9 +440,8 @@ internal class MultiPointerDraggableNode(
      */
     private suspend fun AwaitPointerEventScope.detectDragGestures(
         orientation: Orientation,
-        startDragImmediately: (startedPosition: Offset) -> Boolean,
-        onDragStart:
-            (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+        startDragImmediately: (pointersInfo: PointersInfo) -> Boolean,
+        onDragStart: (pointersInfo: PointersInfo, overSlop: Float) -> DragController,
         onDrag: (controller: DragController, dragAmount: Float) -> Unit,
         onDragEnd: (controller: DragController) -> Unit,
         onDragCancel: (controller: DragController) -> Unit,
@@ -462,8 +466,13 @@ internal class MultiPointerDraggableNode(
                 .first()
 
         var overSlop = 0f
+        var lastPointersInfo =
+            checkNotNull(pointersInfo()) {
+                "We should have pointers down, last event: $currentEvent"
+            }
+
         val drag =
-            if (startDragImmediately(consumablePointer.position)) {
+            if (startDragImmediately(lastPointersInfo)) {
                 consumablePointer.consume()
                 consumablePointer
             } else {
@@ -488,14 +497,18 @@ internal class MultiPointerDraggableNode(
                                 consumablePointer.id,
                                 onSlopReached,
                             )
-                    }
+                    } ?: return
 
+                lastPointersInfo =
+                    checkNotNull(pointersInfo()) {
+                        "We should have pointers down, last event: $currentEvent"
+                    }
                 // Make sure that overSlop is not 0f. This can happen when the user drags by exactly
                 // the touch slop. However, the overSlop we pass to onDragStarted() is used to
                 // compute the direction we are dragging in, so overSlop should never be 0f unless
                 // we intercept an ongoing swipe transition (i.e. startDragImmediately() returned
                 // true).
-                if (drag != null && overSlop == 0f) {
+                if (overSlop == 0f) {
                     val delta = (drag.position - consumablePointer.position).toFloat()
                     check(delta != 0f) { "delta is equal to 0" }
                     overSlop = delta.sign
@@ -503,49 +516,38 @@ internal class MultiPointerDraggableNode(
                 drag
             }
 
-        if (drag != null) {
-            val controller =
-                onDragStart(
-                    // The startedPosition is the starting position when a gesture begins (when the
-                    // first pointer touches the screen), not the point where we begin dragging.
-                    // For example, this could be different if one of our children intercepts the
-                    // gesture first and then we do.
-                    requireNotNull(startedPosition),
-                    overSlop,
-                    pointersDown,
+        val controller = onDragStart(lastPointersInfo, overSlop)
+
+        val successful: Boolean
+        try {
+            onDrag(controller, overSlop)
+
+            successful =
+                drag(
+                    initialPointerId = drag.id,
+                    hasDragged = { it.positionChangeIgnoreConsumed().toFloat() != 0f },
+                    onDrag = {
+                        onDrag(controller, it.positionChange().toFloat())
+                        it.consume()
+                    },
+                    onIgnoredEvent = {
+                        // We are still dragging an object, but this event is not of interest to the
+                        // caller.
+                        // This event will not trigger the onDrag event, but we will consume the
+                        // event to prevent another pointerInput from interrupting the current
+                        // gesture just because the event was ignored.
+                        it.consume()
+                    },
                 )
+        } catch (t: Throwable) {
+            onDragCancel(controller)
+            throw t
+        }
 
-            val successful: Boolean
-            try {
-                onDrag(controller, overSlop)
-
-                successful =
-                    drag(
-                        initialPointerId = drag.id,
-                        hasDragged = { it.positionChangeIgnoreConsumed().toFloat() != 0f },
-                        onDrag = {
-                            onDrag(controller, it.positionChange().toFloat())
-                            it.consume()
-                        },
-                        onIgnoredEvent = {
-                            // We are still dragging an object, but this event is not of interest to
-                            // the caller.
-                            // This event will not trigger the onDrag event, but we will consume the
-                            // event to prevent another pointerInput from interrupting the current
-                            // gesture just because the event was ignored.
-                            it.consume()
-                        },
-                    )
-            } catch (t: Throwable) {
-                onDragCancel(controller)
-                throw t
-            }
-
-            if (successful) {
-                onDragEnd(controller)
-            } else {
-                onDragCancel(controller)
-            }
+        if (successful) {
+            onDragEnd(controller)
+        } else {
+            onDragCancel(controller)
         }
     }
 
@@ -655,11 +657,57 @@ internal class MultiPointerDraggableNode(
 }
 
 internal fun interface PointersInfoOwner {
-    fun pointersInfo(): PointersInfo
+    /**
+     * Provides information about the pointers interacting with this composable.
+     *
+     * @return A [PointersInfo] object containing details about the pointers, including the starting
+     *   position and the number of pointers down, or `null` if there are no pointers down.
+     */
+    fun pointersInfo(): PointersInfo?
 }
 
+/**
+ * Holds information about pointer interactions within a composable.
+ *
+ * This class stores details such as the starting position of a gesture, the number of pointers
+ * down, and whether the last pointer event was a mouse wheel scroll.
+ *
+ * @param startedPosition The starting position of the gesture. This is the position where the first
+ *   pointer touched the screen, not necessarily the point where dragging begins. This may be
+ *   different from the initial touch position if a child composable intercepts the gesture before
+ *   this one.
+ * @param pointersDown The number of pointers currently down.
+ * @param isMouseWheel Indicates whether the last pointer event was a mouse wheel scroll.
+ * @param pointersDownByType Provide a map of pointer types to the count of pointers of that type
+ *   currently down/pressed.
+ */
 internal data class PointersInfo(
-    val startedPosition: Offset?,
+    val startedPosition: Offset,
     val pointersDown: Int,
     val isMouseWheel: Boolean,
-)
+    val pointersDownByType: Map<PointerType, Int>,
+) {
+    init {
+        check(pointersDown > 0) { "We should have at least 1 pointer down, $pointersDown instead" }
+    }
+}
+
+private fun PointersInfo(
+    startedPosition: Offset,
+    pointersDown: Int,
+    lastPointerEvent: PointerEvent,
+): PointersInfo {
+    return PointersInfo(
+        startedPosition = startedPosition,
+        pointersDown = pointersDown,
+        isMouseWheel = lastPointerEvent.type == PointerEventType.Scroll,
+        pointersDownByType =
+            buildMap {
+                lastPointerEvent.changes.fastForEach { change ->
+                    if (!change.pressed) return@fastForEach
+                    val newValue = (get(change.type) ?: 0) + 1
+                    put(change.type, newValue)
+                }
+            },
+    )
+}

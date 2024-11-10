@@ -8687,6 +8687,19 @@ public final class Settings {
         public static final String ACCESSIBILITY_QS_TARGETS = "accessibility_qs_targets";
 
         /**
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via a keyboard shortcut gesture.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_KEY_GESTURE_TARGETS =
+                "accessibility_key_gesture_targets";
+
+        /**
          * The system class name of magnification controller which is a target to be toggled via
          * accessibility shortcut or accessibility button.
          *

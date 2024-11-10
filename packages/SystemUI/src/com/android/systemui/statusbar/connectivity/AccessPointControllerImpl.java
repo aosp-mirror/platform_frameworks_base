@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.connectivity;
 
+import static com.android.systemui.Flags.multiuserWifiPickerTrackerSupport;
+
+import android.content.Context;
 import android.content.Intent;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -65,13 +68,16 @@ public class AccessPointControllerImpl implements AccessPointController,
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
 
     private int mCurrentUser;
+    private Context mContext;
 
     public AccessPointControllerImpl(
+            Context context,
             UserManager userManager,
             UserTracker userTracker,
             Executor mainExecutor,
             WifiPickerTrackerFactory wifiPickerTrackerFactory
     ) {
+        mContext = context;
         mUserManager = userManager;
         mUserTracker = userTracker;
         mCurrentUser = userTracker.getUserId();
@@ -87,7 +93,11 @@ public class AccessPointControllerImpl implements AccessPointController,
      */
     public void init() {
         if (mWifiPickerTracker == null) {
-            mWifiPickerTracker = mWifiPickerTrackerFactory.create(this.getLifecycle(), this, TAG);
+            // We are creating the WifiPickerTracker during init to make sure we have one
+            // available at all times however we expect this to be recreated very quickly
+            // with a user-specific context in onUserSwitched.
+            mWifiPickerTracker =
+                mWifiPickerTrackerFactory.create(mContext, this.getLifecycle(), this, TAG);
         }
     }
 
@@ -116,6 +126,19 @@ public class AccessPointControllerImpl implements AccessPointController,
 
     void onUserSwitched(int newUserId) {
         mCurrentUser = newUserId;
+        // Return early if multiuser support is not enabled.
+        if (!multiuserWifiPickerTrackerSupport()) {
+            return;
+        }
+
+        if (mWifiPickerTracker != null) {
+            mMainExecutor.execute(() -> mLifecycle.setCurrentState(Lifecycle.State.CREATED));
+        }
+        Context context = mContext.createContextAsUser(UserHandle.of(newUserId), /* flags= */ 0);
+        mWifiPickerTracker = mWifiPickerTrackerFactory.create(context, mLifecycle, this, TAG);
+        if (!mCallbacks.isEmpty()) {
+            mMainExecutor.execute(() -> mLifecycle.setCurrentState(Lifecycle.State.STARTED));
+        }
     }
 
     @Override

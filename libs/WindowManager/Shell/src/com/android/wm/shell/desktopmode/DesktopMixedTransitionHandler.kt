@@ -213,7 +213,12 @@ class DesktopMixedTransitionHandler(
             findDesktopTaskChange(info, minimizingTask)
         }
         val launchChange = findDesktopTaskChange(info, pending.launchingTask)
-            ?: error("Should have pending launching task change")
+        if (launchChange == null) {
+            check(minimizeChange == null)
+            check(immersiveExitChange == null)
+            logV("No launch Change, returning")
+            return false
+        }
 
         var subAnimationCount = -1
         var combinedWct: WindowContainerTransaction? = null

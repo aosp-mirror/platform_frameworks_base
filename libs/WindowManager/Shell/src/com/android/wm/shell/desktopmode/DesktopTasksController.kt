@@ -1770,9 +1770,13 @@ class DesktopTasksController(
         transition: IBinder,
         taskIdToMinimize: Int,
     ) {
-        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize) ?: return
+        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize)
         desktopTasksLimiter.ifPresent {
-            it.addPendingMinimizeChange(transition, taskToMinimize.displayId, taskToMinimize.taskId)
+            it.addPendingMinimizeChange(
+                transition = transition,
+                displayId = taskToMinimize?.displayId ?: DEFAULT_DISPLAY,
+                taskId = taskIdToMinimize
+            )
         }
     }
 
@@ -2034,6 +2038,18 @@ class DesktopTasksController(
         releaseVisualIndicator()
         taskbarDesktopTaskListener
             ?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding(taskInfo.displayId))
+    }
+
+    /**
+     * Cancel the drag-to-desktop transition.
+     *
+     * @param taskInfo the task being dragged.
+     */
+    fun onDragPositioningCancelThroughStatusBar(
+        taskInfo: RunningTaskInfo,
+    ) {
+        interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
+        cancelDragToDesktop(taskInfo)
     }
 
     /**

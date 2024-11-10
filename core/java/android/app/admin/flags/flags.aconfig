@@ -276,6 +276,16 @@ flag {
 }
 
 flag {
+    name: "suspend_packages_coexistence"
+    namespace: "enterprise"
+    description: "Migrate setPackagesSuspended for unmanaged mode"
+    bug: "335624297"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "backup_connected_apps_settings"
     namespace: "enterprise"
     description: "backup and restore connected work and personal apps user settings across devices"
@@ -348,4 +358,19 @@ flag {
     namespace: "enterprise"
     description: "Enables coexistence support for Setting MTE policy."
     bug: "376213673"
+}
+
+flag {
+    name: "enable_supervision_service_sync"
+    is_exported: true
+    namespace: "enterprise"
+    description: "Allows DPMS to enable or disable SupervisionService based on whether the device is being managed by the supervision role holder."
+    bug: "376213673"
+}
+
+flag {
+  name: "split_create_managed_profile_enabled"
+  namespace: "enterprise"
+  description: "Split up existing create and provision managed profile API."
+  bug: "375382324"
 }

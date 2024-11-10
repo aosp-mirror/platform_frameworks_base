@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
@@ -25,18 +28,22 @@ import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.DimensionModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.GraphicsLayerModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 
 import java.util.ArrayList;
 
 /** Component with modifiers and children */
 public class LayoutComponent extends Component {
 
-    protected WidthModifierOperation mWidthModifier = null;
-    protected HeightModifierOperation mHeightModifier = null;
+    @Nullable protected WidthModifierOperation mWidthModifier = null;
+    @Nullable protected HeightModifierOperation mHeightModifier = null;
+    @Nullable protected ZIndexModifierOperation mZIndexModifier = null;
+    @Nullable protected GraphicsLayerModifierOperation mGraphicsLayerModifier = null;
 
     // Margins
     protected float mMarginLeft = 0f;
@@ -49,8 +56,10 @@ public class LayoutComponent extends Component {
     protected float mPaddingTop = 0f;
     protected float mPaddingBottom = 0f;
 
-    protected ComponentModifiers mComponentModifiers = new ComponentModifiers();
-    protected ArrayList<Component> mChildrenComponents = new ArrayList<>();
+    @NonNull protected ComponentModifiers mComponentModifiers = new ComponentModifiers();
+    @NonNull protected ArrayList<Component> mChildrenComponents = new ArrayList<>();
+
+    protected boolean mChildrenHaveZIndex = false;
 
     public LayoutComponent(
             Component parent,
@@ -95,15 +104,25 @@ public class LayoutComponent extends Component {
         return mPaddingBottom;
     }
 
+    @Nullable
     public WidthModifierOperation getWidthModifier() {
         return mWidthModifier;
     }
 
+    @Nullable
     public HeightModifierOperation getHeightModifier() {
         return mHeightModifier;
     }
 
-    protected LayoutComponentContent mContent = null;
+    @Override
+    public float getZIndex() {
+        if (mZIndexModifier != null) {
+            return mZIndexModifier.getValue();
+        }
+        return mZIndex;
+    }
+
+    @Nullable protected LayoutComponentContent mContent = null;
 
     // Should be removed after ImageLayout is in
     private static final boolean USE_IMAGE_TEMP_FIX = true;
@@ -164,6 +183,9 @@ public class LayoutComponent extends Component {
         for (Component c : mChildrenComponents) {
             c.mParent = this;
             mList.add(c);
+            if (c instanceof LayoutComponent && ((LayoutComponent) c).mZIndexModifier != null) {
+                mChildrenHaveZIndex = true;
+            }
         }
 
         mX = 0f;
@@ -209,6 +231,12 @@ public class LayoutComponent extends Component {
                 mHeightModifier = (HeightModifierOperation) op;
                 applyVerticalMargin = false;
             }
+            if (op instanceof ZIndexModifierOperation) {
+                mZIndexModifier = (ZIndexModifierOperation) op;
+            }
+            if (op instanceof GraphicsLayerModifierOperation) {
+                mGraphicsLayerModifier = (GraphicsLayerModifierOperation) op;
+            }
         }
         if (mWidthModifier == null) {
             mWidthModifier = new WidthModifierOperation(DimensionModifierOperation.Type.WRAP);
@@ -220,24 +248,64 @@ public class LayoutComponent extends Component {
         setHeight(computeModifierDefinedHeight());
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "UNKNOWN LAYOUT_COMPONENT";
     }
 
     @Override
-    public void paintingComponent(PaintContext context) {
+    public void paintingComponent(@NonNull PaintContext context) {
+        Component prev = context.getContext().lastComponent;
+        context.getContext().lastComponent = this;
         context.save();
         context.translate(mX, mY);
+        if (mGraphicsLayerModifier != null) {
+            context.startGraphicsLayer((int) getWidth(), (int) getHeight());
+            float scaleX = mGraphicsLayerModifier.getScaleX();
+            float scaleY = mGraphicsLayerModifier.getScaleY();
+            float rotationX = mGraphicsLayerModifier.getRotationX();
+            float rotationY = mGraphicsLayerModifier.getRotationY();
+            float rotationZ = mGraphicsLayerModifier.getRotationZ();
+            float shadowElevation = mGraphicsLayerModifier.getShadowElevation();
+            float transformOriginX = mGraphicsLayerModifier.getTransformOriginX();
+            float transformOriginY = mGraphicsLayerModifier.getTransformOriginY();
+            float alpha = mGraphicsLayerModifier.getAlpha();
+            int renderEffectId = mGraphicsLayerModifier.getRenderEffectId();
+            context.setGraphicsLayer(
+                    scaleX,
+                    scaleY,
+                    rotationX,
+                    rotationY,
+                    rotationZ,
+                    shadowElevation,
+                    transformOriginX,
+                    transformOriginY,
+                    alpha,
+                    renderEffectId);
+        }
         mComponentModifiers.paint(context);
         float tx = mPaddingLeft;
         float ty = mPaddingTop;
         context.translate(tx, ty);
-        for (Component child : mChildrenComponents) {
-            child.paint(context);
+        if (mChildrenHaveZIndex) {
+            // TODO -- should only sort when something has changed
+            ArrayList<Component> sorted = new ArrayList<Component>(mChildrenComponents);
+            sorted.sort((a, b) -> (int) (a.getZIndex() - b.getZIndex()));
+            for (Component child : sorted) {
+                child.paint(context);
+            }
+        } else {
+            for (Component child : mChildrenComponents) {
+                child.paint(context);
+            }
+        }
+        if (mGraphicsLayerModifier != null) {
+            context.endGraphicsLayer();
         }
         context.translate(-tx, -ty);
         context.restore();
+        context.getContext().lastComponent = prev;
     }
 
     /** Traverse the modifiers to compute indicated dimension */
@@ -248,7 +316,8 @@ public class LayoutComponent extends Component {
         for (Operation c : mComponentModifiers.getList()) {
             if (c instanceof WidthModifierOperation) {
                 WidthModifierOperation o = (WidthModifierOperation) c;
-                if (o.getType() == DimensionModifierOperation.Type.EXACT) {
+                if (o.getType() == DimensionModifierOperation.Type.EXACT
+                        || o.getType() == DimensionModifierOperation.Type.EXACT_DP) {
                     w = o.getValue();
                 }
                 break;
@@ -291,7 +360,8 @@ public class LayoutComponent extends Component {
         for (Operation c : mComponentModifiers.getList()) {
             if (c instanceof HeightModifierOperation) {
                 HeightModifierOperation o = (HeightModifierOperation) c;
-                if (o.getType() == DimensionModifierOperation.Type.EXACT) {
+                if (o.getType() == DimensionModifierOperation.Type.EXACT
+                        || o.getType() == DimensionModifierOperation.Type.EXACT_DP) {
                     h = o.getValue();
                 }
                 break;
@@ -326,6 +396,7 @@ public class LayoutComponent extends Component {
         return t + b;
     }
 
+    @NonNull
     public ArrayList<Component> getChildrenComponents() {
         return mChildrenComponents;
     }

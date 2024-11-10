@@ -27,6 +27,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Flags
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.battery.BatteryMeterView
+import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -341,7 +342,7 @@ private constructor(
         private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
-        private val darkIconDispatcher: DarkIconDispatcher,
+        @DisplaySpecific private val darkIconDispatcher: DarkIconDispatcher,
         private val statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {

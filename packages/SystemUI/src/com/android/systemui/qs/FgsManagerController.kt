@@ -27,6 +27,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.UserInfo
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.IBinder
 import android.os.PowerExemptionManager
@@ -54,6 +55,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags;
 import com.android.systemui.res.R
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -137,7 +139,7 @@ interface FgsManagerController {
 
 @SysUISingleton
 class FgsManagerControllerImpl @Inject constructor(
-    private val context: Context,
+    @Main private val resources: Resources,
     @Main private val mainExecutor: Executor,
     @Background private val backgroundExecutor: Executor,
     private val systemClock: SystemClock,
@@ -222,6 +224,14 @@ class FgsManagerControllerImpl @Inject constructor(
     private val foregroundServiceObserver = ForegroundServiceObserver()
 
     private val userVisibleJobObserver = UserVisibleJobObserver()
+
+    private val stoppableApps by lazy { resources
+        .getStringArray(com.android.internal.R.array.stoppable_fgs_system_apps)
+    }
+
+    private val vendorStoppableApps by lazy { resources
+        .getStringArray(com.android.internal.R.array.vendor_stoppable_fgs_system_apps)
+    }
 
     override fun init() {
         synchronized(lock) {
@@ -725,7 +735,20 @@ class FgsManagerControllerImpl @Inject constructor(
                     }
                 else -> UIControl.NORMAL
             }
+            // If the app wants to be a good citizen by being stoppable, even if the category it
+            // belongs to is exempted for background restriction, let it be stoppable by user.
+            if (Flags.stoppableFgsSystemApp()) {
+                if (isStoppableApp(packageName)) {
+                    uiControl = UIControl.NORMAL
+                }
+            }
+
             uiControlInitialized = true
+        }
+
+        fun isStoppableApp(packageName: String): Boolean {
+            return stoppableApps.contains(packageName) ||
+                vendorStoppableApps.contains(packageName)
         }
 
         override fun equals(other: Any?): Boolean {

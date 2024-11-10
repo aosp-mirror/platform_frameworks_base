@@ -34,6 +34,7 @@ import static android.view.accessibility.Flags.FLAG_DEPRECATE_ACCESSIBILITY_ANNO
 import static android.view.accessibility.Flags.FLAG_SUPPLEMENTAL_DESCRIPTION;
 import static android.view.accessibility.Flags.removeChildHoverCheckForTouchExploration;
 import static android.view.accessibility.Flags.supplementalDescription;
+import static android.view.accessibility.Flags.supportMultipleLabeledby;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
@@ -11402,7 +11403,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             View label = rootView.findLabelForView(this, mID);
             if (label != null) {
-                info.setLabeledBy(label);
+                if (supportMultipleLabeledby()) {
+                    info.addLabeledBy(label);
+                } else {
+                    info.setLabeledBy(label);
+                }
             }
 
             if ((mAttachInfo.mAccessibilityFetchFlags
@@ -23877,12 +23882,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         draw(canvas);
                     }
-                }
 
-                // For VRR to vote the preferred frame rate
-                if (sToolkitSetFrameRateReadOnlyFlagValue
-                        && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
-                    votePreferredFrameRate();
+                    // For VRR to vote the preferred frame rate
+                    if (sToolkitSetFrameRateReadOnlyFlagValue
+                            && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                        votePreferredFrameRate();
+                    }
                 }
             } finally {
                 renderNode.endRecording();

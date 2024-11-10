@@ -21,6 +21,7 @@ import static android.content.Intent.ACTION_SCREEN_ON;
 import static android.content.Intent.EXTRA_USER_ID;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.LauncherUserInfo.PRIVATE_SPACE_ENTRYPOINT_HIDDEN;
 import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
 import static android.content.pm.PackageManager.FEATURE_EMBEDDED;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
@@ -32,6 +33,7 @@ import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
 import static android.os.UserManager.USER_OPERATION_ERROR_USER_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
+import static android.provider.Settings.Secure.HIDE_PRIVATESPACE_ENTRY_POINT;
 
 import static com.android.internal.app.SetScreenLockDialogActivity.EXTRA_ORIGIN_USER_ID;
 import static com.android.internal.app.SetScreenLockDialogActivity.LAUNCH_REASON_DISABLE_QUIET_MODE;
@@ -340,6 +342,10 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TRON_GUEST_CREATED = "users_guest_created";
     private static final String TRON_USER_CREATED = "users_user_created";
     private static final String TRON_DEMO_CREATED = "users_demo_created";
+
+    // The boot user strategy for HSUM.
+    private static final int BOOT_TO_PREVIOUS_OR_FIRST_SWITCHABLE_USER = 0;
+    private static final int BOOT_TO_HSU_FOR_PROVISIONED_DEVICE = 1;
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -1391,36 +1397,76 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (isHeadlessSystemUserMode()) {
-            if (mContext.getResources()
-                    .getBoolean(com.android.internal.R.bool.config_bootToHeadlessSystemUser)) {
-                return UserHandle.USER_SYSTEM;
+            final int bootStrategy = mContext.getResources()
+                    .getInteger(com.android.internal.R.integer.config_hsumBootStrategy);
+            switch (bootStrategy) {
+                case BOOT_TO_PREVIOUS_OR_FIRST_SWITCHABLE_USER:
+                    return getPreviousOrFirstSwitchableUser();
+                case BOOT_TO_HSU_FOR_PROVISIONED_DEVICE:
+                    return getBootUserBasedOnProvisioning();
+                default:
+                    Slogf.w(LOG_TAG, "Unknown HSUM boot strategy: %d", bootStrategy);
+                    return getPreviousOrFirstSwitchableUser();
             }
-            // Return the previous foreground user, if there is one.
-            final int previousUser = getPreviousFullUserToEnterForeground();
-            if (previousUser != UserHandle.USER_NULL) {
-                Slogf.i(LOG_TAG, "Boot user is previous user %d", previousUser);
-                return previousUser;
-            }
-            // No previous user. Return the first switchable user if there is one.
-            synchronized (mUsersLock) {
-                final int userSize = mUsers.size();
-                for (int i = 0; i < userSize; i++) {
-                    final UserData userData = mUsers.valueAt(i);
-                    if (userData.info.supportsSwitchToByUser()) {
-                        int firstSwitchable = userData.info.id;
-                        Slogf.i(LOG_TAG,
-                                "Boot user is first switchable user %d", firstSwitchable);
-                        return firstSwitchable;
-                    }
-                }
-            }
-            // No switchable users found. Uh oh!
-            throw new UserManager.CheckedUserOperationException(
-                    "No switchable users found", USER_OPERATION_ERROR_UNKNOWN);
         }
         // Not HSUM, return system user.
         return UserHandle.USER_SYSTEM;
     }
+
+    private @UserIdInt int getBootUserBasedOnProvisioning()
+            throws UserManager.CheckedUserOperationException {
+        final boolean provisioned = Settings.Global.getInt(mContext.getContentResolver(),
+                                            Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        if (provisioned) {
+            return UserHandle.USER_SYSTEM;
+        } else {
+            final int firstSwitchableFullUser = getFirstSwitchableUser(true);
+            if (firstSwitchableFullUser != UserHandle.USER_NULL) {
+                Slogf.i(LOG_TAG,
+                        "Boot user is first switchable full user %d",
+                                firstSwitchableFullUser);
+                return firstSwitchableFullUser;
+            }
+            // No switchable full user found. Uh oh!
+            throw new UserManager.CheckedUserOperationException(
+                "No switchable full user found", USER_OPERATION_ERROR_UNKNOWN);
+        }
+    }
+
+    private @UserIdInt int getPreviousOrFirstSwitchableUser()
+            throws UserManager.CheckedUserOperationException {
+        // Return the previous foreground user, if there is one.
+        final int previousUser = getPreviousFullUserToEnterForeground();
+        if (previousUser != UserHandle.USER_NULL) {
+            Slogf.i(LOG_TAG, "Boot user is previous user %d", previousUser);
+            return previousUser;
+        }
+        // No previous user. Return the first switchable user if there is one.
+        final int firstSwitchableUser = getFirstSwitchableUser(false);
+        if (firstSwitchableUser != UserHandle.USER_NULL) {
+            Slogf.i(LOG_TAG,
+                    "Boot user is first switchable user %d", firstSwitchableUser);
+            return firstSwitchableUser;
+        }
+        // No switchable users found. Uh oh!
+        throw new UserManager.CheckedUserOperationException(
+            "No switchable users found", USER_OPERATION_ERROR_UNKNOWN);
+    }
+
+    private @UserIdInt int getFirstSwitchableUser(boolean fullUserOnly) {
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                final UserData userData = mUsers.valueAt(i);
+                if (userData.info.supportsSwitchToByUser() &&
+                        (!fullUserOnly || userData.info.isFull())) {
+                    int firstSwitchable = userData.info.id;
+                    return firstSwitchable;
+                }
+            }
+        }
+       return UserHandle.USER_NULL;
+   }
 
 
     @Override
@@ -7902,11 +7948,25 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if (userInfo != null) {
                 final UserTypeDetails userDetails = getUserTypeDetails(userInfo);
-                final LauncherUserInfo uiInfo = new LauncherUserInfo.Builder(
-                        userDetails.getName(),
-                        userInfo.serialNumber)
-                        .build();
-                return uiInfo;
+
+                if (Flags.addLauncherUserConfig()) {
+                    Bundle config = new Bundle();
+                    if (userInfo.isPrivateProfile()) {
+                        try {
+                            int parentId = getProfileParentIdUnchecked(userId);
+                            config.putBoolean(PRIVATE_SPACE_ENTRYPOINT_HIDDEN,
+                                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                                            HIDE_PRIVATESPACE_ENTRY_POINT, parentId) == 1);
+                        } catch (Settings.SettingNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    return new LauncherUserInfo.Builder(userDetails.getName(),
+                            userInfo.serialNumber, config).build();
+                }
+
+                return new LauncherUserInfo.Builder(userDetails.getName(),
+                        userInfo.serialNumber).build();
             } else {
                 return null;
             }

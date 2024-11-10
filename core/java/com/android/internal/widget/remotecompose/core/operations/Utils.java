@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 /** Utilities to be used across all core operations */
 public class Utils {
     public static float asNan(int v) {
@@ -30,11 +32,13 @@ public class Utils {
         return v - 0x100000000L;
     }
 
+    @NonNull
     public static String idStringFromNan(float value) {
         int b = Float.floatToRawIntBits(value) & 0x3FFFFF;
         return idString(b);
     }
 
+    @NonNull
     public static String idString(int b) {
         return (b > 0xFFFFF) ? "A_" + (b & 0xFFFFF) : "" + b;
     }
@@ -50,7 +54,8 @@ public class Utils {
      * @param n
      * @return
      */
-    public static String trimString(String str, int n) {
+    @NonNull
+    public static String trimString(@NonNull String str, int n) {
         if (str.length() > n) {
             str = str.substring(0, n - 3) + "...";
         }
@@ -145,6 +150,7 @@ public class Utils {
      * @param color
      * @return
      */
+    @NonNull
     public static String colorInt(int color) {
         String str = "000000000000" + Integer.toHexString(color);
         return "0x" + str.substring(str.length() - 8);

@@ -53,6 +53,24 @@ flag {
 }
 
 flag {
+    name: "enhanced_confirmation_in_call_apis_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable enhanced confirmation incall apis"
+    bug: "310220212"
+}
+
+flag {
+    name: "unknown_call_package_install_blocking_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable the blocking of certain app installs during an unknown call"
+    bug: "310220212"
+}
+
+flag {
     name: "op_enable_mobile_data_by_user"
     is_exported: true
     namespace: "permissions"
@@ -331,4 +349,54 @@ flag {
     namespace: "permissions"
     description: "Enables ExtServices to leverage TextClassifier for OTP detection"
     bug: "351976749"
+}
+
+flag {
+    name: "health_connect_backup_restore_permission_enabled"
+    is_fixed_read_only: true
+    namespace: "health_fitness_aconfig"
+    description: "This flag protects the permission that is required to call Health Connect backup and restore apis"
+    bug: "376014879" # android_fr bug
+    is_exported: true
+}
+
+flag {
+    name: "enable_aiai_proxied_text_classifiers"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables the AiAi to utilize the default OTP text classifier that is also used by ExtServices"
+    bug: "377229653"
+}
+
+flag {
+    name: "enable_sqlite_appops_accesses"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables SQlite for recording discrete and historical AppOp accesses"
+    bug: "377584611"
+}
+
+flag {
+    name: "ranging_permission_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "uwb"
+    description: "This fixed read-only flag is used to enable new ranging permission for all ranging use cases."
+    bug: "370977414"
+}
+
+flag {
+    name: "system_selection_toolbar_enabled"
+    namespace: "permissions"
+    description: "Enables the system selection toolbar feature."
+    bug: "363318732"
+}
+
+flag {
+    name: "use_system_selection_toolbar_in_sysui"
+    namespace: "permissions"
+    description: "Uses the SysUi process to host the SelectionToolbarRenderService."
+    bug: "363318732"
 }

@@ -2,6 +2,7 @@ package com.android.systemui.communal.widgets;
 
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
+import android.content.IntentSender;
 import android.os.UserHandle;
 import android.widget.RemoteViews;
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel;
@@ -21,7 +22,8 @@ interface IGlanceableHubWidgetManagerService {
     oneway void setAppWidgetHostListener(int appWidgetId, in IAppWidgetHostListener listener);
 
     // Requests to add a widget in the Glanceable Hub.
-    oneway void addWidget(in ComponentName provider, in UserHandle user, int rank);
+    oneway void addWidget(in ComponentName provider, in UserHandle user, int rank,
+        in IConfigureWidgetCallback callback);
 
     // Requests to delete a widget from the Glanceable Hub.
     oneway void deleteWidget(int appWidgetId);
@@ -31,6 +33,9 @@ interface IGlanceableHubWidgetManagerService {
 
     // Requests to resize a widget in the Glanceable Hub.
     oneway void resizeWidget(int appWidgetId, int spanY, in int[] appWidgetIds, in int[] ranks);
+
+    // Returns the [IntentSender] for launching the configuration activity of the given widget.
+    IntentSender getIntentSenderForConfigureActivity(int appWidgetId);
 
     // Listener for Glanceable Hub widget updates
     oneway interface IGlanceableHubWidgetsListener {
@@ -47,5 +52,16 @@ interface IGlanceableHubWidgetManagerService {
         void updateAppWidgetDeferred(in String packageName, int appWidgetId);
 
         void onViewDataChanged(int viewId);
+    }
+
+    oneway interface IConfigureWidgetCallback {
+        // Called when the given widget should launch its configuration activity. The caller should
+        // report the result through the [IResultReceiver].
+        void onConfigureWidget(int appWidgetId, in IResultReceiver resultReceiver);
+
+        interface IResultReceiver {
+            // Called when the widget configuration operation returns a result.
+            void onResult(boolean success);
+        }
     }
 }

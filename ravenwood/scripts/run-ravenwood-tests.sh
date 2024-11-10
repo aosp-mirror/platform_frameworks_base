@@ -26,14 +26,14 @@
 
 
 # Regex to identify slow tests, in PCRE
-SLOW_TEST_RE='^(SystemUiRavenTests|CtsIcuTestCasesRavenwood)$'
+SLOW_TEST_RE='^(SystemUiRavenTests|CtsIcuTestCasesRavenwood|CarSystemUIRavenTests)$'
 
 smoke=0
 include_re=""
 exclude_re=""
 smoke_exclude_re=""
 dry_run=""
-while getopts "sx:f:d" opt; do
+while getopts "sx:f:dt" opt; do
 case "$opt" in
     s)
         # Remove slow tests.
@@ -51,6 +51,9 @@ case "$opt" in
         # Dry run
         dry_run="echo"
         ;;
+    t)
+        export RAVENWOOD_LOG_OUT=$(tty)
+        ;;
     '?')
         exit 1
         ;;
@@ -67,7 +70,7 @@ filter() {
     if [[ "$re" == "" ]] ; then
         cat # No filtering
     else
-        grep $grep_arg -P "$re"
+        grep $grep_arg -iP "$re"
     fi
 }
 

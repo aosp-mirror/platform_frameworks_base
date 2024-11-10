@@ -2795,11 +2795,8 @@ public final class NfcAdapter {
             @IntRange(from = 0, to = 15) int gid, @IntRange(from = 0) int oid,
             @NonNull byte[] payload) {
         Objects.requireNonNull(payload, "Payload must not be null");
-        try {
-            return sService.sendVendorNciMessage(mt, gid, oid, payload);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return callServiceReturn(() ->  sService.sendVendorNciMessage(mt, gid, oid, payload),
+                SEND_VENDOR_NCI_STATUS_FAILED);
     }
 
     /**
@@ -2870,6 +2867,18 @@ public final class NfcAdapter {
         @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
         void onVendorNciNotification(
                 @IntRange(from = 9, to = 15) int gid, int oid, @NonNull byte[] payload);
+    }
+
+    /**
+     * Used by data migration to indicate data migration is in progrerss or not.
+     *
+     * Note: This is @hide intentionally since the client is inside the NFC apex.
+     * @param inProgress true if migration is in progress, false once done.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void indicateDataMigration(boolean inProgress) {
+        callService(() -> sService.indicateDataMigration(inProgress, mContext.getPackageName()));
     }
 
     /**

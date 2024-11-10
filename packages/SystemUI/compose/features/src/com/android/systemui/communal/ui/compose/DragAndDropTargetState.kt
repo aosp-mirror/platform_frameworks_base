@@ -36,6 +36,7 @@ import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.util.WidgetPickerIntentUtils
@@ -82,9 +83,7 @@ internal fun rememberDragAndDropTargetState(
  * @see DragEvent
  */
 @Composable
-internal fun Modifier.dragAndDropTarget(
-    dragDropTargetState: DragAndDropTargetState,
-): Modifier {
+internal fun Modifier.dragAndDropTarget(dragDropTargetState: DragAndDropTargetState): Modifier {
     val state by rememberUpdatedState(dragDropTargetState)
 
     return this then
@@ -113,7 +112,7 @@ internal fun Modifier.dragAndDropTarget(
                     override fun onEnded(event: DragAndDropEvent) {
                         state.onEnded()
                     }
-                }
+                },
         )
 }
 
@@ -146,6 +145,7 @@ internal class DragAndDropTargetState(
      */
     private var placeHolder = CommunalContentModel.WidgetPlaceholder()
     private var placeHolderIndex: Int? = null
+    private var previousTargetItemKey: Any? = null
 
     internal val scrollChannel = Channel<Float>()
 
@@ -164,7 +164,19 @@ internal class DragAndDropTargetState(
                 .filter { item -> contentListState.isItemEditable(item.index) }
                 .firstItemAtOffset(dragOffset - contentOffset)
 
-        if (targetItem != null) {
+        if (
+            targetItem != null &&
+                (!communalWidgetResizing() || targetItem.key != previousTargetItemKey)
+        ) {
+            if (communalWidgetResizing()) {
+                // Keep track of the previous target item, to avoid rapidly oscillating between
+                // items if the target item doesn't visually move as a result of the index change.
+                // In this case, even after the index changes, we'd still be colliding with the
+                // element, so it would be selected as the target item the next time this function
+                // runs again, which would trigger us to revert the index change we recently made.
+                previousTargetItemKey = targetItem.key
+            }
+
             var scrollIndex: Int? = null
             var scrollOffset: Int? = null
             if (placeHolderIndex == state.firstVisibleItemIndex) {
@@ -183,8 +195,9 @@ internal class DragAndDropTargetState(
                 // this is needed to neutralize automatic keeping the first item first.
                 scope.launch { state.scrollToItem(scrollIndex, scrollOffset) }
             }
-        } else {
+        } else if (targetItem == null) {
             computeAutoscroll(dragOffset).takeIf { it != 0f }?.let { scrollChannel.trySend(it) }
+            previousTargetItemKey = null
         }
     }
 
@@ -198,7 +211,7 @@ internal class DragAndDropTargetState(
                 contentListState.onSaveList(
                     newItemComponentName = componentName,
                     newItemUser = user,
-                    newItemIndex = dropIndex
+                    newItemIndex = dropIndex,
                 )
                 return@let true
             }
@@ -208,6 +221,7 @@ internal class DragAndDropTargetState(
 
     fun onEnded() {
         placeHolderIndex = null
+        previousTargetItemKey = null
         contentListState.list.remove(placeHolder)
     }
 

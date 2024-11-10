@@ -30,6 +30,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
 import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.bounceableInfo
@@ -72,7 +73,12 @@ constructor(
             rememberViewModel(traceName = "InfiniteGridLayout.TileGrid") {
                 viewModel.dynamicIconTilesViewModelFactory.create()
             }
-        val columns by viewModel.gridSizeViewModel.columns
+        val columnsWithMediaViewModel =
+            rememberViewModel(traceName = "InfiniteGridLAyout.TileGrid") {
+                viewModel.columnsWithMediaViewModelFactory.create(LOCATION_QS)
+            }
+
+        val columns = columnsWithMediaViewModel.columns
         val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width()) }
         val bounceables =
             remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
@@ -118,7 +124,11 @@ constructor(
             rememberViewModel(traceName = "InfiniteGridLayout.EditTileGrid") {
                 viewModel.dynamicIconTilesViewModelFactory.create()
             }
-        val columns by viewModel.gridSizeViewModel.columns
+        val columnsViewModel =
+            rememberViewModel(traceName = "InfiniteGridLayout.EditTileGrid") {
+                viewModel.columnsWithMediaViewModelFactory.createWithoutMediaTracking()
+            }
+        val columns = columnsViewModel.columns
         val largeTiles by iconTilesViewModel.largeTiles.collectAsStateWithLifecycle()
 
         // Non-current tiles should always be displayed as icon tiles.

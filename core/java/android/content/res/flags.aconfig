@@ -83,3 +83,25 @@ flag {
     bug: "364035303"
 }
 
+flag {
+    name: "system_context_handle_app_info_changed"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for allowing system context to handle application info changes"
+    bug: "362420029"
+    # This flag is read at boot time.
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "layout_readwrite_flags"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for allowing read/write flags in layout files"
+    bug: "377974898"
+    # This flag is used to control aapt2 behavior.
+    is_fixed_read_only: true
+}

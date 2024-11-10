@@ -2351,6 +2351,7 @@ public class JobSchedulerServiceTest {
 
     /** Tests that jobs are removed from the pending list if the user stops the app. */
     @Test
+    @RequiresFlagsDisabled(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API)
     public void testUserStopRemovesPending() {
         spyOn(mService);
 
@@ -2400,6 +2401,60 @@ public class JobSchedulerServiceTest {
         assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2a));
         assertFalse(mService.getPendingJobQueue().contains(job2b));
         assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2b));
+    }
+
+    /** Tests that jobs are removed from the pending list if the user stops the app. */
+    @Test
+    @RequiresFlagsEnabled(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API)
+    public void testUserStopRemovesPending_withPendingJobReasonsApi() {
+        spyOn(mService);
+
+        JobStatus job1a = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(1), 1, "pkg1");
+        JobStatus job1b = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(2), 1, "pkg1");
+        JobStatus job2a = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(1), 2, "pkg2");
+        JobStatus job2b = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(2), 2, "pkg2");
+        doReturn(1).when(mPackageManagerInternal).getPackageUid("pkg1", 0, 0);
+        doReturn(11).when(mPackageManagerInternal).getPackageUid("pkg1", 0, 1);
+        doReturn(2).when(mPackageManagerInternal).getPackageUid("pkg2", 0, 0);
+
+        mService.getPendingJobQueue().clear();
+        mService.getPendingJobQueue().add(job1a);
+        mService.getPendingJobQueue().add(job1b);
+        mService.getPendingJobQueue().add(job2a);
+        mService.getPendingJobQueue().add(job2b);
+        mService.getJobStore().add(job1a);
+        mService.getJobStore().add(job1b);
+        mService.getJobStore().add(job2a);
+        mService.getJobStore().add(job2b);
+
+        mService.notePendingUserRequestedAppStopInternal("pkg1", 1, "test");
+        assertEquals(4, mService.getPendingJobQueue().size());
+        assertTrue(mService.getPendingJobQueue().contains(job1a));
+        assertTrue(mService.getPendingJobQueue().contains(job1b));
+        assertTrue(mService.getPendingJobQueue().contains(job2a));
+        assertTrue(mService.getPendingJobQueue().contains(job2b));
+
+        mService.notePendingUserRequestedAppStopInternal("pkg1", 0, "test");
+        assertEquals(2, mService.getPendingJobQueue().size());
+        assertFalse(mService.getPendingJobQueue().contains(job1a));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReasons(job1a)[0]);
+        assertFalse(mService.getPendingJobQueue().contains(job1b));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReasons(job1b)[0]);
+        assertTrue(mService.getPendingJobQueue().contains(job2a));
+        assertTrue(mService.getPendingJobQueue().contains(job2b));
+
+        mService.notePendingUserRequestedAppStopInternal("pkg2", 0, "test");
+        assertEquals(0, mService.getPendingJobQueue().size());
+        assertFalse(mService.getPendingJobQueue().contains(job1a));
+        assertFalse(mService.getPendingJobQueue().contains(job1b));
+        assertFalse(mService.getPendingJobQueue().contains(job2a));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReasons(job2a)[0]);
+        assertFalse(mService.getPendingJobQueue().contains(job2b));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReasons(job2b)[0]);
     }
 
     /**

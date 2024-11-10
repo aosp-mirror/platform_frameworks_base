@@ -168,7 +168,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/open_in_browser_pill"
+        android:id="@+id/open_in_app_or_browser_pill"
         android:layout_width="match_parent"
         android:layout_height="@dimen/desktop_mode_handle_menu_open_in_browser_pill_height"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
@@ -178,7 +178,7 @@
         android:background="@drawable/desktop_mode_decor_handle_menu_background">
 
         <Button
-            android:id="@+id/open_in_browser_button"
+            android:id="@+id/open_in_app_or_browser_button"
             android:layout_weight="1"
             android:contentDescription="@string/open_in_browser_text"
             android:text="@string/open_in_browser_text"

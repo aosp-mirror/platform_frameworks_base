@@ -68,7 +68,6 @@ public abstract class ClockRegistryModule {
                         context,
                         layoutInflater,
                         resources,
-                        featureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION),
                         MigrateClocksToBlueprint.isEnabled(),
                         com.android.systemui.Flags.clockReactiveVariants()
                 ),

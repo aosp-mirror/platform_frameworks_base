@@ -21,6 +21,7 @@ import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_ACTIONS;
 import static com.android.systemui.Flags.clipboardImageTimeout;
 import static com.android.systemui.Flags.clipboardSharedTransitions;
+import static com.android.systemui.Flags.showClipboardIndication;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISSED_OTHER;
@@ -99,6 +100,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     private final ClipboardTransitionExecutor mTransitionExecutor;
 
     private final ClipboardOverlayView mView;
+    private final ClipboardIndicationProvider mClipboardIndicationProvider;
 
     private Runnable mOnSessionCompleteListener;
     private Runnable mOnRemoteCopyTapped;
@@ -173,6 +175,13 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 }
             };
 
+    private ClipboardIndicationCallback mIndicationCallback = new ClipboardIndicationCallback() {
+        @Override
+        public void onIndicationTextChanged(@NonNull CharSequence text) {
+            mView.setIndicationText(text);
+        }
+    };
+
     @Inject
     public ClipboardOverlayController(@OverlayWindowContext Context context,
             ClipboardOverlayView clipboardOverlayView,
@@ -185,11 +194,13 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             @Background Executor bgExecutor,
             ClipboardImageLoader clipboardImageLoader,
             ClipboardTransitionExecutor transitionExecutor,
+            ClipboardIndicationProvider clipboardIndicationProvider,
             UiEventLogger uiEventLogger) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mClipboardImageLoader = clipboardImageLoader;
         mTransitionExecutor = transitionExecutor;
+        mClipboardIndicationProvider = clipboardIndicationProvider;
 
         mClipboardLogger = new ClipboardLogger(uiEventLogger);
 
@@ -288,6 +299,9 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         boolean shouldAnimate = !model.dataMatches(mClipboardModel) || wasExiting;
         mClipboardModel = model;
         mClipboardLogger.setClipSource(mClipboardModel.getSource());
+        if (showClipboardIndication()) {
+            mClipboardIndicationProvider.getIndicationText(mIndicationCallback);
+        }
         if (clipboardImageTimeout()) {
             if (shouldAnimate) {
                 reset();

@@ -209,7 +209,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         }
 
         builder.getAggregateBatteryConsumerBuilder(AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
-                .setConsumedPower(totalPowerMah);
+                .addConsumedPower(totalPowerMah);
 
         mAggregateBatteryConsumers =
                 new AggregateBatteryConsumer[AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT];
@@ -1315,7 +1315,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         }
 
         synchronized (BatteryUsageStats.class) {
-            if (!sInstances.isEmpty()) {
+            if (sInstances != null && !sInstances.isEmpty()) {
                 Exception callSite = sInstances.entrySet().iterator().next().getValue();
                 int count = sInstances.size();
                 sInstances.clear();

@@ -1306,6 +1306,8 @@
   <java-symbol type="array" name="vendor_policy_exempt_apps" />
   <java-symbol type="array" name="cloneable_apps" />
   <java-symbol type="array" name="config_securityStatePackages" />
+  <java-symbol type="array" name="stoppable_fgs_system_apps" />
+  <java-symbol type="array" name="vendor_stoppable_fgs_system_apps" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="default_lock_wallpaper" />
@@ -3716,6 +3718,7 @@
   <java-symbol type="string" name="color_correction_feature_name" />
   <java-symbol type="string" name="reduce_bright_colors_feature_name" />
   <java-symbol type="string" name="config_defaultAccessibilityService" />
+  <java-symbol type="string" name="config_defaultSelectToSpeakService" />
   <java-symbol type="string" name="config_defaultAccessibilityNotificationSound" />
   <java-symbol type="string" name="accessibility_shortcut_spoken_feedback" />
   <java-symbol type="array" name="config_trustedAccessibilityServices" />
@@ -5552,6 +5555,30 @@
   <java-symbol type="string" name="satellite_manual_selection_state_popup_cancel" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
   <java-symbol type="drawable" name="ic_android_satellite_24px" />
+  <java-symbol type="string" name="satellite_sos_available_notification_title" />
+  <java-symbol type="string" name="satellite_sos_available_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_not_in_allowed_region_notification_title" />
+  <java-symbol type="string" name="satellite_sos_not_in_allowed_region_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_not_supported_notification_title" />
+  <java-symbol type="string" name="satellite_sos_not_supported_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_not_provisioned_notification_title" />
+  <java-symbol type="string" name="satellite_sos_not_provisioned_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_unsupported_default_sms_app_notification_title" />
+  <java-symbol type="string" name="satellite_sos_unsupported_default_sms_app_notification_summary" />
+  <java-symbol type="string" name="satellite_sos_location_disabled_notification_title" />
+  <java-symbol type="string" name="satellite_sos_location_disabled_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_available_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_available_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_not_in_allowed_region_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_not_in_allowed_region_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_not_supported_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_not_supported_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_not_provisioned_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_not_provisioned_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_unsupported_default_sms_app_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_unsupported_default_sms_app_notification_summary" />
+  <java-symbol type="string" name="satellite_messaging_location_disabled_notification_title" />
+  <java-symbol type="string" name="satellite_messaging_location_disabled_notification_summary" />
 
   <!-- DisplayManager configs. -->
   <java-symbol type="bool" name="config_evenDimmerEnabled" />
@@ -5623,7 +5650,6 @@
   <java-symbol type="drawable" name="ic_zen_mode_type_schedule_calendar" />
   <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
   <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
-  <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
   <java-symbol type="drawable" name="ic_zen_mode_type_special_dnd" />
 
   <!-- System notification for background user sound -->

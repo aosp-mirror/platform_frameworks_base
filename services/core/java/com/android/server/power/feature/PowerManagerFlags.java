@@ -55,6 +55,9 @@ public class PowerManagerFlags {
             Flags::policyReasonInDisplayPowerRequest
     );
 
+    private final FlagState mMoveWscLoggingToNotifier =
+            new FlagState(Flags.FLAG_MOVE_WSC_LOGGING_TO_NOTIFIER, Flags::moveWscLoggingToNotifier);
+
     /** Returns whether early-screen-timeout-detector is enabled on not. */
     public boolean isEarlyScreenTimeoutDetectorEnabled() {
         return mEarlyScreenTimeoutDetectorFlagState.isEnabled();
@@ -89,6 +92,14 @@ public class PowerManagerFlags {
     }
 
     /**
+     * @return Whether we move WakelockStateChanged atom logging to Notifier (enabled) or leave it
+     *     in BatteryStatsImpl (disabled).
+     */
+    public boolean isMoveWscLoggingToNotifierEnabled() {
+        return mMoveWscLoggingToNotifier.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -98,6 +109,7 @@ public class PowerManagerFlags {
         pw.println(" " + mImproveWakelockLatency);
         pw.println(" " + mPerDisplayWakeByTouch);
         pw.println(" " + mFrameworkWakelockInfo);
+        pw.println(" " + mMoveWscLoggingToNotifier);
     }
 
     private static class FlagState {

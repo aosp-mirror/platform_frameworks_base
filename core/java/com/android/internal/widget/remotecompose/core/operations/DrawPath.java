@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -38,21 +40,23 @@ public class DrawPath extends PaintOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DrawPath " + "[" + mId + "]" + ", " + mStart + ", " + mEnd;
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         DrawPath op = new DrawPath(id);
         operations.add(op);
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -61,19 +65,19 @@ public class DrawPath extends PaintOperation {
         return Operations.DRAW_PATH;
     }
 
-    public static void apply(WireBuffer buffer, int id) {
+    public static void apply(@NonNull WireBuffer buffer, int id) {
         buffer.start(Operations.DRAW_PATH);
         buffer.writeInt(id);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap using integer coordinates")
                 .field(DocumentedOperation.INT, "id", "id of path");
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.drawPath(mId, mStart, mEnd);
     }
 }

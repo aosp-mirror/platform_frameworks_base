@@ -27,6 +27,7 @@ import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
+import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
@@ -85,4 +86,5 @@ oneway interface IPhoneStateListener {
     void onCarrierRoamingNtnModeChanged(in boolean active);
     void onCarrierRoamingNtnEligibleStateChanged(in boolean eligible);
     void onCarrierRoamingNtnAvailableServicesChanged(in int[] availableServices);
+    void onCarrierRoamingNtnSignalStrengthChanged(in NtnSignalStrength ntnSignalStrength);
 }

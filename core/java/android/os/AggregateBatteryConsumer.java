@@ -85,7 +85,7 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
             throw new XmlPullParserException("Invalid XML parser state");
         }
 
-        consumerBuilder.setConsumedPower(
+        consumerBuilder.addConsumedPower(
                 parser.getAttributeDouble(null, BatteryUsageStats.XML_ATTR_POWER));
 
         while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(
@@ -132,11 +132,19 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
         }
 
         /**
+         * Adds the total power included in this aggregate.
+         */
+        public Builder addConsumedPower(double consumedPowerMah) {
+            mData.putDouble(COLUMN_INDEX_CONSUMED_POWER,
+                    mData.getDouble(COLUMN_INDEX_CONSUMED_POWER) + consumedPowerMah);
+            return this;
+        }
+
+        /**
          * Adds power and usage duration from the supplied AggregateBatteryConsumer.
          */
         public void add(AggregateBatteryConsumer aggregateBatteryConsumer) {
-            setConsumedPower(mData.getDouble(COLUMN_INDEX_CONSUMED_POWER)
-                    + aggregateBatteryConsumer.getConsumedPower());
+            addConsumedPower(aggregateBatteryConsumer.getConsumedPower());
             mPowerComponentsBuilder.addPowerAndDuration(aggregateBatteryConsumer.mPowerComponents);
         }
 

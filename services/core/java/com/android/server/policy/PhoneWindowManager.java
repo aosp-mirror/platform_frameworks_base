@@ -83,7 +83,8 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
-import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
+import static com.android.hardware.input.Flags.enableNew25q2Keycodes;
+import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
@@ -183,6 +184,7 @@ import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.service.SensorPrivacyToggleSourceProto;
 import android.service.dreams.DreamManagerInternal;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -3414,6 +3416,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        if (useKeyGestureEventHandler()) {
+            return mModifierShortcutManager.getApplicationLaunchKeyboardShortcuts(deviceId,
+                    mInputManager.getAppLaunchBookmarks());
+        }
         return mModifierShortcutManager.getApplicationLaunchKeyboardShortcuts(deviceId);
     }
 
@@ -3608,7 +3614,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_T:
-                if (keyboardA11yShortcutControl()) {
+                if (enableTalkbackAndMagnifierKeyGestures()) {
                     if (firstDown && event.isMetaPressed() && event.isAltPressed()) {
                         mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
                                 TalkbackShortcutController.ShortcutSource.KEYBOARD);
@@ -3987,9 +3993,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
             case KeyEvent.KEYCODE_SCREENSHOT:
-                if (emojiAndScreenshotKeycodesAvailable() && down && repeatCount == 0) {
+                if (firstDown) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
                 }
+                return true;
+            case KeyEvent.KEYCODE_DO_NOT_DISTURB:
+            case KeyEvent.KEYCODE_LOCK:
+            case KeyEvent.KEYCODE_FULLSCREEN:
                 return true;
         }
         if (isValidGlobalKey(keyCode)
@@ -4004,14 +4014,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean interceptSystemKeysAndShortcutsNew(IBinder focusedToken, KeyEvent event) {
         final int keyCode = event.getKeyCode();
         final int metaState = event.getMetaState();
-        final boolean keyguardOn = keyguardOn();
 
-        if (isUserSetupComplete() && !keyguardOn) {
-            if (mModifierShortcutManager.interceptKey(event)) {
-                dismissKeyboardShortcutsMenu();
-                return true;
-            }
-        }
         switch (keyCode) {
             case KeyEvent.KEYCODE_HOME:
                 return handleHomeShortcuts(focusedToken, event);
@@ -4115,7 +4118,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         return mDefaultDisplayPolicy.isAwake() && mAccessibilityShortcutController
                                 .isAccessibilityShortcutAvailable(false);
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
-                        return keyboardA11yShortcutControl();
+                        return enableTalkbackAndMagnifierKeyGestures();
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
                         return InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
                                 && keyboardA11yShortcutControl();
@@ -4348,7 +4351,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
-                if (keyboardA11yShortcutControl()) {
+                if (enableTalkbackAndMagnifierKeyGestures()) {
                     if (complete) {
                         mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
                                 TalkbackShortcutController.ShortcutSource.KEYBOARD);
@@ -4538,8 +4541,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE,
                     SensorPrivacyManager.Sensors.MICROPHONE);
 
-            mSensorPrivacyManager.setSensorPrivacy(SensorPrivacyManager.Sensors.MICROPHONE,
-                    !isEnabled);
+            mSensorPrivacyManager.setSensorPrivacy(SensorPrivacyToggleSourceProto.OTHER,
+                    SensorPrivacyManager.Sensors.MICROPHONE, !isEnabled, mCurrentUserId);
 
             int toastTextResId;
             if (isEnabled) {
@@ -4753,6 +4756,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)
             throws RemoteException {
         synchronized (mLock) {
+            if (useKeyGestureEventHandler()) {
+                mInputManagerInternal.registerShortcutKey(shortcutCode, shortcutService);
+                return;
+            }
             mModifierShortcutManager.registerShortcutKey(shortcutCode, shortcutService);
         }
     }
@@ -5663,9 +5670,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MACRO_4:
                 result &= ~ACTION_PASS_TO_USER;
                 break;
-            case KeyEvent.KEYCODE_EMOJI_PICKER:
-                if (!emojiAndScreenshotKeycodesAvailable()) {
-                    // Don't allow EMOJI_PICKER key to be dispatched until flag is released.
+            case KeyEvent.KEYCODE_DICTATE:
+            case KeyEvent.KEYCODE_NEW:
+            case KeyEvent.KEYCODE_CLOSE:
+            case KeyEvent.KEYCODE_PRINT:
+            case KeyEvent.KEYCODE_F13:
+            case KeyEvent.KEYCODE_F14:
+            case KeyEvent.KEYCODE_F15:
+            case KeyEvent.KEYCODE_F16:
+            case KeyEvent.KEYCODE_F17:
+            case KeyEvent.KEYCODE_F18:
+            case KeyEvent.KEYCODE_F19:
+            case KeyEvent.KEYCODE_F20:
+            case KeyEvent.KEYCODE_F21:
+            case KeyEvent.KEYCODE_F22:
+            case KeyEvent.KEYCODE_F23:
+            case KeyEvent.KEYCODE_F24:
+                if (!enableNew25q2Keycodes()) {
                     result &= ~ACTION_PASS_TO_USER;
                 }
                 break;
@@ -5838,8 +5859,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
             long whenNanos, int policyFlags) {
         if ((policyFlags & FLAG_WAKE) != 0) {
-            if (mWindowWakeUpPolicy.wakeUpFromMotion(
-                        whenNanos / 1000000, source, action == MotionEvent.ACTION_DOWN)) {
+            if (mWindowWakeUpPolicy.wakeUpFromMotion(displayId, whenNanos / 1000000, source,
+                    action == MotionEvent.ACTION_DOWN)) {
                 // Woke up. Pass motion events to user.
                 return ACTION_PASS_TO_USER;
             }
@@ -5853,8 +5874,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // there will be no dream to intercept the touch and wake into ambient.  The device should
         // wake up in this case.
         if (isTheaterModeEnabled() && (policyFlags & FLAG_WAKE) != 0) {
-            if (mWindowWakeUpPolicy.wakeUpFromMotion(
-                        whenNanos / 1000000, source, action == MotionEvent.ACTION_DOWN)) {
+            if (mWindowWakeUpPolicy.wakeUpFromMotion(displayId, whenNanos / 1000000, source,
+                    action == MotionEvent.ACTION_DOWN)) {
                 // Woke up. Pass motion events to user.
                 return ACTION_PASS_TO_USER;
             }
@@ -6202,7 +6223,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void wakeUpFromWakeKey(long eventTime, int keyCode, boolean isDown) {
-        if (mWindowWakeUpPolicy.wakeUpFromKey(eventTime, keyCode, isDown)) {
+        if (mWindowWakeUpPolicy.wakeUpFromKey(DEFAULT_DISPLAY, eventTime, keyCode, isDown)) {
             final boolean keyCanLaunchHome = keyCode == KEYCODE_HOME || keyCode == KEYCODE_POWER;
             // Start HOME with "reason" extra if sleeping for more than mWakeUpToLastStateTimeout
             if (shouldWakeUpWithHomeIntent() &&  keyCanLaunchHome) {

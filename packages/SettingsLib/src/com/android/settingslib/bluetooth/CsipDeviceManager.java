@@ -383,11 +383,7 @@ public class CsipDeviceManager {
                 preferredMainDevice.refresh();
                 hasChanged = true;
             }
-            if (isWorkProfile()) {
-                log("addMemberDevicesIntoMainDevice: skip sync source for work profile");
-            } else {
-                syncAudioSharingSourceIfNeeded(preferredMainDevice);
-            }
+            syncAudioSharingSourceIfNeeded(preferredMainDevice);
         }
         if (hasChanged) {
             log("addMemberDevicesIntoMainDevice: After changed, CachedBluetoothDevice list: "
@@ -402,8 +398,12 @@ public class CsipDeviceManager {
     }
 
     private void syncAudioSharingSourceIfNeeded(CachedBluetoothDevice mainDevice) {
-        boolean isAudioSharingEnabled = BluetoothUtils.isAudioSharingEnabled();
+        boolean isAudioSharingEnabled = BluetoothUtils.isAudioSharingUIAvailable(mContext);
         if (isAudioSharingEnabled) {
+            if (isWorkProfile()) {
+                log("addMemberDevicesIntoMainDevice: skip sync source for work profile");
+                return;
+            }
             boolean hasBroadcastSource = BluetoothUtils.isBroadcasting(mBtManager)
                     && BluetoothUtils.hasConnectedBroadcastSource(
                     mainDevice, mBtManager);
@@ -433,6 +433,8 @@ public class CsipDeviceManager {
                     }
                 }
             }
+        } else {
+            log("addMemberDevicesIntoMainDevice: skip sync source, flag disabled");
         }
     }
 

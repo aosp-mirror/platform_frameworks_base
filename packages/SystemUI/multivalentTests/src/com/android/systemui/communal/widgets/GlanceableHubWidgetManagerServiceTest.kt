@@ -20,6 +20,8 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Intent
+import android.content.IntentSender
+import android.os.Binder
 import android.os.UserHandle
 import android.testing.TestableLooper
 import android.widget.RemoteViews
@@ -29,6 +31,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.fakeGlanceableHubMultiUserHelper
+import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IConfigureWidgetCallback
 import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IGlanceableHubWidgetsListener
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -43,11 +46,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -164,7 +169,7 @@ class GlanceableHubWidgetManagerServiceTest : SysuiTestCase() {
         }
 
     @Test
-    fun addWidget_getWidgetUpdate() =
+    fun addWidget_noConfigurationCallback_getWidgetUpdate() =
         testScope.runTest {
             setupWidgets()
 
@@ -180,10 +185,75 @@ class GlanceableHubWidgetManagerServiceTest : SysuiTestCase() {
             assertThat(widgets?.get(2)?.has(3, "pkg_3/cls_3", 2, 6)).isTrue()
 
             // Add a widget
-            service.addWidget(ComponentName("pkg_4", "cls_4"), UserHandle.of(0), 3)
+            service.addWidget(ComponentName("pkg_4", "cls_4"), UserHandle.of(0), 3, null)
             runCurrent()
 
             // Verify an update pushed with widget 4 added
+            assertThat(widgets).hasSize(4)
+            assertThat(widgets?.get(0)?.has(1, "pkg_1/cls_1", 0, 3)).isTrue()
+            assertThat(widgets?.get(1)?.has(2, "pkg_2/cls_2", 1, 3)).isTrue()
+            assertThat(widgets?.get(2)?.has(3, "pkg_3/cls_3", 2, 6)).isTrue()
+            assertThat(widgets?.get(3)?.has(4, "pkg_4/cls_4", 3, 3)).isTrue()
+        }
+
+    @Test
+    fun addWidget_withConfigurationCallback_configurationFails_doNotAddWidget() =
+        testScope.runTest {
+            setupWidgets()
+
+            // Bind service
+            val binder = underTest.onBind(Intent())
+            val service = IGlanceableHubWidgetManagerService.Stub.asInterface(binder)
+
+            // Verify the update is as expected
+            val widgets by collectLastValue(service.listenForWidgetUpdates())
+            assertThat(widgets).hasSize(3)
+            assertThat(widgets?.get(0)?.has(1, "pkg_1/cls_1", 0, 3)).isTrue()
+            assertThat(widgets?.get(1)?.has(2, "pkg_2/cls_2", 1, 3)).isTrue()
+            assertThat(widgets?.get(2)?.has(3, "pkg_3/cls_3", 2, 6)).isTrue()
+
+            // Add a widget with a configuration callback that fails
+            service.addWidget(
+                ComponentName("pkg_4", "cls_4"),
+                UserHandle.of(0),
+                3,
+                createConfigureWidgetCallback(success = false),
+            )
+            runCurrent()
+
+            // Verify that widget 4 is not added
+            assertThat(widgets).hasSize(3)
+            assertThat(widgets?.get(0)?.has(1, "pkg_1/cls_1", 0, 3)).isTrue()
+            assertThat(widgets?.get(1)?.has(2, "pkg_2/cls_2", 1, 3)).isTrue()
+            assertThat(widgets?.get(2)?.has(3, "pkg_3/cls_3", 2, 6)).isTrue()
+        }
+
+    @Test
+    fun addWidget_withConfigurationCallback_configurationSucceeds_addWidget() =
+        testScope.runTest {
+            setupWidgets()
+
+            // Bind service
+            val binder = underTest.onBind(Intent())
+            val service = IGlanceableHubWidgetManagerService.Stub.asInterface(binder)
+
+            // Verify the update is as expected
+            val widgets by collectLastValue(service.listenForWidgetUpdates())
+            assertThat(widgets).hasSize(3)
+            assertThat(widgets?.get(0)?.has(1, "pkg_1/cls_1", 0, 3)).isTrue()
+            assertThat(widgets?.get(1)?.has(2, "pkg_2/cls_2", 1, 3)).isTrue()
+            assertThat(widgets?.get(2)?.has(3, "pkg_3/cls_3", 2, 6)).isTrue()
+
+            // Add a widget with a configuration callback that fails
+            service.addWidget(
+                ComponentName("pkg_4", "cls_4"),
+                UserHandle.of(0),
+                3,
+                createConfigureWidgetCallback(success = true),
+            )
+            runCurrent()
+
+            // Verify that widget 4 is added
             assertThat(widgets).hasSize(4)
             assertThat(widgets?.get(0)?.has(1, "pkg_1/cls_1", 0, 3)).isTrue()
             assertThat(widgets?.get(1)?.has(2, "pkg_2/cls_2", 1, 3)).isTrue()
@@ -271,6 +341,21 @@ class GlanceableHubWidgetManagerServiceTest : SysuiTestCase() {
             assertThat(widgets?.get(2)?.has(3, "pkg_3/cls_3", 2, 6)).isTrue()
         }
 
+    @Test
+    fun getIntentSenderForConfigureActivity() =
+        testScope.runTest {
+            val expected = IntentSender(Binder())
+            whenever(appWidgetHost.getIntentSenderForConfigureActivity(anyInt(), anyInt()))
+                .thenReturn(expected)
+
+            // Bind service
+            val binder = underTest.onBind(Intent())
+            val service = IGlanceableHubWidgetManagerService.Stub.asInterface(binder)
+
+            val actual = service.getIntentSenderForConfigureActivity(1)
+            assertThat(actual).isEqualTo(expected)
+        }
+
     private fun setupWidgets() {
         widgetRepository.addWidget(
             appWidgetId = 1,
@@ -293,7 +378,7 @@ class GlanceableHubWidgetManagerServiceTest : SysuiTestCase() {
     }
 
     private fun IGlanceableHubWidgetManagerService.listenForWidgetUpdates() =
-        conflatedCallbackFlow<List<CommunalWidgetContentModel>> {
+        conflatedCallbackFlow {
             val listener =
                 object : IGlanceableHubWidgetsListener.Stub() {
                     override fun onWidgetsUpdated(widgets: List<CommunalWidgetContentModel>) {
@@ -315,5 +400,16 @@ class GlanceableHubWidgetManagerServiceTest : SysuiTestCase() {
             this.providerInfo.provider.flattenToString() == componentName &&
             this.rank == rank &&
             this.spanY == spanY
+    }
+
+    private fun createConfigureWidgetCallback(success: Boolean): IConfigureWidgetCallback {
+        return object : IConfigureWidgetCallback.Stub() {
+            override fun onConfigureWidget(
+                appWidgetId: Int,
+                resultReceiver: IConfigureWidgetCallback.IResultReceiver?,
+            ) {
+                resultReceiver?.onResult(success)
+            }
+        }
     }
 }

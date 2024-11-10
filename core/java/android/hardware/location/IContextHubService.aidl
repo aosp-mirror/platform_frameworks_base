@@ -18,6 +18,7 @@ package android.hardware.location;
 
 // Declare any non-default types here with import statements
 import android.app.PendingIntent;
+import android.hardware.location.HubInfo;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
 import android.hardware.location.NanoApp;
@@ -81,6 +82,10 @@ interface IContextHubService {
     // Returns a list of ContextHub objects of available hubs
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     List<ContextHubInfo> getContextHubs();
+
+    // Returns a list of HubInfo objects of available hubs (including ContextHub and VendorHub)
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    List<HubInfo> getHubs();
 
     // Loads a nanoapp at the specified hub (new API)
     @EnforcePermission("ACCESS_CONTEXT_HUB")

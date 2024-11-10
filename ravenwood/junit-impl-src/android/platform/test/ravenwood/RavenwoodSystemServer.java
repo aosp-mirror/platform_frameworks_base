@@ -17,7 +17,9 @@
 package android.platform.test.ravenwood;
 
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.hardware.SerialManager;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.ravenwood.example.BlueManager;
 import android.ravenwood.example.RedManager;
@@ -27,6 +29,8 @@ import android.util.ArraySet;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
+import com.android.server.compat.PlatformCompat;
+import com.android.server.compat.PlatformCompatNative;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import java.util.List;
@@ -65,6 +69,14 @@ public class RavenwoodSystemServer {
     private static SystemServiceManager sServiceManager;
 
     public static void init(RavenwoodConfig config) {
+        // Always start PlatformCompat, regardless of the requested services.
+        // PlatformCompat is not really a SystemService, so it won't receive boot phases / etc.
+        // This initialization code is copied from SystemServer.java.
+        PlatformCompat platformCompat = new PlatformCompat(config.mState.mSystemServerContext);
+        ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE, platformCompat);
+        ServiceManager.addService(Context.PLATFORM_COMPAT_NATIVE_SERVICE,
+                new PlatformCompatNative(platformCompat));
+
         // Avoid overhead if no services required
         if (config.mServicesRequired.isEmpty()) return;
 

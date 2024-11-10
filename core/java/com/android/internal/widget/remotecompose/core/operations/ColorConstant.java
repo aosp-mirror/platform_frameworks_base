@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -39,15 +41,17 @@ public class ColorConstant implements Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mColorId, mColor);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ColorConstant[" + mColorId + "] = " + Utils.colorInt(mColor) + "";
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -63,19 +67,19 @@ public class ColorConstant implements Operation {
      * @param colorId
      * @param color
      */
-    public static void apply(WireBuffer buffer, int colorId, int color) {
+    public static void apply(@NonNull WireBuffer buffer, int colorId, int color) {
         buffer.start(OP_CODE);
         buffer.writeInt(colorId);
         buffer.writeInt(color);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int colorId = buffer.readInt();
         int color = buffer.readInt();
         operations.add(new ColorConstant(colorId, color));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Define a Color")
                 .field(DocumentedOperation.INT, "id", "Id of the color")
@@ -83,10 +87,11 @@ public class ColorConstant implements Operation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.loadColor(mColorId, mColor);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();
