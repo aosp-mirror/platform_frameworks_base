@@ -979,14 +979,16 @@ static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong transactionObj,
 
 static void nativeSetInputWindowInfo(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jobject inputWindow) {
+    if (!inputWindow) {
+        jniThrowNullPointerException(env, "InputWindowHandle is null");
+        return;
+    }
+
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
-    sp<NativeInputWindowHandle> handle = android_view_InputWindowHandle_getHandle(
-            env, inputWindow);
-    handle->updateInfo();
-
+    sp<gui::WindowInfoHandle> info = android_view_InputWindowHandle_getHandle(env, inputWindow);
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->setInputWindowInfo(ctrl, *handle->getInfo());
+    transaction->setInputWindowInfo(ctrl, std::move(info));
 }
 
 static void nativeAddWindowInfosReportedListener(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2403,6 +2405,11 @@ SurfaceComposerClient::Transaction* android_view_SurfaceTransaction_getNativeSur
     }
 }
 
+static void nativeEnableDebugLogCallPoints(JNIEnv* env, jclass clazz, jlong transactionObj) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    transaction->enableDebugLogCallPoints();
+}
+
 static const JNINativeMethod sSurfaceControlMethods[] = {
         // clang-format off
     {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJLandroid/os/Parcel;)J",
@@ -2649,6 +2656,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeNotifyShutdown", "()V",
             (void*)nativeNotifyShutdown },
     {"nativeSetLuts", "(JJ[F[I[I[I[I)V", (void*)nativeSetLuts },
+    {"nativeEnableDebugLogCallPoints", "(J)V", (void*)nativeEnableDebugLogCallPoints },
         // clang-format on
 };
 

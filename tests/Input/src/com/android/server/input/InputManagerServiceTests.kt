@@ -95,8 +95,11 @@ class InputManagerServiceTests {
 
     @get:Rule
     val extendedMockitoRule =
-        ExtendedMockitoRule.Builder(this).mockStatic(LocalServices::class.java)
-            .mockStatic(PermissionChecker::class.java).build()!!
+        ExtendedMockitoRule.Builder(this)
+            .mockStatic(LocalServices::class.java)
+            .mockStatic(PermissionChecker::class.java)
+            .mockStatic(KeyCharacterMap::class.java)
+            .build()!!
 
     @get:Rule
     val setFlagsRule = SetFlagsRule()
@@ -121,6 +124,9 @@ class InputManagerServiceTests {
 
     @Mock
     private lateinit var kbdController: InputManagerService.KeyboardBacklightControllerInterface
+
+    @Mock
+    private lateinit var kcm: KeyCharacterMap
 
     private lateinit var service: InputManagerService
     private lateinit var localService: InputManagerInternal
@@ -170,6 +176,9 @@ class InputManagerServiceTests {
         }
         ExtendedMockito.doReturn(packageManagerInternal).`when` {
             LocalServices.getService(eq(PackageManagerInternal::class.java))
+        }
+        ExtendedMockito.doReturn(kcm).`when` {
+            KeyCharacterMap.load(anyInt())
         }
 
         assertTrue("Local service must be registered", this::localService.isInitialized)

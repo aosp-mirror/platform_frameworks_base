@@ -16,13 +16,13 @@
 package android.platform.test.ravenwood;
 
 import static android.os.Process.FIRST_APPLICATION_UID;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.SYSTEM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Instrumentation;
 import android.content.Context;
+import android.os.Build;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -60,16 +60,13 @@ public final class RavenwoodConfig {
      * Unless the test author requests differently, run as "nobody", and give each collection of
      * tests its own unique PID.
      */
-    int mUid = NOBODY_UID;
+    int mUid = FIRST_APPLICATION_UID;
     int mPid = sNextPid.getAndIncrement();
 
     String mTestPackageName;
     String mTargetPackageName;
 
-    int mMinSdkLevel;
-    int mTargetSdkLevel;
-
-    boolean mProvideMainThread = false;
+    int mTargetSdkLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     final RavenwoodSystemProperties mSystemProperties = new RavenwoodSystemProperties();
 
@@ -107,20 +104,18 @@ public final class RavenwoodConfig {
         }
 
         /**
-         * Configure the identity of this process to be the system UID for the duration of the
-         * test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. We always use an app UID.
          */
+        @Deprecated
         public Builder setProcessSystem() {
-            mConfig.mUid = SYSTEM_UID;
             return this;
         }
 
         /**
-         * Configure the identity of this process to be an app UID for the duration of the
-         * test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. We always use an app UID.
          */
+        @Deprecated
         public Builder setProcessApp() {
-            mConfig.mUid = FIRST_APPLICATION_UID;
             return this;
         }
 
@@ -143,14 +138,6 @@ public final class RavenwoodConfig {
         }
 
         /**
-         * Configure the min SDK level of the test.
-         */
-        public Builder setMinSdkLevel(int sdkLevel) {
-            mConfig.mMinSdkLevel = sdkLevel;
-            return this;
-        }
-
-        /**
          * Configure the target SDK level of the test.
          */
         public Builder setTargetSdkLevel(int sdkLevel) {
@@ -159,14 +146,10 @@ public final class RavenwoodConfig {
         }
 
         /**
-         * Configure a "main" thread to be available for the duration of the test, as defined
-         * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
-         *
-         * @deprecated
+         * @deprecated no longer used. Main thread is always available.
          */
         @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
-            mConfig.mProvideMainThread = provideMainThread;
             return this;
         }
 

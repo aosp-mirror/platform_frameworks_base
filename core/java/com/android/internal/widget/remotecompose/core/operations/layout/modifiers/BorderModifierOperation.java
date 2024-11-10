@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -45,7 +47,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
     float mA;
     int mShapeType = ShapeType.RECTANGLE;
 
-    public PaintBundle paint = new PaintBundle();
+    @NonNull public PaintBundle paint = new PaintBundle();
 
     public BorderModifierOperation(
             float x,
@@ -73,7 +75,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(
                 indent,
                 "BORDER = ["
@@ -105,7 +107,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mX,
@@ -127,6 +129,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         this.mHeight = height;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BorderModifierOperation("
@@ -152,6 +155,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
                 + ")";
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -161,7 +165,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             float x,
             float y,
             float width,
@@ -188,7 +192,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         buffer.writeInt(shapeType);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float x = buffer.readFloat();
         float y = buffer.readFloat();
         float width = buffer.readFloat();
@@ -206,7 +210,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.savePaint();
         paint.reset();
         paint.setColor(mR, mG, mB, mA);
@@ -225,7 +229,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         context.restorePaint();
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Border Modifier")
                 .field(FLOAT, "x", "")

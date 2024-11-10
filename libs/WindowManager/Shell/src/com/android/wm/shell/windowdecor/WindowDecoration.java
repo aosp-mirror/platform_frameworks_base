@@ -127,7 +127,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     }
 
                     mDisplayController.removeDisplayWindowListener(this);
-                    relayout(mTaskInfo, mHasGlobalFocus);
+                    relayout(mTaskInfo, mHasGlobalFocus, mExclusionRegion);
                 }
             };
 
@@ -143,7 +143,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     SurfaceControl mDecorationContainerSurface;
 
     SurfaceControl mCaptionContainerSurface;
-    private WindowlessWindowManager mCaptionWindowManager;
+    private CaptionWindowlessWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
     private Configuration mWindowDecorConfig;
     TaskDragResizer mTaskDragResizer;
@@ -152,6 +152,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     boolean mIsStatusBarVisible;
     boolean mIsKeyguardVisibleAndOccluded;
     boolean mHasGlobalFocus;
+    final Region mExclusionRegion = Region.obtain();
 
     /** The most recent set of insets applied to this window decoration. */
     private WindowDecorationInsets mWindowDecorationInsets;
@@ -218,7 +219,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      *                 constructor.
      * @param hasGlobalFocus Whether the task is focused
      */
-    abstract void relayout(RunningTaskInfo taskInfo, boolean hasGlobalFocus);
+    abstract void relayout(RunningTaskInfo taskInfo, boolean hasGlobalFocus,
+            @NonNull Region displayExclusionRegion);
 
     /**
      * Used by the {@link DragPositioningCallback} associated with the implementing class to
@@ -244,6 +246,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mTaskInfo = params.mRunningTaskInfo;
         }
         mHasGlobalFocus = params.mHasGlobalFocus;
+        mExclusionRegion.set(params.mDisplayExclusionRegion);
         final int oldLayoutResId = mLayoutResId;
         mLayoutResId = params.mLayoutResId;
 
@@ -402,7 +405,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 final int elementWidthPx =
                         resources.getDimensionPixelSize(element.mWidthResId);
                 boundingRects[i] =
-                        calculateBoundingRect(element, elementWidthPx, captionInsetsRect);
+                        calculateBoundingRectLocal(element, elementWidthPx, captionInsetsRect);
                 // Subtract the regions used by the caption elements, the rest is
                 // customizable.
                 if (params.hasInputFeatureSpy()) {
@@ -477,9 +480,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         if (mCaptionWindowManager == null) {
             // Put caption under a container surface because ViewRootImpl sets the destination frame
             // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
-            mCaptionWindowManager = new WindowlessWindowManager(
-                    mTaskInfo.getConfiguration(), mCaptionContainerSurface,
-                    null /* hostInputToken */);
+            mCaptionWindowManager = new CaptionWindowlessWindowManager(
+                    mTaskInfo.getConfiguration(), mCaptionContainerSurface);
         }
         mCaptionWindowManager.setConfiguration(mTaskInfo.getConfiguration());
         final WindowManager.LayoutParams lp =
@@ -492,6 +494,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
         lp.inputFeatures = params.mInputFeatures;
+        final Rect localCaptionBounds = new Rect(
+                outResult.mCaptionX,
+                outResult.mCaptionY,
+                outResult.mCaptionX + outResult.mCaptionWidth,
+                outResult.mCaptionY + outResult.mCaptionHeight);
+        final Region touchableRegion = params.mLimitTouchRegionToSystemAreas
+                ? calculateLimitedTouchableRegion(params, localCaptionBounds)
+                : null;
         if (mViewHost == null) {
             Trace.beginSection("CaptionViewHostLayout-new");
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
@@ -503,6 +513,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
             outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
+            if (params.mLimitTouchRegionToSystemAreas) {
+                mCaptionWindowManager.setTouchRegion(mViewHost, touchableRegion);
+            }
             mViewHost.setView(outResult.mRootView, lp);
             Trace.endSection();
         } else {
@@ -514,13 +527,71 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
             outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
+            if (params.mLimitTouchRegionToSystemAreas) {
+                mCaptionWindowManager.setTouchRegion(mViewHost, touchableRegion);
+            }
             mViewHost.relayout(lp);
             Trace.endSection();
+        }
+        if (touchableRegion != null) {
+            touchableRegion.recycle();
         }
         Trace.endSection(); // CaptionViewHostLayout
     }
 
-    private Rect calculateBoundingRect(@NonNull OccludingCaptionElement element,
+    @NonNull
+    private Region calculateLimitedTouchableRegion(
+            RelayoutParams params,
+            @NonNull Rect localCaptionBounds) {
+        // Make caption bounds relative to display to align with exclusion region.
+        final Point positionInParent = params.mRunningTaskInfo.positionInParent;
+        final Rect captionBoundsInDisplay = new Rect(localCaptionBounds);
+        captionBoundsInDisplay.offsetTo(positionInParent.x, positionInParent.y);
+
+        final Region boundingRects = calculateBoundingRectsRegion(params, captionBoundsInDisplay);
+
+        final Region customizedRegion = Region.obtain();
+        customizedRegion.set(captionBoundsInDisplay);
+        customizedRegion.op(boundingRects, Region.Op.DIFFERENCE);
+        customizedRegion.op(params.mDisplayExclusionRegion, Region.Op.INTERSECT);
+
+        final Region touchableRegion = Region.obtain();
+        touchableRegion.set(captionBoundsInDisplay);
+        touchableRegion.op(customizedRegion, Region.Op.DIFFERENCE);
+        // Return resulting region back to window coordinates.
+        touchableRegion.translate(-positionInParent.x, -positionInParent.y);
+
+        boundingRects.recycle();
+        customizedRegion.recycle();
+        return touchableRegion;
+    }
+
+    @NonNull
+    private Region calculateBoundingRectsRegion(
+            @NonNull RelayoutParams params,
+            @NonNull Rect captionBoundsInDisplay) {
+        final int numOfElements = params.mOccludingCaptionElements.size();
+        final Region region = Region.obtain();
+        if (numOfElements == 0) {
+            // The entire caption is a bounding rect.
+            region.set(captionBoundsInDisplay);
+            return region;
+        }
+        final Resources resources = mDecorWindowContext.getResources();
+        for (int i = 0; i < numOfElements; i++) {
+            final OccludingCaptionElement element = params.mOccludingCaptionElements.get(i);
+            final int elementWidthPx = resources.getDimensionPixelSize(element.mWidthResId);
+            final Rect boundingRect = calculateBoundingRectLocal(element, elementWidthPx,
+                    captionBoundsInDisplay);
+            // Bounding rect is initially calculated relative to the caption, so offset it to make
+            // it relative to the display.
+            boundingRect.offset(captionBoundsInDisplay.left, captionBoundsInDisplay.top);
+            region.union(boundingRect);
+        }
+        return region;
+    }
+
+    private Rect calculateBoundingRectLocal(@NonNull OccludingCaptionElement element,
             int elementWidthPx, @NonNull Rect captionRect) {
         switch (element.mAlignment) {
             case START -> {
@@ -539,7 +610,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mIsKeyguardVisibleAndOccluded = visible && occluded;
         final boolean changed = prevVisAndOccluded != mIsKeyguardVisibleAndOccluded;
         if (changed) {
-            relayout(mTaskInfo, mHasGlobalFocus);
+            relayout(mTaskInfo, mHasGlobalFocus, mExclusionRegion);
         }
     }
 
@@ -549,8 +620,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final boolean changed = prevStatusBarVisibility != mIsStatusBarVisible;
 
         if (changed) {
-            relayout(mTaskInfo, mHasGlobalFocus);
+            relayout(mTaskInfo, mHasGlobalFocus, mExclusionRegion);
         }
+    }
+
+    void onExclusionRegionChanged(@NonNull Region exclusionRegion) {
+        relayout(mTaskInfo, mHasGlobalFocus, exclusionRegion);
     }
 
     /**
@@ -751,9 +826,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionHeightId;
         int mCaptionWidthId;
         final List<OccludingCaptionElement> mOccludingCaptionElements = new ArrayList<>();
+        boolean mLimitTouchRegionToSystemAreas;
         int mInputFeatures;
         boolean mIsInsetSource = true;
         @InsetsSource.Flags int mInsetSourceFlags;
+        final Region mDisplayExclusionRegion = Region.obtain();
 
         int mShadowRadiusId;
         int mCornerRadius;
@@ -772,9 +849,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionHeightId = Resources.ID_NULL;
             mCaptionWidthId = Resources.ID_NULL;
             mOccludingCaptionElements.clear();
+            mLimitTouchRegionToSystemAreas = false;
             mInputFeatures = 0;
             mIsInsetSource = true;
             mInsetSourceFlags = 0;
+            mDisplayExclusionRegion.setEmpty();
 
             mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
@@ -827,6 +906,19 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionTopPadding = 0;
             mCustomizableCaptionRegion.setEmpty();
             mRootView = null;
+        }
+    }
+
+    private static class CaptionWindowlessWindowManager extends WindowlessWindowManager {
+        CaptionWindowlessWindowManager(
+                @NonNull Configuration configuration,
+                @NonNull SurfaceControl rootSurface) {
+            super(configuration, rootSurface, /* hostInputToken= */ null);
+        }
+
+        /** Set the view host's touchable region. */
+        void setTouchRegion(@NonNull SurfaceControlViewHost viewHost, @NonNull Region region) {
+            setTouchRegion(viewHost.getWindowToken().asBinder(), region);
         }
     }
 

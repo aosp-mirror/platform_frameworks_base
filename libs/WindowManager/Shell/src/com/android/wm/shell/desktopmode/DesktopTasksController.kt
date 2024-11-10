@@ -554,19 +554,6 @@ class DesktopTasksController(
         }
     }
 
-    /** Move a desktop app to split screen. */
-    fun moveToSplit(task: RunningTaskInfo) {
-        logV( "moveToSplit taskId=%s", task.taskId)
-        desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
-        val wct = WindowContainerTransaction()
-        wct.setBounds(task.token, Rect())
-        // Rather than set windowing mode to multi-window at task level, set it to
-        // undefined and inherit from split stage.
-        wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
-
-        transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-    }
-
     private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
         if (splitScreenController.isTaskInSplitScreen(taskInfo.taskId)) {
             splitScreenController.prepareExitSplitScreen(
@@ -1783,9 +1770,13 @@ class DesktopTasksController(
         transition: IBinder,
         taskIdToMinimize: Int,
     ) {
-        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize) ?: return
+        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize)
         desktopTasksLimiter.ifPresent {
-            it.addPendingMinimizeChange(transition, taskToMinimize.displayId, taskToMinimize.taskId)
+            it.addPendingMinimizeChange(
+                transition = transition,
+                displayId = taskToMinimize?.displayId ?: DEFAULT_DISPLAY,
+                taskId = taskIdToMinimize
+            )
         }
     }
 
@@ -2047,6 +2038,18 @@ class DesktopTasksController(
         releaseVisualIndicator()
         taskbarDesktopTaskListener
             ?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding(taskInfo.displayId))
+    }
+
+    /**
+     * Cancel the drag-to-desktop transition.
+     *
+     * @param taskInfo the task being dragged.
+     */
+    fun onDragPositioningCancelThroughStatusBar(
+        taskInfo: RunningTaskInfo,
+    ) {
+        interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
+        cancelDragToDesktop(taskInfo)
     }
 
     /**

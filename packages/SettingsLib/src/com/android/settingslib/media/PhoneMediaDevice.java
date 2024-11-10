@@ -26,7 +26,9 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-
+import static android.media.MediaRoute2Info.TYPE_LINE_DIGITAL;
+import static android.media.MediaRoute2Info.TYPE_LINE_ANALOG;
+import static android.media.MediaRoute2Info.TYPE_AUX_LINE;
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.Manifest;
@@ -123,6 +125,15 @@ public class PhoneMediaDevice extends MediaDevice {
                 } else {
                     name = context.getString(R.string.media_transfer_external_device_name);
                 }
+                break;
+            case TYPE_LINE_DIGITAL:
+                name = context.getString(R.string.media_transfer_digital_line_name);
+                break;
+            case TYPE_LINE_ANALOG:
+                name = context.getString(R.string.media_transfer_analog_line_name);
+                break;
+            case TYPE_AUX_LINE:
+                name = context.getString(R.string.media_transfer_aux_line_name);
                 break;
             default:
                 name = context.getString(R.string.media_transfer_default_device_name);
@@ -268,6 +279,9 @@ public class PhoneMediaDevice extends MediaDevice {
         switch (mRouteInfo.getType()) {
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
+            case TYPE_LINE_ANALOG:
+            case TYPE_LINE_DIGITAL:
+            case TYPE_AUX_LINE:
                 id = WIRED_HEADSET_ID;
                 break;
             case TYPE_USB_DEVICE:

@@ -153,3 +153,10 @@ flag {
     bug: "371173368"
     is_exported: true
 }
+
+flag {
+    name: "vdm_settings"
+    namespace: "virtual_devices"
+    description: "Show virtual devices in Settings"
+    bug: "338974320"
+}

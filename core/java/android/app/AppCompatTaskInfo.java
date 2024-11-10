@@ -101,7 +101,6 @@ public class AppCompatTaskInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
             FLAG_UNDEFINED,
-            FLAG_BASE,
             FLAG_LETTERBOX_EDU_ENABLED,
             FLAG_ELIGIBLE_FOR_LETTERBOX_EDU,
             FLAG_LETTERBOXED,
@@ -115,6 +114,10 @@ public class AppCompatTaskInfo implements Parcelable {
     })
     public @interface TopActivityFlag {}
 
+    /**
+     * A combination of {@link TopActivityFlag}s that have been enabled through
+     * {@link #setTopActivityFlag}.
+     */
     @TopActivityFlag
     private int mTopActivityFlags;
 
@@ -167,10 +170,11 @@ public class AppCompatTaskInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if top activity is pillarboxed.
+     * @return {@code true} if the top activity bounds are letterboxed with width <= height.
      */
-    public boolean isTopActivityPillarboxed() {
-        return topActivityLetterboxWidth < topActivityLetterboxHeight;
+    public boolean isTopActivityPillarboxShaped() {
+        return isTopActivityLetterboxed()
+                && topActivityLetterboxWidth <= topActivityLetterboxHeight;
     }
 
     /**

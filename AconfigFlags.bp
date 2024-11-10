@@ -21,6 +21,7 @@ aconfig_declarations_group {
     java_aconfig_libraries: [
         // !!! KEEP THIS LIST ALPHABETICAL !!!
         "aconfig_mediacodec_flags_java_lib",
+        "aconfig_settingslib_flags_java_lib",
         "aconfig_trade_in_mode_flags_java_lib",
         "android-sdk-flags-java",
         "android.adaptiveauth.flags-aconfig-java",
@@ -348,6 +349,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "android.security.flags-aconfig",
     package: "android.security",
+    exportable: true,
     container: "system",
     srcs: ["core/java/android/security/*.aconfig"],
 }
@@ -362,6 +364,13 @@ java_aconfig_library {
     name: "android.security.flags-aconfig-java-host",
     aconfig_declarations: "android.security.flags-aconfig",
     host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.security.flags-aconfig-java-export",
+    aconfig_declarations: "android.security.flags-aconfig",
+    mode: "exported",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -1748,4 +1757,20 @@ cc_aconfig_library {
         "com.android.adbd",
     ],
     min_sdk_version: "apex_inherit",
+}
+
+// Settings Lib
+aconfig_declarations {
+    name: "aconfig_settingslib_flags",
+    package: "com.android.settingslib.flags",
+    container: "system",
+    srcs: [
+        "packages/SettingsLib/aconfig/settingslib.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "aconfig_settingslib_flags_java_lib",
+    aconfig_declarations: "aconfig_settingslib_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

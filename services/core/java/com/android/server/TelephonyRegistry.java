@@ -88,6 +88,7 @@ import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
+import android.telephony.satellite.NtnSignalStrength;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -440,6 +441,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private boolean[] mCarrierRoamingNtnEligible = null;
 
     private List<IntArray> mCarrierRoamingNtnAvailableServices;
+    private NtnSignalStrength[] mCarrierRoamingNtnSignalStrength;
 
     // Local cache to check if Satellite Modem is enabled
     private AtomicBoolean mIsSatelliteEnabled;
@@ -745,6 +747,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mSCBMDuration = copyOf(mSCBMDuration, mNumPhones);
             mCarrierRoamingNtnMode = copyOf(mCarrierRoamingNtnMode, mNumPhones);
             mCarrierRoamingNtnEligible = copyOf(mCarrierRoamingNtnEligible, mNumPhones);
+            if (mCarrierRoamingNtnSignalStrength != null) {
+                mCarrierRoamingNtnSignalStrength = copyOf(
+                        mCarrierRoamingNtnSignalStrength, mNumPhones);
+            } else {
+                mCarrierRoamingNtnSignalStrength = new NtnSignalStrength[mNumPhones];
+            }
             // ds -> ss switch.
             if (mNumPhones < oldNumPhones) {
                 cutListToSize(mCellInfo, mNumPhones);
@@ -807,6 +815,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCarrierRoamingNtnMode[i] = false;
                 mCarrierRoamingNtnEligible[i] = false;
                 mCarrierRoamingNtnAvailableServices.add(i, new IntArray());
+                mCarrierRoamingNtnSignalStrength[i] = new NtnSignalStrength(
+                        NtnSignalStrength.NTN_SIGNAL_STRENGTH_NONE);
             }
         }
     }
@@ -883,6 +893,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCarrierRoamingNtnMode = new boolean[numPhones];
         mCarrierRoamingNtnEligible = new boolean[numPhones];
         mCarrierRoamingNtnAvailableServices = new ArrayList<>();
+        mCarrierRoamingNtnSignalStrength = new NtnSignalStrength[numPhones];
         mIsSatelliteEnabled = new AtomicBoolean();
         mWasSatelliteEnabledNotified = new AtomicBoolean();
 
@@ -932,6 +943,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCarrierRoamingNtnMode[i] = false;
             mCarrierRoamingNtnEligible[i] = false;
             mCarrierRoamingNtnAvailableServices.add(i, new IntArray());
+            mCarrierRoamingNtnSignalStrength[i] = new NtnSignalStrength(
+                    NtnSignalStrength.NTN_SIGNAL_STRENGTH_NONE);
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1561,6 +1574,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onCarrierRoamingNtnAvailableServicesChanged(
                                 mCarrierRoamingNtnAvailableServices.get(r.phoneId).toArray());
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnSignalStrengthChanged(
+                                mCarrierRoamingNtnSignalStrength[r.phoneId]);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -3803,6 +3825,44 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+
+    /**
+     * Notify external listeners that carrier roaming non-terrestrial network
+     * signal strength changed.
+     * @param subId subscription ID.
+     * @param ntnSignalStrength non-terrestrial network signal strength.
+     */
+    public void notifyCarrierRoamingNtnSignalStrengthChanged(int subId,
+            @NonNull NtnSignalStrength ntnSignalStrength) {
+        if (!checkNotifyPermission("notifyCarrierRoamingNtnSignalStrengthChanged")) {
+            log("nnotifyCarrierRoamingNtnSignalStrengthChanged: caller does not have required "
+                    + "permissions.");
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyCarrierRoamingNtnSignalStrengthChanged: "
+                    + "subId=" + subId + " ntnSignalStrength=" + ntnSignalStrength.getLevel());
+        }
+
+        synchronized (mRecords) {
+            int phoneId = getPhoneIdFromSubId(subId);
+            mCarrierRoamingNtnSignalStrength[phoneId] = ntnSignalStrength;
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED)
+                        && idMatch(r, subId, phoneId)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnSignalStrengthChanged(ntnSignalStrength);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
@@ -3858,6 +3918,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mSCBMDuration=" + mSCBMDuration[i]);
                 pw.println("mCarrierRoamingNtnMode=" + mCarrierRoamingNtnMode[i]);
                 pw.println("mCarrierRoamingNtnEligible=" + mCarrierRoamingNtnEligible[i]);
+                pw.println("mCarrierRoamingNtnSignalStrength="
+                        + mCarrierRoamingNtnSignalStrength[i]);
 
                 // We need to obfuscate package names, and primitive arrays' native toString is ugly
                 Pair<List<String>, int[]> carrierPrivilegeState = mCarrierPrivilegeStates.get(i);

@@ -138,6 +138,7 @@ package android {
     field public static final String DISABLE_SYSTEM_SOUND_EFFECTS = "android.permission.DISABLE_SYSTEM_SOUND_EFFECTS";
     field public static final String DISPATCH_PROVISIONING_MESSAGE = "android.permission.DISPATCH_PROVISIONING_MESSAGE";
     field public static final String DOMAIN_VERIFICATION_AGENT = "android.permission.DOMAIN_VERIFICATION_AGENT";
+    field @FlaggedApi("com.android.art.flags.executable_method_file_offsets") public static final String DYNAMIC_INSTRUMENTATION = "android.permission.DYNAMIC_INSTRUMENTATION";
     field @FlaggedApi("com.android.window.flags.untrusted_embedding_any_app_permission") public static final String EMBED_ANY_APP_IN_UNTRUSTED_MODE = "android.permission.EMBED_ANY_APP_IN_UNTRUSTED_MODE";
     field @FlaggedApi("android.content.pm.emergency_install_permission") public static final String EMERGENCY_INSTALL_PACKAGES = "android.permission.EMERGENCY_INSTALL_PACKAGES";
     field public static final String ENTER_CAR_MODE_PRIORITIZED = "android.permission.ENTER_CAR_MODE_PRIORITIZED";
@@ -389,6 +390,7 @@ package android {
     field public static final String START_CROSS_PROFILE_ACTIVITIES = "android.permission.START_CROSS_PROFILE_ACTIVITIES";
     field public static final String START_REVIEW_PERMISSION_DECISIONS = "android.permission.START_REVIEW_PERMISSION_DECISIONS";
     field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
+    field @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public static final String START_VIBRATION_SESSIONS = "android.permission.START_VIBRATION_SESSIONS";
     field public static final String STATUS_BAR_SERVICE = "android.permission.STATUS_BAR_SERVICE";
     field public static final String STOP_APP_SWITCHES = "android.permission.STOP_APP_SWITCHES";
     field public static final String SUBSTITUTE_NOTIFICATION_APP_NAME = "android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME";
@@ -696,6 +698,7 @@ package android.app {
     field public static final String OPSTR_PLAY_AUDIO = "android:play_audio";
     field public static final String OPSTR_POST_NOTIFICATION = "android:post_notification";
     field public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
+    field @FlaggedApi("android.permission.flags.ranging_permission_enabled") public static final String OPSTR_RANGING = "android:ranging";
     field @FlaggedApi("android.view.contentprotection.flags.rapid_clear_notifications_by_listener_app_op_enabled") public static final String OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER = "android:rapid_clear_notifications_by_listener";
     field public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
     field @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled") public static final String OPSTR_READ_HEART_RATE = "android:read_heart_rate";
@@ -704,6 +707,7 @@ package android.app {
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     field public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     field public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED = "android:read_media_visual_user_selected";
+    field @FlaggedApi("android.permission.flags.platform_oxygen_saturation_enabled") public static final String OPSTR_READ_OXYGEN_SATURATION = "android:read_oxygen_saturation";
     field @FlaggedApi("android.permission.flags.platform_skin_temperature_enabled") public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
     field public static final String OPSTR_READ_WRITE_HEALTH_DATA = "android:read_write_health_data";
     field public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO = "android:receive_ambient_trigger_audio";
@@ -3558,10 +3562,12 @@ package android.companion.virtual {
     method @Deprecated public int getDefaultActivityPolicy();
     method @Deprecated public int getDefaultNavigationPolicy();
     method public int getDevicePolicy(int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public java.time.Duration getDimDuration();
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @Nullable public android.content.ComponentName getHomeComponent();
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @Nullable public android.content.ComponentName getInputMethodComponent();
     method public int getLockState();
     method @Nullable public String getName();
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public java.time.Duration getScreenOffTimeout();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
     method @NonNull public java.util.List<android.companion.virtual.sensor.VirtualSensorConfig> getVirtualSensorConfigs();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -3579,6 +3585,7 @@ package android.companion.virtual {
     field @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public static final int POLICY_TYPE_BLOCKED_ACTIVITY = 6; // 0x6
     field @FlaggedApi("android.companion.virtual.flags.virtual_camera") public static final int POLICY_TYPE_CAMERA = 5; // 0x5
     field @FlaggedApi("android.companion.virtual.flags.cross_device_clipboard") public static final int POLICY_TYPE_CLIPBOARD = 4; // 0x4
+    field @FlaggedApi("android.companion.virtualdevice.flags.default_device_camera_access_policy") public static final int POLICY_TYPE_DEFAULT_DEVICE_CAMERA_ACCESS = 7; // 0x7
     field public static final int POLICY_TYPE_RECENTS = 2; // 0x2
     field public static final int POLICY_TYPE_SENSORS = 0; // 0x0
   }
@@ -3594,10 +3601,12 @@ package android.companion.virtual {
     method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDimDuration(@NonNull java.time.Duration);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setHomeComponent(@Nullable android.content.ComponentName);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setInputMethodComponent(@Nullable android.content.ComponentName);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setScreenOffTimeout(@NonNull java.time.Duration);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setVirtualSensorCallback(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.sensor.VirtualSensorCallback);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setVirtualSensorDirectChannelCallback(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.sensor.VirtualSensorDirectChannelCallback);
@@ -5288,13 +5297,19 @@ package android.hardware.display {
     field public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1024; // 0x400
   }
 
+  public abstract static class VirtualDisplay.Callback {
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") public void onRequestedBrightnessChanged(@FloatRange(from=0.0f, to=1.0f) float);
+  }
+
   public final class VirtualDisplayConfig implements android.os.Parcelable {
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @FloatRange(from=0.0f, to=1.0f) public float getDefaultBrightness();
     method @FlaggedApi("android.companion.virtualdevice.flags.virtual_display_insets") @Nullable public android.view.DisplayCutout getDisplayCutout();
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") public boolean isHomeSupported();
     method @FlaggedApi("com.android.window.flags.vdm_force_app_universal_resizable_api") public boolean isIgnoreActivitySizeRestrictions();
   }
 
   public static final class VirtualDisplayConfig.Builder {
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setDefaultBrightness(@FloatRange(from=0.0f, to=1.0f) float);
     method @FlaggedApi("android.companion.virtualdevice.flags.virtual_display_insets") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setDisplayCutout(@Nullable android.view.DisplayCutout);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setHomeSupported(boolean);
     method @FlaggedApi("com.android.window.flags.vdm_force_app_universal_resizable_api") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setIgnoreActivitySizeRestrictions(boolean);
@@ -7022,7 +7037,7 @@ package android.hardware.soundtrigger {
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAllowMultipleTriggers(boolean);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAudioCapabilities(int);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setCaptureRequested(boolean);
-    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setData(@Nullable byte[]);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setData(@NonNull byte[]);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setKeyphrases(@NonNull java.util.Collection<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
@@ -11648,8 +11663,11 @@ package android.os {
   public abstract class Vibrator {
     method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void addVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void addVibratorStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public boolean areVendorEffectsSupported();
+    method @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public boolean areVendorSessionsSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public boolean isVibrating();
     method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void removeVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @FlaggedApi("android.os.vibrator.vendor_vibration_effects") @RequiresPermission(allOf={android.Manifest.permission.VIBRATE, android.Manifest.permission.VIBRATE_VENDOR_EFFECTS, android.Manifest.permission.START_VIBRATION_SESSIONS}) public void startVendorSession(@NonNull android.os.VibrationAttributes, @Nullable String, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.vibrator.VendorVibrationSession.Callback);
   }
 
   public static interface Vibrator.OnVibratorStateChangedListener {
@@ -11797,6 +11815,28 @@ package android.os.storage {
   public final class StorageVolume implements android.os.Parcelable {
     method @NonNull public String getId();
     method public boolean isExternallyManaged();
+  }
+
+}
+
+package android.os.vibrator {
+
+  @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public final class VendorVibrationSession implements java.lang.AutoCloseable {
+    method public void cancel();
+    method public void close();
+    method @RequiresPermission(android.Manifest.permission.VIBRATE) public void vibrate(@NonNull android.os.VibrationEffect, @Nullable String);
+    field public static final int STATUS_CANCELED = 4; // 0x4
+    field public static final int STATUS_IGNORED = 2; // 0x2
+    field public static final int STATUS_SUCCESS = 1; // 0x1
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+    field public static final int STATUS_UNKNOWN_ERROR = 5; // 0x5
+    field public static final int STATUS_UNSUPPORTED = 3; // 0x3
+  }
+
+  public static interface VendorVibrationSession.Callback {
+    method public void onFinished(int);
+    method public void onFinishing();
+    method public void onStarted(@NonNull android.os.vibrator.VendorVibrationSession);
   }
 
 }
@@ -18293,7 +18333,12 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForModemStateChanged(@NonNull android.telephony.satellite.SatelliteModemStateCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForNtnSignalStrengthChanged(@NonNull android.telephony.satellite.NtnSignalStrengthCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForProvisionStateChanged(@NonNull android.telephony.satellite.SatelliteProvisionStateCallback);
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_CHECK_PENDING_INCOMING_SMS = 7; // 0x7
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_KEEP_ALIVE = 3; // 0x3
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5; // 0x5
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP = 4; // 0x4
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int DATAGRAM_TYPE_LOCATION_SHARING = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int DATAGRAM_TYPE_SMS = 6; // 0x6
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int DATAGRAM_TYPE_SOS_MESSAGE = 1; // 0x1
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int DATAGRAM_TYPE_UNKNOWN = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int DEVICE_HOLD_POSITION_LANDSCAPE_LEFT = 2; // 0x2
@@ -18313,6 +18358,7 @@ package android.telephony.satellite {
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int NT_RADIO_TECHNOLOGY_UNKNOWN = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_ENTITLEMENT = 2; // 0x2
     field @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_GEOLOCATION = 1; // 0x1
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED = 7; // 0x7
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_NONE = 6; // 0x6
@@ -18326,6 +18372,8 @@ package android.telephony.satellite {
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_CONNECTED = 7; // 0x7
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_DATAGRAM_RETRYING = 3; // 0x3
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_MODEM_STATE_DISABLING_SATELLITE = 9; // 0x9
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_MODEM_STATE_ENABLING_SATELLITE = 8; // 0x8
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_IDLE = 0; // 0x0
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_LISTENING = 1; // 0x1
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_NOT_CONNECTED = 6; // 0x6
@@ -18333,11 +18381,16 @@ package android.telephony.satellite {
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_UNAVAILABLE = 5; // 0x5
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_MODEM_STATE_UNKNOWN = -1; // 0xffffffff
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_ACCESS_BARRED = 16; // 0x10
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_DISABLE_IN_PROGRESS = 28; // 0x1c
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS = 27; // 0x1b
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_ENABLE_IN_PROGRESS = 29; // 0x1d
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_ERROR = 1; // 0x1
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_ILLEGAL_STATE = 23; // 0x17
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_INVALID_ARGUMENTS = 8; // 0x8
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_INVALID_MODEM_STATE = 7; // 0x7
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_INVALID_TELEPHONY_STATE = 6; // 0x6
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_LOCATION_DISABLED = 25; // 0x19
+    field @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static final int SATELLITE_RESULT_LOCATION_NOT_AVAILABLE = 26; // 0x1a
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_MODEM_BUSY = 22; // 0x16
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_MODEM_ERROR = 4; // 0x4
     field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final int SATELLITE_RESULT_MODEM_TIMEOUT = 24; // 0x18

@@ -22,6 +22,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ApplicationStartInfo;
 import android.app.Flags;
 import android.app.IApplicationStartInfoCompleteListener;
@@ -419,23 +420,25 @@ public final class AppStartInfoTracker {
      * Should only be called for Activity launch sequences from an instance of
      * {@link ActivityMetricsLaunchObserver}.
      */
-    void onActivityReportFullyDrawn(long id, long timestampNanos) {
+    @Nullable
+    ApplicationStartInfo onActivityReportFullyDrawn(long id, long timestampNanos) {
         synchronized (mLock) {
             if (!mEnabled) {
-                return;
+                return null;
             }
             int index = mInProgressRecords.indexOfKey(id);
             if (index < 0) {
-                return;
+                return null;
             }
             ApplicationStartInfo info = mInProgressRecords.valueAt(index);
             if (info == null) {
                 mInProgressRecords.removeAt(index);
-                return;
+                return null;
             }
             info.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN,
                     timestampNanos);
             mInProgressRecords.removeAt(index);
+            return info;
         }
     }
 

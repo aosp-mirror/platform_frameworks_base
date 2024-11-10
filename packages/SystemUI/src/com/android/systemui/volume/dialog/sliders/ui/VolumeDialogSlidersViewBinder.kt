@@ -28,7 +28,6 @@ import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSlidersViewModel
 import javax.inject.Inject
-import kotlin.math.abs
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -50,15 +49,17 @@ constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) 
                 ) { viewModel ->
                     viewModel.sliders
                         .onEach { uiModel ->
-                            uiModel.sliderViewBinder.bind(volumeDialog)
+                            uiModel.sliderComponent.sliderViewBinder().bind(volumeDialog)
 
-                            val floatingSliderViewBinders = uiModel.floatingSliderViewBinders
+                            val floatingSliderViewBinders = uiModel.floatingSliderComponent
                             floatingSlidersContainer.ensureChildCount(
                                 viewLayoutId = R.layout.volume_dialog_slider_floating,
                                 count = floatingSliderViewBinders.size,
                             )
-                            floatingSliderViewBinders.fastForEachIndexed { index, viewBinder ->
-                                viewBinder.bind(floatingSlidersContainer.getChildAt(index))
+                            floatingSliderViewBinders.fastForEachIndexed { index, sliderComponent ->
+                                sliderComponent
+                                    .sliderViewBinder()
+                                    .bind(floatingSlidersContainer.getChildAt(index))
                             }
                         }
                         .launchIn(this)
@@ -76,7 +77,7 @@ private fun ViewGroup.ensureChildCount(@LayoutRes viewLayoutId: Int, count: Int)
         }
         childCountDelta < 0 -> {
             val inflater = LayoutInflater.from(context)
-            repeat(abs(childCountDelta)) { inflater.inflate(viewLayoutId, this, true) }
+            repeat(-childCountDelta) { inflater.inflate(viewLayoutId, this, true) }
         }
     }
 }

@@ -158,3 +158,11 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "writing_tools"
+    namespace: "input_method"
+    description: "Writing tools API"
+    bug: "373788889"
+    is_fixed_read_only: true
+}

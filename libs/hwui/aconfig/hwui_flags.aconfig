@@ -154,3 +154,13 @@ flag {
   description: "API's that enable animated image drawables to use nearest sampling when scaling."
   bug: "370523334"
 }
+
+flag {
+  name: "remove_vri_sketchy_destroy"
+  namespace: "core_graphics"
+  description: "Remove the eager yet thread-violating destroyHardwareResources in VRI#die"
+  bug: "377057106"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

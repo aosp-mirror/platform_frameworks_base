@@ -447,7 +447,6 @@ public final class DisplayInfo implements Parcelable {
                 && Objects.equals(displayCutout, other.displayCutout)
                 && rotation == other.rotation
                 && modeId == other.modeId
-                && renderFrameRate == other.renderFrameRate
                 && hasArrSupport == other.hasArrSupport
                 && Objects.equals(frameRateCategoryRate, other.frameRateCategoryRate)
                 && defaultModeId == other.defaultModeId
@@ -704,6 +703,9 @@ public final class DisplayInfo implements Parcelable {
     public float getRefreshRate() {
         if (refreshRateOverride > 0) {
             return refreshRateOverride;
+        }
+        if (renderFrameRate > 0) {
+            return renderFrameRate;
         }
         if (supportedModes.length == 0) {
             return 0;

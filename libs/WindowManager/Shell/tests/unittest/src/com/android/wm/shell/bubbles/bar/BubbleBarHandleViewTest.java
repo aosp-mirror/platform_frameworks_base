@@ -16,9 +16,8 @@
 package com.android.wm.shell.bubbles.bar;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
-import android.graphics.drawable.ColorDrawable;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -47,10 +46,9 @@ public class BubbleBarHandleViewTest extends ShellTestCase {
     public void testUpdateHandleColor_lightBg() {
         mHandleView.updateHandleColor(false /* isRegionDark */, false /* animated */);
 
-        assertTrue(mHandleView.getClipToOutline());
-        assertTrue(mHandleView.getBackground() instanceof ColorDrawable);
-        ColorDrawable bgDrawable = (ColorDrawable) mHandleView.getBackground();
-        assertEquals(bgDrawable.getColor(),
+        assertFalse(mHandleView.getClipToOutline());
+        int handleColor = mHandleView.mHandlePaint.getColor();
+        assertEquals(handleColor,
                 ContextCompat.getColor(mContext, R.color.bubble_bar_expanded_view_handle_dark));
     }
 
@@ -58,10 +56,9 @@ public class BubbleBarHandleViewTest extends ShellTestCase {
     public void testUpdateHandleColor_darkBg() {
         mHandleView.updateHandleColor(true /* isRegionDark */, false /* animated */);
 
-        assertTrue(mHandleView.getClipToOutline());
-        assertTrue(mHandleView.getBackground() instanceof ColorDrawable);
-        ColorDrawable bgDrawable = (ColorDrawable) mHandleView.getBackground();
-        assertEquals(bgDrawable.getColor(),
+        assertFalse(mHandleView.getClipToOutline());
+        int handleColor = mHandleView.mHandlePaint.getColor();
+        assertEquals(handleColor,
                 ContextCompat.getColor(mContext, R.color.bubble_bar_expanded_view_handle_light));
     }
 }

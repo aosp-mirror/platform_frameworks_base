@@ -17,6 +17,9 @@ package com.android.server.notification;
 
 import static android.os.UserHandle.USER_ALL;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
+import static android.service.notification.Adjustment.TYPE_NEWS;
+import static android.service.notification.Adjustment.TYPE_PROMOTION;
 
 import static com.android.server.notification.NotificationManagerService.DEFAULT_ALLOWED_ADJUSTMENTS;
 
@@ -28,7 +31,6 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertNull;
-
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
@@ -58,6 +60,8 @@ import android.testing.TestableContext;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
+import android.util.Slog;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -197,8 +201,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     @Test
     public void testWriteXml_userTurnedOffNAS() throws Exception {
         int userId = ActivityManager.getCurrentUser();
-
-        doReturn(true).when(mAssistants).isValidService(eq(mCn), eq(userId));
 
         mAssistants.loadDefaultsFromConfig(true);
 
@@ -435,10 +437,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     public void testSetPackageOrComponentEnabled_onlyOnePackage() throws Exception {
         ComponentName component1 = ComponentName.unflattenFromString("package/Component1");
         ComponentName component2 = ComponentName.unflattenFromString("package/Component2");
-
-        doReturn(true).when(mAssistants).isValidService(eq(component1), eq(mZero.id));
-        doReturn(true).when(mAssistants).isValidService(eq(component2), eq(mZero.id));
-
         mAssistants.setPackageOrComponentEnabled(component1.flattenToString(), mZero.id, true,
                 true, true);
         verify(mNm, never()).setNotificationAssistantAccessGrantedForUserInternal(
@@ -584,7 +582,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     public void testSetAdjustmentTypeSupportedState() throws Exception {
         int userId = ActivityManager.getCurrentUser();
 
-        doReturn(true).when(mAssistants).isValidService(eq(mCn), eq(userId));
         mAssistants.loadDefaultsFromConfig(true);
         mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
                 true, true);
@@ -608,7 +605,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     public void testSetAdjustmentTypeSupportedState_readWriteXml_entries() throws Exception {
         int userId = ActivityManager.getCurrentUser();
 
-        doReturn(true).when(mAssistants).isValidService(eq(mCn), eq(userId));
         mAssistants.loadDefaultsFromConfig(true);
         mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
                 true, true);
@@ -632,7 +628,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     public void testSetAdjustmentTypeSupportedState_readWriteXml_empty() throws Exception {
         int userId = ActivityManager.getCurrentUser();
 
-        doReturn(true).when(mAssistants).isValidService(eq(mCn), eq(userId));
         mAssistants.loadDefaultsFromConfig(true);
         mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
                 true, true);
@@ -689,5 +684,48 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         assertThat(mAssistants.getAllowedAssistantAdjustments())
                 .containsExactlyElementsIn(DEFAULT_ALLOWED_ADJUSTMENTS);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testSetAssistantAdjustmentKeyTypeState_allow() {
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactly(TYPE_PROMOTION);
+
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactlyElementsIn(List.of(TYPE_PROMOTION, TYPE_CONTENT_RECOMMENDATION));
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testSetAssistantAdjustmentKeyTypeState_disallow() {
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).isEmpty();
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testDisallowAdjustmentKeyType_readWriteXml() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactlyElementsIn(List.of(TYPE_NEWS, TYPE_CONTENT_RECOMMENDATION));
+    }
+
+    @Test
+    public void testDefaultAllowedKeyAdjustments_readWriteXml() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactly(TYPE_PROMOTION);
     }
 }

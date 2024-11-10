@@ -27,7 +27,7 @@ internal class Fade(override val matcher: ElementMatcher) : PropertyTransformati
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: Float,
+        idleValue: Float,
     ): Float {
         // Return the alpha value of [element] either when it starts fading in or when it finished
         // fading out, which is `0` in both cases.

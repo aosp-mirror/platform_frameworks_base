@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -27,7 +29,7 @@ public class TimeVariables {
      *
      * @param context
      */
-    public void updateTime(RemoteContext context) {
+    public void updateTime(@NonNull RemoteContext context) {
         LocalDateTime dateTime =
                 LocalDateTime.now(ZoneId.systemDefault()); // TODO, pass in a timezone explicitly?
         // This define the time in the format

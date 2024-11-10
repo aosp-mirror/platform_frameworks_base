@@ -48,7 +48,7 @@ import com.android.systemui.brightness.dagger.ScreenBrightnessModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.common.data.CommonDataLayerModule;
-import com.android.systemui.common.ui.ConfigurationStateModule;
+import com.android.systemui.common.ui.ConfigurationModule;
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryModule;
 import com.android.systemui.common.usagestats.data.CommonUsageStatsDataLayerModule;
 import com.android.systemui.communal.dagger.CommunalModule;
@@ -212,7 +212,7 @@ import javax.inject.Named;
         ClockRegistryModule.class,
         CommunalModule.class,
         CommonDataLayerModule.class,
-        ConfigurationStateModule.class,
+        ConfigurationModule.class,
         ConfigurationRepositoryModule.class,
         CommonUsageStatsDataLayerModule.class,
         ConfigurationControllerModule.class,

@@ -30,6 +30,7 @@ import android.content.Intent
 import android.content.Intent.ACTION_MAIN
 import android.content.pm.ActivityInfo
 import android.graphics.Rect
+import android.graphics.Region
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.hardware.input.InputManager
@@ -48,6 +49,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.util.SparseArray
 import android.view.Choreographer
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.ISystemGestureExclusionListener
 import android.view.IWindowManager
 import android.view.InputChannel
 import android.view.InputMonitor
@@ -84,7 +86,6 @@ import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.MultiInstanceHelper
-import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger
@@ -131,6 +132,7 @@ import org.mockito.Mockito.times
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doNothing
@@ -175,7 +177,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockInputMonitorFactory:
             DesktopModeWindowDecorViewModel.InputMonitorFactory
     @Mock private lateinit var mockShellController: ShellController
-    @Mock private lateinit var mockShellExecutor: ShellExecutor
+    private val testShellExecutor = TestShellExecutor()
     @Mock private lateinit var mockAppHeaderViewHolderFactory: AppHeaderViewHolder.Factory
     @Mock private lateinit var mockRootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
@@ -230,13 +232,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         spyContext = spy(mContext)
         doNothing().`when`(spyContext).startActivity(any())
-        shellInit = ShellInit(mockShellExecutor)
+        shellInit = ShellInit(testShellExecutor)
         windowDecorByTaskIdSpy.clear()
         spyContext.addMockSystemService(InputManager::class.java, mockInputManager)
         desktopModeEventLogger = mock<DesktopModeEventLogger>()
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
                 spyContext,
-                mockShellExecutor,
+                testShellExecutor,
                 mockMainHandler,
                 mockMainChoreographer,
                 bgExecutor,
@@ -478,25 +480,10 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
-    fun testDecorationIsCreatedForTopTranslucentActivitiesWithStyleFloating() {
+    fun testDecorationIsNotCreatedForTopTranslucentActivities() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
             isTopActivityTransparent = true
-            isTopActivityStyleFloating = true
-            numActivities = 1
-        }
-        doReturn(true).`when` { DesktopModeStatus.canEnterDesktopMode(any()) }
-        setUpMockDecorationsForTasks(task)
-
-        onTaskOpening(task)
-        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
-    fun testDecorationIsNotCreatedForTopTranslucentActivitiesWithoutStyleFloating() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
-            isTopActivityTransparent = true
-            isTopActivityStyleFloating = false
+            isTopActivityNoDisplay = false
             numActivities = 1
         }
         onTaskOpening(task)
@@ -507,13 +494,14 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForSystemUIActivities() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN)
-
         // Set task as systemUI package
         val systemUIPackageName = context.resources.getString(
             com.android.internal.R.string.config_systemUi)
         val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
-        task.baseActivity = baseComponent
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
+            baseActivity = baseComponent
+            isTopActivityNoDisplay = false
+        }
 
         onTaskOpening(task)
 
@@ -1321,10 +1309,101 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(decor).closeMaximizeMenu()
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS)
+    fun testOnTaskInfoChanged_enableShellTransitionsFlag() {
+        val task = createTask(
+            windowingMode = WINDOWING_MODE_FREEFORM
+        )
+        val taskSurface = SurfaceControl()
+        val decoration = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task, taskSurface)
+        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
+
+        decoration.mHasGlobalFocus = true
+        desktopModeWindowDecorViewModel.onTaskInfoChanged(task)
+        verify(decoration).relayout(eq(task), eq(true), anyOrNull())
+
+        decoration.mHasGlobalFocus = false
+        desktopModeWindowDecorViewModel.onTaskInfoChanged(task)
+        verify(decoration).relayout(eq(task), eq(false), anyOrNull())
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS)
+    fun testOnTaskInfoChanged_disableShellTransitionsFlag() {
+        val task = createTask(
+            windowingMode = WINDOWING_MODE_FREEFORM
+        )
+        val taskSurface = SurfaceControl()
+        val decoration = setUpMockDecorationForTask(task)
+
+        onTaskOpening(task, taskSurface)
+        assertTrue(windowDecorByTaskIdSpy.contains(task.taskId))
+
+        task.isFocused = true
+        desktopModeWindowDecorViewModel.onTaskInfoChanged(task)
+        verify(decoration).relayout(eq(task), eq(true), anyOrNull())
+
+        task.isFocused = false
+        desktopModeWindowDecorViewModel.onTaskInfoChanged(task)
+        verify(decoration).relayout(eq(task), eq(false), anyOrNull())
+    }
+
+    @Test
+    fun testGestureExclusionChanged_updatesDecorations() {
+        val captor = argumentCaptor<ISystemGestureExclusionListener>()
+        verify(mockWindowManager)
+            .registerSystemGestureExclusionListener(captor.capture(), eq(DEFAULT_DISPLAY))
+        val task = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            displayId = DEFAULT_DISPLAY
+        )
+        val task2 = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            displayId = DEFAULT_DISPLAY
+        )
+        val newRegion = Region.obtain().apply {
+            set(Rect(0, 0, 1600, 80))
+        }
+
+        captor.firstValue.onSystemGestureExclusionChanged(DEFAULT_DISPLAY, newRegion, newRegion)
+        testShellExecutor.flushAll()
+
+        verify(task).onExclusionRegionChanged(newRegion)
+        verify(task2).onExclusionRegionChanged(newRegion)
+    }
+
+    @Test
+    fun testGestureExclusionChanged_otherDisplay_skipsDecorationUpdate() {
+        val captor = argumentCaptor<ISystemGestureExclusionListener>()
+        verify(mockWindowManager)
+            .registerSystemGestureExclusionListener(captor.capture(), eq(DEFAULT_DISPLAY))
+        val task = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            displayId = DEFAULT_DISPLAY
+        )
+        val task2 = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            displayId = 2
+        )
+        val newRegion = Region.obtain().apply {
+            set(Rect(0, 0, 1600, 80))
+        }
+
+        captor.firstValue.onSystemGestureExclusionChanged(DEFAULT_DISPLAY, newRegion, newRegion)
+        testShellExecutor.flushAll()
+
+        verify(task).onExclusionRegionChanged(newRegion)
+        verify(task2, never()).onExclusionRegionChanged(newRegion)
+    }
+
     private fun createOpenTaskDecoration(
         @WindowingMode windowingMode: Int,
         taskSurface: SurfaceControl = SurfaceControl(),
         requestingImmersive: Boolean = false,
+        displayId: Int = DEFAULT_DISPLAY,
         onMaxOrRestoreListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
         onImmersiveOrRestoreListenerCaptor: KArgumentCaptor<() -> Unit> =
@@ -1348,6 +1427,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     ): DesktopModeWindowDecoration {
         val decor = setUpMockDecorationForTask(createTask(
             windowingMode = windowingMode,
+            displayId = displayId,
             requestingImmersive = requestingImmersive
         ))
         onTaskOpening(decor.mTaskInfo, taskSurface)

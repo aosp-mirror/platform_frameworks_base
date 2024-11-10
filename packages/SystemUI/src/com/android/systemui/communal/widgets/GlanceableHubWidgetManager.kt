@@ -19,7 +19,10 @@ package com.android.systemui.communal.widgets
 import android.appwidget.AppWidgetHost.AppWidgetHostListener
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
+import android.content.IntentSender
 import android.os.IBinder
+import android.os.OutcomeReceiver
+import android.os.RemoteException
 import android.os.UserHandle
 import android.widget.RemoteViews
 import com.android.server.servicewatcher.ServiceWatcher
@@ -27,14 +30,19 @@ import com.android.server.servicewatcher.ServiceWatcher.ServiceListener
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IAppWidgetHostListener
+import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IConfigureWidgetCallback
 import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IGlanceableHubWidgetsListener
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.launch
 
 /**
  * Manages updates to Glanceable Hub widgets and requests to edit them from the headless system
@@ -47,6 +55,8 @@ import kotlinx.coroutines.channels.awaitClose
 class GlanceableHubWidgetManager
 @Inject
 constructor(
+    @Background private val bgExecutor: Executor,
+    @Background private val bgScope: CoroutineScope,
     glanceableHubMultiUserHelper: GlanceableHubMultiUserHelper,
     @CommunalLog logBuffer: LogBuffer,
     serviceWatcherFactory: ServiceWatcherFactory<GlanceableHubWidgetManagerServiceInfo?>,
@@ -101,8 +111,7 @@ constructor(
         rank: Int?,
         configurator: WidgetConfigurator?,
     ) = runOnService { service ->
-        // TODO(b/375036327): Add support for widget configuration
-        service.addWidget(provider, user, rank ?: -1)
+        service.addWidget(provider, user, rank ?: -1, createIConfigureWidgetCallback(configurator))
     }
 
     /** Requests the foreground user to delete a widget. */
@@ -129,18 +138,54 @@ constructor(
             )
         }
 
-    private fun runOnService(block: (IGlanceableHubWidgetManagerService) -> Unit) {
-        serviceWatcher.runOnBinder(
-            object : ServiceWatcher.BinderOperation {
-                override fun run(binder: IBinder?) {
-                    block(IGlanceableHubWidgetManagerService.Stub.asInterface(binder))
-                }
+    /**
+     * Requests the foreground user for the [IntentSender] to start a configuration activity for the
+     * widget.
+     *
+     * @param appWidgetId Id of the widget to configure.
+     * @param outcomeReceiver Callback for receiving the result or error.
+     * @param executor Executor to run the callback on.
+     */
+    fun getIntentSenderForConfigureActivity(
+        appWidgetId: Int,
+        outcomeReceiver: OutcomeReceiver<IntentSender?, Throwable>,
+        executor: Executor,
+    ) {
+        bgExecutor.execute {
+            serviceWatcher.runOnBinder(
+                object : ServiceWatcher.BinderOperation {
+                    override fun run(binder: IBinder?) {
+                        val service = IGlanceableHubWidgetManagerService.Stub.asInterface(binder)
+                        try {
+                            val result = service.getIntentSenderForConfigureActivity(appWidgetId)
+                            executor.execute { outcomeReceiver.onResult(result) }
+                        } catch (e: RemoteException) {
+                            executor.execute { outcomeReceiver.onError(e) }
+                        }
+                    }
 
-                override fun onError(t: Throwable?) {
-                    // TODO(b/375236794): handle failure in case service is unbound
+                    override fun onError(t: Throwable?) {
+                        t?.let { executor.execute { outcomeReceiver.onError(t) } }
+                    }
                 }
-            }
-        )
+            )
+        }
+    }
+
+    private fun runOnService(block: (IGlanceableHubWidgetManagerService) -> Unit) {
+        bgExecutor.execute {
+            serviceWatcher.runOnBinder(
+                object : ServiceWatcher.BinderOperation {
+                    override fun run(binder: IBinder?) {
+                        block(IGlanceableHubWidgetManagerService.Stub.asInterface(binder))
+                    }
+
+                    override fun onError(t: Throwable?) {
+                        // TODO(b/375236794): handle failure in case service is unbound
+                    }
+                }
+            )
+        }
     }
 
     private fun createIAppWidgetHostListener(
@@ -161,6 +206,30 @@ constructor(
 
             override fun onViewDataChanged(viewId: Int) {
                 listener.onViewDataChanged(viewId)
+            }
+        }
+    }
+
+    private fun createIConfigureWidgetCallback(
+        configurator: WidgetConfigurator?
+    ): IConfigureWidgetCallback? {
+        return configurator?.let {
+            object : IConfigureWidgetCallback.Stub() {
+                override fun onConfigureWidget(
+                    appWidgetId: Int,
+                    resultReceiver: IConfigureWidgetCallback.IResultReceiver?,
+                ) {
+                    bgScope.launch {
+                        val success = configurator.configureWidget(appWidgetId)
+                        try {
+                            resultReceiver?.onResult(success)
+                        } catch (e: RemoteException) {
+                            logger.e({ "Error reporting widget configuration result: $str1" }) {
+                                str1 = e.localizedMessage
+                            }
+                        }
+                    }
+                }
             }
         }
     }

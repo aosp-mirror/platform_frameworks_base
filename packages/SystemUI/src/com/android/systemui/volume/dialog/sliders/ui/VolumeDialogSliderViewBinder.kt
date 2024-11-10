@@ -24,16 +24,14 @@ import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
 import com.android.systemui.volume.dialog.ui.utils.awaitAnimation
 import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.Slider
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.launchIn
@@ -41,10 +39,11 @@ import kotlinx.coroutines.flow.onEach
 
 private const val PROGRESS_CHANGE_ANIMATION_DURATION_MS = 80L
 
+@VolumeDialogSliderScope
 class VolumeDialogSliderViewBinder
-@AssistedInject
+@Inject
 constructor(
-    @Assisted private val viewModelProvider: () -> VolumeDialogSliderViewModel,
+    private val viewModelFactory: VolumeDialogSliderViewModel.Factory,
     private val jankListenerFactory: JankListenerFactory,
 ) {
 
@@ -58,7 +57,7 @@ constructor(
                 viewModel(
                     traceName = "VolumeDialogSliderViewBinder",
                     minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                    factory = { viewModelProvider() },
+                    factory = { viewModelFactory.create() },
                 ) { viewModel ->
                     sliderView.addOnChangeListener { _, value, fromUser ->
                         viewModel.setStreamVolume(value.roundToInt(), fromUser)
@@ -84,15 +83,6 @@ constructor(
                 jankListenerFactory.update(this, PROGRESS_CHANGE_ANIMATION_DURATION_MS),
             )
         }
-    }
-
-    @AssistedFactory
-    @VolumeDialogScope
-    interface Factory {
-
-        fun create(
-            viewModelProvider: () -> VolumeDialogSliderViewModel
-        ): VolumeDialogSliderViewBinder
     }
 }
 

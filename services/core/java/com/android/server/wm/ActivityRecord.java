@@ -254,6 +254,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -707,9 +708,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean mOccludesParent;
 
-    /** Whether the activity have style floating */
-    private boolean mStyleFloating;
-
     /**
      * Unlike {@link #mOccludesParent} which can be changed at runtime. This is a static attribute
      * from the style of activity. Because we don't want {@link WindowContainer#getOrientation()}
@@ -791,10 +789,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // and therefore #isLetterboxedForFixedOrientationAndAspectRatio returns false.
     private boolean mIsEligibleForFixedOrientationLetterbox;
 
-    // activity is not displayed?
-    // TODO: rename to mNoDisplay
-    @VisibleForTesting
-    boolean noDisplay;
+    /**
+     * Whether the activity is to be displayed. See {@link android.R.attr#windowNoDisplay}.
+     */
+    private boolean mNoDisplay;
     final boolean mShowForAllUsers;
     // TODO: Make this final
     int mTargetSdk;
@@ -1178,7 +1176,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" inHistory="); pw.print(inHistory);
                 pw.print(" idle="); pw.println(idle);
         pw.print(prefix); pw.print("occludesParent="); pw.print(occludesParent());
-                pw.print(" noDisplay="); pw.print(noDisplay);
+                pw.print(" mNoDisplay="); pw.print(mNoDisplay);
                 pw.print(" immersive="); pw.print(immersive);
                 pw.print(" launchMode="); pw.println(launchMode);
         pw.print(prefix); pw.print("mActivityType=");
@@ -2011,20 +2009,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (ent != null) {
             final boolean styleTranslucent = ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowIsTranslucent, false);
-            mStyleFloating = ent.array.getBoolean(
+            final boolean styleFloating = ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowIsFloating, false);
-            mOccludesParent = !(styleTranslucent || mStyleFloating)
+            mOccludesParent = !(styleTranslucent || styleFloating)
                     // This style is propagated to the main window attributes with
                     // FLAG_SHOW_WALLPAPER from PhoneWindow#generateLayout.
                     || ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
             mStyleFillsParent = mOccludesParent;
-            noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
+            mNoDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
             mOptOutEdgeToEdge = ent.array.getBoolean(
                     R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false);
         } else {
-            mStyleFloating = false;
             mStyleFillsParent = mOccludesParent = true;
-            noDisplay = false;
+            mNoDisplay = false;
             mOptOutEdgeToEdge = false;
         }
 
@@ -3091,8 +3088,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return occludesParent(true /* includingFinishing */);
     }
 
-    boolean isStyleFloating() {
-        return mStyleFloating;
+    boolean isNoDisplay() {
+        return mNoDisplay;
+    }
+
+    /**
+     * Exposed only for testing and should not be used to modify value of {@link #mNoDisplay}.
+     */
+    @VisibleForTesting
+    void setIsNoDisplay(boolean isNoDisplay) {
+        mNoDisplay = isNoDisplay;
     }
 
     /** Returns true if this activity is not finishing, is opaque and fills the entire space of
@@ -3190,6 +3195,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         if (mWmService.mConstants.isPackageOptOutIgnoreActivityOrientationRequest(packageName)) {
+            return false;
+        }
+        if (mAppCompatController.mAllowRestrictedResizability.getAsBoolean()) {
             return false;
         }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
@@ -6069,7 +6077,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void notifyUnknownVisibilityLaunchedForKeyguardTransition() {
         // No display activities never add a window, so there is no point in waiting them for
         // relayout.
-        if (noDisplay || !isKeyguardLocked()) {
+        if (mNoDisplay || !isKeyguardLocked()) {
             return;
         }
 
@@ -10300,6 +10308,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void adjustPictureInPictureParamsIfNeeded(Rect windowBounds) {
         if (pictureInPictureArgs != null && pictureInPictureArgs.hasSourceBoundsHint()) {
             pictureInPictureArgs.getSourceRectHint().offset(windowBounds.left, windowBounds.top);
+        }
+
+        if (android.app.Flags.enableTvImplicitEnterPipRestriction()) {
+            PackageManager pm = mAtmService.mContext.getPackageManager();
+            if (pictureInPictureArgs.isAutoEnterEnabled()
+                    && pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                    && pm.checkPermission(Manifest.permission.TV_IMPLICIT_ENTER_PIP, packageName)
+                    == PackageManager.PERMISSION_DENIED) {
+                Log.i(TAG,
+                        "Auto-enter PiP only allowed on TV if android.permission"
+                                + ".TV_IMPLICIT_ENTER_PIP permission is held by the app.");
+                PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
+                builder.setAutoEnterEnabled(false);
+                pictureInPictureArgs.copyOnlySet(builder.build());
+            }
         }
     }
 

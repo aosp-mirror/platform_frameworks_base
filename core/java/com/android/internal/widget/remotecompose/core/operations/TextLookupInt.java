@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -45,10 +47,11 @@ public class TextLookupInt implements Operation, VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mTextId, mDataSetId, mIndex);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "TextLookupInt["
@@ -60,15 +63,16 @@ public class TextLookupInt implements Operation, VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         mOutIndex = context.getInteger(mIndex);
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         context.listensTo(mIndex, this);
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -85,21 +89,21 @@ public class TextLookupInt implements Operation, VariableSupport {
      * @param dataSet float pointer to the array/list to turn int a string
      * @param indexId index of element to return
      */
-    public static void apply(WireBuffer buffer, int textId, int dataSet, int indexId) {
+    public static void apply(@NonNull WireBuffer buffer, int textId, int dataSet, int indexId) {
         buffer.start(OP_CODE);
         buffer.writeInt(textId);
         buffer.writeInt(dataSet);
         buffer.writeInt(indexId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
         int dataSetId = buffer.readInt();
         int indexId = buffer.readInt();
         operations.add(new TextLookupInt(textId, dataSetId, indexId));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Look up an array and turn into a text object")
                 .field(DocumentedOperation.INT, "textId", "id of the text generated")
@@ -108,11 +112,12 @@ public class TextLookupInt implements Operation, VariableSupport {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         int id = context.getCollectionsAccess().getId(mDataSetId, (int) mOutIndex);
         context.loadText(mTextId, context.getText(id));
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();

@@ -514,27 +514,11 @@ public class OomAdjuster {
         mLogger = new OomAdjusterDebugLogger(this, mService.mConstants);
 
         mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
-            final int pid = msg.arg1;
-            final int group = msg.arg2;
-            if (pid == ActivityManagerService.MY_PID) {
-                // Skip setting the process group for system_server, keep it as default.
-                return true;
-            }
-            final boolean traceEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-            if (traceEnabled) {
-                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setProcessGroup "
-                        + msg.obj + " to " + group);
-            }
-            try {
-                android.os.Process.setProcessGroup(pid, group);
-            } catch (Exception e) {
-                if (DEBUG_ALL) {
-                    Slog.w(TAG, "Failed setting process group of " + pid + " to " + group, e);
-                }
-            } finally {
-                if (traceEnabled) {
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                }
+            final int group = msg.what;
+            final ProcessRecord app = (ProcessRecord) msg.obj;
+            setProcessGroup(app.getPid(), group, app.processName);
+            if (Flags.phantomProcessesFix()) {
+                mService.mPhantomProcessList.setProcessGroupForPhantomProcessOfApp(app, group);
             }
             return true;
         });
@@ -545,8 +529,31 @@ public class OomAdjuster {
     }
 
     void setProcessGroup(int pid, int group, String processName) {
+        if (pid == ActivityManagerService.MY_PID) {
+            // Skip setting the process group for system_server, keep it as default.
+            return;
+        }
+        final boolean traceEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        if (traceEnabled) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setProcessGroup "
+                    + processName + " to " + group);
+        }
+        try {
+            android.os.Process.setProcessGroup(pid, group);
+        } catch (Exception e) {
+            if (DEBUG_ALL) {
+                Slog.w(TAG, "Failed setting process group of " + pid + " to " + group, e);
+            }
+        } finally {
+            if (traceEnabled) {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            }
+        }
+    }
+
+    void setAppAndChildProcessGroup(ProcessRecord app, int group) {
         mProcessGroupHandler.sendMessage(mProcessGroupHandler.obtainMessage(
-                0 /* unused */, pid, group, processName));
+                group, app));
     }
 
     void initSettings() {
@@ -3503,8 +3510,7 @@ public class OomAdjuster {
                     processGroup = THREAD_GROUP_DEFAULT;
                     break;
             }
-            setProcessGroup(app.getPid(), processGroup, app.processName);
-            mService.mPhantomProcessList.setProcessGroupForPhantomProcessOfApp(app, processGroup);
+            setAppAndChildProcessGroup(app, processGroup);
             try {
                 final int renderThreadTid = app.getRenderThreadTid();
                 if (curSchedGroup == SCHED_GROUP_TOP_APP) {

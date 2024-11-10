@@ -6802,6 +6802,12 @@ public abstract class Context {
     public static final String MEDIA_QUALITY_SERVICE = "media_quality";
 
     /**
+     * Service to perform operations needed for dynamic instrumentation.
+     * @hide
+     */
+    public static final String DYNAMIC_INSTRUMENTATION_SERVICE = "dynamic_instrumentation";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

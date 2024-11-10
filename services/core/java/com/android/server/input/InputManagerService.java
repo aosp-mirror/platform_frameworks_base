@@ -64,6 +64,7 @@ import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
+import android.hardware.input.InputGestureData;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
@@ -129,6 +130,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -2313,7 +2315,8 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private void notifyTouchpadThreeFingerTap() {
-        mKeyGestureController.handleTouchpadThreeFingerTap();
+        mKeyGestureController.handleTouchpadGesture(
+                InputGestureData.TOUCHPAD_GESTURE_TYPE_THREE_FINGER_TAP);
     }
 
     // Native callback.
@@ -2994,35 +2997,41 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     @PermissionManuallyEnforced
-    public int addCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+    public int addCustomInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData inputGestureData) {
         enforceManageKeyGesturePermission();
 
         Objects.requireNonNull(inputGestureData);
-        return mKeyGestureController.addCustomInputGesture(UserHandle.getCallingUserId(),
-                inputGestureData);
+        return mKeyGestureController.addCustomInputGesture(userId, inputGestureData);
     }
 
     @Override
     @PermissionManuallyEnforced
-    public int removeCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+    public int removeCustomInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData inputGestureData) {
         enforceManageKeyGesturePermission();
 
         Objects.requireNonNull(inputGestureData);
-        return mKeyGestureController.removeCustomInputGesture(UserHandle.getCallingUserId(),
-                inputGestureData);
+        return mKeyGestureController.removeCustomInputGesture(userId, inputGestureData);
     }
 
     @Override
     @PermissionManuallyEnforced
-    public void removeAllCustomInputGestures() {
+    public void removeAllCustomInputGestures(@UserIdInt int userId, int tag) {
         enforceManageKeyGesturePermission();
 
-        mKeyGestureController.removeAllCustomInputGestures(UserHandle.getCallingUserId());
+        mKeyGestureController.removeAllCustomInputGestures(userId, InputGestureData.Filter.of(tag));
     }
 
     @Override
-    public AidlInputGestureData[] getCustomInputGestures() {
-        return mKeyGestureController.getCustomInputGestures(UserHandle.getCallingUserId());
+    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId, int tag) {
+        return mKeyGestureController.getCustomInputGestures(userId,
+                InputGestureData.Filter.of(tag));
+    }
+
+    @Override
+    public AidlInputGestureData[] getAppLaunchBookmarks() {
+        return mKeyGestureController.getAppLaunchBookmarks();
     }
 
     private void handleCurrentUserChanged(@UserIdInt int userId) {
@@ -3566,6 +3575,12 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void setCurrentUser(@UserIdInt int newUserId) {
             mHandler.obtainMessage(MSG_CURRENT_USER_CHANGED, newUserId).sendToTarget();
+        }
+
+        @Override
+        public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
+                throws RemoteException {
+            mKeyGestureController.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
         }
 
         @Override

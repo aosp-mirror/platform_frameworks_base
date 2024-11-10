@@ -116,7 +116,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling,record_issue,hearing_devices
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling,record_issue,hearing_devices,notes
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -382,6 +382,10 @@
 
     <!-- Whether to show activity indicators in the status bar -->
     <bool name="config_showActivity">false</bool>
+
+    <!-- Whether to show the opportunistic satellite icon. When true, an icon will show to indicate
+         satellite capabilities when all other connections are out of service. -->
+    <bool name="config_showOpportunisticSatelliteIcon">true</bool>
 
     <!-- Whether or not to show the notification shelf that houses the icons of notifications that
      have been scrolled off-screen. -->
@@ -1082,4 +1086,9 @@
     enable the desktop specific features.
     -->
     <bool name="config_enableDesktopFeatureSet">false</bool>
+
+    <!--
+    Whether the user switching can only happen by logging out and going through the system user (login screen).
+    -->
+    <bool name="config_userSwitchingMustGoThroughLoginScreen">false</bool>
 </resources>

@@ -794,6 +794,7 @@
     <!-- QuickSettings: Bluetooth secondary label shown when bluetooth is being enabled [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_secondary_label_transient">Turning on&#8230;</string>
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_brightness_unable_adjust_msg">Can\'t adjust brightness because it\'s being\n controlled by the top app</string>
     <!-- QuickSettings: Rotation Unlocked [CHAR LIMIT=NONE] -->
     <string name="quick_settings_rotation_unlocked_label">Auto-rotate</string>
     <!-- Accessibility label for Auto-ratate QuickSettings tile [CHAR LIMIT=NONE] -->
@@ -1003,6 +1004,9 @@
     <string name="hearing_devices_preset_label">Preset</string>
     <!-- QuickSettings: Tool name for hearing devices dialog related tools [CHAR LIMIT=40] [BACKUP_MESSAGE_ID=8916875614623730005]-->
     <string name="quick_settings_hearing_devices_live_caption_title">Live Caption</string>
+
+    <!-- QuickSettings: Notes tile. The label of a quick settings tile for launching the default notes taking app. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_notes_label">Note</string>
 
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
@@ -1518,7 +1522,7 @@
     <string name="no_unseen_notif_text">No new notifications</string>
 
     <!-- Title of heads up notification for adaptive notifications user education. [CHAR LIMIT=60] -->
-    <string name="adaptive_notification_edu_hun_title">Notification cooldown is on</string>
+    <string name="adaptive_notification_edu_hun_title">Notification cooldown is now on</string>
 
     <!-- Text of heads up notification for adaptive notifications user education. [CHAR LIMIT=100] -->
     <string name="adaptive_notification_edu_hun_text">Your device volume and alerts are reduced automatically for up to 2 minutes when you get too many notifications at once.</string>
@@ -2270,6 +2274,8 @@
     <string name="system_multitasking_splitscreen_focus_lhs">Switch to app on left or above while using split screen</string>
     <!-- User visible title for the keyboard shortcut that replaces an app from one to another during split screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_replace">During split screen: replace an app from one to another</string>
+    <!-- User visible title for the keyboard shortcut that moves a focused task to a next display [CHAR LIMIT=70] -->
+    <string name="system_multitasking_move_to_next_display">Move active window between displays</string>
 
     <!-- User visible title for the input keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_input">Input</string>
@@ -3738,6 +3744,11 @@
          is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_customize_mode_title">Customize keyboard shortcuts</string>
+    <!-- Sub title at the top of the keyboard shortcut helper customization dialog. Explains to the
+         user what action they need to take in the customization dialog to assign a new custom shortcut.
+         The helper is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_mode_sub_title">Press key to assign shortcut</string>
     <!-- Placeholder text shown in the search box of the keyboard shortcut helper, when the user
          hasn't typed in anything in the search box yet. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
@@ -3749,6 +3760,16 @@
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_content_description_collapse_icon">Collapse icon</string>
+    <!-- Content description of the Meta key (also called Action Key) icon that prompts users to
+         press some key combination starting with meta key to assign new key combination to shortcut
+         in shortcut helper customization dialog. The helper is a  component that shows the  user
+         which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_meta_key">Action or Meta key icon</string>
+    <!-- Content description of the plus icon after the meta key icon prompts users to
+         press some key combination starting with meta key to assign new key combination to shortcut
+         in shortcut helper customization dialog. The helper is a  component that shows the  user
+         which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_plus_icon">Plus icon</string>
     <!-- Description text of the button that allows user to customize shortcuts in keyboard
          shortcut helper The helper is a  component that shows the  user which keyboard shortcuts
          they can use. [CHAR LIMIT=NONE] -->
@@ -3779,6 +3800,24 @@
          open keyboard settings while in shortcut helper. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_keyboard_settings_buttons_label">Keyboard Settings</string>
+    <!-- Label on the set shortcut button in keyboard shortcut helper customize dialog, that allows user to
+         confirm and assign key combination to selected shortcut. The helper is a  component that
+         shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label">Set shortcut</string>
+    <!-- Label on the cancel button in keyboard shortcut helper customize dialog, that allows user to
+         cancel and exit shortcut customization dialog, returning to the main shortcut helper page.
+         The helper is a  component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_dialog_cancel_button_label">Cancel</string>
+    <!-- Placeholder text, prompting user to Press key combination assign to shortcut. This is shown
+         in shortcut helper's "Add Custom Shortcut" Dialog text field when user hasn't pressed
+         any key  yet. The helper is a component that shows the user which keyboard shortcuts
+         they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder">Press key</string>
+    <!-- Error message displayed when the user select a key combination that is already in use while
+         assigning a new custom key combination to a shortcut in shortcut helper. The helper is a
+         component that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_dialog_error_message">Key combination already in use. Try another key.</string>
 
 
     <!-- Keyboard touchpad tutorial scheduler-->

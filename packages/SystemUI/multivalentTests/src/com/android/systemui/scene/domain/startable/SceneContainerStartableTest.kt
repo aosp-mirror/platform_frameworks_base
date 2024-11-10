@@ -23,6 +23,7 @@ import android.hardware.face.FaceManager
 import android.os.PowerManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.provider.Settings
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -59,6 +60,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.haptics.msdl.fakeMSDLPlayer
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyevent.data.repository.fakeKeyEventRepository
+import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
@@ -106,6 +108,7 @@ import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvision
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -753,7 +756,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.POWER_BUTTON,
                 powerButtonLaunchGestureTriggered = false,
             )
-            transitionStateFlow.value = Transition(from = Scenes.Shade, to = Scenes.Lockscreen)
+            transitionStateFlow.value = Transition(from = Scenes.Gone, to = Scenes.Lockscreen)
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
 
             kosmos.fakePowerRepository.updateWakefulness(
@@ -1339,7 +1342,14 @@ class SceneContainerStartableTest : SysuiTestCase() {
             // Putting the device to sleep to lock it again, which shouldn't report another
             // successful unlock.
             kosmos.powerInteractor.setAsleepForTest()
-            runCurrent()
+            advanceTimeBy(
+                kosmos.userAwareSecureSettingsRepository
+                    .getInt(
+                        Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                        KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT,
+                    )
+                    .toLong()
+            )
             // Verify that the startable changed the scene to Lockscreen because the device locked
             // following the sleep.
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
@@ -2116,40 +2126,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isShadeTouchable).isFalse()
 
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
-        }
-
-    @Test
-    fun switchToGone_whenSurfaceBehindLockscreenVisibleMidTransition() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            val transitionStateFlow =
-                prepareState(authenticationMethod = AuthenticationMethodModel.None)
-            underTest.start()
-            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
-            // Swipe to Gone, more than halfway
-            transitionStateFlow.value =
-                ObservableTransitionState.Transition(
-                    fromScene = Scenes.Lockscreen,
-                    toScene = Scenes.Gone,
-                    currentScene = flowOf(Scenes.Gone),
-                    progress = flowOf(0.51f),
-                    isInitiatedByUserInput = true,
-                    isUserInputOngoing = flowOf(true),
-                )
-            runCurrent()
-            // Lift finger
-            transitionStateFlow.value =
-                ObservableTransitionState.Transition(
-                    fromScene = Scenes.Lockscreen,
-                    toScene = Scenes.Gone,
-                    currentScene = flowOf(Scenes.Gone),
-                    progress = flowOf(0.51f),
-                    isInitiatedByUserInput = true,
-                    isUserInputOngoing = flowOf(false),
-                )
-            runCurrent()
-
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 
     @Test

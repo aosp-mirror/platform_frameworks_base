@@ -1,8 +1,13 @@
 package com.android.systemui.kosmos
 
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.settings.brightness.ui.BrightnessWarningToast
+
+import com.android.systemui.util.mockito.mock
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -36,6 +41,9 @@ var Kosmos.backgroundCoroutineContext: CoroutineContext by Fixture {
     testScope.backgroundScope.coroutineContext
 }
 var Kosmos.mainCoroutineContext: CoroutineContext by Fixture { testScope.coroutineContext }
+var Kosmos.brightnessWarningToast: BrightnessWarningToast by Kosmos.Fixture {
+    mock<BrightnessWarningToast>()
+}
 
 /**
  * Run this test body with a [Kosmos] as receiver, and using the [testScope] currently installed in
@@ -45,3 +53,5 @@ fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) =
     testScope.runTest { this@runTest.testBody() }
 
 fun Kosmos.runCurrent() = testScope.runCurrent()
+
+fun <T> Kosmos.collectLastValue(flow: Flow<T>) = testScope.collectLastValue(flow)

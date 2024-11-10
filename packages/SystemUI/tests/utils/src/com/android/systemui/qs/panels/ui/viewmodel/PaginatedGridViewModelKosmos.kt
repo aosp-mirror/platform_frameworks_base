@@ -23,7 +23,7 @@ val Kosmos.paginatedGridViewModel by
     Kosmos.Fixture {
         PaginatedGridViewModel(
             iconTilesViewModel,
-            qsColumnsViewModel,
+            qsColumnsViewModelFactory,
             paginatedGridInteractor,
             inFirstPageViewModel,
         )

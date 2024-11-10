@@ -25,6 +25,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopRepository
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
@@ -52,6 +53,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
     private val transitionsMock: Transitions = mock()
     private val shellTaskOrganizerMock: ShellTaskOrganizer = mock()
     private val desktopRepository: DesktopRepository = mock()
+    private val desktopModeEventLogger: DesktopModeEventLogger = mock()
     private val toggleResizeDesktopTaskTransitionHandlerMock:
         ToggleResizeDesktopTaskTransitionHandler =
         mock()
@@ -74,6 +76,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
                 toggleResizeDesktopTaskTransitionHandlerMock,
                 returnToDragStartAnimatorMock,
                 desktopRepository,
+                desktopModeEventLogger,
             )
         whenever(contextMock.createContextAsUser(any(), any())).thenReturn(contextMock)
     }

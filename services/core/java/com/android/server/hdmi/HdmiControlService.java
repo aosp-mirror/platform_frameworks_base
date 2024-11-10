@@ -771,6 +771,14 @@ public class HdmiControlService extends SystemService {
             Slog.i(TAG, "Device does not support eARC.");
         }
         mHdmiCecNetwork = new HdmiCecNetwork(this, mCecController, mMhlController);
+        if (isTvDevice() && getWasCecDisabledOnStandbyByLowEnergyMode()) {
+            Slog.w(TAG, "Re-enable CEC on boot-up since it was disabled due to low energy "
+                    + " mode.");
+            getHdmiCecConfig().setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                    HDMI_CEC_CONTROL_ENABLED);
+            setWasCecDisabledOnStandbyByLowEnergyMode(false);
+            setCecEnabled(HDMI_CEC_CONTROL_ENABLED);
+        }
         if (isCecControlEnabled()) {
             initializeCec(INITIATED_BY_BOOT_UP);
         } else {

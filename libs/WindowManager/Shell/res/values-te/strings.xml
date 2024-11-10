@@ -127,6 +127,8 @@
     <string name="open_in_browser_text" msgid="9181692926376072904">"బ్రౌజర్‌లో తెరవండి"</string>
     <string name="new_window_text" msgid="6318648868380652280">"కొత్త విండో"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"విండోలను మేనేజ్ చేయండి"</string>
+    <!-- no translation found for change_aspect_ratio_text (9104456064548212806) -->
+    <skip />
     <string name="close_text" msgid="4986518933445178928">"మూసివేయండి"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"మెనూను మూసివేయండి"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"మెనూను తెరవండి"</string>
@@ -144,4 +146,6 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"యాప్‌లో"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"మీ బ్రౌజర్‌లో"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"సరే"</string>
+    <!-- no translation found for desktop_windowing_app_to_web_education_text (1599668769538703570) -->
+    <skip />
 </resources>

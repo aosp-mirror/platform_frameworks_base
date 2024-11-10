@@ -36,14 +36,6 @@ sealed interface Transformation {
      */
     val matcher: ElementMatcher
 
-    /**
-     * The range during which the transformation is applied. If it is `null`, then the
-     * transformation will be applied throughout the whole scene transition.
-     */
-    // TODO(b/240432457): Move this back to PropertyTransformation.
-    val range: TransformationRange?
-        get() = null
-
     /*
      * Reverse this transformation. This is called when we use Transition(from = A, to = B) when
      * animating from B to A and there is no Transition(from = B, to = A) defined.
@@ -66,14 +58,14 @@ interface PropertyTransformation<T> : Transformation {
      * - the value at progress = 100% for elements that are leaving the layout (i.e. elements in the
      *   content we are transitioning from).
      *
-     * The returned value will be interpolated using the [transition] progress and [value], the
+     * The returned value will be interpolated using the [transition] progress and [idleValue], the
      * value of the property when we are idle.
      */
     fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: T,
+        idleValue: T,
     ): T
 }
 
@@ -82,20 +74,15 @@ interface PropertyTransformationScope : Density, ElementStateScope {
     val layoutDirection: LayoutDirection
 }
 
-/**
- * A [PropertyTransformation] associated to a range. This is a helper class so that normal
- * implementations of [PropertyTransformation] don't have to take care of reversing their range when
- * they are reversed.
- */
-internal class RangedPropertyTransformation<T>(
-    val delegate: PropertyTransformation<T>,
-    override val range: TransformationRange,
-) : PropertyTransformation<T> by delegate {
-    override fun reversed(): Transformation {
-        return RangedPropertyTransformation(
-            delegate.reversed() as PropertyTransformation<T>,
-            range.reversed(),
-        )
+/** A pair consisting of a [transformation] and optional [range]. */
+class TransformationWithRange<out T : Transformation>(
+    val transformation: T,
+    val range: TransformationRange?,
+) {
+    fun reversed(): TransformationWithRange<T> {
+        if (range == null) return this
+
+        return TransformationWithRange(transformation = transformation, range = range.reversed())
     }
 }
 

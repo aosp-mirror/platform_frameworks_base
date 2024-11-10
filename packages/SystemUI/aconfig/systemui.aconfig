@@ -16,10 +16,30 @@ flag {
 }
 
 flag {
+   name: "multiuser_wifi_picker_tracker_support"
+   namespace: "systemui"
+   description: "Adds WifiPickerTracker support for multiple users to support when HSUM is enabled."
+   bug: "371586248"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "udfps_view_performance"
    namespace: "systemui"
    description: "Decrease screen off blocking calls by waiting until the device is finished going to sleep before adding the udfps view."
    bug: "225183106"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "user_encrypted_source"
+   namespace: "systemui"
+   description: "Get rid of the local cache and rely on UserManager.isUserUnlocked directly to determine whether user CE storage is encrypted."
+   bug: "333656491"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
@@ -404,6 +424,17 @@ flag {
 }
 
 flag {
+    name: "status_bar_auto_start_screen_record_chip"
+    namespace: "systemui"
+    description: "When screen recording, use the specified start time to update the screen record "
+        "chip state instead of waiting for an official 'recording started' signal"
+    bug: "366448907"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
     description: "Use repositories as the source of truth for call notifications shown as a chip in"
@@ -466,6 +497,15 @@ flag {
     description: "Show promoted ongoing notifications as chips in the status bar"
     bug: "361346412"
 }
+
+flag {
+    name: "status_bar_notification_chips_test"
+    namespace: "systemui"
+    description: "Flag to enable certain features that let us test the status bar notification "
+        "chips with teamfooders. This flag should *never* be released to trunkfood or nextfood."
+    bug: "361346412"
+}
+
 
 flag {
     name: "compose_bouncer"
@@ -601,9 +641,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_simple_fragment"
+    name: "status_bar_root_modernization"
     namespace: "systemui"
-    description: "Feature flag for refactoring the collapsed status bar fragment"
+    description: "Feature flag for replacing the status bar fragment with a compose root"
     bug: "364360986"
 }
 
@@ -1515,6 +1555,16 @@ flag {
 }
 
 flag {
+  namespace: "systemui"
+  name: "user_aware_settings_repositories"
+  description: "Provide user-aware versions of SecureSettingsRepository and SystemSettingsRepository in SystemUI modules (see doc linked from b/356099784)."
+  bug: "356099784"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "notify_password_text_view_user_activity_in_background"
     namespace: "systemui"
     description: "Decide whether to notify the user activity in password text view, to power manager in the background thread."
@@ -1556,6 +1606,13 @@ flag {
    namespace: "systemui"
    description: "Allow override the conditions to suppress the clipboard overlay"
    bug: "358473717"
+}
+
+flag {
+   name: "show_clipboard_indication"
+   namespace: "systemui"
+   description: "Show indication text under the clipboard overlay when copied something"
+   bug: "361199935"
 }
 
 flag {
@@ -1640,6 +1697,16 @@ flag {
 }
 
 flag {
+   name: "show_toast_when_app_control_brightness"
+   namespace: "systemui"
+   description: "Showing the warning toast if the current running app window has controlled the brightness value."
+   bug: "363225340"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
   name: "home_controls_dream_hsum"
   namespace: "systemui"
   description: "Enables the home controls dream in HSUM"
@@ -1709,8 +1776,11 @@ flag {
 }
 
 flag {
-   name: "touchpad_three_finger_tap_customization"
-   namespace: "systemui"
-   description: "Customize touchpad three finger tap"
-   bug: "365063048"
+    name: "stoppable_fgs_system_app"
+    namespace: "systemui"
+    description: "System app with foreground service can opt in to be stoppable."
+    bug: "376564917"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

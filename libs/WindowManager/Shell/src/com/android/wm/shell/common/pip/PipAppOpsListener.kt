@@ -16,8 +16,11 @@
 package com.android.wm.shell.common.pip
 
 import android.app.AppOpsManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Pair
+import com.android.internal.annotations.VisibleForTesting
 import com.android.wm.shell.common.ShellExecutor
 
 class PipAppOpsListener(
@@ -27,10 +30,12 @@ class PipAppOpsListener(
 ) {
     private val mAppOpsManager: AppOpsManager = checkNotNull(
         mContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
+    private var mTopPipActivityInfoSupplier: (Context) -> Pair<ComponentName?, Int> =
+        PipUtils::getTopPipActivity
     private val mAppOpsChangedListener = AppOpsManager.OnOpChangedListener { _, packageName ->
         try {
             // Dismiss the PiP once the user disables the app ops setting for that package
-            val topPipActivityInfo = PipUtils.getTopPipActivity(mContext)
+            val topPipActivityInfo = mTopPipActivityInfoSupplier.invoke(mContext)
             val componentName = topPipActivityInfo.first ?: return@OnOpChangedListener
             val userId = topPipActivityInfo.second
             val appInfo = mContext.packageManager
@@ -74,5 +79,10 @@ class PipAppOpsListener(
     interface Callback {
         /** Dismisses the PIP window.  */
         fun dismissPip()
+    }
+
+    @VisibleForTesting
+    fun setTopPipActivityInfoSupplier(supplier: (Context) -> Pair<ComponentName?, Int>) {
+        mTopPipActivityInfoSupplier = supplier
     }
 }

@@ -19,6 +19,7 @@ package com.android.wm.shell.bubbles.bar;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_GESTURE;
+import static com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -65,8 +66,6 @@ public class BubbleBarLayerView extends FrameLayout
         implements ViewTreeObserver.OnComputeInternalInsetsListener {
 
     private static final String TAG = BubbleBarLayerView.class.getSimpleName();
-
-    private static final float SCRIM_ALPHA = 0.2f;
 
     private final BubbleController mBubbleController;
     private final BubbleData mBubbleData;
@@ -124,18 +123,7 @@ public class BubbleBarLayerView extends FrameLayout
 
         mBubbleExpandedViewPinController = new BubbleExpandedViewPinController(
                 context, this, mPositioner);
-        mBubbleExpandedViewPinController.setListener(
-                new BaseBubblePinController.LocationChangeListener() {
-                    @Override
-                    public void onChange(@NonNull BubbleBarLocation bubbleBarLocation) {
-                        mBubbleController.animateBubbleBarLocation(bubbleBarLocation);
-                    }
-
-                    @Override
-                    public void onRelease(@NonNull BubbleBarLocation location) {
-                        mBubbleController.setBubbleBarLocation(location);
-                    }
-                });
+        mBubbleExpandedViewPinController.setListener(new LocationChangeListener());
 
         setOnClickListener(view -> hideModalOrCollapse());
     }
@@ -238,11 +226,7 @@ public class BubbleBarLayerView extends FrameLayout
             DragListener dragListener = inDismiss -> {
                 if (inDismiss && mExpandedBubble != null) {
                     mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
-                    if (mExpandedBubble instanceof Bubble) {
-                        // Only a bubble can be dragged to dismiss
-                        mBubbleLogger.log((Bubble) mExpandedBubble,
-                                BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_EXP_VIEW);
-                    }
+                    logBubbleEvent(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_EXP_VIEW);
                 }
             };
             mDragController = new BubbleBarExpandedViewDragController(
@@ -401,7 +385,7 @@ public class BubbleBarLayerView extends FrameLayout
         if (show) {
             mScrimView.animate()
                     .setInterpolator(ALPHA_IN)
-                    .alpha(SCRIM_ALPHA)
+                    .alpha(BUBBLE_EXPANDED_SCRIM_ALPHA)
                     .start();
         } else {
             mScrimView.animate()
@@ -423,10 +407,47 @@ public class BubbleBarLayerView extends FrameLayout
         }
     }
 
+    /**
+     * Log the event only if {@link #mExpandedBubble} is a {@link Bubble}.
+     * <p>
+     * Skips logging if it is {@link BubbleOverflow}.
+     */
+    private void logBubbleEvent(BubbleLogger.Event event) {
+        if (mExpandedBubble != null && mExpandedBubble instanceof Bubble bubble) {
+            mBubbleLogger.log(bubble, event);
+        }
+    }
+
     @Nullable
     @VisibleForTesting
     public BubbleBarExpandedViewDragController getDragController() {
         return mDragController;
     }
 
+    private class LocationChangeListener implements
+            BaseBubblePinController.LocationChangeListener {
+
+        private BubbleBarLocation mInitialLocation;
+
+        @Override
+        public void onStart(@NonNull BubbleBarLocation location) {
+            mInitialLocation = location;
+        }
+
+        @Override
+        public void onChange(@NonNull BubbleBarLocation bubbleBarLocation) {
+            mBubbleController.animateBubbleBarLocation(bubbleBarLocation);
+        }
+
+        @Override
+        public void onRelease(@NonNull BubbleBarLocation location) {
+            mBubbleController.setBubbleBarLocation(location);
+            if (location != mInitialLocation) {
+                BubbleLogger.Event event = location.isOnLeft(isLayoutRtl())
+                        ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_EXP_VIEW
+                        : BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_EXP_VIEW;
+                logBubbleEvent(event);
+            }
+        }
+    }
 }

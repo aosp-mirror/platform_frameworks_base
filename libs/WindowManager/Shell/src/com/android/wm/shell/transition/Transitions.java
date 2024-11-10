@@ -203,6 +203,12 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Transition type to minimize a task. */
     public static final int TRANSIT_MINIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 20;
 
+    /** Transition to start the recents transition */
+    public static final int TRANSIT_START_RECENTS_TRANSITION = TRANSIT_FIRST_CUSTOM + 21;
+
+    /** Transition to end the recents transition */
+    public static final int TRANSIT_END_RECENTS_TRANSITION = TRANSIT_FIRST_CUSTOM + 22;
+
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
             WindowManager.TRANSIT_FIRST_CUSTOM + 100;
@@ -1875,6 +1881,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             case TRANSIT_SPLIT_PASSTHROUGH -> "SPLIT_PASSTHROUGH";
             case TRANSIT_CLEANUP_PIP_EXIT -> "CLEANUP_PIP_EXIT";
             case TRANSIT_MINIMIZE -> "MINIMIZE";
+            case TRANSIT_START_RECENTS_TRANSITION -> "START_RECENTS_TRANSITION";
+            case TRANSIT_END_RECENTS_TRANSITION -> "END_RECENTS_TRANSITION";
             default -> "";
         };
         return typeStr + "(FIRST_CUSTOM+" + (transitType - TRANSIT_FIRST_CUSTOM) + ")";

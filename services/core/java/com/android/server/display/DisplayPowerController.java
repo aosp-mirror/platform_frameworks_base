@@ -1595,7 +1595,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Note throttling effectively changes the allowed brightness range, so, similarly to HBM,
         // we broadcast this change through setting.
         final float unthrottledBrightnessState = rawBrightnessState;
-        DisplayBrightnessState clampedState = mBrightnessClamperController.clamp(mPowerRequest,
+        DisplayBrightnessState clampedState = mBrightnessClamperController.clamp(
+                displayBrightnessState, mPowerRequest,
                 brightnessState, slowChange, /* displayState= */ state);
         brightnessState = clampedState.getBrightness();
         slowChange = clampedState.isSlowChange();
@@ -2003,7 +2004,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mCachedBrightnessInfo.brightnessMax.value,
                     mCachedBrightnessInfo.hbmMode.value,
                     mCachedBrightnessInfo.hbmTransitionPoint.value,
-                    mCachedBrightnessInfo.brightnessMaxReason.value);
+                    mCachedBrightnessInfo.brightnessMaxReason.value,
+                    mCachedBrightnessInfo.brightnessReason.value
+                            == BrightnessReason.REASON_OVERRIDE);
         }
     }
 
@@ -2028,6 +2031,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             @BrightnessInfo.BrightnessMaxReason int maxReason =
                     state != null ? state.getBrightnessMaxReason()
                             : BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
+            BrightnessReason brightnessReason = state != null ? state.getBrightnessReason()
+                    : new BrightnessReason(BrightnessReason.REASON_UNKNOWN);
             final float minBrightness = Math.max(stateMin, Math.min(
                     mBrightnessRangeController.getCurrentBrightnessMin(), stateMax));
             final float maxBrightness = Math.min(
@@ -2055,6 +2060,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             changed |=
                     mCachedBrightnessInfo.checkAndSetInt(mCachedBrightnessInfo.brightnessMaxReason,
                             maxReason);
+            changed |=
+                    mCachedBrightnessInfo.checkAndSetInt(mCachedBrightnessInfo.brightnessReason,
+                            brightnessReason.getReason());
             return changed;
         }
     }
@@ -2683,6 +2691,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     + mCachedBrightnessInfo.hbmTransitionPoint.value);
             pw.println("  mCachedBrightnessInfo.brightnessMaxReason ="
                     + mCachedBrightnessInfo.brightnessMaxReason.value);
+            pw.println("  mCachedBrightnessInfo.brightnessReason ="
+                    + mCachedBrightnessInfo.brightnessReason);
         }
         pw.println("  mDisplayBlanksAfterDozeConfig=" + mDisplayBlanksAfterDozeConfig);
         pw.println("  mBrightnessBucketsInDozeConfig=" + mBrightnessBucketsInDozeConfig);
@@ -3390,6 +3400,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 new MutableFloat(HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID);
         public MutableInt brightnessMaxReason =
                 new MutableInt(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE);
+        public MutableInt brightnessReason = new MutableInt(BrightnessReason.REASON_UNKNOWN);
 
         public boolean checkAndSetFloat(MutableFloat mf, float f) {
             if (mf.value != f) {

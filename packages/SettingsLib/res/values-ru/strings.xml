@@ -125,7 +125,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Профиль A2DP"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Звонки"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Профиль OPP"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Профиль HID"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Устройство ввода"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ к интернету"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Разрешить доступ к контактам и журналу звонков"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Эти сведения нужны для оповещений о звонках и других функций"</string>

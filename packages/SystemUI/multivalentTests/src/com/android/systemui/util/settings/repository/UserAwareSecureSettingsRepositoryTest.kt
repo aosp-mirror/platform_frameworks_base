@@ -16,96 +16,16 @@
 
 package com.android.systemui.util.settings.repository
 
-import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.coroutines.collectValues
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.kosmos.testScope
-import com.android.systemui.testKosmos
-import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.settings.fakeSettings
-import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Test
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class UserAwareSecureSettingsRepositoryTest : SysuiTestCase() {
+class UserAwareSecureSettingsRepositoryTest : UserAwareSettingsRepositoryTestBase() {
 
-    private val kosmos = testKosmos()
-    private val dispatcher = kosmos.testDispatcher
-    private val testScope = kosmos.testScope
-    private val secureSettings = kosmos.fakeSettings
-    private val userRepository = Kosmos().fakeUserRepository
-    private lateinit var repository: UserAwareSecureSettingsRepository
-
-    @Before
-    fun setup() {
-        repository =
-            UserAwareSecureSettingsRepositoryImpl(
-                secureSettings,
-                userRepository,
-                dispatcher,
-            )
-        userRepository.setUserInfos(USER_INFOS)
-        setSettingValueForUser(enabled = true, userInfo = SETTING_ENABLED_USER)
-        setSettingValueForUser(enabled = false, userInfo = SETTING_DISABLED_USER)
-    }
-
-    @Test
-    fun settingEnabledEmitsValueForCurrentUser() {
-        testScope.runTest {
-            userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
-
-            val enabled by collectLastValue(repository.boolSettingForActiveUser(SETTING_NAME))
-
-            assertThat(enabled).isTrue()
-        }
-    }
-
-    @Test
-    fun settingEnabledEmitsNewValueWhenSettingChanges() {
-        testScope.runTest {
-            userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
-            val enabled by collectValues(repository.boolSettingForActiveUser(SETTING_NAME))
-            runCurrent()
-
-            setSettingValueForUser(enabled = false, userInfo = SETTING_ENABLED_USER)
-
-            assertThat(enabled).containsExactly(true, false).inOrder()
-        }
-    }
-
-    @Test
-    fun settingEnabledEmitsValueForNewUserWhenUserChanges() {
-        testScope.runTest {
-            userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
-            val enabled by collectLastValue(repository.boolSettingForActiveUser(SETTING_NAME))
-            runCurrent()
-
-            userRepository.setSelectedUserInfo(SETTING_DISABLED_USER)
-
-            assertThat(enabled).isFalse()
-        }
-    }
-
-    private fun setSettingValueForUser(enabled: Boolean, userInfo: UserInfo) {
-        secureSettings.putBoolForUser(SETTING_NAME, enabled, userInfo.id)
-    }
-
-    private companion object {
-        const val SETTING_NAME = "SETTING_NAME"
-        val SETTING_ENABLED_USER = UserInfo(/* id= */ 0, "user1", /* flags= */ 0)
-        val SETTING_DISABLED_USER = UserInfo(/* id= */ 1, "user2", /* flags= */ 0)
-        val USER_INFOS = listOf(SETTING_ENABLED_USER, SETTING_DISABLED_USER)
+    override fun getKosmosUserAwareSettingsRepository(): UserAwareSettingsRepository {
+        return kosmos.userAwareSecureSettingsRepository
     }
 }

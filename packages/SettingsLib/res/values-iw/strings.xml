@@ -577,8 +577,8 @@
     <string name="zen_alarm_warning" msgid="245729928048586280">"לא תושמע ההתראה הבאה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3346777418136233330">"בשעה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"ב-<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"משך זמן"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"יש לשאול בכל פעם"</string>
+    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"כמה זמן"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"אני רוצה לבחור בכל פעם"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"עד הכיבוי"</string>
     <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(ללא שם)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>

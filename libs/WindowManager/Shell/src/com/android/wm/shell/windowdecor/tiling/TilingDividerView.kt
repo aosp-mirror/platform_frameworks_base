@@ -206,7 +206,7 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 if (!isWithinHandleRegion(yTouchPosInDivider)) return true
-                callback.onDividerMoveStart(touchPos)
+                callback.onDividerMoveStart(touchPos, event)
                 setTouching()
                 canResize = true
             }
@@ -230,7 +230,7 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
                 if (!canResize) return true
                 if (moving && resized) {
                     dividerBounds.left = dividerBounds.left + lastAcceptedPos - startPos
-                    callback.onDividerMovedEnd(dividerBounds.left)
+                    callback.onDividerMovedEnd(dividerBounds.left, event)
                 }
                 moving = false
                 canResize = false

@@ -23,6 +23,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -42,7 +43,7 @@ constructor(
     val context: Context,
     val deviceEntryIconViewModel: DeviceEntryIconViewModel,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
     alternateBouncerToDozingTransitionViewModel: AlternateBouncerToDozingTransitionViewModel,
     aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,

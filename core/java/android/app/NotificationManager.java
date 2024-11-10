@@ -1848,6 +1848,20 @@ public class NotificationManager {
     /**
      * @hide
      */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void setAssistantAdjustmentKeyTypeState(@Adjustment.Types int type, boolean enabled) {
+        INotificationManager service = getService();
+        try {
+            service.setAssistantAdjustmentKeyTypeState(type, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
     public List<String> getEnabledNotificationListenerPackages() {
         INotificationManager service = getService();
         try {

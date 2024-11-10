@@ -31,7 +31,7 @@ internal class AnchoredTranslate(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: Offset,
+        idleValue: Offset,
     ): Offset {
         fun throwException(content: ContentKey?): Nothing {
             throwMissingAnchorException(
@@ -51,9 +51,9 @@ internal class AnchoredTranslate(
         val offset = anchorToOffset - anchorFromOffset
 
         return if (content == transition.toContent) {
-            Offset(value.x - offset.x, value.y - offset.y)
+            Offset(idleValue.x - offset.x, idleValue.y - offset.y)
         } else {
-            Offset(value.x + offset.x, value.y + offset.y)
+            Offset(idleValue.x + offset.x, idleValue.y + offset.y)
         }
     }
 }

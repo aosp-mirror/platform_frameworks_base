@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import android.annotation.NonNull;
+
 import java.util.Arrays;
 
 /** Utilities for string manipulation */
@@ -30,6 +32,7 @@ public class StringUtils {
      * @param post character to pad width 0 = no pad typically ' ' or '0'
      * @return
      */
+    @NonNull
     public static String floatToString(
             float value, int beforeDecimalPoint, int afterDecimalPoint, char pre, char post) {
 

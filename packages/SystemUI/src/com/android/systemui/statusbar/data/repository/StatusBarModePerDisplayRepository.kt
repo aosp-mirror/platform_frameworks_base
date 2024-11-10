@@ -27,7 +27,7 @@ import android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BA
 import android.view.WindowInsetsController.Appearance
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
-import com.android.systemui.Dumpable
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
@@ -59,7 +59,7 @@ import kotlinx.coroutines.flow.stateIn
  * Note: These status bar modes are status bar *window* states that are sent to us from
  * WindowManager, not determined internally.
  */
-interface StatusBarModePerDisplayRepository {
+interface StatusBarModePerDisplayRepository : OnStatusBarViewInitializedListener, CoreStartable {
     /**
      * True if the status bar window is showing transiently and will disappear soon, and false
      * otherwise. ("Otherwise" in this case means the status bar is persistently hidden OR
@@ -104,6 +104,12 @@ interface StatusBarModePerDisplayRepository {
      *   determined internally instead.
      */
     fun clearTransient()
+
+    /**
+     * Called when the [StatusBarModePerDisplayRepository] should stop doing any work and clean up
+     * if needed.
+     */
+    fun stop()
 }
 
 class StatusBarModePerDisplayRepositoryImpl
@@ -114,7 +120,7 @@ constructor(
     private val commandQueue: CommandQueue,
     private val letterboxAppearanceCalculator: LetterboxAppearanceCalculator,
     ongoingCallRepository: OngoingCallRepository,
-) : StatusBarModePerDisplayRepository, OnStatusBarViewInitializedListener, Dumpable {
+) : StatusBarModePerDisplayRepository {
 
     private val commandQueueCallback =
         object : CommandQueue.Callbacks {
@@ -163,8 +169,12 @@ constructor(
             }
         }
 
-    fun start() {
+    override fun start() {
         commandQueue.addCallback(commandQueueCallback)
+    }
+
+    override fun stop() {
+        commandQueue.removeCallback(commandQueueCallback)
     }
 
     private val _isTransientShown = MutableStateFlow(false)

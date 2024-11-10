@@ -13,14 +13,6 @@ flag {
 
 flag {
     namespace: "window_surfaces"
-    name: "explicit_refresh_rate_hints"
-    description: "Performance related hints during transitions"
-    is_fixed_read_only: true
-    bug: "300019131"
-}
-
-flag {
-    namespace: "window_surfaces"
     name: "delete_capture_display"
     description: "Delete uses of ScreenCapture#captureDisplay"
     is_fixed_read_only: true

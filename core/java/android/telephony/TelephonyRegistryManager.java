@@ -47,6 +47,7 @@ import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
+import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.SatelliteStateChangeListener;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1137,6 +1138,23 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Notify external listeners that carrier roaming non-terrestrial network
+     * signal strength changed.
+     * @param subId subscription ID.
+     * @param ntnSignalStrength non-terrestrial network signal strength.
+     * @hide
+     */
+    public final void notifyCarrierRoamingNtnSignalStrengthChanged(int subId,
+            @NonNull NtnSignalStrength ntnSignalStrength) {
+        try {
+            sRegistry.notifyCarrierRoamingNtnSignalStrengthChanged(subId, ntnSignalStrength);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Processes potential event changes from the provided {@link TelephonyCallback}.
      *
      * @param telephonyCallback callback for monitoring callback changes to the telephony state.
@@ -1293,6 +1311,7 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED);
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED);
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED);
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED);
         }
         return eventList;
     }

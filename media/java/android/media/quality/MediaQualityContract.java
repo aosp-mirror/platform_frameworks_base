@@ -21,11 +21,16 @@ import android.annotation.FlaggedApi;
 import android.media.tv.flags.Flags;
 
 /**
+ * The contract between the media quality service and applications. Contains definitions for the
+ * commonly used parameter names.
  * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public class MediaQualityContract {
 
+    /**
+     * @hide
+     */
     public interface BaseParameters {
         String PARAMETER_ID = "_id";
         String PARAMETER_NAME = "_name";
@@ -33,13 +38,50 @@ public class MediaQualityContract {
         String PARAMETER_INPUT_ID = "_input_id";
 
     }
-    public static final class PictureQuality implements BaseParameters {
+
+    /**
+     * Parameters picture quality.
+     * @hide
+     */
+    public static final class PictureQuality {
+        /**
+         * The brightness.
+         *
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_BRIGHTNESS = "brightness";
+
+        /**
+         * The contrast.
+         *
+         * <p>The ratio between the luminance of the brightest white and the darkest black.
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_CONTRAST = "contrast";
+
+        /**
+         * The sharpness.
+         *
+         * <p>Sharpness indicates the clarity of detail.
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_SHARPNESS = "sharpness";
+
+        /**
+         * The saturation.
+         *
+         * <p>Saturation indicates the intensity of the color.
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_SATURATION = "saturation";
+
+        private PictureQuality() {
+        }
     }
 
+    /**
+     * @hide
+     */
     public static final class SoundQuality implements BaseParameters {
         public static final String PARAMETER_BALANCE = "balance";
         public static final String PARAMETER_BASS = "bass";

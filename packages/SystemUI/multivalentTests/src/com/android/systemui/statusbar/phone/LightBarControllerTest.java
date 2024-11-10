@@ -48,12 +48,10 @@ import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.data.model.StatusBarAppearance;
 import com.android.systemui.statusbar.data.model.StatusBarMode;
-import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
+import com.android.systemui.statusbar.data.repository.FakeStatusBarModePerDisplayRepository;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.util.kotlin.JavaAdapter;
 
 import kotlinx.coroutines.test.TestScope;
 
@@ -81,8 +79,8 @@ public class LightBarControllerTest extends SysuiTestCase {
     private SysuiDarkIconDispatcher mStatusBarIconController;
     private LightBarController mLightBarController;
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
-    private final FakeStatusBarModeRepository mStatusBarModeRepository =
-            new FakeStatusBarModeRepository();
+    private final FakeStatusBarModePerDisplayRepository mStatusBarModeRepository =
+            new FakeStatusBarModePerDisplayRepository();
 
     @Before
     public void setup() {
@@ -92,15 +90,16 @@ public class LightBarControllerTest extends SysuiTestCase {
         mLightBarTransitionsController = mock(LightBarTransitionsController.class);
         when(mStatusBarIconController.getTransitionsController()).thenReturn(
                 mLightBarTransitionsController);
-        mLightBarController = new LightBarController(
-                mContext,
-                new JavaAdapter(mTestScope),
+        mLightBarController = new LightBarControllerImpl(
+                mContext.getDisplayId(),
+                mTestScope,
                 mStatusBarIconController,
                 mock(BatteryController.class),
                 mock(NavigationModeController.class),
                 mStatusBarModeRepository,
                 mock(DumpManager.class),
-                new FakeDisplayTracker(mContext));
+                mTestScope.getCoroutineContext(),
+                mock(BiometricUnlockController.class));
         mLightBarController.start();
     }
 
@@ -121,7 +120,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, secondBounds)
         );
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -142,7 +141,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 new AppearanceRegion(0 /* appearance */, secondBounds)
         );
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -165,7 +164,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, secondBounds)
         );
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -190,7 +189,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, thirdBounds)
         );
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -214,7 +213,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 new AppearanceRegion(0 /* appearance */, secondBounds)
         );
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -231,7 +230,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, new Rect(0, 0, 1, 1))
         );
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -249,7 +248,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 new AppearanceRegion(0, new Rect(0, 0, 1, 1))
         );
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -266,7 +265,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, new Rect(0, 0, 1, 1))
         );
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -276,7 +275,7 @@ public class LightBarControllerTest extends SysuiTestCase {
         reset(mStatusBarIconController);
 
         // WHEN the same appearance regions but different status bar mode is sent
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.LIGHTS_OUT_TRANSPARENT,
                         STATUS_BAR_BOUNDS,
@@ -298,7 +297,7 @@ public class LightBarControllerTest extends SysuiTestCase {
                 /* start= */ new Rect(0, 0, 10, 10),
                 /* end= */ new Rect(0, 0, 20, 20));
 
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         startingBounds,
@@ -311,7 +310,7 @@ public class LightBarControllerTest extends SysuiTestCase {
         BoundsPair newBounds = new BoundsPair(
                 /* start= */ new Rect(0, 0, 30, 30),
                 /* end= */ new Rect(0, 0, 40, 40));
-        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+        mStatusBarModeRepository.getStatusBarAppearance().setValue(
                 new StatusBarAppearance(
                         StatusBarMode.TRANSPARENT,
                         newBounds,

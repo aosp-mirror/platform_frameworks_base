@@ -49,6 +49,7 @@ import com.android.settingslib.metadata.PreferenceScreenMetadata
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.android.settingslib.metadata.PreferenceSummaryProvider
 import com.android.settingslib.metadata.PreferenceTitleProvider
+import com.android.settingslib.metadata.RangeValue
 import com.android.settingslib.preference.PreferenceScreenFactory
 import com.android.settingslib.preference.PreferenceScreenProvider
 import java.util.Locale
@@ -66,6 +67,7 @@ private constructor(private val context: Context, private val request: GetPrefer
     private val builder by lazy { PreferenceGraphProto.newBuilder() }
     private val visitedScreens = mutableSetOf<String>().apply { addAll(request.visitedScreens) }
     private val includeValue = request.includeValue
+    private val includeValueDescriptor = request.includeValueDescriptor
 
     private suspend fun init() {
         for (key in request.screenKeys) {
@@ -284,14 +286,37 @@ private constructor(private val context: Context, private val request: GetPrefer
             restricted = metadata.isRestricted(context)
         }
         persistent = metadata.isPersistent(context)
-        if (
-            includeValue &&
-                persistent &&
-                metadata is BooleanValue &&
-                metadata is PersistentPreference<*>
-        ) {
-            metadata.storage(context).getValue(metadata.key, Boolean::class.javaObjectType)?.let {
-                value = preferenceValueProto { booleanValue = it }
+        if (persistent) {
+            if (includeValue && metadata is PersistentPreference<*>) {
+                value = preferenceValueProto {
+                    when (metadata) {
+                        is BooleanValue ->
+                            metadata
+                                .storage(context)
+                                .getValue(metadata.key, Boolean::class.javaObjectType)
+                                ?.let { booleanValue = it }
+                        is RangeValue -> {
+                            metadata
+                                .storage(context)
+                                .getValue(metadata.key, Int::class.javaObjectType)
+                                ?.let { intValue = it }
+                        }
+                        else -> {}
+                    }
+                }
+            }
+            if (includeValueDescriptor) {
+                valueDescriptor = preferenceValueDescriptorProto {
+                    when (metadata) {
+                        is BooleanValue -> booleanType = true
+                        is RangeValue -> rangeValue = rangeValueProto {
+                                min = metadata.getMinValue(context)
+                                max = metadata.getMaxValue(context)
+                                step = metadata.getIncrementStep(context)
+                            }
+                        else -> {}
+                    }
+                }
             }
         }
         if (metadata is PreferenceScreenMetadata) {
