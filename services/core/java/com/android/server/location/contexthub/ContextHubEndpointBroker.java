@@ -24,6 +24,8 @@ import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.location.IContextHubTransactionCallback;
+import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * A class that represents a broker for the endpoint registered by the client app. This class
@@ -72,21 +74,40 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
     }
 
     @Override
-    public int openSession(HubEndpointInfo destination, HubServiceInfo serviceInfo) {
-        // TODO(b/378487799): Implement this
-        return 0;
+    public int openSession(HubEndpointInfo destination, HubServiceInfo serviceInfo)
+            throws RemoteException {
+        ContextHubServiceUtil.checkPermissions(mContext);
+        int sessionId = mEndpointManager.reserveSessionId();
+        EndpointInfo halEndpointInfo = ContextHubServiceUtil.convertHalEndpointInfo(destination);
+        try {
+            mContextHubProxy.openEndpointSession(
+                    sessionId,
+                    halEndpointInfo.id,
+                    mHalEndpointInfo.id,
+                    serviceInfo == null ? null : serviceInfo.getServiceDescriptor());
+        } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
+            Log.e(TAG, "Exception while calling HAL openEndpointSession", e);
+            mEndpointManager.returnSessionId(sessionId);
+            throw e;
+        }
+
+        return sessionId;
     }
 
     @Override
-    public void closeSession(int sessionId, int reason) {
-        // TODO(b/378487799): Implement this
-
+    public void closeSession(int sessionId, int reason) throws RemoteException {
+        ContextHubServiceUtil.checkPermissions(mContext);
+        try {
+            mContextHubProxy.closeEndpointSession(sessionId, (byte) reason);
+        } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
+            Log.e(TAG, "Exception while calling HAL closeEndpointSession", e);
+            throw e;
+        }
     }
 
     @Override
     public void openSessionRequestComplete(int sessionId) {
         // TODO(b/378487799): Implement this
-
     }
 
     @Override
