@@ -110,6 +110,7 @@ aconfig_declarations_group {
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
         "interaction_jank_monitor_flags_lib",
+        "keystore2_flags_java-framework",
         "libcore_exported_aconfig_flags_lib",
         "libcore_readonly_aconfig_flags_lib",
         "libgui_flags_java_lib",
