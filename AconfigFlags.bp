@@ -101,6 +101,7 @@ aconfig_declarations_group {
         "framework-jobscheduler-job.flags-aconfig-java",
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
+        "keystore2_flags_java-framework",
         "power_flags_lib",
         "sdk_sandbox_flags_lib",
         "surfaceflinger_flags_java_lib",
