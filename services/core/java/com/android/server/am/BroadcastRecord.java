@@ -44,7 +44,6 @@ import android.app.BroadcastOptions;
 import android.app.BroadcastOptions.DeliveryGroupPolicy;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
-import android.compat.annotation.Overridable;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -88,7 +87,6 @@ final class BroadcastRecord extends Binder {
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
-    @Overridable
     @VisibleForTesting
     static final long CHANGE_LIMIT_PRIORITY_SCOPE = 371307720L;
 
