@@ -7618,7 +7618,7 @@ package android.media {
 
   public final class MediaCas implements java.lang.AutoCloseable {
     method @FlaggedApi("android.media.tv.flags.set_resource_holder_retain") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public void setResourceHolderRetain(boolean);
-    method @FlaggedApi("com.android.media.flags.update_client_profile_priority") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean updateResourcePriority(int, int);
+    method @FlaggedApi("android.media.tv.flags.mediacas_update_client_profile_priority") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean updateResourcePriority(int, int);
   }
 
   public final class MediaCodec {
