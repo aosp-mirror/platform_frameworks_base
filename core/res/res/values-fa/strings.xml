@@ -612,6 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف را مشخص کند"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پرداخت NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پرداخت NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>

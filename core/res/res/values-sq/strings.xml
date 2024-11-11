@@ -612,6 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Lejo që aplikacioni të përcaktojë pozicionin e përafërt mes pajisjeve në afërsi me brezin ultra të gjerë"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"të ndërveprojë me pajisjet Wi-Fi në afërsi"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Lejon që aplikacioni të reklamojë, të lidhet dhe të përcaktojë pozicionin përkatës të pajisjeve Wi-Fi në afërsi"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacionet për shërbimin e preferuar të pagesës me NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lejon aplikacionin të marrë informacione për shërbimin e preferuar të pagesës me NFC si p.sh. ndihmat e regjistruara dhe destinacionin e itinerarit."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
@@ -1663,7 +1667,7 @@
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Kufjet"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistemi"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Audioja e \"bluetooth-it\""</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Audioja e Bluetooth-it"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Ekran wireless"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Transmeto"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Lidhu me pajisjen"</string>
