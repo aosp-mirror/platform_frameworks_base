@@ -267,7 +267,7 @@ flag {
 flag {
     name: "dual_shade"
     namespace: "systemui"
-    description: "Enables the BC25 Dual Shade (go/bc25-dual-shade-design)."
+    description: "Enables Dual Shade (go/dual-shade-design-doc)."
     bug: "337259436"
 }
 
