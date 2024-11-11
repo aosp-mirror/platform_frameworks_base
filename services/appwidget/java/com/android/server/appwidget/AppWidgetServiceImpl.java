@@ -607,7 +607,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     // ... and see if these are hosts we've been awaiting.
                     // NOTE: We are backing up and restoring only the owner.
                     // TODO: http://b/22388012
-                    if (newPackageAdded && userId == UserHandle.USER_SYSTEM) {
+                    if (newPackageAdded && userId == mUserManager.getMainUser().getIdentifier()) {
                         final int uid = getUidForPackage(pkgName, userId);
                         if (uid >= 0 ) {
                             resolveHostUidLocked(pkgName, uid);
@@ -4424,7 +4424,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Host host = lookupHostLocked(oldHostId);
             if (host != null) {
                 final int uid = getUidForPackage(NEW_KEYGUARD_HOST_PACKAGE,
-                        UserHandle.USER_SYSTEM);
+                        UserHandle.USER_SYSTEM); // Keyguard explicitly runs as the system user
                 if (uid >= 0) {
                     host.id = new HostId(uid, KEYGUARD_HOST_ID, NEW_KEYGUARD_HOST_PACKAGE);
                 }
@@ -4445,6 +4445,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static AtomicFile getSavedStateFile(int userId) {
         File dir = Environment.getUserSystemDirectory(userId);
         File settingsFile = getStateFile(userId);
+        // USER_SYSTEM is explicit here, the old file only ever existed for user 0.
         if (!settingsFile.exists() && userId == UserHandle.USER_SYSTEM) {
             if (!dir.exists()) {
                 dir.mkdirs();
