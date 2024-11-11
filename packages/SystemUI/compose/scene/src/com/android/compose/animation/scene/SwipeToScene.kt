@@ -56,7 +56,7 @@ private fun DraggableHandlerImpl.contentForSwipes(): Content {
 }
 
 /** Whether swipe should be enabled in the given [orientation]. */
-private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
+internal fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
     if (userActions.isEmpty()) {
         return false
     }
