@@ -641,6 +641,15 @@ class WindowToken extends WindowContainer<WindowState> {
             getResolvedOverrideConfiguration().updateFrom(
                     mFixedRotationTransformState.mRotatedOverrideConfiguration);
         }
+        if (asActivityRecord() == null) {
+            // Let ActivityRecord override the config if there is one. Otherwise, override here.
+            // Resolve WindowToken's configuration by the latest window.
+            final WindowState win = getTopChild();
+            if (win != null) {
+                final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+                win.applySizeOverride(newParentConfig, resolvedConfig);
+            }
+        }
     }
 
     @Override
