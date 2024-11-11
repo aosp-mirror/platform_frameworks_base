@@ -50,7 +50,7 @@ internal class LinkedTransition(
         get() = originalTransition.progressVelocity
 
     override suspend fun run() {
-        originalTransition.run()
+        originalTransition.await()
     }
 
     override fun freezeAndAnimateToCurrentState() {

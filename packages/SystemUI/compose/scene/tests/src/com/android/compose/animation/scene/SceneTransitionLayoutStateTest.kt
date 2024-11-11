@@ -42,6 +42,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Rule
@@ -776,5 +777,16 @@ class SceneTransitionLayoutStateTest {
         assertThat(transition.progressTo(SceneB)).isEqualTo(0.2f)
         assertThat(transition.progressTo(SceneA)).isEqualTo(1f - 0.2f)
         assertThrows(IllegalArgumentException::class.java) { transition.progressTo(SceneC) }
+    }
+
+    @Test
+    fun transitionCanBeStartedOnlyOnce() = runTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+        val transition = transition(from = SceneA, to = SceneB)
+
+        state.startTransitionImmediately(backgroundScope, transition)
+        assertThrows(IllegalStateException::class.java) {
+            runBlocking { state.startTransition(transition) }
+        }
     }
 }

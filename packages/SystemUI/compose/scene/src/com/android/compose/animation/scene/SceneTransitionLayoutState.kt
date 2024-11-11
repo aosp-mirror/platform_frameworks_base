@@ -372,12 +372,12 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
             // Handle transition links.
             previousTransition?.let { cancelActiveTransitionLinks(it) }
-            if (stateLinks.isNotEmpty()) {
-                coroutineScope { setupTransitionLinks(transition) }
-            }
+            coroutineScope {
+                setupTransitionLinks(transition)
 
-            // Run the transition until it is finished.
-            transition.run()
+                // Run the transition until it is finished.
+                transition.runInternal()
+            }
         } finally {
             finishTransition(transition)
         }
