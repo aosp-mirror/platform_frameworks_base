@@ -166,3 +166,10 @@ flag {
     description: "Allows audio input devices routing and volume control via system settings."
     bug: "355684672"
 }
+
+flag {
+    name: "enable_mirroring_in_media_router_2"
+    namespace: "media_better_together"
+    description: "Enables support for mirroring routes in the MediaRouter2 framework, allowing Output Switcher to offer mirroring routes."
+    bug: "362507305"
+}

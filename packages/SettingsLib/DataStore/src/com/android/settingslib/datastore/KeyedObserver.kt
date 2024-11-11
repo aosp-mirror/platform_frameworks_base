@@ -202,6 +202,12 @@ open class KeyedDataObservable<K> : KeyedObservable<K> {
             entry.value.execute { observer.onKeyChanged(key, reason) }
         }
     }
+
+    fun hasAnyObserver(): Boolean {
+        synchronized(observers) { if (observers.isNotEmpty()) return true }
+        synchronized(keyedObservers) { if (keyedObservers.isNotEmpty()) return true }
+        return false
+    }
 }
 
 /** [KeyedObservable] with no-op implementations for all interfaces. */

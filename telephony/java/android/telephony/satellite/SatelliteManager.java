@@ -36,6 +36,7 @@ import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -270,6 +271,14 @@ public final class SatelliteManager {
      * @hide
      */
     public static final String KEY_DEPROVISION_SATELLITE_TOKENS = "deprovision_satellite";
+
+    /**
+     * Bundle key to get the response from
+     * {@link #requestSatelliteAccessConfigurationForCurrentLocation(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_ACCESS_CONFIGURATION =
+            "satellite_access_configuration";
 
     /**
      * The request was successfully processed.
@@ -2332,6 +2341,68 @@ public final class SatelliteManager {
     }
 
     /**
+     * Request to get satellite access configuration for the current location.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return a {@code SatelliteAccessConfiguration} with value the regional
+     *                 satellite access configuration at the current location.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public void requestSatelliteAccessConfigurationForCurrentLocation(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<SatelliteAccessConfiguration, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_SATELLITE_ACCESS_CONFIGURATION)) {
+                                SatelliteAccessConfiguration satelliteAccessConfiguration =
+                                        resultData.getParcelable(KEY_SATELLITE_ACCESS_CONFIGURATION,
+                                                SatelliteAccessConfiguration.class);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(satelliteAccessConfiguration)));
+                            } else {
+                                loge("KEY_SATELLITE_ACCESS_CONFIGURATION does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestSatelliteAccessConfigurationForCurrentLocation(receiver);
+            } else {
+                loge("requestSatelliteAccessConfigurationForCurrentLocation() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("requestSatelliteAccessConfigurationForCurrentLocation() RemoteException: "
+                    + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
      * Request to get the duration in seconds after which the satellite will be visible.
      * This will be {@link Duration#ZERO} if the satellite is currently visible.
      *
@@ -2436,7 +2507,7 @@ public final class SatelliteManager {
      * <li>There is no satellite communication restriction, which is added by
      * {@link #addAttachRestrictionForCarrier(int, int, Executor, Consumer)}</li>
      * <li>The carrier config {@link
-     * android.telephony.CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} is set to
+     * CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} is set to
      * {@code true}.</li>
      * </ul>
      *
@@ -2759,7 +2830,7 @@ public final class SatelliteManager {
      * <p>
      * Note: This API is specifically designed for OEM enabled satellite connectivity only.
      * For satellite connectivity enabled using carrier roaming, please refer to
-     * {@link android.telephony.TelephonyCallback.SignalStrengthsListener}, and
+     * {@link TelephonyCallback.SignalStrengthsListener}, and
      * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
      * </p>
      *
@@ -2830,7 +2901,7 @@ public final class SatelliteManager {
      * <p>
      * Note: This API is specifically designed for OEM enabled satellite connectivity only.
      * For satellite connectivity enabled using carrier roaming, please refer to
-     * {@link android.telephony.TelephonyCallback.SignalStrengthsListener}, and
+     * {@link TelephonyCallback.SignalStrengthsListener}, and
      * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
      * </p>
      *
@@ -3146,6 +3217,15 @@ public final class SatelliteManager {
                                 executor.execute(() -> Binder.withCleanCallingIdentity(
                                         () -> callback.onSatelliteCommunicationAllowedStateChanged(
                                                 isAllowed)));
+                            }
+
+                            @Override
+                            public void onSatelliteAccessConfigurationChanged(
+                                    @Nullable SatelliteAccessConfiguration
+                                            satelliteAccessConfiguration) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatelliteAccessConfigurationChanged(
+                                                satelliteAccessConfiguration)));
                             }
                         };
                 sSatelliteCommunicationAllowedStateCallbackMap.put(callback, internalCallback);

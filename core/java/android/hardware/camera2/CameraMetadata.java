@@ -3371,6 +3371,32 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_AUTOFRAMING_AUTO = 2;
 
     //
+    // Enumeration values for CaptureRequest#CONTROL_ZOOM_METHOD
+    //
+
+    /**
+     * <p>The camera device automatically detects whether the application does zoom with
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, and in turn decides which
+     * metadata tag reflects the effective zoom level.</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CaptureRequest#CONTROL_ZOOM_METHOD
+     */
+    @FlaggedApi(Flags.FLAG_ZOOM_METHOD)
+    public static final int CONTROL_ZOOM_METHOD_AUTO = 0;
+
+    /**
+     * <p>The application intends to control zoom via {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, and
+     * the effective zoom level is reflected by {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} in capture results.</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CaptureRequest#CONTROL_ZOOM_METHOD
+     */
+    @FlaggedApi(Flags.FLAG_ZOOM_METHOD)
+    public static final int CONTROL_ZOOM_METHOD_ZOOM_RATIO = 1;
+
+    //
     // Enumeration values for CaptureRequest#EDGE_MODE
     //
 

@@ -593,7 +593,7 @@ class BroadcastController {
                             originalStickyCallingUid, BackgroundStartPrivileges.NONE,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
                             null /* filterExtrasForReceiver */,
-                            broadcast.originalCallingAppProcessState);
+                            broadcast.originalCallingAppProcessState, mService.mPlatformCompat);
                     queue.enqueueBroadcastLocked(r);
                 }
             }
@@ -1631,7 +1631,7 @@ class BroadcastController {
                     receivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
                     ordered, sticky, false, userId,
                     backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
-                    callerAppProcessState);
+                    callerAppProcessState, mService.mPlatformCompat);
             broadcastSentEventRecord.setBroadcastRecord(r);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
