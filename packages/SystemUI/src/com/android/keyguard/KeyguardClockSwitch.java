@@ -147,7 +147,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockSwitchYAmount = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_clock_switch_y_shift);
         mSmartspaceTopOffset = (int) (mContext.getResources().getDimensionPixelSize(
-                        R.dimen.keyguard_smartspace_top_offset)
+                com.android.systemui.customization.R.dimen.keyguard_smartspace_top_offset)
                 * mContext.getResources().getConfiguration().fontScale
                 / mContext.getResources().getDisplayMetrics().density
                 * SMARTSPACE_TOP_PADDING_MULTIPLIER);
