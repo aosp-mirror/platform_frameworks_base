@@ -27,21 +27,16 @@ import android.net.TetheringManager;
 import android.net.nsd.NsdManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.os.UpdateLock;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
-import android.util.IndentingPrintWriter;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastPrintWriter;
 
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /** @hide */
@@ -217,41 +212,6 @@ public class BroadcastStickyCache {
         synchronized (sCachedPropertyHandles) {
             sCachedPropertyHandles.clear();
         }
-    }
-
-    public static void dump(@NonNull ParcelFileDescriptor pfd) {
-        if (!Flags.useStickyBcastCache()) {
-            return;
-        }
-        final PrintWriter pw = new FastPrintWriter(new FileOutputStream(pfd.getFileDescriptor()));
-        synchronized (sCachedStickyBroadcasts) {
-            dumpLocked(pw);
-        }
-        pw.flush();
-    }
-
-    @GuardedBy("sCachedStickyBroadcasts")
-    private static void dumpLocked(@NonNull PrintWriter pw) {
-        final IndentingPrintWriter ipw = new IndentingPrintWriter(
-                pw, "  " /* singleIndent */, "  " /* prefix */);
-        ipw.println("Cached sticky broadcasts:");
-        ipw.increaseIndent();
-        final int count = sCachedStickyBroadcasts.size();
-        if (count == 0) {
-            ipw.println("<empty>");
-        } else {
-            for (int i = 0; i < count; ++i) {
-                final CachedStickyBroadcast cachedStickyBroadcast = sCachedStickyBroadcasts.get(i);
-                ipw.print("Entry #"); ipw.print(i); ipw.println(":");
-                ipw.increaseIndent();
-                ipw.print("filter="); ipw.println(cachedStickyBroadcast.filter.toLongString());
-                ipw.print("intent="); ipw.println(cachedStickyBroadcast.intent);
-                ipw.print("version="); ipw.println(cachedStickyBroadcast.version);
-                ipw.print("handle="); ipw.println(cachedStickyBroadcast.propertyHandle);
-                ipw.decreaseIndent();
-            }
-        }
-        ipw.decreaseIndent();
     }
 
     private static final class CachedStickyBroadcast {
