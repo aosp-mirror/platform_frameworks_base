@@ -376,6 +376,7 @@ import android.app.backup.IBackupManager;
 import android.app.compat.CompatChanges;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
+import android.app.supervision.SupervisionManagerInternal;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -926,6 +927,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final UsageStatsManagerInternal mUsageStatsManagerInternal;
     final TelephonyManager mTelephonyManager;
     final RoleManager mRoleManager;
+    final SupervisionManagerInternal mSupervisionManagerInternal;
+
     private final LockPatternUtils mLockPatternUtils;
     private final LockSettingsInternal mLockSettingsInternal;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
@@ -2082,6 +2085,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean isAdminInstalledCaCertAutoApproved() {
             return false;
         }
+
+        @Nullable
+        SupervisionManagerInternal getSupervisionManager() {
+            return LocalServices.getService(SupervisionManagerInternal.class);
+        }
     }
 
     /**
@@ -2113,6 +2121,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mIPermissionManager = Objects.requireNonNull(injector.getIPermissionManager());
         mTelephonyManager = Objects.requireNonNull(injector.getTelephonyManager());
         mRoleManager = Objects.requireNonNull(injector.getRoleManager());
+        if (Flags.secondaryLockscreenApiEnabled()) {
+            mSupervisionManagerInternal = injector.getSupervisionManager();
+        } else {
+            mSupervisionManagerInternal = null;
+        }
 
         mLocalService = new LocalService();
         mLockPatternUtils = injector.newLockPatternUtils();
@@ -2233,7 +2246,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         return Collections.unmodifiableSet(packageNames);
     }
-
 
     private @Nullable String getDefaultRoleHolderPackageName(int resId) {
         String packageNameAndSignature = mContext.getString(resId);
@@ -14585,34 +14597,76 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private boolean hasActiveSupervisionTestAdminLocked(@UserIdInt int userId) {
+        ensureLocked();
+        if (mConstants.USE_TEST_ADMIN_AS_SUPERVISION_COMPONENT) {
+            final DevicePolicyData policy = getUserData(userId);
+            for (ActiveAdmin admin : policy.mAdminMap.values()) {
+                if (admin != null && admin.testOnlyAdmin) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public void setSecondaryLockscreenEnabled(ComponentName who, boolean enabled,
             PersistableBundle options) {
-        Objects.requireNonNull(who, "ComponentName is null");
-
-        // Check can set secondary lockscreen enabled
-        final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwner(caller));
-        Preconditions.checkCallAuthorization(!isManagedProfile(caller.getUserId()),
-                "User %d is not allowed to call setSecondaryLockscreenEnabled",
+        if (Flags.secondaryLockscreenApiEnabled()) {
+            final CallerIdentity caller = getCallerIdentity();
+            final boolean isRoleHolder = isCallerSystemSupervisionRoleHolder(caller);
+            synchronized (getLockObject()) {
+                // TODO(b/378102594): Remove access for test admins.
+                final boolean isTestAdmin = hasActiveSupervisionTestAdminLocked(caller.getUserId());
+                Preconditions.checkCallAuthorization(isRoleHolder || isTestAdmin,
+                        "Caller (%d) is not the SYSTEM_SUPERVISION role holder",
                         caller.getUserId());
+            }
 
-        synchronized (getLockObject()) {
-            // Allow testOnly admins to bypass supervision config requirement.
-            Preconditions.checkCallAuthorization(isAdminTestOnlyLocked(who, caller.getUserId())
-                    || isSupervisionComponentLocked(caller.getComponentName()), "Admin %s is not "
-                    + "the default supervision component", caller.getComponentName());
-            DevicePolicyData policy = getUserData(caller.getUserId());
-            policy.mSecondaryLockscreenEnabled = enabled;
-            saveSettingsLocked(caller.getUserId());
+            if (mSupervisionManagerInternal != null) {
+                mSupervisionManagerInternal.setSupervisionLockscreenEnabledForUser(
+                        caller.getUserId(), enabled, options);
+            } else {
+                synchronized (getLockObject()) {
+                    DevicePolicyData policy = getUserData(caller.getUserId());
+                    policy.mSecondaryLockscreenEnabled = enabled;
+                    saveSettingsLocked(caller.getUserId());
+                }
+            }
+        } else {
+            Objects.requireNonNull(who, "ComponentName is null");
+
+            // Check can set secondary lockscreen enabled
+            final CallerIdentity caller = getCallerIdentity(who);
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller) || isProfileOwner(caller));
+            Preconditions.checkCallAuthorization(!isManagedProfile(caller.getUserId()),
+                    "User %d is not allowed to call setSecondaryLockscreenEnabled",
+                            caller.getUserId());
+
+            synchronized (getLockObject()) {
+                // Allow testOnly admins to bypass supervision config requirement.
+                Preconditions.checkCallAuthorization(isAdminTestOnlyLocked(who, caller.getUserId())
+                        || isSupervisionComponentLocked(caller.getComponentName()),
+                        "Admin %s is not the default supervision component",
+                        caller.getComponentName());
+                DevicePolicyData policy = getUserData(caller.getUserId());
+                policy.mSecondaryLockscreenEnabled = enabled;
+                saveSettingsLocked(caller.getUserId());
+            }
         }
     }
 
     @Override
     public boolean isSecondaryLockscreenEnabled(@NonNull UserHandle userHandle) {
-        synchronized (getLockObject()) {
-            return getUserData(userHandle.getIdentifier()).mSecondaryLockscreenEnabled;
+        if (Flags.secondaryLockscreenApiEnabled() && mSupervisionManagerInternal != null) {
+            return mSupervisionManagerInternal.isSupervisionLockscreenEnabledForUser(
+                    userHandle.getIdentifier());
+        } else {
+            synchronized (getLockObject()) {
+                return getUserData(userHandle.getIdentifier()).mSecondaryLockscreenEnabled;
+            }
         }
     }
 
