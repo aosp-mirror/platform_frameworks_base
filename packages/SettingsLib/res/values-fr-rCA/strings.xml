@@ -512,7 +512,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"En recharge sans fil"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Recharge en cours…"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"N\'est pas en charge"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Connecté, mais ne se recharge pas"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Appareil connecté, mais pas en cours de recharge"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Chargée"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Complètement rechargée"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Recharge en pause"</string>
@@ -591,6 +591,12 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Appareil externe"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Appareil connecté"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ce téléphone"</string>
+    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
+    <skip />
+    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
+    <skip />
+    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
+    <skip />
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossible de faire jouer le contenu sur cet appareil"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Mettez à jour le compte pour passer à la version payante"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Lecture des téléchargements impossible ici"</string>
