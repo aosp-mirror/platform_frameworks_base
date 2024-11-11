@@ -702,6 +702,7 @@ class BroadcastController {
             boolean serialized, boolean sticky, int userId) {
         mService.enforceNotIsolatedCaller("broadcastIntent");
 
+        boolean isCallerCore;
         int result;
         synchronized (mService) {
             intent = verifyBroadcastLocked(intent);
@@ -724,6 +725,7 @@ class BroadcastController {
 
             final long origId = Binder.clearCallingIdentity();
             try {
+                isCallerCore = UserHandle.isCore(callingUid);
                 result = broadcastIntentLocked(callerApp,
                         callerApp != null ? callerApp.info.packageName : null, callingFeatureId,
                         intent, resolvedType, resultToApp, resultTo, resultCode, resultData,
@@ -735,7 +737,7 @@ class BroadcastController {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
-        if (sticky && result == ActivityManager.BROADCAST_SUCCESS) {
+        if (sticky && isCallerCore && result == ActivityManager.BROADCAST_SUCCESS) {
             BroadcastStickyCache.incrementVersion(intent.getAction());
         }
         return result;
