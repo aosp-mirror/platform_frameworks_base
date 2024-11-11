@@ -49,6 +49,7 @@ val Kosmos.statusBarOrchestrator by
             fakeStatusBarModePerDisplayRepository,
             fakeStatusBarInitializer,
             fakeStatusBarWindowController,
+            applicationCoroutineScope.coroutineContext,
             mockDemoModeController,
             mockPluginDependencyProvider,
             mockAutoHideController,
