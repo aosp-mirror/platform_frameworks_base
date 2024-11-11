@@ -47,6 +47,7 @@ class TestWithGoldenOutput(unittest.TestCase):
 
     # Test to check the generated jar files to the golden output.
     def test_compare_to_golden(self):
+        self.skipTest("test cannot handle multiple images (see b/378470825)")
         files = os.listdir(GOLDEN_DIR)
         files.sort()
 
