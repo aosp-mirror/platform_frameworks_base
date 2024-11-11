@@ -741,13 +741,15 @@ public class BluetoothUtils {
     @WorkerThread
     public static boolean hasConnectedBroadcastSourceForBtDevice(
             @Nullable BluetoothDevice device, @Nullable LocalBluetoothManager localBtManager) {
-        if (Flags.audioSharingHysteresisModeFix()) {
+        if (localBtManager == null) {
+            Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
+            return false;
+        }
+        if (isAudioSharingHysteresisModeFixAvailable(localBtManager.getContext())) {
             return hasActiveLocalBroadcastSourceForBtDevice(device, localBtManager);
         }
         LocalBluetoothLeBroadcastAssistant assistant =
-                localBtManager == null
-                        ? null
-                        : localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+                localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
         if (device == null || assistant == null) {
             Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
             return false;
