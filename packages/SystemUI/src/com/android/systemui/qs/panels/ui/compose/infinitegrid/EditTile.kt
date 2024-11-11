@@ -26,7 +26,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
@@ -203,7 +203,7 @@ fun DefaultEditTileGrid(
         containerColor = Color.Transparent,
         topBar = { EditModeTopBar(onStopEditing = onStopEditing, onReset = reset) },
     ) { innerPadding ->
-        CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+        CompositionLocalProvider(LocalOverscrollFactory provides null) {
             val scrollState = rememberScrollState()
             LaunchedEffect(listState.dragInProgress) {
                 if (listState.dragInProgress) {
