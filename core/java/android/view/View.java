@@ -91,6 +91,8 @@ import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UiThread;
 import android.app.PendingIntent;
+import android.app.jank.AppJankStats;
+import android.app.jank.JankTracker;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
 import android.content.ClipData;
@@ -34419,5 +34421,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     boolean getSelfRequestedFrameRateFlag() {
         return (mPrivateFlags4 & PFLAG4_SELF_REQUESTED_FRAME_RATE) != 0;
+    }
+
+    /**
+     * Called from apps when they want to report jank stats to the system.
+     * @param appJankStats the stats that will be merged with the stats collected by the system.
+     */
+    @FlaggedApi(android.app.jank.Flags.FLAG_DETAILED_APP_JANK_METRICS_API)
+    public void reportAppJankStats(@NonNull AppJankStats appJankStats) {
+        getRootView().reportAppJankStats(appJankStats);
+    }
+
+    /**
+     * Called by widgets to get a reference to JankTracker in order to update states.
+     * @hide
+     */
+    public @Nullable JankTracker getJankTracker() {
+        return getRootView().getJankTracker();
     }
 }
