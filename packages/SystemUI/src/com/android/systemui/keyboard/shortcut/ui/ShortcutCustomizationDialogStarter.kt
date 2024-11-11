@@ -24,7 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutInfo
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.ui.composable.AssignNewShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutCustomizationViewModel
@@ -59,8 +59,8 @@ constructor(
         }
     }
 
-    fun onAddShortcutDialogRequested(shortcutBeingCustomized: ShortcutInfo) {
-        viewModel.onAddShortcutDialogRequested(shortcutBeingCustomized)
+    fun onShortcutCustomizationRequested(requestInfo: ShortcutCustomizationRequestInfo) {
+        viewModel.onShortcutCustomizationRequested(requestInfo)
     }
 
     private fun createAddShortcutDialog(): Dialog {

@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -53,6 +54,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
@@ -71,7 +73,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -109,8 +110,8 @@ import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.ui.model.IconSource
@@ -125,7 +126,7 @@ fun ShortcutHelper(
     modifier: Modifier = Modifier,
     shortcutsUiState: ShortcutsUiState,
     useSinglePane: @Composable () -> Boolean = { shouldUseSinglePane() },
-    onCustomizationRequested: (ShortcutInfo) -> Unit = {},
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
 ) {
     when (shortcutsUiState) {
         is ShortcutsUiState.Active -> {
@@ -138,6 +139,7 @@ fun ShortcutHelper(
                 onCustomizationRequested,
             )
         }
+
         else -> {
             // No-op for now.
         }
@@ -151,7 +153,7 @@ private fun ActiveShortcutHelper(
     onSearchQueryChanged: (String) -> Unit,
     modifier: Modifier,
     onKeyboardSettingsClicked: () -> Unit,
-    onCustomizationRequested: (ShortcutInfo) -> Unit = {},
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
 ) {
     var selectedCategoryType by
         remember(shortcutsUiState.defaultSelectedCategory) {
@@ -367,14 +369,10 @@ private fun ShortcutHelperTwoPane(
     onCategorySelected: (ShortcutCategoryType?) -> Unit,
     onKeyboardSettingsClicked: () -> Unit,
     isShortcutCustomizerFlagEnabled: Boolean,
-    onCustomizationRequested: (ShortcutInfo) -> Unit = {},
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
 ) {
     val selectedCategory = categories.fastFirstOrNull { it.type == selectedCategoryType }
-    var isCustomizeModeEntered by remember { mutableStateOf(false) }
-    val isCustomizing by
-        remember(isCustomizeModeEntered, isShortcutCustomizerFlagEnabled) {
-            derivedStateOf { isCustomizeModeEntered && isCustomizeModeEntered }
-        }
+    var isCustomizing by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize().padding(horizontal = 24.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -383,10 +381,10 @@ private fun ShortcutHelperTwoPane(
             }
             Spacer(modifier = Modifier.weight(1f))
             if (isShortcutCustomizerFlagEnabled) {
-                if (isCustomizeModeEntered) {
-                    DoneButton(onClick = { isCustomizeModeEntered = false })
+                if (isCustomizing) {
+                    DoneButton(onClick = { isCustomizing = false })
                 } else {
-                    CustomizeButton(onClick = { isCustomizeModeEntered = true })
+                    CustomizeButton(onClick = { isCustomizing = true })
                 }
             }
         }
@@ -441,7 +439,7 @@ private fun EndSidePanel(
     modifier: Modifier,
     category: ShortcutCategoryUi?,
     isCustomizing: Boolean,
-    onCustomizationRequested: (ShortcutInfo) -> Unit = {},
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     LaunchedEffect(key1 = category) { if (category != null) listState.animateScrollToItem(0) }
@@ -457,7 +455,7 @@ private fun EndSidePanel(
                 isCustomizing = isCustomizing,
                 onCustomizationRequested = { label, subCategoryLabel ->
                     onCustomizationRequested(
-                        ShortcutInfo(
+                        ShortcutCustomizationRequestInfo.Add(
                             label = label,
                             subCategoryLabel = subCategoryLabel,
                             categoryType = category.type,
@@ -565,7 +563,7 @@ private fun Shortcut(
             modifier = Modifier.weight(1f),
             shortcut = shortcut,
             isCustomizing = isCustomizing,
-            onAddShortcutClicked = { onCustomizationRequested(shortcut.label) },
+            onAddShortcutRequested = { onCustomizationRequested(shortcut.label) },
         )
     }
 }
@@ -594,38 +592,88 @@ private fun ShortcutKeyCombinations(
     modifier: Modifier = Modifier,
     shortcut: ShortcutModel,
     isCustomizing: Boolean = false,
-    onAddShortcutClicked: () -> Unit = {},
+    onAddShortcutRequested: () -> Unit = {},
+    onDeleteShortcutRequested: () -> Unit = {},
 ) {
     FlowRow(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.End,
     ) {
         shortcut.commands.forEachIndexed { index, command ->
             if (index > 0) {
                 ShortcutOrSeparator(spacing = 16.dp)
             }
-            ShortcutCommand(command)
+            ShortcutCommandContainer(showBackground = command.isCustom) { ShortcutCommand(command) }
         }
         if (isCustomizing) {
             Spacer(modifier = Modifier.width(16.dp))
-            ShortcutHelperButton(
-                modifier =
-                    Modifier.border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline,
-                        shape = CircleShape,
-                    ),
-                onClick = { onAddShortcutClicked() },
-                color = Color.Transparent,
-                width = 32.dp,
-                height = 32.dp,
-                iconSource = IconSource(imageVector = Icons.Default.Add),
-                contentColor = MaterialTheme.colorScheme.primary,
-                contentPaddingVertical = 0.dp,
-                contentPaddingHorizontal = 0.dp,
-            )
+            if (shortcut.containsCustomShortcutCommands) {
+                DeleteShortcutButton(onDeleteShortcutRequested)
+            } else {
+                AddShortcutButton(onAddShortcutRequested)
+            }
         }
+    }
+}
+
+@Composable
+private fun AddShortcutButton(onClick: () -> Unit) {
+    ShortcutHelperButton(
+        modifier =
+            Modifier.border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = CircleShape,
+            ),
+        onClick = onClick,
+        color = Color.Transparent,
+        width = 32.dp,
+        height = 32.dp,
+        iconSource = IconSource(imageVector = Icons.Default.Add),
+        contentColor = MaterialTheme.colorScheme.primary,
+        contentPaddingVertical = 0.dp,
+        contentPaddingHorizontal = 0.dp,
+    )
+}
+
+@Composable
+private fun DeleteShortcutButton(onClick: () -> Unit) {
+    ShortcutHelperButton(
+        modifier =
+            Modifier.border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = CircleShape,
+            ),
+        onClick = onClick,
+        color = Color.Transparent,
+        width = 32.dp,
+        height = 32.dp,
+        iconSource = IconSource(imageVector = Icons.Default.DeleteOutline),
+        contentColor = MaterialTheme.colorScheme.primary,
+        contentPaddingVertical = 0.dp,
+        contentPaddingHorizontal = 0.dp,
+    )
+}
+
+@Composable
+private fun ShortcutCommandContainer(showBackground: Boolean, content: @Composable () -> Unit) {
+    if (showBackground) {
+        Box(
+            modifier =
+                Modifier.wrapContentSize()
+                    .background(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        shape = RoundedCornerShape(16.dp),
+                    )
+                    .padding(4.dp)
+        ) {
+            content()
+        }
+    } else {
+        content()
     }
 }
 
