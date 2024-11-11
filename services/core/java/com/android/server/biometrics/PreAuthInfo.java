@@ -119,9 +119,16 @@ class PreAuthInfo {
                 == BiometricManager.Authenticators.IDENTITY_CHECK;
         boolean isMandatoryBiometricsAuthentication = false;
 
+        final int effectiveUserId;
+        if (Flags.effectiveUserBp()) {
+            effectiveUserId = userManager.getCredentialOwnerProfile(userId);
+        } else {
+            effectiveUserId = userId;
+        }
+
         if (dropCredentialFallback(promptInfo.getAuthenticators(),
                 settingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
-                        userId), trustManager)) {
+                        effectiveUserId), trustManager)) {
             isMandatoryBiometricsAuthentication = true;
             promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
             if (promptInfo.getNegativeButtonText() == null) {
@@ -144,13 +151,6 @@ class PreAuthInfo {
 
         final List<BiometricSensor> eligibleSensors = new ArrayList<>();
         final List<Pair<BiometricSensor, Integer>> ineligibleSensors = new ArrayList<>();
-
-        final int effectiveUserId;
-        if (Flags.effectiveUserBp()) {
-            effectiveUserId = userManager.getCredentialOwnerProfile(userId);
-        } else {
-            effectiveUserId = userId;
-        }
 
         if (biometricRequested) {
             for (BiometricSensor sensor : sensors) {
