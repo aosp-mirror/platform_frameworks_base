@@ -34,9 +34,6 @@ import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransformationSpec
 import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
-import com.android.compose.animation.scene.transition.link.LinkedTransition
-import com.android.compose.animation.scene.transition.link.StateLink
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 
 /** The state associated to a [SceneTransitionLayout] at some specific point in time. */
@@ -281,14 +278,8 @@ sealed interface TransitionState {
          */
         private var interruptionDecay: Animatable<Float, AnimationVector1D>? = null
 
-        /** The map of active links that connects this transition to other transitions. */
-        internal val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
-
         /** Whether this transition was already started. */
         private var wasStarted = false
-
-        /** A completable to [await] this transition. */
-        private val completable = CompletableDeferred<Unit>()
 
         init {
             check(fromContent != toContent)
@@ -348,18 +339,11 @@ sealed interface TransitionState {
          */
         abstract fun freezeAndAnimateToCurrentState()
 
-        /** Wait for this transition to finish. */
-        internal suspend fun await() = completable.await()
-
         internal suspend fun runInternal() {
             check(!wasStarted) { "A Transition can be started only once." }
             wasStarted = true
 
-            try {
-                run()
-            } finally {
-                completable.complete(Unit)
-            }
+            run()
         }
 
         internal fun updateOverscrollSpecs(

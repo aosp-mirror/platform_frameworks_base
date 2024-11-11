@@ -26,10 +26,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
-import com.android.compose.animation.scene.TestScenes.SceneD
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
-import com.android.compose.animation.scene.transition.link.StateLink
 import com.android.compose.animation.scene.transition.seekToScene
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.TestSceneTransition
@@ -131,147 +129,6 @@ class SceneTransitionLayoutStateTest {
         // Cancelling the scope/job still sets the state to Idle(targetScene).
         job.cancelAndJoin()
         assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneB))
-    }
-
-    private fun setupLinkedStates(
-        parentInitialScene: SceneKey = SceneC,
-        childInitialScene: SceneKey = SceneA,
-        sourceFrom: SceneKey? = SceneA,
-        sourceTo: SceneKey? = SceneB,
-        targetFrom: SceneKey? = SceneC,
-        targetTo: SceneKey = SceneD,
-    ): Pair<MutableSceneTransitionLayoutStateImpl, MutableSceneTransitionLayoutStateImpl> {
-        val parentState = MutableSceneTransitionLayoutState(parentInitialScene)
-        val link =
-            listOf(
-                StateLink(
-                    parentState,
-                    listOf(StateLink.TransitionLink(sourceFrom, sourceTo, targetFrom, targetTo)),
-                )
-            )
-        val childState = MutableSceneTransitionLayoutState(childInitialScene, stateLinks = link)
-        return Pair(
-            parentState as MutableSceneTransitionLayoutStateImpl,
-            childState as MutableSceneTransitionLayoutStateImpl,
-        )
-    }
-
-    @Test
-    fun linkedTransition_startsLinkAndFinishesLinkInToState() = runTest {
-        val (parentState, childState) = setupLinkedStates()
-
-        val childTransition = transition(SceneA, SceneB)
-
-        val job =
-            childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-        assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
-        assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
-
-        childTransition.finish()
-        job.join()
-        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
-        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneD))
-    }
-
-    @Test
-    fun linkedTransition_transitiveLink() = runTest {
-        val parentParentState =
-            MutableSceneTransitionLayoutState(SceneB) as MutableSceneTransitionLayoutStateImpl
-        val parentLink =
-            listOf(
-                StateLink(
-                    parentParentState,
-                    listOf(StateLink.TransitionLink(SceneC, SceneD, SceneB, SceneC)),
-                )
-            )
-        val parentState =
-            MutableSceneTransitionLayoutState(SceneC, stateLinks = parentLink)
-                as MutableSceneTransitionLayoutStateImpl
-        val link =
-            listOf(
-                StateLink(
-                    parentState,
-                    listOf(StateLink.TransitionLink(SceneA, SceneB, SceneC, SceneD)),
-                )
-            )
-        val childState =
-            MutableSceneTransitionLayoutState(SceneA, stateLinks = link)
-                as MutableSceneTransitionLayoutStateImpl
-
-        val childTransition = transition(SceneA, SceneB)
-
-        val job =
-            childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-        assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
-        assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
-        assertThat(parentParentState.isTransitioning(SceneB, SceneC)).isTrue()
-
-        childTransition.finish()
-        job.join()
-        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
-        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneD))
-        assertThat(parentParentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
-    }
-
-    @Test
-    fun linkedTransition_linkProgressIsEqual() = runTest {
-        val (parentState, childState) = setupLinkedStates()
-
-        var progress = 0f
-        val childTransition = transition(SceneA, SceneB, progress = { progress })
-
-        childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-        assertThat(parentState.currentTransition?.progress).isEqualTo(0f)
-
-        progress = .5f
-        assertThat(parentState.currentTransition?.progress).isEqualTo(.5f)
-    }
-
-    @Test
-    fun linkedTransition_reverseTransitionIsNotLinked() = runTest {
-        val (parentState, childState) = setupLinkedStates()
-
-        val childTransition = transition(SceneB, SceneA, current = { SceneB })
-
-        val job =
-            childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-        assertThat(childState.isTransitioning(SceneB, SceneA)).isTrue()
-        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
-
-        childTransition.finish()
-        job.join()
-        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
-        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
-    }
-
-    @Test
-    fun linkedTransition_startsLinkAndFinishesLinkInFromState() = runTest {
-        val (parentState, childState) = setupLinkedStates()
-
-        val childTransition = transition(SceneA, SceneB, current = { SceneA })
-        val job =
-            childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-
-        childTransition.finish()
-        job.join()
-        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneA))
-        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
-    }
-
-    @Test
-    fun linkedTransition_startsLinkButLinkedStateIsTakenOver() = runTest {
-        val (parentState, childState) = setupLinkedStates()
-
-        val childTransition = transition(SceneA, SceneB)
-        val parentTransition = transition(SceneC, SceneA)
-        val job =
-            childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-        parentState.startTransitionImmediately(animationScope = backgroundScope, parentTransition)
-
-        childTransition.finish()
-        job.join()
-        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
-        assertThat(parentState.transitionState).isEqualTo(parentTransition)
     }
 
     @Test
@@ -392,51 +249,6 @@ class SceneTransitionLayoutStateTest {
         currentScene = SceneA
         assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
         assertThat(state.isTransitioning()).isTrue()
-    }
-
-    @Test
-    fun linkedTransition_fuzzyLinksAreMatchedAndStarted() = runTest {
-        val (parentState, childState) = setupLinkedStates(SceneC, SceneA, null, null, null, SceneD)
-        val childTransition = transition(SceneA, SceneB)
-
-        val job =
-            childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-        assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
-        assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
-
-        childTransition.finish()
-        job.join()
-        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
-        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneD))
-    }
-
-    @Test
-    fun linkedTransition_fuzzyLinksAreMatchedAndResetToProperPreviousScene() = runTest {
-        val (parentState, childState) =
-            setupLinkedStates(SceneC, SceneA, SceneA, null, null, SceneD)
-
-        val childTransition = transition(SceneA, SceneB, current = { SceneA })
-
-        val job =
-            childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-        assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
-        assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
-
-        childTransition.finish()
-        job.join()
-        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneA))
-        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
-    }
-
-    @Test
-    fun linkedTransition_fuzzyLinksAreNotMatched() = runTest {
-        val (parentState, childState) =
-            setupLinkedStates(SceneC, SceneA, SceneB, null, SceneC, SceneD)
-        val childTransition = transition(SceneA, SceneB)
-
-        childState.startTransitionImmediately(animationScope = backgroundScope, childTransition)
-        assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
-        assertThat(parentState.isTransitioning(SceneC, SceneD)).isFalse()
     }
 
     private fun MonotonicClockTestScope.startOverscrollableTransistionFromAtoB(
