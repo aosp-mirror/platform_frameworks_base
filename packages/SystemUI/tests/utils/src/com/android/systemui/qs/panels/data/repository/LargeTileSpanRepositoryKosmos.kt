@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.data.repository
 
+import android.content.res.mainResources
+import com.android.systemui.common.ui.data.repository.configurationRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.log.core.FakeLogBuffer
-import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
-import com.android.systemui.qs.panels.data.repository.largeTileSpanRepository
-import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 
-val Kosmos.iconTilesInteractor by
+val Kosmos.largeTileSpanRepository by
     Kosmos.Fixture {
-        IconTilesInteractor(
-            defaultLargeTilesRepository,
-            currentTilesInteractor,
-            qsPreferencesInteractor,
-            largeTileSpanRepository,
-            FakeLogBuffer.Factory.create(),
-            applicationCoroutineScope,
-        )
+        LargeTileSpanRepository(applicationCoroutineScope, mainResources, configurationRepository)
     }
