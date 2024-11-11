@@ -1784,3 +1784,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "keyguard_transition_force_finish_on_screen_off"
+    namespace: "systemui"
+    description: "Forces KTF transitions to finish if the screen turns all the way off."
+    bug: "331636736"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
