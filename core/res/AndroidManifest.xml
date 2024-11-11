@@ -8335,6 +8335,26 @@
         android:protectionLevel="signature|knownSigner"
         android:knownCerts="@array/config_healthConnectMigrationKnownSigners" />
 
+    <!-- @hide @SystemApi Allows permitted apps to back up Health Connect data and settings.
+             <p>Protection level: signature|knownSigner
+         @FlaggedApi("android.permission.flags.health_connect_backup_restore_permission_enabled")
+    -->
+    <permission
+        android:name="android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS"
+        android:protectionLevel="signature|knownSigner"
+        android:knownCerts="@array/config_backupHealthConnectDataAndSettingsKnownSigners"
+        android:featureFlag="android.permission.flags.health_connect_backup_restore_permission_enabled" />
+
+    <!-- @hide @SystemApi Allows permitted apps to restore Health Connect data and settings.
+             <p>Protection level: signature|knownSigner
+         @FlaggedApi("android.permission.flags.health_connect_backup_restore_permission_enabled")
+    -->
+    <permission
+        android:name="android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS"
+        android:protectionLevel="signature|knownSigner"
+        android:knownCerts="@array/config_restoreHealthConnectDataAndSettingsKnownSigners"
+        android:featureFlag="android.permission.flags.health_connect_backup_restore_permission_enabled" />
+
     <!-- @SystemApi Allows an app to query apps in clone profile. The permission is
          bidirectional in nature, i.e. cloned apps would be able to query apps in root user.
          The permission is not meant for 3P apps as of now.
