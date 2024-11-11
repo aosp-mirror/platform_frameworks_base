@@ -387,6 +387,7 @@ stubs_defaults {
         "--error NoSettingsProvider",
         "--error UnhiddenSystemApi",
         "--error UnflaggedApi",
+        "--error FlaggedApiLiteral",
         "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*",
         // Disable CallbackInterface, as Java 8 default interface methods avoid the extensibility
         // issue interfaces had previously.
