@@ -574,7 +574,7 @@ class SwipeToSceneTest {
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
             SceneTransitionLayout(layoutState, Modifier.size(LayoutWidth, LayoutHeight)) {
-                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                scene(SceneA, userActions = mapOf(Swipe.Up to SceneB, Swipe.Down to SceneB)) {
                     Box(
                         Modifier.fillMaxSize()
                             // A scrollable that does not consume the scroll gesture
