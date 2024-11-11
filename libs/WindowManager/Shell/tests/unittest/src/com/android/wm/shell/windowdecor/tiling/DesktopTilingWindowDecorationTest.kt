@@ -328,6 +328,37 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     }
 
     @Test
+    fun taskTiled_broughtToFront_taskInfoNotUpdated_bringToFront() {
+        val task1 = createFreeformTask()
+        val task2 = createFreeformTask()
+        val task3 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+        whenever(desktopWindowDecoration.getLeash()).thenReturn(surfaceControlMock)
+        whenever(desktopRepository.isVisibleTask(any())).thenReturn(true)
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.RIGHT,
+            BOUNDS,
+        )
+        tilingDecoration.onAppTiled(
+            task2,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+
+        assertThat(tilingDecoration.moveTiledPairToFront(task3, isTaskFocused = true)).isFalse()
+        assertThat(tilingDecoration.moveTiledPairToFront(task1, isTaskFocused = true)).isTrue()
+        verify(transitions, times(1)).startTransition(eq(TRANSIT_TO_FRONT), any(), eq(null))
+    }
+
+    @Test
     fun taskTiledTasks_NotResized_BeforeTouchEndArrival() {
         // Setup
         val task1 = createFreeformTask()
