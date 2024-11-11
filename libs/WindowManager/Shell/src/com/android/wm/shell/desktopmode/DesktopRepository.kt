@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.content.Context
+import android.content.pm.UserInfo
 import android.graphics.Rect
 import android.graphics.Region
 import android.util.ArrayMap
@@ -30,11 +30,8 @@ import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
-import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
-import com.android.wm.shell.sysui.ShellInit
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -43,13 +40,10 @@ import kotlinx.coroutines.launch
 
 /** Tracks desktop data for Android Desktop Windowing. */
 class DesktopRepository (
-    private val context: Context,
-    shellInit: ShellInit,
     private val persistentRepository: DesktopPersistentRepository,
-    private val repositoryInitializer: DesktopRepositoryInitializer,
     @ShellMainThread private val mainCoroutineScope: CoroutineScope,
+    val userId: Int,
 ){
-
     /**
      * Task data tracked per desktop.
      *
@@ -115,16 +109,6 @@ class DesktopRepository (
         /** Gets [DesktopTaskData] for existing [displayId] or creates a new one. */
         fun getOrCreate(displayId: Int): DesktopTaskData =
             this[displayId] ?: DesktopTaskData().also { this[displayId] = it }
-    }
-
-    init {
-        if (DesktopModeStatus.canEnterDesktopMode(context)) {
-            shellInit.addInitCallback(::initRepoFromPersistentStorage, this)
-        }
-    }
-
-    private fun initRepoFromPersistentStorage() {
-        repositoryInitializer.initialize(this)
     }
 
     /** Adds [activeTasksListener] to be notified of updates to active tasks. */
@@ -276,6 +260,8 @@ class DesktopRepository (
      * the set of visible tasks on that display and notifies listeners.
      */
     fun updateTask(displayId: Int, taskId: Int, isVisible: Boolean) {
+        logD("updateTask taskId=%d, displayId=%d, isVisible=%b", taskId, displayId, isVisible)
+
         if (isVisible) {
             // If task is visible, remove it from any other display besides [displayId].
             removeVisibleTask(taskId, excludedDisplayId = displayId)
@@ -495,6 +481,7 @@ class DesktopRepository (
                     persistentRepository.addOrUpdateDesktop(
                         // Use display id as desktop id for now since only once desktop per display
                         // is supported.
+                        userId = userId,
                         desktopId = displayId,
                         visibleTasks = desktopTaskDataByDisplayIdCopy.visibleTasks,
                         minimizedTasks = desktopTaskDataByDisplayIdCopy.minimizedTasks,
@@ -529,6 +516,7 @@ class DesktopRepository (
             )
             pw.println("${innerPrefix}minimizedTasks=${data.minimizedTasks.toDumpString()}")
             pw.println("${innerPrefix}fullImmersiveTaskId=${data.fullImmersiveTaskId}")
+            pw.println("${innerPrefix}wallpaperActivityToken=${wallpaperActivityToken}")
         }
     }
 

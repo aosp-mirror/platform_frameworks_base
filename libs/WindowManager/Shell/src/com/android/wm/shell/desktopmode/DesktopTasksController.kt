@@ -159,7 +159,7 @@ class DesktopTasksController(
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val dragToDesktopTransitionHandler: DragToDesktopTransitionHandler,
     private val desktopImmersiveController: DesktopImmersiveController,
-    private val taskRepository: DesktopRepository,
+    private val userRepositories: DesktopUserRepositories,
     private val recentsTransitionHandler: RecentsTransitionHandler,
     private val multiInstanceHelper: MultiInstanceHelper,
     @ShellMainThread private val mainExecutor: ShellExecutor,
@@ -177,6 +177,7 @@ class DesktopTasksController(
     UserChangeListener {
 
     private val desktopMode: DesktopModeImpl
+    private var taskRepository: DesktopRepository
     private var visualIndicator: DesktopModeVisualIndicator? = null
     private var userId: Int
     private val desktopModeShellCommandHandler: DesktopModeShellCommandHandler =
@@ -229,6 +230,7 @@ class DesktopTasksController(
             shellInit.addInitCallback({ onInit() }, this)
         }
         userId = ActivityManager.getCurrentUser()
+        taskRepository = userRepositories.getProfile(userId)
     }
 
     private fun onInit() {
@@ -1239,7 +1241,7 @@ class DesktopTasksController(
                 /* requestCode= */ 0,
                 intent,
                 PendingIntent.FLAG_IMMUTABLE,
-                /* bundle= */ null,
+                /* options= */ null,
                 userHandle
             )
         wct.sendPendingIntent(pendingIntent, intent, options.toBundle())
@@ -1724,8 +1726,7 @@ class DesktopTasksController(
     /** Handle task closing by removing wallpaper activity if it's the last active task */
     private fun handleTaskClosing(task: RunningTaskInfo, transition: IBinder, requestType: Int): WindowContainerTransaction? {
         logV("handleTaskClosing")
-        if (!isDesktopModeShowing(task.displayId))
-            return null
+        if (!isDesktopModeShowing(task.displayId)) return null
 
         val wct = WindowContainerTransaction()
         performDesktopExitCleanupIfNeeded(task.taskId, wct)
@@ -1742,6 +1743,7 @@ class DesktopTasksController(
                 )
             )
         }
+
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(
                 task.displayId,
@@ -2327,7 +2329,9 @@ class DesktopTasksController(
 
     // TODO(b/366397912): Support full multi-user mode in Windowing.
     override fun onUserChanged(newUserId: Int, userContext: Context) {
+        logV("onUserChanged previousUserId=%d, newUserId=%d", userId, newUserId)
         userId = newUserId
+        taskRepository = userRepositories.getProfile(userId)
         desktopTilingDecorViewModel.onUserChange()
     }
 
@@ -2350,6 +2354,7 @@ class DesktopTasksController(
         val innerPrefix = "$prefix  "
         pw.println("${prefix}DesktopTasksController")
         DesktopModeStatus.dump(pw, innerPrefix, context)
+        pw.println("${prefix}userId=$userId")
         taskRepository.dump(pw, innerPrefix)
     }
 
@@ -2378,6 +2383,7 @@ class DesktopTasksController(
             displayId: Int,
             transitionSource: DesktopModeTransitionSource
         ) {
+            logV("moveFocusedTaskToDesktop")
             mainExecutor.execute {
                 this@DesktopTasksController.moveFocusedTaskToDesktop(displayId, transitionSource)
             }
@@ -2387,12 +2393,14 @@ class DesktopTasksController(
             displayId: Int,
             transitionSource: DesktopModeTransitionSource
         ) {
+            logV("moveFocusedTaskToFullscreen")
             mainExecutor.execute {
                 this@DesktopTasksController.enterFullscreen(displayId, transitionSource)
             }
         }
 
         override fun moveFocusedTaskToStageSplit(displayId: Int, leftOrTop: Boolean) {
+            logV("moveFocusedTaskToStageSplit")
             mainExecutor.execute { this@DesktopTasksController.enterSplit(displayId, leftOrTop) }
         }
     }

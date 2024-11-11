@@ -99,7 +99,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
-import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -206,14 +206,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
-    private final DesktopRepository mDesktopRepository;
+    private final DesktopUserRepositories mDesktopUserRepositories;
 
     public DesktopModeWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
-            DesktopRepository desktopRepository,
+            DesktopUserRepositories desktopUserRepositories,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -228,10 +228,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             MultiInstanceHelper multiInstanceHelper,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             DesktopModeEventLogger desktopModeEventLogger) {
-        this (context, userContext, displayController, splitScreenController, desktopRepository,
-                taskOrganizer, taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
-                appHeaderViewHolderFactory, rootTaskDisplayAreaOrganizer, genericLinksParser,
-                assistContentRequester,
+        this (context, userContext, displayController, splitScreenController,
+                desktopUserRepositories, taskOrganizer, taskInfo, taskSurface, handler,
+                bgExecutor, choreographer, syncQueue, appHeaderViewHolderFactory,
+                rootTaskDisplayAreaOrganizer, genericLinksParser, assistContentRequester,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new, new WindowManagerWrapper(
                         context.getSystemService(WindowManager.class)),
@@ -246,7 +246,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
-            DesktopRepository desktopRepository,
+            DesktopUserRepositories desktopUserRepositories,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -287,7 +287,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mMultiInstanceHelper = multiInstanceHelper;
         mWindowManagerWrapper = windowManagerWrapper;
         mWindowDecorCaptionHandleRepository = windowDecorCaptionHandleRepository;
-        mDesktopRepository = desktopRepository;
+        mDesktopUserRepositories = desktopUserRepositories;
     }
 
     /**
@@ -437,7 +437,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     public void updateDisabledResizingEdge(
             DragResizeWindowGeometry.DisabledEdge disabledResizingEdge, boolean shouldDelayUpdate) {
         mDisabledResizingEdge = disabledResizingEdge;
-        final boolean inFullImmersive = mDesktopRepository
+        final boolean inFullImmersive = mDesktopUserRepositories.getCurrent()
                 .isTaskInFullImmersiveState(mTaskInfo.taskId);
         if (shouldDelayUpdate) {
             return;
@@ -541,7 +541,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             mOpenByDefaultDialog.relayout(taskInfo);
         }
 
-        final boolean inFullImmersive = mDesktopRepository
+        final boolean inFullImmersive = mDesktopUserRepositories.getProfile(taskInfo.userId)
                 .isTaskInFullImmersiveState(taskInfo.taskId);
         updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
                 shouldSetTaskVisibilityPositionAndCrop, mIsStatusBarVisible,
@@ -1302,9 +1302,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mMaximizeMenu = mMaximizeMenuFactory.create(mSyncQueue, mRootTaskDisplayAreaOrganizer,
                 mDisplayController, mTaskInfo, mContext,
                 calculateMaximizeMenuPosition(menuWidth), mSurfaceControlTransactionSupplier);
+
         mMaximizeMenu.show(
                 /* isTaskInImmersiveMode= */ Flags.enableFullyImmersiveInDesktop()
-                        && mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId),
+                        && mDesktopUserRepositories.getProfile(mTaskInfo.userId)
+                            .isTaskInFullImmersiveState(mTaskInfo.taskId),
                 /* menuWidth= */ menuWidth,
                 /* showImmersiveOption= */ Flags.enableFullyImmersiveInDesktop()
                         && TaskInfoKt.getRequestingImmersive(mTaskInfo),
@@ -1394,7 +1396,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 && mMinimumInstancesFound;
         final boolean shouldShowChangeAspectRatioButton = HandleMenu.Companion
                 .shouldShowChangeAspectRatioButton(mTaskInfo);
-        final boolean inDesktopImmersive = mDesktopRepository
+        final boolean inDesktopImmersive = mDesktopUserRepositories.getProfile(mTaskInfo.userId)
                 .isTaskInFullImmersiveState(mTaskInfo.taskId);
         final boolean isBrowserApp = isBrowserApp();
         mHandleMenu = mHandleMenuFactory.create(
@@ -1474,7 +1476,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mDisplayController,
                     mRootTaskDisplayAreaOrganizer,
                     mContext,
-                    mDesktopRepository,
+                    mDesktopUserRepositories,
                     mSurfaceControlBuilderSupplier,
                     mSurfaceControlTransactionSupplier,
                     snapshotList,
@@ -1770,7 +1772,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void setAnimatingTaskResizeOrReposition(boolean animatingTaskResizeOrReposition) {
         if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) return;
         final boolean inFullImmersive =
-                mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId);
+                mDesktopUserRepositories.getProfile(mTaskInfo.userId)
+                        .isTaskInFullImmersiveState(mTaskInfo.taskId);
         asAppHeader(mWindowDecorViewHolder).bindData(new AppHeaderViewHolder.HeaderData(
                 mTaskInfo,
                 TaskInfoKt.getRequestingImmersive(mTaskInfo),
@@ -1798,8 +1801,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return !animatingTaskResizeOrReposition;
         }
         final boolean inImmersiveAndRequesting =
-                mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId)
-                        && TaskInfoKt.getRequestingImmersive(mTaskInfo);
+                mDesktopUserRepositories.getProfile(mTaskInfo.userId)
+                        .isTaskInFullImmersiveState(mTaskInfo.taskId)
+                    && TaskInfoKt.getRequestingImmersive(mTaskInfo);
         return !animatingTaskResizeOrReposition && !inImmersiveAndRequesting;
     }
 
@@ -1820,7 +1824,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 @NonNull Context userContext,
                 DisplayController displayController,
                 SplitScreenController splitScreenController,
-                DesktopRepository desktopRepository,
+                DesktopUserRepositories desktopUserRepositories,
                 ShellTaskOrganizer taskOrganizer,
                 ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
@@ -1840,7 +1844,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     userContext,
                     displayController,
                     splitScreenController,
-                    desktopRepository,
+                    desktopUserRepositories,
                     taskOrganizer,
                     taskInfo,
                     taskSurface,

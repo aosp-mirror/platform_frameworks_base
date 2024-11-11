@@ -50,6 +50,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isA
 import org.mockito.Mockito
@@ -75,6 +76,7 @@ class DesktopTasksTransitionObserverTest {
     private val transitions = mock<Transitions>()
     private val context = mock<Context>()
     private val shellTaskOrganizer = mock<ShellTaskOrganizer>()
+    private val userRepositories = mock<DesktopUserRepositories>()
     private val taskRepository = mock<DesktopRepository>()
     private val mixedHandler = mock<DesktopMixedTransitionHandler>()
 
@@ -86,9 +88,12 @@ class DesktopTasksTransitionObserverTest {
         whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(true)
         shellInit = spy(ShellInit(testExecutor))
 
+        whenever(userRepositories.current).thenReturn(taskRepository)
+        whenever(userRepositories.getProfile(anyInt())).thenReturn(taskRepository)
+
         transitionObserver =
             DesktopTasksTransitionObserver(
-                context, taskRepository, transitions, shellTaskOrganizer, mixedHandler, shellInit
+                context, userRepositories, transitions, shellTaskOrganizer, mixedHandler, shellInit
             )
     }
 

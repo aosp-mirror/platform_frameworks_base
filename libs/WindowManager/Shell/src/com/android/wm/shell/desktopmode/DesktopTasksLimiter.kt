@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.ActivityManager
 import android.content.Context
 import android.os.Handler
 import android.os.IBinder
@@ -31,6 +32,7 @@ import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
+import com.android.wm.shell.sysui.UserChangeListener;
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionObserver
 
@@ -43,7 +45,7 @@ import com.android.wm.shell.transition.Transitions.TransitionObserver
  */
 class DesktopTasksLimiter (
         transitions: Transitions,
-        private val taskRepository: DesktopRepository,
+        private val desktopUserRepositories: DesktopUserRepositories,
         private val shellTaskOrganizer: ShellTaskOrganizer,
         private val maxTasksLimit: Int,
         private val interactionJankMonitor: InteractionJankMonitor,
@@ -54,12 +56,15 @@ class DesktopTasksLimiter (
     @VisibleForTesting
     val leftoverMinimizedTasksRemover = LeftoverMinimizedTasksRemover()
 
+    private var userId: Int
+
     init {
         require(maxTasksLimit > 0) {
             "DesktopTasksLimiter: maxTasksLimit should be greater than 0. Current value: $maxTasksLimit."
         }
         transitions.registerObserver(minimizeTransitionObserver)
-        taskRepository.addActiveTaskListener(leftoverMinimizedTasksRemover)
+        userId = ActivityManager.getCurrentUser()
+        desktopUserRepositories.current.addActiveTaskListener(leftoverMinimizedTasksRemover)
         logV("Starting limiter with a maximum of %d tasks", maxTasksLimit)
     }
 
@@ -84,6 +89,7 @@ class DesktopTasksLimiter (
             startTransaction: SurfaceControl.Transaction,
             finishTransaction: SurfaceControl.Transaction
         ) {
+            val taskRepository = desktopUserRepositories.current
             val taskToMinimize = pendingTransitionTokensAndTasks.remove(transition) ?: return
             if (!taskRepository.isActiveTask(taskToMinimize.taskId)) return
             if (!isTaskReadyForMinimize(info, taskToMinimize)) {
@@ -114,6 +120,7 @@ class DesktopTasksLimiter (
         ): Boolean {
             val taskChange = info.changes.find { change ->
                 change.taskInfo?.taskId == taskDetails.taskId }
+            val taskRepository = desktopUserRepositories.current
             if (taskChange == null) return !taskRepository.isVisibleTask(taskDetails.taskId)
             return taskChange.mode == TRANSIT_TO_BACK
         }
@@ -151,7 +158,8 @@ class DesktopTasksLimiter (
     }
 
     @VisibleForTesting
-    inner class LeftoverMinimizedTasksRemover : DesktopRepository.ActiveTasksListener {
+    inner class LeftoverMinimizedTasksRemover
+            : DesktopRepository.ActiveTasksListener, UserChangeListener {
         override fun onActiveTasksChanged(displayId: Int) {
             // If back navigation is enabled, we shouldn't remove the leftover tasks
             if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
@@ -161,6 +169,7 @@ class DesktopTasksLimiter (
         }
 
         fun removeLeftoverMinimizedTasks(displayId: Int, wct: WindowContainerTransaction) {
+            val taskRepository = desktopUserRepositories.current
             if (taskRepository.getExpandedTasksOrdered(displayId).isNotEmpty()) return
             val remainingMinimizedTasks = taskRepository.getMinimizedTasks(displayId)
             if (remainingMinimizedTasks.isEmpty()) return
@@ -173,6 +182,15 @@ class DesktopTasksLimiter (
                 }
             }
         }
+
+        override fun onUserChanged(newUserId: Int, userContext: Context) {
+            // Removes active task listener for the previous repository
+            desktopUserRepositories.getProfile(userId).removeActiveTasksListener(this);
+
+            // Sets active listener for the current repository.
+            userId = newUserId
+            desktopUserRepositories.getProfile(newUserId).addActiveTaskListener(this);
+        }
     }
 
     /**
@@ -183,6 +201,7 @@ class DesktopTasksLimiter (
      */
     private fun minimizeTask(displayId: Int, taskId: Int) {
         logV("Minimize taskId=%d, displayId=%d", taskId, displayId)
+        val taskRepository = desktopUserRepositories.current
         taskRepository.minimizeTask(displayId, taskId)
     }
 
@@ -196,7 +215,7 @@ class DesktopTasksLimiter (
             newFrontTaskId: Int,
     ): Int? {
         logV("addAndGetMinimizeTaskChanges, newFrontTask=%d", newFrontTaskId)
-
+        val taskRepository = desktopUserRepositories.current
         val taskIdToMinimize =
             getTaskIdToMinimize(
                 taskRepository.getExpandedTasksOrdered(displayId),
