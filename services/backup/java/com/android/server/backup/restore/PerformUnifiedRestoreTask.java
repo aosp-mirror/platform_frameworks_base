@@ -814,7 +814,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // Good to go!  Set up and bind the agent...
         mAgent =
-                backupManagerService.bindToAgentSynchronous(
+                backupManagerService.getBackupAgentConnectionManager().bindToAgentSynchronous(
                         mCurrentPackage.applicationInfo,
                         ApplicationThreadConstants.BACKUP_MODE_RESTORE,
                         mBackupEligibilityRules.getBackupDestination());
@@ -1364,7 +1364,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
         // Clear this to avoid using the memory until reboot.
-        backupManagerService.clearNoRestrictedModePackages();
+        backupManagerService.getBackupAgentConnectionManager().clearNoRestrictedModePackages();
 
         // If we have a PM token, we must under all circumstances be sure to
         // handshake when we've finished.
@@ -1838,7 +1838,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             }
             packageNames = transport.getPackagesThatShouldNotUseRestrictedMode(packageNames,
                     RESTORE);
-            backupManagerService.setNoRestrictedModePackages(packageNames, RESTORE);
+            backupManagerService.getBackupAgentConnectionManager().setNoRestrictedModePackages(
+                    packageNames, RESTORE);
         } catch (RemoteException e) {
             Slog.i(TAG, "Failed to retrieve restricted mode packages from transport");
         }
