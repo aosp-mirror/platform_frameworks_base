@@ -391,3 +391,12 @@ flag{
     description: "Batch noteOperations on the client to reduce binder call volume"
     bug: "366013082"
 }
+
+flag {
+    name: "supervision_role_permission_update_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "supervision"
+    description: "This flag is used to enable all the remaining permissions required to the supervision role"
+    bug: "367333883"
+}
