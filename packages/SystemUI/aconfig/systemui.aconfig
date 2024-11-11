@@ -1329,16 +1329,6 @@ flag {
 }
 
 flag {
-  name: "notification_pulsing_fix"
-  namespace: "systemui"
-  description: "Allow showing new pulsing notifications when the device is already pulsing."
-  bug: "335560575"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "media_lockscreen_launch_animation"
     namespace : "systemui"
     description : "Enable the origin launch animation for UMO when opening on top of lockscreen."
