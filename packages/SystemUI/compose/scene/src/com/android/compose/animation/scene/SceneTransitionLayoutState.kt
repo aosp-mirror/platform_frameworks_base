@@ -614,8 +614,8 @@ internal class MutableSceneTransitionLayoutStateImpl(
         }
 
         val shouldSnap =
-            (isProgressCloseTo(0f) && transition.currentScene == transition.fromContent) ||
-                (isProgressCloseTo(1f) && transition.currentScene == transition.toContent)
+            (isProgressCloseTo(0f) && transition.isFromCurrentContent()) ||
+                (isProgressCloseTo(1f) && transition.isToCurrentContent())
         return if (shouldSnap) {
             finishAllTransitions()
             true

@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
@@ -327,6 +328,25 @@ class SceneTransitionLayoutStateTest {
     }
 
     @Test
+    fun snapToIdleIfClose_snapToStart_overlays() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
+        state.startTransitionImmediately(
+            animationScope = backgroundScope,
+            transition(SceneA, OverlayA, isEffectivelyShown = { false }, progress = { 0.2f }),
+        )
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
+        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Go to the initial scene if it is close to 0.
+        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
+        assertThat(state.isTransitioning()).isFalse()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneA))
+    }
+
+    @Test
     fun snapToIdleIfClose_snapToEnd() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
         state.startTransitionImmediately(
@@ -343,6 +363,25 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
         assertThat(state.isTransitioning()).isFalse()
         assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneB))
+    }
+
+    @Test
+    fun snapToIdleIfClose_snapToEnd_overlays() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
+        state.startTransitionImmediately(
+            animationScope = backgroundScope,
+            transition(SceneA, OverlayA, isEffectivelyShown = { true }, progress = { 0.8f }),
+        )
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
+        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Go to the final scene if it is close to 1.
+        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
+        assertThat(state.isTransitioning()).isFalse()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneA, setOf(OverlayA)))
     }
 
     @Test
