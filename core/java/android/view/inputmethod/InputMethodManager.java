@@ -5174,7 +5174,7 @@ public final class InputMethodManager {
         // system can verify the consistency between the uid of this process and package name passed
         // from here. See comment of Context#getOpPackageName() for details.
         editorInfo.packageName = servedView.getContext().getOpPackageName();
-        editorInfo.autofillId = servedView.getAutofillId();
+        editorInfo.setAutofillId(servedView.getAutofillId());
         editorInfo.fieldId = servedView.getId();
         final InputConnection ic = servedView.onCreateInputConnection(editorInfo);
         if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
@@ -5183,7 +5183,7 @@ public final class InputMethodManager {
         // This ensures that even disconnected EditorInfos have well-defined attributes,
         // making them consistently and straightforwardly comparable.
         if (ic == null) {
-            editorInfo.autofillId = AutofillId.NO_AUTOFILL_ID;
+            editorInfo.setAutofillId(AutofillId.NO_AUTOFILL_ID);
             editorInfo.fieldId = 0;
         }
         return new Pair<>(ic, editorInfo);

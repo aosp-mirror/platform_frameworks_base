@@ -24,6 +24,7 @@ import static android.view.inputmethod.EditorInfoProto.PACKAGE_NAME;
 import static android.view.inputmethod.EditorInfoProto.PRIVATE_IME_OPTIONS;
 import static android.view.inputmethod.EditorInfoProto.TARGET_INPUT_METHOD_USER_ID;
 import static android.view.inputmethod.Flags.FLAG_EDITORINFO_HANDWRITING_ENABLED;
+import static android.view.inputmethod.Flags.FLAG_PUBLIC_AUTOFILL_ID_IN_EDITORINFO;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -470,12 +471,10 @@ public class EditorInfo implements InputType, Parcelable {
     public String packageName;
 
     /**
-     * Autofill Id for the field that's currently on focus.
-     *
-     * <p> Marked as hide since it's only used by framework.</p>
-     * @hide
+     * Autofill Id for the field that's currently on focus. See link {@link AutofillId} for more
+     * details. It is set by {@link View#getAutofillId()}
      */
-    public AutofillId autofillId;
+    private AutofillId autofillId;
 
     /**
      * Identifier for the editor's field.  This is optional, and may be
@@ -1197,6 +1196,28 @@ public class EditorInfo implements InputType, Parcelable {
      */
     public void setInitialToolType(@ToolType int toolType) {
         mInitialToolType = toolType;
+    }
+
+    /**
+     * Returns the {@link AutofillId} of the view that this {@link EditorInfo} is associated with.
+     * The value is filled in with the result of {@link android.view.View#getAutofillId()
+     * View.getAutofillId()} on the view that is being edited.
+     *
+     * Note: For virtual view(e.g. Compose or Webview), default behavior is the autofillId is the id
+     * of the container view, unless the virtual view provider sets the virtual id when the
+     * InputMethodManager calls {@link android.view.View#onCreateInputConnection()} on the container
+     * view.
+     */
+    @FlaggedApi(FLAG_PUBLIC_AUTOFILL_ID_IN_EDITORINFO)
+    @Nullable
+    public AutofillId getAutofillId() {
+        return autofillId;
+    }
+
+    /** Sets the {@link AutofillId} of the view that this {@link EditorInfo} is associated with. */
+    @FlaggedApi(FLAG_PUBLIC_AUTOFILL_ID_IN_EDITORINFO)
+    public void setAutofillId(@Nullable AutofillId autofillId) {
+        this.autofillId = autofillId;
     }
 
     /**

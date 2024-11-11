@@ -3437,7 +3437,7 @@ public class InputMethodService extends AbstractInputMethodService {
         initialize();
         mInlineSuggestionSessionController.notifyOnStartInput(
                 editorInfo == null ? null : editorInfo.packageName,
-                editorInfo == null ? null : editorInfo.autofillId);
+                editorInfo == null ? null : editorInfo.getAutofillId());
         if (DEBUG) Log.v(TAG, "CALL: onStartInput");
         onStartInput(editorInfo, restarting);
         if (mDecorViewVisible) {

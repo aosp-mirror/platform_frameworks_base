@@ -79,7 +79,7 @@ public class EditorInfoTest {
         TEST_EDITOR_INFO.label = "testLabel";
         TEST_EDITOR_INFO.packageName = "android.view.inputmethod";
         TEST_EDITOR_INFO.fieldId = 0;
-        TEST_EDITOR_INFO.autofillId = AutofillId.NO_AUTOFILL_ID;
+        TEST_EDITOR_INFO.setAutofillId(AutofillId.NO_AUTOFILL_ID);
         TEST_EDITOR_INFO.fieldName = "testField";
         TEST_EDITOR_INFO.extras = new Bundle();
         TEST_EDITOR_INFO.extras.putString("testKey", "testValue");
@@ -531,7 +531,7 @@ public class EditorInfoTest {
             info.setStylusHandwritingEnabled(true);
         }
         info.packageName = "android.view.inputmethod";
-        info.autofillId = new AutofillId(123);
+        info.setAutofillId(new AutofillId(123));
         info.fieldId = 456;
         info.fieldName = "testField";
         info.extras = new Bundle();
@@ -597,7 +597,7 @@ public class EditorInfoTest {
     @Test
     public void testKindofEqualsComparesAutofillId() {
         final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
-        infoCopy.autofillId = new AutofillId(42);
+        infoCopy.setAutofillId(new AutofillId(42));
         assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
     }
 
