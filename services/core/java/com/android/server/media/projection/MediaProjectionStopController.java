@@ -28,6 +28,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
+import android.telephony.TelephonyCallback;
+import android.telephony.TelephonyManager;
 import android.util.Slog;
 import android.view.Display;
 
@@ -44,17 +47,26 @@ public class MediaProjectionStopController {
     private static final String TAG = "MediaProjectionStopController";
     @VisibleForTesting
     static final int STOP_REASON_KEYGUARD = 1;
+    @VisibleForTesting
+    static final int STOP_REASON_CALL_END = 2;
 
+    private final TelephonyCallback mTelephonyCallback = new ProjectionTelephonyCallback();
     private final Consumer<Integer> mStopReasonConsumer;
     private final KeyguardManager mKeyguardManager;
+    private final TelecomManager mTelecomManager;
+    private final TelephonyManager mTelephonyManager;
     private final AppOpsManager mAppOpsManager;
     private final PackageManager mPackageManager;
     private final RoleManager mRoleManager;
     private final ContentResolver mContentResolver;
 
+    private boolean mIsInCall;
+
     public MediaProjectionStopController(Context context, Consumer<Integer> stopReasonConsumer) {
         mStopReasonConsumer = stopReasonConsumer;
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
+        mTelecomManager = context.getSystemService(TelecomManager.class);
+        mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
         mPackageManager = context.getPackageManager();
         mRoleManager = context.getSystemService(RoleManager.class);
@@ -69,6 +81,11 @@ public class MediaProjectionStopController {
         try {
             mKeyguardManager.addKeyguardLockedStateListener(context.getMainExecutor(),
                     this::onKeyguardLockedStateChanged);
+            if (com.android.media.projection.flags.Flags.stopMediaProjectionOnCallEnd()) {
+                callStateChanged();
+                mTelephonyManager.registerTelephonyCallback(context.getMainExecutor(),
+                        mTelephonyCallback);
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -165,6 +182,21 @@ public class MediaProjectionStopController {
         mStopReasonConsumer.accept(STOP_REASON_KEYGUARD);
     }
 
+    @VisibleForTesting
+    void callStateChanged() {
+        if (!com.android.media.projection.flags.Flags.stopMediaProjectionOnCallEnd()) {
+            return;
+        }
+        boolean isInCall = mTelecomManager.isInCall();
+        if (isInCall == mIsInCall) {
+            return;
+        }
+        if (mIsInCall && !isInCall) {
+            mStopReasonConsumer.accept(STOP_REASON_CALL_END);
+        }
+        mIsInCall = isInCall;
+    }
+
     /**
      * @return a String representation of the stop reason interrupting MediaProjection.
      */
@@ -173,7 +205,18 @@ public class MediaProjectionStopController {
             case STOP_REASON_KEYGUARD -> {
                 return "STOP_REASON_KEYGUARD";
             }
+            case STOP_REASON_CALL_END -> {
+                return "STOP_REASON_CALL_END";
+            }
         }
         return "";
+    }
+
+    private final class ProjectionTelephonyCallback extends TelephonyCallback implements
+            TelephonyCallback.CallStateListener {
+        @Override
+        public void onCallStateChanged(int state) {
+            callStateChanged();
+        }
     }
 }

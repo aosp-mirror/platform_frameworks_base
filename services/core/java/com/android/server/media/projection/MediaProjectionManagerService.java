@@ -170,7 +170,6 @@ public final class MediaProjectionManagerService extends SystemService
         mMediaProjectionMetricsLogger = injector.mediaProjectionMetricsLogger(context);
         mMediaProjectionStopController = new MediaProjectionStopController(context,
                 this::maybeStopMediaProjection);
-        mMediaProjectionStopController.startTrackingStopReasons(context);
         Watchdog.getInstance().addMonitor(this);
     }
 
@@ -248,6 +247,8 @@ public final class MediaProjectionManagerService extends SystemService
                 }
             });
         }
+
+        mMediaProjectionStopController.startTrackingStopReasons(mContext);
     }
 
     @Override

@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -55,6 +56,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
 import android.testing.TestableContext;
 import android.util.ArraySet;
 
@@ -119,6 +121,8 @@ public class MediaProjectionStopControllerTest {
     private PackageManager mPackageManager;
     @Mock
     private KeyguardManager mKeyguardManager;
+    @Mock
+    private TelecomManager mTelecomManager;
 
     private AppOpsManager mAppOpsManager;
     @Mock
@@ -138,6 +142,7 @@ public class MediaProjectionStopControllerTest {
         mAppOpsManager = mockAppOpsManager();
         mContext.addMockSystemService(AppOpsManager.class, mAppOpsManager);
         mContext.addMockSystemService(KeyguardManager.class, mKeyguardManager);
+        mContext.addMockSystemService(TelecomManager.class, mTelecomManager);
         mContext.setMockPackageManager(mPackageManager);
 
         mStopController = new MediaProjectionStopController(mContext, mStopConsumer);
@@ -301,6 +306,66 @@ public class MediaProjectionStopControllerTest {
         mStopController.onKeyguardLockedStateChanged(true);
 
         verify(mStopConsumer).accept(MediaProjectionStopController.STOP_REASON_KEYGUARD);
+    }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_STOP_MEDIA_PROJECTION_ON_CALL_END)
+    public void testCallStateChanged_callStarts() {
+        // Setup call state to false
+        when(mTelecomManager.isInCall()).thenReturn(false);
+        mStopController.callStateChanged();
+
+        clearInvocations(mStopConsumer);
+
+        when(mTelecomManager.isInCall()).thenReturn(true);
+        mStopController.callStateChanged();
+
+        verify(mStopConsumer, never()).accept(anyInt());
+    }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_STOP_MEDIA_PROJECTION_ON_CALL_END)
+    public void testCallStateChanged_remainsInCall() {
+        // Setup call state to false
+        when(mTelecomManager.isInCall()).thenReturn(true);
+        mStopController.callStateChanged();
+
+        clearInvocations(mStopConsumer);
+
+        when(mTelecomManager.isInCall()).thenReturn(true);
+        mStopController.callStateChanged();
+
+        verify(mStopConsumer, never()).accept(anyInt());
+    }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_STOP_MEDIA_PROJECTION_ON_CALL_END)
+    public void testCallStateChanged_remainsNoCall() {
+        // Setup call state to false
+        when(mTelecomManager.isInCall()).thenReturn(false);
+        mStopController.callStateChanged();
+
+        clearInvocations(mStopConsumer);
+
+        when(mTelecomManager.isInCall()).thenReturn(false);
+        mStopController.callStateChanged();
+
+        verify(mStopConsumer, never()).accept(anyInt());
+    }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_STOP_MEDIA_PROJECTION_ON_CALL_END)
+    public void testCallStateChanged_callEnds() {
+        // Setup call state to false
+        when(mTelecomManager.isInCall()).thenReturn(true);
+        mStopController.callStateChanged();
+
+        clearInvocations(mStopConsumer);
+
+        when(mTelecomManager.isInCall()).thenReturn(false);
+        mStopController.callStateChanged();
+
+        verify(mStopConsumer).accept(MediaProjectionStopController.STOP_REASON_CALL_END);
     }
 
     private MediaProjectionManagerService.MediaProjection createMediaProjection()
