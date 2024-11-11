@@ -187,11 +187,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // Simple flag to enable/disable debug logging.
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
-    // String constants for XML schema migration related to changes in keyguard package.
-    private static final String OLD_KEYGUARD_HOST_PACKAGE = "android";
-    private static final String NEW_KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
-    private static final int KEYGUARD_HOST_ID = 0x4b455947;
-
     // Filename for app widgets state persisted on disk.
     private static final String STATE_FILENAME = "appwidgets.xml";
 
@@ -211,6 +206,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static final int UNKNOWN_USER_ID = -10;
 
     // Version of XML schema for app widgets. Bump if the stored widgets need to be upgraded.
+    // Version 1 introduced in 2014 - Android 5.0
     private static final int CURRENT_VERSION = 1;
 
     // Every widget update request is associated which an increasing sequence number. This is
@@ -4428,19 +4424,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         int version = fromVersion;
 
-        // Update 1: keyguard moved from package "android" to "com.android.keyguard"
+        // Update 1: From version 0 to 1, was used from Android 4 to Android 5. It updated the
+        // location of the keyguard widget database. No modern device will have db version 0.
         if (version == 0) {
-            HostId oldHostId = new HostId(Process.myUid(),
-                    KEYGUARD_HOST_ID, OLD_KEYGUARD_HOST_PACKAGE);
-
-            Host host = lookupHostLocked(oldHostId);
-            if (host != null) {
-                final int uid = getUidForPackage(NEW_KEYGUARD_HOST_PACKAGE,
-                        UserHandle.USER_SYSTEM); // Keyguard explicitly runs as the system user
-                if (uid >= 0) {
-                    host.id = new HostId(uid, KEYGUARD_HOST_ID, NEW_KEYGUARD_HOST_PACKAGE);
-                }
-            }
+            Slog.e(TAG, "Found widget database with version 0, this should not be possible,"
+                    + " forcing upgrade to version 1");
 
             version = 1;
         }
@@ -4450,25 +4438,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private static File getStateFile(int userId) {
-        return new File(Environment.getUserSystemDirectory(userId), STATE_FILENAME);
-    }
-
     private static AtomicFile getSavedStateFile(int userId) {
-        File dir = Environment.getUserSystemDirectory(userId);
-        File settingsFile = getStateFile(userId);
-        // USER_SYSTEM is explicit here, the old file only ever existed for user 0.
-        if (!settingsFile.exists() && userId == UserHandle.USER_SYSTEM) {
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            // Migrate old data
-            File oldFile = new File("/data/system/" + STATE_FILENAME);
-            // Method doesn't throw an exception on failure. Ignore any errors
-            // in moving the file (like non-existence)
-            oldFile.renameTo(settingsFile);
-        }
-        return new AtomicFile(settingsFile);
+        return new AtomicFile(new File(Environment.getUserSystemDirectory(userId), STATE_FILENAME));
     }
 
     void onUserStopped(int userId) {
