@@ -22,11 +22,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
-import static android.content.ClipDescription.MIMETYPE_TEXT_INTENT;
-
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.wm.shell.draganddrop.DragTestUtils.createAppClipData;
+import static com.android.wm.shell.draganddrop.DragTestUtils.createIntentClipData;
+import static com.android.wm.shell.draganddrop.DragTestUtils.createTaskInfo;
+import static com.android.wm.shell.draganddrop.DragTestUtils.setClipDataResizeable;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -55,11 +56,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ClipData;
-import android.content.ClipDescription;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
@@ -176,72 +173,9 @@ public class SplitDragPolicyTest extends ShellTestCase {
         mMockitoSession.finishMocking();
     }
 
-    /**
-     * Creates an app-based clip data that is by default resizeable.
-     */
-    private ClipData createAppClipData(String mimeType) {
-        ClipDescription clipDescription = new ClipDescription(mimeType, new String[] { mimeType });
-        Intent i = new Intent();
-        switch (mimeType) {
-            case MIMETYPE_APPLICATION_SHORTCUT:
-                i.putExtra(Intent.EXTRA_PACKAGE_NAME, "package");
-                i.putExtra(Intent.EXTRA_SHORTCUT_ID, "shortcut_id");
-                break;
-            case MIMETYPE_APPLICATION_TASK:
-                i.putExtra(Intent.EXTRA_TASK_ID, 12345);
-                break;
-            case MIMETYPE_APPLICATION_ACTIVITY:
-                final PendingIntent pi = mock(PendingIntent.class);
-                doReturn(android.os.Process.myUserHandle()).when(pi).getCreatorUserHandle();
-                i.putExtra(ClipDescription.EXTRA_PENDING_INTENT, pi);
-                break;
-        }
-        i.putExtra(Intent.EXTRA_USER, android.os.Process.myUserHandle());
-        ClipData.Item item = new ClipData.Item(i);
-        item.setActivityInfo(new ActivityInfo());
-        ClipData data = new ClipData(clipDescription, item);
-        setClipDataResizeable(data, true);
-        return data;
-    }
-
-    /**
-     * Creates an intent-based clip data that is by default resizeable.
-     */
-    private ClipData createIntentClipData(PendingIntent intent) {
-        ClipDescription clipDescription = new ClipDescription("Intent",
-                new String[] { MIMETYPE_TEXT_INTENT });
-        ClipData.Item item = new ClipData.Item.Builder()
-                .setIntentSender(intent.getIntentSender())
-                .build();
-        ClipData data = new ClipData(clipDescription, item);
-        return data;
-    }
-
-    private ActivityManager.RunningTaskInfo createTaskInfo(int winMode, int actType) {
-        ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
-        info.configuration.windowConfiguration.setActivityType(actType);
-        info.configuration.windowConfiguration.setWindowingMode(winMode);
-        info.isResizeable = true;
-        info.baseActivity = new ComponentName(getInstrumentation().getContext(),
-                ".ActivityWithMode" + winMode);
-        info.baseIntent = new Intent();
-        info.baseIntent.setComponent(info.baseActivity);
-        ActivityInfo activityInfo = new ActivityInfo();
-        activityInfo.packageName = info.baseActivity.getPackageName();
-        activityInfo.name = info.baseActivity.getClassName();
-        info.topActivityInfo = activityInfo;
-        return info;
-    }
-
     private void setRunningTask(ActivityManager.RunningTaskInfo task) {
         doReturn(Collections.singletonList(task)).when(mActivityTaskManager)
                 .getTasks(anyInt(), anyBoolean());
-    }
-
-    private void setClipDataResizeable(ClipData data, boolean resizeable) {
-        data.getItemAt(0).getActivityInfo().resizeMode = resizeable
-                ? ActivityInfo.RESIZE_MODE_RESIZEABLE
-                : ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
     }
 
     @Test
