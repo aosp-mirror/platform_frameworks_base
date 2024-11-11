@@ -2124,6 +2124,12 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Display.SCREEN_RESOLUTION_MODE);
         p.end(displayToken);
 
+        final long doubleTapPowerButtonToken = p.start(SecureSettingsProto.DOUBLE_TAP_POWER_BUTTON);
+        dumpSetting(s, p,
+                Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED,
+                SecureSettingsProto.DoubleTapPowerButton.GESTURE_ENABLED);
+        p.end(doubleTapPowerButtonToken);
+
         final long dozeToken = p.start(SecureSettingsProto.DOZE);
         dumpSetting(s, p,
                 Settings.Secure.DOZE_ENABLED,
