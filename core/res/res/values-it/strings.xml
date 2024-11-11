@@ -613,6 +613,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Consenti all\'app di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Interazione con dispositivi Wi-Fi vicini"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Consente all\'app di trasmettere annunci e connettersi a dispositivi Wi‑Fi vicini e di stabilirne la posizione relativa."</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informazioni del servizio di pagamento NFC preferito"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Consente all\'app di recuperare informazioni del servizio di pagamento NFC preferito, quali destinazione della route e identificatori applicazione registrati."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controllo Near Field Communication"</string>
@@ -2489,7 +2493,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Il tuo modello del volto non può più essere riconosciuto. Riconfigura lo Sblocco con il Volto."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configura"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Non ora"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Sveglia per: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Sveglia per <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Cambia utente"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Disattiva audio"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Tocca per disattivare l\'audio"</string>
