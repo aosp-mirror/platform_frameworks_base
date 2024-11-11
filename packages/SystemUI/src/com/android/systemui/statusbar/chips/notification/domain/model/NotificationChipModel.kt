@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.notification.ui.viewmodel
+package com.android.systemui.statusbar.chips.notification.domain.model
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
+import com.android.systemui.statusbar.StatusBarIconView
 
-val Kosmos.notifChipsViewModel: NotifChipsViewModel by
-    Kosmos.Fixture {
-        NotifChipsViewModel(applicationCoroutineScope, statusBarNotificationChipsInteractor)
-    }
+/** Modeling all the data needed to render a status bar notification chip. */
+data class NotificationChipModel(val key: String, val statusBarChipIconView: StatusBarIconView)
