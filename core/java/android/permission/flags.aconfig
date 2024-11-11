@@ -474,3 +474,12 @@ flag {
     description: "Enable cross-user roles platform API"
     bug: "367732307"
 }
+
+flag {
+    name: "rate_limit_batched_note_op_async_callbacks_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Rate limit async noteOp callbacks for batched noteOperation binder call"
+    bug: "366013082"
+}
