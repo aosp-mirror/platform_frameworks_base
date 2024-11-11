@@ -746,8 +746,8 @@ public class WallpaperCropper {
                     final ImageDecoder.Source srcData =
                             ImageDecoder.createSource(wallpaper.getWallpaperFile());
                     final int finalScale = scale;
-                    final int rescaledBitmapWidth = (int) (0.5f + bitmapSize.x / sampleSize);
-                    final int rescaledBitmapHeight = (int) (0.5f + bitmapSize.y / sampleSize);
+                    final int rescaledBitmapWidth = (int) Math.ceil(bitmapSize.x / sampleSize);
+                    final int rescaledBitmapHeight = (int) Math.ceil(bitmapSize.y / sampleSize);
                     Bitmap cropped = ImageDecoder.decodeBitmap(srcData, (decoder, info, src) -> {
                         if (!multiCrop()) decoder.setTargetSampleSize(finalScale);
                         if (multiCrop()) {
