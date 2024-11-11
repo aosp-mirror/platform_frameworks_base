@@ -23,6 +23,7 @@ import android.hardware.face.FaceManager
 import android.os.PowerManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.provider.Settings
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -59,6 +60,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.haptics.msdl.fakeMSDLPlayer
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyevent.data.repository.fakeKeyEventRepository
+import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
@@ -106,6 +108,7 @@ import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvision
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -1339,7 +1342,14 @@ class SceneContainerStartableTest : SysuiTestCase() {
             // Putting the device to sleep to lock it again, which shouldn't report another
             // successful unlock.
             kosmos.powerInteractor.setAsleepForTest()
-            runCurrent()
+            advanceTimeBy(
+                kosmos.userAwareSecureSettingsRepository
+                    .getInt(
+                        Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                        KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT,
+                    )
+                    .toLong()
+            )
             // Verify that the startable changed the scene to Lockscreen because the device locked
             // following the sleep.
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)

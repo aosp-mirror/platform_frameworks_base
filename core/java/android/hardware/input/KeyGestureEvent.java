@@ -119,6 +119,8 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE = 71;
     public static final int KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN = 72;
     public static final int KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT = 73;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION = 74;
+    public static final int KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK = 75;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -207,6 +209,8 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
             KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN,
             KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT,
+            KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION,
+            KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -781,6 +785,10 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN";
             case KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT:
                 return "KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT";
+            case KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION:
+                return "KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION";
+            case KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK:
+                return "KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK";
             default:
                 return Integer.toHexString(value);
         }

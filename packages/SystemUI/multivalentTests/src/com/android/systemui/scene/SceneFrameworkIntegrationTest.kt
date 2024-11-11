@@ -18,6 +18,7 @@
 
 package com.android.systemui.scene
 
+import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -42,6 +43,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenUserActionsViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.collectLastValue
@@ -64,6 +66,7 @@ import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.android.telecom.mockTelecomManager
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -72,6 +75,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
@@ -541,7 +545,14 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .isTrue()
 
         powerInteractor.setAsleepForTest()
-        testScope.runCurrent()
+        testScope.advanceTimeBy(
+            kosmos.userAwareSecureSettingsRepository
+                .getInt(
+                    Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                    KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT,
+                )
+                .toLong()
+        )
 
         powerInteractor.setAwakeForTest()
         testScope.runCurrent()
@@ -631,14 +642,25 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     /** Changes device wakefulness state from awake to asleep, going through intermediary states. */
-    private fun Kosmos.putDeviceToSleep() {
+    private suspend fun Kosmos.putDeviceToSleep(waitForLock: Boolean = true) {
         val wakefulnessModel = powerInteractor.detailedWakefulness.value
         assertWithMessage("Cannot put device to sleep as it's already asleep!")
             .that(wakefulnessModel.isAwake())
             .isTrue()
 
         powerInteractor.setAsleepForTest()
-        testScope.runCurrent()
+        if (waitForLock) {
+            testScope.advanceTimeBy(
+                kosmos.userAwareSecureSettingsRepository
+                    .getInt(
+                        Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                        KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT,
+                    )
+                    .toLong()
+            )
+        } else {
+            testScope.runCurrent()
+        }
     }
 
     /** Emulates the dismissal of the IME (soft keyboard). */
