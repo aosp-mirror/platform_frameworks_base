@@ -558,6 +558,13 @@ flag {
 }
 
 flag {
+   name: "lockscreen_custom_clocks"
+   namespace: "systemui"
+   description: "Enable lockscreen custom clocks"
+   bug: "378486437"
+}
+
+flag {
    name: "faster_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"

@@ -430,7 +430,9 @@ constructor(
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_CLOCKS_ENABLED,
-                value = featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
+                value =
+                    com.android.systemui.Flags.lockscreenCustomClocks() ||
+                        featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_FULLSCREEN_PREVIEW,
