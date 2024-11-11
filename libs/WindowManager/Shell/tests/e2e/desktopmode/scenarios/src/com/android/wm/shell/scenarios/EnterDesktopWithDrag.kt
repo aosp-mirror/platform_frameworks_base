@@ -49,7 +49,7 @@ constructor(
 
     @Test
     open fun enterDesktopWithDrag() {
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopModeWithDrag(wmHelper, device)
     }
 
     @After
