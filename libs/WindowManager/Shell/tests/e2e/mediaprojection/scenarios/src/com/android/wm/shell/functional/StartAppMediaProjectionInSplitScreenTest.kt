@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.utils
+package com.android.wm.shell.functional
 
-object MediaProjectionUtils {
-    // Request code for the normal media projection request
-    const val REQUEST_CODE_NORMAL: Int = 11
-    // Request code for the media projection request which will include an extra intent to open
-    // home screen before starting requested app
-    const val REQUEST_CODE_EXTRA_INTENT: Int = 12
-    const val MSG_START_FOREGROUND_DONE: Int = 1
-    const val MSG_SERVICE_DESTROYED: Int = 2
-    const val EXTRA_MESSENGER: String = "messenger"
-}
+import android.platform.test.annotations.Postsubmit
+import com.android.wm.shell.scenarios.StartAppMediaProjectionInSplitScreen
+import org.junit.runner.RunWith
+import org.junit.runners.BlockJUnit4ClassRunner
+
+/* Functional test for [StartAppMediaProjectionInSplitScreen]. */
+@RunWith(BlockJUnit4ClassRunner::class)
+@Postsubmit
+class StartAppMediaProjectionInSplitScreenTest() : StartAppMediaProjectionInSplitScreen()
