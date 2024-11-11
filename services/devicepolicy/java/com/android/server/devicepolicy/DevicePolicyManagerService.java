@@ -5563,13 +5563,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 caller.getUserId());
         Preconditions.checkArgument(!calledOnParent || isProfileOwner(caller));
 
-        ActiveAdmin activeAdmin = admin.getActiveAdmin();
+        final ActiveAdmin activeAdmin;
+        if (Flags.activeAdminCleanup()) {
+            if (admin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+                synchronized (getLockObject()) {
+                    activeAdmin = getActiveAdminUncheckedLocked(
+                            admin.getComponentName(), admin.getUserId());
+                }
+            } else {
+                activeAdmin = null;
+            }
+        } else {
+            activeAdmin = admin.getActiveAdmin();
+        }
 
         // We require the caller to explicitly clear any password quality requirements set
         // on the parent DPM instance, to avoid the case where password requirements are
         // specified in the form of quality on the parent but complexity on the profile
         // itself.
-        if (!calledOnParent) {
+        if (activeAdmin != null && !calledOnParent) {
             final boolean hasQualityRequirementsOnParent = activeAdmin.hasParentActiveAdmin()
                     && activeAdmin.getParentActiveAdmin().mPasswordPolicy.quality
                     != PASSWORD_QUALITY_UNSPECIFIED;
@@ -5593,19 +5605,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         mInjector.binderWithCleanCallingIdentity(() -> {
-            // Reset the password policy.
-            if (calledOnParent) {
-                activeAdmin.getParentActiveAdmin().mPasswordPolicy = new PasswordPolicy();
-            } else {
-                activeAdmin.mPasswordPolicy = new PasswordPolicy();
+            if (activeAdmin != null) {
+                // Reset the password policy.
+                if (calledOnParent) {
+                    activeAdmin.getParentActiveAdmin().mPasswordPolicy = new PasswordPolicy();
+                } else {
+                    activeAdmin.mPasswordPolicy = new PasswordPolicy();
+                }
+                updatePasswordQualityCacheForUserGroup(caller.getUserId());
             }
+
             synchronized (getLockObject()) {
                 updatePasswordValidityCheckpointLocked(caller.getUserId(), calledOnParent);
             }
-            updatePasswordQualityCacheForUserGroup(caller.getUserId());
             saveSettingsLocked(caller.getUserId());
         });
-
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_COMPLEXITY)
@@ -6287,28 +6301,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int callingUserId = caller.getUserId();
         ComponentName adminComponent = null;
         synchronized (getLockObject()) {
-            ActiveAdmin admin;
             // Make sure the caller has any active admin with the right policy or
             // the required permission.
             if (Flags.lockNowCoexistence()) {
-                admin = enforcePermissionsAndGetEnforcingAdmin(
+                EnforcingAdmin enforcingAdmin = enforcePermissionsAndGetEnforcingAdmin(
                         /* admin= */ null,
                         /* permissions= */ new String[]{MANAGE_DEVICE_POLICY_LOCK, LOCK_DEVICE},
                         /* deviceAdminPolicy= */ USES_POLICY_FORCE_LOCK,
                         caller.getPackageName(),
                         getAffectedUser(parent)
-                 ).getActiveAdmin();
+                );
+                if (Flags.activeAdminCleanup()) {
+                    adminComponent = enforcingAdmin.getComponentName();
+                } else {
+                    ActiveAdmin admin = enforcingAdmin.getActiveAdmin();
+                    adminComponent = admin == null ? null : admin.info.getComponent();
+                }
             } else {
-                admin = getActiveAdminOrCheckPermissionForCallerLocked(
+                ActiveAdmin admin = getActiveAdminOrCheckPermissionForCallerLocked(
                         null,
                         DeviceAdminInfo.USES_POLICY_FORCE_LOCK,
                         parent,
                         LOCK_DEVICE);
+                adminComponent = admin == null ? null : admin.info.getComponent();
             }
             checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_LOCK_NOW);
             final long ident = mInjector.binderClearCallingIdentity();
             try {
-                adminComponent = admin == null ? null : admin.info.getComponent();
                 if (adminComponent != null) {
                     // For Profile Owners only, callers with only permission not allowed.
                     if ((flags & DevicePolicyManager.FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY) != 0) {
@@ -7777,7 +7796,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 USES_POLICY_WIPE_DATA,
                 caller.getPackageName(),
                 factoryReset ? UserHandle.USER_ALL : getAffectedUser(calledOnParentInstance));
-        ActiveAdmin admin = enforcingAdmin.getActiveAdmin();
 
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_WIPE_DATA);
 
@@ -7786,10 +7804,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     calledByProfileOwnerOnOrgOwnedDevice, calledOnParentInstance);
         }
 
-        int userId = admin != null ? admin.getUserHandle().getIdentifier()
-                : caller.getUserId();
-        Slogf.i(LOG_TAG, "wipeDataWithReason(%s): admin=%s, user=%d", wipeReasonForUser, admin,
-                userId);
+        int userId;
+        ActiveAdmin admin = null;
+        if (Flags.activeAdminCleanup()) {
+            userId = enforcingAdmin.getUserId();
+            Slogf.i(LOG_TAG, "wipeDataWithReason(%s): admin=%s, user=%d", wipeReasonForUser,
+                    enforcingAdmin, userId);
+        } else {
+            admin = enforcingAdmin.getActiveAdmin();
+            userId = admin != null ? admin.getUserHandle().getIdentifier()
+                    : caller.getUserId();
+            Slogf.i(LOG_TAG, "wipeDataWithReason(%s): admin=%s, user=%d", wipeReasonForUser, admin,
+                    userId);
+        }
+
         if (calledByProfileOwnerOnOrgOwnedDevice) {
             // When wipeData is called on the parent instance, it implies wiping the entire device.
             if (calledOnParentInstance) {
@@ -7810,25 +7838,36 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final String adminName;
         final ComponentName adminComp;
-        if (admin != null) {
-            if (admin.isPermissionBased) {
-                adminComp = null;
-                adminName = caller.getPackageName();
-                event.setAdmin(adminName);
-            } else {
-                adminComp = admin.info.getComponent();
-                adminName = adminComp.flattenToShortString();
-                event.setAdmin(adminComp);
-            }
+        if (Flags.activeAdminCleanup()) {
+            adminComp = enforcingAdmin.getComponentName();
+            adminName = adminComp != null
+                    ? adminComp.flattenToShortString()
+                    : enforcingAdmin.getPackageName();
+            event.setAdmin(enforcingAdmin.getPackageName());
+            // Not including any HSUM handling here because the "else" branch in the "flag off"
+            // case below is unreachable under normal circumstances and for permission-based
+            // callers admin won't be null.
         } else {
-            adminComp = null;
-            adminName = mInjector.getPackageManager().getPackagesForUid(caller.getUid())[0];
-            Slogf.i(LOG_TAG, "Logging wipeData() event admin as " + adminName);
-            event.setAdmin(adminName);
-            if (mInjector.userManagerIsHeadlessSystemUserMode()) {
-                // On headless system user mode, the call is meant to factory reset the whole
-                // device, otherwise the caller could simply remove the current user.
-                userId = UserHandle.USER_SYSTEM;
+            if (admin != null) {
+                if (admin.isPermissionBased) {
+                    adminComp = null;
+                    adminName = caller.getPackageName();
+                    event.setAdmin(adminName);
+                } else {
+                    adminComp = admin.info.getComponent();
+                    adminName = adminComp.flattenToShortString();
+                    event.setAdmin(adminComp);
+                }
+            } else {
+                adminComp = null;
+                adminName = mInjector.getPackageManager().getPackagesForUid(caller.getUid())[0];
+                Slogf.i(LOG_TAG, "Logging wipeData() event admin as " + adminName);
+                event.setAdmin(adminName);
+                if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+                    // On headless system user mode, the call is meant to factory reset the whole
+                    // device, otherwise the caller could simply remove the current user.
+                    userId = UserHandle.USER_SYSTEM;
+                }
             }
         }
         event.write();
