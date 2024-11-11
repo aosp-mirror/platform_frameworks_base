@@ -310,7 +310,7 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         // read during initialization to set up flows. Maybe there is a better way to handle that.
         underTest =
             KeyguardTouchHandlingInteractor(
-                appContext = mContext,
+                context = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
                 repository = keyguardRepository,

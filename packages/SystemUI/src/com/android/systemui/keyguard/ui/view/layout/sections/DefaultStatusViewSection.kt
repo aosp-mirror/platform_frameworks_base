@@ -38,6 +38,7 @@ import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Utils
 import dagger.Lazy
@@ -47,7 +48,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class DefaultStatusViewSection
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notificationPanelView: NotificationPanelView,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
     private val keyguardViewConfigurator: Lazy<KeyguardViewConfigurator>,
