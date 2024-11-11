@@ -236,6 +236,9 @@ public class BugreportProgressService extends Service {
     /** Always keep remote bugreport files created in the last day. */
     private static final long REMOTE_MIN_KEEP_AGE = DateUtils.DAY_IN_MILLIS;
 
+    /** Minimum delay for sending last update notification */
+    private static final int DELAY_NOTIFICATION_MS = 250;
+
     private final Object mLock = new Object();
 
     /** Managed bugreport info (keyed by id) */
@@ -849,6 +852,7 @@ public class BugreportProgressService extends Service {
             Log.d(TAG, "Progress #" + info.id + ": " + percentageText);
         }
         info.lastProgress.set(progress);
+        info.lastUpdate.set(System.currentTimeMillis());
 
         sendForegroundabledNotification(info.id, builder.build());
     }
@@ -1368,6 +1372,16 @@ public class BugreportProgressService extends Service {
      */
     private void sendBugreportNotification(BugreportInfo info, boolean takingScreenshot) {
 
+        final long lastUpdate = System.currentTimeMillis() - info.lastUpdate.longValue();
+        if (lastUpdate < DELAY_NOTIFICATION_MS) {
+            Log.d(TAG, "Delaying final notification for "
+                    + (DELAY_NOTIFICATION_MS - lastUpdate) + " ms ");
+            mMainThreadHandler.postDelayed(() -> {
+                sendBugreportNotification(info, takingScreenshot);
+            }, DELAY_NOTIFICATION_MS - lastUpdate);
+            return;
+        }
+
         // Since adding the details can take a while, do it before notifying user.
         addDetailsToZipFile(info);
 
@@ -1388,6 +1402,7 @@ public class BugreportProgressService extends Service {
         final Notification.Builder builder = newBaseNotification(mContext)
                 .setContentTitle(title)
                 .setTicker(title)
+                .setProgress(100 /* max value of progress percentage */, 100, false)
                 .setOnlyAlertOnce(false)
                 .setContentText(content);
 
@@ -2426,7 +2441,6 @@ public class BugreportProgressService extends Service {
             }
         }
         info.progress.set(progress);
-        info.lastUpdate.set(System.currentTimeMillis());
 
         updateProgress(info);
     }
