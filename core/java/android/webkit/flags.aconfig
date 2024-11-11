@@ -42,3 +42,11 @@ flag {
     description: "New APIs required by File System Access"
     bug: "40101963"
 }
+
+flag {
+    name: "use_b_entry_point"
+    namespace: "webview"
+    description: "Use B-specific entry point to WebView APK"
+    bug: "373617389"
+    is_fixed_read_only: true
+}
