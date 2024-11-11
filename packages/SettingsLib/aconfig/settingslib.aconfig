@@ -166,3 +166,10 @@ flag {
     description: "Enable the ambient volume control in device details and hearing devices dialog."
     bug: "357878944"
 }
+
+flag {
+    name: "settings_preference_write_consent_enabled"
+    namespace: "android_settings"
+    description: "Enable the user consent prompt before writing sensitive preferences via service"
+    bug: "378552675"
+}
