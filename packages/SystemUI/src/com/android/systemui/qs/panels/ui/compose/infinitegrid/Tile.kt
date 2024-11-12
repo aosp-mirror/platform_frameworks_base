@@ -199,6 +199,7 @@ fun Tile(
                     label = uiState.label,
                     secondaryLabel = uiState.secondaryLabel,
                     icon = icon,
+                    sideDrawable = uiState.sideDrawable,
                     colors = colors,
                     iconShape = iconShape,
                     toggleClick = secondaryClick,
