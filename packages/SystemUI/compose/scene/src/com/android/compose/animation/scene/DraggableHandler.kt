@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.content.Content
-import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.OnStopScope
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
@@ -543,19 +542,6 @@ internal class NestedScrollHandlerImpl(
 
     val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
-    private fun resolveSwipe(
-        isUpOrLeft: Boolean,
-        pointersDown: PointersInfo.PointersDown?,
-    ): Swipe.Resolved {
-        return resolveSwipe(
-            orientation = draggableHandler.orientation,
-            isUpOrLeft = isUpOrLeft,
-            pointersDown = pointersDown,
-            fromSource =
-                pointersDown?.let { draggableHandler.resolveSwipeSource(it.startedPosition) },
-        )
-    }
-
     private fun nestedScrollConnection(): PriorityNestedScrollConnection {
         // If we performed a long gesture before entering priority mode, we would have to avoid
         // moving on to the next scene.
@@ -563,23 +549,8 @@ internal class NestedScrollHandlerImpl(
 
         var lastPointersDown: PointersInfo.PointersDown? = null
 
-        fun hasNextScene(amount: Float): Boolean {
-            val transitionState = layoutState.transitionState
-            val scene = transitionState.currentScene
-            val fromScene = layoutImpl.scene(scene)
-            val resolvedSwipe =
-                when {
-                    amount < 0f -> resolveSwipe(isUpOrLeft = true, lastPointersDown)
-                    amount > 0f -> resolveSwipe(isUpOrLeft = false, lastPointersDown)
-                    else -> null
-                }
-            val nextScene = resolvedSwipe?.let { fromScene.findActionResultBestMatch(it) }
-            if (nextScene != null) return true
-
-            if (transitionState !is TransitionState.Idle) return false
-
-            val overscrollSpec = layoutImpl.state.transitions.overscrollSpec(scene, orientation)
-            return overscrollSpec != null
+        fun shouldEnableSwipes(): Boolean {
+            return layoutImpl.contentForUserActions().shouldEnableSwipes(orientation)
         }
 
         var isIntercepting = false
@@ -650,17 +621,17 @@ internal class NestedScrollHandlerImpl(
                     when (behavior) {
                         NestedScrollBehavior.EdgeNoPreview -> {
                             canChangeScene = isZeroOffset
-                            isZeroOffset && hasNextScene(offsetAvailable)
+                            isZeroOffset && shouldEnableSwipes()
                         }
 
                         NestedScrollBehavior.EdgeWithPreview -> {
                             canChangeScene = isZeroOffset
-                            hasNextScene(offsetAvailable)
+                            shouldEnableSwipes()
                         }
 
                         NestedScrollBehavior.EdgeAlways -> {
                             canChangeScene = true
-                            hasNextScene(offsetAvailable)
+                            shouldEnableSwipes()
                         }
                     }
 
@@ -693,7 +664,7 @@ internal class NestedScrollHandlerImpl(
                     }
                 lastPointersDown = pointersDown
 
-                val canStart = behavior.canStartOnPostFling && hasNextScene(velocityAvailable)
+                val canStart = behavior.canStartOnPostFling && shouldEnableSwipes()
                 if (canStart) {
                     isIntercepting = false
                 }
