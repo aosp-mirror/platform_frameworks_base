@@ -27,6 +27,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -60,6 +64,20 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     /** True if this endpoint is registered with the service. */
     private AtomicBoolean mIsRegistered = new AtomicBoolean(true);
 
+    private final Object mOpenSessionLock = new Object();
+
+    /** The set of session IDs that are pending remote acceptance */
+    @GuardedBy("mOpenSessionLock")
+    private final Set<Integer> mPendingSessionIds = new HashSet<>();
+
+    /** The set of session IDs that are actively enabled by this endpoint */
+    @GuardedBy("mOpenSessionLock")
+    private final Set<Integer> mActiveSessionIds = new HashSet<>();
+
+    /** The set of session IDs that are actively enabled by the remote endpoint */
+    @GuardedBy("mOpenSessionLock")
+    private final Set<Integer> mActiveRemoteSessionIds = new HashSet<>();
+
     /* package */ ContextHubEndpointBroker(
             Context context,
             IContextHubWrapper contextHubProxy,
@@ -86,16 +104,24 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
         int sessionId = mEndpointManager.reserveSessionId();
         EndpointInfo halEndpointInfo = ContextHubServiceUtil.convertHalEndpointInfo(destination);
-        try {
-            mContextHubProxy.openEndpointSession(
-                    sessionId, halEndpointInfo.id, mHalEndpointInfo.id, serviceDescriptor);
-        } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
-            Log.e(TAG, "Exception while calling HAL openEndpointSession", e);
-            mEndpointManager.returnSessionId(sessionId);
-            throw e;
-        }
 
-        return sessionId;
+        synchronized (mOpenSessionLock) {
+            try {
+                mPendingSessionIds.add(sessionId);
+                mContextHubProxy.openEndpointSession(
+                        sessionId,
+                        halEndpointInfo.id,
+                        mHalEndpointInfo.id,
+                        serviceDescriptor);
+            } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
+                Log.e(TAG, "Exception while calling HAL openEndpointSession", e);
+                mPendingSessionIds.remove(sessionId);
+                mEndpointManager.returnSessionId(sessionId);
+                throw e;
+            }
+
+            return sessionId;
+        }
     }
 
     @Override
@@ -111,11 +137,6 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     @Override
-    public void openSessionRequestComplete(int sessionId) {
-        // TODO(b/378487799): Implement this
-    }
-
-    @Override
     public void unregister() {
         ContextHubServiceUtil.checkPermissions(mContext);
         mIsRegistered.set(false);
@@ -124,8 +145,31 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException while calling HAL unregisterEndpoint", e);
         }
-        // TODO(b/378487799): Release reserved session IDs
+        synchronized (mOpenSessionLock) {
+            for (int id : mPendingSessionIds) {
+                mEndpointManager.returnSessionId(id);
+            }
+            for (int id : mActiveSessionIds) {
+                mEndpointManager.returnSessionId(id);
+            }
+            mPendingSessionIds.clear();
+            mActiveSessionIds.clear();
+            mActiveRemoteSessionIds.clear();
+        }
         mEndpointManager.unregisterEndpoint(mEndpointInfo.getIdentifier().getEndpoint());
+    }
+
+    @Override
+    public void openSessionRequestComplete(int sessionId) {
+        ContextHubServiceUtil.checkPermissions(mContext);
+        synchronized (mOpenSessionLock) {
+            try {
+                mContextHubProxy.endpointSessionOpenComplete(sessionId);
+                mActiveRemoteSessionIds.add(sessionId);
+            } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
+                Log.e(TAG, "Exception while calling endpointSessionOpenComplete", e);
+            }
+        }
     }
 
     @Override
@@ -148,6 +192,55 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     /* package */ void attachDeathRecipient() throws RemoteException {
         if (mContextHubEndpointCallback != null) {
             mContextHubEndpointCallback.asBinder().linkToDeath(this, 0 /* flags */);
+        }
+    }
+
+    /* package */ void onEndpointSessionOpenRequest(
+            int sessionId, HubEndpointInfo initiator, String serviceDescriptor) {
+        if (mContextHubEndpointCallback != null) {
+            try {
+                mContextHubEndpointCallback.onSessionOpenRequest(
+                        sessionId, initiator, serviceDescriptor);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onSessionOpenRequest", e);
+            }
+        }
+    }
+
+    /* package */ void onCloseEndpointSession(int sessionId, byte reason) {
+        synchronized (mOpenSessionLock) {
+            mPendingSessionIds.remove(sessionId);
+            mActiveSessionIds.remove(sessionId);
+            mActiveRemoteSessionIds.remove(sessionId);
+        }
+        if (mContextHubEndpointCallback != null) {
+            try {
+                mContextHubEndpointCallback.onSessionClosed(sessionId, reason);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onSessionClosed", e);
+            }
+        }
+    }
+
+    /* package */ void onEndpointSessionOpenComplete(int sessionId) {
+        synchronized (mOpenSessionLock) {
+            mPendingSessionIds.remove(sessionId);
+            mActiveSessionIds.add(sessionId);
+        }
+        if (mContextHubEndpointCallback != null) {
+            try {
+                mContextHubEndpointCallback.onSessionOpenComplete(sessionId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onSessionClosed", e);
+            }
+        }
+    }
+
+    /* package */ boolean hasSessionId(int sessionId) {
+        synchronized (mOpenSessionLock) {
+            return mPendingSessionIds.contains(sessionId)
+                    || mActiveSessionIds.contains(sessionId)
+                    || mActiveRemoteSessionIds.contains(sessionId);
         }
     }
 }

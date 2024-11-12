@@ -87,6 +87,12 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
         }
     }
 
+    public HubEndpointInfo getEndpointInfo(HubEndpointInfo.HubEndpointIdentifier id) {
+        synchronized (mLock) {
+            return mHubEndpointInfos.get(id);
+        }
+    }
+
     /** Invoked when HAL restarts */
     public void onHalRestart() {
         synchronized (mLock) {
