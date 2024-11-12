@@ -66,14 +66,6 @@ flag {
 }
 
 flag {
-    name: "adpf_use_load_hints"
-    namespace: "game"
-    description: "Guards use of the ADPF public load hints behind a readonly flag"
-    is_fixed_read_only: true
-    bug: "367803904"
-}
-
-flag {
     name: "allow_consentless_bugreport_delegated_consent"
     namespace: "crumpet"
     description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"

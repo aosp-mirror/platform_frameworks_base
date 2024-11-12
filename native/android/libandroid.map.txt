@@ -361,8 +361,6 @@ LIBANDROID {
     APerformanceHint_setThreads; # introduced=UpsideDownCake
     APerformanceHint_setPreferPowerEfficiency; # introduced=VanillaIceCream
     APerformanceHint_reportActualWorkDuration2; # introduced=VanillaIceCream
-    APerformanceHint_notifyWorkloadIncrease; # introduced=36
-    APerformanceHint_notifyWorkloadReset; # introduced=36
     AWorkDuration_create; # introduced=VanillaIceCream
     AWorkDuration_release; # introduced=VanillaIceCream
     AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
@@ -381,8 +379,6 @@ LIBANDROID_PLATFORM {
     APerformanceHint_getThreadIds;
     APerformanceHint_createSessionInternal;
     APerformanceHint_setUseFMQForTesting;
-    APerformanceHint_getRateLimiterPropertiesForTesting;
-    APerformanceHint_setUseNewLoadHintBehaviorForTesting;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;
