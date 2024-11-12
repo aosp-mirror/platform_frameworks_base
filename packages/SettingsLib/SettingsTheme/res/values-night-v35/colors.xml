@@ -53,11 +53,11 @@
     <color name="settingslib_materialColorSurfaceContainerLow">@android:color/system_surface_container_low_dark</color>
     <color name="settingslib_materialColorOnPrimaryContainer">@android:color/system_on_primary_container_dark</color>
     <color name="settingslib_materialColorOnErrorContainer">@android:color/system_on_error_container_dark</color>
-    <color name="settingslib_materialColorOnSurfaceInverse">@android:color/system_on_surface_light</color>
+    <color name="settingslib_materialColorInverseOnSurface">@android:color/system_on_surface_light</color>
     <color name="settingslib_materialColorSecondaryContainer">@android:color/system_secondary_container_dark</color>
     <color name="settingslib_materialColorErrorContainer">@android:color/system_error_container_dark</color>
-    <color name="settingslib_materialColorPrimaryInverse">@android:color/system_primary_light</color>
-    <color name="settingslib_materialColorSurfaceInverse">@android:color/system_surface_light</color>
+    <color name="settingslib_materialColorInversePrimary">@android:color/system_primary_light</color>
+    <color name="settingslib_materialColorInverseSurface">@android:color/system_surface_light</color>
     <color name="settingslib_materialColorSurfaceVariant">@android:color/system_surface_variant_dark</color>
     <color name="settingslib_materialColorTertiaryContainer">@android:color/system_tertiary_container_dark</color>
     <color name="settingslib_materialColorPrimaryContainer">@android:color/system_primary_container_dark</color>
