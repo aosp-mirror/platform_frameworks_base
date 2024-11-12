@@ -53,6 +53,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 
 class KairosTests {
@@ -1054,6 +1055,20 @@ class KairosTests {
         runCurrent()
 
         assertEquals(1, stateFlow.value)
+    }
+
+    @Test
+    fun propagateError() {
+        try {
+            runFrpTest { network ->
+                runCurrent()
+                try {
+                    network.transact<Unit> { error("message") }
+                    fail("caller did not throw exception")
+                } catch (_: IllegalStateException) {}
+            }
+            fail("scheduler did not throw exception")
+        } catch (_: IllegalStateException) {}
     }
 
     @Test

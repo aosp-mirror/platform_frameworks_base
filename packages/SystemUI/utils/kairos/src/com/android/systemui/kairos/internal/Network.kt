@@ -101,17 +101,27 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
                 actions.add(func)
             }
             transactionMutex.withLock {
-                // Run all actions
-                evalScope {
-                    for (action in actions) {
-                        launch { action.started(evalScope = this@evalScope) }
+                try {
+                    // Run all actions
+                    evalScope {
+                        for (action in actions) {
+                            launch { action.started(evalScope = this@evalScope) }
+                        }
                     }
-                }
-                // Step through the network
-                doTransaction()
-                // Signal completion
-                while (actions.isNotEmpty()) {
-                    actions.removeLast().completed()
+                    // Step through the network
+                    doTransaction()
+                } catch (e: Exception) {
+                    // Signal failure
+                    while (actions.isNotEmpty()) {
+                        actions.removeLast().fail(e)
+                    }
+                    // re-throw, cancelling this coroutine
+                    throw e
+                } finally {
+                    // Signal completion
+                    while (actions.isNotEmpty()) {
+                        actions.removeLast().completed()
+                    }
                 }
             }
         }
@@ -232,6 +242,11 @@ internal class ScheduledAction<T>(
 
     suspend fun started(evalScope: EvalScope) {
         result = just(onStartTransaction(evalScope))
+    }
+
+    fun fail(ex: Exception) {
+        result = none
+        onResult?.completeExceptionally(ex)
     }
 
     fun completed() {
