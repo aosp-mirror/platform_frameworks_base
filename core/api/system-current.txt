@@ -18794,6 +18794,10 @@ package android.webkit {
     method @Deprecated public void openFileChooser(android.webkit.ValueCallback<android.net.Uri>, String, String);
   }
 
+  public abstract static class WebChromeClient.FileChooserParams {
+    field @FlaggedApi("android.webkit.file_system_access") public static final long ENABLE_FILE_SYSTEM_ACCESS = 364980165L; // 0x15c127c5L
+  }
+
   public abstract class WebHistoryItem implements java.lang.Cloneable {
     method @Deprecated public abstract int getId();
   }
