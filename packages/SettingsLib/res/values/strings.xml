@@ -823,6 +823,8 @@
     <string name="enable_linux_terminal_title">Linux development environment</string>
     <!-- Summary of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=64] -->
     <string name="enable_linux_terminal_summary">Run Linux terminal on Android</string>
+    <!-- Disclaimer below the checkbox that disabling the Linux terminal app would clear its data. [CHAR LIMIT=64] -->
+    <string name="disable_linux_terminal_disclaimer">If you disable, Linux terminal data will be cleared</string>
 
     <!-- HDCP checking title, used for debug purposes only. [CHAR LIMIT=25] -->
     <string name="hdcp_checking_title">HDCP checking</string>
