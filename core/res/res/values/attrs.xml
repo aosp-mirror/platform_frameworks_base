@@ -2737,7 +2737,7 @@
              The default is true. -->
         <attr name="windowIsFrameRatePowerSavingsBalanced" format="boolean"/>
 
-        <!-- Flag indicating whether this window would opt-out the edge-to-edge enforcement.
+        <!-- Flag indicating whether this window would opt out the edge-to-edge enforcement.
 
              <p>If this is false, the edge-to-edge enforcement will be applied to the window if it
              belongs to an app targeting
@@ -2757,8 +2757,9 @@
                  The Configuration will be stable regardless of the system insets change.
              </ul>
 
-             <p>If this is true, the edge-to-edge enforcement won't be applied. However, this
-             attribute will be deprecated and disabled in a future SDK level.
+             <p>If this is true, the edge-to-edge enforcement won't be applied. But if the window
+             belongs to an app targeting {@link android.os.Build.VERSION_CODES#BAKLAVA BAKLAVA} or
+             above, this attribute is ignored and the enforcement is applied regardless.
 
              <p>This is false by default. -->
         <attr name="windowOptOutEdgeToEdgeEnforcement" format="boolean"/>
