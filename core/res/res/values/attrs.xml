@@ -7753,14 +7753,14 @@
     <!-- Used to config the segments of a NotificationProgressDrawable. -->
     <!-- @hide internal use only -->
     <declare-styleable name="NotificationProgressDrawableSegments">
-        <!-- Width of the stroke. -->
-        <attr name="width" />
-        <!-- Default color of the stroke. -->
+        <!-- Height of the solid segments -->
+        <attr name="height" />
+        <!-- Height of the faded segments -->
+        <attr name="fadedHeight" format="dimension"/>
+        <!-- Corner radius of the segment rect. -->
+        <attr name="cornerRadius" format="dimension" />
+        <!-- Default color of the segment. -->
         <attr name="color" />
-        <!-- Length of a dash in the stroke for the dashed segments. -->
-        <attr name="dashWidth" />
-        <!-- Gap between dashes in the stroke for the dashed segments. -->
-        <attr name="dashGap" />
     </declare-styleable>
 
     <!-- Used to config the points of a NotificationProgressDrawable. -->
@@ -7771,7 +7771,7 @@
         <!-- Inset of the point icon or rect. -->
         <attr name="inset" />
         <!-- Corner radius of the point rect. -->
-        <attr name="cornerRadius" format="dimension" />
+        <attr name="cornerRadius"/>
         <!-- Default color of the point rect. -->
         <attr name="color" />
     </declare-styleable>
