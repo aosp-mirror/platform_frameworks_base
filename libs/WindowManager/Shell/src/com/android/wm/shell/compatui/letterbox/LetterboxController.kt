@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.compatui.letterbox
 
-import android.graphics.Color
 import android.graphics.Rect
 import android.view.SurfaceControl
 import com.android.internal.protolog.ProtoLog
@@ -28,7 +27,9 @@ import javax.inject.Inject
  * Component responsible for handling the lifecycle of the letterbox surfaces.
  */
 @WMSingleton
-class LetterboxController @Inject constructor() {
+class LetterboxController @Inject constructor(
+    private val letterboxConfiguration: LetterboxConfiguration
+) {
 
     companion object {
         /*
@@ -64,8 +65,7 @@ class LetterboxController @Inject constructor() {
                             this,
                             TASK_CHILD_LAYER_LETTERBOX_BACKGROUND
                         ).setColorSpaceAgnostic(this, true)
-                            // TODO(b/370940063): Implement LetterboxConfiguration
-                            .setColor(this, Color.valueOf(Color.YELLOW).components)
+                            .setColor(this, letterboxConfiguration.getBackgroundColorRgbArray())
                     }
             )
         })
