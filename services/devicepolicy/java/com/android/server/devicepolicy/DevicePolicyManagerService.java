@@ -3966,7 +3966,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = admins.get(i);
-                if ((admin.isPermissionBased || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD))
+                if (((!Flags.activeAdminCleanup() && admin.isPermissionBased)
+                        || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD))
                         && admin.passwordExpirationTimeout > 0L
                         && now >= admin.passwordExpirationDate - EXPIRATION_GRACE_PERIOD_MS
                         && admin.passwordExpirationDate > 0L) {
@@ -8355,7 +8356,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
         for (int i = 0; i < admins.size(); i++) {
             ActiveAdmin admin = admins.get(i);
-            if (admin.isPermissionBased || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)) {
+            if ((!Flags.activeAdminCleanup() && admin.isPermissionBased)
+                    || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)) {
                 affectedUserIds.add(admin.getUserHandle().getIdentifier());
                 long timeout = admin.passwordExpirationTimeout;
                 admin.passwordExpirationDate =
@@ -8449,7 +8451,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     private int getUserIdToWipeForFailedPasswords(ActiveAdmin admin) {
         final int userId = admin.getUserHandle().getIdentifier();
-        if (admin.isPermissionBased) {
+        if (!Flags.activeAdminCleanup() && admin.isPermissionBased) {
             return userId;
         }
         final ComponentName component = admin.info.getComponent();
@@ -16244,7 +16246,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (admin.mPasswordPolicy.quality < minPasswordQuality) {
             return false;
         }
-        return admin.isPermissionBased || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+        return (!Flags.activeAdminCleanup() && admin.isPermissionBased)
+                || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
     }
 
     @Override
@@ -23317,7 +23320,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return EnforcingAdmin.createDeviceAdminEnforcingAdmin(admin.info.getComponent(), userId,
                     admin);
         }
-        admin = getUserData(userId).createOrGetPermissionBasedAdmin(userId);
+        admin = Flags.activeAdminCleanup()
+                ? null : getUserData(userId).createOrGetPermissionBasedAdmin(userId);
         return  EnforcingAdmin.createEnforcingAdmin(caller.getPackageName(), userId, admin);
     }
 
@@ -23340,8 +23344,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         }
-
-        admin = getUserData(userId).createOrGetPermissionBasedAdmin(userId);
+        admin = Flags.activeAdminCleanup()
+                ? null : getUserData(userId).createOrGetPermissionBasedAdmin(userId);
         return  EnforcingAdmin.createEnforcingAdmin(packageName, userId, admin);
     }
 
