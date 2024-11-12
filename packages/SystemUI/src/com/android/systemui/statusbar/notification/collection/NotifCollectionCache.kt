@@ -102,6 +102,10 @@ class NotifCollectionCache<V>(
                 return --lives <= 0
             }
         }
+
+        override fun toString(): String {
+            return "$key = $value"
+        }
     }
 
     /**
@@ -174,7 +178,10 @@ class NotifCollectionCache<V>(
 
         pw.println("$TAG(retainCount = $retainCount, purgeTimeoutMillis = $purgeTimeoutMillis)")
         pw.withIncreasedIndent {
-            pw.printCollection("keys present in cache", cache.keys.stream().sorted().toList())
+            pw.printCollection(
+                "entries present in cache",
+                cache.values.stream().map { it.toString() }.sorted().toList(),
+            )
 
             val misses = misses.get()
             val hits = hits.get()

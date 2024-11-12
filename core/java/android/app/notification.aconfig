@@ -100,16 +100,6 @@ flag {
 }
 
 flag {
-  name: "visit_person_uri"
-  namespace: "systemui"
-  description: "Guards the security fix that ensures all URIs Person.java are valid"
-  bug: "281044385"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "notification_expansion_optional"
   namespace: "systemui"
   description: "Experiment to restore the pre-S behavior where standard notifications are not expandable unless they have actions."

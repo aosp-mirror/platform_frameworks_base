@@ -22,7 +22,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import com.android.systemui.qs.panels.ui.compose.selection.ResizingDefaults.RESIZING_THRESHOLD
 
-class ResizingState(private val widths: TileWidths, private val onResize: () -> Unit) {
+class ResizingState(val widths: TileWidths, private val onResize: () -> Unit) {
     /** Total drag offset of this resize operation. */
     private var totalOffset by mutableFloatStateOf(0f)
 

@@ -17,8 +17,10 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.res.Resources
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.customization.R as customR
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
@@ -42,7 +44,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 class LockscreenContentViewModel
 @AssistedInject
@@ -82,10 +83,7 @@ constructor(
                         unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = true),
                         unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = false),
                     ) { start, end ->
-                        UnfoldTranslations(
-                            start = start,
-                            end = end,
-                        )
+                        UnfoldTranslations(start = start, end = end)
                     }
                     .collect { _unfoldTranslations.value = it }
             }
@@ -102,17 +100,15 @@ constructor(
 
     /** Returns a flow that indicates whether lockscreen notifications should be rendered. */
     fun areNotificationsVisible(): Flow<Boolean> {
-        return combine(
-            clockSize,
-            shadeInteractor.isShadeLayoutWide,
-        ) { clockSize, isShadeLayoutWide ->
+        return combine(clockSize, shadeInteractor.isShadeLayoutWide) { clockSize, isShadeLayoutWide
+            ->
             clockSize == ClockSize.SMALL || isShadeLayoutWide
         }
     }
 
     fun getSmartSpacePaddingTop(resources: Resources): Int {
         return if (clockSize.value == ClockSize.LARGE) {
-            resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset) +
+            resources.getDimensionPixelSize(customR.dimen.keyguard_smartspace_top_offset) +
                 resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin)
         } else {
             0

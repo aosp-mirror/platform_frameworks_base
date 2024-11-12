@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
 import com.android.internal.policy.SystemBarUtils
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.res.R
@@ -39,20 +40,16 @@ constructor(
     val selectedClockSize: StateFlow<ClockSizeSetting> = interactor.selectedClockSize
 
     val shouldHideSmartspace: Flow<Boolean> =
-        combine(
-                interactor.selectedClockSize,
-                interactor.currentClockId,
-                ::Pair,
-            )
-            .map { (size, currentClockId) ->
-                when (size) {
-                    // TODO (b/284122375) This is temporary. We should use clockController
-                    //      .largeClock.config.hasCustomWeatherDataDisplay instead, but
-                    //      ClockRegistry.createCurrentClock is not reliable.
-                    ClockSizeSetting.DYNAMIC -> currentClockId == "DIGITAL_CLOCK_WEATHER"
-                    ClockSizeSetting.SMALL -> false
-                }
+        combine(interactor.selectedClockSize, interactor.currentClockId, ::Pair).map {
+            (size, currentClockId) ->
+            when (size) {
+                // TODO (b/284122375) This is temporary. We should use clockController
+                //      .largeClock.config.hasCustomWeatherDataDisplay instead, but
+                //      ClockRegistry.createCurrentClock is not reliable.
+                ClockSizeSetting.DYNAMIC -> currentClockId == "DIGITAL_CLOCK_WEATHER"
+                ClockSizeSetting.SMALL -> false
             }
+        }
 
     fun getSmartspaceStartPadding(context: Context): Int {
         return KeyguardSmartspaceViewModel.getSmartspaceStartMargin(context)
@@ -83,7 +80,7 @@ constructor(
             } else {
                 getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
                     SystemBarUtils.getStatusBarHeight(context) +
-                    getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
+                    getDimensionPixelSize(customR.dimen.keyguard_smartspace_top_offset)
             }
         }
     }

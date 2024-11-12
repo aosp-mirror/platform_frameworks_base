@@ -109,6 +109,10 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    data: [
+        ":HelloWorldUsingSdk1And2",
+    ],
 }
 
 java_library {

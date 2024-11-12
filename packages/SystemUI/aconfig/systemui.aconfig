@@ -267,7 +267,7 @@ flag {
 flag {
     name: "dual_shade"
     namespace: "systemui"
-    description: "Enables the BC25 Dual Shade (go/bc25-dual-shade-design)."
+    description: "Enables Dual Shade (go/dual-shade-design-doc)."
     bug: "337259436"
 }
 
@@ -1360,16 +1360,6 @@ flag {
 }
 
 flag {
-  name: "notification_pulsing_fix"
-  namespace: "systemui"
-  description: "Allow showing new pulsing notifications when the device is already pulsing."
-  bug: "335560575"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "media_lockscreen_launch_animation"
     namespace : "systemui"
     description : "Enable the origin launch animation for UMO when opening on top of lockscreen."
@@ -1780,6 +1770,16 @@ flag {
     namespace: "systemui"
     description: "System app with foreground service can opt in to be stoppable."
     bug: "376564917"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "keyguard_transition_force_finish_on_screen_off"
+    namespace: "systemui"
+    description: "Forces KTF transitions to finish if the screen turns all the way off."
+    bug: "331636736"
     metadata {
       purpose: PURPOSE_BUGFIX
     }
