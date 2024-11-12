@@ -79,7 +79,8 @@ constructor(
             }
 
         val columns = columnsWithMediaViewModel.columns
-        val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width()) }
+        val largeTilesSpan by iconTilesViewModel.largeTilesSpanState
+        val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width(largeTilesSpan)) }
         val bounceables =
             remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
         val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()
@@ -129,21 +130,23 @@ constructor(
                 viewModel.columnsWithMediaViewModelFactory.createWithoutMediaTracking()
             }
         val columns = columnsViewModel.columns
+        val largeTilesSpan by iconTilesViewModel.largeTilesSpanState
         val largeTiles by iconTilesViewModel.largeTiles.collectAsStateWithLifecycle()
 
         // Non-current tiles should always be displayed as icon tiles.
         val sizedTiles =
-            remember(tiles, largeTiles) {
+            remember(tiles, largeTiles, largeTilesSpan) {
                 tiles.map {
                     SizedTileImpl(
                         it,
-                        if (!it.isCurrent || !largeTiles.contains(it.tileSpec)) 1 else 2,
+                        if (!it.isCurrent || !largeTiles.contains(it.tileSpec)) 1
+                        else largeTilesSpan,
                     )
                 }
             }
 
         val (currentTiles, otherTiles) = sizedTiles.partition { it.tile.isCurrent }
-        val currentListState = rememberEditListState(currentTiles, columns)
+        val currentListState = rememberEditListState(currentTiles, columns, largeTilesSpan)
         DefaultEditTileGrid(
             listState = currentListState,
             otherTiles = otherTiles,
@@ -154,6 +157,7 @@ constructor(
             onResize = iconTilesViewModel::resize,
             onStopEditing = onStopEditing,
             onReset = viewModel::showResetDialog,
+            largeTilesSpan = largeTilesSpan,
         )
     }
 
@@ -171,7 +175,7 @@ constructor(
             .map { it.flatten().map { it.tile } }
     }
 
-    private fun TileSpec.width(): Int {
-        return if (iconTilesViewModel.isIconTile(this)) 1 else 2
+    private fun TileSpec.width(largeSize: Int = iconTilesViewModel.largeTilesSpan.value): Int {
+        return if (iconTilesViewModel.isIconTile(this)) 1 else largeSize
     }
 }

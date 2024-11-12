@@ -242,6 +242,11 @@ public class DisplayManagerFlags {
             Flags::autoBrightnessModeBedtimeWear
     );
 
+    private final FlagState mEnablePluginManagerFlagState = new FlagState(
+            Flags.FLAG_ENABLE_PLUGIN_MANAGER,
+            Flags::enablePluginManager
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -517,6 +522,10 @@ public class DisplayManagerFlags {
         return mAutoBrightnessModeBedtimeWearFlagState.isEnabled();
     }
 
+    public boolean isPluginManagerEnabled() {
+        return mEnablePluginManagerFlagState.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -568,6 +577,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
         pw.println(" " + mHasArrSupport);
         pw.println(" " + mAutoBrightnessModeBedtimeWearFlagState);
+        pw.println(" " + mEnablePluginManagerFlagState);
     }
 
     private static class FlagState {

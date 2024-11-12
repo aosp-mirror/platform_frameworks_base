@@ -293,7 +293,7 @@
     <string name="notification_channel_account" msgid="6436294521740148173">"खाताको स्थिति"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"विकासकर्ताका म्यासेजहरू"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"विकासकर्तासम्बन्धी महत्त्वपूर्ण म्यासेजहरू"</string>
-    <string name="notification_channel_updates" msgid="7907863984825495278">"अद्यावधिकहरू"</string>
+    <string name="notification_channel_updates" msgid="7907863984825495278">"अपडेटहरू"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"नेटवर्कको स्थिति"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"नेटवर्कका अलर्टहरू"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"नेटवर्क उपलब्ध छ"</string>
@@ -612,6 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"यो एपलाई नजिकै रहेका अल्ट्रा-वाइडब्यान्ड चल्ने डिभाइसहरूबिचको तुलनात्मक स्थान पत्ता लगाउन दिनुहोस्"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Wi-Fi चल्ने नजिकै रहेका डिभाइसहरूमा चलाउन दिन्छ"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"यसले एपलाई Wi-Fi चल्ने नजिकै रहेका डिभाइसहरूमा विज्ञापन गर्न, कनेक्ट गर्न र सापेक्ष स्थिति निर्धारण गर्न दिन्छ"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC भुक्तानी सेवासम्बन्धी रुचाइएको जानकारी"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"यसले एपलाई दर्ता गरिएका सहायता तथा मार्गको गन्तव्य जस्ता रुचाइएका NFC भुक्तानी सेवासम्बन्धी जानकारी प्राप्त गर्न दिन्छ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नजिक क्षेत्र संचार नियन्त्रणहरू"</string>
@@ -2431,54 +2435,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"अन गर्नुहोस्"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"पछाडि जानुहोस्"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"विचाराधीन..."</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"स्याटलाइट SOS अब उपलब्ध भएको छ"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"मोबाइल वा Wi-Fi नेटवर्क नभएका खण्डमा तपाईं आपत्‍कालीन सेवामा म्यासेज पठाउन सक्नुहुन्छ। Google Messages अनिवार्य रूपमा तपाईंको डिफल्ट म्यासेजिङ एप हुनु पर्छ।"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"स्याटलाइट SOS प्रयोग गर्न मिल्दैन"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"यो डिभाइसमा स्याटलाइट SOS प्रयोग गर्न मिल्दैन"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"स्याटलाइट SOS सेटअप गरिएको छैन"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"तपाईंको डिभाइस इन्टरनेटमा कनेक्ट गरिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस् र फेरि सेटअप गरी हेर्नुहोस्"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"स्याटलाइट SOS उपलब्ध छैन"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"यो देश वा क्षेत्रमा स्याटलाइट SOS उपलब्ध छैन"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"स्याटलाइट SOS सेटअप गरिएको छैन"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"स्याटलाइटमार्फत म्यासेज पठाउन Google Messages लाई डिफल्ट म्यासेजिङ एपका रूपमा सेट गर्नुहोस्"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"स्याटलाइट SOS उपलब्ध छैन"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"यो देश वा क्षेत्रमा स्याटलाइट SOS उपलब्ध छ कि छैन भन्ने कुरा जाँच्न लोकेसन सेटिङ अन गर्नुहोस्"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"स्याटलाइटमार्फत म्यासेज पठाउने सुविधा उपलब्ध छ"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"तपाईं मोबाइल वा Wi-Fi नेटवर्क उपलब्ध नभएका खण्डमा स्याटलाइटमार्फत म्यासेज पठाउन सक्नुहुन्छ। Google Messages अनिवार्य रूपमा तपाईंको डिफल्ट म्यासेजिङ एप हुनु पर्छ।"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"स्याटलाइटमार्फत म्यासेज पठाउने सुविधा प्रयोग गर्न मिल्दैन"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"यो डिभाइसमा स्याटलाइटमार्फत म्यासेज पठाउने सुविधा प्रयोग गर्न मिल्दैन"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"स्याटलाइटमार्फत म्यासेज पठाउने सुविधा सेटअप गरिएको छैन"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"तपाईंको डिभाइस इन्टरनेटमा कनेक्ट गरिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस् र फेरि सेटअप गरी हेर्नुहोस्"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"स्याटलाइटमार्फत म्यासेज पठाउने सुविधा उपलब्ध छैन"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"यो देश वा क्षेत्रमा स्याटलाइटमार्फत म्यासेज पठाउने सुविधा उपलब्ध छैन"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"स्याटलाइटमार्फत म्यासेज पठाउने सुविधा सेटअप गरिएको छैन"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"स्याटलाइटमार्फत म्यासेज पठाउन Google Messages लाई डिफल्ट म्यासेजिङ एपका रूपमा सेट गर्नुहोस्"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"स्याटलाइटमार्फत म्यासेज पठाउने सुविधा उपलब्ध छैन"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"यो देश वा क्षेत्रमा स्याटलाइटमार्फत म्यासेज पठाउने सुविधा उपलब्ध छ कि छैन भन्ने कुरा जाँच्न लोकेसन सेटिङ अन गर्नुहोस्"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फिंगरप्रिन्ट अनलक फेरि सेटअप गर्नुहोस्"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> अब पहिचान गर्न सकिँदैन।"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> र <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> अब पहिचान गर्न सकिँदैन।"</string>

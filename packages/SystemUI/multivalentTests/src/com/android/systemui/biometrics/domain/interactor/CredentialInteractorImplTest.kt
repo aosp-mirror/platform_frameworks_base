@@ -36,6 +36,7 @@ import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 22
 private const val OWNER_ID = 10
+private const val PASSWORD_ID = 30
 private const val OPERATION_ID = 100L
 private const val MAX_ATTEMPTS = 5
 
@@ -247,7 +248,11 @@ class CredentialInteractorImplTest : SysuiTestCase() {
 private fun pinRequest(credentialOwner: Int = USER_ID): BiometricPromptRequest.Credential.Pin =
     BiometricPromptRequest.Credential.Pin(
         promptInfo(),
-        BiometricUserInfo(userId = USER_ID, deviceCredentialOwnerId = credentialOwner),
+        BiometricUserInfo(
+            userId = USER_ID,
+            deviceCredentialOwnerId = credentialOwner,
+            userIdForPasswordEntry = PASSWORD_ID,
+        ),
         BiometricOperationInfo(OPERATION_ID),
     )
 

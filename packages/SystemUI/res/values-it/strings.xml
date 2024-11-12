@@ -326,6 +326,8 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Ingresso"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Apparecchi acustici"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Attivazione…"</string>
+    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
+    <skip />
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotazione automatica"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotazione automatica dello schermo"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Posizione"</string>
@@ -414,6 +416,8 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Impossibile aggiornare preset"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Preset"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Sottotitoli in tempo reale"</string>
+    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vuoi sbloccare il microfono del dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vuoi sbloccare la fotocamera del dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Vuoi sbloccare la fotocamera e il microfono del dispositivo?"</string>
@@ -698,8 +702,7 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Fisso"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Rilev. movim. testa"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Tocca per cambiare la modalità della suoneria"</string>
-    <!-- no translation found for volume_ringer_mode (6867838048430807128) -->
-    <skip />
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"modalità suoneria"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"silenzia"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"riattiva l\'audio"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrazione"</string>
@@ -869,6 +872,8 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Passa all\'app a destra o sotto mentre usi lo schermo diviso"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Passa all\'app a sinistra o sopra mentre usi lo schermo diviso"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Con lo schermo diviso: sostituisci un\'app con un\'altra"</string>
+    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Inserimento"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Passa alla lingua successiva"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Passa alla lingua precedente"</string>
@@ -1411,15 +1416,29 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibilità"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Scorciatoie da tastiera"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personalizza scorciatoie da tastiera"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Scorciatoie per la ricerca"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nessun risultato di ricerca"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icona Comprimi"</string>
+    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
+    <skip />
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalizza"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Fine"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icona Espandi"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"oppure"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Punto di trascinamento"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Impostazioni tastiera"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Naviga usando la tastiera"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Informazioni sulle scorciatoie da tastiera"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Naviga usando il touchpad"</string>

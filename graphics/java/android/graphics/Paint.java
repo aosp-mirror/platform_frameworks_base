@@ -2119,7 +2119,7 @@ public class Paint {
      * @see FontVariationAxis
      */
     public boolean setFontVariationSettings(String fontVariationSettings) {
-        final boolean useFontVariationStore = Flags.typefaceRedesign()
+        final boolean useFontVariationStore = Flags.typefaceRedesignReadonly()
                 && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
         if (useFontVariationStore) {
             FontVariationAxis[] axes =

@@ -740,8 +740,10 @@ public class BubbleController implements ConfigurationChangeListener,
     /**
      * Update bubble bar location and trigger and update to listeners
      */
-    public void setBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
+    public void setBubbleBarLocation(BubbleBarLocation bubbleBarLocation,
+            @BubbleBarLocation.UpdateSource int source) {
         if (canShowAsBubbleBar()) {
+            BubbleBarLocation previousLocation = mBubblePositioner.getBubbleBarLocation();
             mBubblePositioner.setBubbleBarLocation(bubbleBarLocation);
             if (mLayerView != null && !mLayerView.isExpandedViewDragged()) {
                 mLayerView.updateExpandedView();
@@ -749,13 +751,47 @@ public class BubbleController implements ConfigurationChangeListener,
             BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
             bubbleBarUpdate.bubbleBarLocation = bubbleBarLocation;
             mBubbleStateListener.onBubbleStateChange(bubbleBarUpdate);
+
+            logBubbleBarLocationIfChanged(bubbleBarLocation, previousLocation, source);
+        }
+    }
+
+    private void logBubbleBarLocationIfChanged(BubbleBarLocation location,
+            BubbleBarLocation previous,
+            @BubbleBarLocation.UpdateSource int source) {
+        if (mLayerView == null) {
+            return;
+        }
+        boolean isRtl = mLayerView.isLayoutRtl();
+        boolean wasLeft = previous.isOnLeft(isRtl);
+        boolean onLeft = location.isOnLeft(isRtl);
+        if (wasLeft == onLeft) {
+            // No changes, skip logging
+            return;
+        }
+        switch (source) {
+            case BubbleBarLocation.UpdateSource.DRAG_BAR:
+            case BubbleBarLocation.UpdateSource.A11Y_ACTION_BAR:
+                mLogger.log(onLeft ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_BAR
+                        : BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_BAR);
+                break;
+            case BubbleBarLocation.UpdateSource.DRAG_BUBBLE:
+            case BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE:
+                mLogger.log(onLeft ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_BUBBLE
+                        : BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_BUBBLE);
+                break;
+            case BubbleBarLocation.UpdateSource.DRAG_EXP_VIEW:
+            case BubbleBarLocation.UpdateSource.A11Y_ACTION_EXP_VIEW:
+                // TODO(b/349845968): move logging from BubbleBarLayerView to here
+                break;
         }
     }
 
     /**
      * Animate bubble bar to the given location. The location change is transient. It does not
      * update the state of the bubble bar.
-     * To update bubble bar pinned location, use {@link #setBubbleBarLocation(BubbleBarLocation)}.
+     * To update bubble bar pinned location, use
+     * {@link #setBubbleBarLocation(BubbleBarLocation, int)}.
      */
     public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
         if (canShowAsBubbleBar()) {
@@ -2568,9 +2604,10 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void setBubbleBarLocation(BubbleBarLocation location) {
+        public void setBubbleBarLocation(BubbleBarLocation location,
+                @BubbleBarLocation.UpdateSource int source) {
             mMainExecutor.execute(() ->
-                    mController.setBubbleBarLocation(location));
+                    mController.setBubbleBarLocation(location, source));
         }
 
         @Override

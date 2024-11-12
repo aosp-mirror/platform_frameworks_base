@@ -181,7 +181,7 @@ constructor(
     fun getLargeClockTopMargin(): Int {
         return systemBarUtils.getStatusBarHeight() +
             resources.getDimensionPixelSize(customR.dimen.small_clock_padding_top) +
-            resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
+            resources.getDimensionPixelSize(customR.dimen.keyguard_smartspace_top_offset)
     }
 
     val largeClockTopMargin: Flow<Int> =

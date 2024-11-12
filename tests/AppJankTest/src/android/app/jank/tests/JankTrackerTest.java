@@ -17,6 +17,7 @@
 package android.app.jank.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import android.app.jank.Flags;
 import android.app.jank.JankTracker;
@@ -30,6 +31,8 @@ import android.view.View;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.policy.DecorView;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -152,5 +155,17 @@ public class JankTrackerTest {
         mJankTracker.getAllUiStates(stateData);
 
         assertEquals(1, stateData.size());
+    }
+
+    /**
+     * Test confirms a JankTracker object is retrieved from the activity.
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DETAILED_APP_JANK_METRICS_LOGGING_ENABLED)
+    public void jankTracker_NotNull_WhenRetrievedFromDecorView() {
+        DecorView decorView  = (DecorView) sActivityDecorView;
+        JankTracker jankTracker = decorView.getJankTracker();
+
+        assertNotNull(jankTracker);
     }
 }

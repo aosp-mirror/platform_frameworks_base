@@ -3215,8 +3215,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final boolean isChanging = AppTransition.isChangeTransitOld(transit) && enter
                 && isChangingAppTransition();
 
-        // Delaying animation start isn't compatible with remote animations at all.
-        if (controller != null && !mSurfaceAnimator.isAnimationStartDelayed()) {
+        if (controller != null) {
             // Here we load App XML in order to read com.android.R.styleable#Animation_showBackdrop.
             boolean showBackdrop = false;
             // Optionally set backdrop color if App explicitly provides it through
@@ -3637,20 +3636,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Deprecated
     final WindowContainer getAnimatingContainer() {
         return getAnimatingContainer(PARENTS, ANIMATION_TYPE_ALL);
-    }
-
-    /**
-     * @see SurfaceAnimator#startDelayingAnimationStart
-     */
-    void startDelayingAnimationStart() {
-        mSurfaceAnimator.startDelayingAnimationStart();
-    }
-
-    /**
-     * @see SurfaceAnimator#endDelayingAnimationStart
-     */
-    void endDelayingAnimationStart() {
-        mSurfaceAnimator.endDelayingAnimationStart();
     }
 
     @Override

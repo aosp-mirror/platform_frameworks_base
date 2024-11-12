@@ -67,6 +67,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
+import com.android.server.utils.LazyJniRegistrar;
 import com.android.server.utils.ManagedApplicationService;
 import com.android.server.utils.ManagedApplicationService.BinderChecker;
 import com.android.server.utils.ManagedApplicationService.LogEvent;
@@ -130,6 +131,10 @@ public class VrManagerService extends SystemService
 
     private static native void initializeNative();
     private static native void setVrModeNative(boolean enabled);
+
+    static {
+        LazyJniRegistrar.registerVrManagerService();
+    }
 
     private final Object mLock = new Object();
 

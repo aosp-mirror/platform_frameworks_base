@@ -21,12 +21,14 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
+import com.android.systemui.qs.panels.data.repository.LargeTileSpanRepository
 import com.android.systemui.qs.panels.shared.model.PanelsLog
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
@@ -38,6 +40,7 @@ constructor(
     private val repo: DefaultLargeTilesRepository,
     private val currentTilesInteractor: CurrentTilesInteractor,
     private val preferencesInteractor: QSPreferencesInteractor,
+    largeTilesSpanRepo: LargeTileSpanRepository,
     @PanelsLog private val logBuffer: LogBuffer,
     @Application private val applicationScope: CoroutineScope,
 ) {
@@ -45,6 +48,8 @@ constructor(
         preferencesInteractor.largeTilesSpecs
             .onEach { logChange(it) }
             .stateIn(applicationScope, SharingStarted.Eagerly, repo.defaultLargeTiles)
+
+    val largeTilesSpan: StateFlow<Int> = largeTilesSpanRepo.span
 
     fun isIconTile(spec: TileSpec): Boolean = !largeTilesSpecs.value.contains(spec)
 

@@ -47,6 +47,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.pm.RoSystemFeatures;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.pm.permission.PermissionAllowlist;
@@ -2000,6 +2001,13 @@ public class SystemConfig {
 
     private void readSplitPermission(XmlPullParser parser, File permFile)
             throws IOException, XmlPullParserException {
+        // If trunkstable feature flag disabled for this split permission, skip this tag.
+        if (ParsingPackageUtils.getAconfigFlags()
+            .skipCurrentElement(/* pkg= */ null, parser, /* allowNoNamespace= */ true)) {
+            XmlUtils.skipCurrentTag(parser);
+            return;
+        }
+
         String splitPerm = parser.getAttributeValue(null, "name");
         if (splitPerm == null) {
             Slog.w(TAG, "<split-permission> without name in " + permFile + " at "

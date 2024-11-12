@@ -28,6 +28,7 @@ import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.window.DesktopModeFlags
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
@@ -35,7 +36,6 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.MotionEventHelper.InputMethod.TOUCH
-import com.android.window.flags.Flags
 import java.time.Duration
 
 /**
@@ -107,7 +107,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
         // drag the window to move to desktop
         if (motionEventHelper.inputMethod == TOUCH
-            && Flags.enableHoldToDragAppHandle()) {
+            && DesktopModeFlags.ENABLE_HOLD_TO_DRAG_APP_HANDLE.isTrue) {
             // Touch requires hold-to-drag.
             motionEventHelper.holdToDrag(startX, startY, startX, endY, steps = 100)
         } else {
