@@ -275,14 +275,12 @@ public final class MediaQualityManager {
     /**
      * Creates a picture profile and store it in the system.
      *
-     * @return the stored profile with an assigned profile ID. {@code null} if it's not created
-     * successfully.
-     * @hide
+     * <p>If the profile is created successfully,
+     * {@link PictureProfileCallback#onPictureProfileAdded(String, PictureProfile)} is invoked.
      */
-    @Nullable
-    public PictureProfile createPictureProfile(@NonNull PictureProfile pp) {
+    public void createPictureProfile(@NonNull PictureProfile pp) {
         try {
-            return mService.createPictureProfile(pp);
+            mService.createPictureProfile(pp);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -542,6 +540,7 @@ public final class MediaQualityManager {
      * @param enabled {@code true} to enable, {@code false} to disable.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public void setAutoPictureQualityEnabled(boolean enabled) {
         try {
@@ -553,7 +552,6 @@ public final class MediaQualityManager {
 
     /**
      * Returns {@code true} if auto picture quality is enabled; {@code false} otherwise.
-     * @hide
      */
     public boolean isAutoPictureQualityEnabled() {
         try {
@@ -570,6 +568,7 @@ public final class MediaQualityManager {
      * @param enabled {@code true} to enable, {@code false} to disable.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public void setSuperResolutionEnabled(boolean enabled) {
         try {
@@ -581,7 +580,6 @@ public final class MediaQualityManager {
 
     /**
      * Returns {@code true} if super resolution is enabled; {@code false} otherwise.
-     * @hide
      */
     public boolean isSuperResolutionEnabled() {
         try {
