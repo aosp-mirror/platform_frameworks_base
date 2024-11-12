@@ -18,6 +18,8 @@ package com.android.settingslib.bluetooth;
 
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
+import static com.android.settingslib.Utils.isAudioModeOngoingCall;
+
 import static java.util.stream.Collectors.toList;
 
 import android.annotation.CallbackExecutor;
@@ -303,6 +305,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + ", sourceId = "
                                         + sourceId);
                     }
+                    updateFallbackActiveDeviceIfNeeded();
                 }
 
                 @Override
@@ -389,9 +392,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + sourceId
                                         + ", state = "
                                         + state);
-                    }
-                    if (BluetoothUtils.isConnected(state)) {
-                        updateFallbackActiveDeviceIfNeeded();
                     }
                 }
             };
@@ -1130,18 +1130,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded for work profile.");
             return;
         }
-        if (mServiceBroadcast == null) {
-            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to broadcast profile is null");
-            return;
-        }
-        List<BluetoothLeBroadcastMetadata> sources = mServiceBroadcast.getAllBroadcastMetadata();
-        if (sources.stream()
-                .noneMatch(source -> mServiceBroadcast.isPlaying(source.getBroadcastId()))) {
-            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to no broadcast ongoing");
-            return;
-        }
-        if (mServiceBroadcastAssistant == null) {
-            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to assistant profile is null");
+        if (isAudioModeOngoingCall(mContext)) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to ongoing call");
             return;
         }
         Map<Integer, List<BluetoothDevice>> deviceGroupsInBroadcast = getDeviceGroupsInBroadcast();
