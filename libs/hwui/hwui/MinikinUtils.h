@@ -73,7 +73,7 @@ public:
     static void forFontRun(const minikin::Layout& layout, Paint* paint, F& f) {
         float saveSkewX = paint->getSkFont().getSkewX();
         bool savefakeBold = paint->getSkFont().isEmbolden();
-        if (text_feature::typeface_redesign()) {
+        if (text_feature::typeface_redesign_readonly()) {
             for (uint32_t runIdx = 0; runIdx < layout.getFontRunCount(); ++runIdx) {
                 uint32_t start = layout.getFontRunStart(runIdx);
                 uint32_t end = layout.getFontRunEnd(runIdx);

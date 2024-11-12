@@ -441,7 +441,8 @@ public class BubbleBarLayerView extends FrameLayout
 
         @Override
         public void onRelease(@NonNull BubbleBarLocation location) {
-            mBubbleController.setBubbleBarLocation(location);
+            mBubbleController.setBubbleBarLocation(location,
+                    BubbleBarLocation.UpdateSource.DRAG_EXP_VIEW);
             if (location != mInitialLocation) {
                 BubbleLogger.Event event = location.isOnLeft(isLayoutRtl())
                         ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_EXP_VIEW

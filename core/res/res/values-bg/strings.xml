@@ -612,6 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Разрешаване на приложението да определя относителната позиция между устройствата с ултрашироколентови сигнали в близост"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"взаимодействие с устройствата с Wi-Fi в близост"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Разрешава на приложението да рекламира, да се свързва и да определя относителната позиция на устройствата с Wi-Fi в близост"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информация за предпочитаната услуга за плащане чрез NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролиране на комуникацията в близкото поле"</string>

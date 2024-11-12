@@ -326,6 +326,8 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Влез"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Слушни помагала"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Се вклучува…"</string>
+    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
+    <skip />
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автоматско ротирање"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматско ротирање на екранот"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Локација"</string>
@@ -414,6 +416,8 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Не можеше да се ажурира зададената вредност"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Зададени вредности"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Автоматски титлови"</string>
+    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се одблокира пристапот до микрофонот на уредот?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се одблокира пристапот до камерата на уредот?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се одблокира пристапот до камерата и микрофонот на уредот?"</string>
@@ -698,8 +702,7 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Фиксно"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Следење на главата"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Допрете за да го промените режимот на ѕвончето"</string>
-    <!-- no translation found for volume_ringer_mode (6867838048430807128) -->
-    <skip />
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"режим на ѕвонче"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"исклучен звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"вклучен звук"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"вибрации"</string>
@@ -869,6 +872,8 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Префрлете се на апликацијата десно или долу при користењето поделен екран"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Префрлете се на апликацијата лево или горе при користењето поделен екран"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"При поделен екран: префрлете ги аплик. од едната на другата страна"</string>
+    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Внесување"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Префрлете на следниот јазик"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Префрлете на претходниот јазик"</string>
@@ -1411,15 +1416,29 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Пристапност"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Кратенки од тастатура"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Приспособете ги кратенките од тастатурата"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Пребарувајте кратенки"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Нема резултати од пребарување"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за собирање"</string>
+    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
+    <skip />
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Приспособете"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Готово"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за проширување"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Рачка за влечење"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Поставки за тастатурата"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Движете се со користење на тастатурата"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Научете ги кратенките од тастатурата"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Движете се со користење на допирната подлога"</string>
@@ -1428,7 +1447,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Научете движења за допирната подлога, кратенки од тастатурата и друго"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Врати се назад"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Оди на почетниот екран"</string>
-    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Прегледајте ги неодамнешните апликации"</string>
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Прикажи ги неодамнешните апликации"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Повлечете налево или надесно со три прста на допирната подлога"</string>
@@ -1438,7 +1457,7 @@
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Повлечете нагоре со три прсти на допирната подлога"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Одлично!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Го завршивте движењето за враќање на почетниот екран"</string>
-    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Прегледајте ги неодамнешните апликации"</string>
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Прикажи ги неодамнешните апликации"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Повлечете нагоре и задржете со три прста на допирната подлога"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Одлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Го завршивте движењето за прегледување на неодамнешните апликации."</string>

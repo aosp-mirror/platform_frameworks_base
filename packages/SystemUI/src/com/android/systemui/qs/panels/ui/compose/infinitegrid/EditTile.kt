@@ -26,7 +26,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
@@ -173,6 +173,7 @@ fun DefaultEditTileGrid(
     listState: EditTileListState,
     otherTiles: List<SizedTile<EditTileViewModel>>,
     columns: Int,
+    largeTilesSpan: Int,
     modifier: Modifier,
     onRemoveTile: (TileSpec) -> Unit,
     onSetTiles: (List<TileSpec>) -> Unit,
@@ -203,7 +204,7 @@ fun DefaultEditTileGrid(
         containerColor = Color.Transparent,
         topBar = { EditModeTopBar(onStopEditing = onStopEditing, onReset = reset) },
     ) { innerPadding ->
-        CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+        CompositionLocalProvider(LocalOverscrollFactory provides null) {
             val scrollState = rememberScrollState()
             LaunchedEffect(listState.dragInProgress) {
                 if (listState.dragInProgress) {
@@ -230,7 +231,14 @@ fun DefaultEditTileGrid(
                     }
                 }
 
-                CurrentTilesGrid(listState, selectionState, columns, onResize, onSetTiles)
+                CurrentTilesGrid(
+                    listState,
+                    selectionState,
+                    columns,
+                    largeTilesSpan,
+                    onResize,
+                    onSetTiles,
+                )
 
                 // Hide available tiles when dragging
                 AnimatedVisibility(
@@ -273,7 +281,7 @@ private fun EditGridHeader(
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = modifier.fillMaxWidth().height(EditModeTileDefaults.EditGridHeaderHeight),
+            modifier = modifier.fillMaxWidth().wrapContentHeight(),
         ) {
             content()
         }
@@ -300,6 +308,7 @@ private fun CurrentTilesGrid(
     listState: EditTileListState,
     selectionState: MutableSelectionState,
     columns: Int,
+    largeTilesSpan: Int,
     onResize: (TileSpec, toIcon: Boolean) -> Unit,
     onSetTiles: (List<TileSpec>) -> Unit,
 ) {
@@ -340,7 +349,8 @@ private fun CurrentTilesGrid(
                 }
                 .testTag(CURRENT_TILES_GRID_TEST_TAG),
     ) {
-        EditTiles(cells, columns, listState, selectionState, coroutineScope) { spec ->
+        EditTiles(cells, columns, listState, selectionState, coroutineScope, largeTilesSpan) { spec
+            ->
             // Toggle the current size of the tile
             currentListState.isIcon(spec)?.let { onResize(spec, !it) }
         }
@@ -425,6 +435,7 @@ fun LazyGridScope.EditTiles(
     dragAndDropState: DragAndDropState,
     selectionState: MutableSelectionState,
     coroutineScope: CoroutineScope,
+    largeTilesSpan: Int,
     onToggleSize: (spec: TileSpec) -> Unit,
 ) {
     items(
@@ -456,6 +467,7 @@ fun LazyGridScope.EditTiles(
                         onToggleSize = onToggleSize,
                         coroutineScope = coroutineScope,
                         bounceableInfo = cells.bounceableInfo(index, columns),
+                        largeTilesSpan = largeTilesSpan,
                         modifier = Modifier.animateItem(),
                     )
                 }
@@ -472,6 +484,7 @@ private fun TileGridCell(
     selectionState: MutableSelectionState,
     onToggleSize: (spec: TileSpec) -> Unit,
     coroutineScope: CoroutineScope,
+    largeTilesSpan: Int,
     bounceableInfo: BounceableInfo,
     modifier: Modifier = Modifier,
 ) {
@@ -514,8 +527,11 @@ private fun TileGridCell(
                 .fillMaxWidth()
                 .onSizeChanged {
                     // Grab the size before the bounceable to get the idle width
-                    val min = if (cell.isIcon) it.width else (it.width - padding) / 2
-                    val max = if (cell.isIcon) (it.width * 2) + padding else it.width
+                    val totalPadding = (largeTilesSpan - 1) * padding
+                    val min =
+                        if (cell.isIcon) it.width else (it.width - totalPadding) / largeTilesSpan
+                    val max =
+                        if (cell.isIcon) (it.width * largeTilesSpan) + totalPadding else it.width
                     tileWidths = TileWidths(it.width, min, max)
                 }
                 .bounceable(
@@ -554,15 +570,13 @@ private fun TileGridCell(
             val targetValue = if (cell.isIcon) 0f else 1f
             val animatedProgress = remember { Animatable(targetValue) }
 
-            if (selected) {
-                val resizingState = selectionState.resizingState
-                LaunchedEffect(targetValue, resizingState) {
-                    if (resizingState == null) {
-                        animatedProgress.animateTo(targetValue)
-                    } else {
-                        snapshotFlow { resizingState.progression }
-                            .collectLatest { animatedProgress.snapTo(it) }
-                    }
+            val resizingState = selectionState.resizingState?.takeIf { selected }
+            LaunchedEffect(targetValue, resizingState) {
+                if (resizingState == null) {
+                    animatedProgress.animateTo(targetValue)
+                } else {
+                    snapshotFlow { resizingState.progression }
+                        .collectLatest { animatedProgress.snapTo(it) }
                 }
             }
 
@@ -705,7 +719,6 @@ private fun Modifier.tileBackground(color: Color): Modifier {
 
 private object EditModeTileDefaults {
     const val PLACEHOLDER_ALPHA = .3f
-    val EditGridHeaderHeight = 60.dp
     val CurrentTilesGridPadding = 8.dp
 
     @Composable

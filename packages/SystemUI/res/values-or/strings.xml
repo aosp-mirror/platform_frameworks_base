@@ -326,6 +326,8 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"ଇନପୁଟ୍"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"ଶ୍ରବଣ ଯନ୍ତ୍ର"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ଅନ୍ ହେଉଛି…"</string>
+    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
+    <skip />
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ଅଟୋ-ରୋଟେଟ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ଅଟୋ-ରୋଟେଟ ସ୍କ୍ରିନ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ଲୋକେସନ"</string>
@@ -414,6 +416,8 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ପ୍ରିସେଟକୁ ଅପଡେଟ କରାଯାଇପାରିଲା ନାହିଁ"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ପ୍ରିସେଟ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"ଲାଇଭ କେପ୍ସନ"</string>
+    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ଡିଭାଇସର କେମେରାକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ଡିଭାଇସର କ୍ୟାମେରା ଏବଂ ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ୍ କରିବେ?"</string>
@@ -698,8 +702,7 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ନିଶ୍ଚିତ ହୋଇଛି"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ହେଡ ଟ୍ରାକିଂ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ରିଙ୍ଗର୍ ମୋଡ୍ ବଦଳାଇବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for volume_ringer_mode (6867838048430807128) -->
-    <skip />
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"ରିଂଗର ମୋଡ"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ମ୍ୟୁଟ"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ଅନ୍‍-ମ୍ୟୁଟ୍ କରନ୍ତୁ"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ଭାଇବ୍ରେଟ୍"</string>
@@ -821,7 +824,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"ଉପର ପୃଷ୍ଠା"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"ତଳ ପୃଷ୍ଠା"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ଡିଲିଟ କରନ୍ତୁ"</string>
-    <string name="keyboard_key_esc" msgid="6230365950511411322">"ଏସକେପ"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ହୋମ"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"ସମାପ୍ତ"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"ଇନ୍‌ସର୍ଟ"</string>
@@ -869,6 +872,8 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ବ୍ୟବହାର କରିବା ସମୟରେ ଡାହାଣପଟର ବା ତଳର ଆପକୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ବ୍ୟବହାର କରିବା ସମୟରେ ବାମପଟର ବା ଉପରର ଆପକୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ସମୟରେ: କୌଣସି ଆପକୁ ଗୋଟିଏରୁ ଅନ୍ୟ ଏକ ଆପରେ ବଦଳାନ୍ତୁ"</string>
+    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ଇନପୁଟ"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ପରବର୍ତ୍ତୀ ଭାଷାକୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"ପୂର୍ବବର୍ତ୍ତୀ ଭାଷାକୁ ସୁଇଚ କରନ୍ତୁ"</string>
@@ -881,7 +886,7 @@
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ଇମେଲ୍"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"ମ୍ୟୁଜିକ୍‍"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"କ୍ୟାଲେଣ୍ଡର"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"କାଲକୁଲେଟର"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
@@ -1411,15 +1416,29 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"କୀବୋର୍ଡ ସର୍ଟକଟ"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"କୀବୋର୍ଡ ସର୍ଟକଟଗୁଡ଼ିକୁ କଷ୍ଟମାଇଜ କରନ୍ତୁ"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ସର୍ଚ୍ଚ ସର୍ଟକଟ"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"କୌଣସି ସର୍ଚ୍ଚ ଫଳାଫଳ ନାହିଁ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ଆଇକନକୁ ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
+    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
+    <skip />
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"କଷ୍ଟମାଇଜ କରନ୍ତୁ"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"ହୋଇଗଲା"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ଆଇକନକୁ ବିସ୍ତାର କରନ୍ତୁ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"କିମ୍ବା"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ଡ୍ରାଗ ହେଣ୍ଡେଲ"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"କୀବୋର୍ଡ ସେଟିଂ"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ଆପଣଙ୍କ କୀବୋର୍ଡ ବ୍ୟବହାର କରି ନାଭିଗେଟ କରନ୍ତୁ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"କୀବୋର୍ଡ ସର୍ଟକଟଗୁଡ଼ିକ ବିଷୟରେ ଜାଣନ୍ତୁ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ଆପଣଙ୍କ ଟଚପେଡ ବ୍ୟବହାର କରି ନାଭିଗେଟ କରନ୍ତୁ"</string>

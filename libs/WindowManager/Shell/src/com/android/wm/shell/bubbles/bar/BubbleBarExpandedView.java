@@ -637,11 +637,13 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
                 return true;
             }
             if (action == R.id.action_move_bubble_bar_left) {
-                mManager.updateBubbleBarLocation(BubbleBarLocation.LEFT);
+                mManager.updateBubbleBarLocation(BubbleBarLocation.LEFT,
+                        BubbleBarLocation.UpdateSource.A11Y_ACTION_EXP_VIEW);
                 return true;
             }
             if (action == R.id.action_move_bubble_bar_right) {
-                mManager.updateBubbleBarLocation(BubbleBarLocation.RIGHT);
+                mManager.updateBubbleBarLocation(BubbleBarLocation.RIGHT,
+                        BubbleBarLocation.UpdateSource.A11Y_ACTION_EXP_VIEW);
                 return true;
             }
             return false;

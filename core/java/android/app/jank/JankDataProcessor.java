@@ -87,6 +87,14 @@ public class JankDataProcessor {
     }
 
     /**
+     * Merges app jank stats reported by components outside the platform to the current pending
+     * stats
+     */
+    public void mergeJankStats(AppJankStats jankStats, String activityName) {
+        // TODO b/377572463 Add Merging Logic
+    }
+
+    /**
      * Returns the aggregate map of different pending jank stats.
      */
     @VisibleForTesting

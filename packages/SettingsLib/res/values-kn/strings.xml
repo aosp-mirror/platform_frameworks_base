@@ -591,6 +591,12 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ಬಾಹ್ಯ ಸಾಧನ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ಕನೆಕ್ಟ್ ಮಾಡಿರುವ ಸಾಧನ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ಈ ಫೋನ್"</string>
+    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
+    <skip />
+    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
+    <skip />
+    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
+    <skip />
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ಈ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ಬದಲಾಯಿಸಲು ಖಾತೆಯನ್ನು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ಇಲ್ಲಿ ಡೌನ್‌ಲೋಡ್‌ಗಳನ್ನು ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>

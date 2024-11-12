@@ -871,11 +871,10 @@ class DesktopTasksController(
             return
         }
 
-        // TODO(b/375356605): Introduce a new ResizeTrigger for drag-to-top.
         desktopModeEventLogger.logTaskResizingStarted(
-            ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
+            ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
         )
-        toggleDesktopTaskSize(taskInfo, ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent)
+        toggleDesktopTaskSize(taskInfo, ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent)
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
@@ -1291,7 +1290,11 @@ class DesktopTasksController(
                     // Check if freeform task launch during recents should be handled
                     shouldHandleMidRecentsFreeformLaunch -> handleMidRecentsFreeformTaskLaunch(task)
                     // Check if the closing task needs to be handled
-                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
+                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(
+                        task,
+                        transition,
+                        request.type
+                    )
                     // Check if the top task shouldn't be allowed to enter desktop mode
                     isIncompatibleTask(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if fullscreen task should be updated
@@ -1621,7 +1624,7 @@ class DesktopTasksController(
     }
 
     /** Handle task closing by removing wallpaper activity if it's the last active task */
-    private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
+    private fun handleTaskClosing(task: RunningTaskInfo, transition: IBinder, requestType: Int): WindowContainerTransaction? {
         logV("handleTaskClosing")
         if (!isDesktopModeShowing(task.displayId))
             return null
@@ -1637,8 +1640,15 @@ class DesktopTasksController(
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
             desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
+        } else if (requestType == TRANSIT_CLOSE) {
+            // Handle closing tasks, tasks that are going to back are handled in
+            // [DesktopTasksTransitionObserver].
+            desktopMixedTransitionHandler.addPendingMixedTransition(
+                DesktopMixedTransitionHandler.PendingMixedTransition.Minimize(
+                    transition, task.taskId, taskRepository.getVisibleTaskCount(task.displayId) == 1
+                )
+            )
         }
-
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(
                 task.displayId,

@@ -184,7 +184,7 @@
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"हटाइएका एपहरू"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"एपहरू र प्रयोगकर्ताहरू हटाइयो।"</string>
-    <string name="data_usage_ota" msgid="7984667793701597001">"प्रणालीसम्बन्धी अद्यावधिकहरू"</string>
+    <string name="data_usage_ota" msgid="7984667793701597001">"प्रणालीसम्बन्धी अपडेटहरू"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB टेदरिङ"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"पोर्टेबल हटस्पट"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ब्लुटुथ टेदर गर्दै"</string>
@@ -591,6 +591,12 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"बाह्य डिभाइस"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"कनेक्ट गरिएको डिभाइस"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यो फोन"</string>
+    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
+    <skip />
+    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
+    <skip />
+    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
+    <skip />
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"यो डिभाइसमा मिडिया प्ले गर्न मिल्दैन"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"आफूले प्रयोग गर्न चाहेको खाता अपग्रेड गर्नुहोस्"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"डाउनलोड गरिएका सामग्री यसमा प्ले गर्न मिल्दैन"</string>
