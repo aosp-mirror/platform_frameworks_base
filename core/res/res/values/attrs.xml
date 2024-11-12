@@ -1218,132 +1218,155 @@
              it prevent any 'false' in any of its children. -->
         <attr name="forceDarkAllowed" format="boolean" />
 
-        <!-- Dynamic Tokens -->
-
-        <!-- @hide -->
-        <attr name="materialColorBackground" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorControlActivated" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorControlHighlight" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorControlNormal" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorError" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorErrorContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorInverseOnSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorInversePrimary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorInverseSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnBackground" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnError" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnErrorContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnPrimary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnPrimaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSecondary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSecondaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSurfaceVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnTertiary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnTertiaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOutline" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOutlineVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorNeutral" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorNeutralVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorPrimary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorSecondary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorTertiary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPrimary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPrimaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorScrim" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSecondary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSecondaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorShadow" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceBright" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainerHigh" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainerHighest" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainerLow" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainerLowest" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceDim" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceTint" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTertiary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTertiaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextHintInverse" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextPrimaryInverse" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextPrimaryInverseDisableOnly" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextSecondaryAndTertiaryInverse" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextSecondaryAndTertiaryInverseDisabled" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnPrimaryFixed" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnPrimaryFixedVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSecondaryFixed" format="color"/>
-        <!-- @hide -->
+        <!-- A lower-emphasized variant of the color on the fixed secondary branding color. @hide
+             -->
         <attr name="materialColorOnSecondaryFixedVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnTertiaryFixed" format="color"/>
-        <!-- @hide -->
+        <!-- A lower-emphasized variant of the color on the fixed tertiary branding color. @hide
+             -->
         <attr name="materialColorOnTertiaryFixedVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPrimaryFixed" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPrimaryFixedDim" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSecondaryFixed" format="color"/>
-        <!-- @hide -->
+        <!-- The container color of surface the most lowered. @hide -->
+        <attr name="materialColorSurfaceContainerLowest" format="color"/>
+        <!-- A lower-emphasized variant of the color on the fixed primary branding color. @hide -->
+        <attr name="materialColorOnPrimaryFixedVariant" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the secondary container color. @hide -->
+        <attr name="materialColorOnSecondaryContainer" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the tertiary container color. @hide -->
+        <attr name="materialColorOnTertiaryContainer" format="color"/>
+        <!-- The container color of surface slightly lowered, which replaces the previous surface
+             at elevation level 1. @hide -->
+        <attr name="materialColorSurfaceContainerLow" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the primary container color. @hide -->
+        <attr name="materialColorOnPrimaryContainer" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed secondary branding color. @hide -->
         <attr name="materialColorSecondaryFixedDim" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTertiaryFixed" format="color"/>
-        <!-- @hide -->
+        <!-- A tonal variation of the on error color that passes accessibility guidelines for
+             text/iconography when drawn on top of error container. @hide -->
+        <attr name="materialColorOnErrorContainer" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed secondary branding color.
+             @hide -->
+        <attr name="materialColorOnSecondaryFixed" format="color"/>
+        <!-- The "on surface" inverse color, useful for inverted backgrounds. @hide -->
+        <attr name="materialColorOnSurfaceInverse" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed tertiary branding color. @hide -->
         <attr name="materialColorTertiaryFixedDim" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed tertiary branding color.
+             @hide -->
+        <attr name="materialColorOnTertiaryFixed" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed primary branding color. @hide -->
+        <attr name="materialColorPrimaryFixedDim" format="color"/>
+        <!-- A tonal variation of the secondary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorSecondaryContainer" format="color"/>
+        <!-- A tonal variation of the error color suitable for background color of container views.
+             @hide -->
+        <attr name="materialColorErrorContainer" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed primary branding color.
+             @hide -->
+        <attr name="materialColorOnPrimaryFixed" format="color"/>
+        <!-- The inverse color of colorPrimary. @hide -->
+        <attr name="materialColorPrimaryInverse" format="color"/>
+        <!-- A secondary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorSecondaryFixed" format="color"/>
+        <!-- The surface inverse color, useful for inverted backgrounds. @hide -->
+        <attr name="materialColorSurfaceInverse" format="color"/>
+        <!-- A tonal variation of the surface color. @hide -->
+        <attr name="materialColorSurfaceVariant" format="color"/>
+        <!-- A tonal variation of the tertiary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorTertiaryContainer" format="color"/>
+        <!-- A tertiary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorTertiaryFixed" format="color"/>
+        <!-- A tonal variation of the primary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorPrimaryContainer" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             background. @hide -->
+        <attr name="materialColorOnBackground" format="color"/>
+        <!-- A primary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorPrimaryFixed" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             secondary. @hide -->
+        <attr name="materialColorOnSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             tertiary. @hide -->
+        <attr name="materialColorOnTertiary" format="color"/>
+        <!-- The surface color which always stay the dimmest in either dark or light theme. @hide
+             -->
+        <attr name="materialColorSurfaceDim" format="color"/>
+        <!-- The surface color which always stay the brightest in either dark or light theme. @hide
+             -->
+        <attr name="materialColorSurfaceBright" format="color"/>
+        <!-- The secondary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             error. @hide -->
+        <attr name="materialColorOnError" format="color"/>
+        <!-- The color of surfaces such as cards, sheets, menus. @hide -->
+        <attr name="materialColorSurface" format="color"/>
+        <!-- The container color of surface slightly elevated, which replaces the previous surface
+             at elevation level 3. @hide -->
+        <attr name="materialColorSurfaceContainerHigh" format="color"/>
+        <!-- The tertiary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorTertiary" format="color"/>
+        <!-- The container color of surface the most elevated, which replaces the previous surface
+             variant. @hide -->
+        <attr name="materialColorSurfaceContainerHighest" format="color"/>
+        <!-- A tonal variation of the on surface color that passes accessibility guidelines for
+             text/iconography when drawn on top of surface variant. @hide -->
+        <attr name="materialColorOnSurfaceVariant" format="color"/>
+        <!-- A color meant to be used in element outlines. @hide -->
+        <attr name="materialColorOutline" format="color"/>
+        <!-- A color meant to be used in element outlines on the surface-variant color. @hide -->
+        <attr name="materialColorOutlineVariant" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             primary. @hide -->
+        <attr name="materialColorOnPrimary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             surface. @hide -->
+        <attr name="materialColorOnSurface" format="color"/>
+        <!-- The container color of surface, which replaces the previous surface at elevation level
+             2. @hide -->
+        <attr name="materialColorSurfaceContainer" format="color"/>
+        <!-- The container color of surface, which replaces the previous surface at elevation level
+             2. @hide -->
+        <attr name="materialColorSurfaceContainer" format="color"/>
+         <!-- The primary branding color for the app. By default, this is the color applied to the
+             action bar background. @hide -->
+        <attr name="materialColorPrimary" format="color"/>
+        <!-- The secondary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top
+             of tertiary. @hide -->
+        <attr name="materialColorTertiary" format="color"/>
+        <!-- The error color for the app, intended to draw attention to error conditions. @hide -->
+        <attr name="materialColorError" format="color"/>
+
+        <!-- System Custom Tokens-->
+        <!-- @hide -->
+        <attr name="customColorWidgetBackground" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockHour" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockMinute" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockSecond" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorThemeApp" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnThemeApp" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorThemeAppRing" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorThemeNotif" format="color"/>
         <!-- @hide -->
         <attr name="customColorBrandA" format="color"/>
         <!-- @hide -->
@@ -1353,41 +1376,23 @@
         <!-- @hide -->
         <attr name="customColorBrandD" format="color"/>
         <!-- @hide -->
-        <attr name="customColorClockHour" format="color"/>
+        <attr name="customColorUnderSurface" format="color"/>
         <!-- @hide -->
-        <attr name="customColorClockMinute" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockSecond" format="color"/>
+        <attr name="customColorShadeActive" format="color"/>
         <!-- @hide -->
         <attr name="customColorOnShadeActive" format="color"/>
         <!-- @hide -->
         <attr name="customColorOnShadeActiveVariant" format="color"/>
         <!-- @hide -->
+        <attr name="customColorShadeInactive" format="color"/>
+        <!-- @hide -->
         <attr name="customColorOnShadeInactive" format="color"/>
         <!-- @hide -->
         <attr name="customColorOnShadeInactiveVariant" format="color"/>
         <!-- @hide -->
-        <attr name="customColorOnThemeApp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOverviewBackground" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeActive" format="color"/>
-        <!-- @hide -->
         <attr name="customColorShadeDisabled" format="color"/>
         <!-- @hide -->
-        <attr name="customColorShadeInactive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeApp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeAppRing" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeNotif" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorUnderSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorWeatherTemp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorWidgetBackground" format="color"/>
+        <attr name="customColorOverviewBackground" format="color"/>
 
     </declare-styleable>
 
