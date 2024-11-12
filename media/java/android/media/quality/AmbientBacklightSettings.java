@@ -16,7 +16,11 @@
 
 package android.media.quality;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.graphics.PixelFormat;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,7 +33,8 @@ import java.lang.annotation.RetentionPolicy;
  * Settings for ambient backlight.
  * @hide
  */
-public class AmbientBacklightSettings implements Parcelable {
+@FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
+public final class AmbientBacklightSettings implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SOURCE_NONE, SOURCE_AUDIO, SOURCE_VIDEO, SOURCE_AUDIO_VIDEO})
@@ -62,6 +67,7 @@ public class AmbientBacklightSettings implements Parcelable {
 
     /**
      * The color format is RGB888.
+     * @hide
      */
     public static final int COLOR_FORMAT_RGB888 = 1;
 
@@ -76,7 +82,7 @@ public class AmbientBacklightSettings implements Parcelable {
     public static final int ALGORITHM_NONE = 0;
 
     /**
-     * The compress algorithm is RLE.
+     * The compress algorithm is run length encoding (RLE).
      */
     public static final int ALGORITHM_RLE = 1;
 
@@ -115,6 +121,9 @@ public class AmbientBacklightSettings implements Parcelable {
      */
     private final int mThreshold;
 
+    /**
+     * Constructs AmbientBacklightSettings.
+     */
     public AmbientBacklightSettings(int source, int maxFps, int colorFormat,
             int horizontalZonesNumber, int verticalZonesNumber, boolean isLetterboxOmitted,
             int threshold) {
@@ -137,32 +146,57 @@ public class AmbientBacklightSettings implements Parcelable {
         mThreshold = in.readInt();
     }
 
+    /**
+     * Gets source of ambient backlight detection.
+     */
     @Source
     public int getSource() {
         return mSource;
     }
 
+    /**
+     * Gets max frames per second.
+     */
+    @IntRange(from = 1)
     public int getMaxFps() {
         return mMaxFps;
     }
 
-    @ColorFormat
+    /**
+     * Gets color format.
+     */
+    @PixelFormat.Format
     public int getColorFormat() {
         return mColorFormat;
     }
 
+    /**
+     * Gets the number of lights in each horizontal zone.
+     */
+    @IntRange(from = 0)
     public int getHorizontalZonesNumber() {
         return mHorizontalZonesNumber;
     }
 
+    /**
+     * Gets the number of lights in each vertical zone.
+     */
+    @IntRange(from = 0)
     public int getVerticalZonesNumber() {
         return mVerticalZonesNumber;
     }
 
+    /**
+     * Returns {@code true} if letter box is omitted; {@code false} otherwise.
+     * @hide
+     */
     public boolean isLetterboxOmitted() {
         return mIsLetterboxOmitted;
     }
 
+    /**
+     * @hide
+     */
     public int getThreshold() {
         return mThreshold;
     }
