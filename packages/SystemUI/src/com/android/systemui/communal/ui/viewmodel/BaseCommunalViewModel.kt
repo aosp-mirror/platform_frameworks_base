@@ -178,7 +178,13 @@ abstract class BaseCommunalViewModel(
      *   alongside the resize, in case resizing also requires re-ordering. This ensures the
      *   re-ordering is done in the same database transaction as the resize.
      */
-    open fun onResizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {}
+    open fun onResizeWidget(
+        appWidgetId: Int,
+        spanY: Int,
+        widgetIdToRankMap: Map<Int, Int>,
+        componentName: ComponentName,
+        rank: Int,
+    ) {}
 
     /** Called as the UI requests opening the widget editor with an optional preselected widget. */
     open fun onOpenWidgetEditor(shouldOpenWidgetPickerOnStart: Boolean = false) {}
