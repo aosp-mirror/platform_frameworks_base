@@ -146,30 +146,6 @@
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b20000">
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_inverse_on_surface_light"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_inverse_primary_light"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_inverse_surface_light"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_scrim_light"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_shadow_light"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_surface_tint_light"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_inverse_on_surface_dark"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_inverse_primary_dark"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_inverse_surface_dark"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_scrim_dark"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_shadow_dark"/>
-    <!-- @FlaggedApi("com.android.systemui.material_colors_10_2024")-->
-    <public name="system_surface_tint_dark"/>
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01b10000">

@@ -89,7 +89,7 @@ class PlatformThemeTest {
             addValue(
                 "inversePrimary",
                 colorScheme.inversePrimary,
-                R.attr.materialColorInversePrimary,
+                R.attr.materialColorPrimaryInverse,
             )
             addValue("secondary", colorScheme.secondary, R.attr.materialColorSecondary)
             addValue("onSecondary", colorScheme.onSecondary, R.attr.materialColorOnSecondary)
@@ -131,12 +131,12 @@ class PlatformThemeTest {
             addValue(
                 "inverseSurface",
                 colorScheme.inverseSurface,
-                R.attr.materialColorInverseSurface,
+                R.attr.materialColorSurfaceInverse,
             )
             addValue(
                 "inverseOnSurface",
                 colorScheme.inverseOnSurface,
-                R.attr.materialColorInverseOnSurface,
+                R.attr.materialColorOnSurfaceInverse,
             )
             addValue("error", colorScheme.error, R.attr.materialColorError)
             addValue("onError", colorScheme.onError, R.attr.materialColorOnError)
