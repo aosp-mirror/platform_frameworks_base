@@ -16754,9 +16754,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_DETERMINED;
             }
         }
-        final boolean processForRotaryScrollHaptics =
-                isRotaryEncoderEvent && ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_ENABLED) != 0);
-        if (processForRotaryScrollHaptics) {
+        if (isRotaryEncoderEvent && ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_ENABLED) != 0)) {
             mPrivateFlags4 &= ~PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT;
             mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT;
         }
@@ -16773,7 +16771,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Process scroll haptics after `onGenericMotionEvent`, since that's where scrolling usually
         // happens. Some views may return false from `onGenericMotionEvent` even if they have done
         // scrolling, so disregard the return value when processing for scroll haptics.
-        if (processForRotaryScrollHaptics) {
+        // Check for `PFLAG4_ROTARY_HAPTICS_ENABLED` again, because the View implementation may
+        // call `disableRotaryScrollFeedback` in `onGenericMotionEvent`, which could change the
+        // value of `PFLAG4_ROTARY_HAPTICS_ENABLED`.
+        if (isRotaryEncoderEvent && ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_ENABLED) != 0)) {
             if ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT) != 0) {
                 doRotaryProgressForScrollHaptics(event);
             } else {
@@ -18716,7 +18717,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private HapticScrollFeedbackProvider getScrollFeedbackProvider() {
         if (mScrollFeedbackProvider == null) {
             mScrollFeedbackProvider = new HapticScrollFeedbackProvider(this,
-                    ViewConfiguration.get(mContext), /* disabledIfViewPlaysScrollHaptics= */ false);
+                    ViewConfiguration.get(mContext), /* isFromView= */ true);
         }
         return mScrollFeedbackProvider;
     }
@@ -18743,6 +18744,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT;
             mPrivateFlags4 &= ~PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT;
         }
+    }
+
+    /**
+     * Disables the rotary scroll feedback implementation of the View class.
+     *
+     * <p>Note that this does NOT disable all rotary scroll feedback; it just disables the logic
+     * implemented within the View class. The child implementation of the View may implement its own
+     * rotary scroll feedback logic or use {@link ScrollFeedbackProvider} to generate rotary scroll
+     * feedback.
+     */
+    void disableRotaryScrollFeedback() {
+        // Force set PFLAG4_ROTARY_HAPTICS_DETERMINED to avoid recalculating
+        // PFLAG4_ROTARY_HAPTICS_ENABLED under any circumstance.
+        mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_DETERMINED;
+        mPrivateFlags4 &= ~PFLAG4_ROTARY_HAPTICS_ENABLED;
     }
 
     /**
