@@ -3380,8 +3380,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (cleanupOnResume) {
                 requestUpdateWallpaperIfNeeded();
             }
-            mDestroying = false;
-            destroyedSomething = true;
+            if (!mHasSurface) {
+                mDestroying = false;
+                destroyedSomething = true;
+            }
 
             // Since mDestroying will affect ActivityRecord#allDrawn, we need to perform another
             // traversal in case we are waiting on this window to start the transition.
