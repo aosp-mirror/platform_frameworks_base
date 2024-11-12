@@ -28,6 +28,7 @@ import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
@@ -42,7 +43,7 @@ class SplitShadeMediaSection
 constructor(
     @ShadeDisplayAware private val context: Context,
     private val notificationPanelView: NotificationPanelView,
-    private val keyguardMediaController: KeyguardMediaController
+    private val keyguardMediaController: KeyguardMediaController,
 ) : KeyguardSection() {
     private val mediaContainerId = R.id.status_view_media_container
 
@@ -62,7 +63,7 @@ constructor(
                 val horizontalPadding =
                     padding +
                         context.resources.getDimensionPixelSize(
-                            R.dimen.status_view_margin_horizontal
+                            customR.dimen.status_view_margin_horizontal
                         )
 
                 setPaddingRelative(horizontalPadding, padding, horizontalPadding, padding)

@@ -1955,8 +1955,6 @@
     <dimen name="dream_overlay_entry_y_offset">40dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
 
-    <dimen name="status_view_margin_horizontal">0dp</dimen>
-
     <!-- Media output broadcast dialog QR code picture size -->
     <dimen name="media_output_qrcode_size">216dp</dimen>
     <dimen name="media_output_broadcast_info">21dp</dimen>
