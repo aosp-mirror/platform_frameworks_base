@@ -21030,6 +21030,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public boolean removeManagedProfile(int userId) {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        if (!isManagedProfile(userId)){
+            throw new IllegalArgumentException("Cannot remove user as it is not a managed profile");
+        }
+
+        boolean success = false;
+        final long identity = Binder.clearCallingIdentity();
+        try{
+            success = mUserManager.removeUserEvenWhenDisallowed(userId);
+        } catch (Exception e) {
+            Slogf.e(LOG_TAG, "Remove managed profile failed due to: ", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return success;
+    }
+
+    @Override
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams,
             @NonNull String callerPackage) {

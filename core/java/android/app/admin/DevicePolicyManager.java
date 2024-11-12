@@ -55,6 +55,7 @@ import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_REMOVE_MANAGED_PROFILE_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
@@ -16956,6 +16957,30 @@ public class DevicePolicyManager {
                     provisioningParams, mContext.getPackageName());
         } catch (ServiceSpecificException e) {
             throw new ProvisioningException(e, e.errorCode, getErrorMessage(e));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a manged profile from the device only when called from a managed profile's context
+     *
+     * @param user UserHandle of the profile to be removed
+     * @return {@code true} when removal of managed profile was successful, {@code false} when
+     * removal was unsuccessful or throws IllegalArgumentException when provided user was not a
+     * managed profile
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @FlaggedApi(FLAG_REMOVE_MANAGED_PROFILE_ENABLED)
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean removeManagedProfile() {
+        if (mService == null) {
+            throw new IllegalStateException("Could not find DevicePolicyManagerService");
+        }
+        try {
+            return mService.removeManagedProfile(myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

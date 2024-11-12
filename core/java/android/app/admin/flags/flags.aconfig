@@ -343,13 +343,20 @@ flag {
 }
 
 flag {
-  name: "user_provisioning_same_state"
-  namespace: "enterprise"
-  description: "Handle exceptions while setting same provisioning state."
-  bug: "326441417"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
+    name: "user_provisioning_same_state"
+    namespace: "enterprise"
+    description: "Handle exceptions while setting same provisioning state."
+    bug: "326441417"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "remove_managed_profile_enabled"
+    namespace: "enterprise"
+    description: "API that removes a given managed profile."
+    bug: "372652841"
 }
 
 flag {
