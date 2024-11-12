@@ -1088,7 +1088,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
-    fun onMaxBoundsChanged_beforeStart_flagDisabled_listenerNotNotified() {
+    fun onMaxBoundsChanged_beforeStart_flagDisabled_listenerNotified() {
         // Start out with an existing configuration with bounds
         configuration.windowConfiguration.setMaxBounds(0, 0, 100, 100)
         configurationController.onConfigurationChanged(configuration)
