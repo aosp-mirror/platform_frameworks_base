@@ -175,7 +175,7 @@ public final class MediaProjectionManagerService extends SystemService
 
     private void maybeStopMediaProjection(int reason) {
         synchronized (mLock) {
-            if (!mMediaProjectionStopController.isExemptFromStopping(mProjectionGrant)) {
+            if (!mMediaProjectionStopController.isExemptFromStopping(mProjectionGrant, reason)) {
                 Slog.d(TAG, "Content Recording: Stopping MediaProjection due to "
                         + MediaProjectionStopController.stopReasonToString(reason));
                 mProjectionGrant.stop();
@@ -1270,6 +1270,10 @@ public final class MediaProjectionManagerService extends SystemService
         @Override // Binder call
         public int getDisplayId() {
             return mDisplayId;
+        }
+
+        long getCreateTimeMillis() {
+            return mCreateTimeMs;
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
