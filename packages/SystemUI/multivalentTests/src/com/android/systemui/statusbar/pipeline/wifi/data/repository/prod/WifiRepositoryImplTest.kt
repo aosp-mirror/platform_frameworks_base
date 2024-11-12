@@ -27,10 +27,14 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
@@ -40,9 +44,7 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkMode
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.user.data.repository.userRepository
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.time.fakeSystemClock
 import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.HotspotNetworkEntry.DeviceType
@@ -53,31 +55,22 @@ import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN
 import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE
 import com.android.wifitrackerlib.WifiPickerTracker
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.capture
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-/**
- * Note: Most of these tests are duplicates of [WifiRepositoryImplTest] tests.
- *
- * Any new tests added here may also need to be added to [WifiRepositoryImplTest].
- */
-@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class WifiRepositoryImplTest() : SysuiTestCase() {
-    private val kosmos = testKosmos()
+class WifiRepositoryImplTest : SysuiTestCase() {
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val userRepository = kosmos.fakeUserRepository
 
     // Using lazy means that the class will only be constructed once it's fetched. Because the
@@ -108,13 +101,13 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
 
     private val callbackCaptor = argumentCaptor<WifiPickerTracker.WifiPickerTrackerCallback>()
 
-    private val dispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(dispatcher)
+    private val dispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
 
     @Before
     fun setUp() {
         userRepository.setUserInfos(listOf(PRIMARY_USER, ANOTHER_USER))
-        whenever(wifiPickerTrackerFactory.create(any(), any(), capture(callbackCaptor), any()))
+        whenever(wifiPickerTrackerFactory.create(any(), any(), callbackCaptor.capture(), any()))
             .thenReturn(wifiPickerTracker)
     }
 
@@ -122,7 +115,6 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
     fun wifiPickerTrackerCreation_scansDisabled() =
         testScope.runTest {
             collectLastValue(underTest.wifiNetwork)
-            testScope.runCurrent()
 
             verify(wifiPickerTracker).disableScanning()
         }
@@ -1001,7 +993,6 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 mock<WifiEntry>().apply { whenever(this.isPrimaryNetwork).thenReturn(false) }
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
-            testScope.runCurrent()
 
             assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
         }
@@ -1017,7 +1008,6 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 }
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
-            testScope.runCurrent()
 
             assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
         }
@@ -1034,7 +1024,6 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 }
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
-            testScope.runCurrent()
 
             assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
         }
@@ -1051,7 +1040,6 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 }
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
-            testScope.runCurrent()
 
             assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
         }
@@ -1068,7 +1056,6 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 }
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
-            testScope.runCurrent()
 
             assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
         }
@@ -1085,7 +1072,6 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 }
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
-            testScope.runCurrent()
 
             assertThat(underTest.isWifiConnectedWithValidSsid()).isTrue()
         }
@@ -1103,14 +1089,12 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 }
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
-            testScope.runCurrent()
 
             assertThat(underTest.isWifiConnectedWithValidSsid()).isTrue()
 
             // WHEN the network is lost
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(null)
             getCallback().onWifiEntriesChanged()
-            testScope.runCurrent()
 
             // THEN the isWifiConnected updates
             assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
@@ -1230,7 +1214,7 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
             )
 
             userRepository.setSelectedUserInfo(PRIMARY_USER)
-            runCurrent()
+
             val currentUserContext by collectLastValue(underTest.selectedUserContext)
 
             assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
@@ -1250,9 +1234,8 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 primaryUserMockContext,
             )
 
-            runCurrent()
             userRepository.setSelectedUserInfo(PRIMARY_USER)
-            runCurrent()
+
             val currentUserContext by collectLastValue(underTest.selectedUserContext)
 
             assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
@@ -1263,9 +1246,8 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 otherUserMockContext,
             )
 
-            runCurrent()
             userRepository.setSelectedUserInfo(ANOTHER_USER)
-            runCurrent()
+
             val otherUserContext by collectLastValue(underTest.selectedUserContext)
 
             assertThat(otherUserContext).isEqualTo(otherUserMockContext)
@@ -1285,9 +1267,8 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 primaryUserMockContext,
             )
 
-            runCurrent()
             userRepository.setSelectedUserInfo(PRIMARY_USER)
-            runCurrent()
+
             val currentUserContext by collectLastValue(underTest.selectedUserContext)
 
             assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
@@ -1298,23 +1279,19 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
                 otherUserMockContext,
             )
 
-            runCurrent()
             userRepository.setSelectedUserInfo(ANOTHER_USER)
-            runCurrent()
 
             verify(wifiPickerTrackerFactory, times(1)).create(any(), any(), any(), any())
         }
 
     private fun getCallback(): WifiPickerTracker.WifiPickerTrackerCallback {
-        testScope.runCurrent()
-        return callbackCaptor.value
+        return callbackCaptor.firstValue
     }
 
     private fun getTrafficStateCallback(): WifiManager.TrafficStateCallback {
-        testScope.runCurrent()
         val callbackCaptor = argumentCaptor<WifiManager.TrafficStateCallback>()
         verify(wifiManager).registerTrafficStateCallback(any(), callbackCaptor.capture())
-        return callbackCaptor.value!!
+        return callbackCaptor.firstValue
     }
 
     private fun createHotspotWithType(@DeviceType type: Int): HotspotNetworkEntry {
@@ -1325,10 +1302,9 @@ class WifiRepositoryImplTest() : SysuiTestCase() {
     }
 
     private fun getScanResultsCallback(): WifiManager.ScanResultsCallback {
-        testScope.runCurrent()
         val callbackCaptor = argumentCaptor<WifiManager.ScanResultsCallback>()
         verify(wifiManager).registerScanResultsCallback(any(), callbackCaptor.capture())
-        return callbackCaptor.value!!
+        return callbackCaptor.firstValue
     }
 
     private companion object {
