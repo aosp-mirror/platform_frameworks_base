@@ -44,7 +44,7 @@ import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.server.UiServiceTestCase;
@@ -89,7 +89,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 @RunWith(AndroidJUnit4.class)
-@EnableFlags({Flags.FLAG_VISIT_PERSON_URI, Flags.FLAG_API_RICH_ONGOING})
+@EnableFlags({Flags.FLAG_API_RICH_ONGOING})
 public class NotificationVisitUrisTest extends UiServiceTestCase {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();

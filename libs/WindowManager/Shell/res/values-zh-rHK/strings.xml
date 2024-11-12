@@ -127,8 +127,7 @@
     <string name="open_in_browser_text" msgid="9181692926376072904">"在瀏覽器中開啟"</string>
     <string name="new_window_text" msgid="6318648868380652280">"新視窗"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"管理視窗"</string>
-    <!-- no translation found for change_aspect_ratio_text (9104456064548212806) -->
-    <skip />
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"變更長寬比"</string>
     <string name="close_text" msgid="4986518933445178928">"關閉"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"關閉選單"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"打開選單"</string>
@@ -146,6 +145,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"在應用程式內"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"在瀏覽器中"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"確定"</string>
-    <!-- no translation found for desktop_windowing_app_to_web_education_text (1599668769538703570) -->
-    <skip />
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"在此透過瀏覽器快速開啟應用程式"</string>
 </resources>

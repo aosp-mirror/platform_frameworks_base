@@ -46,6 +46,7 @@ class DesktopTasksTransitionObserver(
     private val desktopRepository: DesktopRepository,
     private val transitions: Transitions,
     private val shellTaskOrganizer: ShellTaskOrganizer,
+    private val desktopMixedTransitionHandler: DesktopMixedTransitionHandler,
     shellInit: ShellInit
 ) : Transitions.TransitionObserver {
 
@@ -71,7 +72,7 @@ class DesktopTasksTransitionObserver(
         // TODO: b/332682201 Update repository state
         updateWallpaperToken(info)
         if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
-            handleBackNavigation(info)
+            handleBackNavigation(transition, info)
             removeTaskIfNeeded(info)
         }
         removeWallpaperOnLastTaskClosingIfNeeded(transition, info)
@@ -95,7 +96,7 @@ class DesktopTasksTransitionObserver(
         }
     }
 
-    private fun handleBackNavigation(info: TransitionInfo) {
+    private fun handleBackNavigation(transition: IBinder, info: TransitionInfo) {
         // When default back navigation happens, transition type is TO_BACK and the change is
         // TO_BACK. Mark the task going to back as minimized.
         if (info.type == TRANSIT_TO_BACK) {
@@ -105,10 +106,14 @@ class DesktopTasksTransitionObserver(
                     continue
                 }
 
-                if (desktopRepository.getVisibleTaskCount(taskInfo.displayId) > 0 &&
+                val visibleTaskCount = desktopRepository.getVisibleTaskCount(taskInfo.displayId)
+                if (visibleTaskCount > 0 &&
                     change.mode == TRANSIT_TO_BACK &&
                     taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
                     desktopRepository.minimizeTask(taskInfo.displayId, taskInfo.taskId)
+                    desktopMixedTransitionHandler.addPendingMixedTransition(
+                        DesktopMixedTransitionHandler.PendingMixedTransition.Minimize(
+                            transition, taskInfo.taskId, visibleTaskCount == 1))
                 }
             }
         }

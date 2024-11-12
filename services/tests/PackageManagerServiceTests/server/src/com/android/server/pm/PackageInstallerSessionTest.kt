@@ -201,7 +201,8 @@ class PackageInstallerSessionTest {
             /* preVerifiedDomains */ DomainSet(setOf("com.foo", "com.bar")),
             /* VerifierController */ mock(VerifierController::class.java),
             /* initialVerificationPolicy */ VERIFICATION_POLICY_BLOCK_FAIL_OPEN,
-            /* currentVerificationPolicy */ VERIFICATION_POLICY_BLOCK_FAIL_CLOSED
+            /* currentVerificationPolicy */ VERIFICATION_POLICY_BLOCK_FAIL_CLOSED,
+            /* installDependencyHelper */ null
         )
     }
 
@@ -256,7 +257,8 @@ class PackageInstallerSessionTest {
                                 mTmpDir,
                                 mock(PackageSessionProvider::class.java),
                                 mock(SilentUpdatePolicy::class.java),
-                                mock(VerifierController::class.java)
+                                mock(VerifierController::class.java),
+                                mock(InstallDependencyHelper::class.java)
                             )
                             ret.add(session)
                         } catch (e: Exception) {

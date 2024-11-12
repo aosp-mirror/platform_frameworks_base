@@ -594,6 +594,10 @@ class DesktopModeEventLogger {
                 FrameworkStatsLog
                     .DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__MAXIMIZE_MENU_RESIZE_TRIGGER
             ),
+            DRAG_TO_TOP_RESIZE_TRIGGER(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZE_TRIGGER__DRAG_TO_TOP_RESIZE_TRIGGER
+            ),
         }
 
         /**

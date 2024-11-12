@@ -86,7 +86,7 @@ static jlong shapeTextRun(const uint16_t* text, int textSize, int start, int cou
         overallDescent = std::max(overallDescent, extent.descent);
     }
 
-    if (text_feature::typeface_redesign()) {
+    if (text_feature::typeface_redesign_readonly()) {
         uint32_t runCount = layout.getFontRunCount();
 
         std::unordered_map<minikin::FakedFont, uint32_t, FakedFontKey> fakedToFontIds;
@@ -229,7 +229,7 @@ float findValueFromVariationSettings(const minikin::FontFakery& fakery, minikin:
 // CriticalNative
 static jfloat TextShaper_Result_getWeightOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
-    if (text_feature::typeface_redesign()) {
+    if (text_feature::typeface_redesign_readonly()) {
         float value =
                 findValueFromVariationSettings(layout->layout.getFakery(i), minikin::TAG_wght);
         return std::isnan(value) ? NO_OVERRIDE : value;
@@ -241,7 +241,7 @@ static jfloat TextShaper_Result_getWeightOverride(CRITICAL_JNI_PARAMS_COMMA jlon
 // CriticalNative
 static jfloat TextShaper_Result_getItalicOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
-    if (text_feature::typeface_redesign()) {
+    if (text_feature::typeface_redesign_readonly()) {
         float value =
                 findValueFromVariationSettings(layout->layout.getFakery(i), minikin::TAG_ital);
         return std::isnan(value) ? NO_OVERRIDE : value;

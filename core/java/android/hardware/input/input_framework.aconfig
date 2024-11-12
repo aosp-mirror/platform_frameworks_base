@@ -153,8 +153,8 @@ flag {
 
 flag {
   name: "override_power_key_behavior_in_focused_window"
-  namespace: "input_native"
-  description: "Allows privileged focused windows to capture power key events."
+  namespace: "wallet_integration"
+  description: "Allows privileged focused windows to override the power key double tap behavior."
   bug: "357144512"
 }
 

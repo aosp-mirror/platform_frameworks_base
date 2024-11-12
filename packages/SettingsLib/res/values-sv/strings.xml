@@ -235,7 +235,7 @@
     <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Välj profil"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personlig"</string>
     <string name="category_work" msgid="4014193632325996115">"Jobb"</string>
     <string name="category_private" msgid="4244892185452788977">"Privat"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
@@ -591,6 +591,12 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Extern enhet"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Ansluten enhet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Den här telefonen"</string>
+    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
+    <skip />
+    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
+    <skip />
+    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
+    <skip />
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan inte spelas på denna enhet"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Uppgradera kontot för att byta"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Det går inte att spela upp nedladdningar här"</string>

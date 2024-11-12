@@ -32,6 +32,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobWorkItem;
+import android.app.job.PendingJobReasonsInfo;
 import android.app.job.UserVisibleJobSummary;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -39,6 +40,7 @@ import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.text.format.DateFormat;
@@ -72,6 +74,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Predicate;
@@ -514,6 +517,10 @@ public final class JobStatus {
     private int mConstraintChangeHistoryIndex = 0;
     private final long[] mConstraintUpdatedTimesElapsed = new long[NUM_CONSTRAINT_CHANGE_HISTORY];
     private final int[] mConstraintStatusHistory = new int[NUM_CONSTRAINT_CHANGE_HISTORY];
+
+    private final List<PendingJobReasonsInfo> mPendingJobReasonsHistory = new ArrayList<>();
+    private static final int PENDING_JOB_HISTORY_RETURN_LIMIT = 10;
+    private static final int PENDING_JOB_HISTORY_TRIM_THRESHOLD = 25;
 
     /**
      * For use only by ContentObserverController: state it is maintaining about content URIs
@@ -1992,6 +1999,16 @@ public final class JobStatus {
             mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
         }
 
+        final int unsatisfiedConstraints = ~satisfiedConstraints
+                & (requiredConstraints | mDynamicConstraints | IMPLICIT_CONSTRAINTS);
+        populatePendingJobReasonsHistoryMap(isReady, nowElapsed, unsatisfiedConstraints);
+        final int historySize = mPendingJobReasonsHistory.size();
+        if (historySize >= PENDING_JOB_HISTORY_TRIM_THRESHOLD) {
+            // Ensure trimming doesn't occur too often - max history we currently return is 10
+            mPendingJobReasonsHistory.subList(0, historySize - PENDING_JOB_HISTORY_RETURN_LIMIT)
+                                     .clear();
+        }
+
         return true;
     }
 
@@ -2066,14 +2083,10 @@ public final class JobStatus {
         }
     }
 
-    /**
-     * This will return all potential reasons why the job is pending.
-     */
     @NonNull
-    public int[] getPendingJobReasons() {
+    public ArrayList<Integer> constraintsToPendingJobReasons(int unsatisfiedConstraints) {
         final ArrayList<Integer> reasons = new ArrayList<>();
-        final int unsatisfiedConstraints = ~satisfiedConstraints
-                & (requiredConstraints | mDynamicConstraints | IMPLICIT_CONSTRAINTS);
+
         if ((CONSTRAINT_BACKGROUND_NOT_RESTRICTED & unsatisfiedConstraints) != 0) {
             // The BACKGROUND_NOT_RESTRICTED constraint could be unsatisfied either because
             // the app is background restricted, or because we're restricting background work
@@ -2159,6 +2172,18 @@ public final class JobStatus {
             }
         }
 
+        return reasons;
+    }
+
+    /**
+     * This will return all potential reasons why the job is pending.
+     */
+    @NonNull
+    public int[] getPendingJobReasons() {
+        final int unsatisfiedConstraints = ~satisfiedConstraints
+                & (requiredConstraints | mDynamicConstraints | IMPLICIT_CONSTRAINTS);
+        final ArrayList<Integer> reasons = constraintsToPendingJobReasons(unsatisfiedConstraints);
+
         if (reasons.isEmpty()) {
             if (getEffectiveStandbyBucket() == NEVER_INDEX) {
                 Slog.wtf(TAG, "App in NEVER bucket querying pending job reason");
@@ -2176,6 +2201,55 @@ public final class JobStatus {
             reasonsArr[i] = reasons.get(i);
         }
         return reasonsArr;
+    }
+
+    private void populatePendingJobReasonsHistoryMap(boolean isReady,
+            long constraintTimestamp, int unsatisfiedConstraints) {
+        final long constraintTimestampEpoch = // system_boot_time + constraint_satisfied_time
+                (System.currentTimeMillis() - SystemClock.elapsedRealtime()) + constraintTimestamp;
+
+        if (isReady) {
+            // Job is ready to execute. At this point, if the job doesn't execute, it might be
+            // because of the app itself; if not, note it as undefined (documented in javadoc).
+            mPendingJobReasonsHistory.addLast(
+                    new PendingJobReasonsInfo(
+                            constraintTimestampEpoch,
+                            new int[] { serviceProcessName != null
+                                            ? JobScheduler.PENDING_JOB_REASON_APP
+                                            : JobScheduler.PENDING_JOB_REASON_UNDEFINED }));
+            return;
+        }
+
+        final ArrayList<Integer> reasons = constraintsToPendingJobReasons(unsatisfiedConstraints);
+        if (reasons.isEmpty()) {
+            // If the job is not waiting on any constraints to be met, note it as undefined.
+            reasons.add(JobScheduler.PENDING_JOB_REASON_UNDEFINED);
+        }
+
+        final int[] reasonsArr = new int[reasons.size()];
+        for (int i = 0; i < reasonsArr.length; i++) {
+            reasonsArr[i] = reasons.get(i);
+        }
+        mPendingJobReasonsHistory.addLast(
+                new PendingJobReasonsInfo(constraintTimestampEpoch, reasonsArr));
+    }
+
+    /**
+     * Returns the last {@link #PENDING_JOB_HISTORY_RETURN_LIMIT} constraint changes.
+     */
+    @NonNull
+    public List<PendingJobReasonsInfo> getPendingJobReasonsHistory() {
+        final List<PendingJobReasonsInfo> returnList =
+                new ArrayList<>(PENDING_JOB_HISTORY_RETURN_LIMIT);
+        final int historySize = mPendingJobReasonsHistory.size();
+        if (historySize != 0) {
+            returnList.addAll(
+                    mPendingJobReasonsHistory.subList(
+                            Math.max(0, historySize - PENDING_JOB_HISTORY_RETURN_LIMIT),
+                            historySize));
+        }
+
+        return returnList;
     }
 
     /** @return whether or not the @param constraint is satisfied */

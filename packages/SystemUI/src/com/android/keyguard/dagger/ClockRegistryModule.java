@@ -62,7 +62,8 @@ public abstract class ClockRegistryModule {
                 scope,
                 mainDispatcher,
                 bgDispatcher,
-                featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
+                com.android.systemui.Flags.lockscreenCustomClocks()
+                        || featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
                 /* handleAllUsers= */ true,
                 new DefaultClockProvider(
                         context,

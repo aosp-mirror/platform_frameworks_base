@@ -613,6 +613,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permet que l\'aplicació determini la posició relativa entre els dispositius de banda ultraampla propers"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interaccionar amb els dispositius Wi‑Fi propers"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permet que l\'aplicació s\'anunciï i es connecti als dispositius Wi‑Fi propers, i en determini la posició relativa"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informació preferent sobre el servei de pagament per NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet que l\'aplicació obtingui informació preferent sobre el servei de pagament per NFC, com ara complements registrats i destinacions de rutes."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Comunicació de camp proper (NFC)"</string>

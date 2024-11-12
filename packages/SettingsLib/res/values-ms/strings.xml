@@ -591,6 +591,12 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Peranti Luar"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Peranti yang disambungkan"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Telefon ini"</string>
+    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
+    <skip />
+    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
+    <skip />
+    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
+    <skip />
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Tidak dapat dimainkan pada peranti ini"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Tingkatkan akaun untuk beralih"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Tidak dapat memainkan muat turun di sini"</string>

@@ -214,13 +214,30 @@ public class AconfigFlags {
      * @param parser XML parser object currently parsing an element
      * @return true if the element is disabled because of its feature flag
      */
+    public boolean skipCurrentElement(@Nullable ParsingPackage pkg, @NonNull XmlPullParser parser) {
+        return skipCurrentElement(pkg, parser, /* allowNoNamespace= */ false);
+    }
+
+    /**
+     * Check if the element in {@code parser} should be skipped because of the feature flag.
+     * @param pkg The package being parsed
+     * @param parser XML parser object currently parsing an element
+     * @param allowNoNamespace Whether to allow namespace null
+     * @return true if the element is disabled because of its feature flag
+     */
     public boolean skipCurrentElement(
-            @NonNull ParsingPackage pkg,
-            @NonNull XmlResourceParser parser) {
+        @Nullable ParsingPackage pkg,
+        @NonNull XmlPullParser parser,
+        boolean allowNoNamespace
+    ) {
         if (!Flags.manifestFlagging()) {
             return false;
         }
         String featureFlag = parser.getAttributeValue(ANDROID_RES_NAMESPACE, "featureFlag");
+        // If allow no namespace, make another attempt to parse feature flag with null namespace.
+        if (featureFlag == null && allowNoNamespace) {
+            featureFlag = parser.getAttributeValue(null, "featureFlag");
+        }
         if (featureFlag == null) {
             return false;
         }
@@ -242,7 +259,7 @@ public class AconfigFlags {
                     + " behind feature flag " + featureFlag + " = " + flagValue);
             shouldSkip = true;
         }
-        if (android.content.pm.Flags.includeFeatureFlagsInPackageCacher()) {
+        if (pkg != null && android.content.pm.Flags.includeFeatureFlagsInPackageCacher()) {
             pkg.addFeatureFlag(featureFlag, flagValue);
         }
         return shouldSkip;

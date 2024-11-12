@@ -90,14 +90,6 @@ flag {
 
 flag {
     namespace: "backstage_power"
-    name: "use_permission_manager_for_broadcast_delivery_check"
-    description: "Use PermissionManager API for broadcast delivery permission checks."
-    bug: "315468967"
-    is_fixed_read_only: true
-}
-
-flag {
-    namespace: "backstage_power"
     name: "trace_receiver_registration"
     description: "Add tracing for broadcast receiver registration and un-registration"
     bug: "336385821"

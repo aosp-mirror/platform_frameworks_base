@@ -493,6 +493,34 @@ public abstract class JobScheduler {
     }
 
     /**
+     * For the given {@code jobId}, returns a limited historical view of why the job may have
+     * been pending execution. The returned list is composed of {@link PendingJobReasonsInfo}
+     * objects, each of which include a timestamp since epoch along with an array of
+     * unsatisfied constraints represented by {@link PendingJobReason PendingJobReason constants}.
+     * <p>
+     * These constants could either be explicitly set constraints on the job or implicit
+     * constraints imposed by the system due to various reasons.
+     * The results can be used to debug why a given job may have been pending execution.
+     * <p>
+     * If the only {@link PendingJobReason} for the timestamp is
+     * {@link PendingJobReason#PENDING_JOB_REASON_UNDEFINED}, it could mean that
+     * the job was ready to be executed at that point in time.
+     * <p>
+     * Note: there is no set interval for the timestamps in the returned list since
+     * constraint changes occur based on device status and various other factors.
+     * <p>
+     * Note: the pending job reasons history is not persisted across device reboots.
+     * <p>
+     * @throws IllegalArgumentException if the {@code jobId} is invalid.
+     * @see #getPendingJobReasons(int)
+     */
+    @FlaggedApi(Flags.FLAG_GET_PENDING_JOB_REASONS_HISTORY_API)
+    @NonNull
+    public List<PendingJobReasonsInfo> getPendingJobReasonsHistory(int jobId) {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
+
+    /**
      * Returns {@code true} if the calling app currently holds the
      * {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS} permission, allowing it to run
      * user-initiated jobs.

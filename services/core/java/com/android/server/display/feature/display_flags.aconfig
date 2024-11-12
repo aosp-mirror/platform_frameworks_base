@@ -446,3 +446,11 @@ flag {
     bug: "365163968"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_plugin_manager"
+    namespace: "display_manager"
+    description: "Flag to enable DisplayManager plugins"
+    bug: "354059797"
+    is_fixed_read_only: true
+}
