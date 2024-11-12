@@ -20,8 +20,8 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
 import android.view.Window
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.argumentCaptor
@@ -39,7 +39,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyBlocking
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ActionExecutorTest : SysuiTestCase() {
     private val scheduler = TestCoroutineScheduler()

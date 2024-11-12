@@ -16,13 +16,13 @@
 package com.android.systemui.statusbar.notification.row
 
 import android.content.Context
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED
@@ -38,7 +38,7 @@ import org.mockito.Mockito.verify
 
 /** Tests for [NotifLayoutInflaterFactory] */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class NotifLayoutInflaterFactoryTest : SysuiTestCase() {
 

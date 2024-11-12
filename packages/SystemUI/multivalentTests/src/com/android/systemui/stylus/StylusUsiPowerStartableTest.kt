@@ -18,8 +18,8 @@ package com.android.systemui.stylus
 
 import android.hardware.BatteryState
 import android.hardware.input.InputManager
-import android.testing.AndroidTestingRunner
 import android.view.InputDevice
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
@@ -35,7 +35,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class StylusUsiPowerStartableTest : SysuiTestCase() {
     @Mock lateinit var inputManager: InputManager

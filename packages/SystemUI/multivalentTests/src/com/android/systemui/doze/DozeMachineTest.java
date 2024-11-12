@@ -48,10 +48,10 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
-import androidx.test.annotation.UiThreadTest;
 import android.view.Display;
 
 import androidx.annotation.NonNull;
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 

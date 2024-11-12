@@ -30,13 +30,13 @@ import static org.mockito.Mockito.verify;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.testing.AndroidTestingRunner;
 import android.util.FloatProperty;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
 import androidx.test.annotation.UiThreadTest;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.app.animation.Interpolators;
@@ -51,7 +51,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @UiThreadTest
 public class PropertyAnimatorTest extends SysuiTestCase {
 

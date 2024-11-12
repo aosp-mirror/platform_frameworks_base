@@ -17,8 +17,8 @@ package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothLeBroadcastMetadata
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant
@@ -46,7 +46,7 @@ import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class AudioSharingRepositoryTest : SysuiTestCase() {
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
