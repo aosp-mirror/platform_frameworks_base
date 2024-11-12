@@ -400,3 +400,12 @@ flag {
     description: "Uses the SysUi process to host the SelectionToolbarRenderService."
     bug: "363318732"
 }
+
+flag{
+    name: "note_op_batching_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Batch noteOperations on the client to reduce binder call volume"
+    bug: "366013082"
+}
