@@ -3436,7 +3436,8 @@ class Task extends TaskFragment {
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
-        final WindowState windowState = top != null ? top.findMainWindow() : null;
+        final WindowState windowState = top != null
+                ? top.findMainWindow(/* includeStartingApp= */ false) : null;
         info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
                 ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
