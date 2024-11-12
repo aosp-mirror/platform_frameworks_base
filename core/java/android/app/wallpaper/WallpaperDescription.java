@@ -113,7 +113,7 @@ public final class WallpaperDescription implements Parcelable {
     /** @return the description for this wallpaper */
     @NonNull
     public List<CharSequence> getDescription() {
-        return new ArrayList<>();
+        return mDescription;
     }
 
     /** @return the {@link Uri} for the action associated with the wallpaper, or {@code null} if not
