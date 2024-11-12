@@ -3089,7 +3089,7 @@ public class NotificationManagerService extends SystemService {
             migrateDefaultNAS();
             maybeShowInitialReviewPermissionsNotification();
 
-            if (android.app.Flags.modesApi()) {
+            if (android.app.Flags.modesApi() && !mZenModeHelper.hasDeviceEffectsApplier()) {
                 // Cannot be done earlier, as some services aren't ready until this point.
                 mZenModeHelper.setDeviceEffectsApplier(
                         new DefaultDeviceEffectsApplier(getContext()));
