@@ -1378,7 +1378,8 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setDpcDownloaded(boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setMaxPolicyStorageLimit(int);
     method @Deprecated @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIds(@NonNull android.content.ComponentName);
-    method public void setSecondaryLockscreenEnabled(@NonNull android.content.ComponentName, boolean);
+    method @Deprecated @FlaggedApi("android.app.admin.flags.secondary_lockscreen_api_enabled") public void setSecondaryLockscreenEnabled(@NonNull android.content.ComponentName, boolean);
+    method @FlaggedApi("android.app.admin.flags.secondary_lockscreen_api_enabled") public void setSecondaryLockscreenEnabled(boolean, @Nullable android.os.PersistableBundle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setUserProvisioningState(int, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";

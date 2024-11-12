@@ -58,6 +58,7 @@ import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_REMOVE_MANAGED_PROFILE_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
+import static android.app.admin.flags.Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -12642,28 +12643,43 @@ public class DevicePolicyManager {
      * @param enabled Whether or not the lockscreen needs to be shown.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see #isSecondaryLockscreenEnabled
+     * @deprecated Use {@link #setSecondaryLockscreenEnabled(boolean,PersistableBundle)} instead.
      * @hide
-     **/
+     */
+    @Deprecated
     @SystemApi
+    @FlaggedApi(FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
     public void setSecondaryLockscreenEnabled(@NonNull ComponentName admin, boolean enabled) {
-        setSecondaryLockscreenEnabled(admin, enabled, null);
+        throwIfParentInstance("setSecondaryLockscreenEnabled");
+        if (mService != null) {
+            try {
+                mService.setSecondaryLockscreenEnabled(admin, enabled, null);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
      * Called by the system supervision app to set whether a secondary lockscreen needs to be shown.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
-     *              caller is not a device admin.
+     * <p>The secondary lockscreen will by displayed after the primary keyguard security screen
+     * requirements are met.
+     *
+     * <p>This API, and associated APIs, can only be called by the default supervision app.
+     *
      * @param enabled Whether or not the lockscreen needs to be shown.
      * @param options A {@link PersistableBundle} to supply options to the lock screen.
      * @hide
      */
-    public void setSecondaryLockscreenEnabled(@Nullable ComponentName admin, boolean enabled,
+    @SystemApi
+    @FlaggedApi(FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
+    public void setSecondaryLockscreenEnabled(boolean enabled,
             @Nullable PersistableBundle options) {
         throwIfParentInstance("setSecondaryLockscreenEnabled");
         if (mService != null) {
             try {
-                mService.setSecondaryLockscreenEnabled(admin, enabled, options);
+                mService.setSecondaryLockscreenEnabled(null, enabled, options);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
