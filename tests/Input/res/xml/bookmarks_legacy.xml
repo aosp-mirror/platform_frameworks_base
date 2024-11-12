@@ -14,55 +14,47 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<bookmarks xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <!-- the key combinations for the following shortcuts must be in sync
-         with the key combinations sent by the test in KeyGestureControllerTests.java -->
+<bookmarks>
+    <!-- The key combinations for the following shortcuts are legacy way defining bookmarks and we
+         should prefer new way of defining bookmarks as shown in {@link bookmarks.xml} -->
     <bookmark
         role="android.app.role.BROWSER"
-        androidprv:keycode="KEYCODE_B"
-        androidprv:modifierState="META" />
+        shortcut="b" />
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        androidprv:keycode="KEYCODE_C"
-        androidprv:modifierState="META" />
+        shortcut="c" />
     <bookmark
         category="android.intent.category.APP_EMAIL"
-        androidprv:keycode="KEYCODE_E"
-        androidprv:modifierState="META" />
+        shortcut="e" />
     <bookmark
         category="android.intent.category.APP_CALENDAR"
-        androidprv:keycode="KEYCODE_K"
-        androidprv:modifierState="META" />
+        shortcut="k" />
     <bookmark
         category="android.intent.category.APP_MAPS"
-        androidprv:keycode="KEYCODE_M"
-        androidprv:modifierState="META" />
+        shortcut="m" />
     <bookmark
         category="android.intent.category.APP_MUSIC"
-        androidprv:keycode="KEYCODE_P"
-        androidprv:modifierState="META" />
+        shortcut="p" />
     <bookmark
         role="android.app.role.SMS"
-        androidprv:keycode="KEYCODE_S"
-        androidprv:modifierState="META" />
+        shortcut="s" />
     <bookmark
         category="android.intent.category.APP_CALCULATOR"
-        androidprv:keycode="KEYCODE_U"
-        androidprv:modifierState="META" />
+        shortcut="u" />
 
     <bookmark
         role="android.app.role.BROWSER"
-        androidprv:keycode="KEYCODE_B"
-        androidprv:modifierState="META|SHIFT" />
+        shortcut="b"
+        shift="true" />
 
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        androidprv:keycode="KEYCODE_C"
+        shortcut="c"
         shift="true" />
 
     <bookmark
         package="com.test"
         class="com.test.BookmarkTest"
-        androidprv:keycode="KEYCODE_J"
+        shortcut="j"
         shift="true" />
 </bookmarks>
