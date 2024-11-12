@@ -136,10 +136,10 @@ class DiscreteOpsXmlRegistry extends DiscreteOpsRegistry {
     private DiscreteOps mCachedOps = null;
 
     DiscreteOpsXmlRegistry(Object inMemoryLock) {
-        this(inMemoryLock, new File(new File(Environment.getDataSystemDirectory(), "appops"),
-                "discrete"));
+        this(inMemoryLock, getDiscreteOpsDir());
     }
 
+    // constructor for tests.
     DiscreteOpsXmlRegistry(Object inMemoryLock, File discreteAccessDir) {
         mInMemoryLock = inMemoryLock;
         synchronized (mOnDiskLock) {
@@ -152,23 +152,19 @@ class DiscreteOpsXmlRegistry extends DiscreteOpsRegistry {
         }
     }
 
+    static File getDiscreteOpsDir() {
+        return new File(new File(Environment.getDataSystemDirectory(), "appops"), "discrete");
+    }
+
     void recordDiscreteAccess(int uid, String packageName, @NonNull String deviceId, int op,
             @Nullable String attributionTag, @AppOpsManager.OpFlags int flags,
             @AppOpsManager.UidState int uidState, long accessTime, long accessDuration,
             @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId,
             @AccessType int accessType) {
         if (shouldLogAccess(op)) {
-            int firstChar = 0;
-            if (attributionTag != null && attributionTag.startsWith(packageName)) {
-                firstChar = packageName.length();
-                if (firstChar < attributionTag.length() && attributionTag.charAt(firstChar)
-                        == '.') {
-                    firstChar++;
-                }
-            }
             FrameworkStatsLog.write(FrameworkStatsLog.APP_OP_ACCESS_TRACKED, uid, op, accessType,
                     uidState, flags, attributionFlags,
-                    attributionTag == null ? null : attributionTag.substring(firstChar),
+                    getAttributionTag(attributionTag, packageName),
                     attributionChainId);
         }
 
@@ -189,7 +185,7 @@ class DiscreteOpsXmlRegistry extends DiscreteOpsRegistry {
         }
     }
 
-    void writeAndClearAccessHistory() {
+    void writeAndClearOldAccessHistory() {
         synchronized (mOnDiskLock) {
             if (mDiscreteAccessDir == null) {
                 Slog.d(TAG, "State not saved - persistence not initialized.");
@@ -204,6 +200,22 @@ class DiscreteOpsXmlRegistry extends DiscreteOpsRegistry {
             deleteOldDiscreteHistoryFilesLocked();
             if (!discreteOps.isEmpty()) {
                 persistDiscreteOpsLocked(discreteOps);
+            }
+        }
+    }
+
+    void migrateSqliteData(DiscreteOps sqliteOps) {
+        synchronized (mOnDiskLock) {
+            if (mDiscreteAccessDir == null) {
+                Slog.d(TAG, "State not saved - persistence not initialized.");
+                return;
+            }
+            synchronized (mInMemoryLock) {
+                mDiscreteOps.mLargestChainId = sqliteOps.mLargestChainId;
+                mDiscreteOps.mChainIdOffset = sqliteOps.mChainIdOffset;
+            }
+            if (!sqliteOps.isEmpty()) {
+                persistDiscreteOpsLocked(sqliteOps);
             }
         }
     }
@@ -227,7 +239,7 @@ class DiscreteOpsXmlRegistry extends DiscreteOpsRegistry {
         discreteOps.applyToHistoricalOps(result, attributionChains);
     }
 
-    private int readLargestChainIdFromDiskLocked() {
+    int readLargestChainIdFromDiskLocked() {
         final File[] files = mDiscreteAccessDir.listFiles();
         if (files != null && files.length > 0) {
             File latestFile = null;
@@ -352,6 +364,13 @@ class DiscreteOpsXmlRegistry extends DiscreteOpsRegistry {
                 mDiscreteOps = new DiscreteOps(0);
             }
             clearOnDiskHistoryLocked();
+        }
+    }
+
+    void deleteDiscreteOpsDir() {
+        synchronized (mOnDiskLock) {
+            mCachedOps = null;
+            FileUtils.deleteContentsAndDir(mDiscreteAccessDir);
         }
     }
 
@@ -1407,10 +1426,5 @@ class DiscreteOpsXmlRegistry extends DiscreteOpsRegistry {
             }
         }
         return result;
-    }
-
-    private static boolean shouldLogAccess(int op) {
-        return Flags.appopAccessTrackingLoggingEnabled()
-                && ArrayUtils.contains(sDiscreteOpsToLog, op);
     }
 }

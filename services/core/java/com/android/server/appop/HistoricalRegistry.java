@@ -35,6 +35,7 @@ import android.app.AppOpsManager.OpFlags;
 import android.app.AppOpsManager.OpHistoryFlags;
 import android.app.AppOpsManager.UidState;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Build;
@@ -45,6 +46,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
@@ -196,13 +198,30 @@ final class HistoricalRegistry {
     @GuardedBy("mOnDiskLock")
     private Persistence mPersistence;
 
-    HistoricalRegistry(@NonNull Object lock) {
+    private final Context mContext;
+
+    HistoricalRegistry(@NonNull Object lock, Context context) {
         mInMemoryLock = lock;
-        mDiscreteRegistry = new DiscreteOpsXmlRegistry(lock);
+        mContext = context;
+        if (Flags.enableSqliteAppopsAccesses()) {
+            mDiscreteRegistry = new DiscreteOpsSqlRegistry(context);
+            if (DiscreteOpsXmlRegistry.getDiscreteOpsDir().exists()) {
+                DiscreteOpsSqlRegistry sqlRegistry = (DiscreteOpsSqlRegistry) mDiscreteRegistry;
+                DiscreteOpsXmlRegistry xmlRegistry = new DiscreteOpsXmlRegistry(context);
+                DiscreteOpsMigrationHelper.migrateDiscreteOpsToSqlite(xmlRegistry, sqlRegistry);
+            }
+        } else {
+            mDiscreteRegistry = new DiscreteOpsXmlRegistry(context);
+            if (DiscreteOpsDbHelper.getDatabaseFile().exists()) { // roll-back sqlite
+                DiscreteOpsSqlRegistry sqlRegistry = new DiscreteOpsSqlRegistry(context);
+                DiscreteOpsXmlRegistry xmlRegistry = (DiscreteOpsXmlRegistry) mDiscreteRegistry;
+                DiscreteOpsMigrationHelper.migrateDiscreteOpsToXml(sqlRegistry, xmlRegistry);
+            }
+        }
     }
 
     HistoricalRegistry(@NonNull HistoricalRegistry other) {
-        this(other.mInMemoryLock);
+        this(other.mInMemoryLock, other.mContext);
         mMode = other.mMode;
         mBaseSnapshotInterval = other.mBaseSnapshotInterval;
         mIntervalCompressionMultiplier = other.mIntervalCompressionMultiplier;
@@ -648,7 +667,7 @@ final class HistoricalRegistry {
     }
 
     void writeAndClearDiscreteHistory() {
-        mDiscreteRegistry.writeAndClearAccessHistory();
+        mDiscreteRegistry.writeAndClearOldAccessHistory();
     }
 
     void clearAllHistory() {
@@ -743,7 +762,7 @@ final class HistoricalRegistry {
             }
             persistPendingHistory(pendingWrites);
         }
-        mDiscreteRegistry.writeAndClearAccessHistory();
+        mDiscreteRegistry.writeAndClearOldAccessHistory();
     }
 
     private void persistPendingHistory(@NonNull List<HistoricalOps> pendingWrites) {

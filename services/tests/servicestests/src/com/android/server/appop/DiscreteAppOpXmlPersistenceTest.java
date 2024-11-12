@@ -51,7 +51,7 @@ import java.util.List;
  * Test xml persistence implementation for discrete ops.
  */
 @RunWith(AndroidJUnit4.class)
-public class DiscreteAppOpPersistenceTest {
+public class DiscreteAppOpXmlPersistenceTest {
     private DiscreteOpsXmlRegistry mDiscreteRegistry;
     private final Object mLock = new Object();
     private File mMockDataDirectory;
@@ -70,7 +70,7 @@ public class DiscreteAppOpPersistenceTest {
 
     @After
     public void cleanUp() {
-        mDiscreteRegistry.writeAndClearAccessHistory();
+        mDiscreteRegistry.writeAndClearOldAccessHistory();
         FileUtils.deleteContents(mMockDataDirectory);
     }
 
@@ -97,7 +97,7 @@ public class DiscreteAppOpPersistenceTest {
                 duration, uidState, opFlags, attributionFlags, attributionChainId);
 
         // Write to disk and clear the in-memory object
-        mDiscreteRegistry.writeAndClearAccessHistory();
+        mDiscreteRegistry.writeAndClearOldAccessHistory();
 
         // Verify the storage file is created and then verify its content is correct
         File[] files = FileUtils.listFilesOrEmpty(mMockDataDirectory);
@@ -127,7 +127,7 @@ public class DiscreteAppOpPersistenceTest {
         fetchDiscreteOpsAndValidate(uid, packageName, op, deviceId, null, accessTime,
                 duration, uidState, opFlags, attributionFlags, attributionChainId);
 
-        mDiscreteRegistry.writeAndClearAccessHistory();
+        mDiscreteRegistry.writeAndClearOldAccessHistory();
 
         File[] files = FileUtils.listFilesOrEmpty(mMockDataDirectory);
         assertThat(files.length).isEqualTo(1);

@@ -49,6 +49,7 @@ import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.permission.flags.Flags;
 import android.provider.DeviceConfig;
 import android.util.Slog;
 
@@ -91,6 +92,7 @@ import java.util.Set;
 abstract class DiscreteOpsRegistry {
     private static final String TAG = DiscreteOpsRegistry.class.getSimpleName();
 
+    static final boolean DEBUG_LOG = false;
     static final String PROPERTY_DISCRETE_HISTORY_CUTOFF = "discrete_history_cutoff_millis";
     static final String PROPERTY_DISCRETE_HISTORY_QUANTIZATION =
             "discrete_history_quantization_millis";
@@ -166,8 +168,10 @@ abstract class DiscreteOpsRegistry {
     /**
      * A periodic callback from {@link AppOpsService} to flush the in memory events to disk.
      * The shutdown callback is also plugged into it.
+     * <p>
+     * This method flushes in memory records to disk, and also clears old records from disk.
      */
-    abstract void writeAndClearAccessHistory();
+    abstract void writeAndClearOldAccessHistory();
 
     /** Remove all discrete op events. */
     abstract void clearHistory();
@@ -267,4 +271,28 @@ abstract class DiscreteOpsRegistry {
         }
         return result;
     }
+
+    /**
+     * Whether app op access tacking is enabled and a metric event should be logged.
+     */
+    static boolean shouldLogAccess(int op) {
+        return Flags.appopAccessTrackingLoggingEnabled()
+                && ArrayUtils.contains(sDiscreteOpsToLog, op);
+    }
+
+    String getAttributionTag(String attributionTag, String packageName) {
+        if (attributionTag == null || packageName == null) {
+            return attributionTag;
+        }
+        int firstChar = 0;
+        if (attributionTag.startsWith(packageName)) {
+            firstChar = packageName.length();
+            if (firstChar < attributionTag.length() && attributionTag.charAt(firstChar)
+                    == '.') {
+                firstChar++;
+            }
+        }
+        return attributionTag.substring(firstChar);
+    }
+
 }

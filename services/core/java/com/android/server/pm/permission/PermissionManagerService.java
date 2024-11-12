@@ -1681,8 +1681,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             // handle overflow
             if (attributionChainId < 0) {
-                attributionChainId = 0;
                 sAttributionChainIds.set(0);
+                attributionChainId = sAttributionChainIds.incrementAndGet();
             }
             return attributionChainId;
         }
