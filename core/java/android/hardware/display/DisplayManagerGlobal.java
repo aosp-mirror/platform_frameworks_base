@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 
+import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
 import static android.hardware.display.DisplayManager.EventFlag;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.view.Display.HdrCapabilities.HdrType;
@@ -179,9 +180,11 @@ public final class DisplayManagerGlobal {
     }
 
     private PropertyInvalidatedCache<Integer, DisplayInfo> mDisplayCache =
-            new PropertyInvalidatedCache<Integer, DisplayInfo>(
-                8, // size of display cache
-                CACHE_KEY_DISPLAY_INFO_PROPERTY) {
+            new PropertyInvalidatedCache<>(
+                new PropertyInvalidatedCache.Args(MODULE_SYSTEM)
+                .maxEntries(8).api(CACHE_KEY_DISPLAY_INFO_API).isolateUids(false),
+                CACHE_KEY_DISPLAY_INFO_API, null) {
+
                 @Override
                 public DisplayInfo recompute(Integer id) {
                     try {
@@ -1493,18 +1496,17 @@ public final class DisplayManagerGlobal {
     }
 
     /**
-     * Name of the property containing a unique token which changes every time we update the
-     * system's display configuration.
+     * The API portion of the key that identifies the unique PropertyInvalidatedCache token which
+     * changes every time we update the system's display configuration.
      */
-    public static final String CACHE_KEY_DISPLAY_INFO_PROPERTY =
-            PropertyInvalidatedCache.createSystemCacheKey("display_info");
+    private static final String CACHE_KEY_DISPLAY_INFO_API = "display_info";
 
     /**
      * Invalidates the contents of the display info cache for all applications. Can only
      * be called by system_server.
      */
     public static void invalidateLocalDisplayInfoCaches() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DISPLAY_INFO_PROPERTY);
+        PropertyInvalidatedCache.invalidateCache(MODULE_SYSTEM, CACHE_KEY_DISPLAY_INFO_API);
     }
 
     /**

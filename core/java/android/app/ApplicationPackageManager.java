@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
 import static android.app.PropertyInvalidatedCache.createSystemCacheKey;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_NOT_COLORED;
@@ -783,43 +784,24 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     /**
+     * The API and cache name for hasSystemFeature.
+     */
+    private static final String HAS_SYSTEM_FEATURE_API = "has_system_feature";
+
+    /**
      * Identifies a single hasSystemFeature query.
      */
-    @Immutable
-    private static final class HasSystemFeatureQuery {
-        public final String name;
-        public final int version;
-        public HasSystemFeatureQuery(String n, int v) {
-            name = n;
-            version = v;
-        }
-        @Override
-        public String toString() {
-            return String.format("HasSystemFeatureQuery(name=\"%s\", version=%d)",
-                    name, version);
-        }
-        @Override
-        public boolean equals(@Nullable Object o) {
-            if (o instanceof HasSystemFeatureQuery) {
-                HasSystemFeatureQuery r = (HasSystemFeatureQuery) o;
-                return Objects.equals(name, r.name) &&  version == r.version;
-            } else {
-                return false;
-            }
-        }
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(name) * 13 + version;
-        }
-    }
+    private record HasSystemFeatureQuery(String name, int version) {}
 
     // Make this cache relatively large.  There are many system features and
     // none are ever invalidated.  MPTS tests suggests that the cache should
     // hold at least 150 entries.
     private final static PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>
-            mHasSystemFeatureCache =
-            new PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>(
-                256, createSystemCacheKey("has_system_feature")) {
+            mHasSystemFeatureCache = new PropertyInvalidatedCache<>(
+                new PropertyInvalidatedCache.Args(MODULE_SYSTEM)
+                .api(HAS_SYSTEM_FEATURE_API).maxEntries(256).isolateUids(false),
+                HAS_SYSTEM_FEATURE_API, null) {
+
                 @Override
                 public Boolean recompute(HasSystemFeatureQuery query) {
                     try {
