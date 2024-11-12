@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.shared.domain.interactor
+package com.android.systemui.statusbar.disableflags.domain.interactor
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
-val Kosmos.collapsedStatusBarInteractor: CollapsedStatusBarInteractor by
-    Kosmos.Fixture { CollapsedStatusBarInteractor(disableFlagsInteractor) }
+@SysUISingleton
+class DisableFlagsInteractor @Inject constructor(repository: DisableFlagsRepository) {
+    /** A model of the disable flags last received from [IStatusBar]. */
+    val disableFlags: StateFlow<DisableFlagsModel> = repository.disableFlags
+}
