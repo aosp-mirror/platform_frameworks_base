@@ -152,7 +152,7 @@ class SceneTransitionLayoutStateTest {
 
         // Default transition from A to B.
         assertThat(state.setTargetScene(SceneB, animationScope = this)).isNotNull()
-        assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(1)
+        assertThat(state.currentTransition?.transformationSpec?.transformationMatchers).hasSize(1)
 
         // Go back to A.
         state.setTargetScene(SceneA, animationScope = this)
@@ -165,7 +165,7 @@ class SceneTransitionLayoutStateTest {
                 state.setTargetScene(SceneB, animationScope = this, transitionKey = transitionkey)
             )
             .isNotNull()
-        assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(2)
+        assertThat(state.currentTransition?.transformationSpec?.transformationMatchers).hasSize(2)
     }
 
     @Test

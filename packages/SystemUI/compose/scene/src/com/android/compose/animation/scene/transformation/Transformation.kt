@@ -35,17 +35,27 @@ import kotlinx.coroutines.CoroutineScope
 
 /** A transformation applied to one or more elements during a transition. */
 sealed interface Transformation {
-    /**
-     * The matcher that should match the element(s) to which this transformation should be applied.
-     */
-    val matcher: ElementMatcher
+    fun interface Factory {
+        fun create(): Transformation
+    }
 }
 
-internal class SharedElementTransformation(
-    override val matcher: ElementMatcher,
+// Important: SharedElementTransformation must be a data class because we check that we don't
+// provide 2 different transformations for the same element in Element.kt
+internal data class SharedElementTransformation(
     internal val enabled: Boolean,
     internal val elevateInContent: ContentKey?,
-) : Transformation
+) : Transformation {
+    class Factory(
+        internal val matcher: ElementMatcher,
+        internal val enabled: Boolean,
+        internal val elevateInContent: ContentKey?,
+    ) : Transformation.Factory {
+        override fun create(): Transformation {
+            return SharedElementTransformation(enabled, elevateInContent)
+        }
+    }
+}
 
 /** A transformation that changes the value of an element property, like its size or offset. */
 sealed interface PropertyTransformation<T> : Transformation
@@ -122,8 +132,15 @@ interface PropertyTransformationScope : Density, ElementStateScope {
     val layoutDirection: LayoutDirection
 }
 
+/** Defines the transformation-type to be applied to all elements matching [matcher]. */
+class TransformationMatcher(
+    val matcher: ElementMatcher,
+    val factory: Transformation.Factory,
+    val range: TransformationRange?,
+)
+
 /** A pair consisting of a [transformation] and optional [range]. */
-class TransformationWithRange<out T : Transformation>(
+data class TransformationWithRange<out T : Transformation>(
     val transformation: T,
     val range: TransformationRange?,
 ) {

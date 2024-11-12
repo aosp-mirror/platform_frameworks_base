@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.transformation.CustomPropertyTransformation
+import com.android.compose.animation.scene.transformation.Transformation
 import kotlin.math.tanh
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
@@ -529,15 +529,8 @@ interface PropertyTransformationBuilder {
         anchorHeight: Boolean = true,
     )
 
-    /**
-     * Apply a [CustomPropertyTransformation] to one or more elements.
-     *
-     * @see com.android.compose.animation.scene.transformation.CustomSizeTransformation
-     * @see com.android.compose.animation.scene.transformation.CustomOffsetTransformation
-     * @see com.android.compose.animation.scene.transformation.CustomAlphaTransformation
-     * @see com.android.compose.animation.scene.transformation.CustomScaleTransformation
-     */
-    fun transformation(transformation: CustomPropertyTransformation<*>)
+    /** Apply a [transformation] to the element(s) matching [matcher]. */
+    fun transformation(matcher: ElementMatcher, transformation: Transformation.Factory)
 }
 
 /** This converter lets you change a linear progress into a function of your choice. */

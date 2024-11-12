@@ -385,7 +385,7 @@ sealed interface TransitionState {
                     else -> null
                 } ?: return true
 
-            return specForCurrentScene.transformationSpec.transformations.isNotEmpty()
+            return specForCurrentScene.transformationSpec.transformationMatchers.isNotEmpty()
         }
 
         internal open fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {

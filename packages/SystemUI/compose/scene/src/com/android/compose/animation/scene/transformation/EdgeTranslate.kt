@@ -20,15 +20,12 @@ import androidx.compose.ui.geometry.Offset
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Translate an element from an edge of the layout. */
-internal class EdgeTranslate(
-    override val matcher: ElementMatcher,
-    private val edge: Edge,
-    private val startsOutsideLayoutBounds: Boolean = true,
-) : InterpolatedOffsetTransformation {
+internal class EdgeTranslate
+private constructor(private val edge: Edge, private val startsOutsideLayoutBounds: Boolean) :
+    InterpolatedOffsetTransformation {
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
@@ -66,5 +63,10 @@ internal class EdgeTranslate(
                     Offset((sceneSize.width - elementSize.width).toFloat(), idleValue.y)
                 }
         }
+    }
+
+    class Factory(private val edge: Edge, private val startsOutsideLayoutBounds: Boolean) :
+        Transformation.Factory {
+        override fun create(): Transformation = EdgeTranslate(edge, startsOutsideLayoutBounds)
     }
 }
