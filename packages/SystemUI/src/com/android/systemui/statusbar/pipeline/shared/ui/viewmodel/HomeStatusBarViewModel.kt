@@ -35,6 +35,9 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
+import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
@@ -95,7 +98,12 @@ interface HomeStatusBarViewModel {
 
     val isClockVisible: Flow<VisibilityModel>
     val isNotificationIconContainerVisible: Flow<VisibilityModel>
-    val isSystemInfoVisible: Flow<VisibilityModel>
+    /**
+     * Pair of (system info visibility, event animation state). The animation state can be used to
+     * respond to the system event chip animations. In all cases, system info visibility correctly
+     * models the View.visibility for the system info area
+     */
+    val systemInfoCombinedVis: StateFlow<SystemInfoCombinedVisibilityModel>
 
     /**
      * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
@@ -114,6 +122,12 @@ interface HomeStatusBarViewModel {
         /** True if a visibility change should be animated. */
         val shouldAnimateChange: Boolean,
     )
+
+    /** The combined visibility + animation state for the system info status bar area */
+    data class SystemInfoCombinedVisibilityModel(
+        val baseVisibility: VisibilityModel,
+        val animationState: SystemEventAnimationState,
+    )
 }
 
 @SysUISingleton
@@ -129,6 +143,7 @@ constructor(
     sceneContainerOcclusionInteractor: SceneContainerOcclusionInteractor,
     shadeInteractor: ShadeInteractor,
     ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
+    animations: SystemStatusEventAnimationInteractor,
     @Application coroutineScope: CoroutineScope,
 ) : HomeStatusBarViewModel {
     override val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean> =
@@ -228,7 +243,7 @@ constructor(
                 visibilityViaDisableFlags.animate,
             )
         }
-    override val isSystemInfoVisible: Flow<VisibilityModel> =
+    private val isSystemInfoVisible =
         combine(
             shouldHomeStatusBarBeVisible,
             collapsedStatusBarInteractor.visibilityViaDisableFlags,
@@ -237,6 +252,22 @@ constructor(
                 shouldStatusBarBeVisible && visibilityViaDisableFlags.isSystemInfoAllowed
             VisibilityModel(showSystemInfo.toVisibilityInt(), visibilityViaDisableFlags.animate)
         }
+
+    override val systemInfoCombinedVis =
+        combine(isSystemInfoVisible, animations.animationState) { sysInfoVisible, animationState ->
+                HomeStatusBarViewModel.SystemInfoCombinedVisibilityModel(
+                    sysInfoVisible,
+                    animationState,
+                )
+            }
+            .stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(),
+                HomeStatusBarViewModel.SystemInfoCombinedVisibilityModel(
+                    VisibilityModel(View.VISIBLE, false),
+                    Idle,
+                ),
+            )
 
     @View.Visibility
     private fun Boolean.toVisibilityInt(): Int {
