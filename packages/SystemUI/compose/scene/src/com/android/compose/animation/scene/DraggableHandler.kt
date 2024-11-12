@@ -536,31 +536,6 @@ internal class NestedScrollHandlerImpl(
                     }
                 }
             },
-            canStartPostFling = { velocityAvailable ->
-                val behavior: NestedScrollBehavior =
-                    when {
-                        velocityAvailable > 0f -> topOrLeftBehavior
-                        velocityAvailable < 0f -> bottomOrRightBehavior
-                        else -> return@PriorityNestedScrollConnection false
-                    }
-
-                // We could start an overscroll animation
-                canChangeScene = false
-
-                val pointersDown: PointersInfo.PointersDown? =
-                    when (val info = pointersInfoOwner.pointersInfo()) {
-                        PointersInfo.MouseWheel -> {
-                            // Do not support mouse wheel interactions
-                            return@PriorityNestedScrollConnection false
-                        }
-
-                        is PointersInfo.PointersDown -> info
-                        null -> null
-                    }
-                lastPointersDown = pointersDown
-
-                behavior.canStartOnPostFling && shouldEnableSwipes()
-            },
             onStart = { firstScroll ->
                 scrollController(
                     dragController =
