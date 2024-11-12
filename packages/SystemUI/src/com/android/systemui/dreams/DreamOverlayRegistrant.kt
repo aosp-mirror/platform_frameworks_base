@@ -23,12 +23,13 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.PatternMatcher
 import android.os.RemoteException
-import android.os.ServiceManager
-import android.service.dreams.DreamService
 import android.service.dreams.IDreamManager
 import android.util.Log
+import com.android.systemui.Flags
 import com.android.systemui.dagger.qualifiers.SystemUser
 import com.android.systemui.dreams.dagger.DreamModule
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.dagger.DreamLog
 import com.android.systemui.shared.condition.Monitor
 import com.android.systemui.util.condition.ConditionalCoreStartable
 import javax.inject.Inject
@@ -45,10 +46,12 @@ constructor(
     @param:Named(DreamModule.DREAM_OVERLAY_SERVICE_COMPONENT)
     private val overlayServiceComponent: ComponentName,
     @SystemUser monitor: Monitor,
+    private val packageManager: PackageManager,
+    private val dreamManager: IDreamManager,
+    @DreamLog private val logBuffer: LogBuffer,
 ) : ConditionalCoreStartable(monitor) {
-    private val dreamManager: IDreamManager =
-        IDreamManager.Stub.asInterface(ServiceManager.getService(DreamService.DREAM_SERVICE))
     private var currentRegisteredState = false
+    private val logger: DreamLogger = DreamLogger(logBuffer, TAG)
 
     private val receiver: BroadcastReceiver =
         object : BroadcastReceiver() {
@@ -61,19 +64,91 @@ constructor(
             }
         }
 
-    private fun registerOverlayService() {
-        // Check to see if the service has been disabled by the user. In this case, we should not
-        // proceed modifying the enabled setting.
-        val packageManager = context.packageManager
+    internal val enabledInManifest: Boolean
+        get() {
+            return packageManager
+                .getServiceInfo(
+                    overlayServiceComponent,
+                    PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS,
+                )
+                .enabled
+        }
 
+    internal val enabled: Boolean
+        get() {
+            // Always disabled via setting
+            if (
+                packageManager.getComponentEnabledSetting(overlayServiceComponent) ==
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            ) {
+                return false
+            }
+
+            // If the overlay is available in the manifest, then it is already available
+            if (enabledInManifest) {
+                return true
+            }
+
+            if (
+                Flags.communalHubOnMobile() &&
+                    packageManager.getComponentEnabledSetting(overlayServiceComponent) ==
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            ) {
+                return true
+            }
+
+            return false
+        }
+
+    /**
+     * This method enables the dream overlay at runtime. This method allows expanding the eligible
+     * device pool during development before enabling the component in said devices' manifest.
+     */
+    internal fun enableIfAvailable() {
+        // If the overlay is available in the manifest, then it is already available
+        if (enabledInManifest) {
+            return
+        }
+
+        // Enable for hub on mobile
+        if (Flags.communalHubOnMobile()) {
+            // Not available on TV or auto
+            if (
+                packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE) ||
+                    packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) ||
+                    packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY)
+            ) {
+                if (DEBUG) {
+                    Log.d(TAG, "unsupported platform")
+                }
+                return
+            }
+
+            // If the component is not in the default enabled state, then don't update
+            if (
+                packageManager.getComponentEnabledSetting(overlayServiceComponent) !=
+                    PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+            ) {
+                return
+            }
+
+            packageManager.setComponentEnabledSetting(
+                overlayServiceComponent,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP,
+            )
+        }
+    }
+
+    private fun registerOverlayService() {
         // The overlay service is only registered when its component setting is enabled.
         var register = false
 
         try {
-            register =
-                packageManager
-                    .getServiceInfo(overlayServiceComponent, PackageManager.GET_META_DATA)
-                    .enabled
+            Log.d(TAG, "trying to find component:" + overlayServiceComponent)
+            // Check to see if the service has been disabled by the user. In this case, we should
+            // not proceed modifying the enabled setting.
+            register = enabled
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(TAG, "could not find dream overlay service")
         }
@@ -97,6 +172,7 @@ constructor(
             dreamManager.registerDreamOverlayService(
                 if (currentRegisteredState) overlayServiceComponent else null
             )
+            logger.logDreamOverlayEnabled(currentRegisteredState)
         } catch (e: RemoteException) {
             Log.e(TAG, "could not register dream overlay service:$e")
         }
@@ -114,6 +190,8 @@ constructor(
         context.registerReceiver(receiver, filter)
 
         registerOverlayService()
+
+        enableIfAvailable()
     }
 
     companion object {
