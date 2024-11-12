@@ -211,6 +211,7 @@ import android.app.RemoteServiceException.BadForegroundServiceNotificationExcept
 import android.app.RemoteServiceException.BadUserInitiatedJobNotificationException;
 import android.app.StatsManager;
 import android.app.UriGrantsManager;
+import android.app.ZenBypassingApp;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupRestoreEventLogger;
@@ -238,7 +239,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.ModuleInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -4043,7 +4043,7 @@ public class NotificationManagerService extends SystemService {
                         "canNotifyAsPackage for uid " + uid);
             }
 
-            return areNotificationsEnabledForPackageInt(pkg, uid);
+            return areNotificationsEnabledForPackageInt(uid);
         }
 
         /**
@@ -4864,30 +4864,20 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public List<String> getPackagesBypassingDnd(int userId,
-                boolean includeConversationChannels) {
+        public ParceledListSlice<ZenBypassingApp> getPackagesBypassingDnd(int userId)
+                throws RemoteException {
             checkCallerIsSystem();
 
-            final ArraySet<String> packageNames = new ArraySet<>();
-
-            List<PackageInfo> pkgs = mPackageManagerClient.getInstalledPackagesAsUser(0, userId);
-            for (PackageInfo pi : pkgs) {
-                String pkg = pi.packageName;
-                // If any NotificationChannel for this package is bypassing, the
-                // package is considered bypassing.
-                for (NotificationChannel channel : getNotificationChannelsBypassingDnd(pkg,
-                        pi.applicationInfo.uid).getList()) {
-                    // Skips non-demoted conversation channels.
-                    if (!includeConversationChannels
-                            && !TextUtils.isEmpty(channel.getConversationId())
-                            && !channel.isDemoted()) {
-                        continue;
-                    }
-                    packageNames.add(pkg);
+            UserHandle user = UserHandle.of(userId);
+            ArrayList<ZenBypassingApp> bypassing =
+                    mPreferencesHelper.getPackagesBypassingDnd(userId);
+            for (int i = bypassing.size() - 1; i >= 0; i--) {
+                String pkg = bypassing.get(i).getPkg();
+                if (!areNotificationsEnabledForPackage(pkg, getUidForPackageAndUser(pkg, user))) {
+                    bypassing.remove(i);
                 }
             }
-
-            return new ArrayList<String>(packageNames);
+            return new ParceledListSlice<>(bypassing);
         }
 
         @Override
@@ -7763,7 +7753,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
-            return areNotificationsEnabledForPackageInt(pkg, uid);
+            return areNotificationsEnabledForPackageInt(uid);
         }
 
         @Override
@@ -8742,7 +8732,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         // blocked apps
-        boolean isBlocked = !areNotificationsEnabledForPackageInt(pkg, uid);
+        boolean isBlocked = !areNotificationsEnabledForPackageInt(uid);
         synchronized (mNotificationLock) {
             isBlocked |= isRecordBlockedLocked(r);
         }
@@ -8792,7 +8782,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private boolean areNotificationsEnabledForPackageInt(String pkg, int uid) {
+    private boolean areNotificationsEnabledForPackageInt(int uid) {
         return mPermissionHelper.hasPermission(uid);
     }
 
@@ -9328,7 +9318,7 @@ public class NotificationManagerService extends SystemService {
          * notifying all listeners to a background thread; false otherwise.
          */
         private boolean postNotification() {
-            boolean appBanned = !areNotificationsEnabledForPackageInt(pkg, uid);
+            boolean appBanned = !areNotificationsEnabledForPackageInt(uid);
             boolean isCallNotification = isCallNotification(pkg, uid);
             boolean posted = false;
             synchronized (NotificationManagerService.this.mNotificationLock) {
