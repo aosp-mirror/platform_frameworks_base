@@ -136,7 +136,11 @@ val Kosmos.shortcutHelperStateInteractor by
     }
 
 val Kosmos.shortcutHelperCategoriesInteractor by
-    Kosmos.Fixture { ShortcutHelperCategoriesInteractor(defaultShortcutCategoriesRepository) }
+    Kosmos.Fixture {
+        ShortcutHelperCategoriesInteractor(
+            defaultShortcutCategoriesRepository,
+        ) { customShortcutCategoriesRepository }
+    }
 
 val Kosmos.shortcutHelperViewModel by
     Kosmos.Fixture {
