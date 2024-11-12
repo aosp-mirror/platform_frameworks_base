@@ -77,7 +77,7 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         if (userHandle == UserHandle.USER_ALL) {
             contentObserversAllUsers
@@ -107,31 +107,31 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
     override suspend fun registerContentObserver(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) = suspendAdvanceDispatcher {
         super<UserSettingsProxy>.registerContentObserver(
             uri,
             notifyForDescendants,
-            settingsObserver
+            settingsObserver,
         )
     }
 
     override fun registerContentObserverAsync(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ): Job = advanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverAsync(
             uri,
             notifyForDescendants,
-            settingsObserver
+            settingsObserver,
         )
     }
 
     override suspend fun registerContentObserverForUser(
         name: String,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) = suspendAdvanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverForUser(name, settingsObserver, userHandle)
     }
@@ -139,12 +139,12 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
     override fun registerContentObserverForUserAsync(
         name: String,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ): Job = advanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverForUserAsync(
             name,
             settingsObserver,
-            userHandle
+            userHandle,
         )
     }
 
@@ -156,7 +156,7 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
     override suspend fun registerContentObserverForUser(
         uri: Uri,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) = suspendAdvanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverForUser(uri, settingsObserver, userHandle)
     }
@@ -164,12 +164,12 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
     override fun registerContentObserverForUserAsync(
         uri: Uri,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ): Job = advanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverForUserAsync(
             uri,
             settingsObserver,
-            userHandle
+            userHandle,
         )
     }
 
@@ -177,13 +177,13 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         uri: Uri,
         settingsObserver: ContentObserver,
         userHandle: Int,
-        registered: Runnable
+        registered: Runnable,
     ): Job = advanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverForUserAsync(
             uri,
             settingsObserver,
             userHandle,
-            registered
+            registered,
         )
     }
 
@@ -191,13 +191,13 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) = suspendAdvanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverForUser(
             name,
             notifyForDescendants,
             settingsObserver,
-            userHandle
+            userHandle,
         )
     }
 
@@ -205,13 +205,13 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) = advanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverForUserAsync(
             name,
             notifyForDescendants,
             settingsObserver,
-            userHandle
+            userHandle,
         )
     }
 
@@ -219,13 +219,13 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ): Job = advanceDispatcher {
         super<UserSettingsProxy>.registerContentObserverForUserAsync(
             uri,
             notifyForDescendants,
             settingsObserver,
-            userHandle
+            userHandle,
         )
     }
 
@@ -259,7 +259,7 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         tag: String?,
         makeDefault: Boolean,
         userHandle: Int,
-        overrideableByRestore: Boolean
+        overrideableByRestore: Boolean,
     ): Boolean {
         val key = SettingsKey(userHandle, getUriFor(name).toString())
         values[key] = value
@@ -275,7 +275,7 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         name: String,
         value: String?,
         tag: String?,
-        makeDefault: Boolean
+        makeDefault: Boolean,
     ): Boolean {
         return putString(name, value)
     }

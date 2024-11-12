@@ -20,11 +20,12 @@ import android.os.Handler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Tracing
 import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.util.settings.SettingsSingleThreadBackground
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.Executor
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -33,8 +34,6 @@ import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.plus
-import java.util.concurrent.Executor
-import kotlin.coroutines.CoroutineContext
 
 private const val LIMIT_BACKGROUND_DISPATCHER_THREADS = true
 
@@ -62,7 +61,7 @@ class SysUICoroutinesModule {
     @Background
     @Deprecated(
         "Use @Background CoroutineContext instead",
-        ReplaceWith("bgCoroutineContext()", "kotlin.coroutines.CoroutineContext")
+        ReplaceWith("bgCoroutineContext()", "kotlin.coroutines.CoroutineContext"),
     )
     fun bgDispatcher(): CoroutineDispatcher {
         return if (LIMIT_BACKGROUND_DISPATCHER_THREADS) {
@@ -73,7 +72,7 @@ class SysUICoroutinesModule {
             // code on those.
             newFixedThreadPoolContext(
                 nThreads = Runtime.getRuntime().availableProcessors(),
-                name = "SystemUIBg"
+                name = "SystemUIBg",
             )
         } else {
             Dispatchers.IO
@@ -92,7 +91,7 @@ class SysUICoroutinesModule {
     @Background
     @SysUISingleton
     fun bgCoroutineContext(
-        @Background bgCoroutineDispatcher: CoroutineDispatcher,
+        @Background bgCoroutineDispatcher: CoroutineDispatcher
     ): CoroutineContext {
         return bgCoroutineDispatcher
     }
@@ -103,7 +102,7 @@ class SysUICoroutinesModule {
     @UiBackground
     @Deprecated(
         "Use @UiBackground CoroutineContext instead",
-        ReplaceWith("uiBgCoroutineContext()", "kotlin.coroutines.CoroutineContext")
+        ReplaceWith("uiBgCoroutineContext()", "kotlin.coroutines.CoroutineContext"),
     )
     fun uiBgDispatcher(@UiBackground uiBgExecutor: Executor): CoroutineDispatcher =
         uiBgExecutor.asCoroutineDispatcher()
@@ -112,7 +111,7 @@ class SysUICoroutinesModule {
     @UiBackground
     @SysUISingleton
     fun uiBgCoroutineContext(
-        @UiBackground uiBgCoroutineDispatcher: CoroutineDispatcher,
+        @UiBackground uiBgCoroutineDispatcher: CoroutineDispatcher
     ): CoroutineContext {
         return uiBgCoroutineDispatcher
     }

@@ -23,13 +23,13 @@ import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings.SettingNotFoundException
 import com.android.app.tracing.TraceUtils.trace
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloat
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseFloatOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrThrow
 import com.android.systemui.util.settings.SettingsProxy.Companion.parseLongOrUseDefault
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -96,7 +96,7 @@ interface UserSettingsProxy : SettingsProxy {
     override suspend fun registerContentObserver(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) {
         withContext(backgroundDispatcher) {
             registerContentObserverForUserSync(uri, notifyForDescendants, settingsObserver, userId)
@@ -126,7 +126,7 @@ interface UserSettingsProxy : SettingsProxy {
     fun registerContentObserverForUserSync(
         name: String,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         registerContentObserverForUserSync(getUriFor(name), settingsObserver, userHandle)
     }
@@ -141,7 +141,7 @@ interface UserSettingsProxy : SettingsProxy {
     suspend fun registerContentObserverForUser(
         name: String,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         withContext(backgroundDispatcher) {
             registerContentObserverForUserSync(name, settingsObserver, userHandle)
@@ -167,7 +167,7 @@ interface UserSettingsProxy : SettingsProxy {
     fun registerContentObserverForUserSync(
         uri: Uri,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         registerContentObserverForUserSync(uri, false, settingsObserver, userHandle)
     }
@@ -182,7 +182,7 @@ interface UserSettingsProxy : SettingsProxy {
     suspend fun registerContentObserverForUser(
         uri: Uri,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         withContext(backgroundDispatcher) {
             registerContentObserverForUserSync(uri, settingsObserver, userHandle)
@@ -231,13 +231,13 @@ interface UserSettingsProxy : SettingsProxy {
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         registerContentObserverForUserSync(
             getUriFor(name),
             notifyForDescendants,
             settingsObserver,
-            userHandle
+            userHandle,
         )
     }
 
@@ -252,14 +252,14 @@ interface UserSettingsProxy : SettingsProxy {
         name: String,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         withContext(backgroundDispatcher) {
             registerContentObserverForUserSync(
                 name,
                 notifyForDescendants,
                 settingsObserver,
-                userHandle
+                userHandle,
             )
         }
     }
@@ -291,7 +291,7 @@ interface UserSettingsProxy : SettingsProxy {
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         trace({ "USP#registerObserver#[$uri]" }) {
             getContentResolver()
@@ -299,7 +299,7 @@ interface UserSettingsProxy : SettingsProxy {
                     uri,
                     notifyForDescendants,
                     settingsObserver,
-                    getRealUserHandle(userHandle)
+                    getRealUserHandle(userHandle),
                 )
             Unit
         }
@@ -316,14 +316,14 @@ interface UserSettingsProxy : SettingsProxy {
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
-        userHandle: Int
+        userHandle: Int,
     ) {
         withContext(backgroundDispatcher) {
             registerContentObserverForUserSync(
                 uri,
                 notifyForDescendants,
                 settingsObserver,
-                getRealUserHandle(userHandle)
+                getRealUserHandle(userHandle),
             )
         }
     }
@@ -385,7 +385,7 @@ interface UserSettingsProxy : SettingsProxy {
         tag: String?,
         makeDefault: Boolean,
         @UserIdInt userHandle: Int,
-        overrideableByRestore: Boolean
+        overrideableByRestore: Boolean,
     ): Boolean
 
     override fun getInt(name: String, default: Int): Int {

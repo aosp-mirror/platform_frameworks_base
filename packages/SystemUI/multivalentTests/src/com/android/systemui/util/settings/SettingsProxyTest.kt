@@ -92,7 +92,7 @@ class SettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserverSync(
                 TEST_SETTING,
                 notifyForDescendants = true,
-                mContentObserver
+                mContentObserver,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
@@ -104,7 +104,7 @@ class SettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserver(
                 TEST_SETTING,
                 notifyForDescendants = true,
-                mContentObserver
+                mContentObserver,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
@@ -116,7 +116,7 @@ class SettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserverAsync(
                 TEST_SETTING,
                 notifyForDescendants = true,
-                mContentObserver
+                mContentObserver,
             )
             testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
@@ -154,7 +154,7 @@ class SettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserverSync(
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
-                mContentObserver
+                mContentObserver,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
@@ -166,7 +166,7 @@ class SettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserver(
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
-                mContentObserver
+                mContentObserver,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(eq(TEST_SETTING_URI), eq(true), eq(mContentObserver))
@@ -178,7 +178,7 @@ class SettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserverAsync(
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
-                mContentObserver
+                mContentObserver,
             )
             testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
@@ -202,7 +202,7 @@ class SettingsProxyTest : SysuiTestCase() {
                     TEST_SETTING_URI,
                     false,
                     mContentObserver,
-                    it
+                    it,
                 )
             }
         }
@@ -408,7 +408,7 @@ class SettingsProxyTest : SysuiTestCase() {
             name: String,
             value: String?,
             tag: String?,
-            makeDefault: Boolean
+            makeDefault: Boolean,
         ): Boolean {
             settingToValueMap[name] = value
             return true

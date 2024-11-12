@@ -69,7 +69,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -82,7 +82,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -96,7 +96,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -107,14 +107,14 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING,
                 notifyForDescendants = true,
                 mContentObserver,
-                userId
+                userId,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
                     eq(true),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -125,16 +125,14 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING,
                 notifyForDescendants = true,
                 mContentObserver,
-                userId
+                userId,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
-                    eq(
-                        true,
-                    ),
+                    eq(true),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -145,7 +143,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING,
                 notifyForDescendants = true,
                 mContentObserver,
-                userId
+                userId,
             )
             testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
@@ -153,7 +151,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(true),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -166,7 +164,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -179,7 +177,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -189,7 +187,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserverForUserAsync(
                 TEST_SETTING_URI,
                 mContentObserver,
-                userId
+                userId,
             )
             testScope.advanceUntilIdle()
 
@@ -198,7 +196,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -213,7 +211,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING_URI,
                 mContentObserver,
                 userId,
-                runnable
+                runnable,
             )
             testScope.advanceUntilIdle()
             assertThat(callbackCalled).isTrue()
@@ -226,14 +224,14 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
                 mContentObserver,
-                userId
+                userId,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
                     eq(true),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -244,14 +242,14 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
                 mContentObserver,
-                userId
+                userId,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
                     eq(true),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -262,7 +260,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
                 mContentObserver,
-                userId
+                userId,
             )
             testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
@@ -270,7 +268,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(true),
                     eq(mContentObserver),
-                    eq(MAIN_USER_ID)
+                    eq(MAIN_USER_ID),
                 )
         }
 
@@ -283,7 +281,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(0)
+                    eq(0),
                 )
         }
 
@@ -296,7 +294,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(0)
+                    eq(0),
                 )
         }
 
@@ -309,7 +307,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(0)
+                    eq(0),
                 )
         }
     }
@@ -320,14 +318,14 @@ class UserSettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserverSync(
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
-                mContentObserver
+                mContentObserver,
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
                     eq(true),
                     eq(mContentObserver),
-                    eq(0)
+                    eq(0),
                 )
         }
 
@@ -340,7 +338,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                     eq(TEST_SETTING_URI),
                     eq(false),
                     eq(mContentObserver),
-                    eq(0)
+                    eq(0),
                 )
         }
 
@@ -354,7 +352,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                         eq(TEST_SETTING_URI),
                         eq(false),
                         eq(mContentObserver),
-                        eq(0)
+                        eq(0),
                     )
             }
         }
@@ -557,7 +555,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
      */
     private class FakeUserSettingsProxy(
         override val currentUserProvider: SettingsProxy.CurrentUserIdProvider,
-        val testDispatcher: CoroutineDispatcher
+        val testDispatcher: CoroutineDispatcher,
     ) : UserSettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
@@ -578,7 +576,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
         override fun putString(
             name: String,
             value: String?,
-            overrideableByRestore: Boolean
+            overrideableByRestore: Boolean,
         ): Boolean {
             userIdToSettingsValueMap[DEFAULT_USER_ID]?.put(name, value)
             return true
@@ -588,7 +586,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
             name: String,
             value: String?,
             tag: String?,
-            makeDefault: Boolean
+            makeDefault: Boolean,
         ): Boolean {
             putStringForUser(name, value, DEFAULT_USER_ID)
             return true
@@ -605,7 +603,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
             tag: String?,
             makeDefault: Boolean,
             userHandle: Int,
-            overrideableByRestore: Boolean
+            overrideableByRestore: Boolean,
         ): Boolean {
             userIdToSettingsValueMap[userHandle]?.set(name, value)
             return true

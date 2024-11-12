@@ -23,10 +23,10 @@ import android.provider.Settings.SettingNotFoundException
 import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
 import com.android.app.tracing.TraceUtils.trace
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.coroutines.newTracingContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -188,7 +188,7 @@ interface SettingsProxy {
     suspend fun registerContentObserver(
         name: String,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) {
         withContext(backgroundDispatcher) {
             registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
@@ -239,7 +239,7 @@ interface SettingsProxy {
     fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) {
         trace({ "SP#registerObserver#[$uri]" }) {
             getContentResolver()
@@ -257,7 +257,7 @@ interface SettingsProxy {
     suspend fun registerContentObserver(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) {
         withContext(backgroundDispatcher) {
             registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
