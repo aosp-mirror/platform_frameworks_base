@@ -55,7 +55,6 @@ import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.swipeWithVelocity
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -685,7 +684,8 @@ class SwipeToSceneTest {
         val swipeDistance =
             object : UserActionDistance {
                 override fun UserActionDistanceScope.absoluteDistance(
-                    fromSceneSize: IntSize,
+                    fromContent: ContentKey,
+                    toContent: ContentKey,
                     orientation: Orientation,
                 ): Float {
                     // Foo is going to have a vertical offset of 50dp. Let's make the swipe distance

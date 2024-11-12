@@ -645,7 +645,7 @@ class DraggableHandlerTest {
         mutableUserActionsA = emptyMap()
         mutableUserActionsB = emptyMap()
 
-        // start accelaratedScroll and scroll over to B -> null
+        // start acceleratedScroll and scroll over to B -> null
         val dragController2 = onDragStartedImmediately()
         dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
         dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
@@ -1531,7 +1531,7 @@ class DraggableHandlerTest {
     fun interceptingTransitionKeepsDistance() = runGestureTest {
         var swipeDistance = 75f
         layoutState.transitions = transitions {
-            from(SceneA, to = SceneB) { distance = UserActionDistance { _, _ -> swipeDistance } }
+            from(SceneA, to = SceneB) { distance = UserActionDistance { _, _, _ -> swipeDistance } }
         }
 
         // Start transition.

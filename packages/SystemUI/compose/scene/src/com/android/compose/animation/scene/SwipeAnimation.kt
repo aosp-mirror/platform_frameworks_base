@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import kotlin.math.absoluteValue
@@ -66,8 +65,9 @@ internal fun createSwipeAnimation(
         val absoluteDistance =
             with(animation.contentTransition.transformationSpec.distance ?: DefaultSwipeDistance) {
                 layoutImpl.userActionDistanceScope.absoluteDistance(
-                    layoutImpl.content(animation.fromContent).targetSize,
-                    orientation,
+                    fromContent = animation.fromContent,
+                    toContent = animation.toContent,
+                    orientation = orientation,
                 )
             }
 
@@ -475,12 +475,14 @@ internal class SwipeAnimation<T : ContentKey>(
 
 private object DefaultSwipeDistance : UserActionDistance {
     override fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float {
+        val fromContentSize = checkNotNull(fromContent.targetSize())
         return when (orientation) {
-            Orientation.Horizontal -> fromSceneSize.width
-            Orientation.Vertical -> fromSceneSize.height
+            Orientation.Horizontal -> fromContentSize.width
+            Orientation.Vertical -> fromContentSize.height
         }.toFloat()
     }
 }
