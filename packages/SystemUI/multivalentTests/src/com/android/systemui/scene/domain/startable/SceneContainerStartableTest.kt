@@ -44,6 +44,7 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingCollector
@@ -54,6 +55,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.flags.EnableSceneContainer
@@ -114,6 +116,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -2354,6 +2357,58 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 )
             runCurrent()
             assertThat(isLockscreenEnabled).isTrue()
+        }
+
+    @Test
+    fun replacesLockscreenSceneOnBackStack_whenUnlockdViaAlternateBouncer_fromShade() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val backStack by collectLastValue(sceneBackInteractor.backStack)
+            val isAlternateBouncerVisible by
+                collectLastValue(kosmos.alternateBouncerInteractor.isVisible)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Change to shade.
+            sceneInteractor.changeScene(Scenes.Shade, "")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Shade)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Show the alternate bouncer.
+            kosmos.alternateBouncerInteractor.forceShow()
+            kosmos.sysuiStatusBarStateController.leaveOpen = true // leave shade open
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isTrue()
+
+            // Trigger a fingerprint unlock.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Gone)
+            assertThat(isAlternateBouncerVisible).isFalse()
         }
 
     private fun TestScope.emulateSceneTransition(
