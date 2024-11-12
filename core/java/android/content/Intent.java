@@ -87,7 +87,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.expresslog.Counter;
 
@@ -12304,7 +12303,6 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
-    @VisibleForTesting
     public Set<NestedIntentKey> getExtraIntentKeys() {
         return mCreatorTokenInfo == null ? null : mCreatorTokenInfo.mNestedIntentKeys;
     }
