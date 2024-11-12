@@ -3182,9 +3182,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
             final int taskId = mPausingTasks.get(i);
             if (mMainStage.containsTask(taskId)) {
-                mMainStage.evictChildren(finishWct, taskId);
+                mMainStage.evictChild(finishWct, taskId, "recentsPairToPair");
             } else if (mSideStage.containsTask(taskId)) {
-                mSideStage.evictChildren(finishWct, taskId);
+                mSideStage.evictChild(finishWct, taskId, "recentsPairToPair");
             }
         }
         // If pending enter hasn't consumed, the mix handler will invoke start pending
