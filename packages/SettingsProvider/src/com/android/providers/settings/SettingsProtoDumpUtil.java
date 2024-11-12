@@ -2128,6 +2128,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED,
                 SecureSettingsProto.DoubleTapPowerButton.GESTURE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE,
+                SecureSettingsProto.DoubleTapPowerButton.GESTURE);
         p.end(doubleTapPowerButtonToken);
 
         final long dozeToken = p.start(SecureSettingsProto.DOZE);

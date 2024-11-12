@@ -258,6 +258,7 @@ message SecureSettingsProto {
 
     message DoubleTapPowerButton {
         optional SettingProto gesture_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto gesture = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional DoubleTapPowerButton double_tap_power_button = 103;
 

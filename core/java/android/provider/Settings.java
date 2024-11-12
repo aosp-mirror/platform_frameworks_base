@@ -11000,6 +11000,16 @@ public final class Settings {
                 "double_tap_power_button_gesture_enabled";
 
         /**
+         * Double tap power button gesture behavior.
+         * 0 = Camera launch
+         * 1 = Wallet launch
+         * @hide
+         */
+        @Readable
+        public static final String DOUBLE_TAP_POWER_BUTTON_GESTURE =
+                "double_tap_power_button_gesture";
+
+        /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
          * should be disabled.
          *
