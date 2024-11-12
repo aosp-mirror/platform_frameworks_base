@@ -30,6 +30,7 @@ import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.wm.shell.MockSurfaceControlHelper.createMockSurfaceControlTransaction;
 import static com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.CLOSE_MAXIMIZE_MENU_DELAY_MS;
+import static com.android.wm.shell.windowdecor.WindowDecoration.INVALID_CORNER_RADIUS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -312,8 +313,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersAreEnabled() {
+    public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersSetForFreeform() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         fillRoundedCornersResources(/* fillValue= */ 30);
         RelayoutParams relayoutParams = new RelayoutParams();
 
@@ -331,6 +333,29 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mExclusionRegion);
 
         assertThat(relayoutParams.mCornerRadius).isGreaterThan(0);
+    }
+
+    @Test
+    public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersNotSetForFullscreen() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        fillRoundedCornersResources(/* fillValue= */ 30);
+        RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false,
+                /* isStatusBarVisible */ true,
+                /* isKeyguardVisibleAndOccluded */ false,
+                /* inFullImmersiveMode */ false,
+                new InsetsState(),
+                /* hasGlobalFocus= */ true,
+                mExclusionRegion);
+
+        assertThat(relayoutParams.mCornerRadius).isEqualTo(INVALID_CORNER_RADIUS);
     }
 
     @Test

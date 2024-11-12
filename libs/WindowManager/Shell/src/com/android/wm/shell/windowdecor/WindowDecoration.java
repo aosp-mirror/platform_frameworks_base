@@ -107,6 +107,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     static final int INPUT_SINK_Z_ORDER = -2;
 
     /**
+     * Invalid corner radius that signifies that corner radius should not be set.
+     */
+    static final int INVALID_CORNER_RADIUS = -1;
+
+    /**
      * System-wide context. Only used to create context with overridden configurations.
      */
     final Context mContext;
@@ -449,19 +454,21 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             startT.show(mTaskSurface);
         }
 
-        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-            if (!DesktopModeStatus.isVeiledResizeEnabled()) {
-                // When fluid resize is enabled, add a background to freeform tasks
-                int backgroundColorInt = mTaskInfo.taskDescription.getBackgroundColor();
-                mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
-                mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
-                mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
-                startT.setColor(mTaskSurface, mTmpColor);
-            }
-            startT.setCornerRadius(mTaskSurface, params.mCornerRadius);
-            finishT.setCornerRadius(mTaskSurface, params.mCornerRadius);
+        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                && !DesktopModeStatus.isVeiledResizeEnabled()) {
+            // When fluid resize is enabled, add a background to freeform tasks
+            int backgroundColorInt = mTaskInfo.taskDescription.getBackgroundColor();
+            mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
+            mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
+            mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
+            startT.setColor(mTaskSurface, mTmpColor);
         } else if (!DesktopModeStatus.isVeiledResizeEnabled()) {
             startT.unsetColor(mTaskSurface);
+        }
+
+        if (params.mCornerRadius != INVALID_CORNER_RADIUS) {
+            startT.setCornerRadius(mTaskSurface, params.mCornerRadius);
+            finishT.setCornerRadius(mTaskSurface, params.mCornerRadius);
         }
     }
 
