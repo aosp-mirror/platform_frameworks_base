@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.notification.domain.interactor
 
+import com.android.systemui.activity.data.repository.ActivityManagerRepository
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
@@ -25,8 +26,11 @@ import com.android.systemui.statusbar.notification.shared.ActiveNotificationMode
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /**
@@ -38,10 +42,12 @@ import kotlinx.coroutines.flow.map
  * [StatusBarNotificationChipsInteractor] will collect all the individual instances of this
  * interactor and send all the necessary information to the UI layer.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class SingleNotificationChipInteractor
 @AssistedInject
 constructor(
     @Assisted startingModel: ActiveNotificationModel,
+    private val activityManagerRepository: ActivityManagerRepository,
     @StatusBarChipsLog private val logBuffer: LogBuffer,
 ) {
     private val key = startingModel.key
@@ -67,12 +73,29 @@ constructor(
         _notificationModel.value = model
     }
 
+    private val uid: Flow<Int> = _notificationModel.map { it.uid }
+
+    /** True if the application managing the notification is visible to the user. */
+    private val isAppVisible: Flow<Boolean> =
+        uid.flatMapLatest { currentUid ->
+            activityManagerRepository.createIsAppVisibleFlow(currentUid, logger, extraLogTag)
+        }
+
     /**
      * Emits this notification's status bar chip, or null if this notification shouldn't show a
      * status bar chip.
      */
     val notificationChip: Flow<NotificationChipModel?> =
-        _notificationModel.map { notif -> notif.toNotificationChipModel() }
+        combine(_notificationModel, isAppVisible) { notif, isAppVisible ->
+            if (isAppVisible) {
+                // If the app that posted this notification is visible, we want to hide the chip
+                // because information between the status bar chip and the app itself could be
+                // out-of-sync (like a timer that's slightly off)
+                null
+            } else {
+                notif.toNotificationChipModel()
+            }
+        }
 
     private fun ActiveNotificationModel.toNotificationChipModel(): NotificationChipModel? {
         val statusBarChipIconView = this.statusBarChipIconView

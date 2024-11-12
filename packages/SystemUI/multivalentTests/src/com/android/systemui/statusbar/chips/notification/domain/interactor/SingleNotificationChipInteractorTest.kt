@@ -19,11 +19,12 @@ package com.android.systemui.statusbar.chips.notification.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.data.repository.activityManagerRepository
+import com.android.systemui.activity.data.repository.fake
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.chips.statusBarChipsLogger
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -35,7 +36,7 @@ import org.mockito.kotlin.mock
 @RunWith(AndroidJUnit4::class)
 class SingleNotificationChipInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
-    val logger = kosmos.statusBarChipsLogger
+    val factory = kosmos.singleNotificationChipInteractorFactory
 
     @Test
     fun notificationChip_startsWithStartingModel() =
@@ -43,7 +44,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             val icon = mock<StatusBarIconView>()
             val startingNotif = activeNotificationModel(key = "notif1", statusBarChipIcon = icon)
 
-            val underTest = SingleNotificationChipInteractor(startingNotif, logger)
+            val underTest = factory.create(startingNotif)
 
             val latest by collectLastValue(underTest.notificationChip)
 
@@ -56,9 +57,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
         kosmos.runTest {
             val originalIconView = mock<StatusBarIconView>()
             val underTest =
-                SingleNotificationChipInteractor(
-                    activeNotificationModel(key = "notif1", statusBarChipIcon = originalIconView),
-                    logger,
+                factory.create(
+                    activeNotificationModel(key = "notif1", statusBarChipIcon = originalIconView)
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -77,9 +77,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
         kosmos.runTest {
             val originalIconView = mock<StatusBarIconView>()
             val underTest =
-                SingleNotificationChipInteractor(
-                    activeNotificationModel(key = "notif1", statusBarChipIcon = originalIconView),
-                    logger,
+                factory.create(
+                    activeNotificationModel(key = "notif1", statusBarChipIcon = originalIconView)
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -97,10 +96,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
     fun notificationChip_missingStatusBarIconChipView_inConstructor_emitsNull() =
         kosmos.runTest {
             val underTest =
-                SingleNotificationChipInteractor(
-                    activeNotificationModel(key = "notif1", statusBarChipIcon = null),
-                    logger,
-                )
+                factory.create(activeNotificationModel(key = "notif1", statusBarChipIcon = null))
 
             val latest by collectLastValue(underTest.notificationChip)
 
@@ -111,7 +107,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
     fun notificationChip_missingStatusBarIconChipView_inSet_emitsNull() =
         kosmos.runTest {
             val startingNotif = activeNotificationModel(key = "notif1", statusBarChipIcon = mock())
-            val underTest = SingleNotificationChipInteractor(startingNotif, logger)
+            val underTest = factory.create(startingNotif)
             val latest by collectLastValue(underTest.notificationChip)
             assertThat(latest).isNotNull()
 
@@ -121,4 +117,91 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
 
             assertThat(latest).isNull()
         }
+
+    @Test
+    fun notificationChip_appIsVisibleOnCreation_emitsNull() =
+        kosmos.runTest {
+            activityManagerRepository.fake.startingIsAppVisibleValue = true
+
+            val underTest =
+                factory.create(
+                    activeNotificationModel(key = "notif", uid = UID, statusBarChipIcon = mock())
+                )
+
+            val latest by collectLastValue(underTest.notificationChip)
+
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun notificationChip_appNotVisibleOnCreation_emitsValue() =
+        kosmos.runTest {
+            activityManagerRepository.fake.startingIsAppVisibleValue = false
+
+            val underTest =
+                factory.create(
+                    activeNotificationModel(key = "notif", uid = UID, statusBarChipIcon = mock())
+                )
+
+            val latest by collectLastValue(underTest.notificationChip)
+
+            assertThat(latest).isNotNull()
+        }
+
+    @Test
+    fun notificationChip_hidesWhenAppIsVisible() =
+        kosmos.runTest {
+            val underTest =
+                factory.create(
+                    activeNotificationModel(key = "notif", uid = UID, statusBarChipIcon = mock())
+                )
+
+            val latest by collectLastValue(underTest.notificationChip)
+
+            activityManagerRepository.fake.setIsAppVisible(UID, false)
+            assertThat(latest).isNotNull()
+
+            activityManagerRepository.fake.setIsAppVisible(UID, true)
+            assertThat(latest).isNull()
+
+            activityManagerRepository.fake.setIsAppVisible(UID, false)
+            assertThat(latest).isNotNull()
+        }
+
+    // Note: This test is theoretically impossible because the notification key should contain the
+    // UID, so if the UID changes then the key would also change and a new interactor would be
+    // created. But, test it just in case.
+    @Test
+    fun notificationChip_updatedUid_rechecksAppVisibility_oldObserverUnregistered() =
+        kosmos.runTest {
+            activityManagerRepository.fake.startingIsAppVisibleValue = false
+
+            val hiddenUid = 100
+            val shownUid = 101
+
+            val underTest =
+                factory.create(
+                    activeNotificationModel(
+                        key = "notif",
+                        uid = hiddenUid,
+                        statusBarChipIcon = mock(),
+                    )
+                )
+            val latest by collectLastValue(underTest.notificationChip)
+            assertThat(latest).isNotNull()
+
+            // WHEN the notif gets a new UID that starts as visible
+            activityManagerRepository.fake.startingIsAppVisibleValue = true
+            underTest.setNotification(
+                activeNotificationModel(key = "notif", uid = shownUid, statusBarChipIcon = mock())
+            )
+
+            // THEN we re-fetch the app visibility state with the new UID, and since that UID is
+            // visible, we hide the chip
+            assertThat(latest).isNull()
+        }
+
+    companion object {
+        private const val UID = 885
+    }
 }

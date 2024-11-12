@@ -32,6 +32,7 @@ import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CameraProtectionModule;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.activity.ActivityManagerModule;
 import com.android.systemui.ambient.dagger.AmbientModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
@@ -198,6 +199,7 @@ import javax.inject.Named;
  * may not appreciate that.
  */
 @Module(includes = {
+        ActivityManagerModule.class,
         AmbientModule.class,
         AppOpsModule.class,
         AssistModule.class,
