@@ -1179,7 +1179,7 @@ class DesktopTasksController(
         val userContext =
             context.createContextAsUser(userHandle, /* flags= */ 0)
         val intent = Intent(userContext, DesktopWallpaperActivity::class.java)
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId)
         val options =
             ActivityOptions.makeBasic().apply {
                 launchWindowingMode = WINDOWING_MODE_FULLSCREEN
