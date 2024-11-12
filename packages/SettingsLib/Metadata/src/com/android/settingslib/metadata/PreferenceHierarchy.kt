@@ -166,10 +166,6 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
         }
         return null
     }
-
-    /** Returns all the [PreferenceHierarchyNode]s appear in the hierarchy. */
-    fun getAllPreferences(): List<PreferenceHierarchyNode> =
-        mutableListOf<PreferenceHierarchyNode>().apply { forEachRecursively { add(it) } }
 }
 
 /**

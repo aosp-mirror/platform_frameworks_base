@@ -108,6 +108,9 @@ interface PreferenceBinding {
     }
 }
 
+/** Interface indicates that a virtual [Preference] should be created for binding. */
+interface PreferenceBindingPlaceholder
+
 /** Abstract preference screen to provide preference hierarchy and binding factory. */
 interface PreferenceScreenCreator : PreferenceScreenMetadata, PreferenceScreenProvider {
 
