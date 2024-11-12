@@ -62,7 +62,8 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -1200,9 +1201,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isEmpty()
         }
 
-    // TODO(b/371586248): This test currently require currentUserContext to be public for testing,
-    // this needs to
-    // be updated to capture the argument instead so currentUserContext can be private.
     @Test
     @EnableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
     fun oneUserVerifyCreatingWifiPickerTracker_multiuserFlagEnabled() =
@@ -1215,15 +1213,15 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
             userRepository.setSelectedUserInfo(PRIMARY_USER)
 
-            val currentUserContext by collectLastValue(underTest.selectedUserContext)
+            collectLastValue(underTest.wifiNetwork)
 
-            assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
-            verify(wifiPickerTrackerFactory).create(any(), any(), any(), any())
+            val contextCaptor = argumentCaptor<Context>()
+            verify(wifiPickerTrackerFactory).create(contextCaptor.capture(), any(), any(), any())
+            // If the flag is on, verify that we use the context from #createContextAsUser and we
+            // do NOT use the top-level context
+            assertThat(contextCaptor.firstValue).isEqualTo(primaryUserMockContext)
         }
 
-    // TODO(b/371586248): This test currently require currentUserContext to be public for testing,
-    // this needs to
-    // be updated to capture the argument instead so currentUserContext can be private.
     @Test
     @EnableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
     fun changeUserVerifyCreatingWifiPickerTracker_multiuserEnabled() =
@@ -1233,30 +1231,30 @@ class WifiRepositoryImplTest : SysuiTestCase() {
                 UserHandle.of(PRIMARY_USER_ID),
                 primaryUserMockContext,
             )
-
             userRepository.setSelectedUserInfo(PRIMARY_USER)
 
-            val currentUserContext by collectLastValue(underTest.selectedUserContext)
+            collectLastValue(underTest.wifiNetwork)
 
-            assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
+            val contextCaptor = argumentCaptor<Context>()
+            verify(wifiPickerTrackerFactory).create(contextCaptor.capture(), any(), any(), any())
+            assertThat(contextCaptor.firstValue).isEqualTo(primaryUserMockContext)
 
+            reset(wifiPickerTrackerFactory)
+
+            // WHEN we switch to a different user
             val otherUserMockContext = mock<Context>()
             mContext.prepareCreateContextAsUser(
                 UserHandle.of(ANOTHER_USER_ID),
                 otherUserMockContext,
             )
-
             userRepository.setSelectedUserInfo(ANOTHER_USER)
 
-            val otherUserContext by collectLastValue(underTest.selectedUserContext)
-
-            assertThat(otherUserContext).isEqualTo(otherUserMockContext)
-            verify(wifiPickerTrackerFactory, times(2)).create(any(), any(), any(), any())
+            // THEN we use the different user's context to create WifiPickerTracker
+            val newCaptor = argumentCaptor<Context>()
+            verify(wifiPickerTrackerFactory).create(newCaptor.capture(), any(), any(), any())
+            assertThat(newCaptor.firstValue).isEqualTo(otherUserMockContext)
         }
 
-    // TODO(b/371586248): This test currently require currentUserContext to be public for testing,
-    // this needs to
-    // be updated to capture the argument instead so currentUserContext can be private.
     @Test
     @DisableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
     fun changeUserVerifyCreatingWifiPickerTracker_multiuserDisabled() =
@@ -1269,19 +1267,27 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
             userRepository.setSelectedUserInfo(PRIMARY_USER)
 
-            val currentUserContext by collectLastValue(underTest.selectedUserContext)
+            collectLastValue(underTest.wifiNetwork)
 
-            assertThat(currentUserContext).isEqualTo(primaryUserMockContext)
+            val contextCaptor = argumentCaptor<Context>()
+            verify(wifiPickerTrackerFactory).create(contextCaptor.capture(), any(), any(), any())
+            // If the flag is off, verify that we do NOT use the context from #createContextAsUser
+            // and we instead use the top-level context
+            assertThat(contextCaptor.firstValue).isNotEqualTo(primaryUserMockContext)
+            assertThat(contextCaptor.firstValue).isEqualTo(mContext)
 
+            reset(wifiPickerTrackerFactory)
+
+            // WHEN we switch to a different user
             val otherUserMockContext = mock<Context>()
             mContext.prepareCreateContextAsUser(
                 UserHandle.of(ANOTHER_USER_ID),
                 otherUserMockContext,
             )
-
             userRepository.setSelectedUserInfo(ANOTHER_USER)
 
-            verify(wifiPickerTrackerFactory, times(1)).create(any(), any(), any(), any())
+            // THEN we do NOT re-create WifiPickerTracker because the multiuser flag is off
+            verify(wifiPickerTrackerFactory, never()).create(any(), any(), any(), any())
         }
 
     private fun getCallback(): WifiPickerTracker.WifiPickerTrackerCallback {
