@@ -31,6 +31,7 @@ import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
 import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.keyboardRepeatKeys;
@@ -1146,5 +1147,14 @@ public class InputSettings {
      */
     public static boolean isCustomizableInputGesturesFeatureFlagEnabled() {
         return enableCustomizableInputGestures() && useKeyGestureEventHandler();
+    }
+
+    /**
+     * Whether multi-key gestures are supported using {@code KeyGestureEventHandler}
+     *
+     * @hide
+     */
+    public static boolean doesKeyGestureEventHandlerSupportMultiKeyGestures() {
+        return useKeyGestureEventHandler() && useKeyGestureEventHandlerMultiPressGestures();
     }
 }
