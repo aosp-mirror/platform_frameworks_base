@@ -1357,7 +1357,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void clearSplitPairedInRecents(@ExitReason int exitReason) {
-        if (!shouldBreakPairedTaskInRecents(exitReason) || !mShouldUpdateRecents) return;
+        if (!shouldBreakPairedTaskInRecents(exitReason) || !mShouldUpdateRecents) {
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "clearSplitPairedInRecents: skipping reason=%s",
+                    !mShouldUpdateRecents ? "shouldn't update" : exitReasonToString(exitReason));
+            return;
+        }
 
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "clearSplitPairedInRecents: reason=%s",
                 exitReasonToString(exitReason));
@@ -1610,6 +1614,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void updateRecentTasksSplitPair() {
         // Preventing from single task update while processing recents.
         if (!mShouldUpdateRecents || !mPausingTasks.isEmpty()) {
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "updateRecentTasksSplitPair: skipping reason=%s",
+                    !mShouldUpdateRecents ? "shouldn't update" : "no pausing tasks");
             return;
         }
         mRecentTasks.ifPresent(recentTasks -> {
