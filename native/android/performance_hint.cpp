@@ -33,14 +33,12 @@
 #include <android/performance_hint.h>
 #include <android/trace.h>
 #include <android_os.h>
-#include <cutils/trace.h>
 #include <fmq/AidlMessageQueue.h>
 #include <inttypes.h>
 #include <performance_hint_private.h>
 #include <utils/SystemClock.h>
 
 #include <chrono>
-#include <format>
 #include <future>
 #include <set>
 #include <utility>
@@ -65,22 +63,6 @@ struct APerformanceHintSession;
 constexpr int64_t SEND_HINT_TIMEOUT = std::chrono::nanoseconds(100ms).count();
 struct AWorkDuration : public hal::WorkDuration {};
 
-// A pair of values that determine the behavior of the
-// load hint rate limiter, to only allow "X hints every Y seconds"
-constexpr double kLoadHintInterval = std::chrono::nanoseconds(2s).count();
-constexpr double kMaxLoadHintsPerInterval = 20;
-constexpr double kReplenishRate = kMaxLoadHintsPerInterval / kLoadHintInterval;
-bool kForceNewHintBehavior = false;
-
-template <class T>
-constexpr int32_t enum_size() {
-    return static_cast<int32_t>(*(ndk::enum_range<T>().end() - 1)) + 1;
-}
-
-bool useNewLoadHintBehavior() {
-    return android::os::adpf_use_load_hints() || kForceNewHintBehavior;
-}
-
 // Shared lock for the whole PerformanceHintManager and sessions
 static std::mutex sHintMutex = std::mutex{};
 class FMQWrapper {
@@ -94,8 +76,7 @@ public:
                                    hal::WorkDuration* durations, size_t count) REQUIRES(sHintMutex);
     bool updateTargetWorkDuration(std::optional<hal::SessionConfig>& config,
                                   int64_t targetDurationNanos) REQUIRES(sHintMutex);
-    bool sendHints(std::optional<hal::SessionConfig>& config, std::vector<hal::SessionHint>& hint,
-                   int64_t now) REQUIRES(sHintMutex);
+    bool sendHint(std::optional<hal::SessionConfig>& config, SessionHint hint) REQUIRES(sHintMutex);
     bool setMode(std::optional<hal::SessionConfig>& config, hal::SessionMode, bool enabled)
             REQUIRES(sHintMutex);
     void setToken(ndk::SpAIBinder& token);
@@ -105,11 +86,10 @@ public:
 private:
     template <HalChannelMessageContents::Tag T, bool urgent = false,
               class C = HalChannelMessageContents::_at<T>>
-    bool sendMessages(std::optional<hal::SessionConfig>& config, C* message, size_t count = 1,
-                      int64_t now = ::android::uptimeNanos()) REQUIRES(sHintMutex);
-    template <HalChannelMessageContents::Tag T, class C = HalChannelMessageContents::_at<T>>
-    void writeBuffer(C* message, hal::SessionConfig& config, size_t count, int64_t now)
+    bool sendMessages(std::optional<hal::SessionConfig>& config, C* message, size_t count = 1)
             REQUIRES(sHintMutex);
+    template <HalChannelMessageContents::Tag T, class C = HalChannelMessageContents::_at<T>>
+    void writeBuffer(C* message, hal::SessionConfig& config, size_t count) REQUIRES(sHintMutex);
 
     bool isActiveLocked() REQUIRES(sHintMutex);
     bool updatePersistentTransaction() REQUIRES(sHintMutex);
@@ -140,7 +120,6 @@ public:
                                            hal::SessionTag tag = hal::SessionTag::APP);
     int64_t getPreferredRateNanos() const;
     FMQWrapper& getFMQWrapper();
-    bool canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) REQUIRES(sHintMutex);
 
 private:
     // Necessary to create an empty binder object
@@ -159,8 +138,6 @@ private:
     ndk::SpAIBinder mToken;
     const int64_t mPreferredRateNanos;
     FMQWrapper mFMQWrapper;
-    double mHintBudget = kMaxLoadHintsPerInterval;
-    int64_t mLastBudgetReplenish = 0;
 };
 
 struct APerformanceHintSession {
@@ -174,9 +151,7 @@ public:
 
     int updateTargetWorkDuration(int64_t targetDurationNanos);
     int reportActualWorkDuration(int64_t actualDurationNanos);
-    int sendHints(std::vector<hal::SessionHint>& hints, int64_t now, const char* debugName);
-    int notifyWorkloadIncrease(bool cpu, bool gpu, const char* debugName);
-    int notifyWorkloadReset(bool cpu, bool gpu, const char* debugName);
+    int sendHint(SessionHint hint);
     int setThreads(const int32_t* threadIds, size_t size);
     int getThreadIds(int32_t* const threadIds, size_t* size);
     int setPreferPowerEfficiency(bool enabled);
@@ -198,8 +173,6 @@ private:
     // Last target hit timestamp
     int64_t mLastTargetMetTimestamp GUARDED_BY(sHintMutex);
     // Last hint reported from sendHint indexed by hint value
-    // This is only used by the old rate limiter impl and is replaced
-    // with the new rate limiter under a flag
     std::vector<int64_t> mLastHintSentTimestamp GUARDED_BY(sHintMutex);
     // Cached samples
     std::vector<hal::WorkDuration> mActualWorkDurations GUARDED_BY(sHintMutex);
@@ -282,21 +255,6 @@ APerformanceHintManager* APerformanceHintManager::create(std::shared_ptr<IHintMa
     return new APerformanceHintManager(manager, preferredRateNanos);
 }
 
-bool APerformanceHintManager::canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) {
-    mHintBudget =
-            std::max(kMaxLoadHintsPerInterval,
-                     mHintBudget +
-                             static_cast<double>(now - mLastBudgetReplenish) * kReplenishRate);
-    mLastBudgetReplenish = now;
-
-    // If this youngest timestamp isn't older than the timeout time, we can't send
-    if (hints.size() > mHintBudget) {
-        return false;
-    }
-    mHintBudget -= hints.size();
-    return true;
-}
-
 APerformanceHintSession* APerformanceHintManager::createSession(
         const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos,
         hal::SessionTag tag) {
@@ -334,7 +292,9 @@ FMQWrapper& APerformanceHintManager::getFMQWrapper() {
 
 // ===================================== APerformanceHintSession implementation
 
-constexpr int kNumEnums = enum_size<hal::SessionHint>();
+constexpr int kNumEnums =
+        ndk::enum_range<hal::SessionHint>().end() - ndk::enum_range<hal::SessionHint>().begin();
+
 APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> hintManager,
                                                  std::shared_ptr<IHintSession> session,
                                                  int64_t preferredRateNanos,
@@ -401,81 +361,29 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
     return reportActualWorkDurationInternal(static_cast<AWorkDuration*>(&workDuration));
 }
 
-int APerformanceHintSession::sendHints(std::vector<hal::SessionHint>& hints, int64_t now,
-                                       const char*) {
+int APerformanceHintSession::sendHint(SessionHint hint) {
     std::scoped_lock lock(sHintMutex);
-    if (hints.empty()) {
+    if (hint < 0 || hint >= static_cast<int32_t>(mLastHintSentTimestamp.size())) {
+        ALOGE("%s: invalid session hint %d", __FUNCTION__, hint);
         return EINVAL;
     }
-    for (auto&& hint : hints) {
-        if (static_cast<int32_t>(hint) < 0 || static_cast<int32_t>(hint) >= kNumEnums) {
-            ALOGE("%s: invalid session hint %d", __FUNCTION__, hint);
-            return EINVAL;
+    int64_t now = uptimeNanos();
+
+    // Limit sendHint to a pre-detemined rate for safety
+    if (now < (mLastHintSentTimestamp[hint] + SEND_HINT_TIMEOUT)) {
+        return 0;
+    }
+
+    if (!getFMQ().sendHint(mSessionConfig, hint)) {
+        ndk::ScopedAStatus ret = mHintSession->sendHint(hint);
+
+        if (!ret.isOk()) {
+            ALOGE("%s: HintSession sendHint failed: %s", __FUNCTION__, ret.getMessage());
+            return EPIPE;
         }
     }
-
-    if (useNewLoadHintBehavior()) {
-        if (!APerformanceHintManager::getInstance()->canSendLoadHints(hints, now)) {
-            return EBUSY;
-        }
-    }
-    // keep old rate limiter behavior for legacy flag
-    else {
-        for (auto&& hint : hints) {
-            if (now < (mLastHintSentTimestamp[static_cast<int32_t>(hint)] + SEND_HINT_TIMEOUT)) {
-                return EBUSY;
-            }
-        }
-    }
-
-    if (!getFMQ().sendHints(mSessionConfig, hints, now)) {
-        for (auto&& hint : hints) {
-            ndk::ScopedAStatus ret = mHintSession->sendHint(static_cast<int32_t>(hint));
-
-            if (!ret.isOk()) {
-                ALOGE("%s: HintSession sendHint failed: %s", __FUNCTION__, ret.getMessage());
-                return EPIPE;
-            }
-        }
-    }
-
-    if (!useNewLoadHintBehavior()) {
-        for (auto&& hint : hints) {
-            mLastHintSentTimestamp[static_cast<int32_t>(hint)] = now;
-        }
-    }
-
-    if (ATrace_isEnabled()) {
-        ATRACE_INSTANT("Sending load hint");
-    }
-
+    mLastHintSentTimestamp[hint] = now;
     return 0;
-}
-
-int APerformanceHintSession::notifyWorkloadIncrease(bool cpu, bool gpu, const char* debugName) {
-    std::vector<hal::SessionHint> hints(2);
-    hints.clear();
-    if (cpu) {
-        hints.push_back(hal::SessionHint::CPU_LOAD_UP);
-    }
-    if (gpu) {
-        hints.push_back(hal::SessionHint::GPU_LOAD_UP);
-    }
-    int64_t now = ::android::uptimeNanos();
-    return sendHints(hints, now, debugName);
-}
-
-int APerformanceHintSession::notifyWorkloadReset(bool cpu, bool gpu, const char* debugName) {
-    std::vector<hal::SessionHint> hints(2);
-    hints.clear();
-    if (cpu) {
-        hints.push_back(hal::SessionHint::CPU_LOAD_RESET);
-    }
-    if (gpu) {
-        hints.push_back(hal::SessionHint::GPU_LOAD_RESET);
-    }
-    int64_t now = ::android::uptimeNanos();
-    return sendHints(hints, now, debugName);
 }
 
 int APerformanceHintSession::setThreads(const int32_t* threadIds, size_t size) {
@@ -657,25 +565,24 @@ void FMQWrapper::stopChannel(IHintManager* manager) {
 }
 
 template <HalChannelMessageContents::Tag T, class C>
-void FMQWrapper::writeBuffer(C* message, hal::SessionConfig& config, size_t count, int64_t now) {
-    for (size_t i = 0; i < count; ++i) {
-        new (mFmqTransaction.getSlot(i)) hal::ChannelMessage{
-                .sessionID = static_cast<int32_t>(config.id),
-                .timeStampNanos = now,
-                .data = HalChannelMessageContents::make<T, C>(std::move(*(message + i))),
-        };
-    }
+void FMQWrapper::writeBuffer(C* message, hal::SessionConfig& config, size_t) {
+    new (mFmqTransaction.getSlot(0)) hal::ChannelMessage{
+            .sessionID = static_cast<int32_t>(config.id),
+            .timeStampNanos = ::android::uptimeNanos(),
+            .data = HalChannelMessageContents::make<T, C>(std::move(*message)),
+    };
 }
 
 template <>
 void FMQWrapper::writeBuffer<HalChannelMessageContents::workDuration>(hal::WorkDuration* messages,
                                                                       hal::SessionConfig& config,
-                                                                      size_t count, int64_t now) {
+                                                                      size_t count) {
     for (size_t i = 0; i < count; ++i) {
         hal::WorkDuration& message = messages[i];
         new (mFmqTransaction.getSlot(i)) hal::ChannelMessage{
                 .sessionID = static_cast<int32_t>(config.id),
-                .timeStampNanos = (i == count - 1) ? now : message.timeStampNanos,
+                .timeStampNanos =
+                        (i == count - 1) ? ::android::uptimeNanos() : message.timeStampNanos,
                 .data = HalChannelMessageContents::make<HalChannelMessageContents::workDuration,
                                                         hal::WorkDurationFixedV1>({
                         .durationNanos = message.cpuDurationNanos,
@@ -688,8 +595,7 @@ void FMQWrapper::writeBuffer<HalChannelMessageContents::workDuration>(hal::WorkD
 }
 
 template <HalChannelMessageContents::Tag T, bool urgent, class C>
-bool FMQWrapper::sendMessages(std::optional<hal::SessionConfig>& config, C* message, size_t count,
-                              int64_t now) {
+bool FMQWrapper::sendMessages(std::optional<hal::SessionConfig>& config, C* message, size_t count) {
     if (!isActiveLocked() || !config.has_value() || mCorrupted) {
         return false;
     }
@@ -703,7 +609,7 @@ bool FMQWrapper::sendMessages(std::optional<hal::SessionConfig>& config, C* mess
             return false;
         }
     }
-    writeBuffer<T, C>(message, *config, count, now);
+    writeBuffer<T, C>(message, *config, count);
     mQueue->commitWrite(count);
     mEventFlag->wake(mWriteMask);
     // Re-create the persistent transaction after writing
@@ -735,9 +641,10 @@ bool FMQWrapper::updateTargetWorkDuration(std::optional<hal::SessionConfig>& con
     return sendMessages<HalChannelMessageContents::targetDuration>(config, &targetDurationNanos);
 }
 
-bool FMQWrapper::sendHints(std::optional<hal::SessionConfig>& config,
-                           std::vector<hal::SessionHint>& hints, int64_t now) {
-    return sendMessages<HalChannelMessageContents::hint>(config, hints.data(), hints.size(), now);
+bool FMQWrapper::sendHint(std::optional<hal::SessionConfig>& config, SessionHint hint) {
+    return sendMessages<HalChannelMessageContents::hint>(config,
+                                                         reinterpret_cast<hal::SessionHint*>(
+                                                                 &hint));
 }
 
 bool FMQWrapper::setMode(std::optional<hal::SessionConfig>& config, hal::SessionMode mode,
@@ -851,9 +758,7 @@ void APerformanceHint_closeSession(APerformanceHintSession* session) {
 
 int APerformanceHint_sendHint(APerformanceHintSession* session, SessionHint hint) {
     VALIDATE_PTR(session)
-    std::vector<hal::SessionHint> hints{static_cast<hal::SessionHint>(hint)};
-    int64_t now = ::android::uptimeNanos();
-    return session->sendHints(hints, now, "HWUI hint");
+    return session->sendHint(hint);
 }
 
 int APerformanceHint_setThreads(APerformanceHintSession* session, const pid_t* threadIds,
@@ -884,26 +789,6 @@ int APerformanceHint_reportActualWorkDuration2(APerformanceHintSession* session,
     VALIDATE_INT(workDurationPtr->gpuDurationNanos, >= 0)
     VALIDATE_INT(workDurationPtr->gpuDurationNanos + workDurationPtr->cpuDurationNanos, > 0)
     return session->reportActualWorkDuration(workDurationPtr);
-}
-
-int APerformanceHint_notifyWorkloadIncrease(APerformanceHintSession* session, bool cpu, bool gpu,
-                                            const char* debugName) {
-    VALIDATE_PTR(session)
-    VALIDATE_PTR(debugName)
-    if (!useNewLoadHintBehavior()) {
-        return ENOTSUP;
-    }
-    return session->notifyWorkloadIncrease(cpu, gpu, debugName);
-}
-
-int APerformanceHint_notifyWorkloadReset(APerformanceHintSession* session, bool cpu, bool gpu,
-                                         const char* debugName) {
-    VALIDATE_PTR(session)
-    VALIDATE_PTR(debugName)
-    if (!useNewLoadHintBehavior()) {
-        return ENOTSUP;
-    }
-    return session->notifyWorkloadReset(cpu, gpu, debugName);
 }
 
 AWorkDuration* AWorkDuration_create() {
@@ -952,14 +837,4 @@ void APerformanceHint_setIHintManagerForTesting(void* iManager) {
 
 void APerformanceHint_setUseFMQForTesting(bool enabled) {
     gForceFMQEnabled = enabled;
-}
-
-void APerformanceHint_getRateLimiterPropertiesForTesting(int32_t* maxLoadHintsPerInterval,
-                                                         int64_t* loadHintInterval) {
-    *maxLoadHintsPerInterval = kMaxLoadHintsPerInterval;
-    *loadHintInterval = kLoadHintInterval;
-}
-
-void APerformanceHint_setUseNewLoadHintBehaviorForTesting(bool newBehavior) {
-    kForceNewHintBehavior = newBehavior;
 }

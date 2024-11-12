@@ -90,10 +90,7 @@ class PerformanceHintTest : public Test {
 public:
     void SetUp() override {
         mMockIHintManager = ndk::SharedRefBase::make<NiceMock<MockIHintManager>>();
-        APerformanceHint_getRateLimiterPropertiesForTesting(&mMaxLoadHintsPerInterval,
-                                                            &mLoadHintInterval);
         APerformanceHint_setIHintManagerForTesting(&mMockIHintManager);
-        APerformanceHint_setUseNewLoadHintBehaviorForTesting(true);
     }
 
     void TearDown() override {
@@ -179,9 +176,6 @@ public:
     int kMockQueueSize = 20;
     bool mUsingFMQ = false;
 
-    int32_t mMaxLoadHintsPerInterval;
-    int64_t mLoadHintInterval;
-
     template <HalChannelMessageContents::Tag T, class C = HalChannelMessageContents::_at<T>>
     void expectToReadFromFmq(C expected) {
         hal::ChannelMessage readData;
@@ -224,6 +218,7 @@ TEST_F(PerformanceHintTest, TestSession) {
     EXPECT_CALL(*mMockSession, reportActualWorkDuration2(_)).Times(Exactly(1));
     result = APerformanceHint_reportActualWorkDuration(session, actualDurationNanos);
     EXPECT_EQ(0, result);
+
     result = APerformanceHint_updateTargetWorkDuration(session, -1L);
     EXPECT_EQ(EINVAL, result);
     result = APerformanceHint_reportActualWorkDuration(session, -1L);
@@ -233,28 +228,18 @@ TEST_F(PerformanceHintTest, TestSession) {
     EXPECT_CALL(*mMockSession, sendHint(Eq(hintId))).Times(Exactly(1));
     result = APerformanceHint_sendHint(session, hintId);
     EXPECT_EQ(0, result);
-    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::CPU_LOAD_UP))).Times(Exactly(1));
-    result = APerformanceHint_notifyWorkloadIncrease(session, true, false, "Test hint");
+    usleep(110000); // Sleep for longer than the update timeout.
+    EXPECT_CALL(*mMockSession, sendHint(Eq(hintId))).Times(Exactly(1));
+    result = APerformanceHint_sendHint(session, hintId);
     EXPECT_EQ(0, result);
-    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::CPU_LOAD_RESET))).Times(Exactly(1));
-    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::GPU_LOAD_RESET))).Times(Exactly(1));
-    result = APerformanceHint_notifyWorkloadReset(session, true, true, "Test hint");
+    // Expect to get rate limited if we try to send faster than the limiter allows
+    EXPECT_CALL(*mMockSession, sendHint(Eq(hintId))).Times(Exactly(0));
+    result = APerformanceHint_sendHint(session, hintId);
     EXPECT_EQ(0, result);
 
     result = APerformanceHint_sendHint(session, static_cast<SessionHint>(-1));
     EXPECT_EQ(EINVAL, result);
 
-    Mock::VerifyAndClearExpectations(mMockSession.get());
-    for (int i = 0; i < mMaxLoadHintsPerInterval; ++i) {
-        APerformanceHint_sendHint(session, hintId);
-    }
-
-    // Expect to get rate limited if we try to send faster than the limiter allows
-    EXPECT_CALL(*mMockSession, sendHint(_)).Times(Exactly(0));
-    result = APerformanceHint_notifyWorkloadIncrease(session, true, true, "Test hint");
-    EXPECT_EQ(result, EBUSY);
-    EXPECT_CALL(*mMockSession, sendHint(_)).Times(Exactly(0));
-    result = APerformanceHint_notifyWorkloadReset(session, true, true, "Test hint");
     EXPECT_CALL(*mMockSession, close()).Times(Exactly(1));
     APerformanceHint_closeSession(session);
 }
