@@ -211,9 +211,6 @@ public class VirtualDeviceManagerService extends SystemService {
     }
 
     CameraAccessController getCameraAccessController(UserHandle userHandle) {
-        if (Flags.streamCamera()) {
-            return null;
-        }
         int userId = userHandle.getIdentifier();
         synchronized (mVirtualDeviceManagerLock) {
             for (int i = 0; i < mVirtualDevices.size(); i++) {
