@@ -35,12 +35,6 @@ sealed interface Transformation {
      * The matcher that should match the element(s) to which this transformation should be applied.
      */
     val matcher: ElementMatcher
-
-    /*
-     * Reverse this transformation. This is called when we use Transition(from = A, to = B) when
-     * animating from B to A and there is no Transition(from = B, to = A) defined.
-     */
-    fun reversed(): Transformation = this
 }
 
 internal class SharedElementTransformation(
