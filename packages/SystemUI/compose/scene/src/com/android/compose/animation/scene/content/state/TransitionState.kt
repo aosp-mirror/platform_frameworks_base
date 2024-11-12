@@ -18,6 +18,7 @@ package com.android.compose.animation.scene.content.state
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
@@ -381,7 +382,7 @@ sealed interface TransitionState {
                     val progressSpec =
                         spring(
                             stiffness = swipeSpec.stiffness,
-                            dampingRatio = swipeSpec.dampingRatio,
+                            dampingRatio = Spring.DampingRatioNoBouncy,
                             visibilityThreshold = ProgressVisibilityThreshold,
                         )
                     animatable.animateTo(0f, progressSpec)
