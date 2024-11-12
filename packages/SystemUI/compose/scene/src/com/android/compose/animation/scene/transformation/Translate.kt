@@ -25,7 +25,9 @@ import com.android.compose.animation.scene.OverscrollScope
 import com.android.compose.animation.scene.content.state.TransitionState
 
 internal class Translate private constructor(private val x: Dp, private val y: Dp) :
-    InterpolatedOffsetTransformation {
+    InterpolatedPropertyTransformation<Offset> {
+    override val property = PropertyTransformation.Property.Offset
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
@@ -44,7 +46,9 @@ internal class OverscrollTranslate
 private constructor(
     private val x: OverscrollScope.() -> Float,
     private val y: OverscrollScope.() -> Float,
-) : InterpolatedOffsetTransformation {
+) : InterpolatedPropertyTransformation<Offset> {
+    override val property = PropertyTransformation.Property.Offset
+
     private val cachedOverscrollScope = CachedOverscrollScope()
 
     override fun PropertyTransformationScope.transform(

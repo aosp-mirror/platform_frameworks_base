@@ -27,7 +27,9 @@ private constructor(
     private val anchor: ElementKey,
     private val anchorWidth: Boolean,
     private val anchorHeight: Boolean,
-) : InterpolatedSizeTransformation {
+) : InterpolatedPropertyTransformation<IntSize> {
+    override val property = PropertyTransformation.Property.Size
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

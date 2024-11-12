@@ -25,7 +25,9 @@ import com.android.compose.animation.scene.content.state.TransitionState
 /** Translate an element from an edge of the layout. */
 internal class EdgeTranslate
 private constructor(private val edge: Edge, private val startsOutsideLayoutBounds: Boolean) :
-    InterpolatedOffsetTransformation {
+    InterpolatedPropertyTransformation<Offset> {
+    override val property = PropertyTransformation.Property.Offset
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

@@ -21,7 +21,9 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Fade an element in or out. */
-internal object Fade : InterpolatedAlphaTransformation {
+internal object Fade : InterpolatedPropertyTransformation<Float> {
+    override val property = PropertyTransformation.Property.Alpha
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

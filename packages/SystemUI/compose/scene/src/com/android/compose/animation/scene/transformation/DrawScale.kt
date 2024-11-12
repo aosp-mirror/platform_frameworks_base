@@ -31,7 +31,9 @@ private constructor(
     private val scaleX: Float,
     private val scaleY: Float,
     private val pivot: Offset,
-) : InterpolatedScaleTransformation {
+) : InterpolatedPropertyTransformation<Scale> {
+    override val property = PropertyTransformation.Property.Scale
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

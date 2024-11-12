@@ -23,7 +23,9 @@ import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the translation of an element to another element. */
 internal class AnchoredTranslate private constructor(private val anchor: ElementKey) :
-    InterpolatedOffsetTransformation {
+    InterpolatedPropertyTransformation<Offset> {
+    override val property = PropertyTransformation.Property.Offset
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

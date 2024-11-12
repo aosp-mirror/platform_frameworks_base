@@ -27,7 +27,9 @@ import kotlin.math.roundToInt
  * therefore impact the layout of other elements.
  */
 internal class ScaleSize private constructor(private val width: Float, private val height: Float) :
-    InterpolatedSizeTransformation {
+    InterpolatedPropertyTransformation<IntSize> {
+    override val property = PropertyTransformation.Property.Size
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

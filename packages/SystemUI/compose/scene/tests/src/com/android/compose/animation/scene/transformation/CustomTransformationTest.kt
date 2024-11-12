@@ -46,7 +46,9 @@ class CustomTransformationTest {
     @Test
     fun customSize() {
         /** A size transformation that adds [add] to the size of the transformed element(s). */
-        class AddSizeTransformation(private val add: Dp) : CustomSizeTransformation {
+        class AddSizeTransformation(private val add: Dp) : CustomPropertyTransformation<IntSize> {
+            override val property = PropertyTransformation.Property.Size
+
             override fun PropertyTransformationScope.transform(
                 content: ContentKey,
                 element: ElementKey,
@@ -82,7 +84,9 @@ class CustomTransformationTest {
     @Test
     fun customOffset() {
         /** An offset transformation that adds [add] to the offset of the transformed element(s). */
-        class AddOffsetTransformation(private val add: Dp) : CustomOffsetTransformation {
+        class AddOffsetTransformation(private val add: Dp) : CustomPropertyTransformation<Offset> {
+            override val property = PropertyTransformation.Property.Offset
+
             override fun PropertyTransformationScope.transform(
                 content: ContentKey,
                 element: ElementKey,

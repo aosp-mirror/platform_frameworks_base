@@ -26,14 +26,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.transformation.CustomAlphaTransformation
-import com.android.compose.animation.scene.transformation.CustomOffsetTransformation
-import com.android.compose.animation.scene.transformation.CustomScaleTransformation
-import com.android.compose.animation.scene.transformation.CustomSizeTransformation
-import com.android.compose.animation.scene.transformation.InterpolatedAlphaTransformation
-import com.android.compose.animation.scene.transformation.InterpolatedOffsetTransformation
-import com.android.compose.animation.scene.transformation.InterpolatedScaleTransformation
-import com.android.compose.animation.scene.transformation.InterpolatedSizeTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.TransformationMatcher
@@ -358,13 +350,20 @@ internal class TransformationSpecImpl(
                 return@fastForEach
             }
 
-            when (val transformation = transformationMatcher.factory.create()) {
-                is SharedElementTransformation -> {
-                    throwIfNotNull(shared, element, name = "shared")
-                    shared = TransformationWithRange(transformation, transformationMatcher.range)
+            val transformation = transformationMatcher.factory.create()
+            val property =
+                when (transformation) {
+                    is SharedElementTransformation -> {
+                        throwIfNotNull(shared, element, name = "shared")
+                        shared =
+                            TransformationWithRange(transformation, transformationMatcher.range)
+                        return@fastForEach
+                    }
+                    is PropertyTransformation<*> -> transformation.property
                 }
-                is InterpolatedOffsetTransformation,
-                is CustomOffsetTransformation -> {
+
+            when (property) {
+                is PropertyTransformation.Property.Offset -> {
                     throwIfNotNull(offset, element, name = "offset")
                     offset =
                         TransformationWithRange(
@@ -372,8 +371,7 @@ internal class TransformationSpecImpl(
                             transformationMatcher.range,
                         )
                 }
-                is InterpolatedSizeTransformation,
-                is CustomSizeTransformation -> {
+                is PropertyTransformation.Property.Size -> {
                     throwIfNotNull(size, element, name = "size")
                     size =
                         TransformationWithRange(
@@ -381,8 +379,7 @@ internal class TransformationSpecImpl(
                             transformationMatcher.range,
                         )
                 }
-                is InterpolatedScaleTransformation,
-                is CustomScaleTransformation -> {
+                is PropertyTransformation.Property.Scale -> {
                     throwIfNotNull(drawScale, element, name = "drawScale")
                     drawScale =
                         TransformationWithRange(
@@ -390,8 +387,7 @@ internal class TransformationSpecImpl(
                             transformationMatcher.range,
                         )
                 }
-                is InterpolatedAlphaTransformation,
-                is CustomAlphaTransformation -> {
+                is PropertyTransformation.Property.Alpha -> {
                     throwIfNotNull(alpha, element, name = "alpha")
                     alpha =
                         TransformationWithRange(

@@ -57,14 +57,37 @@ internal data class SharedElementTransformation(
     }
 }
 
-/** A transformation that changes the value of an element property, like its size or offset. */
-sealed interface PropertyTransformation<T> : Transformation
+/**
+ * A transformation that changes the value of an element [Property], like its [size][Property.Size]
+ * or [offset][Property.Offset].
+ */
+sealed interface PropertyTransformation<T> : Transformation {
+    /** The property to which this transformation is applied. */
+    val property: Property<T>
+
+    sealed class Property<T> {
+        /** The size of an element. */
+        data object Size : Property<IntSize>()
+
+        /** The offset (position) of an element. */
+        data object Offset : Property<androidx.compose.ui.geometry.Offset>()
+
+        /** The alpha of an element. */
+        data object Alpha : Property<Float>()
+
+        /**
+         * The drawing scale of an element. Animating the scale does not have any effect on the
+         * layout.
+         */
+        data object Scale : Property<com.android.compose.animation.scene.Scale>()
+    }
+}
 
 /**
  * A transformation to a target/transformed value that is automatically interpolated using the
  * transition progress and transformation range.
  */
-sealed interface InterpolatedPropertyTransformation<T> : PropertyTransformation<T> {
+interface InterpolatedPropertyTransformation<T> : PropertyTransformation<T> {
     /**
      * Return the transformed value for the given property, i.e.:
      * - the value at progress = 0% for elements that are entering the layout (i.e. elements in the
@@ -83,19 +106,7 @@ sealed interface InterpolatedPropertyTransformation<T> : PropertyTransformation<
     ): T
 }
 
-/** An [InterpolatedPropertyTransformation] applied to the size of one or more elements. */
-interface InterpolatedSizeTransformation : InterpolatedPropertyTransformation<IntSize>
-
-/** An [InterpolatedPropertyTransformation] applied to the offset of one or more elements. */
-interface InterpolatedOffsetTransformation : InterpolatedPropertyTransformation<Offset>
-
-/** An [InterpolatedPropertyTransformation] applied to the alpha of one or more elements. */
-interface InterpolatedAlphaTransformation : InterpolatedPropertyTransformation<Float>
-
-/** An [InterpolatedPropertyTransformation] applied to the scale of one or more elements. */
-interface InterpolatedScaleTransformation : InterpolatedPropertyTransformation<Scale>
-
-sealed interface CustomPropertyTransformation<T> : PropertyTransformation<T> {
+interface CustomPropertyTransformation<T> : PropertyTransformation<T> {
     /**
      * Return the value that the property should have in the current frame for the given [content]
      * and [element].
@@ -114,18 +125,6 @@ sealed interface CustomPropertyTransformation<T> : PropertyTransformation<T> {
         transitionScope: CoroutineScope,
     ): T
 }
-
-/** A [CustomPropertyTransformation] applied to the size of one or more elements. */
-interface CustomSizeTransformation : CustomPropertyTransformation<IntSize>
-
-/** A [CustomPropertyTransformation] applied to the offset of one or more elements. */
-interface CustomOffsetTransformation : CustomPropertyTransformation<Offset>
-
-/** A [CustomPropertyTransformation] applied to the alpha of one or more elements. */
-interface CustomAlphaTransformation : CustomPropertyTransformation<Float>
-
-/** A [CustomPropertyTransformation] applied to the scale of one or more elements. */
-interface CustomScaleTransformation : CustomPropertyTransformation<Scale>
 
 interface PropertyTransformationScope : Density, ElementStateScope {
     /** The current [direction][LayoutDirection] of the layout. */

@@ -28,8 +28,9 @@ import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.transformation.CustomSizeTransformation
+import com.android.compose.animation.scene.transformation.CustomPropertyTransformation
 import com.android.compose.animation.scene.transformation.OverscrollTranslate
+import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformationScope
 import com.android.compose.animation.scene.transformation.TransformationMatcher
 import com.android.compose.animation.scene.transformation.TransformationRange
@@ -354,7 +355,9 @@ class TransitionDslTest {
             from(SceneA, to = SceneB) {
                 fractionRange {
                     transformation(TestElements.Foo) {
-                        object : CustomSizeTransformation {
+                        object : CustomPropertyTransformation<IntSize> {
+                            override val property = PropertyTransformation.Property.Size
+
                             override fun PropertyTransformationScope.transform(
                                 content: ContentKey,
                                 element: ElementKey,
