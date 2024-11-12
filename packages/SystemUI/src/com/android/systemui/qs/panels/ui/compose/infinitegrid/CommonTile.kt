@@ -17,6 +17,7 @@
 package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import android.graphics.drawable.Animatable
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import androidx.compose.animation.animateColorAsState
@@ -226,7 +227,14 @@ fun SmallTileContent(
                         }
                     }
                 }
-                is Icon.Loaded -> rememberDrawablePainter(loadedDrawable)
+                is Icon.Loaded -> {
+                    LaunchedEffect(loadedDrawable) {
+                        if (loadedDrawable is AnimatedVectorDrawable) {
+                            loadedDrawable.forceAnimationOnUI()
+                        }
+                    }
+                    rememberDrawablePainter(loadedDrawable)
+                }
             }
 
         Image(
