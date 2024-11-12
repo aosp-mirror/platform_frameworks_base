@@ -8896,6 +8896,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAppCompatController.getAppCompatSizeCompatModePolicy();
 
         if (scmPolicy.hasAppCompatDisplayInsetsWithoutInheritance()
+                && mAppCompatDisplayInsets != null
                 && !mAppCompatDisplayInsets.mIsInFixedOrientationOrAspectRatioLetterbox) {
             // App prefers to keep its original size.
             // If the size compat is from previous fixed orientation letterboxing, we may want to
