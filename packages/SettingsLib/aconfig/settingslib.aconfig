@@ -74,16 +74,6 @@ flag {
 }
 
 flag {
-    name: "volume_panel_broadcast_fix"
-    namespace: "systemui"
-    description: "Make the volume panel's repository listen for the new ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED broadcast instead of ACTION_NOTIFICATION_POLICY_CHANGED"
-    bug: "347707024"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "volume_dialog_audio_sharing_fix"
     namespace: "cross_device_experiences"
     description: "Gates whether to show separate volume bars during audio sharing"
