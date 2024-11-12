@@ -12553,8 +12553,19 @@ package android.security.advancedprotection {
   }
 
   @FlaggedApi("android.security.aapm_api") public final class AdvancedProtectionManager {
+    method @NonNull public android.content.Intent createSupportIntent(@NonNull String, @Nullable String);
     method @NonNull @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public java.util.List<android.security.advancedprotection.AdvancedProtectionFeature> getAdvancedProtectionFeatures();
     method @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public void setAdvancedProtectionEnabled(boolean);
+    field @FlaggedApi("android.security.aapm_api") public static final String ACTION_SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG = "android.security.advancedprotection.action.SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG";
+    field public static final String EXTRA_SUPPORT_DIALOG_FEATURE = "android.security.advancedprotection.extra.SUPPORT_DIALOG_FEATURE";
+    field public static final String EXTRA_SUPPORT_DIALOG_TYPE = "android.security.advancedprotection.extra.SUPPORT_DIALOG_TYPE";
+    field public static final String FEATURE_ID_DISALLOW_CELLULAR_2G = "android.security.advancedprotection.feature_disallow_2g";
+    field public static final String FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES = "android.security.advancedprotection.feature_disallow_install_unknown_sources";
+    field public static final String FEATURE_ID_DISALLOW_USB = "android.security.advancedprotection.feature_disallow_usb";
+    field public static final String FEATURE_ID_DISALLOW_WEP = "android.security.advancedprotection.feature_disallow_wep";
+    field public static final String FEATURE_ID_ENABLE_MTE = "android.security.advancedprotection.feature_enable_mte";
+    field public static final String SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION = "android.security.advancedprotection.type_blocked_interaction";
+    field public static final String SUPPORT_DIALOG_TYPE_DISABLED_SETTING = "android.security.advancedprotection.type_disabled_setting";
   }
 
 }
