@@ -111,6 +111,14 @@ flag {
 }
 
 flag {
+    name: "write_system_preference_permission_enabled"
+    is_fixed_read_only: true
+    namespace: "android_settings"
+    description: "Enable WRITE_SYSTEM_PREFERENCE permission and appop"
+    bug: "375193223"
+}
+
+flag {
   name: "asha_profile_access_profile_enabled_true"
   namespace: "accessibility"
   description: "Changes the return value of HearingAidProfile.accessProfileEnabled() to true"
