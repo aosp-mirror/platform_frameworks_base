@@ -21,6 +21,14 @@ import android.content.Context.INPUT_SERVICE
 import android.hardware.input.fakeInputManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.view.KeyEvent.KEYCODE_SLASH
+import android.view.KeyEvent.META_ALT_ON
+import android.view.KeyEvent.META_CAPS_LOCK_ON
+import android.view.KeyEvent.META_CTRL_ON
+import android.view.KeyEvent.META_FUNCTION_ON
+import android.view.KeyEvent.META_META_ON
+import android.view.KeyEvent.META_SHIFT_ON
+import android.view.KeyEvent.META_SYM_ON
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.hardware.input.Flags.FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES
@@ -31,8 +39,11 @@ import com.android.systemui.keyboard.shortcut.customShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allCustomizableInputGesturesWithSimpleShortcutCombinations
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.customizableInputGestureWithUnknownKeyGestureType
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.expectedShortcutCategoriesWithSimpleShortcutCombination
+import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
@@ -114,4 +125,74 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
             assertThat(categories).isEmpty()
         }
     }
+
+    @Test
+    fun pressedKeys_isEmptyByDefault() {
+        testScope.runTest {
+            val pressedKeys by collectLastValue(repo.pressedKeys)
+            assertThat(pressedKeys).isEmpty()
+
+            helper.toggle(deviceId = 123)
+            assertThat(pressedKeys).isEmpty()
+        }
+    }
+
+    @Test
+    fun pressedKeys_recognizesAllSupportedModifiers() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            val pressedKeys by collectLastValue(repo.pressedKeys)
+            repo.updateUserKeyCombination(
+                KeyCombination(modifiers = allSupportedModifiers, keyCode = null)
+            )
+
+            assertThat(pressedKeys)
+                .containsExactly(
+                    ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
+                    ShortcutKey.Text("Ctrl"),
+                    ShortcutKey.Text("Fn"),
+                    ShortcutKey.Text("Shift"),
+                    ShortcutKey.Text("Alt"),
+                    ShortcutKey.Text("Sym"),
+                )
+        }
+    }
+
+    @Test
+    fun pressedKeys_ignoresUnsupportedModifiers() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            val pressedKeys by collectLastValue(repo.pressedKeys)
+            repo.updateUserKeyCombination(
+                KeyCombination(modifiers = META_CAPS_LOCK_ON, keyCode = null)
+            )
+
+            assertThat(pressedKeys).isEmpty()
+        }
+    }
+
+    @Test
+    fun pressedKeys_assertCorrectConversion() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            val pressedKeys by collectLastValue(repo.pressedKeys)
+            repo.updateUserKeyCombination(
+                KeyCombination(modifiers = META_META_ON, keyCode = KEYCODE_SLASH)
+            )
+
+            assertThat(pressedKeys)
+                .containsExactly(
+                    ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
+                    ShortcutKey.Text("/"),
+                )
+        }
+    }
+
+    private val allSupportedModifiers =
+        META_META_ON or
+            META_CTRL_ON or
+            META_FUNCTION_ON or
+            META_SHIFT_ON or
+            META_ALT_ON or
+            META_SYM_ON
 }

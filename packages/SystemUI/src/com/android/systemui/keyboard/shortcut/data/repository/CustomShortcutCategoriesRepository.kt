@@ -23,19 +23,24 @@ import android.hardware.input.InputGestureData.KeyTrigger
 import android.hardware.input.InputManager
 import android.hardware.input.InputSettings
 import android.hardware.input.KeyGestureEvent
+import com.android.systemui.Flags.shortcutHelperKeyGlyph
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.data.model.InternalKeyboardShortcutGroup
 import com.android.systemui.keyboard.shortcut.data.model.InternalKeyboardShortcutInfo
+import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState.Active
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
@@ -60,6 +65,8 @@ constructor(
     private val inputManager: InputManager
         get() = userContext.getSystemService(INPUT_SERVICE) as InputManager
 
+    private val _selectedKeyCombination = MutableStateFlow<KeyCombination?>(null)
+
     private val activeInputDevice =
         stateRepository.state.map {
             if (it is Active) {
@@ -68,6 +75,41 @@ constructor(
                 null
             }
         }
+
+    val pressedKeys =
+        _selectedKeyCombination
+            .combine(activeInputDevice) { keyCombination, inputDevice ->
+                if (inputDevice == null || keyCombination == null) {
+                    return@combine emptyList()
+                } else {
+                    val keyGlyphMap =
+                        if (shortcutHelperKeyGlyph()) {
+                            inputManager.getKeyGlyphMap(inputDevice.id)
+                        } else null
+                    val modifiers =
+                        shortcutCategoriesUtils.toShortcutModifierKeys(
+                            keyCombination.modifiers,
+                            keyGlyphMap,
+                        )
+                    val triggerKey =
+                        keyCombination.keyCode?.let {
+                            shortcutCategoriesUtils.toShortcutKey(
+                                keyGlyphMap,
+                                inputDevice.keyCharacterMap,
+                                keyCode = it,
+                            )
+                        }
+                    val keys = mutableListOf<ShortcutKey>()
+                    modifiers?.let { keys += it }
+                    triggerKey?.let { keys += it }
+                    return@combine keys
+                }
+            }
+            .stateIn(
+                scope = backgroundScope,
+                started = SharingStarted.Lazily,
+                initialValue = emptyList(),
+            )
 
     override val categories: Flow<List<ShortcutCategory>> =
         activeInputDevice
@@ -103,6 +145,10 @@ constructor(
                 initialValue = emptyList(),
                 started = SharingStarted.Lazily,
             )
+
+    fun updateUserKeyCombination(keyCombination: KeyCombination?) {
+        _selectedKeyCombination.value = keyCombination
+    }
 
     private fun toInternalGroupSources(
         inputGestures: List<InputGestureData>
