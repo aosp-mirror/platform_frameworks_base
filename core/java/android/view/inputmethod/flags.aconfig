@@ -175,3 +175,12 @@ flag {
   bug: "342672560"
   is_fixed_read_only: true
 }
+
+flag {
+  name: "adaptive_handwriting_bounds"
+  is_exported: true
+  namespace: "input_method"
+  description: "Feature flag for adaptively increasing handwriting bounds."
+  bug: "350047836"
+  is_fixed_read_only: true
+}
