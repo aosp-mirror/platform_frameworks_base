@@ -1024,10 +1024,13 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static TaskStackTransitionObserver provideTaskStackTransitionObserver(
-            Lazy<Transitions> transitions,
-            ShellInit shellInit
+            ShellInit shellInit,
+            Lazy<ShellTaskOrganizer> shellTaskOrganizer,
+            ShellCommandHandler shellCommandHandler,
+            Lazy<Transitions> transitions
     ) {
-        return new TaskStackTransitionObserver(transitions, shellInit);
+        return new TaskStackTransitionObserver(shellInit, shellTaskOrganizer, shellCommandHandler,
+                transitions);
     }
 
     //
