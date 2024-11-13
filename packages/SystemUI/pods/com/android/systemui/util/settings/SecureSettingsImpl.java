@@ -21,24 +21,25 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
+import com.android.systemui.util.settings.SettingsSingleThreadBackground;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
 import javax.inject.Inject;
 
-class SystemSettingsImpl implements SystemSettings {
+class SecureSettingsImpl implements SecureSettings {
     private final ContentResolver mContentResolver;
     private final CurrentUserIdProvider mCurrentUserProvider;
-    private final CoroutineDispatcher mBgCoroutineDispatcher;
+    private final CoroutineDispatcher mBgDispatcher;
 
     @Inject
-    SystemSettingsImpl(ContentResolver contentResolver,
+    SecureSettingsImpl(
+            ContentResolver contentResolver,
             CurrentUserIdProvider currentUserProvider,
             @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
         mCurrentUserProvider = currentUserProvider;
-        mBgCoroutineDispatcher = bgDispatcher;
+        mBgDispatcher = bgDispatcher;
     }
 
     @NonNull
@@ -56,42 +57,42 @@ class SystemSettingsImpl implements SystemSettings {
     @NonNull
     @Override
     public Uri getUriFor(@NonNull String name) {
-        return Settings.System.getUriFor(name);
+        return Settings.Secure.getUriFor(name);
     }
 
     @NonNull
     @Override
     public CoroutineDispatcher getBackgroundDispatcher() {
-        return mBgCoroutineDispatcher;
+        return mBgDispatcher;
     }
 
     @Override
     public String getStringForUser(@NonNull String name, int userHandle) {
-        return Settings.System.getStringForUser(mContentResolver, name,
+        return Settings.Secure.getStringForUser(mContentResolver, name,
                 getRealUserHandle(userHandle));
     }
 
     @Override
     public boolean putString(@NonNull String name, String value, boolean overrideableByRestore) {
-        return Settings.System.putString(mContentResolver, name, value, overrideableByRestore);
+        return Settings.Secure.putString(mContentResolver, name, value, overrideableByRestore);
     }
 
     @Override
     public boolean putStringForUser(@NonNull String name, String value, int userHandle) {
-        return Settings.System.putStringForUser(mContentResolver, name, value,
+        return Settings.Secure.putStringForUser(mContentResolver, name, value,
                 getRealUserHandle(userHandle));
     }
 
     @Override
     public boolean putStringForUser(@NonNull String name, String value, String tag,
             boolean makeDefault, int userHandle, boolean overrideableByRestore) {
-        throw new UnsupportedOperationException(
-                "This method only exists publicly for Settings.Secure and Settings.Global");
+        return Settings.Secure.putStringForUser(
+                mContentResolver, name, value, tag, makeDefault, getRealUserHandle(userHandle),
+                overrideableByRestore);
     }
 
     @Override
     public boolean putString(@NonNull String name, String value, String tag, boolean makeDefault) {
-        throw new UnsupportedOperationException(
-                "This method only exists publicly for Settings.Secure and Settings.Global");
+        return Settings.Secure.putString(mContentResolver, name, value, tag, makeDefault);
     }
 }

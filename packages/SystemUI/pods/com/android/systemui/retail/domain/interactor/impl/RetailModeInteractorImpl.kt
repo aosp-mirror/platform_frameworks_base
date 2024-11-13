@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.retail.dagger
+package com.android.systemui.retail.domain.interactor.impl
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.retail.data.repository.RetailModeRepository
-import com.android.systemui.retail.data.repository.RetailModeSettingsRepository
 import com.android.systemui.retail.domain.interactor.RetailModeInteractor
-import com.android.systemui.retail.domain.interactor.RetailModeInteractorImpl
-import dagger.Binds
-import dagger.Module
+import javax.inject.Inject
 
-@Module
-abstract class RetailModeModule {
-
-    @Binds
-    abstract fun bindsRetailModeRepository(impl: RetailModeSettingsRepository): RetailModeRepository
-
-    @Binds
-    abstract fun bindsRetailModeInteractor(impl: RetailModeInteractorImpl): RetailModeInteractor
+@SysUISingleton
+class RetailModeInteractorImpl
+@Inject
+constructor(
+    private val repository: RetailModeRepository,
+) : RetailModeInteractor {
+    override val isInRetailMode: Boolean
+        get() = repository.inRetailMode
 }
