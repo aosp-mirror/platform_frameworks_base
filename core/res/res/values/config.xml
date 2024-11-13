@@ -5898,6 +5898,11 @@
         <!-- <item>com.android.settings</item> -->
     </string-array>
 
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         SET_DEFAULT_ACCOUNT_FOR_CONTACTS permissions. The digest should be computed over the DER
+         encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_setContactsDefaultAccountKnownSigners">
+    </string-array>
 
     <!-- Class name of the custom country detector to be used. -->
     <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>

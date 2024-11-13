@@ -914,13 +914,26 @@
                 android:featureFlag="android.provider.user_keys" />
 
     <!-- Allows an application to set default account for new contacts.
-        <p> This permission is only granted to system applications fulfilling the Contacts app role.
+        <p>This permission is only granted to system applications fulfilling the Contacts app role.
         <p>Protection level: internal|role
         @SystemApi
         @hide
     -->
     <permission android:name="android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS"
-        android:protectionLevel="internal|role" />
+        android:protectionLevel="internal|role"
+        android:featureFlag="!android.provider.new_default_account_api_enabled"/>
+
+    <!-- Allows an application to set default account for new contacts.
+        <p>This permission is only granted to system applications fulfilling the Contacts app role
+        and the application with known signers.
+        <p>Protection level: internal|role|knownSigner
+        @SystemApi
+        @hide
+    -->
+    <permission android:name="android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS"
+        android:protectionLevel="internal|role|knownSigner"
+        android:knownCerts="@array/config_setContactsDefaultAccountKnownSigners"
+        android:featureFlag="android.provider.new_default_account_api_enabled"/>
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing user's calendar                              -->
