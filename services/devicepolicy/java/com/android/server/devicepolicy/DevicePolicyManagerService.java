@@ -13362,9 +13362,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Objects.requireNonNull(systemEntity);
 
         CallerIdentity caller = getCallerIdentity();
-        if (caller.getUid() != Process.SYSTEM_UID) {
+        if (!isSystemUid(caller)) {
             throw new SecurityException("Only system services can call setUserRestrictionForUser"
                     + " on a target user: " + targetUser);
+        }
+        if (!UserRestrictionsUtils.isValidRestriction(key)) {
+            throw new IllegalArgumentException("Invalid restriction key: " + key);
         }
         if (VERBOSE_LOG) {
             Slogf.v(LOG_TAG, "Creating SystemEnforcingAdmin %s for calling package %s",
@@ -13498,6 +13501,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         logUserRestrictionCall(key, /* enabled= */ true, /* parent= */ false, caller,
                 UserHandle.USER_ALL);
     }
+
+    @Override
+    public void setUserRestrictionGloballyFromSystem(@NonNull String systemEntity, String key,
+            boolean enabled) {
+        Objects.requireNonNull(systemEntity);
+
+        CallerIdentity caller = getCallerIdentity();
+        if (!isSystemUid(caller)) {
+            throw new SecurityException("Only system services can call"
+                    + " setUserRestrictionGloballyFromSystem");
+        }
+        if (!UserRestrictionsUtils.isValidRestriction(key)) {
+            throw new IllegalArgumentException("Invalid restriction key: " + key);
+        }
+        if (VERBOSE_LOG) {
+            Slogf.v(LOG_TAG, "Creating SystemEnforcingAdmin %s for calling package %s",
+                    systemEntity, caller.getPackageName());
+        }
+        EnforcingAdmin admin = EnforcingAdmin.createSystemEnforcingAdmin(systemEntity);
+
+        setGlobalUserRestrictionInternal(admin, key, enabled);
+
+        logUserRestrictionCall(key, enabled, /* parent= */ false, caller, UserHandle.USER_ALL);
+    }
+
     private void setLocalUserRestrictionInternal(
             EnforcingAdmin admin, String key, boolean enabled, int userId) {
         PolicyDefinition<Boolean> policyDefinition =
@@ -13515,6 +13543,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     userId);
         }
     }
+
     private void setGlobalUserRestrictionInternal(
             EnforcingAdmin admin, String key, boolean enabled) {
         PolicyDefinition<Boolean> policyDefinition =
