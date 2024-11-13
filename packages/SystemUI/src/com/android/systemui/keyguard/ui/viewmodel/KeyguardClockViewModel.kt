@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.helper.widget.Layer
@@ -27,7 +28,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
-import com.android.systemui.res.R
+import com.android.systemui.plugins.clocks.ClockPreviewConfig
+import com.android.systemui.plugins.clocks.DefaultClockFaceLayout.Companion.getSmallClockTopPadding
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -46,6 +48,7 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardClockViewModel
 @Inject
 constructor(
+    val context: Context,
     keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
     aodNotificationIconViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
@@ -158,16 +161,15 @@ constructor(
             )
 
     /** Calculates the top margin for the small clock. */
-    fun getSmallClockTopMargin(): Int {
-        val statusBarHeight = systemBarUtils.getStatusBarHeaderHeightKeyguard()
-        return if (shadeInteractor.isShadeLayoutWide.value) {
-            resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin) -
-                if (SceneContainerFlag.isEnabled) statusBarHeight else 0
-        } else {
-            resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-                if (!SceneContainerFlag.isEnabled) statusBarHeight else 0
-        }
-    }
+    fun getSmallClockTopMargin(): Int =
+        getSmallClockTopPadding(
+            ClockPreviewConfig(
+                context,
+                shadeInteractor.isShadeLayoutWide.value,
+                SceneContainerFlag.isEnabled,
+            ),
+            systemBarUtils.getStatusBarHeaderHeightKeyguard(),
+        )
 
     val smallClockTopMargin =
         combine(
