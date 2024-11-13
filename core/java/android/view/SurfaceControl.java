@@ -22,6 +22,7 @@ import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
+import static android.view.flags.Flags.bufferStuffingRecovery;
 import static android.view.SurfaceControlProto.HASH_CODE;
 import static android.view.SurfaceControlProto.LAYER_ID;
 import static android.view.SurfaceControlProto.NAME;
@@ -661,6 +662,13 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int CAN_OCCLUDE_PRESENTATION = 0x00001000;
+
+    /**
+     * Indicates that the SurfaceControl should recover from buffer stuffing when
+     * possible. This is the case when the SurfaceControl is a ViewRootImpl.
+     * @hide
+     */
+    public static final int RECOVERABLE_FROM_BUFFER_STUFFING = 0x00002000;
 
     /**
      * Surface creation flag: Creates a surface where color components are interpreted
@@ -4867,6 +4875,23 @@ public final class SurfaceControl implements Parcelable {
             nativeSetDesiredPresentTimeNanos(mNativeObject, desiredPresentTimeNanos);
             return this;
         }
+
+        /**
+         * Specifies that the SurfaceControl is a buffer producer that should recover from buffer
+         * stuffing, meaning that the SurfaceControl is a ViewRootImpl.
+         *
+         * @hide
+         */
+        @NonNull
+        public Transaction setRecoverableFromBufferStuffing(@NonNull SurfaceControl sc) {
+            if (bufferStuffingRecovery()) {
+                checkPreconditions(sc);
+                nativeSetFlags(mNativeObject, sc.mNativeObject, RECOVERABLE_FROM_BUFFER_STUFFING,
+                        RECOVERABLE_FROM_BUFFER_STUFFING);
+            }
+            return this;
+        }
+
         /**
          * Writes the transaction to parcel, clearing the transaction as if it had been applied so
          * it can be used to store future transactions. It's the responsibility of the parcel

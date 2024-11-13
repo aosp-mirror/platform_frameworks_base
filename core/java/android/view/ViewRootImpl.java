@@ -2758,6 +2758,9 @@ public final class ViewRootImpl implements ViewParent,
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.
         mSurface.transferFrom(blastSurface);
+
+        // Since the SurfaceControl is a VRI, indicate that it can recover from buffer stuffing.
+        mTransaction.setRecoverableFromBufferStuffing(mSurfaceControl).applyAsyncUnsafe();
     }
 
     private void setBoundsLayerCrop(Transaction t) {
