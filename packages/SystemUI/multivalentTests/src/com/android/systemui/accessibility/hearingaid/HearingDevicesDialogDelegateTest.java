@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Space;
@@ -165,6 +166,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         when(mCachedDevice.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
         when(mCachedDevice.isConnectedHearingAidDevice()).thenReturn(true);
         when(mCachedDevice.isConnectedHapClientDevice()).thenReturn(true);
+        when(mCachedDevice.getDrawableWithDescription()).thenReturn(new Pair<>(mDrawable, ""));
         when(mHearingDeviceItem.getCachedBluetoothDevice()).thenReturn(mCachedDevice);
 
         mContext.setMockPackageManager(mPackageManager);
