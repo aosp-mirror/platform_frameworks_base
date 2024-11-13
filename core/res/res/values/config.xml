@@ -6547,7 +6547,7 @@
     </string-array>
 
     <!-- the number of the max cached processes in the system. -->
-    <integer name="config_customizedMaxCachedProcesses">32</integer>
+    <integer name="config_customizedMaxCachedProcesses">1024</integer>
 
     <!-- Whether this device should support taking app snapshots on closure -->
     <bool name="config_disableTaskSnapshots">false</bool>
