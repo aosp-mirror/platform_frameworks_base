@@ -245,6 +245,14 @@ flag {
 }
 
 flag {
+    name: "fix_apply_oomadj_order"
+    namespace: "backstage_power"
+    is_fixed_read_only: true
+    description: "Fix the iteration direction of process LRU list when applying oom adj"
+    bug: "378580264"
+}
+
+flag {
     name: "phantom_processes_fix"
     namespace: "backstage_power"
     description: "Make sure setProcessGroupForPhantomProcessOfApp deals with phantom processes properly"
