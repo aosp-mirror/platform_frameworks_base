@@ -16,17 +16,64 @@
 
 package com.android.systemui.dreams.ui.viewmodel
 
+import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
+import com.android.systemui.scene.shared.model.SceneFamilies
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.ui.viewmodel.dualShadeActions
+import com.android.systemui.shade.ui.viewmodel.singleShadeActions
+import com.android.systemui.shade.ui.viewmodel.splitShadeActions
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** Handles user input for the dream scene. */
-class DreamUserActionsViewModel @AssistedInject constructor() : UserActionsViewModel() {
+class DreamUserActionsViewModel
+@AssistedInject
+constructor(
+    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
+    private val shadeInteractor: ShadeInteractor,
+) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
-        setActions(emptyMap())
+        shadeInteractor.isShadeTouchable
+            .flatMapLatestConflated { isShadeTouchable ->
+                if (!isShadeTouchable) {
+                    flowOf(emptyMap())
+                } else {
+                    combine(
+                        deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked },
+                        shadeInteractor.shadeMode,
+                    ) { isDeviceUnlocked, shadeMode ->
+                        buildList {
+                                val bouncerOrGone =
+                                    if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer
+                                add(Swipe.Up to bouncerOrGone)
+
+                                // "Home" is either Dream, Lockscreen, or Gone.
+                                add(Swipe.End to SceneFamilies.Home)
+
+                                addAll(
+                                    when (shadeMode) {
+                                        ShadeMode.Single -> singleShadeActions()
+                                        ShadeMode.Split -> splitShadeActions()
+                                        ShadeMode.Dual -> dualShadeActions()
+                                    }
+                                )
+                            }
+                            .associate { it }
+                    }
+                }
+            }
+            .collect { setActions(it) }
     }
 
     @AssistedFactory
