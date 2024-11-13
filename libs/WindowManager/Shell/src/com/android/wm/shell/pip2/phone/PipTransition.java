@@ -420,7 +420,8 @@ public class PipTransition extends PipTransitionController implements
         }
 
         // Update the src-rect-hint in params in place, to set up initial animator transform.
-        params.getSourceRectHint().set(adjustedSourceRectHint);
+        params.copyOnlySet(new PictureInPictureParams.Builder()
+                .setSourceRectHint(adjustedSourceRectHint).build());
 
         // Config-at-end transitions need to have their activities transformed before starting
         // the animation; this makes the buffer seem like it's been updated to final size.
