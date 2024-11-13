@@ -754,7 +754,7 @@ public class VibrationThreadTest {
         HalVibration vibration = startThreadAndDispatcher(effect);
         waitForCompletion();
 
-        verify(mManagerHooks).noteVibratorOn(eq(UID), eq(0L));
+        verify(mManagerHooks, never()).noteVibratorOn(eq(UID), anyLong());
         verify(mManagerHooks, never()).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks, never()).onComplete(eq(VIBRATOR_ID), eq(vibration.id));
         verifyCallbacksTriggered(vibration, Status.IGNORED_UNSUPPORTED);
