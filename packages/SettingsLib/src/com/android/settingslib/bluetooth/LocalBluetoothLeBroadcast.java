@@ -54,7 +54,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
-import com.android.settingslib.flags.Flags;
 
 import com.google.common.collect.ImmutableList;
 
@@ -1152,7 +1151,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         int targetGroupId = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         int fallbackActiveGroupId = BluetoothUtils.getPrimaryGroupIdForBroadcast(
                 mContext.getContentResolver());
-        if (Flags.audioSharingHysteresisModeFix()) {
+        if (BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext)) {
             int userPreferredPrimaryGroupId = getUserPreferredPrimaryGroupId();
             if (userPreferredPrimaryGroupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
                     && deviceGroupsInBroadcast.containsKey(userPreferredPrimaryGroupId)) {
@@ -1193,7 +1192,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
 
     @NonNull
     private Map<Integer, List<BluetoothDevice>> getDeviceGroupsInBroadcast() {
-        boolean hysteresisModeFixEnabled = Flags.audioSharingHysteresisModeFix();
+        boolean hysteresisModeFixEnabled =
+                BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext);
         List<BluetoothDevice> connectedDevices = mServiceBroadcastAssistant.getConnectedDevices();
         return connectedDevices.stream()
                 .filter(
