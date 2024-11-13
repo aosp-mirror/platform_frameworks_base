@@ -78,7 +78,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.heads
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.keyguardBypassController
 import com.android.systemui.statusbar.phone.scrimController
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.fakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.wifiInteractor
 import com.android.systemui.statusbar.policy.configurationController
@@ -126,7 +126,7 @@ class KosmosJavaAdapter() {
     val keyguardStatusBarViewModel by lazy { kosmos.keyguardStatusBarViewModel }
     val powerRepository by lazy { kosmos.fakePowerRepository }
     val clock by lazy { kosmos.systemClock }
-    val mobileConnectionsRepository by lazy { kosmos.fakeMobileConnectionsRepository }
+    val mobileConnectionsRepository by lazy { kosmos.mobileConnectionsRepository }
     val simBouncerInteractor by lazy { kosmos.simBouncerInteractor }
     val statusBarStateController by lazy { kosmos.statusBarStateController }
     val statusBarModePerDisplayRepository by lazy { kosmos.fakeStatusBarModePerDisplayRepository }

@@ -47,7 +47,8 @@ import com.android.systemui.keyguard.data.repository.BiometricType.SIDE_FINGERPR
 import com.android.systemui.keyguard.data.repository.BiometricType.UNDER_DISPLAY_FINGERPRINT
 import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fake
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -99,7 +100,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     private lateinit var devicePostureRepository: FakeDevicePostureRepository
     private lateinit var facePropertyRepository: FakeFacePropertyRepository
     private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
-    private val mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
+    private val mobileConnectionsRepository = kosmos.mobileConnectionsRepository
 
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var testScope: TestScope
@@ -142,7 +143,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             1,
             SensorStrength.STRONG,
             FingerprintSensorType.UDFPS_OPTICAL,
-            emptyMap()
+            emptyMap(),
         )
         verify(lockPatternUtils).registerStrongAuthTracker(strongAuthTracker.capture())
         verify(authController, times(2)).addCallback(authControllerCallback.capture())
@@ -247,7 +248,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     private fun deviceIsInPostureThatSupportsFaceAuth() {
         overrideResource(
             R.integer.config_face_auth_supported_posture,
-            DevicePostureController.DEVICE_POSTURE_FLIPPED
+            DevicePostureController.DEVICE_POSTURE_FLIPPED,
         )
         devicePostureRepository.setCurrentPosture(DevicePosture.FLIPPED)
     }
@@ -459,7 +460,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
 
             biometricsAreEnabledBySettings()
             doNotDisableKeyguardAuthFeatures()
-            mobileConnectionsRepository.isAnySimSecure.value = false
+            mobileConnectionsRepository.fake.isAnySimSecure.value = false
             runCurrent()
 
             val isFaceAuthEnabledAndEnrolled by
@@ -467,7 +468,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
 
             assertThat(isFaceAuthEnabledAndEnrolled).isTrue()
 
-            mobileConnectionsRepository.isAnySimSecure.value = true
+            mobileConnectionsRepository.fake.isAnySimSecure.value = true
             runCurrent()
 
             assertThat(isFaceAuthEnabledAndEnrolled).isFalse()
@@ -485,13 +486,13 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             doNotDisableKeyguardAuthFeatures()
             faceAuthIsStrongBiometric()
             biometricsAreEnabledBySettings()
-            mobileConnectionsRepository.isAnySimSecure.value = false
+            mobileConnectionsRepository.fake.isAnySimSecure.value = false
 
             onStrongAuthChanged(STRONG_AUTH_NOT_REQUIRED, PRIMARY_USER_ID)
             onNonStrongAuthChanged(false, PRIMARY_USER_ID)
             assertThat(isFaceAuthCurrentlyAllowed).isTrue()
 
-            mobileConnectionsRepository.isAnySimSecure.value = true
+            mobileConnectionsRepository.fake.isAnySimSecure.value = true
             assertThat(isFaceAuthCurrentlyAllowed).isFalse()
         }
 
@@ -584,7 +585,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(
                 R.integer.config_face_auth_supported_posture,
-                DevicePostureController.DEVICE_POSTURE_UNKNOWN
+                DevicePostureController.DEVICE_POSTURE_UNKNOWN,
             )
 
             createBiometricSettingsRepository()
@@ -597,7 +598,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             overrideResource(
                 R.integer.config_face_auth_supported_posture,
-                DevicePostureController.DEVICE_POSTURE_FLIPPED
+                DevicePostureController.DEVICE_POSTURE_FLIPPED,
             )
 
             createBiometricSettingsRepository()
@@ -749,7 +750,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
                 1,
                 SensorStrength.STRONG,
                 FingerprintSensorType.UDFPS_OPTICAL,
-                emptyMap()
+                emptyMap(),
             )
             // Non strong auth is not allowed now, FP is marked strong
             onStrongAuthChanged(STRONG_AUTH_NOT_REQUIRED, PRIMARY_USER_ID)
@@ -761,7 +762,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
                 1,
                 SensorStrength.CONVENIENCE,
                 FingerprintSensorType.UDFPS_OPTICAL,
-                emptyMap()
+                emptyMap(),
             )
             assertThat(isFingerprintCurrentlyAllowed).isFalse()
 
@@ -769,7 +770,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
                 1,
                 SensorStrength.WEAK,
                 FingerprintSensorType.UDFPS_OPTICAL,
-                emptyMap()
+                emptyMap(),
             )
             assertThat(isFingerprintCurrentlyAllowed).isFalse()
         }
@@ -791,7 +792,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
                 1,
                 SensorStrength.STRONG,
                 FingerprintSensorType.UDFPS_OPTICAL,
-                emptyMap()
+                emptyMap(),
             )
             // Non strong auth is not allowed now, FP is marked strong
             onStrongAuthChanged(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN, PRIMARY_USER_ID)
@@ -830,7 +831,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             UserInfo(
                 /* id= */ PRIMARY_USER_ID,
                 /* name= */ "primary user",
-                /* flags= */ UserInfo.FLAG_PRIMARY
+                /* flags= */ UserInfo.FLAG_PRIMARY,
             )
 
         private const val ANOTHER_USER_ID = 1
@@ -838,7 +839,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             UserInfo(
                 /* id= */ ANOTHER_USER_ID,
                 /* name= */ "another user",
-                /* flags= */ UserInfo.FLAG_PRIMARY
+                /* flags= */ UserInfo.FLAG_PRIMARY,
             )
     }
 }
