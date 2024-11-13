@@ -130,7 +130,7 @@ sealed interface TransitionState {
              * starting a swipe transition to show [overlay] and will be `true` only once the swipe
              * transition is committed.
              */
-            protected abstract val isEffectivelyShown: Boolean
+            abstract val isEffectivelyShown: Boolean
 
             init {
                 check(
@@ -165,7 +165,7 @@ sealed interface TransitionState {
              * [fromOverlay] by [toOverlay] and will [toOverlay] once the swipe transition is
              * committed.
              */
-            protected abstract val effectivelyShownOverlay: OverlayKey
+            abstract val effectivelyShownOverlay: OverlayKey
 
             init {
                 check(fromOverlay != toOverlay)
@@ -341,6 +341,21 @@ sealed interface TransitionState {
                         "content ($content) should be either toContent ($toContent) or " +
                             "fromContent ($fromContent)"
                     )
+            }
+        }
+
+        /** Whether [fromContent] is effectively the current content of the transition. */
+        internal fun isFromCurrentContent() = isCurrentContent(expectedFrom = true)
+
+        /** Whether [toContent] is effectively the current content of the transition. */
+        internal fun isToCurrentContent() = isCurrentContent(expectedFrom = false)
+
+        private fun isCurrentContent(expectedFrom: Boolean): Boolean {
+            val expectedContent = if (expectedFrom) fromContent else toContent
+            return when (this) {
+                is ChangeScene -> currentScene == expectedContent
+                is ReplaceOverlay -> effectivelyShownOverlay == expectedContent
+                is ShowOrHideOverlay -> isEffectivelyShown == (expectedContent == overlay)
             }
         }
 
