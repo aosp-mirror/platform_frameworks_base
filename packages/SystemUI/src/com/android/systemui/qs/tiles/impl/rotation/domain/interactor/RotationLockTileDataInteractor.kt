@@ -75,10 +75,10 @@ constructor(
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(true)
 
     private fun hasSufficientPermission(): Boolean {
-        val rotationPackage: String = packageManager.rotationResolverPackageName
-        return rotationPackage != null &&
-            packageManager.checkPermission(Manifest.permission.CAMERA, rotationPackage) ==
+        return packageManager.rotationResolverPackageName?.let {
+            packageManager.checkPermission(Manifest.permission.CAMERA, it) ==
                 PackageManager.PERMISSION_GRANTED
+        } ?: false
     }
 
     private fun isCameraRotationEnabled(
