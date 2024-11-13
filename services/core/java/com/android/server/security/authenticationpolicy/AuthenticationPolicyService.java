@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.security.adaptiveauthentication;
+package com.android.server.security.authenticationpolicy;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 
@@ -55,8 +55,8 @@ import java.util.Objects;
 /**
  * @hide
  */
-public class AdaptiveAuthenticationService extends SystemService {
-    private static final String TAG = "AdaptiveAuthenticationService";
+public class AuthenticationPolicyService extends SystemService {
+    private static final String TAG = "AuthenticationPolicyService";
     private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
 
     @VisibleForTesting
@@ -78,12 +78,12 @@ public class AdaptiveAuthenticationService extends SystemService {
     final SparseIntArray mFailedAttemptsForUser = new SparseIntArray();
     private final SparseLongArray mLastLockedTimestamp = new SparseLongArray();
 
-    public AdaptiveAuthenticationService(Context context) {
+    public AuthenticationPolicyService(Context context) {
         this(context, new LockPatternUtils(context));
     }
 
     @VisibleForTesting
-    public AdaptiveAuthenticationService(Context context, LockPatternUtils lockPatternUtils) {
+    public AuthenticationPolicyService(Context context, LockPatternUtils lockPatternUtils) {
         super(context);
         mLockPatternUtils = lockPatternUtils;
         mLockSettings = Objects.requireNonNull(
