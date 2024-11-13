@@ -28,15 +28,18 @@ parcelable AidlInputGestureData {
     String appLaunchPackageName;
     String appLaunchClassName;
 
+    @JavaDerive(equals=true)
     parcelable KeyTrigger {
         int keycode;
         int modifierState;
     }
 
+    @JavaDerive(equals=true)
     parcelable TouchpadGestureTrigger {
         int gestureType;
     }
 
+    @JavaDerive(equals=true)
     union Trigger {
         KeyTrigger key;
         TouchpadGestureTrigger touchpadGesture;
