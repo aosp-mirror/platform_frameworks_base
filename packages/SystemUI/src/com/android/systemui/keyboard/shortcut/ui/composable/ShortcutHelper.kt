@@ -93,6 +93,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -394,7 +395,7 @@ private fun ShortcutHelperTwoPane(
         Row(Modifier.fillMaxWidth()) {
             StartSidePanel(
                 onSearchQueryChanged = onSearchQueryChanged,
-                modifier = Modifier.width(240.dp),
+                modifier = Modifier.width(240.dp).semantics { isTraversalGroup = true },
                 categories = categories,
                 onKeyboardSettingsClicked = onKeyboardSettingsClicked,
                 selectedCategory = selectedCategoryType,
@@ -403,7 +404,7 @@ private fun ShortcutHelperTwoPane(
             Spacer(modifier = Modifier.width(24.dp))
             EndSidePanel(
                 searchQuery,
-                Modifier.fillMaxSize().padding(top = 8.dp),
+                Modifier.fillMaxSize().padding(top = 8.dp).semantics { isTraversalGroup = true },
                 selectedCategory,
                 isCustomizing = isCustomizing,
                 onCustomizationRequested = onCustomizationRequested,
