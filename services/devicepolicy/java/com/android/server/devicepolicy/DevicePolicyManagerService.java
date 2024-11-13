@@ -23708,24 +23708,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setMtePolicy(int flags, String callerPackageName) {
-        final Set<Integer> allowedModes =
-                Set.of(
-                        DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY,
-                        DevicePolicyManager.MTE_DISABLED,
-                        DevicePolicyManager.MTE_ENABLED);
-        Preconditions.checkArgument(
-                allowedModes.contains(flags), "Provided mode is not one of the allowed values.");
-        // In general, this API should be available when "bootctl_settings_toggle" is set, which
-        // signals that there is a control for MTE in the user settings and this API fundamentally
-        // is a way for the device admin to override that setting.
-        // Allow bootctl_device_policy_manager as an override, e.g. to offer the
-        // DevicePolicyManager only without a visible user setting.
-        if (!mInjector.systemPropertiesGetBoolean(
-                "ro.arm64.memtag.bootctl_device_policy_manager",
-                mInjector.systemPropertiesGetBoolean(
-                        "ro.arm64.memtag.bootctl_settings_toggle", false))) {
-            throw new UnsupportedOperationException("device does not support MTE");
-        }
+        checkMteSupportedAndAllowedPolicy(flags);
         final CallerIdentity caller = getCallerIdentity(callerPackageName);
         // For now we continue to restrict the DISABLED setting to device owner - we might need
         // another permission for this in future.
@@ -23779,6 +23762,53 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     .setInt(flags)
                     .setAdmin(caller.getPackageName())
                     .write();
+        }
+    }
+
+    @Override
+    public void setMtePolicyBySystem(
+            @NonNull String systemEntity, int policy) {
+        Objects.requireNonNull(systemEntity);
+        checkMteSupportedAndAllowedPolicy(policy);
+
+        Preconditions.checkCallAuthorization(isSystemUid(getCallerIdentity()),
+                "Only system services can call setMtePolicyBySystem");
+
+        if (!Flags.setMtePolicyCoexistence()) {
+            throw new UnsupportedOperationException("System can not set MTE policy only");
+        }
+
+        EnforcingAdmin admin = EnforcingAdmin.createSystemEnforcingAdmin(systemEntity);
+        if (policy != DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+            mDevicePolicyEngine.setGlobalPolicy(
+                    PolicyDefinition.MEMORY_TAGGING,
+                    admin,
+                    new IntegerPolicyValue(policy));
+        } else {
+            mDevicePolicyEngine.removeGlobalPolicy(
+                    PolicyDefinition.MEMORY_TAGGING,
+                    admin);
+        }
+    }
+
+    private void checkMteSupportedAndAllowedPolicy(int policy) {
+        final Set<Integer> allowedModes =
+                Set.of(
+                        DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY,
+                        DevicePolicyManager.MTE_DISABLED,
+                        DevicePolicyManager.MTE_ENABLED);
+        Preconditions.checkArgument(
+                allowedModes.contains(policy), "Provided mode is not one of the allowed values.");
+        // In general, this API should be available when "bootctl_settings_toggle" is set, which
+        // signals that there is a control for MTE in the user settings and this API fundamentally
+        // is a way for the device admin to override that setting.
+        // Allow bootctl_device_policy_manager as an override, e.g. to offer the
+        // DevicePolicyManager only without a visible user setting.
+        if (!mInjector.systemPropertiesGetBoolean(
+                "ro.arm64.memtag.bootctl_device_policy_manager",
+                mInjector.systemPropertiesGetBoolean(
+                        "ro.arm64.memtag.bootctl_settings_toggle", false))) {
+            throw new UnsupportedOperationException("device does not support MTE");
         }
     }
 
