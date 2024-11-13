@@ -58,7 +58,7 @@ flag {
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable enhanced confirmation incall apis"
-    bug: "310220212"
+    bug: "364535720"
 }
 
 flag {
@@ -67,7 +67,7 @@ flag {
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable the blocking of certain app installs during an unknown call"
-    bug: "310220212"
+    bug: "364535720"
 }
 
 flag {

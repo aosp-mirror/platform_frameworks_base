@@ -9236,6 +9236,17 @@
             </intent-filter>
         </service>
 
+        <service android:name="com.android.ecm.EnhancedConfirmationCallTrackerService"
+            android:permission="android.permission.BIND_INCALL_SERVICE"
+            android:featureFlag="android.permission.flags.enhanced_confirmation_in_call_apis_enabled"
+            android:exported="true">
+            <meta-data android:name="android.telecom.INCLUDE_SELF_MANAGED_CALLS"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.telecom.InCallService"/>
+            </intent-filter>
+        </service>
+
         <service android:name="com.android.server.companion.datatransfer.contextsync.CallMetadataSyncConnectionService"
                  android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
                  android:exported="true">
