@@ -19,7 +19,7 @@ package com.android.systemui.keyboard.shortcut.ui.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.input.key.KeyEvent
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutCustomizationInteractor
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutInfo
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -30,32 +30,35 @@ import kotlinx.coroutines.flow.update
 class ShortcutCustomizationViewModel
 @AssistedInject
 constructor(private val shortcutCustomizationInteractor: ShortcutCustomizationInteractor) {
-    private val _shortcutBeingCustomized = mutableStateOf<ShortcutInfo?>(null)
+    private val _shortcutBeingCustomized = mutableStateOf<ShortcutCustomizationRequestInfo?>(null)
 
     private val _shortcutCustomizationUiState =
         MutableStateFlow<ShortcutCustomizationUiState>(ShortcutCustomizationUiState.Inactive)
 
     val shortcutCustomizationUiState = _shortcutCustomizationUiState.asStateFlow()
 
-    fun onAddShortcutDialogRequested(shortcutBeingCustomized: ShortcutInfo) {
-        _shortcutCustomizationUiState.value =
-            ShortcutCustomizationUiState.AddShortcutDialog(
-                shortcutLabel = shortcutBeingCustomized.label,
-                shouldShowErrorMessage = false,
-                isValidKeyCombination = false,
-                defaultCustomShortcutModifierKey =
-                    shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey(),
-                isDialogShowing = false,
-            )
-
-        _shortcutBeingCustomized.value = shortcutBeingCustomized
+    fun onShortcutCustomizationRequested(requestInfo: ShortcutCustomizationRequestInfo) {
+        when (requestInfo) {
+            is ShortcutCustomizationRequestInfo.Add -> {
+                _shortcutCustomizationUiState.value =
+                    ShortcutCustomizationUiState.AddShortcutDialog(
+                        shortcutLabel = requestInfo.label,
+                        shouldShowErrorMessage = false,
+                        isValidKeyCombination = false,
+                        defaultCustomShortcutModifierKey =
+                            shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey(),
+                        isDialogShowing = false,
+                    )
+                _shortcutBeingCustomized.value = requestInfo
+            }
+        }
     }
 
     fun onAddShortcutDialogShown() {
         _shortcutCustomizationUiState.update { uiState ->
-            (uiState as? ShortcutCustomizationUiState.AddShortcutDialog)
-                ?.let { it.copy(isDialogShowing = true) }
-                ?: uiState
+            (uiState as? ShortcutCustomizationUiState.AddShortcutDialog)?.copy(
+                isDialogShowing = true
+            ) ?: uiState
         }
     }
 
