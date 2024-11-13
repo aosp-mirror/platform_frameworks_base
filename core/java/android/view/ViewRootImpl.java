@@ -140,6 +140,8 @@ import android.accessibilityservice.AccessibilityService;
 import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -11896,6 +11898,20 @@ public final class ViewRootImpl implements ViewParent,
     @NonNull
     public IBinder getWindowToken() {
         return mAttachInfo.mWindowToken;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @NonNull
+    @Override
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_JANK_API)
+    public SurfaceControl.OnJankDataListenerRegistration registerOnJankDataListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SurfaceControl.OnJankDataListener listener) {
+        SurfaceControl.OnJankDataListener wrapped = (data) ->
+                executor.execute(() -> listener.onJankDataAvailable(data));
+        return mSurfaceControl.addOnJankDataListener(wrapped);
     }
 
     /**
