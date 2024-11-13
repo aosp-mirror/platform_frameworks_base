@@ -59,6 +59,7 @@ interface HeadsUpManager : Dumpable {
      * Gets the touchable region needed for heads up notifications. Returns null if no touchable
      * region is required (ie: no heads up notification currently exists).
      */
+    // TODO(b/347007367): With scene container enabled this method may report outdated regions
     fun getTouchableRegion(): Region?
 
     /**
@@ -83,6 +84,10 @@ interface HeadsUpManager : Dumpable {
     /** Returns whether the entry is (pinned and expanded) or (has an active remote input). */
     fun isSticky(key: String?): Boolean
 
+    /**
+     * Returns the value of the tracking-heads-up flag. See the doc of {@code setTrackingHeadsUp} as
+     * well.
+     */
     fun isTrackingHeadsUp(): Boolean
 
     fun onExpandingFinished()
@@ -115,7 +120,7 @@ interface HeadsUpManager : Dumpable {
         key: String,
         releaseImmediately: Boolean,
         animate: Boolean,
-        reason: String
+        reason: String,
     ): Boolean
 
     /** Clears all managed notifications. */
@@ -149,6 +154,10 @@ interface HeadsUpManager : Dumpable {
      */
     fun setRemoteInputActive(entry: NotificationEntry, remoteInputActive: Boolean)
 
+    /**
+     * Sets the tracking-heads-up flag. If the flag is true, HeadsUpManager doesn't remove the entry
+     * from the list even after a Heads Up Notification is gone.
+     */
     fun setTrackingHeadsUp(tracking: Boolean)
 
     /** Sets the current user. */
@@ -260,7 +269,7 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
         key: String,
         releaseImmediately: Boolean,
         animate: Boolean,
-        reason: String
+        reason: String,
     ) = false
 
     override fun setAnimationStateHandler(handler: AnimationStateHandler) {}
