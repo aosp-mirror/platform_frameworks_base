@@ -4984,7 +4984,10 @@ public class UserManagerService extends IUserManager.Stub {
             res.getValue(com.android.internal.R.string.owner_name, mOwnerNameTypedValue, true);
             final CharSequence ownerName = mOwnerNameTypedValue.coerceToString();
             mOwnerName.set(ownerName != null ? ownerName.toString() : null);
+            // Invalidate when owners name changes due to config change.
+            UserManager.invalidateCacheOnUserDataChanged();
         }
+
     }
 
     private void scheduleWriteUserList() {
@@ -4997,6 +5000,8 @@ public class UserManagerService extends IUserManager.Stub {
             Message msg = mHandler.obtainMessage(WRITE_USER_LIST_MSG);
             mHandler.sendMessageDelayed(msg, WRITE_USER_DELAY);
         }
+        // Invalidate cache when {@link UserData} changed, but write was scheduled for later.
+        UserManager.invalidateCacheOnUserDataChanged();
     }
 
     private void scheduleWriteUser(@UserIdInt int userId) {
@@ -5009,6 +5014,8 @@ public class UserManagerService extends IUserManager.Stub {
             Message msg = mHandler.obtainMessage(WRITE_USER_MSG, userId);
             mHandler.sendMessageDelayed(msg, WRITE_USER_DELAY);
         }
+        // Invalidate cache when {@link Data} changed, but write was scheduled for later.
+        UserManager.invalidateCacheOnUserDataChanged();
     }
 
     private ResilientAtomicFile getUserFile(int userId) {
@@ -5032,6 +5039,9 @@ public class UserManagerService extends IUserManager.Stub {
         if (DBG) {
             debug("writeUserLP " + userData);
         }
+        // invalidate caches related to any {@link UserData} change.
+        UserManager.invalidateCacheOnUserDataChanged();
+
         try (ResilientAtomicFile userFile = getUserFile(userData.info.id)) {
             FileOutputStream fos = null;
             try {
@@ -5196,6 +5206,8 @@ public class UserManagerService extends IUserManager.Stub {
         if (DBG) {
             debug("writeUserList");
         }
+        // invalidate caches related to any {@link UserData} change.
+        UserManager.invalidateCacheOnUserDataChanged();
 
         try (ResilientAtomicFile file = getUserListFile()) {
             FileOutputStream fos = null;
