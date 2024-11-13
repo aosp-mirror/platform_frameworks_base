@@ -32,6 +32,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
@@ -222,6 +223,13 @@ constructor(
             isHomeStatusBarAllowed && !isSecureCameraActive
         }
 
+    private val isAnyChipVisible =
+        if (StatusBarNotifChips.isEnabled) {
+            ongoingActivityChips.map { it.primary is OngoingActivityChipModel.Shown }
+        } else {
+            primaryOngoingActivityChip.map { it is OngoingActivityChipModel.Shown }
+        }
+
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,
@@ -234,10 +242,16 @@ constructor(
     override val isNotificationIconContainerVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,
+            isAnyChipVisible,
             collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
+        ) { shouldStatusBarBeVisible, anyChipVisible, visibilityViaDisableFlags ->
             val showNotificationIconContainer =
-                shouldStatusBarBeVisible && visibilityViaDisableFlags.areNotificationIconsAllowed
+                if (anyChipVisible) {
+                    false
+                } else {
+                    shouldStatusBarBeVisible &&
+                        visibilityViaDisableFlags.areNotificationIconsAllowed
+                }
             VisibilityModel(
                 showNotificationIconContainer.toVisibilityInt(),
                 visibilityViaDisableFlags.animate,

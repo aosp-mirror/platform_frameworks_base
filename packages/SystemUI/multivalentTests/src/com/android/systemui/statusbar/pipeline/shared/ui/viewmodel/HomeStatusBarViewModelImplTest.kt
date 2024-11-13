@@ -28,8 +28,6 @@ import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -39,7 +37,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testCase
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.collectValues
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.assertLogsWtf
@@ -52,6 +52,7 @@ import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsShareToAppChip
@@ -70,11 +71,11 @@ import com.android.systemui.statusbar.notification.data.repository.activeNotific
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -83,35 +84,22 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HomeStatusBarViewModelImplTest : SysuiTestCase() {
-    private val kosmos =
-        Kosmos().also {
-            it.testCase = this
-            it.testDispatcher = UnconfinedTestDispatcher()
-        }
-
-    private val testScope = kosmos.testScope
-
-    private val statusBarModeRepository = kosmos.fakeStatusBarModeRepository
-    private val activeNotificationListRepository = kosmos.activeNotificationListRepository
-    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    private val disableFlagsRepository = kosmos.fakeDisableFlagsRepository
-    private val systemStatusEventAnimationRepository = kosmos.systemStatusEventAnimationRepository
-
-    private lateinit var underTest: HomeStatusBarViewModel
+    private val kosmos by lazy {
+        testKosmos().also { it.testDispatcher = UnconfinedTestDispatcher() }
+    }
+    private val Kosmos.underTest by Kosmos.Fixture { kosmos.homeStatusBarViewModel }
 
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
-        // Initialize here because some flags are checked when this class is constructed
-        underTest = kosmos.homeStatusBarViewModel
     }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_started_isTrue() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.OCCLUDED,
@@ -125,10 +113,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_running_isTrue() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.OCCLUDED,
@@ -142,10 +130,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_finished_isFalse() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.OCCLUDED,
                 testScope.testScheduler,
@@ -156,10 +144,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_canceled_isFalse() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.OCCLUDED,
@@ -173,10 +161,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_irrelevantTransition_isFalse() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.AOD,
                     KeyguardState.LOCKSCREEN,
@@ -190,10 +178,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_followsRepoUpdates() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.OCCLUDED,
@@ -205,7 +193,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             assertThat(latest).isTrue()
 
             // WHEN the repo updates the transition to finished
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.OCCLUDED,
@@ -220,10 +208,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun transitionFromLockscreenToDreamStartedEvent_started_emitted() =
-        testScope.runTest {
+        kosmos.runTest {
             val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -237,10 +225,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun transitionFromLockscreenToDreamStartedEvent_startedMultiple_emittedMultiple() =
-        testScope.runTest {
+        kosmos.runTest {
             val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -249,7 +237,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -258,7 +246,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -272,10 +260,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun transitionFromLockscreenToDreamStartedEvent_startedThenRunning_emittedOnlyOne() =
-        testScope.runTest {
+        kosmos.runTest {
             val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -287,7 +275,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             // WHEN the transition progresses through its animation by going through the RUNNING
             // step with increasing fractions
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -296,7 +284,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -305,7 +293,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -321,10 +309,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun transitionFromLockscreenToDreamStartedEvent_irrelevantTransition_notEmitted() =
-        testScope.runTest {
+        kosmos.runTest {
             val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.OCCLUDED,
@@ -338,10 +326,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun transitionFromLockscreenToDreamStartedEvent_irrelevantTransitionState_notEmitted() =
-        testScope.runTest {
+        kosmos.runTest {
             val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
 
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     KeyguardState.LOCKSCREEN,
                     KeyguardState.DREAMING,
@@ -359,8 +347,8 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_lowProfileWithNotifications_true() =
-        testScope.runTest {
-            statusBarModeRepository.defaultDisplay.statusBarMode.value =
+        kosmos.runTest {
+            fakeStatusBarModeRepository.defaultDisplay.statusBarMode.value =
                 StatusBarMode.LIGHTS_OUT_TRANSPARENT
             activeNotificationListRepository.activeNotifications.value =
                 activeNotificationsStore(testNotifications)
@@ -373,8 +361,8 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_lowProfileWithoutNotifications_false() =
-        testScope.runTest {
-            statusBarModeRepository.defaultDisplay.statusBarMode.value =
+        kosmos.runTest {
+            fakeStatusBarModeRepository.defaultDisplay.statusBarMode.value =
                 StatusBarMode.LIGHTS_OUT_TRANSPARENT
             activeNotificationListRepository.activeNotifications.value =
                 activeNotificationsStore(emptyList())
@@ -387,8 +375,9 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_defaultStatusBarModeWithoutNotifications_false() =
-        testScope.runTest {
-            statusBarModeRepository.defaultDisplay.statusBarMode.value = StatusBarMode.TRANSPARENT
+        kosmos.runTest {
+            fakeStatusBarModeRepository.defaultDisplay.statusBarMode.value =
+                StatusBarMode.TRANSPARENT
             activeNotificationListRepository.activeNotifications.value =
                 activeNotificationsStore(emptyList())
 
@@ -400,8 +389,9 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_defaultStatusBarModeWithNotifications_false() =
-        testScope.runTest {
-            statusBarModeRepository.defaultDisplay.statusBarMode.value = StatusBarMode.TRANSPARENT
+        kosmos.runTest {
+            fakeStatusBarModeRepository.defaultDisplay.statusBarMode.value =
+                StatusBarMode.TRANSPARENT
             activeNotificationListRepository.activeNotifications.value =
                 activeNotificationsStore(testNotifications)
 
@@ -413,7 +403,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_requiresFlagEnabled() =
-        testScope.runTest {
+        kosmos.runTest {
             assertLogsWtf {
                 val flow = underTest.areNotificationsLightsOut(DISPLAY_ID)
                 assertThat(flow).isEqualTo(emptyFlow<Boolean>())
@@ -422,7 +412,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun primaryOngoingActivityChip_matchesViewModel() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.primaryOngoingActivityChip)
 
             kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
@@ -441,7 +431,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isHomeStatusBarAllowedByScene_sceneLockscreen_notOccluded_false() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
@@ -452,7 +442,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isHomeStatusBarAllowedByScene_sceneLockscreen_occluded_true() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
@@ -463,7 +453,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isHomeStatusBarAllowedByScene_sceneBouncer_false() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Bouncer)
@@ -473,7 +463,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isHomeStatusBarAllowedByScene_sceneCommunal_false() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Communal)
@@ -483,7 +473,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isHomeStatusBarAllowedByScene_sceneShade_false() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Shade)
@@ -493,7 +483,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isHomeStatusBarAllowedByScene_sceneGone_true() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isHomeStatusBarAllowedByScene)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Gone)
@@ -503,11 +493,11 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isClockVisible_allowedByDisableFlags_visible() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isClockVisible)
             transitionKeyguardToGone()
 
-            disableFlagsRepository.disableFlags.value =
+            fakeDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
 
             assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
@@ -515,11 +505,11 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isClockVisible_notAllowedByDisableFlags_gone() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isClockVisible)
             transitionKeyguardToGone()
 
-            disableFlagsRepository.disableFlags.value =
+            fakeDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_CLOCK, DISABLE2_NONE)
 
             assertThat(latest!!.visibility).isEqualTo(View.GONE)
@@ -527,11 +517,11 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isNotificationIconContainerVisible_allowedByDisableFlags_visible() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isNotificationIconContainerVisible)
             transitionKeyguardToGone()
 
-            disableFlagsRepository.disableFlags.value =
+            fakeDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
 
             assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
@@ -539,23 +529,55 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isNotificationIconContainerVisible_notAllowedByDisableFlags_gone() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.isNotificationIconContainerVisible)
             transitionKeyguardToGone()
 
-            disableFlagsRepository.disableFlags.value =
+            fakeDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_NOTIFICATION_ICONS, DISABLE2_NONE)
 
             assertThat(latest!!.visibility).isEqualTo(View.GONE)
         }
 
     @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun isNotificationIconContainerVisible_anyChipShowing_PromotedNotifsOn() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isNotificationIconContainerVisible)
+            transitionKeyguardToGone()
+
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
+
+            assertThat(latest!!.visibility).isEqualTo(View.GONE)
+
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
+
+            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+        }
+
+    @Test
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun isNotificationIconContainerVisible_anyChipShowing_PromotedNotifsOff() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isNotificationIconContainerVisible)
+            transitionKeyguardToGone()
+
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
+
+            assertThat(latest!!.visibility).isEqualTo(View.GONE)
+
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
+
+            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+        }
+
+    @Test
     fun isSystemInfoVisible_allowedByDisableFlags_visible() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.systemInfoCombinedVis)
             transitionKeyguardToGone()
 
-            disableFlagsRepository.disableFlags.value =
+            fakeDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
 
             assertThat(latest!!.baseVisibility.visibility).isEqualTo(View.VISIBLE)
@@ -563,11 +585,11 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun isSystemInfoVisible_notAllowedByDisableFlags_gone() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.systemInfoCombinedVis)
             transitionKeyguardToGone()
 
-            disableFlagsRepository.disableFlags.value =
+            fakeDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_SYSTEM_INFO, DISABLE2_NONE)
 
             assertThat(latest!!.baseVisibility.visibility).isEqualTo(View.GONE)
@@ -575,7 +597,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
     @Test
     fun systemInfoCombineVis_animationsPassThrough() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.systemInfoCombinedVis)
             transitionKeyguardToGone()
 
@@ -601,15 +623,15 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @DisableSceneContainer
     fun lockscreenVisible_sceneFlagOff_noStatusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GONE,
                 to = KeyguardState.LOCKSCREEN,
-                testScope = this,
+                testScope = testScope,
             )
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
@@ -620,7 +642,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableSceneContainer
     fun lockscreenVisible_sceneFlagOn_noStatusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -635,15 +657,15 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @DisableSceneContainer
     fun bouncerVisible_sceneFlagOff_noStatusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.PRIMARY_BOUNCER,
-                testScope = this,
+                testScope = testScope,
             )
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
@@ -654,7 +676,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableSceneContainer
     fun bouncerVisible_sceneFlagOn_noStatusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -669,15 +691,15 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @DisableSceneContainer
     fun keyguardIsOccluded_sceneFlagOff_statusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.OCCLUDED,
-                testScope = this,
+                testScope = testScope,
             )
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.VISIBLE)
@@ -688,7 +710,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableSceneContainer
     fun keyguardIsOccluded_sceneFlagOn_statusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -704,7 +726,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @DisableSceneContainer
     fun keyguardNotShown_sceneFlagOff_statusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -719,7 +741,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @DisableSceneContainer
     fun shadeNotShown_sceneFlagOff_statusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -735,7 +757,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableSceneContainer
     fun keyguardNotShownAndShadeNotShown_sceneFlagOn_statusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -750,7 +772,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @DisableSceneContainer
     fun shadeShown_sceneFlagOff_noStatusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -766,7 +788,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableSceneContainer
     fun shadeShown_sceneFlagOn_noStatusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -782,16 +804,16 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @DisableSceneContainer
     fun secureCameraActive_sceneFlagOff_noStatusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             // Secure camera is an occluding activity
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.OCCLUDED,
-                testScope = this,
+                testScope = testScope,
             )
             kosmos.keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
 
@@ -803,7 +825,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     @EnableSceneContainer
     fun secureCameraActive_sceneFlagOn_noStatusBarViewsShown() =
-        testScope.runTest {
+        kosmos.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
             val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
@@ -823,11 +845,12 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             .apply { notifications.forEach(::addIndividualNotif) }
             .build()
 
-    private val testNotifications =
+    private val testNotifications by lazy {
         listOf(activeNotificationModel(key = "notif1"), activeNotificationModel(key = "notif2"))
+    }
 
-    private suspend fun transitionKeyguardToGone() {
-        keyguardTransitionRepository.sendTransitionSteps(
+    private suspend fun Kosmos.transitionKeyguardToGone() {
+        fakeKeyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.LOCKSCREEN,
             to = KeyguardState.GONE,
             testScope = testScope,
