@@ -84,7 +84,9 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.GroupHelper.CachedSummary;
+import com.android.server.notification.GroupHelper.FullyQualifiedGroupKey;
 import com.android.server.notification.GroupHelper.NotificationAttributes;
+import com.android.server.notification.GroupHelper.NotificationSectioner;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -3054,6 +3056,120 @@ public class GroupHelperTest extends UiServiceTestCase {
         CachedSummary cachedSummary = mGroupHelper.findCanceledSummary(pkg, String.valueOf(id), id,
                 UserHandle.SYSTEM.getIdentifier());
         assertThat(cachedSummary).isNull();
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS)
+    public void testNonGroupableChildren_singletonGroups_disableConversations() {
+        // Check that singleton groups with children that are not groupable, is not grouped
+        // Even though the group summary is a regular (alerting) notification, the children are
+        // conversations => the group should not be forced grouped.
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        final String pkg = "package";
+
+        // Trigger notification, ungrouped
+        final int triggerId = 1;
+        NotificationRecord triggerNotification = getNotificationRecord(pkg, triggerId,
+                String.valueOf(triggerId), UserHandle.SYSTEM);
+        notificationList.add(triggerNotification);
+        final NotificationSectioner triggerSection = GroupHelper.getSection(triggerNotification);
+        final FullyQualifiedGroupKey triggerFullAggregateGroupKey = new FullyQualifiedGroupKey(
+                triggerNotification.getUserId(), triggerNotification.getSbn().getPackageName(),
+                triggerSection);
+
+        // Add singleton group with alerting child
+        final String groupName_valid = "testGrp_valid";
+        final int summaryId_valid = 0;
+        NotificationRecord summary = getNotificationRecord(pkg, summaryId_valid,
+                String.valueOf(summaryId_valid), UserHandle.SYSTEM, groupName_valid, true);
+        notificationList.add(summary);
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        final String groupKey_valid = summary.getGroupKey();
+        NotificationRecord child = getNotificationRecord(pkg, summaryId_valid + 42,
+                String.valueOf(summaryId_valid + 42), UserHandle.SYSTEM, groupName_valid, false);
+        notificationList.add(child);
+
+        // Add singleton group with conversation child
+        final String groupName_invalid = "testGrp_invalid";
+        final int summaryId_invalid = 100;
+        summary = getNotificationRecord(pkg, summaryId_invalid,
+                String.valueOf(summaryId_invalid), UserHandle.SYSTEM, groupName_invalid, true);
+        notificationList.add(summary);
+        final String groupKey_invalid = summary.getGroupKey();
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        child = getNotificationRecord(pkg, summaryId_invalid + 42,
+                String.valueOf(summaryId_invalid + 42), UserHandle.SYSTEM, groupName_invalid,
+                false);
+        child = spy(child);
+        when(child.isConversation()).thenReturn(true);
+        notificationList.add(child);
+
+        // Check that the invalid group will not be force grouped
+        final ArrayMap<String, NotificationRecord> sparseGroups = mGroupHelper.getSparseGroups(
+                triggerFullAggregateGroupKey, notificationList, summaryByGroup, triggerSection);
+        assertThat(sparseGroups).containsKey(groupKey_valid);
+        assertThat(sparseGroups).doesNotContainKey(groupKey_invalid);
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS})
+    public void testNonGroupableChildren_singletonGroups_enableConversations() {
+        // Check that singleton groups with children that are not groupable, is not grouped
+        // Conversations are groupable (FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS is enabled)
+        // The invalid group is the alerting notifications: because the triggering notifications'
+        // section is Conversations, so the alerting group should be skipped.
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        final String pkg = "package";
+
+        // Trigger notification, ungrouped conversation
+        final int triggerId = 1;
+        NotificationRecord triggerNotification = getNotificationRecord(pkg, triggerId,
+                String.valueOf(triggerId), UserHandle.SYSTEM);
+        triggerNotification = spy(triggerNotification);
+        when(triggerNotification.isConversation()).thenReturn(true);
+        notificationList.add(triggerNotification);
+        final NotificationSectioner triggerSection = GroupHelper.getSection(triggerNotification);
+        final FullyQualifiedGroupKey triggerFullAggregateGroupKey = new FullyQualifiedGroupKey(
+                triggerNotification.getUserId(), triggerNotification.getSbn().getPackageName(),
+                triggerSection);
+
+        // Add singleton group with conversation child
+        final String groupName_valid = "testGrp_valid";
+        final int summaryId_valid = 0;
+        NotificationRecord summary = getNotificationRecord(pkg, summaryId_valid,
+                String.valueOf(summaryId_valid), UserHandle.SYSTEM, groupName_valid, true);
+        summary = spy(summary);
+        when(summary.isConversation()).thenReturn(true);
+        notificationList.add(summary);
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        final String groupKey_valid = summary.getGroupKey();
+        NotificationRecord child = getNotificationRecord(pkg, summaryId_valid + 42,
+                String.valueOf(summaryId_valid + 42), UserHandle.SYSTEM, groupName_valid, false);
+        child = spy(child);
+        when(child.isConversation()).thenReturn(true);
+        notificationList.add(child);
+
+        // Add singleton group with non-conversation child
+        final String groupName_invalid = "testGrp_invalid";
+        final int summaryId_invalid = 100;
+        summary = getNotificationRecord(pkg, summaryId_invalid,
+                String.valueOf(summaryId_invalid), UserHandle.SYSTEM, groupName_invalid, true);
+        notificationList.add(summary);
+        final String groupKey_invalid = summary.getGroupKey();
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        child = getNotificationRecord(pkg, summaryId_invalid + 42,
+                String.valueOf(summaryId_invalid + 42), UserHandle.SYSTEM, groupName_invalid,
+                false);
+        notificationList.add(child);
+
+        // Check that the invalid group will not be force grouped
+        final ArrayMap<String, NotificationRecord> sparseGroups = mGroupHelper.getSparseGroups(
+                triggerFullAggregateGroupKey, notificationList, summaryByGroup, triggerSection);
+        assertThat(sparseGroups).containsKey(groupKey_valid);
+        assertThat(sparseGroups).doesNotContainKey(groupKey_invalid);
     }
 
     @Test

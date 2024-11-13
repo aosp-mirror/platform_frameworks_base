@@ -1436,7 +1436,8 @@ public class GroupHelper {
         }
     }
 
-    private ArrayMap<String, NotificationRecord> getSparseGroups(
+    @VisibleForTesting
+    protected ArrayMap<String, NotificationRecord> getSparseGroups(
             final FullyQualifiedGroupKey fullAggregateGroupKey,
             final List<NotificationRecord> notificationList,
             final Map<String, NotificationRecord> summaryByGroupKey,
@@ -1448,8 +1449,8 @@ public class GroupHelper {
                         && summary.getUserId() == fullAggregateGroupKey.userId
                         && summary.getSbn().isAppGroup()
                         && !summary.getGroupKey().equals(fullAggregateGroupKey.toString())) {
-                    int numChildren = getNumChildrenForGroup(summary.getSbn().getGroup(),
-                            notificationList);
+                    int numChildren = getNumChildrenForGroupWithSection(summary.getSbn().getGroup(),
+                            notificationList, sectioner);
                     if (numChildren > 0 && numChildren < MIN_CHILD_COUNT_TO_AVOID_FORCE_GROUPING) {
                         sparseGroups.put(summary.getGroupKey(), summary);
                     }
@@ -1457,6 +1458,43 @@ public class GroupHelper {
             }
         }
         return sparseGroups;
+    }
+
+    /**
+     *  Get the number of children of a group if all match a certain section.
+     *  Used for force grouping sparse groups, where the summary may match a section but the
+     *  child notifications do not: ie. conversations
+     *
+     * @param groupKey the group key (name)
+     * @param notificationList all notifications list
+     * @param sectioner the section to match
+     * @return number of children in that group or -1 if section does not match
+     */
+    private int getNumChildrenForGroupWithSection(final String groupKey,
+            final List<NotificationRecord> notificationList,
+            final NotificationSectioner sectioner) {
+        int numChildren = 0;
+        for (NotificationRecord r : notificationList) {
+            if (!r.getNotification().isGroupSummary() && groupKey.equals(r.getSbn().getGroup())) {
+                NotificationSectioner childSection = getSection(r);
+                if (childSection == null || childSection != sectioner) {
+                    if (DEBUG) {
+                        Slog.i(TAG,
+                                "getNumChildrenForGroupWithSection skip because invalid section: "
+                                    + groupKey + " r: " + r);
+                    }
+                    return -1;
+                } else {
+                    numChildren++;
+                }
+            }
+        }
+
+        if (DEBUG) {
+            Slog.i(TAG,
+                    "getNumChildrenForGroupWithSection " + groupKey + " numChild: " + numChildren);
+        }
+        return numChildren;
     }
 
     @GuardedBy("mAggregatedNotifications")
