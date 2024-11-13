@@ -7970,7 +7970,7 @@ public class UserManagerService extends IUserManager.Stub {
                                     Settings.Secure.getIntForUser(mContext.getContentResolver(),
                                             HIDE_PRIVATESPACE_ENTRY_POINT, parentId) == 1);
                         } catch (Settings.SettingNotFoundException e) {
-                            throw new RuntimeException(e);
+                            config.putBoolean(PRIVATE_SPACE_ENTRYPOINT_HIDDEN, false);
                         }
                     }
                     return new LauncherUserInfo.Builder(userDetails.getName(),
