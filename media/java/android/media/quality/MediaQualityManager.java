@@ -254,6 +254,17 @@ public final class MediaQualityManager {
         }
     }
 
+    /**
+     * Gets picture profile handle by profile ID.
+     * @hide
+     */
+    public PictureProfileHandle getPictureProfileHandle(String id) {
+        try {
+            return mService.getPictureProfileHandle(id);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Creates a picture profile and store it in the system.
