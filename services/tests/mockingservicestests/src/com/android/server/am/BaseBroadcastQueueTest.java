@@ -186,9 +186,9 @@ public abstract class BaseBroadcastQueueTest {
         doReturn(mAppStartInfoTracker).when(mProcessList).getAppStartInfoTracker();
 
         doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), anyInt());
         doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), anyInt());
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), anyInt());
     }
 
     public void tearDown() throws Exception {
