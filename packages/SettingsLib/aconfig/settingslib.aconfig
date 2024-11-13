@@ -171,3 +171,10 @@ flag {
     description: "Enable the user consent prompt before writing sensitive preferences via service"
     bug: "378552675"
 }
+
+flag {
+    name: "hearing_devices_input_routing_control"
+    namespace: "accessibility"
+    description: "Enable the input routing control in device details and hearing devices dialog."
+    bug: "349255906"
+}
