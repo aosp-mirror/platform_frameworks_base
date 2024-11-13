@@ -30,9 +30,8 @@ import javax.inject.Inject
 class LetterboxConfiguration @Inject constructor(
     private val context: Context
 ) {
-
-    // TODO(b/370940685): Integrate CommandHandler in LetterboxConfiguration.
-    private var letterboxBackgroundColorOverride: Color? = Color.valueOf(Color.YELLOW)
+    // Color to use for the solid color letterbox background type.
+    private var letterboxBackgroundColorOverride: Color? = null
 
     // Color resource id for the solid color letterbox background type.
     private var letterboxBackgroundColorResourceIdOverride: Int? = null
