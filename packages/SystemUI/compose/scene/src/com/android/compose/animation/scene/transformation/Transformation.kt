@@ -133,14 +133,14 @@ interface PropertyTransformationScope : Density, ElementStateScope {
 }
 
 /** Defines the transformation-type to be applied to all elements matching [matcher]. */
-class TransformationMatcher(
+internal class TransformationMatcher(
     val matcher: ElementMatcher,
     val factory: Transformation.Factory,
     val range: TransformationRange?,
 )
 
 /** A pair consisting of a [transformation] and optional [range]. */
-data class TransformationWithRange<out T : Transformation>(
+internal data class TransformationWithRange<out T : Transformation>(
     val transformation: T,
     val range: TransformationRange?,
 ) {
@@ -152,7 +152,7 @@ data class TransformationWithRange<out T : Transformation>(
 }
 
 /** The progress-based range of a [PropertyTransformation]. */
-data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
+internal data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
     constructor(
         start: Float? = null,
         end: Float? = null,

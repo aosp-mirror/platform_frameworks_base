@@ -169,7 +169,7 @@ internal constructor(
 }
 
 /** The definition of a transition between [from] and [to]. */
-interface TransitionSpec {
+internal interface TransitionSpec {
     /** The key of this [TransitionSpec]. */
     val key: TransitionKey?
 
@@ -209,7 +209,7 @@ interface TransitionSpec {
     fun previewTransformationSpec(transition: TransitionState.Transition): TransformationSpec?
 }
 
-interface TransformationSpec {
+internal interface TransformationSpec {
     /**
      * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
      * the transition is triggered (i.e. it is not gesture-based).
@@ -295,7 +295,7 @@ internal class TransitionSpecImpl(
 }
 
 /** The definition of the overscroll behavior of the [content]. */
-interface OverscrollSpec {
+internal interface OverscrollSpec {
     /** The scene we are over scrolling. */
     val content: ContentKey
 

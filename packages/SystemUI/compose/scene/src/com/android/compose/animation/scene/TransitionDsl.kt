@@ -76,7 +76,7 @@ interface SceneTransitionsBuilder {
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
-    ): TransitionSpec
+    )
 
     /**
      * Define the animation to be played when transitioning [from] the specified content. For the
@@ -102,7 +102,7 @@ interface SceneTransitionsBuilder {
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
-    ): TransitionSpec
+    )
 
     /**
      * Define the animation to be played when the [content] is overscrolled in the given
@@ -115,13 +115,13 @@ interface SceneTransitionsBuilder {
         content: ContentKey,
         orientation: Orientation,
         builder: OverscrollBuilder.() -> Unit,
-    ): OverscrollSpec
+    )
 
     /**
      * Prevents overscroll the [content] in the given [orientation], allowing ancestors to
      * eventually consume the remaining gesture.
      */
-    fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec
+    fun overscrollDisabled(content: ContentKey, orientation: Orientation)
 }
 
 interface BaseTransitionBuilder : PropertyTransformationBuilder {
