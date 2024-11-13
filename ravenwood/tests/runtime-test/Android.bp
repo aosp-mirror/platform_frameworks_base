@@ -9,7 +9,7 @@ package {
 
 android_ravenwood_test {
     name: "RavenwoodRuntimeTest",
-
+    target_sdk_version: "34",
     libs: [
         "ravenwood-helper-runtime",
     ],

@@ -284,4 +284,21 @@ public class RavenwoodCommonUtils {
         th.printStackTrace(writer);
         return stringWriter.toString();
     }
+
+    /** Same as {@link Integer#parseInt(String)} but accepts null and returns null. */
+    @Nullable
+    public static Integer parseNullableInt(@Nullable String value) {
+        if (value == null) {
+            return null;
+        }
+        return Integer.parseInt(value);
+    }
+
+    /**
+     * @return {@code value} if it's non-null. Otherwise, returns {@code def}.
+     */
+    @Nullable
+    public static <T> T withDefault(@Nullable T value, @Nullable T def) {
+        return value != null ? value : def;
+    }
 }
