@@ -17,8 +17,8 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothDevice
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.LeAudioProfile
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager
@@ -48,7 +48,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @OptIn(ExperimentalCoroutinesApi::class)
 class AudioSharingDialogViewModelTest : SysuiTestCase() {

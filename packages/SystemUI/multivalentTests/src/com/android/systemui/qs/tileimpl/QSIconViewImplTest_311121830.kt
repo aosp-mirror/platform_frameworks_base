@@ -19,10 +19,10 @@ package com.android.systemui.qs.tileimpl
 import android.animation.AnimatorTestRule
 import android.content.Context
 import android.service.quicksettings.Tile
-import android.testing.AndroidTestingRunner
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.ImageView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -35,7 +35,7 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 
 /** Test for regression b/311121830 and b/323125376 */
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @UiThreadTest
 @SmallTest
 class QSIconViewImplTest_311121830 : SysuiTestCase() {

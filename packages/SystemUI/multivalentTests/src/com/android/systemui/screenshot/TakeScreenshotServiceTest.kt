@@ -23,9 +23,9 @@ import android.content.ComponentName
 import android.net.Uri
 import android.os.UserHandle
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.SysuiTestCase
@@ -49,7 +49,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class TakeScreenshotServiceTest : SysuiTestCase() {
 
     private val userManager = mock<UserManager> { on { isUserUnlocked } doReturn (true) }
