@@ -166,6 +166,25 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .waitForAndVerify()
     }
 
+    private fun getHeaderEmptyView(caption: UiObject2?): UiObject2 {
+        return caption
+            ?.children
+            ?.find { it.resourceName.endsWith(HEADER_EMPTY_VIEW) }
+            ?: error("Unable to find resource $HEADER_EMPTY_VIEW\n")
+    }
+
+    /** Click on an existing window's header to bring it to the front. */
+    fun bringToFront(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+        val caption = getCaptionForTheApp(wmHelper, device)
+        val openHeaderView = getHeaderEmptyView(caption)
+        openHeaderView.click()
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withTopVisibleApp(innerHelper)
+            .waitForAndVerify()
+    }
+
     /** Open maximize menu and click snap resize button on the app header for the given app. */
     fun snapResizeDesktopApp(
         wmHelper: WindowManagerStateHelper,
@@ -447,6 +466,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         const val SNAP_LEFT_BUTTON: String = "maximize_menu_snap_left_button"
         const val SNAP_RIGHT_BUTTON: String = "maximize_menu_snap_right_button"
         const val MINIMIZE_BUTTON_VIEW: String = "minimize_window"
+        const val HEADER_EMPTY_VIEW: String = "caption_handle"
         val caption: BySelector
             get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
     }
