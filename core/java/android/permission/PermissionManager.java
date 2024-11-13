@@ -1742,6 +1742,16 @@ public final class PermissionManager {
         }
     }
 
+    private static int getPermissionRequestStateUncached(String packageName, String permission,
+            int deviceId) {
+        try {
+            return AppGlobals.getPermissionManager().getPermissionRequestState(
+                    packageName, permission, deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Identifies a permission query.
      *
@@ -1795,6 +1805,46 @@ public final class PermissionManager {
         }
     }
 
+    private static final class PermissionRequestStateQuery {
+        final String mPackageName;
+        final String mPermission;
+        final int mDeviceId;
+
+        PermissionRequestStateQuery(@NonNull String packageName, @NonNull String permission,
+                int deviceId) {
+            mPackageName = packageName;
+            mPermission = permission;
+            mDeviceId = deviceId;
+        }
+
+        @Override
+        public String toString() {
+            return TextUtils.formatSimple("PermissionRequestStateQuery(package=\"%s\","
+                            + " permission=\"%s\", " + "deviceId=%d)",
+                    mPackageName, mPermission, mDeviceId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mPackageName, mPermission, mDeviceId);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object rval) {
+            if (rval == null) {
+                return false;
+            }
+            PermissionRequestStateQuery other;
+            try {
+                other = (PermissionRequestStateQuery) rval;
+            } catch (ClassCastException ex) {
+                return false;
+            }
+            return mDeviceId == other.mDeviceId && Objects.equals(mPackageName, other.mPackageName)
+                    && Objects.equals(mPermission, other.mPermission);
+        }
+    }
+
     // The legacy system property "package_info" had two purposes: to invalidate PIC caches and to
     // signal that package information, and therefore permissions, might have changed.
     // AudioSystem is the only client of the signaling behavior.  The "separate permissions
@@ -1842,8 +1892,28 @@ public final class PermissionManager {
             };
 
     /** @hide */
+    private static final PropertyInvalidatedCache<PermissionRequestStateQuery, Integer>
+            sPermissionRequestStateCache =
+            new PropertyInvalidatedCache<>(
+                    512, CACHE_KEY_PACKAGE_INFO_CACHE, "getPermissionRequestState") {
+                @Override
+                public Integer recompute(PermissionRequestStateQuery query) {
+                    return getPermissionRequestStateUncached(query.mPackageName, query.mPermission,
+                            query.mDeviceId);
+                }
+            };
+
+    /** @hide */
     public static int checkPermission(@Nullable String permission, int pid, int uid, int deviceId) {
         return sPermissionCache.query(new PermissionQuery(permission, pid, uid, deviceId));
+    }
+
+    /** @hide */
+    @Context.PermissionRequestState
+    public int getPermissionRequestState(@NonNull String packageName, @NonNull String permission,
+            int deviceId) {
+        return sPermissionRequestStateCache.query(
+                new PermissionRequestStateQuery(packageName, permission, deviceId));
     }
 
     /**
