@@ -81,20 +81,24 @@ final class PolicyEnforcerCallbacks {
         return AndroidFuture.completedFuture(true);
     }
 
-    static CompletableFuture<Boolean> setAutoTimezoneEnabled(@Nullable Boolean enabled,
-            @NonNull Context context) {
+    static CompletableFuture<Boolean> setAutoTimeZonePolicy(
+            @Nullable Integer policy, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
         if (!Flags.setAutoTimeZoneEnabledCoexistence()) {
-            Slogf.w(LOG_TAG, "Trying to enforce setAutoTimezoneEnabled while flag is off.");
+            Slogf.w(LOG_TAG, "Trying to enforce setAutoTimeZonePolicy while flag is off.");
             return AndroidFuture.completedFuture(true);
         }
         return Binder.withCleanCallingIdentity(() -> {
             Objects.requireNonNull(context);
-
-            int value = enabled != null && enabled ? 1 : 0;
-            return AndroidFuture.completedFuture(
-                    Settings.Global.putInt(
-                            context.getContentResolver(), Settings.Global.AUTO_TIME_ZONE,
-                    value));
+            if (policy != null &&
+                    policy == DevicePolicyManager.AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY) {
+                return AndroidFuture.completedFuture(false);
+            }
+            int enabled = policy != null &&
+                    policy == DevicePolicyManager.AUTO_TIME_ZONE_ENABLED ? 1 : 0;
+            return AndroidFuture.completedFuture(Settings.Global.putInt(
+                    context.getContentResolver(), Settings.Global.AUTO_TIME_ZONE,
+                    enabled));
         });
     }
 

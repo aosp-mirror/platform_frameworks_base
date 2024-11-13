@@ -5003,7 +5003,7 @@ public class Notification implements Parcelable
 
         /**
          * Sets a very short string summarizing the most critical information contained in the
-         * notification. Suggested max length is 5 characters, and there is no guarantee how much or
+         * notification. Suggested max length is 7 characters, and there is no guarantee how much or
          * how little of this text will be shown.
          */
         @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)

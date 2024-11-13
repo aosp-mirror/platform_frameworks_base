@@ -5550,8 +5550,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!visible) {
                 if (mTransitionController.inPlayingTransition(this)) {
                     mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
-                } else if (mTransitionController.inFinishingTransition(this)) {
-                    mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
+                    if (mTransitionController.mFinishingTransition != null
+                            && mTransitionController.mFinishingTransition.isTransientLaunch(this)) {
+                        mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
+                    }
                 }
             } else {
                 mTransitionChangeFlags &= ~FLAG_IS_OCCLUDED;
@@ -8894,6 +8896,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAppCompatController.getAppCompatSizeCompatModePolicy();
 
         if (scmPolicy.hasAppCompatDisplayInsetsWithoutInheritance()
+                && mAppCompatDisplayInsets != null
                 && !mAppCompatDisplayInsets.mIsInFixedOrientationOrAspectRatioLetterbox) {
             // App prefers to keep its original size.
             // If the size compat is from previous fixed orientation letterboxing, we may want to

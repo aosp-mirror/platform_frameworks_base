@@ -21,8 +21,6 @@ import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 
 import static com.android.hardware.input.Flags.enableNew25q2Keycodes;
-import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
-import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
@@ -51,7 +49,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
@@ -215,7 +212,7 @@ final class KeyGestureController {
     }
 
     private void initKeyCombinationRules() {
-        if (!useKeyGestureEventHandler() || !useKeyGestureEventHandlerMultiPressGestures()) {
+        if (!InputSettings.doesKeyGestureEventHandlerSupportMultiKeyGestures()) {
             return;
         }
         // TODO(b/358569822): Handle Power, Back key properly since key combination gesture is
@@ -441,7 +438,8 @@ final class KeyGestureController {
 
     public boolean interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
         final boolean interactive = (policyFlags & FLAG_INTERACTIVE) != 0;
-        if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
+        if (InputSettings.doesKeyGestureEventHandlerSupportMultiKeyGestures()
+                && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
             return mKeyCombinationManager.interceptKey(event, interactive);
         }
         return false;
@@ -457,15 +455,18 @@ final class KeyGestureController {
         final long keyConsumed = -1;
         final long keyNotConsumed = 0;
 
-        if (mKeyCombinationManager.isKeyConsumed(event)) {
-            return keyConsumed;
-        }
+        if (InputSettings.doesKeyGestureEventHandlerSupportMultiKeyGestures()) {
+            if (mKeyCombinationManager.isKeyConsumed(event)) {
+                return keyConsumed;
+            }
 
-        if ((flags & KeyEvent.FLAG_FALLBACK) == 0) {
-            final long now = SystemClock.uptimeMillis();
-            final long interceptTimeout = mKeyCombinationManager.getKeyInterceptTimeout(keyCode);
-            if (now < interceptTimeout) {
-                return interceptTimeout - now;
+            if ((flags & KeyEvent.FLAG_FALLBACK) == 0) {
+                final long now = SystemClock.uptimeMillis();
+                final long interceptTimeout = mKeyCombinationManager.getKeyInterceptTimeout(
+                        keyCode);
+                if (now < interceptTimeout) {
+                    return interceptTimeout - now;
+                }
             }
         }
 

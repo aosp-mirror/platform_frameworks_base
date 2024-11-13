@@ -19,6 +19,7 @@
 <resources>
     <!-- A list of system apps whose FGS can be stopped in the task manager. -->
     <string-array translatable="false" name="stoppable_fgs_system_apps">
+        <item>com.android.virtualization.terminal</item>
     </string-array>
     <!-- stoppable_fgs_system_apps which is supposed to be overridden by vendor -->
     <string-array translatable="false" name="vendor_stoppable_fgs_system_apps">

@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
@@ -44,7 +45,6 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 object KeyguardClockViewBinder {
     private val TAG = KeyguardClockViewBinder::class.simpleName!!
@@ -133,15 +133,26 @@ object KeyguardClockViewBinder {
                     launch {
                         if (!MigrateClocksToBlueprint.isEnabled) return@launch
                         aodBurnInViewModel.movement.collect { burnInModel ->
-                            viewModel.currentClock.value?.let {
-                                it.largeClock.layout.applyAodBurnIn(
+                            viewModel.currentClock.value
+                                ?.largeClock
+                                ?.layout
+                                ?.applyAodBurnIn(
                                     AodClockBurnInModel(
                                         translationX = burnInModel.translationX.toFloat(),
                                         translationY = burnInModel.translationY.toFloat(),
                                         scale = burnInModel.scale,
                                     )
                                 )
-                            }
+                        }
+                    }
+
+                    launch {
+                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                        viewModel.largeClockTextSize.collect { fontSizePx ->
+                            viewModel.currentClock.value
+                                ?.largeClock
+                                ?.events
+                                ?.onFontSettingChanged(fontSizePx = fontSizePx.toFloat())
                         }
                     }
                 }

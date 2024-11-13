@@ -567,7 +567,6 @@ public final class MediaQualityManager {
 
     /**
      * Registers a {@link AmbientBacklightCallback}.
-     * @hide
      */
     public void registerAmbientBacklightCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -581,7 +580,6 @@ public final class MediaQualityManager {
 
     /**
      * Unregisters the existing {@link AmbientBacklightCallback}.
-     * @hide
      */
     public void unregisterAmbientBacklightCallback(
             @NonNull final AmbientBacklightCallback callback) {
@@ -602,7 +600,6 @@ public final class MediaQualityManager {
      * Set the ambient backlight settings.
      *
      * @param settings The settings to use for the backlight detector.
-     * @hide
      */
     public void setAmbientBacklightSettings(
             @NonNull AmbientBacklightSettings settings) {
@@ -618,7 +615,6 @@ public final class MediaQualityManager {
      * Enables or disables the ambient backlight detection.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
-     * @hide
      */
     public void setAmbientBacklightEnabled(boolean enabled) {
         try {
@@ -843,14 +839,12 @@ public final class MediaQualityManager {
 
     /**
      * Callback used to monitor status of ambient backlight.
-     * @hide
      */
     public abstract static class AmbientBacklightCallback {
         /**
          * Called when new ambient backlight event is emitted.
-         * @hide
          */
-        public void onAmbientBacklightEvent(AmbientBacklightEvent event) {
+        public void onAmbientBacklightEvent(@NonNull AmbientBacklightEvent event) {
         }
     }
 }

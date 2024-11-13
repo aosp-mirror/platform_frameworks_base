@@ -3497,4 +3497,15 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void deprovisionSatellite(in List<SatelliteSubscriberInfo> list, in ResultReceiver result);
+
+   /**
+    * Inform whether application supports NTN SMS in satellite mode.
+    *
+    * This method is used by default messaging application to inform framework whether it supports
+    * NTN SMS or not.
+    *
+    * @param ntnSmsSupported {@code true} If application supports NTN SMS, else {@code false}.
+    * @hide
+    */
+    void setNtnSmsSupported(boolean ntnSmsSupported);
 }

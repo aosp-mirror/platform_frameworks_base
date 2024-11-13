@@ -18,6 +18,7 @@ package com.android.compose.animation.scene.content.state
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
@@ -34,8 +35,6 @@ import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransformationSpec
 import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
-import com.android.compose.animation.scene.transition.link.LinkedTransition
-import com.android.compose.animation.scene.transition.link.StateLink
 import kotlinx.coroutines.launch
 
 /** The state associated to a [SceneTransitionLayout] at some specific point in time. */
@@ -280,8 +279,8 @@ sealed interface TransitionState {
          */
         private var interruptionDecay: Animatable<Float, AnimationVector1D>? = null
 
-        /** The map of active links that connects this transition to other transitions. */
-        internal val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
+        /** Whether this transition was already started. */
+        private var wasStarted = false
 
         init {
             check(fromContent != toContent)
@@ -328,7 +327,7 @@ sealed interface TransitionState {
         }
 
         /** Run this transition and return once it is finished. */
-        abstract suspend fun run()
+        protected abstract suspend fun run()
 
         /**
          * Freeze this transition state so that neither [currentScene] nor [currentOverlays] will
@@ -340,6 +339,13 @@ sealed interface TransitionState {
          * This is called when this transition is interrupted (replaced) by another transition.
          */
         abstract fun freezeAndAnimateToCurrentState()
+
+        internal suspend fun runInternal() {
+            check(!wasStarted) { "A Transition can be started only once." }
+            wasStarted = true
+
+            run()
+        }
 
         internal fun updateOverscrollSpecs(
             fromSpec: OverscrollSpecImpl?,
@@ -376,7 +382,7 @@ sealed interface TransitionState {
                     val progressSpec =
                         spring(
                             stiffness = swipeSpec.stiffness,
-                            dampingRatio = swipeSpec.dampingRatio,
+                            dampingRatio = Spring.DampingRatioNoBouncy,
                             visibilityThreshold = ProgressVisibilityThreshold,
                         )
                     animatable.animateTo(0f, progressSpec)

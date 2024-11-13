@@ -72,6 +72,7 @@ aconfig_declarations_group {
         "android.service.dreams.flags-aconfig-java",
         "android.service.notification.flags-aconfig-java",
         "android.service.appprediction.flags-aconfig-java",
+        "android.service.quickaccesswallet.flags-aconfig-java",
         "android.service.voice.flags-aconfig-java",
         "android.speech.flags-aconfig-java",
         "android.systemserver.flags-aconfig-java",
@@ -111,6 +112,7 @@ aconfig_declarations_group {
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
         "interaction_jank_monitor_flags_lib",
+        "keystore2_flags_java-framework",
         "libcore_exported_aconfig_flags_lib",
         "libcore_readonly_aconfig_flags_lib",
         "libgui_flags_java_lib",
@@ -1772,5 +1774,20 @@ aconfig_declarations {
 java_aconfig_library {
     name: "aconfig_settingslib_flags_java_lib",
     aconfig_declarations: "aconfig_settingslib_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Quick Access Wallet
+aconfig_declarations {
+    name: "android.service.quickaccesswallet.flags-aconfig",
+    package: "android.service.quickaccesswallet",
+    exportable: true,
+    container: "system",
+    srcs: ["core/java/android/service/quickaccesswallet/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.quickaccesswallet.flags-aconfig-java",
+    aconfig_declarations: "android.service.quickaccesswallet.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

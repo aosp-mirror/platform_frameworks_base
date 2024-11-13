@@ -1286,6 +1286,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
             if (mFinishCB == null
                     || (Flags.enableShellTopTaskTracking() && mPendingFinishTransition != null)) {
                 Slog.e(TAG, "Duplicate call to finish");
+                if (runnerFinishCb != null) {
+                    try {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "[%d] RecentsController.finishInner: calling finish callback",
+                                mInstanceId);
+                        runnerFinishCb.send(0, null);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to report transition finished", e);
+                    }
+                }
                 return;
             }
 

@@ -3928,9 +3928,9 @@ public class UserManager {
 
         final int callingUid = Binder.getCallingUid();
         final int processUid = Process.myUid();
-        if (Build.isDebuggable() && callingUid != processUid) {
-            Log.w(TAG, "Uid " + processUid + " is fetching a copy of UserProperties on"
-                            + " behalf of callingUid " + callingUid + ". Possibly"
+        if (processUid == Process.SYSTEM_UID && callingUid != processUid) {
+            Log.w(TAG, "The System (uid " + processUid + ") is fetching a copy of"
+                            + " UserProperties on behalf of callingUid " + callingUid + ". Possibly"
                             + " it should carefully first clearCallingIdentity or perhaps use"
                             + " UserManagerInternal.getUserProperties() instead?",
                     new Throwable());

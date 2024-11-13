@@ -57,6 +57,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.ZenBypassingApp;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -1947,6 +1948,35 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         return new ParceledListSlice<>(channels);
+    }
+
+    /**
+     * Gets all apps that can bypass DND, and a boolean indicating whether all (true) or some
+     * (false) of its notification channels can currently bypass.
+     */
+    public @NonNull ArrayList<ZenBypassingApp> getPackagesBypassingDnd(@UserIdInt int userId) {
+        ArrayList<ZenBypassingApp> bypassing = new ArrayList<>();
+        synchronized (mLock) {
+            for (PackagePreferences p : mPackagePreferences.values()) {
+                if (p.userId != userId) {
+                    continue;
+                }
+                int totalChannelCount = p.channels.size();
+                int bypassingCount = 0;
+                if  (totalChannelCount == 0) {
+                    continue;
+                }
+                for (NotificationChannel channel : p.channels.values()) {
+                    if (channelIsLiveLocked(p, channel) && channel.canBypassDnd()) {
+                        bypassingCount++;
+                    }
+                }
+                if (bypassingCount > 0) {
+                    bypassing.add(new ZenBypassingApp(p.pkg, totalChannelCount == bypassingCount));
+                }
+            }
+        }
+        return bypassing;
     }
 
     /**

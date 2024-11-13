@@ -2527,12 +2527,12 @@ public class AppOpsManager {
 
     /** @hide Access to read oxygen saturation. */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_PLATFORM_OXYGEN_SATURATION_ENABLED)
+    @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
     public static final String OPSTR_READ_OXYGEN_SATURATION = "android:read_oxygen_saturation";
 
     /** @hide Access to read skin temperature. */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_PLATFORM_SKIN_TEMPERATURE_ENABLED)
+    @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
     public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
 
     /** @hide Access to ranging */
@@ -2616,8 +2616,8 @@ public class AppOpsManager {
             OP_POST_NOTIFICATION,
             // Health
             Flags.replaceBodySensorPermissionEnabled() ? OP_READ_HEART_RATE : OP_NONE,
-            Flags.platformSkinTemperatureEnabled() ? OP_READ_SKIN_TEMPERATURE : OP_NONE,
-            Flags.platformOxygenSaturationEnabled() ? OP_READ_OXYGEN_SATURATION : OP_NONE,
+            Flags.replaceBodySensorPermissionEnabled() ? OP_READ_SKIN_TEMPERATURE : OP_NONE,
+            Flags.replaceBodySensorPermissionEnabled() ? OP_READ_OXYGEN_SATURATION : OP_NONE,
     };
 
     /**
@@ -3132,7 +3132,7 @@ public class AppOpsManager {
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_READ_SKIN_TEMPERATURE, OPSTR_READ_SKIN_TEMPERATURE,
             "READ_SKIN_TEMPERATURE").setPermission(
-                Flags.platformSkinTemperatureEnabled()
+                Flags.replaceBodySensorPermissionEnabled()
                     ? HealthPermissions.READ_SKIN_TEMPERATURE : null)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_RANGING, OPSTR_RANGING, "RANGING")
@@ -3141,7 +3141,7 @@ public class AppOpsManager {
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_READ_OXYGEN_SATURATION, OPSTR_READ_OXYGEN_SATURATION,
             "READ_OXYGEN_SATURATION").setPermission(
-                Flags.platformOxygenSaturationEnabled()
+                Flags.replaceBodySensorPermissionEnabled()
                     ? HealthPermissions.READ_OXYGEN_SATURATION : null)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
     };

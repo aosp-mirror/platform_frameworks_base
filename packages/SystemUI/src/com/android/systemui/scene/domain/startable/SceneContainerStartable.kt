@@ -373,6 +373,7 @@ constructor(
                                     "device was unlocked with alternate bouncer showing" +
                                         " and shade didn't need to be left open"
                             } else {
+                                replaceLockscreenSceneOnBackStack()
                                 null
                             }
                         }
@@ -391,16 +392,7 @@ constructor(
                                 val prevScene = previousScene.value
                                 val targetScene = prevScene ?: Scenes.Gone
                                 if (targetScene != Scenes.Gone) {
-                                    sceneBackInteractor.updateBackStack { stack ->
-                                        val list = stack.asIterable().toMutableList()
-                                        check(list.last() == Scenes.Lockscreen) {
-                                            "The bottommost/last SceneKey of the back stack isn't" +
-                                                " the Lockscreen scene like expected. The back" +
-                                                " stack is $stack."
-                                        }
-                                        list[list.size - 1] = Scenes.Gone
-                                        sceneStackOf(*list.toTypedArray())
-                                    }
+                                    replaceLockscreenSceneOnBackStack()
                                 }
                                 targetScene to
                                     "device was unlocked with primary bouncer showing," +
@@ -432,6 +424,20 @@ constructor(
                 .collect { (targetSceneKey, loggingReason) ->
                     switchToScene(targetSceneKey = targetSceneKey, loggingReason = loggingReason)
                 }
+        }
+    }
+
+    /** If the [Scenes.Lockscreen] is on the backstack, replaces it with [Scenes.Gone]. */
+    private fun replaceLockscreenSceneOnBackStack() {
+        sceneBackInteractor.updateBackStack { stack ->
+            val list = stack.asIterable().toMutableList()
+            check(list.last() == Scenes.Lockscreen) {
+                "The bottommost/last SceneKey of the back stack isn't" +
+                    " the Lockscreen scene like expected. The back" +
+                    " stack is $stack."
+            }
+            list[list.size - 1] = Scenes.Gone
+            sceneStackOf(*list.toTypedArray())
         }
     }
 
