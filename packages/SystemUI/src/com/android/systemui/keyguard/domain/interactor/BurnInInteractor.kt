@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.stateIn
 class BurnInInteractor
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val burnInHelperWrapper: BurnInHelperWrapper,
     @Application private val scope: CoroutineScope,
     @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,

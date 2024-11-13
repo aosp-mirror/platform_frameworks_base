@@ -45,6 +45,7 @@ import com.android.systemui.log.dagger.LongPressTouchLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.VibratorHelper
 import dagger.Lazy
 import javax.inject.Inject
@@ -60,7 +61,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val authController: AuthController,
     private val windowManager: WindowManager,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notificationPanelView: NotificationPanelView,
     private val featureFlags: FeatureFlags,
     private val deviceEntryIconViewModel: Lazy<DeviceEntryIconViewModel>,
