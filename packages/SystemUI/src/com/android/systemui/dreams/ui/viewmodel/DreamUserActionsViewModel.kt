@@ -54,6 +54,8 @@ constructor(
                         shadeInteractor.shadeMode,
                     ) { isDeviceUnlocked, shadeMode ->
                         buildList {
+                                add(Swipe.Start to Scenes.Communal)
+
                                 val bouncerOrGone =
                                     if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer
                                 add(Swipe.Up to bouncerOrGone)
