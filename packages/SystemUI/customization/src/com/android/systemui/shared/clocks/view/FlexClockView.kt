@@ -16,7 +16,6 @@
 
 package com.android.systemui.shared.clocks.view
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Point
 import android.util.MathUtils.constrainedMap
@@ -25,8 +24,7 @@ import android.view.ViewGroup
 import android.widget.RelativeLayout
 import com.android.app.animation.Interpolators
 import com.android.systemui.customization.R
-import com.android.systemui.log.core.MessageBuffer
-import com.android.systemui.shared.clocks.AssetLoader
+import com.android.systemui.shared.clocks.ClockContext
 import com.android.systemui.shared.clocks.DigitTranslateAnimator
 import kotlin.math.abs
 import kotlin.math.max
@@ -34,8 +32,7 @@ import kotlin.math.min
 
 fun clamp(value: Float, minVal: Float, maxVal: Float): Float = max(min(value, maxVal), minVal)
 
-class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: MessageBuffer) :
-    DigitalClockFaceView(context, messageBuffer) {
+class FlexClockView(clockCtx: ClockContext) : DigitalClockFaceView(clockCtx) {
     override var digitalClockTextViewMap = mutableMapOf<Int, SimpleDigitalClockTextView>()
     val digitLeftTopMap = mutableMapOf<Int, Point>()
     var maxSingleDigitSize = Point(-1, -1)

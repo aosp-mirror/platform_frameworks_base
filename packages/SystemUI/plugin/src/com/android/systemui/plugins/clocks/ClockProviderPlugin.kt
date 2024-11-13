@@ -139,7 +139,9 @@ data class ClockMessageBuffers(
 
     /** Message buffer for large clock rendering */
     val largeClockMessageBuffer: MessageBuffer,
-)
+) {
+    constructor(buffer: MessageBuffer) : this(buffer, buffer, buffer) {}
+}
 
 data class AodClockBurnInModel(val scale: Float, val translationX: Float, val translationY: Float)
 
