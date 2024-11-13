@@ -31,6 +31,8 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TransitionType
@@ -47,6 +49,7 @@ import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler.PendingMix
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.util.StubTransaction
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -491,6 +494,72 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun startLaunchTransition_unknownLaunchingTask_animates() {
+        val wct = WindowContainerTransaction()
+        val task = createTask(WINDOWING_MODE_FREEFORM)
+        val transition = Binder()
+        whenever(transitions.startTransition(eq(TRANSIT_OPEN), eq(wct), anyOrNull()))
+            .thenReturn(transition)
+        whenever(transitions.dispatchTransition(eq(transition), any(), any(), any(), any(), any()))
+            .thenReturn(mock())
+
+        mixedHandler.startLaunchTransition(
+            transitionType = TRANSIT_OPEN,
+            wct = wct,
+            taskId = null,
+        )
+
+        val started = mixedHandler.startAnimation(
+            transition,
+            createTransitionInfo(
+                TRANSIT_OPEN,
+                listOf(createChange(task, mode = TRANSIT_OPEN))
+            ),
+            StubTransaction(),
+            StubTransaction(),
+        ) { }
+
+        assertThat(started).isEqualTo(true)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun startLaunchTransition_unknownLaunchingTaskOverImmersive_animatesImmersiveChange() {
+        val wct = WindowContainerTransaction()
+        val immersiveTask = createTask(WINDOWING_MODE_FREEFORM)
+        val openingTask = createTask(WINDOWING_MODE_FREEFORM)
+        val transition = Binder()
+        whenever(transitions.startTransition(eq(TRANSIT_OPEN), eq(wct), anyOrNull()))
+            .thenReturn(transition)
+        whenever(transitions.dispatchTransition(eq(transition), any(), any(), any(), any(), any()))
+            .thenReturn(mock())
+
+        mixedHandler.startLaunchTransition(
+            transitionType = TRANSIT_OPEN,
+            wct = wct,
+            taskId = null,
+            exitingImmersiveTask = immersiveTask.taskId,
+        )
+
+        val immersiveChange = createChange(immersiveTask, mode = TRANSIT_CHANGE)
+        val openingChange = createChange(openingTask, mode = TRANSIT_OPEN)
+        val started = mixedHandler.startAnimation(
+            transition,
+            createTransitionInfo(
+                TRANSIT_OPEN,
+                listOf(immersiveChange, openingChange)
+            ),
+            StubTransaction(),
+            StubTransaction(),
+        ) { }
+
+        assertThat(started).isEqualTo(true)
+        verify(desktopImmersiveController)
+            .animateResizeChange(eq(immersiveChange), any(), any(), any())
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
     fun addPendingAndAnimateLaunchTransition_noMinimizeChange_doesNotReparentMinimizeChange() {
         val wct = WindowContainerTransaction()
@@ -712,9 +781,13 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         changes.forEach { change -> addChange(change) }
     }
 
-    private fun createChange(task: RunningTaskInfo): TransitionInfo.Change =
+    private fun createChange(
+        task: RunningTaskInfo,
+        @TransitionInfo.TransitionMode mode: Int = TRANSIT_NONE
+    ): TransitionInfo.Change =
         TransitionInfo.Change(task.token, SurfaceControl()).apply {
             taskInfo = task
+            setMode(mode)
         }
 
     private fun createTask(@WindowingMode windowingMode: Int): RunningTaskInfo =
