@@ -284,7 +284,7 @@ flag {
     is_fixed_read_only: true
     is_exported: true
     namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable replacing permission BODY_SENSORS (and BODY_SENSORS_BACKGROUND) with granular health permission READ_HEART_RATE (and READ_HEALTH_DATA_IN_BACKGROUND)"
+    description: "Enables replacement of BODY_SENSORS/BODY_SENSORS_BACKGROUND permissions with granular health permissions READ_HEART_RATE, READ_SKIN_TEMPERATURE, READ_OXYGEN_SATURATION, and READ_HEALTH_DATA_IN_BACKGROUND"
     bug: "364638912"
 }
 
@@ -297,24 +297,6 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
-}
-
-flag {
-    name: "platform_skin_temperature_enabled"
-    is_fixed_read_only: true
-    is_exported: true
-    namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable platform support for Skin Temperature."
-    bug: "369872443"
-}
-
-flag {
-    name: "platform_oxygen_saturation_enabled"
-    is_fixed_read_only: true
-    is_exported: true
-    namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable platform support for Oxygen Saturation (SpO2)."
-    bug: "369873227"
 }
 
 flag {
@@ -399,4 +381,13 @@ flag {
     namespace: "permissions"
     description: "Uses the SysUi process to host the SelectionToolbarRenderService."
     bug: "363318732"
+}
+
+flag{
+    name: "note_op_batching_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Batch noteOperations on the client to reduce binder call volume"
+    bug: "366013082"
 }

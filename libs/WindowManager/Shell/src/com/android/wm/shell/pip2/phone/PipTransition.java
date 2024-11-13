@@ -543,7 +543,7 @@ public class PipTransition extends PipTransitionController implements
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        WindowContainerToken pipToken = mPipTransitionState.mPipTaskToken;
+        WindowContainerToken pipToken = mPipTransitionState.getPipTaskToken();
 
         TransitionInfo.Change pipChange = getChangeByToken(info, pipToken);
         if (pipChange == null) {
@@ -773,11 +773,11 @@ public class PipTransition extends PipTransitionController implements
     }
 
     private boolean isRemovePipTransition(@NonNull TransitionInfo info) {
-        if (mPipTransitionState.mPipTaskToken == null) {
+        if (mPipTransitionState.getPipTaskToken() == null) {
             // PiP removal makes sense if enter-PiP has cached a valid pinned task token.
             return false;
         }
-        TransitionInfo.Change pipChange = info.getChange(mPipTransitionState.mPipTaskToken);
+        TransitionInfo.Change pipChange = info.getChange(mPipTransitionState.getPipTaskToken());
         if (pipChange == null) {
             // Search for the PiP change by token since the windowing mode might be FULLSCREEN now.
             return false;
@@ -859,18 +859,18 @@ public class PipTransition extends PipTransitionController implements
                 Preconditions.checkState(extra != null,
                         "No extra bundle for " + mPipTransitionState);
 
-                mPipTransitionState.mPipTaskToken = extra.getParcelable(
-                        PIP_TASK_TOKEN, WindowContainerToken.class);
+                mPipTransitionState.setPipTaskToken(extra.getParcelable(
+                        PIP_TASK_TOKEN, WindowContainerToken.class));
                 mPipTransitionState.setPinnedTaskLeash(extra.getParcelable(
                         PIP_TASK_LEASH, SurfaceControl.class));
-                boolean hasValidTokenAndLeash = mPipTransitionState.mPipTaskToken != null
+                boolean hasValidTokenAndLeash = mPipTransitionState.getPipTaskToken() != null
                         && mPipTransitionState.getPinnedTaskLeash() != null;
 
                 Preconditions.checkState(hasValidTokenAndLeash,
                         "Unexpected bundle for " + mPipTransitionState);
                 break;
             case PipTransitionState.EXITED_PIP:
-                mPipTransitionState.mPipTaskToken = null;
+                mPipTransitionState.setPipTaskToken(null);
                 mPipTransitionState.setPinnedTaskLeash(null);
                 break;
         }

@@ -20,6 +20,8 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
@@ -552,6 +554,23 @@ public class WebChromeClient {
      * Parameters used in the {@link #onShowFileChooser} method.
      */
     public static abstract class FileChooserParams {
+        /**
+         * Enable File System Access for webview.
+         *
+         * File System Access JS APIs window.showOpenFileChooser(), showDirectoryChooser(), and
+         * showSaveFilePicker() will invoke #onFileChooser(). Additional MODE_OPEN_FOLDER will be
+         * returned by #getMode(), #getIntent() will return ACTION_OPEN_DOCUMENT,
+         * ACTION_OPEN_DOCUMENT_TREE, and ACTION_CREATE_DOCUMENT rather than the current
+         * ACTION_GET_CONTENT, and new function #getPermissionMode() will be available.
+         *
+         * @hide
+         */
+        @ChangeId
+        @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM)
+        @FlaggedApi(android.webkit.Flags.FLAG_FILE_SYSTEM_ACCESS)
+        @SystemApi
+        public static final long ENABLE_FILE_SYSTEM_ACCESS = 364980165L;
+
         /** @hide */
         @IntDef(prefix = { "MODE_" }, value = {
             MODE_OPEN,

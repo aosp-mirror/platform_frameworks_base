@@ -187,6 +187,9 @@ constructor(
     val largeClockTopMargin: Flow<Int> =
         configurationInteractor.onAnyConfigurationChange.map { getLargeClockTopMargin() }
 
+    val largeClockTextSize: Flow<Int> =
+        configurationInteractor.dimensionPixelSize(customR.dimen.large_clock_text_size)
+
     enum class ClockLayout {
         LARGE_CLOCK,
         SMALL_CLOCK,

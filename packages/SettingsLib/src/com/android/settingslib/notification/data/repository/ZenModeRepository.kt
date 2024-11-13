@@ -93,33 +93,23 @@ class ZenModeRepositoryImpl(
                     IntentFilter().apply {
                         addAction(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED)
                         addAction(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED)
-                        if (Flags.volumePanelBroadcastFix() && android.app.Flags.modesApi())
+                        if (android.app.Flags.modesApi())
                             addAction(
-                                NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED)
+                                NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED
+                            )
                     },
                     /* broadcastPermission = */ null,
-                    /* scheduler = */ if (Flags.volumePanelBroadcastFix()) {
-                        backgroundHandler
-                    } else {
-                        null
-                    },
+                    /* scheduler = */ backgroundHandler,
                 )
 
                 awaitClose { context.unregisterReceiver(receiver) }
             }
-            .let {
-                if (Flags.volumePanelBroadcastFix()) {
-                    // Share the flow to avoid having multiple broadcasts.
-                    it.flowOn(backgroundCoroutineContext)
-                        .shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
-                } else {
-                    it.shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
-                }
-            }
+            .flowOn(backgroundCoroutineContext)
+            .shareIn(started = SharingStarted.WhileSubscribed(), scope = scope)
     }
 
     override val consolidatedNotificationPolicy: StateFlow<NotificationManager.Policy?> by lazy {
-        if (Flags.volumePanelBroadcastFix() && android.app.Flags.modesApi())
+        if (android.app.Flags.modesApi())
             flowFromBroadcast(NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED) {
                 // If available, get the value from extras to avoid a potential binder call.
                 it?.extras?.getParcelable(EXTRA_NOTIFICATION_POLICY)
@@ -161,11 +151,13 @@ class ZenModeRepositoryImpl(
                     contentResolver.registerContentObserver(
                         Settings.Global.getUriFor(Settings.Global.ZEN_MODE),
                         /* notifyForDescendants= */ false,
-                        observer)
+                        observer,
+                    )
                     contentResolver.registerContentObserver(
                         Settings.Global.getUriFor(Settings.Global.ZEN_MODE_CONFIG_ETAG),
                         /* notifyForDescendants= */ false,
-                        observer)
+                        observer,
+                    )
 
                     awaitClose { contentResolver.unregisterContentObserver(observer) }
                 }

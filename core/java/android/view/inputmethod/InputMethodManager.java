@@ -2471,6 +2471,11 @@ public final class InputMethodManager {
                 return;
             }
 
+            if (Flags.refactorInsetsController()) {
+                showSoftInput(rootView, statsToken, flags, resultReceiver, reason);
+                return;
+            }
+
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.

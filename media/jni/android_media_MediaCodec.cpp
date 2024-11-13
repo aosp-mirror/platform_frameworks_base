@@ -1461,6 +1461,21 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
             break;
         }
 
+        case MediaCodec::CB_METRICS_FLUSHED:
+        {
+            sp<WrapperObject<std::unique_ptr<mediametrics::Item>>> metrics;
+            CHECK(msg->findObject("metrics", (sp<RefBase>*)&metrics));
+
+            // metrics should never be null. Not sure if checking it here adds any value.
+            if (metrics == nullptr) {
+                return;
+            }
+
+            mediametrics::Item *item = metrics->value.get();
+            obj = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+            break;
+        }
+
         default:
             TRESPASS();
     }

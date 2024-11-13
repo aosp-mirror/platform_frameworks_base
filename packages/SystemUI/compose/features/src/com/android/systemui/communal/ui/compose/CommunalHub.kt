@@ -807,7 +807,6 @@ private fun BoxScope.CommunalHubLazyGrid(
                 ) {
                     ResizeableItemFrameViewModel()
                 }
-
             if (viewModel.isEditMode && dragDropState != null) {
                 val isItemDragging = dragDropState.draggingItemKey == item.key
                 val outlineAlpha by

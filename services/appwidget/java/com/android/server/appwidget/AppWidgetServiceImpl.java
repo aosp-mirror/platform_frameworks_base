@@ -607,7 +607,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     // ... and see if these are hosts we've been awaiting.
                     // NOTE: We are backing up and restoring only the owner.
                     // TODO: http://b/22388012
-                    if (newPackageAdded && userId == mUserManager.getMainUser().getIdentifier()) {
+                    if (newPackageAdded && userId == UserHandle.USER_SYSTEM) {
                         final int uid = getUidForPackage(pkgName, userId);
                         if (uid >= 0 ) {
                             resolveHostUidLocked(pkgName, uid);

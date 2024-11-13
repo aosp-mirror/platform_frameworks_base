@@ -138,7 +138,7 @@ public class PipTransitionState {
 
     // pinned PiP task's WC token
     @Nullable
-    WindowContainerToken mPipTaskToken;
+    private WindowContainerToken mPipTaskToken;
 
     // pinned PiP task's leash
     @Nullable
@@ -302,6 +302,14 @@ public class PipTransitionState {
         mInSwipePipToHomeTransition = false;
         mSwipePipToHomeOverlay = null;
         mSwipePipToHomeAppBounds.setEmpty();
+    }
+
+    @Nullable WindowContainerToken getPipTaskToken() {
+        return mPipTaskToken;
+    }
+
+    public void setPipTaskToken(@Nullable WindowContainerToken token) {
+        mPipTaskToken = token;
     }
 
     @Nullable SurfaceControl getPinnedTaskLeash() {

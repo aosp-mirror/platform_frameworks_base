@@ -210,6 +210,7 @@ import android.app.Person;
 import android.app.RemoteInput;
 import android.app.RemoteInputHistoryItem;
 import android.app.StatsManager;
+import android.app.ZenBypassingApp;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupRestoreEventLogger;
 import android.app.job.JobScheduler;
@@ -360,6 +361,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -373,9 +377,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -489,7 +490,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private final NotificationChannel mParentChannel =
             new NotificationChannel(PARENT_CHANNEL_ID, "parentName", IMPORTANCE_DEFAULT);
     private final NotificationChannel mConversationChannel =
-            new NotificationChannel(CONVERSATION_CHANNEL_ID, "conversationName", IMPORTANCE_DEFAULT);
+            new NotificationChannel(
+                    CONVERSATION_CHANNEL_ID, "conversationName", IMPORTANCE_DEFAULT);
 
     private static final String PARENT_CHANNEL_ID = "parentChannelId";
     private static final String CONVERSATION_CHANNEL_ID = "conversationChannelId";
@@ -4296,8 +4298,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     new NotificationChannel("foo", "foo", IMPORTANCE_HIGH));
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
-        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, "testTvExtenderChannelOverride_onTv", 0,
-                generateNotificationRecord(null, tv).getNotification(), mUserId);
+        mBinderService.enqueueNotificationWithTag(
+                mPkg,
+                mPkg,
+                "testTvExtenderChannelOverride_onTv",
+                0,
+                generateNotificationRecord(null, tv).getNotification(),
+                mUserId);
         verify(mPreferencesHelper, times(1)).getConversationNotificationChannel(
                 anyString(), anyInt(), eq("foo"), eq(null), anyBoolean(), anyBoolean());
     }
@@ -4311,8 +4318,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel);
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
-        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, "testTvExtenderChannelOverride_notOnTv",
-                0, generateNotificationRecord(null, tv).getNotification(), mUserId);
+        mBinderService.enqueueNotificationWithTag(
+                mPkg,
+                mPkg,
+                "testTvExtenderChannelOverride_notOnTv",
+                0,
+                generateNotificationRecord(null, tv).getNotification(),
+                mUserId);
         verify(mPreferencesHelper, times(1)).getConversationNotificationChannel(
                 anyString(), anyInt(), eq(mTestNotificationChannel.getId()), eq(null),
                 anyBoolean(), anyBoolean());
@@ -7745,9 +7757,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.MessagingStyle("").addMessage(message2));
-        NotificationRecord recordB = new NotificationRecord(mContext, new StatusBarNotification(mPkg,
-                mPkg, 0, "tag", mUid, 0, nbB.build(), UserHandle.getUserHandleForUid(mUid), null, 0),
-                c);
+        NotificationRecord recordB =
+                new NotificationRecord(
+                        mContext,
+                        new StatusBarNotification(
+                                mPkg,
+                                mPkg,
+                                0,
+                                "tag",
+                                mUid,
+                                0,
+                                nbB.build(),
+                                UserHandle.getUserHandleForUid(mUid),
+                                null,
+                                0),
+                        c);
 
         // Update means we drop access to first
         reset(mUgmInternal);
@@ -13174,6 +13198,37 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void getPackagesBypassingDnd_blocked()
+            throws RemoteException, PackageManager.NameNotFoundException {
+
+        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel2 = new NotificationChannel("id3", "name3",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel3 = new NotificationChannel("id4", "name3",
+                NotificationManager.IMPORTANCE_MAX);
+        channel1.setBypassDnd(true);
+        channel2.setBypassDnd(true);
+        channel3.setBypassDnd(false);
+        // has DND access, so can set bypassDnd attribute
+        mService.mPreferencesHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true,
+                /*has DND access*/ true, UID_N_MR1, false);
+        mService.mPreferencesHelper.createNotificationChannel(PKG_P, UID_P, channel2, true, true,
+                UID_P, false);
+        mService.mPreferencesHelper.createNotificationChannel(PKG_P, UID_P, channel3, true, true,
+                UID_P, false);
+
+        when(mPackageManager.getPackageUid(eq(PKG_P), anyLong(), anyInt())).thenReturn(UID_P);
+        when(mPackageManager.getPackageUid(eq(PKG_N_MR1), anyLong(), anyInt()))
+                .thenReturn(UID_N_MR1);
+        when(mPermissionHelper.hasPermission(UID_N_MR1)).thenReturn(false);
+        when(mPermissionHelper.hasPermission(UID_P)).thenReturn(true);
+
+        assertThat(mBinderService.getPackagesBypassingDnd(UserHandle.getUserId(UID_P)).getList())
+                .containsExactly(new ZenBypassingApp(PKG_P, false));
+    }
+
+    @Test
     public void testGetNotificationChannelsBypassingDnd_blocked() throws RemoteException {
         mService.setPreferencesHelper(mPreferencesHelper);
 
@@ -13187,122 +13242,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testGetPackagesBypassingDnd_empty() throws RemoteException {
         mService.setPreferencesHelper(mPreferencesHelper);
-        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, true);
+        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId).getList();
         assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void testGetPackagesBypassingDnd_excludeConversationChannels() throws RemoteException {
-        mService.setPreferencesHelper(mPreferencesHelper);
-
-        // Set packages
-        PackageInfo pkg0 = new PackageInfo();
-        pkg0.packageName = "pkg0";
-        pkg0.applicationInfo = new ApplicationInfo();
-        pkg0.applicationInfo.uid = mUid;
-        PackageInfo pkg1 = new PackageInfo();
-        pkg1.packageName = "pkg1";
-        pkg1.applicationInfo = new ApplicationInfo();
-        pkg1.applicationInfo.uid = mUid;
-        PackageInfo pkg2 = new PackageInfo();
-        pkg2.packageName = "pkg2";
-        pkg2.applicationInfo = new ApplicationInfo();
-        pkg2.applicationInfo.uid = mUid;
-
-        when(mPackageManagerClient.getInstalledPackagesAsUser(0, mUserId))
-                .thenReturn(List.of(pkg0, pkg1, pkg2));
-
-        // Conversation channels
-        NotificationChannel nc0 = new NotificationChannel("id0", "id0",
-                NotificationManager.IMPORTANCE_HIGH);
-        nc0.setConversationId("parentChannel", "conversationId");
-
-        // Demoted conversation channel
-        NotificationChannel nc1 = new NotificationChannel("id1", "id1",
-                NotificationManager.IMPORTANCE_HIGH);
-        nc1.setConversationId("parentChannel", "conversationId");
-        nc1.setDemoted(true);
-
-        // Non-conversation channels
-        NotificationChannel nc2 = new NotificationChannel("id2", "id2",
-                NotificationManager.IMPORTANCE_HIGH);
-        NotificationChannel nc3 = new NotificationChannel("id3", "id3",
-                NotificationManager.IMPORTANCE_HIGH);
-
-        ParceledListSlice<NotificationChannel> pls0 =
-                new ParceledListSlice(ImmutableList.of(nc0));
-        ParceledListSlice<NotificationChannel> pls1 =
-                new ParceledListSlice(ImmutableList.of(nc1));
-        ParceledListSlice<NotificationChannel> pls2 =
-                new ParceledListSlice(ImmutableList.of(nc2, nc3));
-
-        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg0", mUid))
-                .thenReturn(pls0);
-        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg1", mUid))
-                .thenReturn(pls1);
-        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg2", mUid))
-                .thenReturn(pls2);
-
-        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, false);
-
-        assertThat(result).containsExactly("pkg1", "pkg2");
-    }
-
-    @Test
-    public void testGetPackagesBypassingDnd_includeConversationChannels() throws RemoteException {
-        mService.setPreferencesHelper(mPreferencesHelper);
-
-        // Set packages
-        PackageInfo pkg0 = new PackageInfo();
-        pkg0.packageName = "pkg0";
-        pkg0.applicationInfo = new ApplicationInfo();
-        pkg0.applicationInfo.uid = mUid;
-        PackageInfo pkg1 = new PackageInfo();
-        pkg1.packageName = "pkg1";
-        pkg1.applicationInfo = new ApplicationInfo();
-        pkg1.applicationInfo.uid = mUid;
-        PackageInfo pkg2 = new PackageInfo();
-        pkg2.packageName = "pkg2";
-        pkg2.applicationInfo = new ApplicationInfo();
-        pkg2.applicationInfo.uid = mUid;
-
-        when(mPackageManagerClient.getInstalledPackagesAsUser(0, mUserId))
-                .thenReturn(List.of(pkg0, pkg1, pkg2));
-
-        // Conversation channels
-        NotificationChannel nc0 = new NotificationChannel("id0", "id0",
-                NotificationManager.IMPORTANCE_HIGH);
-        nc0.setConversationId("parentChannel", "conversationId");
-
-        // Demoted conversation channel
-        NotificationChannel nc1 = new NotificationChannel("id1", "id1",
-                NotificationManager.IMPORTANCE_HIGH);
-        nc1.setConversationId("parentChannel", "conversationId");
-        nc1.setDemoted(true);
-
-        // Non-conversation channels
-        NotificationChannel nc2 = new NotificationChannel("id2", "id2",
-                NotificationManager.IMPORTANCE_HIGH);
-        NotificationChannel nc3 = new NotificationChannel("id3", "id3",
-                NotificationManager.IMPORTANCE_HIGH);
-
-        ParceledListSlice<NotificationChannel> pls0 =
-                new ParceledListSlice(ImmutableList.of(nc0));
-        ParceledListSlice<NotificationChannel> pls1 =
-                new ParceledListSlice(ImmutableList.of(nc1));
-        ParceledListSlice<NotificationChannel> pls2 =
-                new ParceledListSlice(ImmutableList.of(nc2, nc3));
-
-        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg0", mUid))
-                .thenReturn(pls0);
-        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg1", mUid))
-                .thenReturn(pls1);
-        when(mPreferencesHelper.getNotificationChannelsBypassingDnd("pkg2", mUid))
-                .thenReturn(pls2);
-
-        List<String> result = mBinderService.getPackagesBypassingDnd(mUserId, true);
-
-        assertThat(result).containsExactly("pkg0", "pkg1", "pkg2");
     }
 
     @Test
@@ -15482,8 +15423,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
             StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
                     i, null, false).getSbn();
-            mBinderService.enqueueNotificationWithTag(mPkg, mPkg, "testCannotPostNonUijWhenOverLimit",
-                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+            mBinderService.enqueueNotificationWithTag(
+                    mPkg,
+                    mPkg,
+                    "testCannotPostNonUijWhenOverLimit",
+                    sbn.getId(),
+                    sbn.getNotification(),
+                    sbn.getUserId());
             waitForIdle();
         }
 
@@ -16213,6 +16159,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         initNMS(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mInternalService.setDeviceEffectsApplier(mock(DeviceEffectsApplier.class));
+
+        mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START, mMainLooper);
         // No exception!
     }
 

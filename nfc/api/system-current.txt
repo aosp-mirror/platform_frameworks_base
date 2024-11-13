@@ -107,6 +107,7 @@ package android.nfc {
     method public void onRfDiscoveryStarted(boolean);
     method public void onRfFieldActivated(boolean);
     method public void onRoutingChanged();
+    method public void onRoutingTableFull();
     method public void onStateUpdated(int);
     method public void onTagConnected(boolean);
     method public void onTagDispatch(@NonNull java.util.function.Consumer<java.lang.Boolean>);

@@ -42,6 +42,7 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.SystemProperties
+import android.os.UserHandle
 import android.util.Size
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
@@ -1174,7 +1175,11 @@ class DesktopTasksController(
 
     private fun addWallpaperActivity(wct: WindowContainerTransaction) {
         logV("addWallpaperActivity")
-        val intent = Intent(context, DesktopWallpaperActivity::class.java)
+        val userHandle = UserHandle.of(userId)
+        val userContext =
+            context.createContextAsUser(userHandle, /* flags= */ 0)
+        val intent = Intent(userContext, DesktopWallpaperActivity::class.java)
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId)
         val options =
             ActivityOptions.makeBasic().apply {
                 launchWindowingMode = WINDOWING_MODE_FULLSCREEN
@@ -1182,11 +1187,13 @@ class DesktopTasksController(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
             }
         val pendingIntent =
-            PendingIntent.getActivity(
-                context,
-                /* requestCode = */ 0,
+            PendingIntent.getActivityAsUser(
+                userContext,
+                /* requestCode= */ 0,
                 intent,
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_IMMUTABLE,
+                /* bundle= */ null,
+                userHandle
             )
         wct.sendPendingIntent(pendingIntent, intent, options.toBundle())
     }

@@ -40,6 +40,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
+import com.android.systemui.keyboard.shortcut.defaultShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
@@ -47,7 +48,6 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
-import com.android.systemui.keyboard.shortcut.shortcutHelperCategoriesRepository
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcutsSource
@@ -71,7 +71,7 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class ShortcutHelperCategoriesRepositoryTest : SysuiTestCase() {
+class DefaultShortcutCategoriesRepositoryTest : SysuiTestCase() {
 
     private val fakeSystemSource = FakeKeyboardShortcutGroupsSource()
     private val fakeMultiTaskingSource = FakeKeyboardShortcutGroupsSource()
@@ -87,7 +87,7 @@ class ShortcutHelperCategoriesRepositoryTest : SysuiTestCase() {
             it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
         }
 
-    private val repo = kosmos.shortcutHelperCategoriesRepository
+    private val repo = kosmos.defaultShortcutCategoriesRepository
     private val helper = kosmos.shortcutHelperTestHelper
     private val testScope = kosmos.testScope
     private val fakeInputManager = kosmos.fakeInputManager
