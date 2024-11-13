@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.audio.Flags.FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE;
+import static android.media.audio.Flags.FLAG_SPEAKER_LAYOUT_API;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -545,6 +546,19 @@ public final class AudioDeviceInfo {
             counts[index++] = count;
         }
         return counts;
+    }
+
+    /**
+     * @return A ChannelMask representing the physical output speaker layout of the device.
+     *
+     * The layout channel mask only indicates which speaker channels are present, the
+     * physical layout of the speakers should be informed by a standard for multi-channel
+     * sound playback systems, such as ITU-R BS.2051.
+     * @see AudioFormat
+     */
+    @FlaggedApi(FLAG_SPEAKER_LAYOUT_API)
+    public int getSpeakerLayoutChannelMask() {
+        return mPort.speakerLayoutChannelMask();
     }
 
     /**
