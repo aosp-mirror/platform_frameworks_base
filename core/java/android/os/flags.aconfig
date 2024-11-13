@@ -225,3 +225,12 @@ flag {
      is_exported: true
      bug: "366598445"
 }
+
+flag {
+    name: "update_engine_api"
+    namespace: "art_mainline"
+    description: "Update Engine APIs for ART"
+    is_exported: true
+    is_fixed_read_only: true
+    bug: "377557749"
+}
