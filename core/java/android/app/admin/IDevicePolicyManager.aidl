@@ -375,6 +375,9 @@ interface IDevicePolicyManager {
     void setAutoTimeEnabled(in ComponentName who, String callerPackageName, boolean enabled);
     boolean getAutoTimeEnabled(in ComponentName who, String callerPackageName);
 
+    void setAutoTimePolicy(String callerPackageName, int policy);
+    int getAutoTimePolicy(String callerPackageName);
+
     void setAutoTimeZoneEnabled(in ComponentName who, String callerPackageName, boolean enabled);
     boolean getAutoTimeZoneEnabled(in ComponentName who, String callerPackageName);
 
