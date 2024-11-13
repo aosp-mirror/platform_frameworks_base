@@ -36,8 +36,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlin.math.max
 
 /** Encapsulates business logic for interacting with the UDFPS overlay. */
 @SysUISingleton
@@ -124,8 +126,9 @@ constructor(
         udfpsOverlayParams.map { params ->
             val sensorWidth = params.nativeSensorBounds.right - params.nativeSensorBounds.left
             val nativePadding = (sensorWidth - iconSize) / 2
-            (nativePadding * params.scaleFactor).toInt()
-        }
+            // padding can be negative when udfpsOverlayParams has not been initialized yet.
+            max(0, (nativePadding * params.scaleFactor).toInt())
+        }.distinctUntilChanged()
 
     companion object {
         private const val TAG = "UdfpsOverlayInteractor"
