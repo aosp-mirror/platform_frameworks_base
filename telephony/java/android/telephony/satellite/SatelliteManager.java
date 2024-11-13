@@ -746,7 +746,7 @@ public final class SatelliteManager {
      * @hide
      */
     public static final String ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED =
-            "android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED";
+            "android.telephony.satellite.action.SATELLITE_SUBSCRIBER_ID_LIST_CHANGED";
 
 
     /**
@@ -757,7 +757,7 @@ public final class SatelliteManager {
      * @hide
      */
     public static final String ACTION_SATELLITE_START_NON_EMERGENCY_SESSION =
-            "android.telephony.action.ACTION_SATELLITE_START_NON_EMERGENCY_SESSION";
+            "android.telephony.satellite.action.SATELLITE_START_NON_EMERGENCY_SESSION";
     /**
      * Meta-data represents whether the application supports P2P SMS over carrier roaming satellite
      * which needs manual trigger to connect to satellite. The messaging applications that supports
