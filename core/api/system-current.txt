@@ -7464,6 +7464,7 @@ package android.media {
   }
 
   public final class AudioPlaybackConfiguration implements android.os.Parcelable {
+    method @FlaggedApi("android.media.audio.routed_device_ids") @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceInfo> getAudioDeviceInfos();
     method public int getChannelMask();
     method public int getClientPid();
     method public int getClientUid();
