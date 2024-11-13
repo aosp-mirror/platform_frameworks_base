@@ -21,6 +21,7 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 
+import android.annotation.IntDef;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
@@ -41,6 +42,8 @@ import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.DateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -70,6 +73,23 @@ public class DateTimeView extends TextView {
     private static final int SHOW_TIME = 0;
     private static final int SHOW_MONTH_DAY_YEAR = 1;
 
+    /** @hide */
+    @IntDef(value = {UNIT_DISPLAY_LENGTH_SHORTEST, UNIT_DISPLAY_LENGTH_MEDIUM})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UnitDisplayLength {}
+    public static final int UNIT_DISPLAY_LENGTH_SHORTEST = 0;
+    public static final int UNIT_DISPLAY_LENGTH_MEDIUM = 1;
+
+    /** @hide */
+    @IntDef(flag = true, value = {DISAMBIGUATION_TEXT_PAST, DISAMBIGUATION_TEXT_FUTURE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DisambiguationTextMask {}
+    public static final int DISAMBIGUATION_TEXT_PAST = 0x01;
+    public static final int DISAMBIGUATION_TEXT_FUTURE = 0x02;
+
+    private final boolean mCanUseRelativeTimeDisplayConfigs =
+            android.view.flags.Flags.dateTimeViewRelativeTimeDisplayConfigs();
+
     private long mTimeMillis;
     // The LocalDateTime equivalent of mTimeMillis but truncated to minute, i.e. no seconds / nanos.
     private LocalDateTime mLocalTime;
@@ -81,6 +101,8 @@ public class DateTimeView extends TextView {
     private static final ThreadLocal<ReceiverInfo> sReceiverInfo = new ThreadLocal<ReceiverInfo>();
     private String mNowText;
     private boolean mShowRelativeTime;
+    private int mRelativeTimeDisambiguationTextMask;
+    private int mRelativeTimeUnitDisplayLength = UNIT_DISPLAY_LENGTH_SHORTEST;
 
     public DateTimeView(Context context) {
         this(context, null);
@@ -89,20 +111,23 @@ public class DateTimeView extends TextView {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public DateTimeView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        final TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.DateTimeView, 0,
-                0);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.DateTimeView, 0, 0);
 
-        final int N = a.getIndexCount();
-        for (int i = 0; i < N; i++) {
-            int attr = a.getIndex(i);
-            switch (attr) {
-                case R.styleable.DateTimeView_showRelative:
-                    boolean relative = a.getBoolean(i, false);
-                    setShowRelativeTime(relative);
-                    break;
-            }
+        setShowRelativeTime(a.getBoolean(R.styleable.DateTimeView_showRelative, false));
+        if (mCanUseRelativeTimeDisplayConfigs) {
+            setRelativeTimeDisambiguationTextMask(
+                    a.getInt(
+                            R.styleable.DateTimeView_relativeTimeDisambiguationText,
+                            // The original implementation showed disambiguation text for future
+                            // times only, so continue with that default.
+                            DISAMBIGUATION_TEXT_FUTURE));
+            setRelativeTimeUnitDisplayLength(
+                    a.getInt(
+                            R.styleable.DateTimeView_relativeTimeUnitDisplayLength,
+                            UNIT_DISPLAY_LENGTH_SHORTEST));
         }
+
         a.recycle();
     }
 
@@ -146,6 +171,29 @@ public class DateTimeView extends TextView {
     @android.view.RemotableViewMethod
     public void setShowRelativeTime(boolean showRelativeTime) {
         mShowRelativeTime = showRelativeTime;
+        updateNowText();
+        update();
+    }
+
+    /** See {@link R.styleable.DateTimeView_relativeTimeDisambiguationText}. */
+    @android.view.RemotableViewMethod
+    public void setRelativeTimeDisambiguationTextMask(
+            @DisambiguationTextMask int disambiguationTextMask) {
+        if (!mCanUseRelativeTimeDisplayConfigs) {
+            return;
+        }
+        mRelativeTimeDisambiguationTextMask = disambiguationTextMask;
+        updateNowText();
+        update();
+    }
+
+    /** See {@link R.styleable.DateTimeView_relativeTimeUnitDisplayLength}. */
+    @android.view.RemotableViewMethod
+    public void setRelativeTimeUnitDisplayLength(@UnitDisplayLength int unitDisplayLength) {
+        if (!mCanUseRelativeTimeDisplayConfigs) {
+            return;
+        }
+        mRelativeTimeUnitDisplayLength = unitDisplayLength;
         updateNowText();
         update();
     }
@@ -264,17 +312,11 @@ public class DateTimeView extends TextView {
             return;
         } else if (duration < HOUR_IN_MILLIS) {
             count = (int)(duration / MINUTE_IN_MILLIS);
-            result = getContext().getResources().getString(past
-                    ? com.android.internal.R.string.duration_minutes_shortest
-                    : com.android.internal.R.string.duration_minutes_shortest_future,
-                    count);
+            result = getContext().getResources().getString(getMinutesStringId(past), count);
             millisIncrease = MINUTE_IN_MILLIS;
         } else if (duration < DAY_IN_MILLIS) {
             count = (int)(duration / HOUR_IN_MILLIS);
-            result = getContext().getResources().getString(past
-                            ? com.android.internal.R.string.duration_hours_shortest
-                            : com.android.internal.R.string.duration_hours_shortest_future,
-                            count);
+            result = getContext().getResources().getString(getHoursStringId(past), count);
             millisIncrease = HOUR_IN_MILLIS;
         } else if (duration < YEAR_IN_MILLIS) {
             // In weird cases it can become 0 because of daylight savings
@@ -283,10 +325,7 @@ public class DateTimeView extends TextView {
             LocalDateTime localNow = toLocalDateTime(now, zoneId);
 
             count = Math.max(Math.abs(dayDistance(localDateTime, localNow)), 1);
-            result = getContext().getResources().getString(past
-                    ? com.android.internal.R.string.duration_days_shortest
-                    : com.android.internal.R.string.duration_days_shortest_future,
-                    count);
+            result = getContext().getResources().getString(getDaysStringId(past), count);
             if (past || count != 1) {
                 mUpdateTimeMillis = computeNextMidnight(localNow, zoneId);
                 millisIncrease = -1;
@@ -296,10 +335,7 @@ public class DateTimeView extends TextView {
 
         } else {
             count = (int)(duration / YEAR_IN_MILLIS);
-            result = getContext().getResources().getString(past
-                    ? com.android.internal.R.string.duration_years_shortest
-                    : com.android.internal.R.string.duration_years_shortest_future,
-                    count);
+            result = getContext().getResources().getString(getYearsStringId(past), count);
             millisIncrease = YEAR_IN_MILLIS;
         }
         if (millisIncrease != -1) {
@@ -310,6 +346,139 @@ public class DateTimeView extends TextView {
             }
         }
         maybeSetText(result);
+    }
+
+    private int getMinutesStringId(boolean past) {
+        if (!mCanUseRelativeTimeDisplayConfigs) {
+            return past
+                    ? com.android.internal.R.string.duration_minutes_shortest
+                    : com.android.internal.R.string.duration_minutes_shortest_future;
+        }
+
+        if (mRelativeTimeUnitDisplayLength == UNIT_DISPLAY_LENGTH_SHORTEST) {
+            if (past && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_PAST) != 0) {
+                // "1m ago"
+                return com.android.internal.R.string.duration_minutes_shortest_past;
+            } else if (!past
+                    && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_FUTURE) != 0) {
+                // "in 1m"
+                return com.android.internal.R.string.duration_minutes_shortest_future;
+            } else {
+                // "1m"
+                return com.android.internal.R.string.duration_minutes_shortest;
+            }
+        } else { // UNIT_DISPLAY_LENGTH_MEDIUM
+            if (past && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_PAST) != 0) {
+                // "1min ago"
+                return com.android.internal.R.string.duration_minutes_medium_past;
+            } else if (!past
+                    && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_FUTURE) != 0) {
+                // "in 1min"
+                return com.android.internal.R.string.duration_minutes_medium_future;
+            } else {
+                // "1min"
+                return com.android.internal.R.string.duration_minutes_medium;
+            }
+        }
+    }
+
+    private int getHoursStringId(boolean past) {
+        if (!mCanUseRelativeTimeDisplayConfigs) {
+            return past
+                    ? com.android.internal.R.string.duration_hours_shortest
+                    : com.android.internal.R.string.duration_hours_shortest_future;
+        }
+        if (mRelativeTimeUnitDisplayLength == UNIT_DISPLAY_LENGTH_SHORTEST) {
+            if (past && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_PAST) != 0) {
+                // "1h ago"
+                return com.android.internal.R.string.duration_hours_shortest_past;
+            } else if (!past
+                    && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_FUTURE) != 0) {
+                // "in 1h"
+                return com.android.internal.R.string.duration_hours_shortest_future;
+            } else {
+                // "1h"
+                return com.android.internal.R.string.duration_hours_shortest;
+            }
+        } else { // UNIT_DISPLAY_LENGTH_MEDIUM
+            if (past && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_PAST) != 0) {
+                // "1hr ago"
+                return com.android.internal.R.string.duration_hours_medium_past;
+            } else if (!past
+                    && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_FUTURE) != 0) {
+                // "in 1hr"
+                return com.android.internal.R.string.duration_hours_medium_future;
+            } else {
+                // "1hr"
+                return com.android.internal.R.string.duration_hours_medium;
+            }
+        }
+    }
+
+    private int getDaysStringId(boolean past) {
+        if (!mCanUseRelativeTimeDisplayConfigs) {
+            return past
+                    ? com.android.internal.R.string.duration_days_shortest
+                    : com.android.internal.R.string.duration_days_shortest_future;
+        }
+        if (mRelativeTimeUnitDisplayLength == UNIT_DISPLAY_LENGTH_SHORTEST) {
+            if (past && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_PAST) != 0) {
+                // "1d ago"
+                return com.android.internal.R.string.duration_days_shortest_past;
+            } else if (!past
+                    && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_FUTURE) != 0) {
+                // "in 1d"
+                return com.android.internal.R.string.duration_days_shortest_future;
+            } else {
+                // "1d"
+                return com.android.internal.R.string.duration_days_shortest;
+            }
+        } else { // UNIT_DISPLAY_LENGTH_MEDIUM
+            if (past && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_PAST) != 0) {
+                // "1d ago"
+                return com.android.internal.R.string.duration_days_medium_past;
+            } else if (!past
+                    && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_FUTURE) != 0) {
+                // "in 1d"
+                return com.android.internal.R.string.duration_days_medium_future;
+            } else {
+                // "1d"
+                return com.android.internal.R.string.duration_days_medium;
+            }
+        }
+    }
+
+    private int getYearsStringId(boolean past) {
+        if (!mCanUseRelativeTimeDisplayConfigs) {
+            return past
+                    ? com.android.internal.R.string.duration_years_shortest
+                    : com.android.internal.R.string.duration_years_shortest_future;
+        }
+        if (mRelativeTimeUnitDisplayLength == UNIT_DISPLAY_LENGTH_SHORTEST) {
+            if (past && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_PAST) != 0) {
+                // "1y ago"
+                return com.android.internal.R.string.duration_years_shortest_past;
+            } else if (!past
+                    && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_FUTURE) != 0) {
+                // "in 1y"
+                return com.android.internal.R.string.duration_years_shortest_future;
+            } else {
+                // "1y"
+                return com.android.internal.R.string.duration_years_shortest;
+            }
+        } else { // UNIT_DISPLAY_LENGTH_MEDIUM
+            if (past && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_PAST) != 0) {
+                // "1y ago"
+                return com.android.internal.R.string.duration_years_medium_past;
+            } else if (!past
+                    && (mRelativeTimeDisambiguationTextMask & DISAMBIGUATION_TEXT_FUTURE) != 0) {
+                // "in 1y"
+                return com.android.internal.R.string.duration_years_medium_future;
+            } else {
+                // "1y"
+                return com.android.internal.R.string.duration_years_medium;
+            }
+        }
     }
 
     /**

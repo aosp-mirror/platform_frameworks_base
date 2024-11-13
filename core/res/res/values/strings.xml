@@ -3135,6 +3135,86 @@
         in <xliff:g id="count">%d</xliff:g>y
     </string>
 
+    <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_minutes_shortest_past">
+        <xliff:g id="count">%d</xliff:g>m ago
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_hours_shortest_past">
+        <xliff:g id="count">%d</xliff:g>h ago
+    </string>
+
+    <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_days_shortest_past">
+        <xliff:g example="1" id="count">%d</xliff:g>d ago
+    </string>
+
+    <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_years_shortest_past">
+        <xliff:g id="count">%d</xliff:g>y ago
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_minutes_medium">
+        <xliff:g id="count">%d</xliff:g>min
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_hours_medium">
+        <xliff:g id="count">%d</xliff:g>hr
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_days_medium">
+       <xliff:g id="count">%d</xliff:g>d
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_years_medium">
+        <xliff:g id="count">%d</xliff:g>yr
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_minutes_medium_future">
+        in <xliff:g id="count">%d</xliff:g>min
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_hours_medium_future">
+        in <xliff:g id="count">%d</xliff:g>hr
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_days_medium_future">
+        in <xliff:g example="1" id="count">%d</xliff:g>d
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_years_medium_future">
+        in <xliff:g id="count">%d</xliff:g>yr
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_minutes_medium_past">
+        <xliff:g id="count">%d</xliff:g>min ago
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_hours_medium_past">
+        <xliff:g id="count">%d</xliff:g>hr ago
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_days_medium_past">
+        <xliff:g example="1" id="count">%d</xliff:g>d ago
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_years_medium_past">
+        <xliff:g id="count">%d</xliff:g>yr ago
+    </string>
+
     <!-- Phrase describing a relative time using minutes in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
     <string name="duration_minutes_relative">{count, plural,
         =1 {# minute ago}

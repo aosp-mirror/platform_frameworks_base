@@ -3359,6 +3359,23 @@
   <java-symbol type="string" name="duration_hours_shortest_future" />
   <java-symbol type="string" name="duration_days_shortest_future" />
   <java-symbol type="string" name="duration_years_shortest_future" />
+  <java-symbol type="string" name="duration_minutes_shortest_past" />
+  <java-symbol type="string" name="duration_hours_shortest_past" />
+  <java-symbol type="string" name="duration_days_shortest_past" />
+  <java-symbol type="string" name="duration_years_shortest_past" />
+
+  <java-symbol type="string" name="duration_minutes_medium" />
+  <java-symbol type="string" name="duration_hours_medium" />
+  <java-symbol type="string" name="duration_days_medium" />
+  <java-symbol type="string" name="duration_years_medium" />
+  <java-symbol type="string" name="duration_minutes_medium_future" />
+  <java-symbol type="string" name="duration_hours_medium_future" />
+  <java-symbol type="string" name="duration_days_medium_future" />
+  <java-symbol type="string" name="duration_years_medium_future" />
+  <java-symbol type="string" name="duration_minutes_medium_past" />
+  <java-symbol type="string" name="duration_hours_medium_past" />
+  <java-symbol type="string" name="duration_days_medium_past" />
+  <java-symbol type="string" name="duration_years_medium_past" />
 
   <java-symbol type="string" name="duration_minutes_relative" />
   <java-symbol type="string" name="duration_hours_relative" />

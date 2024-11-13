@@ -192,10 +192,14 @@ object OngoingActivityChipBinder {
             }
             is OngoingActivityChipModel.Shown.ShortTimeDelta -> {
                 chipShortTimeDeltaView.setTime(chipModel.time)
-                // TODO(b/364653005): DateTimeView's relative time doesn't quite match the format we
-                //  want in the status bar chips.
-                chipShortTimeDeltaView.isShowRelativeTime = true
                 chipShortTimeDeltaView.visibility = View.VISIBLE
+                chipShortTimeDeltaView.isShowRelativeTime = true
+                chipShortTimeDeltaView.setRelativeTimeDisambiguationTextMask(
+                    DateTimeView.DISAMBIGUATION_TEXT_PAST
+                )
+                chipShortTimeDeltaView.setRelativeTimeUnitDisplayLength(
+                    DateTimeView.UNIT_DISPLAY_LENGTH_MEDIUM
+                )
 
                 chipTextView.visibility = View.GONE
                 chipTimeView.hide()

@@ -69,6 +69,141 @@ public class DateTimeViewTest {
         Assert.assertFalse(dateTimeView.wasLayoutRequested());
     }
 
+    @UiThreadTest
+    @Test
+    public void disambiguationTextMask_none_noPastOrFutureDisambiguationText() {
+        final TestDateTimeView dateTimeView = new TestDateTimeView();
+        dateTimeView.setShowRelativeTime(true);
+        dateTimeView.setRelativeTimeDisambiguationTextMask(0);
+
+        // Minutes
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofMinutes(8).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("in"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofMinutes(8).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("ago"));
+
+        // Hours
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofHours(4).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("in"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofHours(4).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("ago"));
+
+        // Days
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofDays(14).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("in"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofDays(14).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("ago"));
+
+        // Years
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofDays(400).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("in"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofDays(400).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("ago"));
+    }
+
+    @UiThreadTest
+    @Test
+    public void disambiguationTextMask_bothPastAndFuture_usesPastAndFutureDisambiguationText() {
+        final TestDateTimeView dateTimeView = new TestDateTimeView();
+        dateTimeView.setShowRelativeTime(true);
+        dateTimeView.setRelativeTimeDisambiguationTextMask(
+                DateTimeView.DISAMBIGUATION_TEXT_PAST | DateTimeView.DISAMBIGUATION_TEXT_FUTURE);
+
+        // Minutes
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofMinutes(8).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("in"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofMinutes(8).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("ago"));
+
+        // Hours
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofHours(4).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("in"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofHours(4).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("ago"));
+
+        // Days
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofDays(14).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("in"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofDays(14).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("ago"));
+
+        // Years
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofDays(400).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("in"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofDays(400).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("ago"));
+    }
+
+    @UiThreadTest
+    @Test
+    public void unitDisplayLength_shortest_noMediumText() {
+        final TestDateTimeView dateTimeView = new TestDateTimeView();
+        dateTimeView.setShowRelativeTime(true);
+        dateTimeView.setRelativeTimeUnitDisplayLength(DateTimeView.UNIT_DISPLAY_LENGTH_SHORTEST);
+
+        // Minutes
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofMinutes(8).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("min"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofMinutes(8).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("min"));
+
+        // Hours
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofHours(4).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("hr"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofHours(4).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("hr"));
+
+        // Days excluded because the string is the same for both shortest length and medium length
+
+        // Years
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofDays(400).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("yr"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofDays(400).toMillis());
+        Assert.assertFalse(dateTimeView.getText().toString().contains("yr"));
+    }
+
+    @UiThreadTest
+    @Test
+    public void unitDisplayLength_medium_usesMediumText() {
+        final TestDateTimeView dateTimeView = new TestDateTimeView();
+        dateTimeView.setShowRelativeTime(true);
+        dateTimeView.setRelativeTimeUnitDisplayLength(DateTimeView.UNIT_DISPLAY_LENGTH_MEDIUM);
+
+        // Minutes
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofMinutes(8).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("min"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofMinutes(8).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("min"));
+
+        // Hours
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofHours(4).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("hr"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofHours(4).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("hr"));
+
+        // Days excluded because the string is the same for both shortest length and medium length
+
+        // Years
+        dateTimeView.setTime(System.currentTimeMillis() + Duration.ofDays(400).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("yr"));
+
+        dateTimeView.setTime(System.currentTimeMillis() - Duration.ofDays(400).toMillis());
+        Assert.assertTrue(dateTimeView.getText().toString().contains("yr"));
+    }
+
     private static class TestDateTimeView extends DateTimeView {
         private boolean mRequestedLayout = false;
 
