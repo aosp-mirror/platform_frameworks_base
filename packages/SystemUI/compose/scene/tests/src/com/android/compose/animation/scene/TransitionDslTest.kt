@@ -22,17 +22,22 @@ import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.ui.unit.IntSize
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.transformation.CustomSizeTransformation
 import com.android.compose.animation.scene.transformation.OverscrollTranslate
+import com.android.compose.animation.scene.transformation.PropertyTransformationScope
 import com.android.compose.animation.scene.transformation.TransformationRange
 import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.test.transition
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -341,6 +346,33 @@ class TransitionDslTest {
         val transition = aToB()
         state.startTransitionImmediately(animationScope = backgroundScope, transition)
         assertThat(transitionPassedToBuilder).isSameInstanceAs(transition)
+    }
+
+    @Test
+    fun customTransitionsAreNotSupportedInRanges() = runTest {
+        val transitions = transitions {
+            from(SceneA, to = SceneB) {
+                fractionRange {
+                    transformation(
+                        object : CustomSizeTransformation {
+                            override val matcher: ElementMatcher = TestElements.Foo
+
+                            override fun PropertyTransformationScope.transform(
+                                content: ContentKey,
+                                element: ElementKey,
+                                transition: TransitionState.Transition,
+                                transitionScope: CoroutineScope,
+                            ): IntSize = IntSize.Zero
+                        }
+                    )
+                }
+            }
+        }
+
+        val state = MutableSceneTransitionLayoutState(SceneA, transitions)
+        assertThrows(IllegalStateException::class.java) {
+            runBlocking { state.startTransition(transition(from = SceneA, to = SceneB)) }
+        }
     }
 
     companion object {

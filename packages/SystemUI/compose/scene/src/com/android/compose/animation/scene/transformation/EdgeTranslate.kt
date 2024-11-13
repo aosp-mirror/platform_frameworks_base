@@ -28,7 +28,7 @@ internal class EdgeTranslate(
     override val matcher: ElementMatcher,
     private val edge: Edge,
     private val startsOutsideLayoutBounds: Boolean = true,
-) : PropertyTransformation<Offset> {
+) : InterpolatedOffsetTransformation {
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

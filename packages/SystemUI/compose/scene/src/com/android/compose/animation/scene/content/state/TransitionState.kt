@@ -35,6 +35,8 @@ import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransformationSpec
 import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 /** The state associated to a [SceneTransitionLayout] at some specific point in time. */
@@ -279,8 +281,24 @@ sealed interface TransitionState {
          */
         private var interruptionDecay: Animatable<Float, AnimationVector1D>? = null
 
-        /** Whether this transition was already started. */
-        private var wasStarted = false
+        /**
+         * The coroutine scope associated to this transition.
+         *
+         * This coroutine scope can be used to launch animations associated to this transition,
+         * which will not finish until at least one animation/job is still running in the scope.
+         *
+         * Important: Make sure to never launch long-running jobs in this scope, otherwise the
+         * transition will never be considered as finished.
+         */
+        internal val coroutineScope: CoroutineScope
+            get() =
+                _coroutineScope
+                    ?: error(
+                        "Transition.coroutineScope can only be accessed once the transition was " +
+                            "started "
+                    )
+
+        private var _coroutineScope: CoroutineScope? = null
 
         init {
             check(fromContent != toContent)
@@ -341,10 +359,11 @@ sealed interface TransitionState {
         abstract fun freezeAndAnimateToCurrentState()
 
         internal suspend fun runInternal() {
-            check(!wasStarted) { "A Transition can be started only once." }
-            wasStarted = true
-
-            run()
+            check(_coroutineScope == null) { "A Transition can be started only once." }
+            coroutineScope {
+                _coroutineScope = this
+                run()
+            }
         }
 
         internal fun updateOverscrollSpecs(
