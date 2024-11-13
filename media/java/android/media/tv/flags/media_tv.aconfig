@@ -2,6 +2,14 @@ package: "android.media.tv.flags"
 container: "system"
 
 flag {
+    name: "enable_le_audio_broadcast_ui"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Enable Broadcast UI for LE Audio on TV."
+    bug: "378732734"
+}
+
+flag {
     name: "enable_le_audio_unicast_ui"
     is_exported: true
     namespace: "media_tv"
