@@ -46,7 +46,6 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
-import com.android.server.integrity.model.RuleMetadata;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;

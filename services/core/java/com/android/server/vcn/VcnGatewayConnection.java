@@ -1263,7 +1263,7 @@ public class VcnGatewayConnection extends StateMachine {
         final PersistableBundleWrapper carrierConfig = snapshot.getCarrierConfigForSubGrp(subGrp);
         int resultSeconds = defaultSeconds;
 
-        if (vcnContext.isFlagSafeModeTimeoutConfigEnabled() && carrierConfig != null) {
+        if (carrierConfig != null) {
             resultSeconds =
                     carrierConfig.getInt(
                             VcnManager.VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY, defaultSeconds);

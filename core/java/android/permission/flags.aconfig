@@ -213,3 +213,21 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "replace_body_sensor_permission_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "android_health_services"
+    description: "Enables replacement of BODY_SENSORS/BODY_SENSORS_BACKGROUND permissions with granular health permissions READ_HEART_RATE, READ_SKIN_TEMPERATURE, READ_OXYGEN_SATURATION, and READ_HEALTH_DATA_IN_BACKGROUND"
+    bug: "364638912"
+}
+
+flag {
+    name: "ranging_permission_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "uwb"
+    description: "This fixed read-only flag is used to enable new ranging permission for all ranging use cases."
+    bug: "370977414"
+}

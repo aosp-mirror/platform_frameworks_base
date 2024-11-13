@@ -39,6 +39,7 @@ import android.aconfigd.Aconfigd.StorageRequestMessages;
 import android.aconfigd.Aconfigd.StorageReturnMessage;
 import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
+import static com.android.aconfig.flags.Flags.enableSystemAconfigdRust;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -391,9 +392,11 @@ public class SettingsToPropertiesMapper {
     static ProtoInputStream sendAconfigdRequests(ProtoOutputStream requests) {
         // connect to aconfigd socket
         LocalSocket client = new LocalSocket();
-        try{
+        String socketName = enableSystemAconfigdRust()
+                    ? "aconfigd_system" : "aconfigd";
+        try {
             client.connect(new LocalSocketAddress(
-                "aconfigd", LocalSocketAddress.Namespace.RESERVED));
+                socketName, LocalSocketAddress.Namespace.RESERVED));
             Slog.d(TAG, "connected to aconfigd socket");
         } catch (IOException ioe) {
             logErr("failed to connect to aconfigd socket", ioe);
