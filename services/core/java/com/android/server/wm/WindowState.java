@@ -213,6 +213,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
@@ -792,6 +793,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
     private final List<DrawHandler> mDrawHandlers = new ArrayList<>();
+
+    /**
+     * Indicates whether inset animations are currently running within the Window.
+     * This value is used by (@link com.android.server.wm.RefreshRatePolicy.java)
+     * to omit setting a frame rate on the WindowState. Insets Animation is unique in that
+     * sense that an app might drive an insets animation for a Window owned by a different
+     * app (such as IME). In that case, we need the app that drives the insets animation
+     * to be able to vote for high refresh rate from VRI.
+     */
+    private boolean mInsetsAnimationRunning;
 
     private final Consumer<SurfaceControl.Transaction> mSeamlessRotationFinishedConsumer = t -> {
         finishSeamlessRotation(t);
@@ -6190,5 +6201,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mDisplayContent.refreshImeSecureFlag(getSyncTransaction());
         }
         mWmService.scheduleAnimationLocked();
+    }
+
+    void notifyInsetsAnimationRunningStateChanged(boolean running) {
+        if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.instant(TRACE_TAG_WINDOW_MANAGER,
+                    TextUtils.formatSimple("%s: notifyInsetsAnimationRunningStateChanged(%s)",
+                    getName(),
+                    Boolean.toString(running)));
+        }
+        mInsetsAnimationRunning = running;
+        mWmService.scheduleAnimationLocked();
+    }
+
+    boolean isInsetsAnimationRunning() {
+        return mInsetsAnimationRunning;
     }
 }
