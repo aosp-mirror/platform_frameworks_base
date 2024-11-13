@@ -9004,26 +9004,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-
-        CallerIdentity caller;
-        if (Flags.setAutoTimeEnabledCoexistence()) {
-            caller = getCallerIdentity(who, callerPackageName);
-        } else {
-            caller = getCallerIdentity(who);
-        }
-
-        if (Flags.setAutoTimeEnabledCoexistence()) {
-            // The effect of this policy is device-wide.
-            enforcePermission(SET_TIME, caller.getPackageName(), UserHandle.USER_ALL);
-        } else {
-            Objects.requireNonNull(who, "ComponentName is null");
-            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
-                    || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
-                    caller));
-        }
+        CallerIdentity caller = getCallerIdentity(who);
+        Objects.requireNonNull(who, "ComponentName is null");
+        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
+                caller));
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsGlobalPutInt(Settings.Global.AUTO_TIME, enabled ? 1 : 0));
-
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_AUTO_TIME)
                 .setAdmin(caller.getPackageName())
@@ -9039,23 +9026,74 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        CallerIdentity caller;
-        if (Flags.setAutoTimeEnabledCoexistence()) {
-            caller = getCallerIdentity(who, callerPackageName);
-        } else {
-            caller = getCallerIdentity(who);
-        }
+        CallerIdentity caller = getCallerIdentity(who);
 
-        if (Flags.setAutoTimeEnabledCoexistence()) {
-            enforceCanQuery(SET_TIME, caller.getPackageName(), UserHandle.USER_ALL);
-        } else {
-            Objects.requireNonNull(who, "ComponentName is null");
-            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
-                    || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
-                    caller));
-        }
+        Objects.requireNonNull(who, "ComponentName is null");
+        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) > 0;
+    }
+
+    /**
+     * Set whether auto time is enabled on the device.
+     */
+    @Override
+    public void setAutoTimePolicy(String callerPackageName, int policy) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        final Set<Integer> allowedValues =
+                Set.of(
+                        DevicePolicyManager.AUTO_TIME_ENABLED,
+                        DevicePolicyManager.AUTO_TIME_DISABLED,
+                        DevicePolicyManager.AUTO_TIME_NOT_CONTROLLED_BY_POLICY);
+        Preconditions.checkArgument(
+                allowedValues.contains(policy), "Provided mode is not one of the allowed values.");
+
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        // The effect of this policy is device-wide.
+        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                /* who */ null,
+                SET_TIME,
+                caller.getPackageName(),
+                UserHandle.USER_ALL
+        );
+        if (policy == DevicePolicyManager.AUTO_TIME_NOT_CONTROLLED_BY_POLICY) {
+            mDevicePolicyEngine.removeGlobalPolicy(PolicyDefinition.AUTO_TIME, enforcingAdmin);
+        } else {
+            mDevicePolicyEngine.setGlobalPolicy(
+                    PolicyDefinition.AUTO_TIME,
+                    enforcingAdmin,
+                    new IntegerPolicyValue(policy));
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.SET_AUTO_TIME)
+                    .setAdmin(caller.getPackageName())
+                    .setBoolean(policy == DevicePolicyManager.AUTO_TIME_ENABLED)
+                    .write();
+        }
+    }
+
+    /**
+     * Returns whether auto time is used on the device or not.
+     */
+    @Override
+    public int getAutoTimePolicy(String callerPackageName) {
+        if (!mHasFeature) {
+            return DevicePolicyManager.AUTO_TIME_NOT_CONTROLLED_BY_POLICY;
+        }
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        // The effect of this policy is device-wide.
+        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                /* who */ null,
+                SET_TIME,
+                caller.getPackageName(),
+                UserHandle.USER_ALL
+        );
+        Integer state = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
+                PolicyDefinition.AUTO_TIME, enforcingAdmin);
+        return state != null ? state : DevicePolicyManager.AUTO_TIME_NOT_CONTROLLED_BY_POLICY;
     }
 
     /**
@@ -9068,35 +9106,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        CallerIdentity caller;
-        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
-            caller = getCallerIdentity(who, callerPackageName);
-        } else {
-            caller = getCallerIdentity(who);
-        }
+        CallerIdentity caller = getCallerIdentity(who);
 
-        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
-            // The effect of this policy is device-wide.
-            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                    who,
-                    SET_TIME_ZONE,
-                    caller.getPackageName(),
-                    UserHandle.USER_ALL
-            );
-            mDevicePolicyEngine.setGlobalPolicy(
-                    PolicyDefinition.AUTO_TIMEZONE,
-                    // TODO(b/260573124): add correct enforcing admin when permission changes are
-                    //  merged.
-                    enforcingAdmin,
-                    new BooleanPolicyValue(enabled));
-        } else {
-            Objects.requireNonNull(who, "ComponentName is null");
-            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
-                    || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
-                    caller));
-            mInjector.binderWithCleanCallingIdentity(() ->
-                    mInjector.settingsGlobalPutInt(Global.AUTO_TIME_ZONE, enabled ? 1 : 0));
-        }
+        Objects.requireNonNull(who, "ComponentName is null");
+        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
+                caller));
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsGlobalPutInt(Global.AUTO_TIME_ZONE, enabled ? 1 : 0));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_AUTO_TIME_ZONE)
@@ -9114,24 +9131,68 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
-        CallerIdentity caller;
-        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
-            caller = getCallerIdentity(who, callerPackageName);
-        } else {
-            caller = getCallerIdentity(who);
-        }
-
-        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
-            // The effect of this policy is device-wide.
-            enforceCanQuery(SET_TIME_ZONE, caller.getPackageName(), UserHandle.USER_ALL);
-        } else {
-            Objects.requireNonNull(who, "ComponentName is null");
-            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
-                    || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
-                    caller));
-        }
-
+        CallerIdentity caller = getCallerIdentity(who);
+        Objects.requireNonNull(who, "ComponentName is null");
+        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
+                caller));
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) > 0;
+    }
+
+    /**
+     * Set auto time zone state.
+     */
+    public void setAutoTimeZonePolicy(String callerPackageName, int policy) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        // The effect of this policy is device-wide.
+        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                /* who */ null,
+                SET_TIME_ZONE,
+                caller.getPackageName(),
+                UserHandle.USER_ALL
+        );
+
+        if (policy != DevicePolicyManager.AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY) {
+            mDevicePolicyEngine.setGlobalPolicy(
+                    PolicyDefinition.AUTO_TIME_ZONE,
+                    enforcingAdmin,
+                    new IntegerPolicyValue(policy));
+
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.SET_AUTO_TIME_ZONE)
+                    .setAdmin(caller.getPackageName())
+                    .setBoolean(policy == DevicePolicyManager.AUTO_TIME_ZONE_ENABLED)
+                    .write();
+        } else {
+            mDevicePolicyEngine.removeGlobalPolicy(
+                    PolicyDefinition.AUTO_TIME_ZONE,
+                    enforcingAdmin);
+        }
+    }
+
+    /**
+     * Returns whether auto time zone is used on the device or not.
+     */
+    @Override
+    public int getAutoTimeZonePolicy(String callerPackageName) {
+        if (!mHasFeature) {
+            return DevicePolicyManager.AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY;
+        }
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        // The effect of this policy is device-wide.
+        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                /* who */ null,
+                SET_TIME_ZONE,
+                caller.getPackageName(),
+                UserHandle.USER_ALL
+        );
+        Integer state = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
+                PolicyDefinition.AUTO_TIME_ZONE, enforcingAdmin);
+        return state != null ? state : DevicePolicyManager.AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY;
     }
 
     // TODO (b/137101239): remove this method in follow-up CL
@@ -21030,6 +21091,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public boolean removeManagedProfile(int userId) {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        if (!isManagedProfile(userId)){
+            throw new IllegalArgumentException("Cannot remove user as it is not a managed profile");
+        }
+
+        boolean success = false;
+        final long identity = Binder.clearCallingIdentity();
+        try{
+            success = mUserManager.removeUserEvenWhenDisallowed(userId);
+        } catch (Exception e) {
+            Slogf.e(LOG_TAG, "Remove managed profile failed due to: ", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return success;
+    }
+
+    @Override
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams,
             @NonNull String callerPackage) {
@@ -23765,9 +23847,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     Slogf.i(LOG_TAG,
                             "Started device policies migration to the device policy engine.");
                     // TODO(b/359188869): Move this to the current migration method.
-                    if (Flags.setAutoTimeZoneEnabledCoexistence()) {
-                        migrateAutoTimezonePolicy();
-                    }
                     if (Flags.setPermissionGrantStateCoexistence()) {
                         migratePermissionGrantStatePolicies();
                     }
@@ -23814,11 +23893,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         // Additional migration steps should repeat the pattern above with a new backupId.
-    }
-
-    private void migrateAutoTimezonePolicy() {
-        Slogf.i(LOG_TAG, "Skipping Migration of AUTO_TIMEZONE policy to device policy engine,"
-                + "as no way to identify if the value was set by the admin or the user.");
     }
 
     private void migratePermissionGrantStatePolicies() {

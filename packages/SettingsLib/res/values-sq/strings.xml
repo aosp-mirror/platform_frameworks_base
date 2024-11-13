@@ -304,12 +304,12 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Zgjidh versionin AVRCP të Bluetooth-it"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Versioni MAP i Bluetooth-it"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Zgjidh versionin MAP të Bluetooth-it"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Kodeku Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Kodeku i audios me Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Shpejtësia e shembullit të Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Shpejtësia e shembullit"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Çaktivizimi do të thotë se nuk mbështetet nga telefoni ose kufjet"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bite për shembull Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bite të audios me Bluetooth për shembull"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Bite për shembull"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Modaliteti i kanalit të audios me Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Modaliteti i kanalit"</string>
@@ -591,6 +591,12 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Pajisja e jashtme"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pajisja e lidhur"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ky telefon"</string>
+    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
+    <skip />
+    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
+    <skip />
+    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
+    <skip />
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nuk mund të luhet në këtë pajisje"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Përmirëso llogarinë për të ndryshuar"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Shkarkimet nuk mund të luhen këtu"</string>

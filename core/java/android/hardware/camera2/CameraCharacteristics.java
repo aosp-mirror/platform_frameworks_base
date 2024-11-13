@@ -560,7 +560,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * on a particular SessionConfiguration.</p>
      *
      * @return List of CameraCharacteristic keys containing characterisitics specific to a session
-     * configuration. If {@link #INFO_SESSION_CONFIGURATION_QUERY_VERSION} is
+     * configuration. If {@link #INFO_SESSION_CONFIGURATION_QUERY_VERSION} is at least
      * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, then this list will only contain
      * CONTROL_ZOOM_RATIO_RANGE and SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
      *
@@ -1434,6 +1434,24 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
     public static final Key<android.util.Range<Float>> CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE =
             new Key<android.util.Range<Float>>("android.control.lowLightBoostInfoLuminanceRange", new TypeReference<android.util.Range<Float>>() {{ }});
+
+    /**
+     * <p>List of auto-exposure priority modes for {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode}
+     * that are supported by this camera device.</p>
+     * <p>This entry lists the valid modes for
+     * {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} for this camera device.
+     * If no AE priority modes are available for a device, this will only list OFF.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final Key<int[]> CONTROL_AE_AVAILABLE_PRIORITY_MODES =
+            new Key<int[]>("android.control.aeAvailablePriorityModes", int[].class);
 
     /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
@@ -5241,6 +5259,32 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>All of the above configurations can be set up with a SessionConfiguration. The list of
      * OutputConfiguration contains the stream configurations and DYNAMIC_RANGE_PROFILE, and
      * the AE_TARGET_FPS_RANGE and VIDEO_STABILIZATION_MODE are set as session parameters.</p>
+     * <p>When set to BAKLAVA, the additional stream combinations below are verified
+     * by the compliance tests:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th style="text-align: center;">Target 1</th>
+     * <th style="text-align: center;">Size</th>
+     * <th style="text-align: center;">Target 2</th>
+     * <th style="text-align: center;">Size</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * </tr>
+     * </tbody>
+     * </table>
      * <p>This key is available on all devices.</p>
      */
     @PublicKey

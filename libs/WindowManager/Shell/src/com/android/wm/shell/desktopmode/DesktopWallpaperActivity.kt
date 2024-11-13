@@ -36,7 +36,6 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 class DesktopWallpaperActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "DesktopWallpaperActivity: onCreate")
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
     }

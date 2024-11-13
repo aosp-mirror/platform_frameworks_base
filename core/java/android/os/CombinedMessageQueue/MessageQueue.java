@@ -31,6 +31,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import dalvik.annotation.optimization.NeverCompile;
+import dalvik.system.VMDebug;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -55,7 +56,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("MessageQueue_host")
+@RavenwoodRedirectionClass("MessageQueue_ravenwood")
 public final class MessageQueue {
     private static final String TAG_L = "LegacyMessageQueue";
     private static final String TAG_C = "ConcurrentMessageQueue";
@@ -110,7 +111,7 @@ public final class MessageQueue {
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
-        mUseConcurrent = UserHandle.isCore(Process.myUid());
+        mUseConcurrent = UserHandle.isCore(Process.myUid()) && !VMDebug.isDebuggingEnabled();
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
     }

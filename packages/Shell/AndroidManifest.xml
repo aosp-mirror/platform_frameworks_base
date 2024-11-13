@@ -263,6 +263,8 @@
     <uses-permission android:name="android.permission.MANAGE_APP_OPS_MODES" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_VIBRATOR_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS" />
+    <uses-permission android:name="android.permission.START_VIBRATION_SESSIONS" />
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS" />
     <uses-permission android:name="android.permission.START_TASKS_FROM_RECENTS" />
     <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
@@ -956,6 +958,13 @@
 
     <!-- Permission required for CTS test - CtsTelephonyTestCases -->
     <uses-permission android:name="android.permission.READ_BASIC_PHONE_STATE" />
+
+    <!-- Permission required for ExecutableMethodFileOffsetsTest -->
+    <uses-permission android:name="android.permission.DYNAMIC_INSTRUMENTATION" />
+
+    <!-- Permissions required for CTS test - SettingsPreferenceServiceClientTest -->
+    <uses-permission android:name="android.permission.READ_SYSTEM_PREFERENCES" />
+    <uses-permission android:name="android.permission.WRITE_SYSTEM_PREFERENCES" />
 
     <application
         android:label="@string/app_label"

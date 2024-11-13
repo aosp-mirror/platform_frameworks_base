@@ -21,13 +21,14 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.SystemClock
-import android.platform.uiautomator_helpers.DeviceHelpers
+import android.platform.uiautomatorhelpers.DeviceHelpers
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.window.DesktopModeFlags
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
@@ -35,7 +36,6 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.MotionEventHelper.InputMethod.TOUCH
-import com.android.window.flags.Flags
 import java.time.Duration
 
 /**
@@ -107,7 +107,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
         // drag the window to move to desktop
         if (motionEventHelper.inputMethod == TOUCH
-            && Flags.enableHoldToDragAppHandle()) {
+            && DesktopModeFlags.ENABLE_HOLD_TO_DRAG_APP_HANDLE.isTrue) {
             // Touch requires hold-to-drag.
             motionEventHelper.holdToDrag(startX, startY, startX, endY, steps = 100)
         } else {
@@ -159,7 +159,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     ) {
         val caption = getCaptionForTheApp(wmHelper, device)
         val maximizeButton = getMaximizeButtonForTheApp(caption)
-        maximizeButton?.longClick()
+        maximizeButton.longClick()
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
 
         val buttonResId = if (toLeft) SNAP_LEFT_BUTTON else SNAP_RIGHT_BUTTON
@@ -345,6 +345,14 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     ) {
         dragAppWindowToTopDragZone(wmHelper, device)
         waitForTransitionToFullscreen(wmHelper)
+    }
+
+    /** Maximize an app by dragging the app handle to the top drag zone. */
+    fun maximizeAppWithDragToTopDragZone(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+    ) {
+        dragAppWindowToTopDragZone(wmHelper, device)
     }
 
     private fun dragAppWindowToTopDragZone(wmHelper: WindowManagerStateHelper, device: UiDevice) {

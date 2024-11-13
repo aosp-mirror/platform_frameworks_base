@@ -19,6 +19,7 @@ package com.android.wm.shell.bubbles.bar;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_GESTURE;
+import static com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -65,8 +66,6 @@ public class BubbleBarLayerView extends FrameLayout
         implements ViewTreeObserver.OnComputeInternalInsetsListener {
 
     private static final String TAG = BubbleBarLayerView.class.getSimpleName();
-
-    private static final float SCRIM_ALPHA = 0.2f;
 
     private final BubbleController mBubbleController;
     private final BubbleData mBubbleData;
@@ -386,7 +385,7 @@ public class BubbleBarLayerView extends FrameLayout
         if (show) {
             mScrimView.animate()
                     .setInterpolator(ALPHA_IN)
-                    .alpha(SCRIM_ALPHA)
+                    .alpha(BUBBLE_EXPANDED_SCRIM_ALPHA)
                     .start();
         } else {
             mScrimView.animate()
@@ -442,7 +441,8 @@ public class BubbleBarLayerView extends FrameLayout
 
         @Override
         public void onRelease(@NonNull BubbleBarLocation location) {
-            mBubbleController.setBubbleBarLocation(location);
+            mBubbleController.setBubbleBarLocation(location,
+                    BubbleBarLocation.UpdateSource.DRAG_EXP_VIEW);
             if (location != mInitialLocation) {
                 BubbleLogger.Event event = location.isOnLeft(isLayoutRtl())
                         ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_EXP_VIEW

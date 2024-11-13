@@ -158,3 +158,20 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "writing_tools"
+    namespace: "input_method"
+    description: "Writing tools API"
+    bug: "373788889"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "public_autofill_id_in_editorinfo"
+  is_exported: true
+  namespace: "input_method"
+  description: "Guarding public API autofillId in editor info"
+  bug: "342672560"
+  is_fixed_read_only: true
+}

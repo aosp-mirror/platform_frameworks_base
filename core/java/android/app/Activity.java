@@ -30,6 +30,7 @@ import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 
 import static java.lang.Character.MIN_VALUE;
 
+import android.Manifest;
 import android.annotation.AnimRes;
 import android.annotation.CallSuper;
 import android.annotation.CallbackExecutor;
@@ -53,6 +54,7 @@ import android.app.VoiceInteractor.Request;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.compat.CompatChanges;
+import android.app.jank.JankTracker;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -123,6 +125,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SuperNotCalledException;
 import android.view.ActionMode;
+import android.view.Choreographer;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
@@ -174,6 +177,7 @@ import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.util.dump.DumpableContainerImpl;
 
@@ -1143,6 +1147,9 @@ public class Activity extends ContextThemeWrapper
         }
 
     };
+
+    @Nullable
+    private JankTracker mJankTracker;
 
     private static native String getDlWarning();
 
@@ -2244,6 +2251,10 @@ public class Activity extends ContextThemeWrapper
         // Notify autofill
         getAutofillClientController().onActivityPostResumed();
 
+        if (android.app.jank.Flags.detailedAppJankMetricsApi()) {
+            startAppJankTracking();
+        }
+
         mCalled = true;
     }
 
@@ -3191,6 +3202,16 @@ public class Activity extends ContextThemeWrapper
      */
     public int getMaxNumPictureInPictureActions() {
         return ActivityTaskManager.getMaxNumPictureInPictureActions(this);
+    }
+
+    private boolean isImplicitEnterPipProhibited() {
+        PackageManager pm = getPackageManager();
+        if (android.app.Flags.enableTvImplicitEnterPipRestriction()) {
+            return pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                    && pm.checkPermission(Manifest.permission.TV_IMPLICIT_ENTER_PIP,
+                    getPackageName()) == PackageManager.PERMISSION_DENIED;
+        }
+        return false;
     }
 
     /**
@@ -9192,6 +9213,8 @@ public class Activity extends ContextThemeWrapper
         }
         dispatchActivityPreResumed();
 
+        mCanEnterPictureInPicture = true;
+
         mFragments.execPendingActions();
 
         mLastNonConfigurationInstances = null;
@@ -9243,9 +9266,17 @@ public class Activity extends ContextThemeWrapper
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performPause:"
                     + mComponent.getClassName());
         }
+
+        if (isImplicitEnterPipProhibited()) {
+            mCanEnterPictureInPicture = false;
+        }
+
         dispatchActivityPrePaused();
         mDoReportFullyDrawn = false;
         mFragments.dispatchPause();
+        if (android.app.jank.Flags.detailedAppJankMetricsApi()) {
+            stopAppJankTracking();
+        }
         mCalled = false;
         final long startTime = SystemClock.uptimeMillis();
         onPause();
@@ -9265,6 +9296,10 @@ public class Activity extends ContextThemeWrapper
 
     final void performUserLeaving() {
         onUserInteraction();
+
+        if (isImplicitEnterPipProhibited()) {
+            mCanEnterPictureInPicture = false;
+        }
         onUserLeaveHint();
     }
 
@@ -9922,6 +9957,51 @@ public class Activity extends ContextThemeWrapper
     public void unregisterScreenCaptureCallback(@NonNull ScreenCaptureCallback callback) {
         if (mScreenCaptureCallbackHandler != null) {
             mScreenCaptureCallbackHandler.unregisterScreenCaptureCallback(callback);
+        }
+    }
+
+    /**
+     * Enabling jank tracking for this activity but only if certain conditions are met. The
+     * application must have an app category other than undefined and a visible view.
+     */
+    private void startAppJankTracking() {
+        if (!android.app.jank.Flags.detailedAppJankMetricsLoggingEnabled()) {
+            return;
+        }
+        if (mApplication.getApplicationInfo().category == ApplicationInfo.CATEGORY_UNDEFINED) {
+            return;
+        }
+        if (getWindow() != null && getWindow().peekDecorView() != null) {
+            DecorView decorView = (DecorView) getWindow().peekDecorView();
+            if (decorView.getVisibility() == View.VISIBLE) {
+                decorView.setAppJankStatsCallback(new DecorView.AppJankStatsCallback() {
+                    @Override
+                    public JankTracker getAppJankTracker() {
+                        return mJankTracker;
+                    }
+                });
+                if (mJankTracker == null) {
+                    // TODO b/377960907 use the Choreographer attached to the ViewRootImpl instead.
+                    mJankTracker = new JankTracker(Choreographer.getInstance(),
+                            decorView);
+                }
+                // TODO b/377674765 confirm this is the string we want logged.
+                mJankTracker.setActivityName(getComponentName().getClassName());
+                mJankTracker.setAppUid(myUid());
+                mJankTracker.enableAppJankTracking();
+            }
+        }
+    }
+
+    /**
+     * Call to disable jank tracking for this activity.
+     */
+    private void stopAppJankTracking() {
+        if (!android.app.jank.Flags.detailedAppJankMetricsLoggingEnabled()) {
+            return;
+        }
+        if (mJankTracker != null) {
+            mJankTracker.disableAppJankTracking();
         }
     }
 }

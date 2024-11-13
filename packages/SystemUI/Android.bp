@@ -497,6 +497,9 @@ android_library {
     resource_dirs: [],
     static_libs: [
         "//frameworks/libs/systemui:compilelib",
+        "//frameworks/base/packages/SystemUI/pods/com/android/systemui/dagger:api",
+        "//frameworks/base/packages/SystemUI/pods/com/android/systemui/util/settings:api",
+        "//frameworks/base/packages/SystemUI/pods/com/android/systemui/retail:impl",
         "SystemUI-res",
         "WifiTrackerLib",
         "WindowManager-Shell",
@@ -770,6 +773,9 @@ android_library {
     ],
     static_libs: [
         "//frameworks/libs/systemui:compilelib",
+        "//frameworks/base/packages/SystemUI/pods/com/android/systemui/dagger:api",
+        "//frameworks/base/packages/SystemUI/pods/com/android/systemui/util/settings:api",
+        "//frameworks/base/packages/SystemUI/pods/com/android/systemui/retail:impl",
         "SystemUI-tests-base",
         "androidx.test.uiautomator_uiautomator",
         "androidx.core_core-animation-testing",

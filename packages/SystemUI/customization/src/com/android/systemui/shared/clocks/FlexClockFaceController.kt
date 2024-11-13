@@ -55,10 +55,7 @@ class FlexClockFaceController(
     override val view: View
         get() = layerController.view
 
-    override val config =
-        ClockFaceConfig(
-            hasCustomPositionUpdatedAnimation = false // TODO(b/364673982)
-        )
+    override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
 
     override var theme = ThemeConfig(true, assets.seedColor)
 
@@ -94,6 +91,19 @@ class FlexClockFaceController(
                 )
             }
         layerController.view.layoutParams = lp
+    }
+
+    /** See documentation at [FlexClockView.offsetGlyphsForStepClockAnimation]. */
+    private fun offsetGlyphsForStepClockAnimation(
+        clockStartLeft: Int,
+        direction: Int,
+        fraction: Float
+    ) {
+        (view as? FlexClockView)?.offsetGlyphsForStepClockAnimation(
+            clockStartLeft,
+            direction,
+            fraction,
+        )
     }
 
     override val layout: ClockFaceLayout =
@@ -248,10 +258,12 @@ class FlexClockFaceController(
 
             override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {
                 layerController.animations.onPositionUpdated(fromLeft, direction, fraction)
+                if (isLargeClock) offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
             }
 
             override fun onPositionUpdated(distance: Float, fraction: Float) {
                 layerController.animations.onPositionUpdated(distance, fraction)
+                // TODO(b/378128811) port stepping animation
             }
         }
 }

@@ -36,6 +36,7 @@ import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -272,6 +273,14 @@ public final class SatelliteManager {
     public static final String KEY_DEPROVISION_SATELLITE_TOKENS = "deprovision_satellite";
 
     /**
+     * Bundle key to get the response from
+     * {@link #requestSatelliteAccessConfigurationForCurrentLocation(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_ACCESS_CONFIGURATION =
+            "satellite_access_configuration";
+
+    /**
      * The request was successfully processed.
      * @hide
      */
@@ -483,43 +492,43 @@ public final class SatelliteManager {
     /**
      * Telephony framework needs to access the current location of the device to perform the
      * request. However, location in the settings is disabled by users.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_LOCATION_DISABLED = 25;
 
     /**
      * Telephony framework needs to access the current location of the device to perform the
      * request. However, Telephony fails to fetch the current location from location service.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_LOCATION_NOT_AVAILABLE = 26;
 
     /**
      * Emergency call is in progress.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS = 27;
 
     /**
      * Disabling satellite is in progress.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_DISABLE_IN_PROGRESS = 28;
 
     /**
      * Enabling satellite is in progress.
-     *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_ENABLE_IN_PROGRESS = 29;
 
     /** @hide */
@@ -715,7 +724,7 @@ public final class SatelliteManager {
     public static final int EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911 = 2;
 
     /**
-     * This intent will be broadcasted if there are any change to list of subscriber informations.
+     * This intent will be broadcasted if there are any change to list of subscriber information.
      * This intent will be sent only to the app with component defined in
      * config_satellite_carrier_roaming_esos_provisioned_class and package defined in
      * config_satellite_gateway_service_package
@@ -1349,12 +1358,16 @@ public final class SatelliteManager {
      * The satellite modem is being powered on.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_MODEM_STATE_ENABLING_SATELLITE = 8;
 
     /**
      * The satellite modem is being powered off.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_MODEM_STATE_DISABLING_SATELLITE = 9;
 
     /**
@@ -1414,6 +1427,8 @@ public final class SatelliteManager {
      * there is any incoming message.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_KEEP_ALIVE = 3;
 
     /**
@@ -1421,6 +1436,8 @@ public final class SatelliteManager {
      * is the last message to emergency service provider indicating still needs help.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP = 4;
 
     /**
@@ -1428,12 +1445,16 @@ public final class SatelliteManager {
      * is the last message to emergency service provider indicating no more help is needed.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5;
 
     /**
      * Datagram type indicating that the message to be sent or received is of type SMS.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_SMS = 6;
 
     /**
@@ -1441,6 +1462,8 @@ public final class SatelliteManager {
      * for pending incoming SMS.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int DATAGRAM_TYPE_CHECK_PENDING_INCOMING_SMS = 7;
 
     /** @hide */
@@ -1461,6 +1484,8 @@ public final class SatelliteManager {
      * Satellite communication restricted by user.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER = 0;
 
     /**
@@ -2316,6 +2341,68 @@ public final class SatelliteManager {
     }
 
     /**
+     * Request to get satellite access configuration for the current location.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return a {@code SatelliteAccessConfiguration} with value the regional
+     *                 satellite access configuration at the current location.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public void requestSatelliteAccessConfigurationForCurrentLocation(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<SatelliteAccessConfiguration, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_SATELLITE_ACCESS_CONFIGURATION)) {
+                                SatelliteAccessConfiguration satelliteAccessConfiguration =
+                                        resultData.getParcelable(KEY_SATELLITE_ACCESS_CONFIGURATION,
+                                                SatelliteAccessConfiguration.class);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(satelliteAccessConfiguration)));
+                            } else {
+                                loge("KEY_SATELLITE_ACCESS_CONFIGURATION does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestSatelliteAccessConfigurationForCurrentLocation(receiver);
+            } else {
+                loge("requestSatelliteAccessConfigurationForCurrentLocation() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("requestSatelliteAccessConfigurationForCurrentLocation() RemoteException: "
+                    + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
      * Request to get the duration in seconds after which the satellite will be visible.
      * This will be {@link Duration#ZERO} if the satellite is currently visible.
      *
@@ -2420,7 +2507,7 @@ public final class SatelliteManager {
      * <li>There is no satellite communication restriction, which is added by
      * {@link #addAttachRestrictionForCarrier(int, int, Executor, Consumer)}</li>
      * <li>The carrier config {@link
-     * android.telephony.CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} is set to
+     * CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} is set to
      * {@code true}.</li>
      * </ul>
      *
@@ -2743,7 +2830,7 @@ public final class SatelliteManager {
      * <p>
      * Note: This API is specifically designed for OEM enabled satellite connectivity only.
      * For satellite connectivity enabled using carrier roaming, please refer to
-     * {@link android.telephony.TelephonyCallback.SignalStrengthsListener}, and
+     * {@link TelephonyCallback.SignalStrengthsListener}, and
      * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
      * </p>
      *
@@ -2814,7 +2901,7 @@ public final class SatelliteManager {
      * <p>
      * Note: This API is specifically designed for OEM enabled satellite connectivity only.
      * For satellite connectivity enabled using carrier roaming, please refer to
-     * {@link android.telephony.TelephonyCallback.SignalStrengthsListener}, and
+     * {@link TelephonyCallback.SignalStrengthsListener}, and
      * {@link TelephonyManager#registerTelephonyCallback(Executor, TelephonyCallback)}.
      * </p>
      *
@@ -3131,6 +3218,15 @@ public final class SatelliteManager {
                                         () -> callback.onSatelliteCommunicationAllowedStateChanged(
                                                 isAllowed)));
                             }
+
+                            @Override
+                            public void onSatelliteAccessConfigurationChanged(
+                                    @Nullable SatelliteAccessConfiguration
+                                            satelliteAccessConfiguration) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatelliteAccessConfigurationChanged(
+                                                satelliteAccessConfiguration)));
+                            }
                         };
                 sSatelliteCommunicationAllowedStateCallbackMap.put(callback, internalCallback);
                 return telephony.registerForCommunicationAllowedStateChanged(
@@ -3412,6 +3508,40 @@ public final class SatelliteManager {
             loge("deprovisionSatellite() RemoteException: " + ex);
             executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                     new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
+     * Inform whether application supports NTN SMS in satellite mode.
+     *
+     * This method is used by default messaging application to inform framework whether it supports
+     * NTN SMS or not.
+     *
+     * Invoking this API will internally result in triggering
+     * {@link android.telephony.TelephonyCallback.CarrierRoamingNtnModeListener
+     * #onCarrierRoamingNtnAvailableServicesChanged(List)} and
+     * {@link android.telephony.TelephonyCallback.CarrierRoamingNtnModeListener
+     * #onCarrierRoamingNtnEligibleStateChanged(boolean)} callbacks.
+     *
+     * @param ntnSmsSupported {@code true} If application supports NTN SMS, else {@code false}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(allOf = {Manifest.permission.SATELLITE_COMMUNICATION,
+            Manifest.permission.SEND_SMS})
+    public void setNtnSmsSupported(boolean ntnSmsSupported) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setNtnSmsSupported(ntnSmsSupported);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("setNtnSmsSupported() RemoteException:" + ex);
+            ex.rethrowAsRuntimeException();
         }
     }
 

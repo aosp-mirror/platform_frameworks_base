@@ -220,6 +220,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                     }
                     mMainExecutor.execute(() -> {
                         mExclusionRegion.set(systemGestureExclusion);
+                        onExclusionRegionChanged(displayId, mExclusionRegion);
                     });
                 }
             };
@@ -432,7 +433,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             boolean isFocusedGlobally) {
         final WindowDecoration decor = mWindowDecorByTaskId.get(taskId);
         if (decor != null) {
-            decor.relayout(decor.mTaskInfo, isFocusedGlobally);
+            decor.relayout(decor.mTaskInfo, isFocusedGlobally, decor.mExclusionRegion);
         }
     }
 
@@ -465,15 +466,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         final RunningTaskInfo oldTaskInfo = decoration.mTaskInfo;
 
         if (taskInfo.displayId != oldTaskInfo.displayId
-                && !Flags.enableHandleInputFix()) {
+                && !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             removeTaskFromEventReceiver(oldTaskInfo.displayId);
             incrementEventReceiverTasks(taskInfo.displayId);
         }
         if (enableDisplayFocusInShellTransitions()) {
             // Pass the current global focus status to avoid updates outside of a ShellTransition.
-            decoration.relayout(taskInfo, decoration.mHasGlobalFocus);
+            decoration.relayout(taskInfo, decoration.mHasGlobalFocus, decoration.mExclusionRegion);
         } else {
-            decoration.relayout(taskInfo, taskInfo.isFocused);
+            decoration.relayout(taskInfo, taskInfo.isFocused, decoration.mExclusionRegion);
         }
         mActivityOrientationChangeHandler.ifPresent(handler ->
                 handler.handleActivityOrientationChange(oldTaskInfo, taskInfo));
@@ -514,7 +515,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         } else {
             decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
                     false /* shouldSetTaskPositionAndCrop */,
-                    mFocusTransitionObserver.hasGlobalFocus(taskInfo));
+                    mFocusTransitionObserver.hasGlobalFocus(taskInfo),
+                    mExclusionRegion);
         }
     }
 
@@ -528,7 +530,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
 
         decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
                 false /* shouldSetTaskPositionAndCrop */,
-                mFocusTransitionObserver.hasGlobalFocus(taskInfo));
+                mFocusTransitionObserver.hasGlobalFocus(taskInfo),
+                mExclusionRegion);
     }
 
     @Override
@@ -539,13 +542,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         decoration.close();
         final int displayId = taskInfo.displayId;
         if (mEventReceiversByDisplay.contains(displayId)
-                && !Flags.enableHandleInputFix()) {
+                && !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             removeTaskFromEventReceiver(displayId);
         }
         // Remove the decoration from the cache last because WindowDecoration#close could still
         // issue CANCEL MotionEvents to touch listeners before its view host is released.
         // See b/327664694.
         mWindowDecorByTaskId.remove(taskInfo.taskId);
+    }
+
+    private void onExclusionRegionChanged(int displayId, @NonNull Region exclusionRegion) {
+        final int decorCount = mWindowDecorByTaskId.size();
+        for (int i = 0; i < decorCount; i++) {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.valueAt(i);
+            if (decoration.mTaskInfo.displayId != displayId) continue;
+            decoration.onExclusionRegionChanged(exclusionRegion);
+        }
     }
 
     private void openHandleMenu(int taskId) {
@@ -750,10 +762,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
 
         /**
          * Whether to pilfer the next motion event to send cancellations to the windows below.
-         * Useful when the caption window is spy and the gesture should be handle by the system
+         * Useful when the caption window is spy and the gesture should be handled by the system
          * instead of by the app for their custom header content.
+         * Should not have any effect when {@link Flags#enableAccessibleCustomHeaders()}, because
+         * a spy window is not used then.
          */
-        private boolean mShouldPilferCaptionEvents;
+        private boolean mIsCustomHeaderGesture;
+        private boolean mIsResizeGesture;
         private boolean mIsDragging;
         private boolean mTouchscreenInUse;
         private boolean mHasLongClicked;
@@ -767,7 +782,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             mTaskToken = taskInfo.token;
             mDragPositioningCallback = dragPositioningCallback;
             final int touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-            final long appHandleHoldToDragDuration = Flags.enableHoldToDragAppHandle()
+            final long appHandleHoldToDragDuration =
+                    DesktopModeFlags.ENABLE_HOLD_TO_DRAG_APP_HANDLE.isTrue()
                     ? APP_HANDLE_HOLD_TO_DRAG_DURATION_MS : 0;
             mHandleDragDetector = new DragDetector(this, appHandleHoldToDragDuration,
                     touchSlop);
@@ -867,7 +883,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 // to offset position relative to caption as a whole.
                 int[] viewLocation = new int[2];
                 v.getLocationInWindow(viewLocation);
-                final boolean isResizeEvent = decoration.shouldResizeListenerHandleEvent(e,
+                mIsResizeGesture = decoration.shouldResizeListenerHandleEvent(e,
                         new Point(viewLocation[0], viewLocation[1]));
                 // The caption window may be a spy window when the caption background is
                 // transparent, which means events will fall through to the app window. Make
@@ -875,21 +891,23 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 // customizable region and what the app reported as exclusion areas, because
                 // the drag-move or other caption gestures should take priority outside those
                 // regions.
-                mShouldPilferCaptionEvents = !(downInCustomizableCaptionRegion
-                        && downInExclusionRegion && isTransparentCaption) && !isResizeEvent;
+                mIsCustomHeaderGesture = downInCustomizableCaptionRegion
+                        && downInExclusionRegion && isTransparentCaption;
             }
-            if (!mShouldPilferCaptionEvents) {
-                // The event will be handled by a window below or pilfered by resize handler.
+            if (mIsCustomHeaderGesture || mIsResizeGesture) {
+                // The event will be handled by the custom window below or pilfered by resize
+                // handler.
                 return false;
             }
-            // Otherwise pilfer so that windows below receive cancellations for this gesture, and
-            // continue normal handling as a caption gesture.
-            if (mInputManager != null) {
+            if (mInputManager != null
+                    && !Flags.enableAccessibleCustomHeaders()) {
+                // Pilfer so that windows below receive cancellations for this gesture.
                 mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
             }
             if (isUpOrCancel) {
                 // Gesture is finished, reset state.
-                mShouldPilferCaptionEvents = false;
+                mIsCustomHeaderGesture = false;
+                mIsResizeGesture = false;
             }
             if (isAppHandle) {
                 return mHandleDragDetector.onMotionEvent(v, e);
@@ -1234,7 +1252,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         relevantDecor.updateHoverAndPressStatus(ev);
         final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            if (!mTransitionDragActive && !Flags.enableHandleInputFix()) {
+            if (!mTransitionDragActive && !DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
                 relevantDecor.closeHandleMenuIfNeeded(ev);
             }
         }
@@ -1277,7 +1295,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 }
                 final boolean shouldStartTransitionDrag =
                         relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)
-                                || Flags.enableHandleInputFix();
+                                || DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue();
                 if (dragFromStatusBarAllowed && shouldStartTransitionDrag) {
                     mTransitionDragActive = true;
                 }
@@ -1592,8 +1610,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         windowDecoration.setDragPositioningCallback(taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */,
-                mFocusTransitionObserver.hasGlobalFocus(taskInfo));
-        if (!Flags.enableHandleInputFix()) {
+                mFocusTransitionObserver.hasGlobalFocus(taskInfo),
+                mExclusionRegion);
+        if (!DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
             incrementEventReceiverTasks(taskInfo.displayId);
         }
     }
@@ -1618,6 +1637,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         pw.println(innerPrefix + "mTransitionDragActive=" + mTransitionDragActive);
         pw.println(innerPrefix + "mEventReceiversByDisplay=" + mEventReceiversByDisplay);
         pw.println(innerPrefix + "mWindowDecorByTaskId=" + mWindowDecorByTaskId);
+        pw.println(innerPrefix + "mExclusionRegion=" + mExclusionRegion);
     }
 
     private class DesktopModeOnTaskRepositionAnimationListener
@@ -1754,7 +1774,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         && Flags.enableDesktopWindowingImmersiveHandleHiding()) {
                     decor.onInsetsStateChanged(insetsState);
                 }
-                if (!Flags.enableHandleInputFix()) {
+                if (!DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
                     // If status bar inset is visible, top task is not in immersive mode.
                     // This value is only needed when the App Handle input is being handled
                     // through the global input monitor (hence the flag check) to ignore gestures

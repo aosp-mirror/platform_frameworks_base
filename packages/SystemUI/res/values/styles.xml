@@ -557,6 +557,16 @@
         <item name="android:showWhenLocked">true</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog.Volume">
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:showWhenLocked">true</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <style name="SystemUI.Material3.Slider.Volume">
         <item name="trackHeight">40dp</item>
         <item name="thumbHeight">52dp</item>
@@ -1471,28 +1481,14 @@
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
-    <style name="BluetoothTileDialog.Device.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
-    </style>
-
-    <style name="BluetoothTileDialog.DeviceName">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textAppearance">@style/TextAppearance.Dialog.Title</item>
+    <style name="TextAppearance.BluetoothTileDialog">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:textAlignment">gravity</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
-    <style name="BluetoothTileDialog.DeviceSummary">
-        <item name="android:ellipsize">end</item>
-        <item name="android:maxLines">2</item>
-        <item name="android:textAppearance">@style/TextAppearance.Dialog.Body.Message</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
-    </style>
-
-    <style name="BluetoothTileDialog.DeviceName.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
-    </style>
-
-    <style name="BluetoothTileDialog.DeviceSummary.Active">
+    <style name="TextAppearance.BluetoothTileDialog.Active">
         <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 

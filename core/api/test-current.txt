@@ -535,9 +535,13 @@ package android.app {
   public class WallpaperManager {
     method @Nullable public android.graphics.Bitmap getBitmap();
     method @Nullable public android.graphics.Bitmap getBitmapAsUser(int, boolean, int);
+    method @FlaggedApi("com.android.window.flags.multi_crop") @NonNull @RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL) public java.util.List<android.graphics.Rect> getBitmapCrops(@NonNull java.util.List<android.graphics.Point>, int, boolean);
+    method @FlaggedApi("com.android.window.flags.multi_crop") @NonNull public java.util.List<android.graphics.Rect> getBitmapCrops(@NonNull android.graphics.Point, @NonNull java.util.List<android.graphics.Point>, @Nullable java.util.Map<android.graphics.Point,android.graphics.Rect>);
     method public boolean isLockscreenLiveWallpaperEnabled();
     method @Nullable public android.graphics.Rect peekBitmapDimensions();
     method @Nullable public android.graphics.Rect peekBitmapDimensions(int);
+    method @FlaggedApi("com.android.window.flags.multi_crop") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setBitmapWithCrops(@Nullable android.graphics.Bitmap, @NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>, boolean, int) throws java.io.IOException;
+    method @FlaggedApi("com.android.window.flags.multi_crop") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setStreamWithCrops(@NonNull java.io.InputStream, @NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>, boolean, int) throws java.io.IOException;
     method public void setWallpaperZoomOut(@NonNull android.os.IBinder, float);
     method public boolean shouldEnableWideColorGamut();
     method public boolean wallpaperSupportsWcg(int);
@@ -2061,6 +2065,29 @@ package android.media {
     method public boolean isAidlHal();
   }
 
+  public final class MediaCodec {
+    method @FlaggedApi("android.media.codec.codec_availability") @NonNull public static java.util.List<android.media.MediaCodec.GlobalResourceInfo> getGloballyAvailableResources();
+    method @FlaggedApi("android.media.codec.codec_availability") @NonNull public java.util.List<android.media.MediaCodec.InstanceResourceInfo> getRequiredResources();
+  }
+
+  public abstract static class MediaCodec.Callback {
+    method @FlaggedApi("android.media.codec.codec_availability") public void onRequiredResourcesChanged(@NonNull android.media.MediaCodec);
+  }
+
+  @FlaggedApi("android.media.codec.codec_availability") public static final class MediaCodec.GlobalResourceInfo {
+    ctor public MediaCodec.GlobalResourceInfo();
+    method public long getAvailable();
+    method public long getCapacity();
+    method @NonNull public String getName();
+  }
+
+  @FlaggedApi("android.media.codec.codec_availability") public static final class MediaCodec.InstanceResourceInfo {
+    ctor public MediaCodec.InstanceResourceInfo();
+    method @NonNull public String getName();
+    method public long getPerFrameCount();
+    method public long getStaticCount();
+  }
+
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);
@@ -3247,6 +3274,14 @@ package android.service.quicksettings {
 
 }
 
+package android.service.settings.preferences {
+
+  @FlaggedApi("com.android.settingslib.flags.settings_catalyst") public class SettingsPreferenceServiceClient implements java.lang.AutoCloseable {
+    ctor public SettingsPreferenceServiceClient(@NonNull android.content.Context, @NonNull String, boolean, @Nullable android.content.ServiceConnection);
+  }
+
+}
+
 package android.service.voice {
 
   public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
@@ -3729,7 +3764,7 @@ package android.view {
     method public final int getDisplayId();
     method public final void setDisplayId(int);
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
-    field public static final int LAST_KEYCODE = 318; // 0x13e
+    field public static final int LAST_KEYCODE = 337; // 0x151
   }
 
   public final class KeyboardShortcutGroup implements android.os.Parcelable {

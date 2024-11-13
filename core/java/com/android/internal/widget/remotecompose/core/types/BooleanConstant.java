@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.types;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.BYTE;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -47,23 +49,26 @@ public class BooleanConstant implements Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mValue);
     }
 
     @Override
     public void apply(RemoteContext context) {}
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return toString();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BooleanConstant[" + mId + "] = " + mValue + "";
     }
 
+    @NonNull
     public static String name() {
         return "OrigamiBoolean";
     }
@@ -79,20 +84,20 @@ public class BooleanConstant implements Operation {
      * @param id
      * @param value
      */
-    public static void apply(WireBuffer buffer, int id, boolean value) {
+    public static void apply(@NonNull WireBuffer buffer, int id, boolean value) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeBoolean(value);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
 
         boolean value = buffer.readBoolean();
         operations.add(new BooleanConstant(id, value));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, "BooleanConstant")
                 .description("A boolean and its associated id")
                 .field(DocumentedOperation.INT, "id", "id of Int")

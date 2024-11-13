@@ -42,6 +42,8 @@ import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.BroadcastOptions.DeliveryGroupPolicy;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -55,10 +57,12 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.PrintWriterPrinter;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.compat.PlatformCompat;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -77,6 +81,15 @@ import java.util.function.BiFunction;
  * An active intent broadcast.
  */
 final class BroadcastRecord extends Binder {
+    /**
+     * Limit the scope of the priority values to the process level. This means that priority values
+     * will only influence the order of broadcast delivery within the same process.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
+    @VisibleForTesting
+    static final long CHANGE_LIMIT_PRIORITY_SCOPE = 371307720L;
+
     final @NonNull Intent intent;    // the original intent that generated us
     final @Nullable ComponentName targetComp; // original component name set on the intent
     final @Nullable ProcessRecord callerApp; // process that sent this
@@ -417,13 +430,13 @@ final class BroadcastRecord extends Binder {
             @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
             boolean timeoutExempt,
             @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
-            int callerAppProcessState) {
+            int callerAppProcessState, PlatformCompat platformCompat) {
         this(queue, intent, callerApp, callerPackage, callerFeatureId, callingPid,
                 callingUid, callerInstantApp, resolvedType, requiredPermissions,
                 excludedPermissions, excludedPackages, appOp, options, receivers, resultToApp,
                 resultTo, resultCode, resultData, resultExtras, serialized, sticky,
                 initialSticky, userId, -1, backgroundStartPrivileges, timeoutExempt,
-                filterExtrasForReceiver, callerAppProcessState);
+                filterExtrasForReceiver, callerAppProcessState, platformCompat);
     }
 
     BroadcastRecord(BroadcastQueue _queue,
@@ -439,7 +452,7 @@ final class BroadcastRecord extends Binder {
             @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
             boolean timeoutExempt,
             @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
-            int callerAppProcessState) {
+            int callerAppProcessState, PlatformCompat platformCompat) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
         }
@@ -466,7 +479,8 @@ final class BroadcastRecord extends Binder {
         urgent = calculateUrgent(_intent, _options);
         deferUntilActive = calculateDeferUntilActive(_callingUid,
                 _options, _resultTo, _serialized, urgent);
-        blockedUntilBeyondCount = calculateBlockedUntilBeyondCount(receivers, _serialized);
+        blockedUntilBeyondCount = calculateBlockedUntilBeyondCount(
+                receivers, _serialized, platformCompat);
         scheduledTime = new long[delivery.length];
         terminalTime = new long[delivery.length];
         resultToApp = _resultToApp;
@@ -730,7 +744,8 @@ final class BroadcastRecord extends Binder {
     }
 
     /**
-     * Determine if the result of {@link #calculateBlockedUntilBeyondCount(List, boolean)}
+     * Determine if the result of
+     * {@link #calculateBlockedUntilBeyondCount(List, boolean, PlatformCompat)}
      * has prioritized tranches of receivers.
      */
     @VisibleForTesting
@@ -754,35 +769,119 @@ final class BroadcastRecord extends Binder {
      */
     @VisibleForTesting
     static @NonNull int[] calculateBlockedUntilBeyondCount(
-            @NonNull List<Object> receivers, boolean ordered) {
+            @NonNull List<Object> receivers, boolean ordered, PlatformCompat platformCompat) {
         final int N = receivers.size();
         final int[] blockedUntilBeyondCount = new int[N];
-        int lastPriority = 0;
-        int lastPriorityIndex = 0;
-        for (int i = 0; i < N; i++) {
-            if (ordered) {
-                // When sending an ordered broadcast, we need to block this
-                // receiver until all previous receivers have terminated
+        if (ordered) {
+            // When sending an ordered broadcast, we need to block this
+            // receiver until all previous receivers have terminated
+            for (int i = 0; i < N; i++) {
                 blockedUntilBeyondCount[i] = i;
+            }
+        } else {
+            if (Flags.limitPriorityScope()) {
+                final boolean[] changeEnabled = calculateChangeStateForReceivers(
+                        receivers, CHANGE_LIMIT_PRIORITY_SCOPE, platformCompat);
+
+                // Priority of the previous tranche
+                int lastTranchePriority = 0;
+                // Priority of the current tranche
+                int currentTranchePriority = 0;
+                // Index of the last receiver in the previous tranche
+                int lastTranchePriorityIndex = -1;
+                // Index of the last receiver with change disabled in the previous tranche
+                int lastTrancheChangeDisabledIndex = -1;
+                // Index of the last receiver with change disabled in the current tranche
+                int currentTrancheChangeDisabledIndex = -1;
+
+                for (int i = 0; i < N; i++) {
+                    final int thisPriority = getReceiverPriority(receivers.get(i));
+                    if (i == 0) {
+                        currentTranchePriority = thisPriority;
+                        if (!changeEnabled[i]) {
+                            currentTrancheChangeDisabledIndex = i;
+                        }
+                        continue;
+                    }
+
+                    // Check if a new priority tranche has started
+                    if (thisPriority != currentTranchePriority) {
+                        // Update tranche boundaries and reset the disabled index.
+                        if (currentTrancheChangeDisabledIndex != -1) {
+                            lastTrancheChangeDisabledIndex = currentTrancheChangeDisabledIndex;
+                        }
+                        lastTranchePriority = currentTranchePriority;
+                        lastTranchePriorityIndex = i - 1;
+                        currentTranchePriority = thisPriority;
+                        currentTrancheChangeDisabledIndex = -1;
+                    }
+                    if (!changeEnabled[i]) {
+                        currentTrancheChangeDisabledIndex = i;
+
+                        // Since the change is disabled, block the current receiver until the
+                        // last receiver in the previous tranche.
+                        blockedUntilBeyondCount[i] = lastTranchePriorityIndex + 1;
+                    } else if (thisPriority != lastTranchePriority) {
+                        // If the changeId was disabled for an earlier receiver and the current
+                        // receiver has a different priority, block the current receiver
+                        // until that earlier receiver.
+                        if (lastTrancheChangeDisabledIndex != -1) {
+                            blockedUntilBeyondCount[i] = lastTrancheChangeDisabledIndex + 1;
+                        }
+                    }
+                }
+                // If the entire list is in the same priority tranche or no receivers had
+                // changeId disabled, mark as -1 to indicate that none of them need to wait
+                if (N > 0 && (lastTranchePriorityIndex == -1
+                        || (lastTrancheChangeDisabledIndex == -1
+                                && currentTrancheChangeDisabledIndex == -1))) {
+                    Arrays.fill(blockedUntilBeyondCount, -1);
+                }
             } else {
                 // When sending a prioritized broadcast, we only need to wait
                 // for the previous tranche of receivers to be terminated
-                final int thisPriority = getReceiverPriority(receivers.get(i));
-                if ((i == 0) || (thisPriority != lastPriority)) {
-                    lastPriority = thisPriority;
-                    lastPriorityIndex = i;
-                    blockedUntilBeyondCount[i] = i;
-                } else {
-                    blockedUntilBeyondCount[i] = lastPriorityIndex;
+                int lastPriority = 0;
+                int lastPriorityIndex = 0;
+                for (int i = 0; i < N; i++) {
+                    final int thisPriority = getReceiverPriority(receivers.get(i));
+                    if ((i == 0) || (thisPriority != lastPriority)) {
+                        lastPriority = thisPriority;
+                        lastPriorityIndex = i;
+                        blockedUntilBeyondCount[i] = i;
+                    } else {
+                        blockedUntilBeyondCount[i] = lastPriorityIndex;
+                    }
+                }
+                // If the entire list is in the same priority tranche, mark as -1 to
+                // indicate that none of them need to wait
+                if (N > 0 && blockedUntilBeyondCount[N - 1] == 0) {
+                    Arrays.fill(blockedUntilBeyondCount, -1);
                 }
             }
         }
-        // If the entire list is in the same priority tranche, mark as -1 to
-        // indicate that none of them need to wait
-        if (N > 0 && blockedUntilBeyondCount[N - 1] == 0) {
-            Arrays.fill(blockedUntilBeyondCount, -1);
-        }
         return blockedUntilBeyondCount;
+    }
+
+    @VisibleForTesting
+    static @NonNull boolean[] calculateChangeStateForReceivers(@NonNull List<Object> receivers,
+            long changeId, PlatformCompat platformCompat) {
+        final SparseBooleanArray changeStateForUids = new SparseBooleanArray();
+        final int count = receivers.size();
+        final boolean[] changeStateForReceivers = new boolean[count];
+        for (int i = 0; i < count; ++i) {
+            final int receiverUid = getReceiverUid(receivers.get(i));
+            final boolean isChangeEnabled;
+            final int idx = changeStateForUids.indexOfKey(receiverUid);
+            if (idx >= 0) {
+                isChangeEnabled = changeStateForUids.valueAt(idx);
+            } else {
+                isChangeEnabled = platformCompat.isChangeEnabledByUidInternalNoLogging(
+                        changeId, receiverUid);
+                changeStateForUids.put(receiverUid, isChangeEnabled);
+            }
+            changeStateForReceivers[i] = isChangeEnabled;
+        }
+        return changeStateForReceivers;
     }
 
     static int getReceiverUid(@NonNull Object receiver) {

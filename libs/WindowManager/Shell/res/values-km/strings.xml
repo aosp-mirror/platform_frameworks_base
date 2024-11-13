@@ -127,8 +127,7 @@
     <string name="open_in_browser_text" msgid="9181692926376072904">"បើកក្នុងកម្មវិធីរុករកតាមអ៊ីនធឺណិត"</string>
     <string name="new_window_text" msgid="6318648868380652280">"វិនដូ​ថ្មី"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"គ្រប់គ្រង​វិនដូ"</string>
-    <!-- no translation found for change_aspect_ratio_text (9104456064548212806) -->
-    <skip />
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"ប្ដូរ​​សមាមាត្រ"</string>
     <string name="close_text" msgid="4986518933445178928">"បិទ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"បិទ​ម៉ឺនុយ"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"បើកម៉ឺនុយ"</string>
@@ -146,6 +145,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"នៅក្នុងកម្មវិធី"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"នៅក្នុង​កម្មវិធីរុករកតាម​អ៊ីនធឺណិត​របស់អ្នក"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"យល់ព្រម"</string>
-    <!-- no translation found for desktop_windowing_app_to_web_education_text (1599668769538703570) -->
-    <skip />
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"បើកកម្មវិធីយ៉ាងរហ័សនៅក្នុងកម្មវិធីរុករកតាមអ៊ីនធឺណិតរបស់អ្នកនៅទីនេះ"</string>
 </resources>

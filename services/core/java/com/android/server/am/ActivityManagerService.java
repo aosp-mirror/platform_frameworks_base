@@ -668,6 +668,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     private static final boolean ENABLE_PROC_LOCK = true;
 
+    private static final int DEFAULT_INTENT_CREATOR_UID = -1;
+
     /**
      * The lock for process management.
      *
@@ -1101,7 +1103,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProfilingServiceHelper.getInstance().onProfilingTriggerOccurred(
                         startInfo.getRealUid(),
                         startInfo.getPackageName(),
-                        ProfilingTrigger.TRIGGER_TYPE_APP_COLD_START_ACTIVITY);
+                        ProfilingTrigger.TRIGGER_TYPE_APP_FULLY_DRAWN);
             }
         }
     };
@@ -19307,36 +19309,37 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void addCreatorToken(@Nullable Intent intent, String creatorPackage) {
         if (!preventIntentRedirect()) return;
 
-        if (intent == null || intent.getExtraIntentKeys() == null) return;
-        for (String key : intent.getExtraIntentKeys()) {
-            try {
-                Intent extraIntent = intent.getParcelableExtra(key, Intent.class);
-                if (extraIntent == null) {
-                    Slog.w(TAG, "The key {" + key
-                            + "} does not correspond to an intent in the extra bundle.");
-                    continue;
-                }
-                IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent,
-                        creatorPackage);
-                if (creatorToken != null) {
-                    extraIntent.setCreatorToken(creatorToken);
-                    Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
-                            + creatorPackage + "; intent: " + intent);
-                    FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED,
-                            creatorToken.getCreatorUid());
-                }
-            } catch (Exception e) {
-                Slog.wtf(TAG,
-                        "Something went wrong when trying to add creator token for embedded "
-                                + "intents of intent: ."
-                                + intent, e);
+        if (intent == null) return;
+
+        String targetPackage = intent.getComponent() != null
+                ? intent.getComponent().getPackageName()
+                : intent.getPackage();
+        final boolean isCreatorSameAsTarget = creatorPackage != null && creatorPackage.equals(
+                targetPackage);
+        final boolean noExtraIntentKeys =
+                intent.getExtraIntentKeys() == null || intent.getExtraIntentKeys().isEmpty();
+        final int creatorUid = noExtraIntentKeys ? DEFAULT_INTENT_CREATOR_UID : Binder.getCallingUid();
+
+        intent.forEachNestedCreatorToken(extraIntent -> {
+            if (isCreatorSameAsTarget) {
+                FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED, creatorUid, true);
+                return;
             }
-        }
+            IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent, creatorUid,
+                    creatorPackage);
+            if (creatorToken != null) {
+                extraIntent.setCreatorToken(creatorToken);
+                // TODO remove Slog.wtf once proven FrameworkStatsLog works. b/375396329
+                Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
+                        + creatorPackage + "; intent: " + extraIntent);
+                FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED, creatorUid, false);
+            }
+        });
     }
 
-    private IntentCreatorToken createIntentCreatorToken(Intent intent, String creatorPackage) {
+    private IntentCreatorToken createIntentCreatorToken(Intent intent, int creatorUid,
+            String creatorPackage) {
         if (IntentCreatorToken.isValid(intent)) return null;
-        int creatorUid = getCallingUid();
         IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, creatorPackage, intent);
         IntentCreatorToken token;
         synchronized (sIntentCreatorTokenCache) {

@@ -76,6 +76,14 @@ flag {
 }
 
 flag {
+  name: "disable_opt_out_edge_to_edge"
+  namespace: "windowing_frontend"
+  description: "Deprecate and disable windowOptOutEdgeToEdgeEnforcement"
+  bug: "377864165"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "keyguard_going_away_timeout"
   namespace: "windowing_frontend"
   description: "Allow a maximum of 10 seconds with keyguardGoingAway=true before force-resetting"
@@ -152,12 +160,21 @@ flag {
 }
 
 flag {
-  name: "delegate_unhandled_drags"
-  is_exported: true
-  namespace: "multitasking"
-  description: "Enables delegating unhandled drags to SystemUI"
-  bug: "320797628"
-  is_fixed_read_only: true
+    name: "delegate_unhandled_drags"
+    is_exported: true
+    namespace: "multitasking"
+    description: "Enables delegating unhandled drags to SystemUI"
+    bug: "320797628"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "supports_drag_assistant_to_multiwindow"
+    is_exported: true
+    namespace: "multitasking"
+    description: "Enables support for dragging the assistant into multiwindow"
+    bug: "371206207"
+    is_fixed_read_only: true
 }
 
 flag {
@@ -254,6 +271,16 @@ flag {
   description: "The aspect ratio should always match when drawing snapshot"
   bug: "341020277"
   is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "system_ui_post_animation_end"
+  namespace: "windowing_frontend"
+  description: "Run AnimatorListener#onAnimationEnd on next frame for SystemUI"
+  bug: "300035126"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -388,4 +415,11 @@ flag {
     description: "Provide pre-make predictive back API extension"
     is_fixed_read_only: true
     bug: "362938401"
+}
+
+flag {
+    name: "predictive_back_three_button_nav"
+    namespace: "systemui"
+    description: "Enable Predictive Back Animation for 3-button-nav"
+    bug: "373544911"
 }

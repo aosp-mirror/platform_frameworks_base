@@ -612,6 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Дозволува апликацијата да ја одреди релативната положба помеѓу уредите со ултраширок појас во близина"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"да има интеракција со уредите со Wi‑Fi во близина"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Дозволува апликацијата да рекламира, да се поврзува и да ја одредува релативната положба на уреди со Wi‑Fi во близина"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информации за претпочитаната услуга за плаќање преку NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>

@@ -52,6 +52,7 @@ class DesktopMixedTransitionHandler(
     private val freeformTaskTransitionHandler: FreeformTaskTransitionHandler,
     private val closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler,
     private val desktopImmersiveController: DesktopImmersiveController,
+    private val desktopBackNavigationTransitionHandler: DesktopBackNavigationTransitionHandler,
     private val interactionJankMonitor: InteractionJankMonitor,
     @ShellMainThread private val handler: Handler,
     shellInit: ShellInit,
@@ -161,6 +162,14 @@ class DesktopMixedTransitionHandler(
                 finishTransaction,
                 finishCallback
             )
+            is PendingMixedTransition.Minimize -> animateMinimizeTransition(
+                pending,
+                transition,
+                info,
+                startTransaction,
+                finishTransaction,
+                finishCallback
+            )
         }
     }
 
@@ -205,17 +214,19 @@ class DesktopMixedTransitionHandler(
         finishTransaction: SurfaceControl.Transaction,
         finishCallback: TransitionFinishCallback,
     ): Boolean {
-        val launchChange = findDesktopTaskChange(info, pending.launchingTask)
-        if (launchChange == null) {
-            logV("No launch Change, returning")
-            return false
-        }
         // Check if there's also an immersive change during this launch.
         val immersiveExitChange = pending.exitingImmersiveTask?.let { exitingTask ->
             findDesktopTaskChange(info, exitingTask)
         }
         val minimizeChange = pending.minimizingTask?.let { minimizingTask ->
             findDesktopTaskChange(info, minimizingTask)
+        }
+        val launchChange = findDesktopTaskChange(info, pending.launchingTask)
+        if (launchChange == null) {
+            check(minimizeChange == null)
+            check(immersiveExitChange == null)
+            logV("No launch Change, returning")
+            return false
         }
 
         var subAnimationCount = -1
@@ -267,6 +278,42 @@ class DesktopMixedTransitionHandler(
             startTransaction,
             finishTransaction,
             finishCb
+        )
+    }
+
+    private fun animateMinimizeTransition(
+        pending: PendingMixedTransition.Minimize,
+        transition: IBinder,
+        info: TransitionInfo,
+        startTransaction: SurfaceControl.Transaction,
+        finishTransaction: SurfaceControl.Transaction,
+        finishCallback: TransitionFinishCallback,
+    ): Boolean {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue) return false
+
+        val minimizeChange = findDesktopTaskChange(info, pending.minimizingTask)
+        if (minimizeChange == null) {
+            logW("Should have minimizing desktop task")
+            return false
+        }
+        if (pending.isLastTask) {
+            // Dispatch close desktop task animation to the default transition handlers.
+            return dispatchToLeftoverHandler(
+                transition,
+                info,
+                startTransaction,
+                finishTransaction,
+                finishCallback
+            )
+        }
+
+        // Animate minimizing desktop task transition with [DesktopBackNavigationTransitionHandler].
+        return desktopBackNavigationTransitionHandler.startAnimation(
+            transition,
+            info,
+            startTransaction,
+            finishTransaction,
+            finishCallback,
         )
     }
 
@@ -397,6 +444,14 @@ class DesktopMixedTransitionHandler(
             val launchingTask: Int,
             val minimizingTask: Int?,
             val exitingImmersiveTask: Int?,
+        ) : PendingMixedTransition()
+
+        /** A task is minimizing. This should be used for task going to back and some closing cases
+         * with back navigation. */
+        data class Minimize(
+            override val transition: IBinder,
+            val minimizingTask: Int,
+            val isLastTask: Boolean,
         ) : PendingMixedTransition()
     }
 

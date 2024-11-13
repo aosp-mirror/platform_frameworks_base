@@ -130,15 +130,7 @@ fun Tile(
 
     // TODO(b/361789146): Draw the shapes instead of clipping
     val tileShape = TileDefaults.animateTileShape(uiState.state)
-    val animatedColor by
-        animateColorAsState(
-            if (iconOnly || !uiState.handlesSecondaryClick) {
-                colors.iconBackground
-            } else {
-                colors.background
-            },
-            label = "QSTileBackgroundColor",
-        )
+    val animatedColor by animateColorAsState(colors.background, label = "QSTileBackgroundColor")
 
     TileExpandable(
         color = { animatedColor },
@@ -156,6 +148,14 @@ fun Tile(
                     bounceEnd = currentBounceableInfo.bounceEnd,
                 ),
     ) { expandable ->
+        val longClick: (() -> Unit)? =
+            {
+                    hapticsViewModel?.setTileInteractionState(
+                        TileHapticsViewModel.TileInteractionState.LONG_CLICKED
+                    )
+                    tile.onLongClick(expandable)
+                }
+                .takeIf { uiState.handlesLongClick }
         TileContainer(
             onClick = {
                 tile.onClick(expandable)
@@ -166,12 +166,7 @@ fun Tile(
                     coroutineScope.launch { currentBounceableInfo.bounceable.animateBounce() }
                 }
             },
-            onLongClick = {
-                hapticsViewModel?.setTileInteractionState(
-                    TileHapticsViewModel.TileInteractionState.LONG_CLICKED
-                )
-                tile.onLongClick(expandable)
-            },
+            onLongClick = longClick,
             uiState = uiState,
             iconOnly = iconOnly,
         ) {
@@ -192,18 +187,11 @@ fun Tile(
                             tile.onSecondaryClick()
                         }
                         .takeIf { uiState.handlesSecondaryClick }
-                val longClick: (() -> Unit)? =
-                    {
-                            hapticsViewModel?.setTileInteractionState(
-                                TileHapticsViewModel.TileInteractionState.LONG_CLICKED
-                            )
-                            tile.onLongClick(expandable)
-                        }
-                        .takeIf { uiState.handlesLongClick }
                 LargeTileContent(
                     label = uiState.label,
                     secondaryLabel = uiState.secondaryLabel,
                     icon = icon,
+                    sideDrawable = uiState.sideDrawable,
                     colors = colors,
                     iconShape = iconShape,
                     toggleClick = secondaryClick,
@@ -237,7 +225,7 @@ private fun TileExpandable(
 @Composable
 fun TileContainer(
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onLongClick: (() -> Unit)?,
     uiState: TileUiState,
     iconOnly: Boolean,
     content: @Composable BoxScope.() -> Unit,
@@ -281,7 +269,7 @@ fun Modifier.tilePadding(): Modifier {
 @Composable
 fun Modifier.tileCombinedClickable(
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onLongClick: (() -> Unit)?,
     uiState: TileUiState,
     iconOnly: Boolean,
 ): Modifier {

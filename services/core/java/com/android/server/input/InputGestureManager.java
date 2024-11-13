@@ -215,6 +215,18 @@ final class InputGestureManager {
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_T,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                     KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_MINUS,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_EQUALS,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_M,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_S,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK));
         }
         if (keyboardA11yShortcutControl()) {
             if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()) {
@@ -323,26 +335,50 @@ final class InputGestureManager {
                 return InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST;
             }
             customGestures.remove(data.getTrigger());
-            if (customGestures.size() == 0) {
+            if (customGestures.isEmpty()) {
                 mCustomInputGestures.remove(userId);
             }
             return InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS;
         }
     }
 
-    public void removeAllCustomInputGestures(int userId) {
+    public void removeAllCustomInputGestures(int userId, @Nullable InputGestureData.Filter filter) {
         synchronized (mGestureLock) {
-            mCustomInputGestures.remove(userId);
+            Map<InputGestureData.Trigger, InputGestureData> customGestures =
+                    mCustomInputGestures.get(userId);
+            if (customGestures == null) {
+                return;
+            }
+            if (filter == null) {
+                mCustomInputGestures.remove(userId);
+                return;
+            }
+            customGestures.entrySet().removeIf(entry -> filter.matches(entry.getValue()));
+            if (customGestures.isEmpty()) {
+                mCustomInputGestures.remove(userId);
+            }
         }
     }
 
     @NonNull
-    public List<InputGestureData> getCustomInputGestures(int userId) {
+    public List<InputGestureData> getCustomInputGestures(int userId,
+            @Nullable InputGestureData.Filter filter) {
         synchronized (mGestureLock) {
             if (!mCustomInputGestures.contains(userId)) {
                 return List.of();
             }
-            return new ArrayList<>(mCustomInputGestures.get(userId).values());
+            Map<InputGestureData.Trigger, InputGestureData> customGestures =
+                    mCustomInputGestures.get(userId);
+            if (filter == null) {
+                return new ArrayList<>(customGestures.values());
+            }
+            List<InputGestureData> result = new ArrayList<>();
+            for (InputGestureData customGesture : customGestures.values()) {
+                if (filter.matches(customGesture)) {
+                    result.add(customGesture);
+                }
+            }
+            return result;
         }
     }
 

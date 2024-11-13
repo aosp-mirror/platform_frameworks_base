@@ -70,8 +70,8 @@ public class JankDataProcessor {
             for (int j = 0; j < mPendingStates.size(); j++) {
                 StateData pendingState = mPendingStates.get(j);
                 // This state was active during the frame
-                if (frame.frameVsyncId >= pendingState.mVsyncIdStart
-                        && frame.frameVsyncId <= pendingState.mVsyncIdEnd) {
+                if (frame.getVsyncId() >= pendingState.mVsyncIdStart
+                        && frame.getVsyncId() <= pendingState.mVsyncIdEnd) {
                     recordFrameCount(frame, pendingState, activityName, appUid);
 
                     pendingState.mProcessed = true;
@@ -84,6 +84,14 @@ public class JankDataProcessor {
         }
         // return the StatData object back to the pool to be reused.
         jankDataProcessingComplete();
+    }
+
+    /**
+     * Merges app jank stats reported by components outside the platform to the current pending
+     * stats
+     */
+    public void mergeJankStats(AppJankStats jankStats, String activityName) {
+        // TODO b/377572463 Add Merging Logic
     }
 
     /**
@@ -123,14 +131,14 @@ public class JankDataProcessor {
             mPendingJankStats.put(stateData.mStateDataKey, jankStats);
         }
         // This state has already been accounted for
-        if (jankStats.processedVsyncId == frameData.frameVsyncId) return;
+        if (jankStats.processedVsyncId == frameData.getVsyncId()) return;
 
         jankStats.mTotalFrames += 1;
-        if (frameData.jankType == JankData.JANK_APPLICATION) {
+        if ((frameData.getJankType() & JankData.JANK_APPLICATION) != 0) {
             jankStats.mJankyFrames += 1;
         }
-        jankStats.recordFrameOverrun(frameData.actualAppFrameTimeNs);
-        jankStats.processedVsyncId = frameData.frameVsyncId;
+        jankStats.recordFrameOverrun(frameData.getActualAppFrameTimeNanos());
+        jankStats.processedVsyncId = frameData.getVsyncId();
 
     }
 

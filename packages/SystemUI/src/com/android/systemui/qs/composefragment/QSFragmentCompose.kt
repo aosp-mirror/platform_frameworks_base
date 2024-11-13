@@ -70,6 +70,7 @@ import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -124,6 +125,7 @@ import com.android.systemui.qs.ui.composable.QuickSettingsShade
 import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.res.R
 import com.android.systemui.util.LifecycleFragment
+import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
@@ -447,8 +449,7 @@ constructor(
     }
 
     override fun setShouldUpdateSquishinessOnMedia(shouldUpdate: Boolean) {
-        super.setShouldUpdateSquishinessOnMedia(shouldUpdate)
-        // TODO (b/353253280)
+        viewModel.shouldUpdateSquishinessOnMedia = shouldUpdate
     }
 
     override fun setInSplitShade(isInSplitShade: Boolean) {
@@ -660,7 +661,20 @@ constructor(
 
                     Column(
                         modifier =
-                            Modifier.offset {
+                            Modifier.onPlaced { coordinates ->
+                                    val positionOnScreen = coordinates.positionOnScreen()
+                                    val left = positionOnScreen.x
+                                    val right = left + coordinates.size.width
+                                    val top = positionOnScreen.y
+                                    val bottom = top + coordinates.size.height
+                                    viewModel.applyNewQsScrollerBounds(
+                                        left = left,
+                                        top = top,
+                                        right = right,
+                                        bottom = bottom,
+                                    )
+                                }
+                                .offset {
                                     IntOffset(
                                         x = 0,
                                         y = viewModel.qsScrollTranslationY.fastRoundToInt(),
@@ -704,7 +718,10 @@ constructor(
                         val Media =
                             @Composable {
                                 if (viewModel.qsMediaVisible) {
-                                    MediaObject(mediaHost = viewModel.qsMediaHost)
+                                    MediaObject(
+                                        mediaHost = viewModel.qsMediaHost,
+                                        update = { translationY = viewModel.qsMediaTranslationY },
+                                    )
                                 }
                             }
                         Box(
@@ -987,7 +1004,11 @@ private fun Modifier.gesturesDisabled(disabled: Boolean) =
     }
 
 @Composable
-private fun MediaObject(mediaHost: MediaHost, modifier: Modifier = Modifier) {
+private fun MediaObject(
+    mediaHost: MediaHost,
+    modifier: Modifier = Modifier,
+    update: UniqueObjectHostView.() -> Unit = {},
+) {
     Box {
         AndroidView(
             modifier = modifier,
@@ -1000,6 +1021,7 @@ private fun MediaObject(mediaHost: MediaHost, modifier: Modifier = Modifier) {
                         )
                 }
             },
+            update = { view -> view.update() },
             onReset = {},
         )
     }

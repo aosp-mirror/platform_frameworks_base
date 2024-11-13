@@ -100,18 +100,6 @@ public class TestLooper {
             throw new RuntimeException("Reflection error constructing or accessing looper", e);
         }
 
-        // If we are using CombinedMessageQueue, we need to disable concurrent mode for testing.
-        try {
-            Field messageQueueUseConcurrentField =
-                    MessageQueue.class.getDeclaredField("mUseConcurrent");
-            messageQueueUseConcurrentField.setAccessible(true);
-            messageQueueUseConcurrentField.set(mLooper.getQueue(), false);
-        } catch (NoSuchFieldException e) {
-            // Ignore - maybe this is not CombinedMessageQueue?
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Reflection error constructing or accessing looper", e);
-        }
-
         mClock = clock;
     }
 

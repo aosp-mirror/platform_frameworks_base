@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -87,10 +89,11 @@ public class TextFromFloat implements Operation, VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mTextId, mValue, mDigitsBefore, mDigitsAfter, mFlags);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "TextFromFloat["
@@ -106,19 +109,20 @@ public class TextFromFloat implements Operation, VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         if (Float.isNaN(mValue)) {
             mOutValue = context.getFloat(Utils.idFromNan(mValue));
         }
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (Float.isNaN(mValue)) {
             context.listensTo(Utils.idFromNan(mValue), this);
         }
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -138,7 +142,7 @@ public class TextFromFloat implements Operation, VariableSupport {
      * @param flags flags that control if and how to fill the empty spots
      */
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int textId,
             float value,
             short digitsBefore,
@@ -151,7 +155,7 @@ public class TextFromFloat implements Operation, VariableSupport {
         buffer.writeInt(flags);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
         float value = buffer.readFloat();
         int tmp = buffer.readInt();
@@ -162,7 +166,7 @@ public class TextFromFloat implements Operation, VariableSupport {
         operations.add(new TextFromFloat(textId, value, pre, post, flags));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Draw text along path object")
                 .field(DocumentedOperation.INT, "textId", "id of the text generated")
@@ -173,12 +177,13 @@ public class TextFromFloat implements Operation, VariableSupport {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         float v = mOutValue;
         String s = StringUtils.floatToString(v, mDigitsBefore, mDigitsAfter, mPre, mAfter);
         context.loadText(mTextId, s);
     }
 
+    @NonNull
     @Override
     public String deepToString(String indent) {
         return indent + toString();

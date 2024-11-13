@@ -15,15 +15,18 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.util.ArrayList;
 
 public class OperationField {
     int mType;
     String mName;
     String mDescription;
-    String mVarSize = null;
+    @Nullable String mVarSize = null;
 
-    ArrayList<StringPair> mPossibleValues = new ArrayList<>();
+    @NonNull ArrayList<StringPair> mPossibleValues = new ArrayList<>();
 
     public OperationField(int type, String name, String description) {
         mType = type;
@@ -50,6 +53,7 @@ public class OperationField {
         return mDescription;
     }
 
+    @NonNull
     public ArrayList<StringPair> getPossibleValues() {
         return mPossibleValues;
     }
@@ -62,6 +66,7 @@ public class OperationField {
         return !mPossibleValues.isEmpty();
     }
 
+    @Nullable
     public String getVarSize() {
         return mVarSize;
     }

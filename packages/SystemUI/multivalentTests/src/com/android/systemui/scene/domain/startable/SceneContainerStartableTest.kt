@@ -23,6 +23,7 @@ import android.hardware.face.FaceManager
 import android.os.PowerManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.provider.Settings
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -43,6 +44,7 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingCollector
@@ -53,12 +55,14 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.haptics.msdl.fakeMSDLPlayer
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyevent.data.repository.fakeKeyEventRepository
+import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
@@ -106,11 +110,13 @@ import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvision
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -753,7 +759,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.POWER_BUTTON,
                 powerButtonLaunchGestureTriggered = false,
             )
-            transitionStateFlow.value = Transition(from = Scenes.Shade, to = Scenes.Lockscreen)
+            transitionStateFlow.value = Transition(from = Scenes.Gone, to = Scenes.Lockscreen)
             assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
 
             kosmos.fakePowerRepository.updateWakefulness(
@@ -1339,7 +1345,14 @@ class SceneContainerStartableTest : SysuiTestCase() {
             // Putting the device to sleep to lock it again, which shouldn't report another
             // successful unlock.
             kosmos.powerInteractor.setAsleepForTest()
-            runCurrent()
+            advanceTimeBy(
+                kosmos.userAwareSecureSettingsRepository
+                    .getInt(
+                        Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                        KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT,
+                    )
+                    .toLong()
+            )
             // Verify that the startable changed the scene to Lockscreen because the device locked
             // following the sleep.
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
@@ -2344,6 +2357,58 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 )
             runCurrent()
             assertThat(isLockscreenEnabled).isTrue()
+        }
+
+    @Test
+    fun replacesLockscreenSceneOnBackStack_whenUnlockdViaAlternateBouncer_fromShade() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val backStack by collectLastValue(sceneBackInteractor.backStack)
+            val isAlternateBouncerVisible by
+                collectLastValue(kosmos.alternateBouncerInteractor.isVisible)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Change to shade.
+            sceneInteractor.changeScene(Scenes.Shade, "")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Shade)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Show the alternate bouncer.
+            kosmos.alternateBouncerInteractor.forceShow()
+            kosmos.sysuiStatusBarStateController.leaveOpen = true // leave shade open
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isTrue()
+
+            // Trigger a fingerprint unlock.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Gone)
+            assertThat(isAlternateBouncerVisible).isFalse()
         }
 
     private fun TestScope.emulateSceneTransition(

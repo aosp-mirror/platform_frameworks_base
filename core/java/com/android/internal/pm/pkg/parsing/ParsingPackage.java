@@ -413,6 +413,18 @@ public interface ParsingPackage {
 
     ParsingPackage setOnBackInvokedCallbackEnabled(boolean enableOnBackInvokedCallback);
 
+    /**
+     * Set the drawable resources id array of the alternate icons that are parsing from the
+     * AndroidManifest file
+     */
+    ParsingPackage setAlternateLauncherIconResIds(int[] alternateLauncherIconResIds);
+
+    /**
+     * Set the string resources id array of the alternate labels that are parsing from the
+     * AndroidManifest file
+     */
+    ParsingPackage setAlternateLauncherLabelResIds(int[] alternateLauncherLabelResIds);
+
     @CallSuper
     ParsedPackage hideAsParsed();
 

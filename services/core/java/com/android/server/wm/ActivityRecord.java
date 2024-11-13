@@ -254,6 +254,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2537,6 +2538,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             }
             if (!activityAllDrawn && !isActivityHome) {
+                // Only check the special case of a fragment host task because the starting window
+                // may not be visible if the client organizer delays the transition ready.
+                if (task.mTaskFragmentHostProcessName != null) {
+                    // It may be launched from a task trampoline that already has a starting window.
+                    // Return NONE because 2 consecutive splashes may not look smooth in visual.
+                    final Task prevTask = task.getParent().getTaskBelow(task);
+                    if (prevTask != null) {
+                        final ActivityRecord prevTaskTop = prevTask.getTopMostActivity();
+                        if (prevTaskTop != null && prevTaskTop.hasStartingWindow()) {
+                            return STARTING_WINDOW_TYPE_NONE;
+                        }
+                    }
+                }
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
         }
@@ -5549,8 +5563,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!visible) {
                 if (mTransitionController.inPlayingTransition(this)) {
                     mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
-                } else if (mTransitionController.inFinishingTransition(this)) {
-                    mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
+                    if (mTransitionController.mFinishingTransition != null
+                            && mTransitionController.mFinishingTransition.isTransientLaunch(this)) {
+                        mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
+                    }
                 }
             } else {
                 mTransitionChangeFlags &= ~FLAG_IS_OCCLUDED;
@@ -8893,6 +8909,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAppCompatController.getAppCompatSizeCompatModePolicy();
 
         if (scmPolicy.hasAppCompatDisplayInsetsWithoutInheritance()
+                && mAppCompatDisplayInsets != null
                 && !mAppCompatDisplayInsets.mIsInFixedOrientationOrAspectRatioLetterbox) {
             // App prefers to keep its original size.
             // If the size compat is from previous fixed orientation letterboxing, we may want to
@@ -10307,6 +10324,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void adjustPictureInPictureParamsIfNeeded(Rect windowBounds) {
         if (pictureInPictureArgs != null && pictureInPictureArgs.hasSourceBoundsHint()) {
             pictureInPictureArgs.getSourceRectHint().offset(windowBounds.left, windowBounds.top);
+        }
+
+        if (android.app.Flags.enableTvImplicitEnterPipRestriction()) {
+            PackageManager pm = mAtmService.mContext.getPackageManager();
+            if (pictureInPictureArgs.isAutoEnterEnabled()
+                    && pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                    && pm.checkPermission(Manifest.permission.TV_IMPLICIT_ENTER_PIP, packageName)
+                    == PackageManager.PERMISSION_DENIED) {
+                Log.i(TAG,
+                        "Auto-enter PiP only allowed on TV if android.permission"
+                                + ".TV_IMPLICIT_ENTER_PIP permission is held by the app.");
+                PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
+                builder.setAutoEnterEnabled(false);
+                pictureInPictureArgs.copyOnlySet(builder.build());
+            }
         }
     }
 

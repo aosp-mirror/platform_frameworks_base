@@ -87,6 +87,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.times;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -4782,6 +4783,114 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testCameraCompatAspectRatioAppliedForFixedOrientationCameraActivities() {
+        // Needed to create camera compat policy in DisplayContent.
+        allowDesktopMode();
+        // Create display that has all stable insets and does not rotate.
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1080, 600)
+                .setSystemDecorations(true).setCanRotate(false).build();
+
+        final float cameraCompatAspectRatio = 4.0f;
+        setupCameraCompatAspectRatio(cameraCompatAspectRatio, display);
+
+        // Create task on test display.
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+
+        // Create fixed portrait activity.
+        final ActivityRecord fixedOrientationActivity = new ActivityBuilder(mAtm)
+                .setTask(task).setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT).build();
+        final Rect fixedOrientationAppBounds = new Rect(fixedOrientationActivity.getConfiguration()
+                .windowConfiguration.getAppBounds());
+
+        assertEquals(cameraCompatAspectRatio, computeAspectRatio(fixedOrientationAppBounds),
+                DELTA_ASPECT_RATIO_TOLERANCE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testCameraCompatAspectRatioForFixedOrientationCameraActivitiesPortraitWindow() {
+        // Needed to create camera compat policy in DisplayContent.
+        allowDesktopMode();
+        // Create portrait display that has all stable insets and does not rotate.
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1080, 1600)
+                .setSystemDecorations(true).setCanRotate(false).build();
+
+        final float cameraCompatAspectRatio = 4.0f;
+        setupCameraCompatAspectRatio(cameraCompatAspectRatio, display);
+
+        // Create task on test display.
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+
+        // Create fixed portrait activity.
+        final ActivityRecord fixedOrientationActivity = new ActivityBuilder(mAtm)
+                .setTask(task).setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT).build();
+        final Rect fixedOrientationAppBounds = new Rect(fixedOrientationActivity.getConfiguration()
+                .windowConfiguration.getAppBounds());
+
+        assertEquals(cameraCompatAspectRatio, computeAspectRatio(fixedOrientationAppBounds),
+                DELTA_ASPECT_RATIO_TOLERANCE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testCameraCompatAspectRatioAppliedInsteadOfDefaultAspectRatio() {
+        // Needed to create camera compat policy in DisplayContent.
+        allowDesktopMode();
+        // Create display that has all stable insets and does not rotate.
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1080, 600)
+                .setSystemDecorations(true).setCanRotate(false).build();
+
+        final float cameraCompatAspectRatio = 5.0f;
+        setupCameraCompatAspectRatio(cameraCompatAspectRatio, display);
+
+        // Create task on test display.
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+
+        // App's target min aspect ratio - this should not be used, as camera controls aspect ratio.
+        final float targetMinAspectRatio = 4.0f;
+
+        // Create fixed portrait activity with min aspect ratio greater than parent aspect ratio.
+        final ActivityRecord minAspectRatioActivity = new ActivityBuilder(mAtm)
+                .setTask(task).setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setMinAspectRatio(targetMinAspectRatio).build();
+        final Rect minAspectRatioAppBounds = new Rect(minAspectRatioActivity.getConfiguration()
+                .windowConfiguration.getAppBounds());
+
+        assertEquals(cameraCompatAspectRatio, computeAspectRatio(minAspectRatioAppBounds),
+                DELTA_ASPECT_RATIO_TOLERANCE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testCameraCompatAspectRatio_defualtAspectRatioAppliedWhenGreater() {
+        // Needed to create camera compat policy in DisplayContent.
+        allowDesktopMode();
+        // Create display that has all stable insets and does not rotate.
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1080, 600)
+                .setSystemDecorations(true).setCanRotate(false).build();
+
+        final float cameraCompatAspectRatio = 5.0f;
+        setupCameraCompatAspectRatio(cameraCompatAspectRatio, display);
+
+        // Create task on test display.
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
+
+        // App's target min aspect ratio bigger than camera compat aspect ratio - use that instead.
+        final float targetMinAspectRatio = 6.0f;
+
+        // Create fixed portrait activity with min aspect ratio greater than parent aspect ratio.
+        final ActivityRecord minAspectRatioActivity = new ActivityBuilder(mAtm)
+                .setTask(task).setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setMinAspectRatio(targetMinAspectRatio).build();
+        final Rect minAspectRatioAppBounds = new Rect(minAspectRatioActivity.getConfiguration()
+                .windowConfiguration.getAppBounds());
+
+        assertEquals(targetMinAspectRatio, computeAspectRatio(minAspectRatioAppBounds),
+                DELTA_ASPECT_RATIO_TOLERANCE);
+    }
+
+    @Test
     public void testUniversalResizeable() {
         mWm.mConstants.mIgnoreActivityOrientationRequest = true;
         setUpApp(mDisplayContent);
@@ -4866,6 +4975,25 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertFitted();
         assertEquals(newDensity, mActivity.getConfiguration().densityDpi);
+    }
+
+    /**
+     * {@code canEnterDesktopMode} is called when {@link CameraCompatFreeformPolicy} is created in
+     * {@link AppCompatCameraPolicy}.
+     *
+     * <p>{@link #allowDesktopMode()} needs to be called before {@link DisplayContent} is created.
+     */
+    private void allowDesktopMode() {
+        doReturn(true).when(() -> DesktopModeHelper.canEnterDesktopMode(any()));
+    }
+
+    private void setupCameraCompatAspectRatio(float cameraCompatAspectRatio,
+            @NonNull DisplayContent display) {
+        CameraCompatFreeformPolicy cameraPolicy = display.mAppCompatCameraPolicy
+                .mCameraCompatFreeformPolicy;
+        spyOn(cameraPolicy);
+        doReturn(true).when(cameraPolicy).shouldCameraCompatControlAspectRatio(any());
+        doReturn(cameraCompatAspectRatio).when(cameraPolicy).getCameraCompatAspectRatio(any());
     }
 
     private void setUpAllowThinLetterboxed(boolean thinLetterboxAllowed) {

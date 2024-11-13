@@ -20,7 +20,9 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.media.tv.flags.Flags;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -43,6 +45,7 @@ import java.util.Set;
  *
  * @hide
  */
+@SystemApi
 @FlaggedApi(Flags.FLAG_TIF_EXTENSION_STANDARDIZATION)
 public final class TvInputServiceExtensionManager {
     private static final String TAG = "TvInputServiceExtensionManager";
@@ -186,8 +189,7 @@ public final class TvInputServiceExtensionManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface StandardizedExtensionName {}
     /**
-     * Interface responsible for creating scan session and obtain parameters.
-     * @hide
+     * Interface responsible for creating scan session and obtaining related parameters.
      */
     public static final String ISCAN_INTERFACE = SCAN_PACKAGE + "IScanInterface";
     /**
@@ -286,12 +288,10 @@ public final class TvInputServiceExtensionManager {
     public static final String ISCAN_SAT_SEARCH = SCAN_PACKAGE + "IScanSatSearch";
     /**
      * Interface for Over-the-Air Download.
-     * @hide
      */
     public static final String IOAD_UPDATE_INTERFACE = OAD_PACKAGE + "IOadUpdateInterface";
     /**
      * Interface for handling conditional access module app related information.
-     * @hide
      */
     public static final String ICAM_APP_INFO_SERVICE = CAM_PACKAGE + "ICamAppInfoService";
     /**
@@ -406,8 +406,7 @@ public final class TvInputServiceExtensionManager {
     public static final String IDOWNLOADABLE_RATING_TABLE_MONITOR = RATING_PACKAGE
             + "IDownloadableRatingTableMonitor";
     /**
-     * Interface for handling RRT rating related information.
-     * @hide
+     * Interface for handling Region Rating Table rating system related information.
      */
     public static final String IRATING_INTERFACE = RATING_PACKAGE + "IRatingInterface";
     /**
@@ -442,12 +441,10 @@ public final class TvInputServiceExtensionManager {
     public static final String IPROGRAM_INFO_LISTENER = RATING_PACKAGE + "IProgramInfoListener";
     /**
      * Interface for getting broadcast time related information.
-     * @hide
      */
     public static final String IBROADCAST_TIME = TIME_PACKAGE + "BroadcastTime";
     /**
      * Interface for handling data service signal information on teletext.
-     * @hide
      */
     public static final String IDATA_SERVICE_SIGNAL_INFO = TELETEXT_PACKAGE
             + "IDataServiceSignalInfo";
@@ -476,17 +473,14 @@ public final class TvInputServiceExtensionManager {
             + "IScanBackgroundServiceUpdateListener";
     /**
      * Interface for generating client token.
-     * @hide
      */
     public static final String ICLIENT_TOKEN = CLIENT_TOKEN_PACKAGE + "IClientToken";
     /**
      * Interfaces for handling screen mode information.
-     * @hide
      */
     public static final String ISCREEN_MODE_SETTINGS = SCREEN_MODE_PACKAGE + "IScreenModeSettings";
     /**
      * Interfaces for handling HDMI signal information update.
-     * @hide
      */
     public static final String IHDMI_SIGNAL_INTERFACE = SIGNAL_PACKAGE + "IHdmiSignalInterface";
     /**
@@ -529,7 +523,6 @@ public final class TvInputServiceExtensionManager {
     public static final String ISERVICE_LIST_EDIT = SERVICE_DATABASE_PACKAGE + "IServiceListEdit";
     /**
      * Interfaces for changes on service database updates.
-     * @hide
      */
     public static final String ISERVICE_LIST_EDIT_LISTENER = SERVICE_DATABASE_PACKAGE
             + "IServiceListEditListener";
@@ -587,8 +580,7 @@ public final class TvInputServiceExtensionManager {
     public static final String ICHANNEL_LIST_TRANSFER = SERVICE_DATABASE_PACKAGE
             + "IChannelListTransfer";
     /**
-     * Interfaces for record contents updates.
-     * @hide
+     * Interface for operations related to recorded contents.
      */
     public static final String IRECORDED_CONTENTS = PVR_PACKAGE + "IRecordedContents";
     /**
@@ -605,7 +597,6 @@ public final class TvInputServiceExtensionManager {
             + "IGetInfoRecordedContentsCallback";
     /**
      * Interfaces for monitoring present event information.
-     * @hide
      */
     public static final String IEVENT_MONITOR = EVENT_PACKAGE + "IEventMonitor";
     /**
@@ -784,20 +775,22 @@ public final class TvInputServiceExtensionManager {
     }
 
     /**
-     * This function should be used by OEM to register IBinder objects that implement
-     * standardized AIDL interfaces.
+     * Registers IBinder objects that implement standardized AIDL interfaces.
+     * <p>This function should be used by SoCs/OEMs
      *
      * @param extensionName Extension Interface Name
      * @param binder        IBinder object to be registered
-     * @return REGISTER_SUCCESS on success of registering IBinder object
-     *         REGISTER_FAIL_NAME_NOT_STANDARDIZED on failure due to registering extension with
-     *              non-standardized name
-     *         REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED on failure due to IBinder not
+     * @return {@link #REGISTER_SUCCESS} on success of registering IBinder object
+     *         {@link #REGISTER_FAIL_NAME_NOT_STANDARDIZED} on failure due to registering extension
+     *              with non-standardized name
+     *         {@link #REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED} on failure due to IBinder not
      *              implementing standardized AIDL interface
-     *         REGISTER_FAIL_REMOTE_EXCEPTION on failure due to remote exception
+     *         {@link #REGISTER_FAIL_REMOTE_EXCEPTION} on failure due to remote exception
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
     @RegisterResult
     public int registerExtensionIBinder(@StandardizedExtensionName @NonNull String extensionName,
             @NonNull IBinder binder) {

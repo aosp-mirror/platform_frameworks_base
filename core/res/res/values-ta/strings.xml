@@ -612,6 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானிக்க ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"அருகிலுள்ள வைஃபை சாதனங்களுடன் தொடர்பு கொள்ளுதல்"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"அருகிலுள்ள வைஃபை சாதனங்களைத் தெரியப்படுத்தவும் இணைக்கவும் இருப்பிடத்தைத் தீர்மானிக்கவும் இது ஆப்ஸை அனுமதிக்கும்"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்கள்"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>

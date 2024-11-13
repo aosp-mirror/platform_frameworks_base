@@ -335,7 +335,11 @@ class MobileIconInteractorImpl(
     // Satellite level is unaffected by the inflateSignalStrength property
     // See b/346904529 for details
     private val satelliteShownLevel: StateFlow<Int> =
-        combine(level, isInService) { level, isInService -> if (isInService) level else 0 }
+        if (Flags.carrierRoamingNbIotNtn()) {
+                connectionRepository.satelliteLevel
+            } else {
+                combine(level, isInService) { level, isInService -> if (isInService) level else 0 }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
     private val cellularIcon: Flow<SignalIconModel.Cellular> =

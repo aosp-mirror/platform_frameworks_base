@@ -1017,6 +1017,12 @@ public class ActivityManager {
     public static final int PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL = 1 << 6;
 
     /**
+     * @hide
+     * Process is guaranteed cpu time (IE. it will not be frozen).
+     */
+    public static final int PROCESS_CAPABILITY_CPU_TIME = 1 << 7;
+
+    /**
      * @hide all capabilities, the ORing of all flags in {@link ProcessCapability}.
      *
      * Don't expose it as TestApi -- we may add new capabilities any time, which could
@@ -1028,7 +1034,8 @@ public class ActivityManager {
             | PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
             | PROCESS_CAPABILITY_BFSL
             | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK
-            | PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
+            | PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL
+            | PROCESS_CAPABILITY_CPU_TIME;
 
     /**
      * All implicit capabilities. This capability set is currently only used for processes under
@@ -1053,6 +1060,7 @@ public class ActivityManager {
         pw.print((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
         pw.print((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL) != 0 ? 'A' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_CPU_TIME) != 0 ? 'T' : '-');
     }
 
     /** @hide */
@@ -1065,6 +1073,7 @@ public class ActivityManager {
         sb.append((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
         sb.append((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
         sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL) != 0 ? 'A' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_CPU_TIME) != 0 ? 'T' : '-');
     }
 
     /**
@@ -5291,7 +5300,6 @@ public class ActivityManager {
         if (!exported) {
             /*
             RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
             Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid,
                     here);
             */

@@ -1306,6 +1306,8 @@
   <java-symbol type="array" name="vendor_policy_exempt_apps" />
   <java-symbol type="array" name="cloneable_apps" />
   <java-symbol type="array" name="config_securityStatePackages" />
+  <java-symbol type="array" name="stoppable_fgs_system_apps" />
+  <java-symbol type="array" name="vendor_stoppable_fgs_system_apps" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="default_lock_wallpaper" />
@@ -2096,6 +2098,7 @@
   <java-symbol type="integer" name="config_autoBrightnessDarkeningLightDebounce"/>
   <java-symbol type="integer" name="config_autoBrightnessInitialLightSensorRate"/>
   <java-symbol type="integer" name="config_autoBrightnessLightSensorRate"/>
+  <java-symbol type="integer" name="config_keyboardBacklightTimeoutMs" />
   <java-symbol type="integer" name="config_carDockKeepsScreenOn" />
   <java-symbol type="integer" name="config_criticalBatteryWarningLevel" />
   <java-symbol type="integer" name="config_datause_notification_type" />
@@ -3716,6 +3719,7 @@
   <java-symbol type="string" name="color_correction_feature_name" />
   <java-symbol type="string" name="reduce_bright_colors_feature_name" />
   <java-symbol type="string" name="config_defaultAccessibilityService" />
+  <java-symbol type="string" name="config_defaultSelectToSpeakService" />
   <java-symbol type="string" name="config_defaultAccessibilityNotificationSound" />
   <java-symbol type="string" name="accessibility_shortcut_spoken_feedback" />
   <java-symbol type="array" name="config_trustedAccessibilityServices" />

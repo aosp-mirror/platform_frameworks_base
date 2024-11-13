@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"تحديد الملف"</string>
     <string name="category_personal" msgid="6236798763159385225">"الملف الشخصي"</string>
     <string name="category_work" msgid="4014193632325996115">"ملف العمل"</string>
-    <string name="category_private" msgid="4244892185452788977">"الملف الخاص"</string>
+    <string name="category_private" msgid="4244892185452788977">"المساخة الخاصة"</string>
     <string name="category_clone" msgid="1554511758987195974">"استنساخ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"خيارات المطورين"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"تفعيل خيارات المطورين"</string>
@@ -591,6 +591,12 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"جهاز خارجي"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"جهاز متّصل"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"هذا الهاتف"</string>
+    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
+    <skip />
+    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
+    <skip />
+    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
+    <skip />
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"لا يمكن تشغيل الوسائط هنا"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"يجب ترقية الحساب للتبديل"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"المحتوى المنزَّل غير متوافق"</string>

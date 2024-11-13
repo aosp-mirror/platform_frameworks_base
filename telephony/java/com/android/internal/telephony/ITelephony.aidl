@@ -886,7 +886,7 @@ interface ITelephony {
     /**
     *  @return true if the ImsService to bind to for the slot id specified was set, false otherwise.
     */
-    boolean setBoundImsServiceOverride(int slotIndex, boolean isCarrierService,
+    boolean setBoundImsServiceOverride(int slotIndex, int userId, boolean isCarrierService,
             in int[] featureTypes, in String packageName);
 
     /**
@@ -2999,6 +2999,16 @@ interface ITelephony {
     void requestIsCommunicationAllowedForCurrentLocation(int subId, in ResultReceiver receiver);
 
     /**
+     * Request to get satellite access configuration for the current location.
+     *
+     * @param receiver Result receiver to get the error code of the request
+     *                 and satellite access configuration for the current location.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestSatelliteAccessConfigurationForCurrentLocation(in ResultReceiver receiver);
+
+    /**
      * Request to get the time after which the satellite will be visible.
      *
      * @param receiver Result receiver to get the error code of the request and the requested
@@ -3487,4 +3497,15 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void deprovisionSatellite(in List<SatelliteSubscriberInfo> list, in ResultReceiver result);
+
+   /**
+    * Inform whether application supports NTN SMS in satellite mode.
+    *
+    * This method is used by default messaging application to inform framework whether it supports
+    * NTN SMS or not.
+    *
+    * @param ntnSmsSupported {@code true} If application supports NTN SMS, else {@code false}.
+    * @hide
+    */
+    void setNtnSmsSupported(boolean ntnSmsSupported);
 }

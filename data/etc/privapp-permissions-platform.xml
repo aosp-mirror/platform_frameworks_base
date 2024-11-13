@@ -402,6 +402,9 @@ applications that come with the platform
         <permission name="android.permission.SHOW_CUSTOMIZED_RESOLVER"/>
         <!-- Permission required for access VIBRATOR_STATE. -->
         <permission name="android.permission.ACCESS_VIBRATOR_STATE"/>
+        <!-- Permission required for vendor vibration effects and sessions. -->
+        <permission name="android.permission.VIBRATE_VENDOR_EFFECTS"/>
+        <permission name="android.permission.START_VIBRATION_SESSIONS"/>
         <!-- Permission required for UsageStatsTest CTS test. -->
         <permission name="android.permission.MANAGE_NOTIFICATIONS"/>
         <!-- Permission required for CompanionDeviceManager CTS test. -->
@@ -591,6 +594,9 @@ applications that come with the platform
         <!-- Permission required for CTS test - AdvancedProtectionManagerTest -->
         <permission name="android.permission.SET_ADVANCED_PROTECTION_MODE" />
         <permission name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
+        <!-- Permissions required for CTS test - SettingsPreferenceServiceClientTest -->
+        <permission name="android.permission.READ_SYSTEM_PREFERENCES" />
+        <permission name="android.permission.WRITE_SYSTEM_PREFERENCES" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

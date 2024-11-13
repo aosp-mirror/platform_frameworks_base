@@ -42,6 +42,7 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.SystemProperties
+import android.os.UserHandle
 import android.util.Size
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
@@ -871,11 +872,10 @@ class DesktopTasksController(
             return
         }
 
-        // TODO(b/375356605): Introduce a new ResizeTrigger for drag-to-top.
         desktopModeEventLogger.logTaskResizingStarted(
-            ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
+            ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent, taskInfo, displayController
         )
-        toggleDesktopTaskSize(taskInfo, ResizeTrigger.UNKNOWN_RESIZE_TRIGGER, motionEvent)
+        toggleDesktopTaskSize(taskInfo, ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent)
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
@@ -1175,7 +1175,11 @@ class DesktopTasksController(
 
     private fun addWallpaperActivity(wct: WindowContainerTransaction) {
         logV("addWallpaperActivity")
-        val intent = Intent(context, DesktopWallpaperActivity::class.java)
+        val userHandle = UserHandle.of(userId)
+        val userContext =
+            context.createContextAsUser(userHandle, /* flags= */ 0)
+        val intent = Intent(userContext, DesktopWallpaperActivity::class.java)
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId)
         val options =
             ActivityOptions.makeBasic().apply {
                 launchWindowingMode = WINDOWING_MODE_FULLSCREEN
@@ -1183,11 +1187,13 @@ class DesktopTasksController(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
             }
         val pendingIntent =
-            PendingIntent.getActivity(
-                context,
-                /* requestCode = */ 0,
+            PendingIntent.getActivityAsUser(
+                userContext,
+                /* requestCode= */ 0,
                 intent,
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_IMMUTABLE,
+                /* bundle= */ null,
+                userHandle
             )
         wct.sendPendingIntent(pendingIntent, intent, options.toBundle())
     }
@@ -1291,7 +1297,11 @@ class DesktopTasksController(
                     // Check if freeform task launch during recents should be handled
                     shouldHandleMidRecentsFreeformLaunch -> handleMidRecentsFreeformTaskLaunch(task)
                     // Check if the closing task needs to be handled
-                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
+                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(
+                        task,
+                        transition,
+                        request.type
+                    )
                     // Check if the top task shouldn't be allowed to enter desktop mode
                     isIncompatibleTask(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if fullscreen task should be updated
@@ -1621,7 +1631,7 @@ class DesktopTasksController(
     }
 
     /** Handle task closing by removing wallpaper activity if it's the last active task */
-    private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
+    private fun handleTaskClosing(task: RunningTaskInfo, transition: IBinder, requestType: Int): WindowContainerTransaction? {
         logV("handleTaskClosing")
         if (!isDesktopModeShowing(task.displayId))
             return null
@@ -1637,8 +1647,15 @@ class DesktopTasksController(
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
             desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
+        } else if (requestType == TRANSIT_CLOSE) {
+            // Handle closing tasks, tasks that are going to back are handled in
+            // [DesktopTasksTransitionObserver].
+            desktopMixedTransitionHandler.addPendingMixedTransition(
+                DesktopMixedTransitionHandler.PendingMixedTransition.Minimize(
+                    transition, task.taskId, taskRepository.getVisibleTaskCount(task.displayId) == 1
+                )
+            )
         }
-
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(
                 task.displayId,
@@ -1770,9 +1787,13 @@ class DesktopTasksController(
         transition: IBinder,
         taskIdToMinimize: Int,
     ) {
-        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize) ?: return
+        val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize)
         desktopTasksLimiter.ifPresent {
-            it.addPendingMinimizeChange(transition, taskToMinimize.displayId, taskToMinimize.taskId)
+            it.addPendingMinimizeChange(
+                transition = transition,
+                displayId = taskToMinimize?.displayId ?: DEFAULT_DISPLAY,
+                taskId = taskIdToMinimize
+            )
         }
     }
 

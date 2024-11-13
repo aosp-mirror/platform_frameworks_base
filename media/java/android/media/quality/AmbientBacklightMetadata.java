@@ -16,6 +16,10 @@
 
 package android.media.quality;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntRange;
+import android.graphics.PixelFormat;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,9 +28,11 @@ import androidx.annotation.NonNull;
 import java.util.Arrays;
 
 /**
+ * Metadata of ambient backlight.
  * @hide
  */
-public class AmbientBacklightMetadata implements Parcelable {
+@FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
+public final class AmbientBacklightMetadata implements Parcelable {
     @NonNull
     private final String mPackageName;
     private final int mCompressAlgorithm;
@@ -37,6 +43,9 @@ public class AmbientBacklightMetadata implements Parcelable {
     @NonNull
     private final int[] mZonesColors;
 
+    /**
+     * Constructor of AmbientBacklightMetadata.
+     */
     public AmbientBacklightMetadata(@NonNull String packageName, int compressAlgorithm,
             int source, int colorFormat, int horizontalZonesNumber, int verticalZonesNumber,
             @NonNull int[] zonesColors) {
@@ -59,31 +68,58 @@ public class AmbientBacklightMetadata implements Parcelable {
         mZonesColors = in.createIntArray();
     }
 
+    /**
+     * Gets package name.
+     * @hide
+     */
     @NonNull
     public String getPackageName() {
         return mPackageName;
     }
 
+    /**
+     * Gets compress algorithm.
+     */
+    @AmbientBacklightSettings.CompressAlgorithm
     public int getCompressAlgorithm() {
         return mCompressAlgorithm;
     }
 
+    /**
+     * Gets source of ambient backlight detection.
+     */
+    @AmbientBacklightSettings.Source
     public int getSource() {
         return mSource;
     }
 
+    /**
+     * Gets color format.
+     */
+    @PixelFormat.Format
     public int getColorFormat() {
         return mColorFormat;
     }
 
+    /**
+     * Gets the number of lights in each horizontal zone.
+     */
+    @IntRange(from = 0)
     public int getHorizontalZonesNumber() {
         return mHorizontalZonesNumber;
     }
 
+    /**
+     * Gets the number of lights in each vertical zone.
+     */
+    @IntRange(from = 0)
     public int getVerticalZonesNumber() {
         return mVerticalZonesNumber;
     }
 
+    /**
+     * @hide
+     */
     @NonNull
     public int[] getZonesColors() {
         return mZonesColors;

@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.LifecycleCoroutineScope
+import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.BouncerPanelExpansionCalculator
 import com.android.systemui.Dumpable
@@ -63,6 +64,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.asIndenting
+import com.android.systemui.util.kotlin.emitOnStart
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
@@ -269,6 +271,23 @@ constructor(
     val qsMediaInRow: Boolean
         get() = qsMediaInRowViewModel.shouldMediaShowInRow
 
+    var shouldUpdateSquishinessOnMedia by mutableStateOf(false)
+
+    val qsMediaTranslationY by derivedStateOf {
+        if (
+            qsExpansion > 0f &&
+                !isKeyguardState &&
+                !qqsMediaVisible &&
+                !qsMediaInRow &&
+                !isInSplitShade
+        ) {
+            val interpolation = Interpolators.ACCELERATE.getInterpolation(1f - qsExpansion)
+            -qsMediaHost.hostView.height * 1.3f * interpolation
+        } else {
+            0f
+        }
+    }
+
     val animateTilesExpansion: Boolean
         get() = inFirstPage && !mediaSuddenlyAppearingInLandscape
 
@@ -277,6 +296,36 @@ constructor(
 
     private val mediaSuddenlyAppearingInLandscape: Boolean
         get() = !qqsMediaInRow && qsMediaInRow
+
+    private val collapsedLandscapeMedia by
+        hydrator.hydratedStateOf(
+            traceName = "collapsedLandscapeMedia",
+            initialValue = resources.getBoolean(R.bool.config_quickSettingsMediaLandscapeCollapsed),
+            source =
+                configurationInteractor.onAnyConfigurationChange.emitOnStart().map {
+                    resources.getBoolean(R.bool.config_quickSettingsMediaLandscapeCollapsed)
+                },
+        )
+
+    private val qqsMediaExpansion: Float
+        get() =
+            if (qqsMediaInRow && collapsedLandscapeMedia) {
+                MediaHostState.COLLAPSED
+            } else {
+                MediaHostState.EXPANDED
+            }
+
+    private val shouldApplySquishinessToMedia by derivedStateOf {
+        shouldUpdateSquishinessOnMedia || (isInSplitShade && statusBarState == StatusBarState.SHADE)
+    }
+
+    private val mediaSquishiness by derivedStateOf {
+        if (shouldApplySquishinessToMedia) {
+            squishinessFraction
+        } else {
+            1f
+        }
+    }
 
     private var qsBounds by mutableStateOf(Rect())
 
@@ -336,8 +385,6 @@ constructor(
     private val isOverscrolling: Boolean
         get() = overScrollAmount != 0
 
-    private var shouldUpdateMediaSquishiness by mutableStateOf(false)
-
     private val forceQs by derivedStateOf {
         (isQsExpanded || isStackScrollerOverscrolling) &&
             (isKeyguardState && !showCollapsedOnKeyguard)
@@ -375,10 +422,26 @@ constructor(
                 ),
         )
 
+    fun applyNewQsScrollerBounds(left: Float, top: Float, right: Float, bottom: Float) {
+        if (usingMedia) {
+            qsMediaHost.currentClipping.set(
+                left.toInt(),
+                top.toInt(),
+                right.toInt(),
+                bottom.toInt(),
+            )
+        }
+    }
+
     override suspend fun onActivated(): Nothing {
         initMediaHosts() // init regardless of using media (same as current QS).
         coroutineScope {
             launch { hydrateSquishinessInteractor() }
+            if (usingMedia) {
+                launch { hydrateQqsMediaExpansion() }
+                launch { hydrateMediaSquishiness() }
+                launch { hydrateMediaDisappearParameters() }
+            }
             launch { hydrator.activate() }
             launch { containerViewModel.activate() }
             launch { qqsMediaInRowViewModel.activate() }
@@ -389,7 +452,7 @@ constructor(
 
     private fun initMediaHosts() {
         qqsMediaHost.apply {
-            expansion = MediaHostState.EXPANDED
+            expansion = qqsMediaExpansion
             showsOnlyActiveMedia = true
             init(MediaHierarchyManager.LOCATION_QQS)
         }
@@ -403,6 +466,25 @@ constructor(
     private suspend fun hydrateSquishinessInteractor() {
         snapshotFlow { constrainedSquishinessFraction }
             .collect { squishinessInteractor.setSquishinessValue(it) }
+    }
+
+    private suspend fun hydrateQqsMediaExpansion() {
+        snapshotFlow { qqsMediaExpansion }.collect { qqsMediaHost.expansion = it }
+    }
+
+    private suspend fun hydrateMediaSquishiness() {
+        snapshotFlow { mediaSquishiness }.collect { qsMediaHost.squishFraction = it }
+    }
+
+    private suspend fun hydrateMediaDisappearParameters() {
+        coroutineScope {
+            launch {
+                snapshotFlow { qqsMediaInRow }.collect { qqsMediaHost.applyDisappearParameters(it) }
+            }
+            launch {
+                snapshotFlow { qsMediaInRow }.collect { qsMediaHost.applyDisappearParameters(it) }
+            }
+        }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -448,6 +530,11 @@ constructor(
                 println("qqsMediaInRow", qqsMediaInRow)
                 println("qsMediaVisible", qsMediaVisible)
                 println("qsMediaInRow", qsMediaInRow)
+                println("collapsedLandscapeMedia", collapsedLandscapeMedia)
+                println("qqsMediaExpansion", qqsMediaExpansion)
+                println("shouldUpdateSquishinessOnMedia", shouldUpdateSquishinessOnMedia)
+                println("mediaSquishiness", mediaSquishiness)
+                println("qsMediaTranslationY", qsMediaTranslationY)
             }
         }
     }
@@ -483,4 +570,23 @@ private fun mediaHostVisible(mediaHost: MediaHost): Flow<Boolean> {
         // the listener. The correct state is set as part of init, so we need to get the state
         // lazily.
         .onStart { emit(mediaHost.visible) }
+}
+
+// Taken from QSPanelControllerBase
+private fun MediaHost.applyDisappearParameters(inRow: Boolean) {
+    disappearParameters.apply {
+        fadeStartPosition = 0.95f
+        disappearStart = 0f
+        if (inRow) {
+            disappearSize.set(0f, 0.4f)
+            gonePivot.set(1f, 0f)
+            contentTranslationFraction.set(0.25f, 1f)
+            disappearEnd = 0.6f
+        } else {
+            disappearSize.set(1f, 0f)
+            gonePivot.set(0f, 0f)
+            contentTranslationFraction.set(0f, 1f)
+            disappearEnd = 0.95f
+        }
+    }
 }

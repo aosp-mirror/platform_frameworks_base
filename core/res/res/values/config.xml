@@ -1849,6 +1849,10 @@
         <item>-1</item>
     </integer-array>
 
+     <!-- Specifies the delay in milliseconds after the last user input before turning off the
+          keyboard backlight.
+    -->
+    <integer name="config_keyboardBacklightTimeoutMs">30000</integer>
     <!-- An array describing the screen's backlight values corresponding to the brightness
          values in the config_screenBrightnessNits array.
 
@@ -4596,6 +4600,11 @@
          exists on the device, the accessibility shortcut will be disabled by default. -->
     <string name="config_defaultAccessibilityService" translatable="false"></string>
 
+    <!-- The component name, flattened to a string, for the default select to speak service to be
+         enabled by the accessibility keyboard shortcut. If the service with the specified component
+         name is not preinstalled then this shortcut will do nothing. -->
+    <string name="config_defaultSelectToSpeakService" translatable="false"></string>
+
     <!-- URI for default Accessibility notification sound when to enable accessibility shortcut. -->
     <string name="config_defaultAccessibilityNotificationSound" translatable="false"></string>
 
@@ -6999,6 +7008,15 @@
         trusted certificate using the SHA-256 digest algorithm. -->
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
+
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for backing up HealthConnect's data and settings. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_backupHealthConnectDataAndSettingsKnownSigners"/>
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for restoring HealthConnect's data and settings. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_restoreHealthConnectDataAndSettingsKnownSigners"/>
 
     <!-- Package name of Health Connect data migrator application.  -->
     <string name="config_healthConnectMigratorPackageName"></string>

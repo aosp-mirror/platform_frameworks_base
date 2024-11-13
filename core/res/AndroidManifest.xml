@@ -2632,10 +2632,19 @@
 
     <!-- @SystemApi Allows access to perform vendor effects in the vibrator.
          <p>Protection level: signature
-         @FlaggedApi("android.os.vibrator.vendor_vibration_effects")
+         @FlaggedApi(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
          @hide
     -->
     <permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.os.vibrator.vendor_vibration_effects" />
+
+    <!-- @SystemApi Allows access to start a vendor vibration session.
+         <p>Protection level: signature
+        @FlaggedApi(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+        @hide
+    -->
+    <permission android:name="android.permission.START_VIBRATION_SESSIONS"
         android:protectionLevel="signature|privileged"
         android:featureFlag="android.os.vibrator.vendor_vibration_effects" />
 
@@ -4454,6 +4463,18 @@
                 android:description="@string/permdesc_hideOverlayWindows"
                 android:protectionLevel="normal" />
 
+    <!-- Allows an app to enter Picture-in-Picture mode when the user is not explicitly requesting
+        it. This includes using {@link PictureInPictureParams.Builder#setAutoEnterEnabled} as well
+        as lifecycle methods such as {@link Activity#onUserLeaveHint} and {@link Activity#onPause}
+        to enter PiP when the user leaves the app.
+        This permission should only be used for certain PiP
+        <a href="{@docRoot}training/tv/get-started/multitasking#usage-types">usage types</a>.
+        @FlaggedApi(android.app.Flags.FLAG_ENABLE_TV_IMPLICIT_ENTER_PIP_RESTRICTION)
+     -->
+    <permission android:name="android.permission.TV_IMPLICIT_ENTER_PIP"
+        android:protectionLevel="normal"
+        android:featureFlag="android.app.enable_tv_implicit_enter_pip_restriction" />
+
     <!-- ================================== -->
     <!-- Permissions affecting the system wallpaper -->
     <!-- ================================== -->
@@ -4959,6 +4980,27 @@
     <p>Protection level: signature|privileged|role -->
     <permission android:name="android.permission.PROVIDE_REMOTE_CREDENTIALS"
                 android:protectionLevel="signature|privileged|role" />
+
+    <!-- @FlaggedApi(com.android.settingslib.flags.Flags.FLAG_SETTINGS_CATALYST)
+         Allows an application to access the Settings Preference services to read settings exposed
+         by the system Settings app and system apps that contribute settings surfaced by the
+         Settings app.
+         <p>This allows the calling application to read settings values through the host
+         application, agnostic of underlying storage. -->
+    <permission android:name="android.permission.READ_SYSTEM_PREFERENCES"
+        android:protectionLevel="signature|privileged|role"
+        android:featureFlag="com.android.settingslib.flags.settings_catalyst" />
+
+    <!-- @FlaggedApi(com.android.settingslib.flags.Flags.FLAG_SETTINGS_CATALYST)
+         Allows an application to access the Settings Preference services to write settings
+         values exposed by the system Settings app and system apps that contribute settings surfaced
+         in the Settings app.
+         <p>This allows the calling application to write settings values
+         through the host application, agnostic of underlying storage.
+         <p>Protection Level: signature|privileged|appop - appop to be added in followup -->
+    <permission android:name="android.permission.WRITE_SYSTEM_PREFERENCES"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="com.android.settingslib.flags.settings_catalyst" />
 
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
@@ -8293,6 +8335,26 @@
         android:protectionLevel="signature|knownSigner"
         android:knownCerts="@array/config_healthConnectMigrationKnownSigners" />
 
+    <!-- @hide @SystemApi Allows permitted apps to back up Health Connect data and settings.
+             <p>Protection level: signature|knownSigner
+         @FlaggedApi("android.permission.flags.health_connect_backup_restore_permission_enabled")
+    -->
+    <permission
+        android:name="android.permission.BACKUP_HEALTH_CONNECT_DATA_AND_SETTINGS"
+        android:protectionLevel="signature|knownSigner"
+        android:knownCerts="@array/config_backupHealthConnectDataAndSettingsKnownSigners"
+        android:featureFlag="android.permission.flags.health_connect_backup_restore_permission_enabled" />
+
+    <!-- @hide @SystemApi Allows permitted apps to restore Health Connect data and settings.
+             <p>Protection level: signature|knownSigner
+         @FlaggedApi("android.permission.flags.health_connect_backup_restore_permission_enabled")
+    -->
+    <permission
+        android:name="android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS"
+        android:protectionLevel="signature|knownSigner"
+        android:knownCerts="@array/config_restoreHealthConnectDataAndSettingsKnownSigners"
+        android:featureFlag="android.permission.flags.health_connect_backup_restore_permission_enabled" />
+
     <!-- @SystemApi Allows an app to query apps in clone profile. The permission is
          bidirectional in nature, i.e. cloned apps would be able to query apps in root user.
          The permission is not meant for 3P apps as of now.
@@ -8481,6 +8543,16 @@
     <permission android:name="android.permission.ENTER_TRADE_IN_MODE"
                 android:protectionLevel="signature|privileged"
                 android:featureFlag="com.android.tradeinmode.flags.enable_trade_in_mode" />
+
+    <!-- @SystemApi
+        @FlaggedApi(com.android.art.flags.Flags.FLAG_EXECUTABLE_METHOD_FILE_OFFSETS)
+        Ability to read program metadata and attach dynamic instrumentation.
+        <p>Protection level: signature
+        @hide
+    -->
+    <permission android:name="android.permission.DYNAMIC_INSTRUMENTATION"
+                android:protectionLevel="signature"
+                android:featureFlag="com.android.art.flags.executable_method_file_offsets" />
 
     <!--
         @TestApi

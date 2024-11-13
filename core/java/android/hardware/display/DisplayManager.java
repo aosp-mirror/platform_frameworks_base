@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.HdrCapabilities.HdrType;
 import static android.view.Display.INVALID_DISPLAY;
@@ -575,12 +576,20 @@ public final class DisplayManager {
             EVENT_FLAG_DISPLAY_ADDED,
             EVENT_FLAG_DISPLAY_CHANGED,
             EVENT_FLAG_DISPLAY_REMOVED,
-            EVENT_FLAG_DISPLAY_BRIGHTNESS,
-            EVENT_FLAG_HDR_SDR_RATIO_CHANGED,
-            EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventFlag {}
+
+    /**
+     * @hide
+     */
+    @LongDef(flag = true, prefix = {"PRIVATE_EVENT_FLAG_"}, value = {
+            PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS,
+            PRIVATE_EVENT_FLAG_HDR_SDR_RATIO_CHANGED,
+            PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PrivateEventFlag {}
 
     /**
      * Event type for when a new display is added.
@@ -618,7 +627,7 @@ public final class DisplayManager {
      *
      * @hide
      */
-    public static final long EVENT_FLAG_DISPLAY_BRIGHTNESS = 1L << 3;
+    public static final long PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS = 1L << 0;
 
     /**
      * Event flag to register for a display's hdr/sdr ratio changes. This notification is sent
@@ -631,14 +640,16 @@ public final class DisplayManager {
      *
      * @hide
      */
-    public static final long EVENT_FLAG_HDR_SDR_RATIO_CHANGED = 1L << 4;
+    public static final long PRIVATE_EVENT_FLAG_HDR_SDR_RATIO_CHANGED = 1L << 1;
 
     /**
      * Event flag to register for a display's connection changed.
      *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
      * @hide
      */
-    public static final long EVENT_FLAG_DISPLAY_CONNECTION_CHANGED = 1L << 5;
+    public static final long PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED = 1L << 2;
+
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -774,20 +785,49 @@ public final class DisplayManager {
      * @param listener The listener to register.
      * @param handler The handler on which the listener should be invoked, or null
      * if the listener should be invoked on the calling thread's looper.
-     * @param eventFlagsMask A bitmask of the event types for which this listener is subscribed.
+     * @param eventFlags A bitmask of the event types for which this listener is subscribed.
      *
      * @see #EVENT_FLAG_DISPLAY_ADDED
      * @see #EVENT_FLAG_DISPLAY_CHANGED
      * @see #EVENT_FLAG_DISPLAY_REMOVED
-     * @see #EVENT_FLAG_DISPLAY_BRIGHTNESS
      * @see #registerDisplayListener(DisplayListener, Handler)
      * @see #unregisterDisplayListener
      *
      * @hide
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
-            @Nullable Handler handler, @EventFlag long eventFlagsMask) {
-        mGlobal.registerDisplayListener(listener, handler, eventFlagsMask,
+            @Nullable Handler handler, @EventFlag long eventFlags) {
+        mGlobal.registerDisplayListener(listener, handler,
+                mGlobal.mapFlagsToInternalEventFlag(eventFlags, 0),
+                ActivityThread.currentPackageName());
+    }
+
+    /**
+     * Registers a display listener to receive notifications about given display event types.
+     *
+     * @param listener The listener to register.
+     * @param handler The handler on which the listener should be invoked, or null
+     * if the listener should be invoked on the calling thread's looper.
+     * @param eventFlags A bitmask of the event types for which this listener is subscribed.
+     * @param privateEventFlags A bitmask of the private event types for which this listener
+     *                          is subscribed.
+     *
+     * @see #EVENT_FLAG_DISPLAY_ADDED
+     * @see #EVENT_FLAG_DISPLAY_CHANGED
+     * @see #EVENT_FLAG_DISPLAY_REMOVED
+     * @see #PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS
+     * @see #PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED
+     * @see #PRIVATE_EVENT_FLAG_HDR_SDR_RATIO_CHANGED
+     * @see #registerDisplayListener(DisplayListener, Handler)
+     * @see #unregisterDisplayListener
+     *
+     * @hide
+     */
+    public void registerDisplayListener(@NonNull DisplayListener listener,
+            @Nullable Handler handler, @EventFlag long eventFlags,
+            @PrivateEventFlag long privateEventFlags) {
+        mGlobal.registerDisplayListener(listener, handler,
+                mGlobal.mapFlagsToInternalEventFlag(eventFlags, privateEventFlags),
                 ActivityThread.currentPackageName());
     }
 
@@ -1722,6 +1762,29 @@ public final class DisplayManager {
                     : DEFAULT_DISPLAY;
         }
         return mDisplayIdToMirror;
+    }
+
+    /**
+     * @return The current display topology that represents the relative positions of extended
+     * displays.
+     *
+     * @hide
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    @Nullable
+    public DisplayTopology getDisplayTopology() {
+        return mGlobal.getDisplayTopology();
+    }
+
+    /**
+     * Set the relative positions between extended displays (display topology).
+     * @param topology The display topology to be set
+     *
+     * @hide
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    public void setDisplayTopology(DisplayTopology topology) {
+        mGlobal.setDisplayTopology(topology);
     }
 
     /**

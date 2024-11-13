@@ -303,6 +303,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private final GnssPowerStatsCollector mGnssPowerStatsCollector;
     private final CustomEnergyConsumerPowerStatsCollector mCustomEnergyConsumerPowerStatsCollector;
     private final SparseBooleanArray mPowerStatsCollectorEnabled = new SparseBooleanArray();
+    private boolean mMoveWscLoggingToNotifierEnabled = false;
+
     private ScreenPowerStatsCollector.ScreenUsageTimeRetriever mScreenUsageTimeRetriever =
             new ScreenPowerStatsCollector.ScreenUsageTimeRetriever() {
 
@@ -5155,7 +5157,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
             Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
             uidStats.noteStartWakeLocked(pid, name, type, elapsedRealtimeMs);
-            if (!mPowerManagerFlags.isMoveWscLoggingToNotifierEnabled()) {
+            if (!mMoveWscLoggingToNotifierEnabled) {
                 mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
                         uidStats.mProcessState, true /* acquired */,
                         getPowerManagerWakeLockLevel(type));
@@ -5206,7 +5208,7 @@ public class BatteryStatsImpl extends BatteryStats {
             Uid uidStats = getUidStatsLocked(mappedUid, elapsedRealtimeMs, uptimeMs);
             uidStats.noteStopWakeLocked(pid, name, type, elapsedRealtimeMs);
 
-            if (!mPowerManagerFlags.isMoveWscLoggingToNotifierEnabled()) {
+            if (!mMoveWscLoggingToNotifierEnabled) {
                 mFrameworkStatsLogger.wakelockStateChanged(mapIsolatedUid(uid), wc, name,
                         uidStats.mProcessState, false/* acquired */,
                         getPowerManagerWakeLockLevel(type));
@@ -15975,6 +15977,15 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /**
+     * Controls where the logging of the WakelockStateChanged atom occurs:
+     *   true = Notifier, false = BatteryStatsImpl.
+     */
+    public void setMoveWscLoggingToNotifierEnabled(boolean enabled) {
+        synchronized (this) {
+            mMoveWscLoggingToNotifierEnabled = enabled;
+        }
+    }
     @GuardedBy("this")
     public void systemServicesReady(Context context) {
         mConstants.startObserving(context.getContentResolver());

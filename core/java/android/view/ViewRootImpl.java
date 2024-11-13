@@ -140,6 +140,8 @@ import android.accessibilityservice.AccessibilityService;
 import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -185,7 +187,6 @@ import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.SyncFence;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.input.InputManagerGlobal;
@@ -1251,7 +1252,6 @@ public final class ViewRootImpl implements ViewParent,
         mExtraDisplayListenerLogging = !TextUtils.isEmpty(name) && name.equals(mBasePackageName);
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
-        mLocation.fillInStackTrace();
         mWidth = -1;
         mHeight = -1;
         mDirty = new Rect();
@@ -1816,9 +1816,9 @@ public final class ViewRootImpl implements ViewParent,
                 .registerDisplayListener(
                         mDisplayListener,
                         mHandler,
-                        DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED,
+                        DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
                         mBasePackageName);
 
         if (forceInvertColor()) {
@@ -2759,6 +2759,9 @@ public final class ViewRootImpl implements ViewParent,
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.
         mSurface.transferFrom(blastSurface);
+
+        // Since the SurfaceControl is a VRI, indicate that it can recover from buffer stuffing.
+        mTransaction.setRecoverableFromBufferStuffing(mSurfaceControl).applyAsyncUnsafe();
     }
 
     private void setBoundsLayerCrop(Transaction t) {
@@ -9952,11 +9955,13 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        if (!mIsDrawing) {
-            destroyHardwareRenderer();
-        } else {
-            Log.e(mTag, "Attempting to destroy the window while drawing!\n" +
-                    "  window=" + this + ", title=" + mWindowAttributes.getTitle());
+        if (!com.android.graphics.hwui.flags.Flags.removeVriSketchyDestroy()) {
+            if (!mIsDrawing) {
+                destroyHardwareRenderer();
+            } else {
+                Log.e(mTag, "Attempting to destroy the window while drawing!\n"
+                        + "  window=" + this + ", title=" + mWindowAttributes.getTitle());
+            }
         }
         mHandler.sendEmptyMessage(MSG_DIE);
         return true;
@@ -9977,9 +9982,9 @@ public final class ViewRootImpl implements ViewParent,
                 dispatchDetachedFromWindow();
             }
 
-            if (mAdded && !mFirst) {
-                destroyHardwareRenderer();
+            destroyHardwareRenderer();
 
+            if (mAdded && !mFirst) {
                 if (mView != null) {
                     int viewVisibility = mView.getVisibility();
                     boolean viewVisibilityChanged = mViewVisibility != viewVisibility;
@@ -11893,6 +11898,20 @@ public final class ViewRootImpl implements ViewParent,
     @NonNull
     public IBinder getWindowToken() {
         return mAttachInfo.mWindowToken;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @NonNull
+    @Override
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_JANK_API)
+    public SurfaceControl.OnJankDataListenerRegistration registerOnJankDataListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SurfaceControl.OnJankDataListener listener) {
+        SurfaceControl.OnJankDataListener wrapped = (data) ->
+                executor.execute(() -> listener.onJankDataAvailable(data));
+        return mSurfaceControl.addOnJankDataListener(wrapped);
     }
 
     /**

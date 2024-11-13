@@ -243,6 +243,15 @@ flag {
 }
 
 flag {
+    name: "update_engine_api"
+    namespace: "art_mainline"
+    description: "Update Engine APIs for ART"
+    is_exported: true
+    is_fixed_read_only: true
+    bug: "377557749"
+}
+
+flag {
      namespace: "system_performance"
      name: "perfetto_sdk_tracing"
      description: "Tracing using Perfetto SDK."

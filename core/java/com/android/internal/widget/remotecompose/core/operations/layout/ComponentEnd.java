@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -26,10 +29,11 @@ import java.util.List;
 public class ComponentEnd implements Operation {
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "COMPONENT_END";
@@ -40,11 +44,13 @@ public class ComponentEnd implements Operation {
         // nothing
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@Nullable String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
+    @NonNull
     public static String name() {
         return "ComponentEnd";
     }
@@ -53,7 +59,7 @@ public class ComponentEnd implements Operation {
         return Operations.COMPONENT_END;
     }
 
-    public static void apply(WireBuffer buffer) {
+    public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(Operations.COMPONENT_END);
     }
 
@@ -61,11 +67,11 @@ public class ComponentEnd implements Operation {
         return 1 + 4 + 4 + 4;
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new ComponentEnd());
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(
                         "End tag for components / layouts. This operation marks the end"

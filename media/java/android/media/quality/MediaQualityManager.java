@@ -19,6 +19,7 @@ package android.media.quality;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.media.tv.flags.Flags;
@@ -63,7 +64,7 @@ public final class MediaQualityManager {
         mService = service;
         IPictureProfileCallback ppCallback = new IPictureProfileCallback.Stub() {
             @Override
-            public void onPictureProfileAdded(long profileId, PictureProfile profile) {
+            public void onPictureProfileAdded(String profileId, PictureProfile profile) {
                 synchronized (mLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
@@ -72,7 +73,7 @@ public final class MediaQualityManager {
                 }
             }
             @Override
-            public void onPictureProfileUpdated(long profileId, PictureProfile profile) {
+            public void onPictureProfileUpdated(String profileId, PictureProfile profile) {
                 synchronized (mLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
@@ -81,11 +82,29 @@ public final class MediaQualityManager {
                 }
             }
             @Override
-            public void onPictureProfileRemoved(long profileId, PictureProfile profile) {
+            public void onPictureProfileRemoved(String profileId, PictureProfile profile) {
                 synchronized (mLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
                         record.postPictureProfileRemoved(profileId, profile);
+                    }
+                }
+            }
+            @Override
+            public void onParamCapabilitiesChanged(String profileId, List<ParamCapability> caps) {
+                synchronized (mLock) {
+                    for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
+                        // TODO: filter callback record
+                        record.postParamCapabilitiesChanged(profileId, caps);
+                    }
+                }
+            }
+            @Override
+            public void onError(int err) {
+                synchronized (mLock) {
+                    for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
+                        // TODO: filter callback record
+                        record.postError(err);
                     }
                 }
             }
@@ -175,14 +194,17 @@ public final class MediaQualityManager {
 
 
     /**
-     * Gets picture profile by given profile ID.
-     * @return the corresponding picture profile if available; {@code null} if the ID doesn't
-     *         exist or the profile is not accessible to the caller.
+     * Gets picture profile by given profile type and name.
+     *
+     * @return the corresponding picture profile if available; {@code null} if the name doesn't
+     *         exist.
      * @hide
      */
-    public PictureProfile getPictureProfileById(long profileId) {
+    @Nullable
+    public PictureProfile getPictureProfile(
+            @PictureProfile.ProfileType int type, @NonNull String name) {
         try {
-            return mService.getPictureProfileById(profileId);
+            return mService.getPictureProfile(type, name);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -190,11 +212,13 @@ public final class MediaQualityManager {
 
 
     /**
-     * @SystemApi gets profiles that available to the given package
-     * @hide
+     * Gets profiles that available to the given package.
+     *
+     * @hide @SystemApi
      */
+    @NonNull
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
-    public List<PictureProfile> getPictureProfilesByPackage(String packageName) {
+    public List<PictureProfile> getPictureProfilesByPackage(@NonNull String packageName) {
         try {
             return mService.getPictureProfilesByPackage(packageName);
         } catch (RemoteException e) {
@@ -215,13 +239,16 @@ public final class MediaQualityManager {
     }
 
     /**
-     * @SystemApi all stored picture profiles of all packages
-     * @hide
+     * Gets all package names whose picture profiles are available.
+     *
+     * @see #getPictureProfilesByPackage(String)
+     * @hide @SystemApi
      */
+    @NonNull
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
-    public List<PictureProfile> getAllPictureProfiles() {
+    public List<String> getPictureProfilePackageNames() {
         try {
-            return mService.getAllPictureProfiles();
+            return mService.getPictureProfilePackageNames();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -231,10 +258,12 @@ public final class MediaQualityManager {
     /**
      * Creates a picture profile and store it in the system.
      *
-     * @return the stored profile with an assigned profile ID.
+     * @return the stored profile with an assigned profile ID. {@code null} if it's not created
+     * successfully.
      * @hide
      */
-    public PictureProfile createPictureProfile(PictureProfile pp) {
+    @Nullable
+    public PictureProfile createPictureProfile(@NonNull PictureProfile pp) {
         try {
             return mService.createPictureProfile(pp);
         } catch (RemoteException e) {
@@ -247,7 +276,7 @@ public final class MediaQualityManager {
      * Updates an existing picture profile and store it in the system.
      * @hide
      */
-    public void updatePictureProfile(long profileId, PictureProfile pp) {
+    public void updatePictureProfile(@NonNull String profileId, @NonNull PictureProfile pp) {
         try {
             mService.updatePictureProfile(profileId, pp);
         } catch (RemoteException e) {
@@ -260,7 +289,7 @@ public final class MediaQualityManager {
      * Removes a picture profile from the system.
      * @hide
      */
-    public void removePictureProfile(long profileId) {
+    public void removePictureProfile(@NonNull String profileId) {
         try {
             mService.removePictureProfile(profileId);
         } catch (RemoteException e) {
@@ -307,7 +336,7 @@ public final class MediaQualityManager {
      *         exist or the profile is not accessible to the caller.
      * @hide
      */
-    public SoundProfile getSoundProfileById(long profileId) {
+    public SoundProfile getSoundProfileById(String profileId) {
         try {
             return mService.getSoundProfileById(profileId);
         } catch (RemoteException e) {
@@ -346,9 +375,9 @@ public final class MediaQualityManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
-    public List<SoundProfile> getAllSoundProfiles() {
+    public List<String> getSoundProfilePackageNames() {
         try {
-            return mService.getAllSoundProfiles();
+            return mService.getSoundProfilePackageNames();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -374,7 +403,7 @@ public final class MediaQualityManager {
      * Updates an existing sound profile and store it in the system.
      * @hide
      */
-    public void updateSoundProfile(long profileId, SoundProfile sp) {
+    public void updateSoundProfile(String profileId, SoundProfile sp) {
         try {
             mService.updateSoundProfile(profileId, sp);
         } catch (RemoteException e) {
@@ -387,7 +416,7 @@ public final class MediaQualityManager {
      * Removes a sound profile from the system.
      * @hide
      */
-    public void removeSoundProfile(long profileId) {
+    public void removeSoundProfile(String profileId) {
         try {
             mService.removeSoundProfile(profileId);
         } catch (RemoteException e) {
@@ -399,7 +428,8 @@ public final class MediaQualityManager {
      * Gets capability information of the given parameters.
      * @hide
      */
-    public List<ParamCapability> getParamCapabilities(List<String> names) {
+    @NonNull
+    public List<ParamCapability> getParamCapabilities(@NonNull List<String> names) {
         try {
             return mService.getParamCapabilities(names);
         } catch (RemoteException e) {
@@ -408,7 +438,38 @@ public final class MediaQualityManager {
     }
 
     /**
+     * Gets the allowlist of packages that can create and removed picture profiles
+     *
+     * @see #createPictureProfile(PictureProfile)
+     * @see #removePictureProfile(String)
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    @NonNull
+    public List<String> getPictureProfileAllowList() {
+        try {
+            return mService.getPictureProfileAllowList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the allowlist of packages that can create and removed picture profiles
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    public void setPictureProfileAllowList(@NonNull List<String> packageNames) {
+        try {
+            mService.setPictureProfileAllowList(packageNames);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns {@code true} if media quality HAL is implemented; {@code false} otherwise.
+     * @hide
      */
     public boolean isSupported() {
         try {
@@ -506,7 +567,6 @@ public final class MediaQualityManager {
 
     /**
      * Registers a {@link AmbientBacklightCallback}.
-     * @hide
      */
     public void registerAmbientBacklightCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -520,7 +580,6 @@ public final class MediaQualityManager {
 
     /**
      * Unregisters the existing {@link AmbientBacklightCallback}.
-     * @hide
      */
     public void unregisterAmbientBacklightCallback(
             @NonNull final AmbientBacklightCallback callback) {
@@ -541,7 +600,6 @@ public final class MediaQualityManager {
      * Set the ambient backlight settings.
      *
      * @param settings The settings to use for the backlight detector.
-     * @hide
      */
     public void setAmbientBacklightSettings(
             @NonNull AmbientBacklightSettings settings) {
@@ -557,7 +615,6 @@ public final class MediaQualityManager {
      * Enables or disables the ambient backlight detection.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
-     * @hide
      */
     public void setAmbientBacklightEnabled(boolean enabled) {
         try {
@@ -581,7 +638,7 @@ public final class MediaQualityManager {
             return mCallback;
         }
 
-        public void postPictureProfileAdded(final long id, PictureProfile profile) {
+        public void postPictureProfileAdded(final String id, PictureProfile profile) {
 
             mExecutor.execute(new Runnable() {
                 @Override
@@ -591,7 +648,7 @@ public final class MediaQualityManager {
             });
         }
 
-        public void postPictureProfileUpdated(final long id, PictureProfile profile) {
+        public void postPictureProfileUpdated(final String id, PictureProfile profile) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -600,11 +657,29 @@ public final class MediaQualityManager {
             });
         }
 
-        public void postPictureProfileRemoved(final long id, PictureProfile profile) {
+        public void postPictureProfileRemoved(final String id, PictureProfile profile) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     mCallback.onPictureProfileRemoved(id, profile);
+                }
+            });
+        }
+
+        public void postParamCapabilitiesChanged(final String id, List<ParamCapability> caps) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onParamCapabilitiesChanged(id, caps);
+                }
+            });
+        }
+
+        public void postError(int error) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onError(error);
                 }
             });
         }
@@ -681,24 +756,57 @@ public final class MediaQualityManager {
      */
     public abstract static class PictureProfileCallback {
         /**
+         * This is invoked when a picture profile has been added.
+         *
+         * @param profileId the ID of the profile.
+         * @param profile the newly added profile.
          * @hide
          */
-        public void onPictureProfileAdded(long id, PictureProfile profile) {
+        public void onPictureProfileAdded(
+                @NonNull String profileId, @NonNull PictureProfile profile) {
         }
+
         /**
+         * This is invoked when a picture profile has been updated.
+         *
+         * @param profileId the ID of the profile.
+         * @param profile the profile with updated info.
          * @hide
          */
-        public void onPictureProfileUpdated(long id, PictureProfile profile) {
+        public void onPictureProfileUpdated(
+                @NonNull String profileId, @NonNull PictureProfile profile) {
         }
+
         /**
+         * This is invoked when a picture profile has been removed.
+         *
+         * @param profileId the ID of the profile.
+         * @param profile the removed profile.
          * @hide
          */
-        public void onPictureProfileRemoved(long id, PictureProfile profile) {
+        public void onPictureProfileRemoved(
+                @NonNull String profileId, @NonNull PictureProfile profile) {
         }
+
         /**
+         * This is invoked when an issue has occurred.
+         *
+         * @param errorCode the error code
          * @hide
          */
-        public void onError(int errorCode) {
+        public void onError(@PictureProfile.ErrorCode int errorCode) {
+        }
+
+        /**
+         * This is invoked when parameter capabilities has been changed due to status changes of the
+         * content.
+         *
+         * @param profileId the ID of the profile used by the media content.
+         * @param updatedCaps the updated capabilities.
+         * @hide
+         */
+        public void onParamCapabilitiesChanged(
+                @NonNull String profileId, @NonNull List<ParamCapability> updatedCaps) {
         }
     }
 
@@ -731,14 +839,12 @@ public final class MediaQualityManager {
 
     /**
      * Callback used to monitor status of ambient backlight.
-     * @hide
      */
     public abstract static class AmbientBacklightCallback {
         /**
          * Called when new ambient backlight event is emitted.
-         * @hide
          */
-        public void onAmbientBacklightEvent(AmbientBacklightEvent event) {
+        public void onAmbientBacklightEvent(@NonNull AmbientBacklightEvent event) {
         }
     }
 }

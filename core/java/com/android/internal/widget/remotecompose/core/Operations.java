@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.ClickArea;
 import com.android.internal.widget.remotecompose.core.operations.ClipPath;
@@ -65,15 +67,19 @@ import com.android.internal.widget.remotecompose.core.operations.TextLookupInt;
 import com.android.internal.widget.remotecompose.core.operations.TextMeasure;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
-import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.OperationsListEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.TouchCancelModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.TouchDownModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.TouchUpModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.CanvasLayout;
@@ -85,15 +91,19 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BorderModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ClipRectModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.GraphicsLayerModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostNamedActionOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.OffsetModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueFloatChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerExpressionChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueStringChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
 import com.android.internal.widget.remotecompose.core.types.BooleanConstant;
 import com.android.internal.widget.remotecompose.core.types.IntegerConstant;
@@ -165,6 +175,7 @@ public class Operations {
     public static final int DATA_MAP_LOOKUP = 154;
     public static final int TEXT_MEASURE = 155;
     public static final int TEXT_LENGTH = 156;
+    public static final int TOUCH_EXPRESSION = 157;
 
     ///////////////////////////////////////// ======================
 
@@ -194,8 +205,16 @@ public class Operations {
     public static final int MODIFIER_ROUNDED_CLIP_RECT = 54;
 
     public static final int MODIFIER_CLICK = 59;
+    public static final int MODIFIER_TOUCH_DOWN = 219;
+    public static final int MODIFIER_TOUCH_UP = 220;
+    public static final int MODIFIER_TOUCH_CANCEL = 225;
 
-    public static final int MODIFIER_CLICK_END = 214;
+    public static final int OPERATIONS_LIST_END = 214;
+
+    public static final int MODIFIER_OFFSET = 221;
+    public static final int MODIFIER_ZINDEX = 223;
+    public static final int MODIFIER_GRAPHICS_LAYER = 224;
+
     public static final int LOOP_START = 215;
     public static final int LOOP_END = 216;
 
@@ -206,12 +225,13 @@ public class Operations {
     public static final int VALUE_INTEGER_CHANGE_ACTION = 212;
     public static final int VALUE_STRING_CHANGE_ACTION = 213;
     public static final int VALUE_INTEGER_EXPRESSION_CHANGE_ACTION = 218;
+    public static final int VALUE_FLOAT_CHANGE_ACTION = 222;
 
     public static final int ANIMATION_SPEC = 14;
 
     public static final int COMPONENT_VALUE = 150;
 
-    public static UniqueIntMap<CompanionOperation> map = new UniqueIntMap<>();
+    @NonNull public static UniqueIntMap<CompanionOperation> map = new UniqueIntMap<>();
 
     static class UniqueIntMap<T> extends IntMap<T> {
         @Override
@@ -289,8 +309,16 @@ public class Operations {
         map.put(MODIFIER_ROUNDED_CLIP_RECT, RoundedClipRectModifierOperation::read);
         map.put(MODIFIER_CLIP_RECT, ClipRectModifierOperation::read);
         map.put(MODIFIER_CLICK, ClickModifierOperation::read);
-        map.put(MODIFIER_CLICK_END, ClickModifierEnd::read);
+        map.put(MODIFIER_TOUCH_DOWN, TouchDownModifierOperation::read);
+        map.put(MODIFIER_TOUCH_UP, TouchUpModifierOperation::read);
+        map.put(MODIFIER_TOUCH_CANCEL, TouchCancelModifierOperation::read);
         map.put(MODIFIER_VISIBILITY, ComponentVisibilityOperation::read);
+        map.put(MODIFIER_OFFSET, OffsetModifierOperation::read);
+        map.put(MODIFIER_ZINDEX, ZIndexModifierOperation::read);
+        map.put(MODIFIER_GRAPHICS_LAYER, GraphicsLayerModifierOperation::read);
+
+        map.put(OPERATIONS_LIST_END, OperationsListEnd::read);
+
         map.put(HOST_ACTION, HostActionOperation::read);
         map.put(HOST_NAMED_ACTION, HostNamedActionOperation::read);
         map.put(VALUE_INTEGER_CHANGE_ACTION, ValueIntegerChangeActionOperation::read);
@@ -298,6 +326,7 @@ public class Operations {
                 VALUE_INTEGER_EXPRESSION_CHANGE_ACTION,
                 ValueIntegerExpressionChangeActionOperation::read);
         map.put(VALUE_STRING_CHANGE_ACTION, ValueStringChangeActionOperation::read);
+        map.put(VALUE_FLOAT_CHANGE_ACTION, ValueFloatChangeActionOperation::read);
 
         map.put(LAYOUT_ROOT, RootLayoutComponent::read);
         map.put(LAYOUT_CONTENT, LayoutComponentContent::read);
@@ -315,5 +344,6 @@ public class Operations {
         map.put(DATA_MAP_LOOKUP, DataMapLookup::read);
         map.put(TEXT_MEASURE, TextMeasure::read);
         map.put(TEXT_LENGTH, TextLength::read);
+        map.put(TOUCH_EXPRESSION, TouchExpression::read);
     }
 }

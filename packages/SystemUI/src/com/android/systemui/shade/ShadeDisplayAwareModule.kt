@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.ConfigurationStateImpl
 import com.android.systemui.common.ui.GlobalConfig
@@ -29,12 +30,16 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.ShadePositionRepository
+import com.android.systemui.shade.data.repository.ShadePositionRepositoryImpl
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
 /**
  * Module responsible for managing display-specific components and resources for the notification
@@ -147,6 +152,26 @@ object ShadeDisplayAwareModule {
             ConfigurationInteractorImpl(configurationRepository)
         } else {
             configurationInteractor
+        }
+    }
+
+    @SysUISingleton
+    @Provides
+    fun provideShadePositionRepository(impl: ShadePositionRepositoryImpl): ShadePositionRepository {
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
+        return impl
+    }
+
+    @Provides
+    @IntoMap
+    @ClassKey(ShadePositionRepositoryImpl::class)
+    fun provideShadePositionRepositoryAsCoreStartable(
+        impl: ShadePositionRepositoryImpl
+    ): CoreStartable {
+        return if (ShadeWindowGoesAround.isEnabled) {
+            impl
+        } else {
+            CoreStartable.NOP
         }
     }
 }

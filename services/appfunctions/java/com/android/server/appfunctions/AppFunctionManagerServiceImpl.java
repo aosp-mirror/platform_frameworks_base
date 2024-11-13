@@ -29,7 +29,7 @@ import android.app.appfunctions.AppFunctionManagerHelper;
 import android.app.appfunctions.AppFunctionRuntimeMetadata;
 import android.app.appfunctions.AppFunctionStaticMetadataHelper;
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
-import android.app.appfunctions.ExecuteAppFunctionResponse;
+import android.app.appfunctions.AppFunctionException;
 import android.app.appfunctions.IAppFunctionEnabledCallback;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appfunctions.IAppFunctionService;
@@ -156,11 +156,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             mCallerValidator.verifyTargetUserHandle(
                     requestInternal.getUserHandle(), validatedCallingPackage);
         } catch (SecurityException exception) {
-            safeExecuteAppFunctionCallback.onResult(
-                    ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_DENIED,
-                            exception.getMessage(),
-                            /* extras= */ null));
+            safeExecuteAppFunctionCallback.onError(
+                    new AppFunctionException(
+                            AppFunctionException.ERROR_DENIED,
+                            exception.getMessage()));
             return null;
         }
 
@@ -180,7 +179,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                 safeExecuteAppFunctionCallback,
                                 executeAppFunctionCallback.asBinder());
                     } catch (Exception e) {
-                        safeExecuteAppFunctionCallback.onResult(
+                        safeExecuteAppFunctionCallback.onError(
                                 mapExceptionToExecuteAppFunctionResponse(e));
                     }
                 });
@@ -198,22 +197,19 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         UserHandle targetUser = requestInternal.getUserHandle();
         // TODO(b/354956319): Add and honor the new enterprise policies.
         if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
-            safeExecuteAppFunctionCallback.onResult(
-                    ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
+            safeExecuteAppFunctionCallback.onError(
+                    new AppFunctionException(AppFunctionException.ERROR_SYSTEM_ERROR,
                             "Cannot run on a device with a device owner or from the managed"
-                                    + " profile.",
-                            /* extras= */ null));
+                                    + " profile."));
             return;
         }
 
         String targetPackageName = requestInternal.getClientRequest().getTargetPackageName();
         if (TextUtils.isEmpty(targetPackageName)) {
-            safeExecuteAppFunctionCallback.onResult(
-                    ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT,
-                            "Target package name cannot be empty.",
-                            /* extras= */ null));
+            safeExecuteAppFunctionCallback.onError(
+                    new AppFunctionException(
+                            AppFunctionException.ERROR_INVALID_ARGUMENT,
+                            "Target package name cannot be empty."));
             return;
         }
 
@@ -253,11 +249,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                     mInternalServiceHelper.resolveAppFunctionService(
                                             targetPackageName, targetUser);
                             if (serviceIntent == null) {
-                                safeExecuteAppFunctionCallback.onResult(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
-                                                "Cannot find the target service.",
-                                                /* extras= */ null));
+                                safeExecuteAppFunctionCallback.onError(
+                                        new AppFunctionException(
+                                                AppFunctionException.ERROR_SYSTEM_ERROR,
+                                                "Cannot find the target service."));
                                 return;
                             }
                             bindAppFunctionServiceUnchecked(
@@ -272,7 +267,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         })
                 .exceptionally(
                         ex -> {
-                            safeExecuteAppFunctionCallback.onResult(
+                            safeExecuteAppFunctionCallback.onError(
                                     mapExceptionToExecuteAppFunctionResponse(ex));
                             return null;
                         });
@@ -446,11 +441,9 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
         if (!bindServiceResult) {
             Slog.e(TAG, "Failed to bind to the AppFunctionService");
-            safeExecuteAppFunctionCallback.onResult(
-                    ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR,
-                            "Failed to bind the AppFunctionService.",
-                            /* extras= */ null));
+            safeExecuteAppFunctionCallback.onError(
+                    new AppFunctionException(AppFunctionException.ERROR_SYSTEM_ERROR,
+                            "Failed to bind the AppFunctionService."));
         }
     }
 
@@ -459,22 +452,21 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                 .getSystemService(AppSearchManager.class);
     }
 
-    private ExecuteAppFunctionResponse mapExceptionToExecuteAppFunctionResponse(Throwable e) {
+    private AppFunctionException mapExceptionToExecuteAppFunctionResponse(Throwable e) {
         if (e instanceof CompletionException) {
             e = e.getCause();
         }
-        int resultCode = ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR;
+        int resultCode = AppFunctionException.ERROR_SYSTEM_ERROR;
         if (e instanceof AppSearchException appSearchException) {
             resultCode =
                     mapAppSearchResultFailureCodeToExecuteAppFunctionResponse(
                             appSearchException.getResultCode());
         } else if (e instanceof SecurityException) {
-            resultCode = ExecuteAppFunctionResponse.RESULT_DENIED;
+            resultCode = AppFunctionException.ERROR_DENIED;
         } else if (e instanceof DisabledAppFunctionException) {
-            resultCode = ExecuteAppFunctionResponse.RESULT_DISABLED;
+            resultCode = AppFunctionException.ERROR_DISABLED;
         }
-        return ExecuteAppFunctionResponse.newFailure(
-                resultCode, e.getMessage(), /* extras= */ null);
+        return new AppFunctionException(resultCode, e.getMessage());
     }
 
     private int mapAppSearchResultFailureCodeToExecuteAppFunctionResponse(int resultCode) {
@@ -485,13 +477,13 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
         switch (resultCode) {
             case AppSearchResult.RESULT_NOT_FOUND:
-                return ExecuteAppFunctionResponse.RESULT_FUNCTION_NOT_FOUND;
+                return AppFunctionException.ERROR_FUNCTION_NOT_FOUND;
             case AppSearchResult.RESULT_INVALID_ARGUMENT:
             case AppSearchResult.RESULT_INTERNAL_ERROR:
             case AppSearchResult.RESULT_SECURITY_ERROR:
                 // fall-through
         }
-        return ExecuteAppFunctionResponse.RESULT_SYSTEM_ERROR;
+        return AppFunctionException.ERROR_SYSTEM_ERROR;
     }
 
     private void registerAppSearchObserver(@NonNull TargetUser user) {

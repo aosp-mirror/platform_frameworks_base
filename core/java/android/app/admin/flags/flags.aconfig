@@ -343,13 +343,20 @@ flag {
 }
 
 flag {
-  name: "user_provisioning_same_state"
-  namespace: "enterprise"
-  description: "Handle exceptions while setting same provisioning state."
-  bug: "326441417"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
+    name: "user_provisioning_same_state"
+    namespace: "enterprise"
+    description: "Handle exceptions while setting same provisioning state."
+    bug: "326441417"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "remove_managed_profile_enabled"
+    namespace: "enterprise"
+    description: "API that removes a given managed profile."
+    bug: "372652841"
 }
 
 flag {
@@ -358,4 +365,27 @@ flag {
     namespace: "enterprise"
     description: "Enables coexistence support for Setting MTE policy."
     bug: "376213673"
+}
+
+flag {
+    name: "enable_supervision_service_sync"
+    is_exported: true
+    namespace: "enterprise"
+    description: "Allows DPMS to enable or disable SupervisionService based on whether the device is being managed by the supervision role holder."
+    bug: "376213673"
+}
+
+flag {
+  name: "split_create_managed_profile_enabled"
+  namespace: "enterprise"
+  description: "Split up existing create and provision managed profile API."
+  bug: "375382324"
+}
+
+flag {
+  name: "secondary_lockscreen_api_enabled"
+  is_exported: true
+  namespace: "enterprise"
+  description: "Add new API for secondary lockscreen"
+  bug: "336297680"
 }

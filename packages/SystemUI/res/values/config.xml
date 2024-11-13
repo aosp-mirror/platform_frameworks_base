@@ -79,6 +79,9 @@
     <!-- The number of columns in the infinite grid QuickSettings -->
     <integer name="quick_settings_infinite_grid_num_columns">4</integer>
 
+    <!-- The maximum width of large tiles in the infinite grid QuickSettings -->
+    <integer name="quick_settings_infinite_grid_tile_max_width">4</integer>
+
     <!-- The number of columns in the Dual Shade QuickSettings -->
     <integer name="quick_settings_dual_shade_num_columns">4</integer>
 
@@ -1086,4 +1089,9 @@
     enable the desktop specific features.
     -->
     <bool name="config_enableDesktopFeatureSet">false</bool>
+
+    <!--
+    Whether the user switching can only happen by logging out and going through the system user (login screen).
+    -->
+    <bool name="config_userSwitchingMustGoThroughLoginScreen">false</bool>
 </resources>

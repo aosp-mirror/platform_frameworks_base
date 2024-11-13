@@ -18,6 +18,7 @@ package android.hardware.location;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,7 +32,6 @@ import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.chre.flags.Flags;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.contexthub.ErrorCode;
 import android.os.Handler;
@@ -484,15 +484,33 @@ public final class ContextHubManager {
         }
     }
 
-   /**
-    * Helper function to generate a stub for a query transaction callback.
-    *
-    * @param transaction the transaction to unblock when complete
-    *
-    * @return the callback
-    *
-    * @hide
-    */
+    /**
+     * Returns the list of HubInfo objects describing the available hubs (including ContextHub and
+     * VendorHub). This method is primarily used for debugging purposes as most clients care about
+     * endpoints and services more than hubs.
+     *
+     * @return the list of HubInfo objects
+     * @see HubInfo
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public List<HubInfo> getHubs() {
+        try {
+            return mService.getHubs();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Helper function to generate a stub for a query transaction callback.
+     *
+     * @param transaction the transaction to unblock when complete
+     * @return the callback
+     * @hide
+     */
     private IContextHubTransactionCallback createQueryCallback(
             ContextHubTransaction<List<NanoAppState>> transaction) {
         return new IContextHubTransactionCallback.Stub() {

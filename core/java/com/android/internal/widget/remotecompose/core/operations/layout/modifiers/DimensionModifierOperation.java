@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
@@ -29,8 +32,10 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
         WRAP,
         WEIGHT,
         INTRINSIC_MIN,
-        INTRINSIC_MAX;
+        INTRINSIC_MAX,
+        EXACT_DP;
 
+        @NonNull
         static Type fromInt(int value) {
             switch (value) {
                 case 0:
@@ -45,6 +50,8 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
                     return INTRINSIC_MIN;
                 case 5:
                     return INTRINSIC_MAX;
+                case 6:
+                    return EXACT_DP;
             }
             return EXACT;
         }
@@ -68,15 +75,28 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         if (mType == Type.EXACT) {
             mOutValue = Float.isNaN(mValue) ? context.getFloat(Utils.idFromNan(mValue)) : mValue;
+        }
+        if (mType == Type.EXACT_DP) {
+            float pre = mOutValue;
+            mOutValue = Float.isNaN(mValue) ? context.getFloat(Utils.idFromNan(mValue)) : mValue;
+            mOutValue *= context.getDensity();
+            if (pre != mOutValue) {
+                context.getDocument().getRootLayoutComponent().invalidateMeasure();
+            }
         }
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (mType == Type.EXACT) {
+            if (Float.isNaN(mValue)) {
+                context.listensTo(Utils.idFromNan(mValue), this);
+            }
+        }
+        if (mType == Type.EXACT_DP) {
             if (Float.isNaN(mValue)) {
                 context.listensTo(Utils.idFromNan(mValue), this);
             }
@@ -107,25 +127,31 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
         mOutValue = mValue = value;
     }
 
+    @NonNull
     public String serializedName() {
         return "DIMENSION";
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         if (mType == Type.EXACT) {
             serializer.append(indent, serializedName() + " = " + mValue);
+        }
+        if (mType == Type.EXACT_DP) {
+            serializer.append(indent, serializedName() + " = " + mValue + " dp");
         }
     }
 
     @Override
     public void apply(RemoteContext context) {}
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@Nullable String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DimensionModifierOperation(" + mValue + ")";

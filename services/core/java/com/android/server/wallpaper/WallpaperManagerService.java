@@ -858,10 +858,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             wpdData.mPadding, mDisplayId, wallpaper.mWhich, connection.mInfo,
                             wallpaper.getDescription());
                 } else {
+                    WallpaperDescription desc = new WallpaperDescription.Builder().setComponent(
+                            (connection.mInfo != null) ? connection.mInfo.getComponent()
+                                    : null).build();
                     connection.mService.attach(connection, mToken, TYPE_WALLPAPER, false,
                             wpdData.mWidth, wpdData.mHeight,
-                            wpdData.mPadding, mDisplayId, wallpaper.mWhich, connection.mInfo,
-                            /* description= */ null);
+                            wpdData.mPadding, mDisplayId, wallpaper.mWhich, connection.mInfo, desc);
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed attaching wallpaper on display", e);
@@ -2378,8 +2380,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             SparseArray<Rect> relativeSuggestedCrops =
                     mWallpaperCropper.getRelativeCropHints(wallpaper);
             Point croppedBitmapSize = new Point(
-                    (int) (0.5f + wallpaper.cropHint.width() / wallpaper.mSampleSize),
-                    (int) (0.5f + wallpaper.cropHint.height() / wallpaper.mSampleSize));
+                    (int) Math.ceil(wallpaper.cropHint.width() / wallpaper.mSampleSize),
+                    (int) Math.ceil(wallpaper.cropHint.height() / wallpaper.mSampleSize));
             if (croppedBitmapSize.equals(0, 0)) {
                 // There is an ImageWallpaper, but there are no crop hints and the bitmap size is
                 // unknown (e.g. the default wallpaper). Return a special "null" value that will be
@@ -2404,6 +2406,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
             if (originalBitmap) result = WallpaperCropper.getOriginalCropHints(wallpaper, result);
             return result;
+        }
+    }
+
+    @Override
+    public Bundle getCurrentBitmapCrops(int which, int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "getBitmapCrop", null);
+        synchronized (mLock) {
+            checkPermission(READ_WALLPAPER_INTERNAL);
+            WallpaperData wallpaper = (which == FLAG_LOCK) ? mLockWallpaperMap.get(userId)
+                    : mWallpaperMap.get(userId);
+            if (wallpaper == null || !mImageWallpaper.equals(wallpaper.getComponent())) {
+                return null;
+            }
+            Bundle bundle = new Bundle();
+            for (int i = 0; i < wallpaper.mCropHints.size(); i++) {
+                String key = String.valueOf(wallpaper.mCropHints.keyAt(i));
+                Rect rect = wallpaper.mCropHints.valueAt(i);
+                bundle.putParcelable(key, rect);
+            }
+            return bundle;
         }
     }
 

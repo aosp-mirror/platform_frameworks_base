@@ -1217,6 +1217,69 @@ public final class Settings {
             "android.settings.REGIONAL_PREFERENCES_SETTINGS";
 
     /**
+     * Activity Action: Show screen for allowing the region configuration.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REGION_SETTINGS =
+            "android.settings.REGION_SETTINGS";
+
+    /**
+     * Activity Action: Show first day of week configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_FIRST_DAY_OF_WEEK_SETTINGS =
+            "android.settings.FIRST_DAY_OF_WEEK_SETTINGS";
+
+    /**
+     * Activity Action: Show temperature unit configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TEMPERATURE_UNIT_SETTINGS =
+            "android.settings.TEMPERATURE_UNIT_SETTINGS";
+
+    /**
+     * Activity Action: Show numbering system configuration settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NUMBERING_SYSTEM_SETTINGS =
+            "android.settings.NUMBERING_SYSTEM_SETTINGS";
+
+    /**
+     * Activity Action: Show measurement system configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MEASUREMENT_SYSTEM_SETTINGS =
+            "android.settings.MEASUREMENT_SYSTEM_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of lockscreen.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -8685,6 +8748,19 @@ public final class Settings {
          * @hide
          */
         public static final String ACCESSIBILITY_QS_TARGETS = "accessibility_qs_targets";
+
+        /**
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via a keyboard shortcut gesture.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_KEY_GESTURE_TARGETS =
+                "accessibility_key_gesture_targets";
 
         /**
          * The system class name of magnification controller which is a target to be toggled via

@@ -18,6 +18,7 @@ package com.android.systemui.qs.composefragment.viewmodel
 
 import android.app.StatusBarManager
 import android.content.testableContext
+import android.graphics.Rect
 import android.testing.TestableLooper.RunWithLooper
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -43,6 +44,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.statusbar.sysuiStatusBarStateController
+import com.android.systemui.util.animation.DisappearParameters
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -318,6 +320,149 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
             }
         }
 
+    @Test
+    fun qqsMediaExpansion_collapsedMediaInLandscape() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                setCollapsedMediaInLandscape(true)
+                setMediaState(ACTIVE_MEDIA)
+
+                setConfigurationForMediaInRow(mediaInRow = false)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
+
+                setConfigurationForMediaInRow(mediaInRow = true)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.COLLAPSED)
+            }
+        }
+
+    @Test
+    fun qqsMediaExpansion_notCollapsedMediaInLandscape_alwaysExpanded() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                setCollapsedMediaInLandscape(false)
+                setMediaState(ACTIVE_MEDIA)
+
+                setConfigurationForMediaInRow(mediaInRow = false)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
+
+                setConfigurationForMediaInRow(mediaInRow = true)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
+            }
+        }
+
+    @Test
+    fun qqsMediaExpansion_reactsToChangesInCollapsedMediaInLandscape() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                setConfigurationForMediaInRow(mediaInRow = true)
+                setMediaState(ACTIVE_MEDIA)
+
+                setCollapsedMediaInLandscape(false)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
+
+                setCollapsedMediaInLandscape(true)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.COLLAPSED)
+            }
+        }
+
+    @Test
+    fun applyQsScrollPositionForClipping() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val left = 1f
+                val top = 3f
+                val right = 5f
+                val bottom = 7f
+
+                underTest.applyNewQsScrollerBounds(left, top, right, bottom)
+
+                assertThat(qsMediaHost.currentClipping)
+                    .isEqualTo(Rect(left.toInt(), top.toInt(), right.toInt(), bottom.toInt()))
+            }
+        }
+
+    @Test
+    fun shouldUpdateMediaSquishiness_inSplitShadeFalse_mediaSquishinessSet() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                underTest.isInSplitShade = false
+                underTest.squishinessFraction = 0.3f
+
+                underTest.shouldUpdateSquishinessOnMedia = true
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+
+                assertThat(underTest.qsMediaHost.squishFraction).isWithin(0.01f).of(0.3f)
+
+                underTest.shouldUpdateSquishinessOnMedia = false
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qsMediaHost.squishFraction).isWithin(0.01f).of(1f)
+            }
+        }
+
+    @Test
+    fun inSplitShade_differentStatusBarState_mediaSquishinessSet() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                underTest.isInSplitShade = true
+                underTest.squishinessFraction = 0.3f
+
+                sysuiStatusBarStateController.setState(StatusBarState.SHADE)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qsMediaHost.squishFraction).isWithin(epsilon).of(0.3f)
+
+                sysuiStatusBarStateController.setState(StatusBarState.KEYGUARD)
+                runCurrent()
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qsMediaHost.squishFraction).isWithin(epsilon).of(1f)
+
+                sysuiStatusBarStateController.setState(StatusBarState.SHADE_LOCKED)
+                runCurrent()
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+                assertThat(underTest.qsMediaHost.squishFraction).isWithin(epsilon).of(1f)
+            }
+        }
+
+    @Test
+    fun disappearParams() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                setMediaState(ACTIVE_MEDIA)
+
+                setConfigurationForMediaInRow(false)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+
+                assertThat(underTest.qqsMediaHost.disappearParameters)
+                    .isEqualTo(disappearParamsColumn)
+                assertThat(underTest.qsMediaHost.disappearParameters)
+                    .isEqualTo(disappearParamsColumn)
+
+                setConfigurationForMediaInRow(true)
+                Snapshot.sendApplyNotifications()
+                runCurrent()
+
+                assertThat(underTest.qqsMediaHost.disappearParameters).isEqualTo(disappearParamsRow)
+                assertThat(underTest.qsMediaHost.disappearParameters).isEqualTo(disappearParamsRow)
+            }
+        }
+
     private fun TestScope.setMediaState(state: MediaState) {
         with(kosmos) {
             val activeMedia = state == ACTIVE_MEDIA
@@ -331,6 +476,14 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
         runCurrent()
     }
 
+    private fun TestScope.setCollapsedMediaInLandscape(collapsed: Boolean) {
+        with(kosmos) {
+            overrideResource(R.bool.config_quickSettingsMediaLandscapeCollapsed, collapsed)
+            fakeConfigurationRepository.onAnyConfigurationChange()
+        }
+        runCurrent()
+    }
+
     companion object {
         private const val QS_DISABLE_FLAG = StatusBarManager.DISABLE2_QUICK_SETTINGS
 
@@ -339,6 +492,26 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
         }
 
         private const val epsilon = 0.001f
+
+        private val disappearParamsColumn =
+            DisappearParameters().apply {
+                fadeStartPosition = 0.95f
+                disappearStart = 0f
+                disappearEnd = 0.95f
+                disappearSize.set(1f, 0f)
+                gonePivot.set(0f, 0f)
+                contentTranslationFraction.set(0f, 1f)
+            }
+
+        private val disappearParamsRow =
+            DisappearParameters().apply {
+                fadeStartPosition = 0.95f
+                disappearStart = 0f
+                disappearEnd = 0.6f
+                disappearSize.set(0f, 0.4f)
+                gonePivot.set(1f, 0f)
+                contentTranslationFraction.set(0.25f, 1f)
+            }
     }
 }
 

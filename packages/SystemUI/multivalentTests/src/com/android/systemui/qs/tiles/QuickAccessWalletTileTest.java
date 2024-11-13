@@ -93,6 +93,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private static final String CARD_DESCRIPTION = "•••• 1234";
     private static final Icon CARD_IMAGE =
             Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888));
+    private static final Icon INVALID_CARD_IMAGE =
+            Icon.createWithContentUri("content://media/external/images/media");
     private static final int PRIMARY_USER_ID = 0;
     private static final int SECONDARY_USER_ID = 10;
 
@@ -444,6 +446,14 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
+    public void testQueryCards_invalidDrawable_noSideViewDrawable() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+        setUpInvalidWalletCard(/* hasCard= */ true);
+
+        assertNull(mTile.getState().sideViewCustomDrawable);
+    }
+
+    @Test
     public void testQueryCards_error_notUpdateSideViewDrawable() {
         String errorMessage = "getWalletCardsError";
         GetWalletCardsError error = new GetWalletCardsError(CARD_IMAGE, errorMessage);
@@ -503,9 +513,33 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
+    private void setUpInvalidWalletCard(boolean hasCard) {
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        hasCard
+                                ? Collections.singletonList(createInvalidWalletCard(mContext))
+                                : Collections.EMPTY_LIST, 0);
+
+        mTile.handleSetListening(true);
+
+        verify(mController).queryWalletCards(mCallbackCaptor.capture());
+
+        mCallbackCaptor.getValue().onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+    }
+
     private WalletCard createWalletCard(Context context) {
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
         return new WalletCard.Builder(CARD_ID, CARD_IMAGE, CARD_DESCRIPTION, pendingIntent).build();
     }
+
+    private WalletCard createInvalidWalletCard(Context context) {
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
+        return new WalletCard.Builder(
+                CARD_ID, INVALID_CARD_IMAGE, CARD_DESCRIPTION, pendingIntent).build();
+    }
+
+
 }

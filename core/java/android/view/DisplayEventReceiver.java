@@ -207,6 +207,8 @@ public abstract class DisplayEventReceiver {
         // reasonable timestamps.
         public int frameTimelinesLength = 1;
 
+        public int numberQueuedBuffers = 0;
+
         VsyncEventData() {
             frameTimelines = new FrameTimeline[FRAME_TIMELINES_CAPACITY];
             for (int i = 0; i < frameTimelines.length; i++) {
@@ -217,11 +219,13 @@ public abstract class DisplayEventReceiver {
         // Called from native code.
         @SuppressWarnings("unused")
         VsyncEventData(FrameTimeline[] frameTimelines, int preferredFrameTimelineIndex,
-                int frameTimelinesLength, long frameInterval) {
+                int frameTimelinesLength, long frameInterval,
+                int numberQueuedBuffers) {
             this.frameTimelines = frameTimelines;
             this.preferredFrameTimelineIndex = preferredFrameTimelineIndex;
             this.frameTimelinesLength = frameTimelinesLength;
             this.frameInterval = frameInterval;
+            this.numberQueuedBuffers = numberQueuedBuffers;
         }
 
         void copyFrom(VsyncEventData other) {
@@ -231,6 +235,7 @@ public abstract class DisplayEventReceiver {
             for (int i = 0; i < frameTimelines.length; i++) {
                 frameTimelines[i].copyFrom(other.frameTimelines[i]);
             }
+            numberQueuedBuffers = other.numberQueuedBuffers;
         }
 
         public FrameTimeline preferredFrameTimeline() {

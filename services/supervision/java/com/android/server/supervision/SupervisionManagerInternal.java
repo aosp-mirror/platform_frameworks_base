@@ -35,6 +35,14 @@ public abstract class SupervisionManagerInternal {
     public abstract boolean isSupervisionEnabledForUser(@UserIdInt int userId);
 
     /**
+     * Set whether supervision is enabled for the specified user.
+     *
+     * @param userId The user to set the supervision state for
+     * @param enabled Whether or not the user should be supervised
+     */
+    public abstract void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled);
+
+    /**
      * Sets whether the supervision lock screen should be shown for the specified user
      *
      * @param userId The user set the superivision state for
