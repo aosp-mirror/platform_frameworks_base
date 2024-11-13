@@ -92,10 +92,16 @@ public class GroupHelper {
     static final int REGROUP_REASON_CHANNEL_UPDATE = 0;
     // Regrouping needed because of notification bundling
     static final int REGROUP_REASON_BUNDLE = 1;
+    // Regrouping needed because of notification unbundling
+    static final int REGROUP_REASON_UNBUNDLE = 2;
+    // Regrouping needed because of notification unbundling + the original group summary exists
+    static final int REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP = 3;
 
     @IntDef(prefix = { "REGROUP_REASON_" }, value = {
         REGROUP_REASON_CHANNEL_UPDATE,
         REGROUP_REASON_BUNDLE,
+        REGROUP_REASON_UNBUNDLE,
+        REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface RegroupingReason {}
@@ -103,7 +109,6 @@ public class GroupHelper {
     private final Callback mCallback;
     private final int mAutoGroupAtCount;
     private final int mAutogroupSparseGroupsAtCount;
-    private final int mAutoGroupRegroupingAtCount;
     private final Context mContext;
     private final PackageManager mPackageManager;
     private boolean mIsTestHarnessExempted;
@@ -190,11 +195,6 @@ public class GroupHelper {
         mContext = context;
         mPackageManager = packageManager;
         mAutogroupSparseGroupsAtCount = autoGroupSparseGroupsAtCount;
-        if (notificationRegroupOnClassification()) {
-            mAutoGroupRegroupingAtCount = 1;
-        } else {
-            mAutoGroupRegroupingAtCount = mAutoGroupAtCount;
-        }
         NOTIFICATION_SHADE_SECTIONS = getNotificationShadeSections();
     }
 
@@ -797,7 +797,8 @@ public class GroupHelper {
                         Slog.v(TAG, "isGroupChildInDifferentBundleThanSummary: " + record);
                     }
                     moveNotificationsToNewSection(record.getUserId(), pkgName,
-                            List.of(new NotificationMoveOp(record, null, fullAggregateGroupKey)));
+                            List.of(new NotificationMoveOp(record, null, fullAggregateGroupKey)),
+                            REGROUP_REASON_BUNDLE);
                     return;
                 }
             }
@@ -945,6 +946,27 @@ public class GroupHelper {
         }
     }
 
+    /**
+     * Called when a notification that was classified (bundled) is restored to its original channel.
+     * The notification will be restored to its original group, if any/if summary still exists.
+     * Otherwise it will be moved to the appropriate section as an ungrouped notification.
+     *
+     * @param record the notification which had its channel updated
+     * @param originalSummaryExists the original group summary exists
+     */
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void onNotificationUnbundled(final NotificationRecord record,
+            final boolean originalSummaryExists) {
+        synchronized (mAggregatedNotifications) {
+            ArrayMap<String, NotificationRecord> notificationsToCheck = new ArrayMap<>();
+            notificationsToCheck.put(record.getKey(), record);
+            regroupNotifications(record.getUserId(), record.getSbn().getPackageName(),
+                    notificationsToCheck,
+                    originalSummaryExists ? REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP
+                        : REGROUP_REASON_UNBUNDLE);
+        }
+    }
+
     @GuardedBy("mAggregatedNotifications")
     private void regroupNotifications(int userId, String pkgName,
             ArrayMap<String, NotificationRecord> notificationsToCheck,
@@ -973,7 +995,7 @@ public class GroupHelper {
 
         // Batch move to new section
         if (!notificationsToMove.isEmpty()) {
-            moveNotificationsToNewSection(userId, pkgName, notificationsToMove);
+            moveNotificationsToNewSection(userId, pkgName, notificationsToMove, regroupingReason);
         }
     }
 
@@ -1093,7 +1115,7 @@ public class GroupHelper {
 
     @GuardedBy("mAggregatedNotifications")
     private void moveNotificationsToNewSection(final int userId, final String pkgName,
-            final List<NotificationMoveOp> notificationsToMove) {
+            final List<NotificationMoveOp> notificationsToMove, int regroupingReason) {
         record GroupUpdateOp(FullyQualifiedGroupKey groupKey, NotificationRecord record,
                              boolean hasSummary) { }
         // Bundled operations to apply to groups affected by the channel update
@@ -1111,7 +1133,8 @@ public class GroupHelper {
             if (DEBUG) {
                 Log.i(TAG,
                     "moveNotificationToNewSection: " + record + " " + newFullAggregateGroupKey
-                        + " from: " + oldFullAggregateGroupKey);
+                            + " from: " + oldFullAggregateGroupKey + " regroupingReason: "
+                            + regroupingReason);
             }
 
             // Update/remove aggregate summary for old group
@@ -1140,28 +1163,35 @@ public class GroupHelper {
             // Add moved notifications to the ungrouped list for new group and do grouping
             // after all notifications have been handled
             if (newFullAggregateGroupKey != null) {
-                final ArrayMap<String, NotificationAttributes> newAggregatedNotificationsAttrs =
+                if (notificationRegroupOnClassification()
+                        && regroupingReason == REGROUP_REASON_UNBUNDLE_ORIGINAL_GROUP) {
+                    // Just reset override group key, original summary exists
+                    // => will be grouped back to its original group
+                    record.setOverrideGroupKey(null);
+                } else {
+                    final ArrayMap<String, NotificationAttributes> newAggregatedNotificationsAttrs =
                         mAggregatedNotifications.getOrDefault(newFullAggregateGroupKey,
                             new ArrayMap<>());
-                boolean hasSummary = !newAggregatedNotificationsAttrs.isEmpty();
-                ArrayMap<String, NotificationAttributes> ungrouped =
+                    boolean hasSummary = !newAggregatedNotificationsAttrs.isEmpty();
+                    ArrayMap<String, NotificationAttributes> ungrouped =
                         mUngroupedAbuseNotifications.getOrDefault(newFullAggregateGroupKey,
                             new ArrayMap<>());
-                ungrouped.put(record.getKey(), new NotificationAttributes(
+                    ungrouped.put(record.getKey(), new NotificationAttributes(
                         record.getFlags(),
                         record.getNotification().getSmallIcon(),
                         record.getNotification().color,
                         record.getNotification().visibility,
                         record.getNotification().getGroupAlertBehavior(),
                         record.getChannel().getId()));
-                mUngroupedAbuseNotifications.put(newFullAggregateGroupKey, ungrouped);
+                    mUngroupedAbuseNotifications.put(newFullAggregateGroupKey, ungrouped);
 
-                record.setOverrideGroupKey(null);
+                    record.setOverrideGroupKey(null);
 
-                // Only add once, for triggering notification
-                if (!groupsToUpdate.containsKey(newFullAggregateGroupKey)) {
-                    groupsToUpdate.put(newFullAggregateGroupKey,
-                        new GroupUpdateOp(newFullAggregateGroupKey, record, hasSummary));
+                    // Only add once, for triggering notification
+                    if (!groupsToUpdate.containsKey(newFullAggregateGroupKey)) {
+                        groupsToUpdate.put(newFullAggregateGroupKey,
+                            new GroupUpdateOp(newFullAggregateGroupKey, record, hasSummary));
+                    }
                 }
             }
         }
@@ -1176,7 +1206,7 @@ public class GroupHelper {
             NotificationRecord triggeringNotification = groupsToUpdate.get(groupKey).record;
             boolean hasSummary = groupsToUpdate.get(groupKey).hasSummary;
             //Group needs to be created/updated
-            if (ungrouped.size() >= mAutoGroupRegroupingAtCount
+            if (ungrouped.size() >= mAutoGroupAtCount
                     || (hasSummary && !aggregatedNotificationsAttrs.isEmpty())) {
                 NotificationSectioner sectioner = getSection(triggeringNotification);
                 if (sectioner == null) {

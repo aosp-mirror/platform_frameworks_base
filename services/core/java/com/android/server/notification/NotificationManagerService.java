@@ -7180,13 +7180,16 @@ public class NotificationManagerService extends SystemService {
                         Slog.i(TAG, "Removing app summary (all children bundled): "
                                 + groupSummary);
                     }
-                    canceledSummary = groupSummary;
-                    mSummaryByGroupKey.remove(oldGroupKey);
-                    cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(),
+                    if (convertSummaryToNotificationLocked(groupSummary.getKey())) {
+                        groupSummary.isCanceled = true;
+                        canceledSummary = groupSummary;
+                        mSummaryByGroupKey.remove(oldGroupKey);
+                        cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(),
                             groupSummary.getSbn().getPackageName(),
                             groupSummary.getSbn().getTag(),
                             groupSummary.getSbn().getId(), 0, 0, false, groupSummary.getUserId(),
                             NotificationListenerService.REASON_GROUP_OPTIMIZATION, null);
+                    }
                 }
             }
         }
