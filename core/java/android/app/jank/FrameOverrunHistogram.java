@@ -39,7 +39,7 @@ public class FrameOverrunHistogram {
      * Create a new instance of FrameOverrunHistogram.
      */
     public FrameOverrunHistogram() {
-        mBucketCounts = new int[sBucketEndpoints.length - 1];
+        mBucketCounts = new int[sBucketEndpoints.length];
     }
 
     /**
