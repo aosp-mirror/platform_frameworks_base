@@ -214,8 +214,7 @@ java_genrule {
 
 java_genrule {
     name: "services.core.ravenwood",
-    // This is used by unit tests too (so tests will be able to access HSG-processed implementation)
-    // so it's visible to all.
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [
         ":services.core.ravenwood-base{ravenwood.jar}",

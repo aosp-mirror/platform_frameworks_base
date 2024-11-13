@@ -28,7 +28,6 @@ import java.util.Arrays;
  *
  * @hide
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class AppCompatCallbacks implements Compatibility.BehaviorChangeDelegate {
     private final long[] mDisabledChanges;
     private final long[] mLoggableChanges;

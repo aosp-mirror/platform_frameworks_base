@@ -28,7 +28,6 @@ import java.util.Set;
  * Parcelable containing compat config overrides for a given application.
  * @hide
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CompatibilityChangeConfig implements Parcelable {
     private final ChangeConfig mChangeConfig;
 

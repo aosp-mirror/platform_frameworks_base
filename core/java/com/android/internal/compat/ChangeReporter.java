@@ -42,7 +42,6 @@ import java.util.function.Function;
  *
  * @hide
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ChangeReporter {
     private static final String TAG = "CompatChangeReporter";
     private static final Function<Integer, Set<ChangeReport>> NEW_CHANGE_REPORT_SET =

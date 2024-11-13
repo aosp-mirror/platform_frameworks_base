@@ -35,7 +35,6 @@ import java.util.Objects;
  * @hide
  */
 @Immutable
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 final class ChangeIdStateQuery {
 
     static final int QUERY_BY_PACKAGE_NAME = 0;

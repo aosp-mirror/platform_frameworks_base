@@ -28,7 +28,6 @@ import java.util.Map;
  * Parcelable containing compat config overrides for a given application.
  * @hide
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CompatibilityOverrideConfig implements Parcelable {
     public final Map<Long, PackageOverride> overrides;
 
