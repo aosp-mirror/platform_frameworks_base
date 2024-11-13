@@ -1532,6 +1532,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mPrivateLayout.getSingleLineView();
     }
 
+    /**
+     * Whether this row is displayed over the unoccluded lockscreen. Returns false on the
+     * locked shade.
+     */
     public boolean isOnKeyguard() {
         return mOnKeyguard;
     }
@@ -2811,7 +2815,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    void setOnKeyguard(boolean onKeyguard) {
+    /** @see #isOnKeyguard() */
+    public void setOnKeyguard(boolean onKeyguard) {
         if (onKeyguard != mOnKeyguard) {
             boolean wasAboveShelf = isAboveShelf();
             final boolean wasExpanded = isExpanded();
