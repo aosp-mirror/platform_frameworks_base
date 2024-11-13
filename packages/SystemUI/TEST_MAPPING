@@ -153,5 +153,11 @@
     {
       "path": "cts/tests/tests/multiuser"
     }
+  ],
+
+  "sysui-e2e-presubmit": [
+    {
+      "name": "PlatformScenarioTests_SysUI_Presubmit"
+    }
   ]
 }
