@@ -795,13 +795,14 @@ public abstract class WMShellBaseModule {
     static KeyguardTransitionHandler provideKeyguardTransitionHandler(
             ShellInit shellInit,
             ShellController shellController,
+            DisplayController displayController,
             Transitions transitions,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new KeyguardTransitionHandler(
-                shellInit, shellController, transitions, taskStackListener, mainHandler,
-                mainExecutor);
+                shellInit, shellController, displayController, transitions, taskStackListener,
+                mainHandler, mainExecutor);
     }
 
     @WMSingleton
