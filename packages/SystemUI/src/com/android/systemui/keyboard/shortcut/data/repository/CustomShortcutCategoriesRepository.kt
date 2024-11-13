@@ -148,7 +148,7 @@ constructor(
     private fun fetchGroupLabelByGestureType(
         @KeyGestureEvent.KeyGestureType keyGestureType: Int
     ): String? {
-        InputGestures.gestureToInternalKeyboardShortcutGroupLabelMap[keyGestureType]?.let {
+        InputGestures.gestureToInternalKeyboardShortcutGroupLabelResIdMap[keyGestureType]?.let {
             return context.getString(it)
         } ?: return null
     }
@@ -156,7 +156,7 @@ constructor(
     private fun fetchShortcutInfoLabelByGestureType(
         @KeyGestureEvent.KeyGestureType keyGestureType: Int
     ): String? {
-        InputGestures.gestureToInternalKeyboardShortcutInfoLabelMap[keyGestureType]?.let {
+        InputGestures.gestureToInternalKeyboardShortcutInfoLabelResIdMap[keyGestureType]?.let {
             return context.getString(it)
         } ?: return null
     }
