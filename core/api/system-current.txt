@@ -5204,8 +5204,16 @@ package android.hardware.contexthub {
     method public void close();
   }
 
+  @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSessionResult {
+    method @NonNull public static android.hardware.contexthub.HubEndpointSessionResult accept();
+    method @Nullable public String getReason();
+    method public boolean isAccepted();
+    method @NonNull public static android.hardware.contexthub.HubEndpointSessionResult reject(@NonNull String);
+  }
+
   @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointLifecycleCallback {
     method public void onSessionClosed(@NonNull android.hardware.contexthub.HubEndpointSession, int);
+    method @NonNull public android.hardware.contexthub.HubEndpointSessionResult onSessionOpenRequest(@NonNull android.hardware.contexthub.HubEndpointInfo);
     method public void onSessionOpened(@NonNull android.hardware.contexthub.HubEndpointSession);
     field public static final int REASON_CLOSE_ENDPOINT_SESSION_REQUESTED = 4; // 0x4
     field public static final int REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED = 3; // 0x3

@@ -69,15 +69,40 @@ public class HubEndpoint {
                         }
                     }
 
-                    mLifecycleCallbackExecutor.execute(
-                            () -> {
-                                // TODO(b/375487784): create API and connect for this
-                                onSessionOpenRequestResult(sessionId, initiator);
-                            });
+                    if (mLifecycleCallback != null) {
+                        mLifecycleCallbackExecutor.execute(
+                                () ->
+                                        processSessionOpenRequestResult(
+                                                sessionId,
+                                                initiator,
+                                                mLifecycleCallback.onSessionOpenRequest(
+                                                        initiator)));
+                    }
                 }
 
-                // TODO(b/375487784): Process the result, always accept for now
-                private void onSessionOpenRequestResult(int sessionId, HubEndpointInfo initiator) {
+                private void processSessionOpenRequestResult(
+                        int sessionId, HubEndpointInfo initiator, HubEndpointSessionResult result) {
+                    if (result == null) {
+                        throw new IllegalArgumentException(
+                                "HubEndpointSessionResult shouldn't be null.");
+                    }
+
+                    if (result.isAccepted()) {
+                        acceptSession(sessionId, initiator);
+                    } else {
+                        Log.i(
+                                TAG,
+                                "Session "
+                                        + sessionId
+                                        + " from "
+                                        + initiator
+                                        + " was rejected, reason="
+                                        + result.getReason());
+                        rejectSession(sessionId);
+                    }
+                }
+
+                private void acceptSession(int sessionId, HubEndpointInfo initiator) {
                     if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
                         // No longer registered?
                         return;
@@ -119,6 +144,22 @@ public class HubEndpoint {
                         final HubEndpointSession finalActiveSession = activeSession;
                         mLifecycleCallbackExecutor.execute(
                                 () -> mLifecycleCallback.onSessionOpened(finalActiveSession));
+                    }
+                }
+
+                private void rejectSession(int sessionId) {
+                    if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
+                        // No longer registered?
+                        return;
+                    }
+
+                    try {
+                        mServiceToken.closeSession(
+                                sessionId,
+                                IHubEndpointLifecycleCallback
+                                        .REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED);
+                    } catch (RemoteException e) {
+                        e.rethrowFromSystemServer();
                     }
                 }
 

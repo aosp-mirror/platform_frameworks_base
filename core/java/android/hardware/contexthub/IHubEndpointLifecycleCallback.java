@@ -52,6 +52,14 @@ public interface IHubEndpointLifecycleCallback {
     @interface EndpointLifecycleReason {}
 
     /**
+     * Called when an endpoint is requesting a session be opened with another endpoint.
+     *
+     * @param requester The {@link HubEndpointInfo} object representing the requester
+     */
+    @NonNull
+    HubEndpointSessionResult onSessionOpenRequest(@NonNull HubEndpointInfo requester);
+
+    /**
      * Called when a communication session is opened and ready to be used.
      *
      * @param session The {@link HubEndpointSession} object that can be used for communication
