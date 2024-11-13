@@ -171,14 +171,12 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeViewController;
-import com.android.systemui.shade.StatusBarLongPressGestureDetector;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.AutoHideUiElement;
@@ -368,7 +366,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private PhoneStatusBarViewController mPhoneStatusBarViewController;
     private PhoneStatusBarTransitions mStatusBarTransitions;
-    private final Provider<StatusBarLongPressGestureDetector> mStatusBarLongPressGestureDetector;
     private final AuthRippleController mAuthRippleController;
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -674,7 +671,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             ShadeController shadeController,
             WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            Provider<StatusBarLongPressGestureDetector> statusBarLongPressGestureDetector,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
@@ -782,7 +778,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeController = shadeController;
         mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
-        mStatusBarLongPressGestureDetector = statusBarLongPressGestureDetector;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
         mPluginDependencyProvider = pluginDependencyProvider;
@@ -1532,11 +1527,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // to touch outside the customizer to close it, such as on the status or nav bar.
                 mShadeController.onStatusBarTouch(event);
             }
-            if (ShadeExpandsOnStatusBarLongPress.isEnabled()
-                    && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
-                mStatusBarLongPressGestureDetector.get().handleTouch(event);
-            }
-
             return getNotificationShadeWindowView().onTouchEvent(event);
         };
     }

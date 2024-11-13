@@ -155,7 +155,6 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
-import com.android.systemui.shade.StatusBarLongPressGestureDetector;
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutListSearch;
@@ -175,6 +174,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
+import com.android.systemui.statusbar.core.StatusBarOrchestrator;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -371,7 +371,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
     @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
     @Mock private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
-    @Mock private StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
+    @Mock private StatusBarOrchestrator mStatusBarOrchestrator;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -602,7 +602,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mShadeController,
                 mWindowRootViewVisibilityInteractor,
                 mStatusBarKeyguardViewManager,
-                () -> mStatusBarLongPressGestureDetector,
                 mViewMediatorCallback,
                 mInitController,
                 new Handler(TestableLooper.get(this).getLooper()),
