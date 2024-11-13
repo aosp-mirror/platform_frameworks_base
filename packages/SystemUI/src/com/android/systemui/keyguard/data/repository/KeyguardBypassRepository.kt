@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.data.repository
 import android.annotation.IntDef
 import android.content.res.Resources
 import android.provider.Settings
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -27,13 +26,11 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.keyguard.shared.model.DevicePosture.UNKNOWN
 import com.android.systemui.res.R
-import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.kotlin.FlowDumperImpl
+import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
@@ -48,7 +45,7 @@ constructor(
     biometricSettingsRepository: BiometricSettingsRepository,
     devicePostureRepository: DevicePostureRepository,
     dumpManager: DumpManager,
-    private val tunerService: TunerService,
+    secureSettingsRepository: UserAwareSecureSettingsRepository,
     @Background backgroundDispatcher: CoroutineDispatcher,
 ) : FlowDumperImpl(dumpManager) {
 
@@ -61,40 +58,26 @@ constructor(
         DevicePosture.toPosture(resources.getInteger(R.integer.config_face_auth_supported_posture))
     }
 
-    private val dismissByDefault: Int by lazy {
-        if (resources.getBoolean(com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) {
-            1
-        } else {
-            0
-        }
-    }
-
     private var bypassEnabledSetting: Flow<Boolean> =
-        callbackFlow {
-                val updateBypassSetting = { state: Boolean ->
-                    trySendWithFailureLogging(state, TAG, "Error sending bypassSetting $state")
-                }
-
-                val tunable =
-                    TunerService.Tunable { key, _ ->
-                        updateBypassSetting(tunerService.getValue(key, dismissByDefault) != 0)
-                    }
-
-                updateBypassSetting(false)
-                tunerService.addTunable(tunable, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
-                awaitClose { tunerService.removeTunable(tunable) }
-            }
+        secureSettingsRepository
+            .boolSetting(
+                name = Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
+                defaultValue =
+                    resources.getBoolean(
+                        com.android.internal.R.bool.config_faceAuthDismissesKeyguard
+                    ),
+            )
             .flowOn(backgroundDispatcher)
             .dumpWhileCollecting("bypassEnabledSetting")
 
-    val overrideFaceBypassSetting: Flow<Boolean> =
+    private val overrideFaceBypassSetting: Flow<Boolean> =
         when (bypassOverride) {
             FACE_UNLOCK_BYPASS_ALWAYS -> flowOf(true)
             FACE_UNLOCK_BYPASS_NEVER -> flowOf(false)
             else -> bypassEnabledSetting
         }
 
-    val isPostureAllowedForFaceAuth: Flow<Boolean> =
+    private val isPostureAllowedForFaceAuth: Flow<Boolean> =
         when (configFaceAuthSupportedPosture) {
             UNKNOWN -> flowOf(true)
             else ->
