@@ -17,6 +17,7 @@
 package com.android.server.location.contexthub;
 
 import android.chre.flags.Flags;
+import android.hardware.contexthub.Message;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubTransactionCallback;
 import android.hardware.location.NanoAppBinary;
@@ -399,6 +400,48 @@ import java.util.concurrent.atomic.AtomicInteger;
     }
 
     /**
+     * Creates a transaction to send a message through a session.
+     *
+     * @param sessionId The ID of the endpoint session the message should be sent through.
+     * @param message The message to send.
+     * @param transactionCallback The callback of the transactions.
+     * @return The generated transaction.
+     */
+    /* package */ ContextHubServiceTransaction createSessionMessageTransaction(
+            int sessionId,
+            Message message,
+            String packageName,
+            IContextHubTransactionCallback transactionCallback) {
+        return new ContextHubServiceTransaction(
+                mNextAvailableId.getAndIncrement(),
+                ContextHubTransaction.TYPE_HUB_MESSAGE_REQUIRES_RESPONSE,
+                packageName,
+                mNextAvailableMessageSequenceNumber.getAndIncrement(),
+                sessionId) {
+            @Override
+            /* package */ int onTransact() {
+                try {
+                    message.sequenceNumber = getMessageSequenceNumber();
+                    mContextHubProxy.sendMessageToEndpoint(sessionId, message);
+                    return ContextHubTransaction.RESULT_SUCCESS;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while trying to send a session message", e);
+                    return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+                }
+            }
+
+            @Override
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                try {
+                    transactionCallback.onTransactionComplete(result);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
+                }
+            }
+        };
+    }
+
+    /**
      * Creates a transaction for querying for a list of nanoapps.
      *
      * @param contextHubId       the ID of the hub to query
@@ -457,9 +500,14 @@ import java.util.concurrent.atomic.AtomicInteger;
             mTransactionRecordDeque.add(new TransactionRecord(transaction.toString()));
         }
 
-        if (Flags.reliableMessageRetrySupportService()
-                && transaction.getTransactionType()
-                        == ContextHubTransaction.TYPE_RELIABLE_MESSAGE) {
+        boolean isReliableMessage =
+                Flags.reliableMessageRetrySupportService()
+                        && (transaction.getTransactionType()
+                                == ContextHubTransaction.TYPE_RELIABLE_MESSAGE);
+        boolean isEndpointMessage =
+                (transaction.getTransactionType()
+                        == ContextHubTransaction.TYPE_HUB_MESSAGE_REQUIRES_RESPONSE);
+        if (isReliableMessage || isEndpointMessage) {
             synchronized (mReliableMessageLock) {
                 if (mReliableMessageTransactionMap.size() >= MAX_PENDING_REQUESTS) {
                     throw new IllegalStateException(

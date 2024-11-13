@@ -334,7 +334,8 @@ public class ContextHubService extends IContextHubService.Stub {
             try {
                 registry = new HubInfoRegistry(mContextHubWrapper);
                 mEndpointManager =
-                        new ContextHubEndpointManager(mContext, mContextHubWrapper, registry);
+                        new ContextHubEndpointManager(
+                                mContext, mContextHubWrapper, registry, mTransactionManager);
                 Log.i(TAG, "Enabling generic offload API");
             } catch (UnsupportedOperationException e) {
                 mEndpointManager = null;

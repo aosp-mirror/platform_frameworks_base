@@ -20,7 +20,9 @@ import android.Manifest;
 import android.content.Context;
 import android.hardware.contexthub.EndpointInfo;
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubMessage;
 import android.hardware.contexthub.HubServiceInfo;
+import android.hardware.contexthub.Message;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
@@ -464,5 +466,40 @@ import java.util.List;
             i++;
         }
         return outputInfo;
+    }
+
+    /**
+     * Converts a HubMessage object to a AIDL HAL Message object.
+     *
+     * @param message the HubMessage message to convert
+     * @return the AIDL HAL message
+     */
+    /* package */
+    static Message createHalMessage(HubMessage message) {
+        Message outMessage = new Message();
+        outMessage.flags =
+                message.getDeliveryParams().isResponseRequired()
+                        ? Message.FLAG_REQUIRES_DELIVERY_STATUS
+                        : 0;
+        outMessage.permissions = new String[0];
+        outMessage.sequenceNumber = message.getMessageSequenceNumber();
+        outMessage.type = message.getMessageType();
+        outMessage.content = message.getMessageBody();
+        return outMessage;
+    }
+
+    /**
+     * Converts a AIDL HAL Message object to a HubMessage object.
+     *
+     * @param message the AIDL HAL Message message to convert
+     * @return the HubMessage
+     */
+    /* package */
+    static HubMessage createHubMessage(Message message) {
+        boolean isReliable = (message.flags & Message.FLAG_REQUIRES_DELIVERY_STATUS) != 0;
+        return HubMessage.createMessage(
+                message.type,
+                message.content,
+                HubMessage.DeliveryParams.makeBasic().setResponseRequired(isReliable));
     }
 }
