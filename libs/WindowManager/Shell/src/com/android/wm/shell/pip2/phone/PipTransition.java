@@ -241,7 +241,7 @@ public class PipTransition extends PipTransitionController implements
             extra.putParcelable(PIP_TASK_LEASH, pipChange.getLeash());
             mPipTransitionState.setState(PipTransitionState.ENTERING_PIP, extra);
 
-            if (mPipTransitionState.isInSwipePipToHomeTransition()) {
+            if (isInSwipePipToHomeTransition()) {
                 // If this is the second transition as a part of swipe PiP to home cuj,
                 // handle this transition as a special case with no-op animation.
                 return handleSwipePipToHomeTransition(info, startTransaction, finishTransaction,
@@ -701,6 +701,13 @@ public class PipTransition extends PipTransitionController implements
             @NonNull TransitionInfo.Change pipChange) {
         TransitionInfo.Change fixedRotationChange = findFixedRotationChange(info);
         int startRotation = pipChange.getStartRotation();
+        if (pipChange.getEndRotation() != ROTATION_UNDEFINED
+                && startRotation != pipChange.getEndRotation()) {
+            // If PiP change was collected along with the display change and the orientation change
+            // happened in sync with the PiP change, then do not treat this as fixed-rotation case.
+            return ROTATION_0;
+        }
+
         int endRotation = fixedRotationChange != null
                 ? fixedRotationChange.getEndFixedRotation() : mPipDisplayLayoutState.getRotation();
         int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0

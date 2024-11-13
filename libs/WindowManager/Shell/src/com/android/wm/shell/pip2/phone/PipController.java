@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
@@ -290,6 +291,11 @@ public class PipController implements ConfigurationChangeListener,
 
         // Update the display layout caches even if we are not in PiP.
         setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
+        if (toRotation != ROTATION_UNDEFINED) {
+            // Make sure we rotate to final rotation ourselves in case display change is coming
+            // from the remote rotation as a part of an already collecting transition.
+            mPipDisplayLayoutState.rotateTo(toRotation);
+        }
 
         if (!mPipTransitionState.isInPip()) {
             // Skip the PiP-relevant updates if we aren't in a valid PiP state.
