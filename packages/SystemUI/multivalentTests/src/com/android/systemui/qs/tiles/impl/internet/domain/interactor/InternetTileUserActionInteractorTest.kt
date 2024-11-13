@@ -27,6 +27,7 @@ import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandl
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerSubject
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
+import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
 import com.android.systemui.statusbar.connectivity.AccessPointController
 import com.android.systemui.util.mockito.mock
@@ -40,6 +41,8 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.times
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @EnabledOnRavenwood
@@ -51,17 +54,20 @@ class InternetTileUserActionInteractorTest : SysuiTestCase() {
     private lateinit var underTest: InternetTileUserActionInteractor
 
     @Mock private lateinit var internetDialogManager: InternetDialogManager
+    @Mock private lateinit var wifiStateWorker: WifiStateWorker
     @Mock private lateinit var controller: AccessPointController
 
     @Before
     fun setup() {
         internetDialogManager = mock<InternetDialogManager>()
+        wifiStateWorker = mock<WifiStateWorker>()
         controller = mock<AccessPointController>()
 
         underTest =
             InternetTileUserActionInteractor(
                 kosmos.testScope.coroutineContext,
                 internetDialogManager,
+                wifiStateWorker,
                 controller,
                 inputHandler,
             )
@@ -109,5 +115,25 @@ class InternetTileUserActionInteractorTest : SysuiTestCase() {
             QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
                 Truth.assertThat(it.intent.action).isEqualTo(Settings.ACTION_WIFI_SETTINGS)
             }
+        }
+
+    @Test
+    fun handleSecondaryClickWhenWifiOn() =
+        kosmos.testScope.runTest {
+            whenever(wifiStateWorker.isWifiEnabled).thenReturn(true)
+
+            underTest.handleInput(QSTileInputTestKtx.toggleClick(InternetTileModel.Active()))
+
+            verify(wifiStateWorker, times(1)).isWifiEnabled = eq(false)
+        }
+
+    @Test
+    fun handleSecondaryClickWhenWifiOff() =
+        kosmos.testScope.runTest {
+            whenever(wifiStateWorker.isWifiEnabled).thenReturn(false)
+
+            underTest.handleInput(QSTileInputTestKtx.toggleClick(InternetTileModel.Inactive()))
+
+            verify(wifiStateWorker, times(1)).isWifiEnabled = eq(true)
         }
 }

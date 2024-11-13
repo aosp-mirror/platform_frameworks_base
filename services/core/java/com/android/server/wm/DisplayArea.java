@@ -45,7 +45,7 @@ import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -267,7 +267,8 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 // between fullscreen and PiP would work well. Checking TaskFragment rather than
                 // Task to ensure that Activity Embedding is excluded.
                 && activity.getTaskFragment().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && activity.mLetterboxUiController.isOverrideRespectRequestedOrientationEnabled();
+                && activity.mAppCompatController.getAppCompatOrientationOverrides()
+                    .isOverrideRespectRequestedOrientationEnabled();
     }
 
     boolean getIgnoreOrientationRequest() {
@@ -355,7 +356,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId, int logLevel) {
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 
@@ -817,7 +818,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      * DisplayArea that can be dimmed.
      */
     static class Dimmable extends DisplayArea<DisplayArea> {
-        private final Dimmer mDimmer = Dimmer.create(this);
+        private final Dimmer mDimmer = new Dimmer(this);
 
         Dimmable(WindowManagerService wms, Type type, String name, int featureId) {
             super(wms, type, name, featureId);

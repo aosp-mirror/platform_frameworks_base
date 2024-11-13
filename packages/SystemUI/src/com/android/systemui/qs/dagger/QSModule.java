@@ -16,17 +16,7 @@
 
 package com.android.systemui.qs.dagger;
 
-import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
-
-import android.content.Context;
-import android.os.Handler;
-
-import com.android.systemui.dagger.NightDisplayListenerModule;
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dagger.MediaModule;
-import com.android.systemui.qs.AutoAddTracker;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.ReduceBrightColorsControllerImpl;
 import com.android.systemui.qs.external.QSExternalModule;
@@ -36,24 +26,12 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.di.QSTilesModule;
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter;
 import com.android.systemui.qs.ui.adapter.QSSceneAdapterImpl;
-import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.ManagedProfileController;
-import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.DataSaverController;
-import com.android.systemui.statusbar.policy.DeviceControlsController;
-import com.android.systemui.statusbar.policy.HotspotController;
-import com.android.systemui.statusbar.policy.SafetyController;
-import com.android.systemui.statusbar.policy.WalletController;
-import com.android.systemui.util.settings.SecureSettings;
-
-import dagger.Binds;
-import dagger.Module;
-import dagger.Provides;
-import dagger.multibindings.Multibinds;
 
 import java.util.Map;
 
-import javax.inject.Named;
+import dagger.Binds;
+import dagger.Module;
+import dagger.multibindings.Multibinds;
 
 /**
  * Module for QS dependencies
@@ -77,45 +55,6 @@ public interface QSModule {
      */
     @Multibinds
     Map<String, QSTileImpl<?>> tileMap();
-
-    @Provides
-    @SysUISingleton
-    static AutoTileManager provideAutoTileManager(
-            Context context,
-            AutoAddTracker.Builder autoAddTrackerBuilder,
-            QSHost host,
-            @Background Handler handler,
-            SecureSettings secureSettings,
-            HotspotController hotspotController,
-            DataSaverController dataSaverController,
-            ManagedProfileController managedProfileController,
-            NightDisplayListenerModule.Builder nightDisplayListenerBuilder,
-            CastController castController,
-            ReduceBrightColorsController reduceBrightColorsController,
-            DeviceControlsController deviceControlsController,
-            WalletController walletController,
-            SafetyController safetyController,
-            @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
-        AutoTileManager manager = new AutoTileManager(
-                context,
-                autoAddTrackerBuilder,
-                host,
-                handler,
-                secureSettings,
-                hotspotController,
-                dataSaverController,
-                managedProfileController,
-                nightDisplayListenerBuilder,
-                castController,
-                reduceBrightColorsController,
-                deviceControlsController,
-                walletController,
-                safetyController,
-                isReduceBrightColorsAvailable
-        );
-        manager.init();
-        return manager;
-    }
 
     @Binds
     QSSceneAdapter bindsQsSceneInteractor(QSSceneAdapterImpl impl);

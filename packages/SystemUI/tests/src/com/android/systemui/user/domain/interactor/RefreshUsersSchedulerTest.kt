@@ -17,6 +17,7 @@
 
 package com.android.systemui.user.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -26,11 +27,10 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class RefreshUsersSchedulerTest : SysuiTestCase() {
 
     private lateinit var underTest: RefreshUsersScheduler

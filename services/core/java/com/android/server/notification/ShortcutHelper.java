@@ -27,7 +27,6 @@ import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
@@ -65,85 +64,34 @@ public class ShortcutHelper {
         void onShortcutRemoved(String key);
     }
 
+    private final ShortcutListener mShortcutListener;
     private LauncherApps mLauncherAppsService;
-    private ShortcutListener mShortcutListener;
     private ShortcutServiceInternal mShortcutServiceInternal;
     private UserManager mUserManager;
 
-    // Key: packageName Value: <shortcutId, notifId>
-    private HashMap<String, HashMap<String, String>> mActiveShortcutBubbles = new HashMap<>();
-    private boolean mLauncherAppsCallbackRegistered;
+    // Key: packageName|userId Value: <shortcutId, notifId>
+    private final HashMap<String, HashMap<String, String>> mActiveShortcutBubbles = new HashMap<>();
+    private boolean mShortcutChangedCallbackRegistered;
 
     // Bubbles can be created based on a shortcut, we need to listen for changes to
     // that shortcut so that we may update the bubble appropriately.
-    private final LauncherApps.Callback mLauncherAppsCallback = new LauncherApps.Callback() {
-        @Override
-        public void onPackageRemoved(String packageName, UserHandle user) {
-        }
+    private final LauncherApps.ShortcutChangeCallback mShortcutChangeCallback =
+            new LauncherApps.ShortcutChangeCallback() {
 
-        @Override
-        public void onPackageAdded(String packageName, UserHandle user) {
-        }
+                @Override
+                public void onShortcutsAddedOrUpdated(@NonNull String packageName,
+                        @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
+                }
 
-        @Override
-        public void onPackageChanged(String packageName, UserHandle user) {
-        }
-
-        @Override
-        public void onPackagesAvailable(String[] packageNames, UserHandle user,
-                boolean replacing) {
-        }
-
-        @Override
-        public void onPackagesUnavailable(String[] packageNames, UserHandle user,
-                boolean replacing) {
-        }
-
-        @Override
-        public void onShortcutsChanged(@NonNull String packageName,
-                @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
-            HashMap<String, String> shortcutBubbles = mActiveShortcutBubbles.get(packageName);
-            ArrayList<String> bubbleKeysToRemove = new ArrayList<>();
-            if (shortcutBubbles != null) {
-                // Copy to avoid a concurrent modification exception when we remove bubbles from
-                // shortcutBubbles.
-                final Set<String> shortcutIds = new HashSet<>(shortcutBubbles.keySet());
-
-                // If we can't find one of our bubbles in the shortcut list, that bubble needs
-                // to be removed.
-                for (String shortcutId : shortcutIds) {
-                    boolean foundShortcut = false;
-                    for (int i = 0; i < shortcuts.size(); i++) {
-                        if (shortcuts.get(i).getId().equals(shortcutId)) {
-                            foundShortcut = true;
-                            break;
-                        }
-                    }
-                    if (!foundShortcut) {
-                        bubbleKeysToRemove.add(shortcutBubbles.get(shortcutId));
-                        shortcutBubbles.remove(shortcutId);
-                        if (shortcutBubbles.isEmpty()) {
-                            mActiveShortcutBubbles.remove(packageName);
-                            if (mLauncherAppsCallbackRegistered
-                                    && mActiveShortcutBubbles.isEmpty()) {
-                                mLauncherAppsService.unregisterCallback(mLauncherAppsCallback);
-                                mLauncherAppsCallbackRegistered = false;
-                            }
-                        }
+                public void onShortcutsRemoved(@NonNull String packageName,
+                        @NonNull List<ShortcutInfo> removedShortcuts, @NonNull UserHandle user) {
+                    final String packageUserKey = getPackageUserKey(packageName, user);
+                    if (mActiveShortcutBubbles.get(packageUserKey) == null) return;
+                    for (ShortcutInfo info : removedShortcuts) {
+                        onShortcutRemoved(packageUserKey, info.getId());
                     }
                 }
-            }
-
-            // Let NoMan know about the updates
-            for (int i = 0; i < bubbleKeysToRemove.size(); i++) {
-                // update flag bubble
-                String bubbleKey = bubbleKeysToRemove.get(i);
-                if (mShortcutListener != null) {
-                    mShortcutListener.onShortcutRemoved(bubbleKey);
-                }
-            }
-        }
-    };
+            };
 
     ShortcutHelper(LauncherApps launcherApps, ShortcutListener listener,
             ShortcutServiceInternal shortcutServiceInternal, UserManager userManager) {
@@ -172,14 +120,14 @@ public class ShortcutHelper {
      * Returns whether the given shortcut info is a conversation shortcut.
      */
     public static boolean isConversationShortcut(
-            ShortcutInfo shortcutInfo, ShortcutServiceInternal mShortcutServiceInternal,
+            ShortcutInfo shortcutInfo, ShortcutServiceInternal shortcutServiceInternal,
             int callingUserId) {
         if (shortcutInfo == null || !shortcutInfo.isLongLived() || !shortcutInfo.isEnabled()) {
             return false;
         }
         // TODO (b/155016294) uncomment when sharing shortcuts are required
         /*
-        mShortcutServiceInternal.isSharingShortcut(callingUserId, "android",
+        shortcutServiceInternal.isSharingShortcut(callingUserId, "android",
                 shortcutInfo.getPackage(), shortcutInfo.getId(), shortcutInfo.getUserId(),
                 SHARING_FILTER);
          */
@@ -233,34 +181,30 @@ public class ShortcutHelper {
      *
      * @param r the notification record to check
      * @param removedNotification true if this notification is being removed
-     * @param handler handler to register the callback with
      */
     void maybeListenForShortcutChangesForBubbles(NotificationRecord r,
-            boolean removedNotification,
-            Handler handler) {
+            boolean removedNotification) {
         final String shortcutId = r.getNotification().getBubbleMetadata() != null
                 ? r.getNotification().getBubbleMetadata().getShortcutId()
                 : null;
+        final String packageUserKey = getPackageUserKey(r.getSbn().getPackageName(), r.getUser());
         if (!removedNotification
                 && !TextUtils.isEmpty(shortcutId)
                 && r.getShortcutInfo() != null
                 && r.getShortcutInfo().getId().equals(shortcutId)) {
             // Must track shortcut based bubbles in case the shortcut is removed
             HashMap<String, String> packageBubbles = mActiveShortcutBubbles.get(
-                    r.getSbn().getPackageName());
+                    packageUserKey);
             if (packageBubbles == null) {
                 packageBubbles = new HashMap<>();
             }
             packageBubbles.put(shortcutId, r.getKey());
-            mActiveShortcutBubbles.put(r.getSbn().getPackageName(), packageBubbles);
-            if (!mLauncherAppsCallbackRegistered) {
-                mLauncherAppsService.registerCallback(mLauncherAppsCallback, handler);
-                mLauncherAppsCallbackRegistered = true;
-            }
+            mActiveShortcutBubbles.put(packageUserKey, packageBubbles);
+            registerCallbackIfNeeded();
         } else {
             // No longer track shortcut
             HashMap<String, String> packageBubbles = mActiveShortcutBubbles.get(
-                    r.getSbn().getPackageName());
+                    packageUserKey);
             if (packageBubbles != null) {
                 if (!TextUtils.isEmpty(shortcutId)) {
                     packageBubbles.remove(shortcutId);
@@ -278,20 +222,62 @@ public class ShortcutHelper {
                     }
                 }
                 if (packageBubbles.isEmpty()) {
-                    mActiveShortcutBubbles.remove(r.getSbn().getPackageName());
+                    mActiveShortcutBubbles.remove(packageUserKey);
                 }
             }
-            if (mLauncherAppsCallbackRegistered && mActiveShortcutBubbles.isEmpty()) {
-                mLauncherAppsService.unregisterCallback(mLauncherAppsCallback);
-                mLauncherAppsCallbackRegistered = false;
+            unregisterCallbackIfNeeded();
+        }
+    }
+
+    private String getPackageUserKey(String packageName, UserHandle user) {
+        return packageName + "|" + user.getIdentifier();
+    }
+
+    private void onShortcutRemoved(String packageUserKey, String shortcutId) {
+        HashMap<String, String> shortcutBubbles = mActiveShortcutBubbles.get(packageUserKey);
+        ArrayList<String> bubbleKeysToRemove = new ArrayList<>();
+        if (shortcutBubbles != null) {
+            if (shortcutBubbles.containsKey(shortcutId)) {
+                bubbleKeysToRemove.add(shortcutBubbles.get(shortcutId));
+                shortcutBubbles.remove(shortcutId);
+                if (shortcutBubbles.isEmpty()) {
+                    mActiveShortcutBubbles.remove(packageUserKey);
+                    unregisterCallbackIfNeeded();
+                }
             }
+            notifyNoMan(bubbleKeysToRemove);
+        }
+    }
+
+    private void registerCallbackIfNeeded() {
+        if (!mShortcutChangedCallbackRegistered) {
+            mShortcutChangedCallbackRegistered = true;
+            mShortcutServiceInternal.addShortcutChangeCallback(mShortcutChangeCallback);
+        }
+    }
+
+    private void unregisterCallbackIfNeeded() {
+        if (mShortcutChangedCallbackRegistered && mActiveShortcutBubbles.isEmpty()) {
+            mShortcutServiceInternal.removeShortcutChangeCallback(mShortcutChangeCallback);
+            mShortcutChangedCallbackRegistered = false;
         }
     }
 
     void destroy() {
-        if (mLauncherAppsCallbackRegistered) {
-            mLauncherAppsService.unregisterCallback(mLauncherAppsCallback);
-            mLauncherAppsCallbackRegistered = false;
+        if (mShortcutChangedCallbackRegistered) {
+            mShortcutServiceInternal.removeShortcutChangeCallback(mShortcutChangeCallback);
+            mShortcutChangedCallbackRegistered = false;
+        }
+    }
+
+    private void notifyNoMan(List<String> bubbleKeysToRemove) {
+        // Let NoMan know about the updates
+        for (int i = 0; i < bubbleKeysToRemove.size(); i++) {
+            // update flag bubble
+            String bubbleKey = bubbleKeysToRemove.get(i);
+            if (mShortcutListener != null) {
+                mShortcutListener.onShortcutRemoved(bubbleKey);
+            }
         }
     }
 }

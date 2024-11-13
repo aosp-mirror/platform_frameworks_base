@@ -19,12 +19,14 @@ package android.view;
 import static android.view.InsetsController.DEBUG;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 
 import java.util.List;
@@ -151,10 +153,17 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void updateRequestedVisibleTypes(@WindowInsets.Type.InsetsType int types) {
+    public void updateRequestedVisibleTypes(@WindowInsets.Type.InsetsType int types,
+            @Nullable ImeTracker.Token statsToken) {
         try {
             if (mViewRoot.mAdded) {
-                mViewRoot.mWindowSession.updateRequestedVisibleTypes(mViewRoot.mWindow, types);
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES);
+                mViewRoot.mWindowSession.updateRequestedVisibleTypes(mViewRoot.mWindow, types,
+                        statsToken);
+            } else {
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);

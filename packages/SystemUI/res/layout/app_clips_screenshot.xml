@@ -16,6 +16,7 @@
   -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@null"
@@ -30,9 +31,10 @@
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:background="@drawable/overlay_button_background"
+        android:backgroundTint="?androidprv:attr/materialColorPrimary"
         android:paddingHorizontal="24dp"
         android:text="@string/app_clips_save_add_to_note"
-        android:textColor="?android:textColorSecondary"
+        android:textColor="?androidprv:attr/materialColorOnPrimary"
         app:layout_constraintBottom_toTopOf="@id/preview"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -49,6 +51,52 @@
         android:textColor="?android:textColorSecondary"
         app:layout_constraintBottom_toTopOf="@id/preview"
         app:layout_constraintStart_toEndOf="@id/save"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <CheckBox
+        android:id="@+id/backlinks_include_data"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:button="@drawable/checkbox_circle_shape"
+        android:checked="true"
+        android:text="@string/backlinks_include_link"
+        android:textColor="?androidprv:attr/materialColorOnBackground"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/preview"
+        app:layout_constraintStart_toEndOf="@id/cancel"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/backlinks_data"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/backlinks_rounded_rectangle"
+        android:drawablePadding="4dp"
+        android:gravity="center"
+        android:paddingHorizontal="8dp"
+        android:textColor="?android:textColorSecondary"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/preview"
+        app:layout_constraintStart_toEndOf="@id/backlinks_include_data"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/backlinks_cross_profile_error"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:drawablePadding="4dp"
+        android:drawableStart="@drawable/ic_info_outline"
+        android:drawableTint="?androidprv:attr/materialColorOnBackground"
+        android:gravity="center"
+        android:paddingHorizontal="8dp"
+        android:text="@string/backlinks_cross_profile_error"
+        android:textColor="?androidprv:attr/materialColorOnBackground"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/preview"
+        app:layout_constraintStart_toEndOf="@id/backlinks_data"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView

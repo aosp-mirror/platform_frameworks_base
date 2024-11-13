@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy.data.repository
 
+import com.android.settingslib.notification.data.repository.FakeZenModeRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 

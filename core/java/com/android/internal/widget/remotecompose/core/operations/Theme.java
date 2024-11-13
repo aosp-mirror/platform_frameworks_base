@@ -15,12 +15,15 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 
 import java.util.List;
 
@@ -70,12 +73,12 @@ public class Theme implements RemoteComposeOperation {
         return indent + toString();
     }
 
-    public static class Companion implements CompanionOperation {
+    public static class Companion implements DocumentedCompanionOperation {
         private Companion() {}
 
         @Override
         public String name() {
-            return "SetTheme";
+            return "Theme";
         }
 
         @Override
@@ -92,6 +95,16 @@ public class Theme implements RemoteComposeOperation {
         public void read(WireBuffer buffer, List<Operation> operations) {
             int theme = buffer.readInt();
             operations.add(new Theme(theme));
+        }
+
+        @Override
+        public void documentation(DocumentationBuilder doc) {
+            doc.operation("Protocol Operations", id(), name())
+                    .description("Set a theme")
+                    .field(INT, "THEME", "theme id")
+                    .possibleValues("UNSPECIFIED", Theme.UNSPECIFIED)
+                    .possibleValues("DARK", Theme.DARK)
+                    .possibleValues("LIGHT", Theme.LIGHT);
         }
     }
 }

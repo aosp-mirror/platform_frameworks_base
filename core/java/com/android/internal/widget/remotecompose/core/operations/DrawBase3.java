@@ -63,23 +63,23 @@ public abstract class DrawBase3 extends PaintOperation
 
     @Override
     public void updateVariables(RemoteContext context) {
-        mV1 = (Float.isNaN(mValue1))
+        mV1 = (Utils.isVariable(mValue1))
                 ? context.getFloat(Utils.idFromNan(mValue1)) : mValue1;
-        mV2 = (Float.isNaN(mValue2))
+        mV2 = (Utils.isVariable(mValue2))
                 ? context.getFloat(Utils.idFromNan(mValue2)) : mValue2;
-        mV3 = (Float.isNaN(mValue3))
+        mV3 = (Utils.isVariable(mValue3))
                 ? context.getFloat(Utils.idFromNan(mValue3)) : mValue3;
     }
 
     @Override
     public void registerListening(RemoteContext context) {
-        if (Float.isNaN(mValue1)) {
+        if (Utils.isVariable(mValue1)) {
             context.listensTo(Utils.idFromNan(mValue1), this);
         }
-        if (Float.isNaN(mValue2)) {
+        if (Utils.isVariable(mValue2)) {
             context.listensTo(Utils.idFromNan(mValue2), this);
         }
-        if (Float.isNaN(mValue3)) {
+        if (Utils.isVariable(mValue3)) {
             context.listensTo(Utils.idFromNan(mValue3), this);
         }
     }

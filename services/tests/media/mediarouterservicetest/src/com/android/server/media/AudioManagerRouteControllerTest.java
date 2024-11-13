@@ -346,14 +346,16 @@ public class AudioManagerRouteControllerTest {
                 .thenReturn(mAvailableAudioDeviceInfos.toArray(new AudioDeviceInfo[0]));
     }
 
-    private static AudioDeviceAttributes createAudioDeviceAttribute(int type) {
+    private static AudioDeviceAttributes createAudioDeviceAttribute(
+            @AudioDeviceInfo.AudioDeviceType int type) {
         // Address is unused.
         return new AudioDeviceAttributes(
                 AudioDeviceAttributes.ROLE_OUTPUT, type, /* address= */ "");
     }
 
     private static AudioDeviceInfo createAudioDeviceInfo(
-            int type, @NonNull String name, @NonNull String address) {
+            @AudioDeviceInfo.AudioDeviceType int type, @NonNull String name,
+            @NonNull String address) {
         return new AudioDeviceInfo(AudioDevicePort.createForTesting(type, name, address));
     }
 }

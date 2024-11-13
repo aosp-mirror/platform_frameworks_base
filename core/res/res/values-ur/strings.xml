@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ہینڈ رائٹنگ پاس ورڈ فیلڈز میں تعاون یافتہ نہیں ہے"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"پیچھے"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"اندراج کا طریقہ سوئچ کریں"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"اندراج کے طریقے کا منتخب کنندہ کھولیں"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ترتیبات"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"اسٹوریج کی جگہ ختم ہو رہی ہے"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ممکن ہے سسٹم کے کچھ فنکشنز کام نہ کریں"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"‏سسٹم کیلئے کافی اسٹوریج نہیں ہے۔ اس بات کو یقینی بنائیں کہ آپ کے پاس 250MB خالی جگہ ہے اور دوبارہ شروع کریں۔"</string>
@@ -1411,6 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"وائرلیس ڈیبگنگ کو غیر فعال کرنے کے ليے منتخب کریں۔"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ٹیسٹ ہارنیس موڈ فعال ہے"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ٹیسٹ ہارنیس موڈ غیر فعال کرنے کے لیے فیکٹری ری سیٹ کریں۔"</string>
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"‏‫HSUM کی غلط بلڈ کنفیگریشن"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"اس آلہ کی ہیڈ لیس سسٹم یوزر موڈ کی حیثیت اس کی بلڈ کنفیگریشن سے مختلف ہوتی ہے۔ براہ کرم آلہ کو فیکٹری ری سیٹ کریں۔"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"شمار کونسول فعال ہے"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"کارکردگی پر اثر پڑا ہے۔ غیر فعال کرنے کے ليے، بوٹ لوڈر چیک کریں۔"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"‏تجرباتی MTE کو فعال کیا گیا"</string>
@@ -1426,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"اشتراک کریں"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"مسترد کریں"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ان پٹ کا طریقہ منتخب کریں"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"زبان کی ترتیبات"</string>
     <string name="show_ime" msgid="6406112007347443383">"‏جب فزیکل کی بورڈ فعال ہو تو IME کو اسکرین پر رکھیں"</string>
     <string name="hardware" msgid="3611039921284836033">"آن اسکرین کی بورڈ استعمال کریں"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> کنفیگر کریں"</string>
@@ -1741,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ایپ اجازت کی درخواست کو مبہم کر رہی ہے لہذا آپ کے جواب کی تصدیق نہیں کی جا سکتی۔"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ایک خصوصیت کا استعمال شروع کرنے کیلئے اسے تھپتھپائیں:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ایکسیسبیلٹی بٹن کے ساتھ استعمال کرنے کیلئے خصوصیات منتخب کریں"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"والیوم کلید کے شارٹ کٹ کے ساتھ استعمال کرنے کیلئے خصوصیات منتخب کریں"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"والیوم کلیدوں کے شارٹ کٹ کے ساتھ استعمال کرنے کیلئے خصوصیات منتخب کریں"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> کو آف کر دیا گیا ہے"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"شارٹ کٹس میں ترمیم کریں"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ہو گیا"</string>
@@ -1755,12 +1760,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آن ہے۔"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آف ہے۔"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"والیوم کی کلیدوں کو ریلیز کریں <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آن کرنے کے لیے، والیوم کی دونوں کلیدوں کو دوبارہ 3 سیکنڈ تک چھوئیں اور دبائے رکھیں۔"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ایکسیسبیلٹی بٹن پر تھپتھپانے وقت استعمال کرنے کیلئے ایک خصوصیت منتخب کریں:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ایکسیسبیلٹی اشارہ کے ساتھ استعمال کرنے کے لیے ایک خصوصیت چنیں (دو انگلیوں سے اسکرین کے نیچے سے اوپر کی طرف سوائپ کریں):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ایکسیسبیلٹی اشارہ کے ساتھ استعمال کرنے کے لیے ایک خصوصیت چنیں (تین انگلیوں سے اسکرین کے نیچے سے اوپر کی طرف سوائپ کریں):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"خصوصیات کے مابین سوئچ کرنے کے لیے، ایکسیسبیلٹی بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"خصوصیات کے مابین سوئچ کرنے کے لیے، دو انگلیوں سے اوپر سوائپ کریں اور دبائیں رکھیں۔"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"خصوصیات کے مابین سوئچ کرنے کے لیے، تین انگلیوں سے اوپر سوائپ کریں اور دبائیں رکھیں۔"</string>
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"ایک خصوصیت منتخب کریں"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"ایک خصوصیت منتخب کریں"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"ایک خصوصیت منتخب کریں"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"اگلی بار جب آپ ایکسیسبیلٹی بٹن پر تھپتھپائیں گے تو خصوصیت کھل جائے گی"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"اگلی بار جب آپ یہ شارٹ کٹ استعمال کریں گے تو خصوصیت کھل جائے گی۔ اپنی اسکرین کے نیچے سے 2 انگلیوں سے اوپر کی طرف سوائپ کریں اور تیزی سے ریلیز کریں۔"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"اگلی بار جب آپ یہ شارٹ کٹ استعمال کریں گے تو خصوصیت کھل جائے گی۔ اپنی اسکرین کے نیچے سے 3 انگلیوں سے اوپر کی طرف سوائپ کریں اور تیزی سے ریلیز کریں۔"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"میگنیفکیشن"</string>
     <string name="user_switched" msgid="7249833311585228097">"موجودہ صارف <xliff:g id="NAME">%1$s</xliff:g>۔"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> پر سوئچ کیا جا رہا ہے…"</string>
@@ -1975,6 +1980,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"جاری کال"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"اِن کمنگ کال کی اسکریننگ"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"غیر زمرہ بند"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"پروموشنز"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"سوشل"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"خبریں"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"تجاویز"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ان اطلاعات کی اہمیت آپ مقرر کرتے ہیں۔"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"اس میں موجود لوگوں کی وجہ سے یہ اہم ہے۔"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"حسب ضرورت ایپ کی اطلاع"</string>
@@ -2001,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"اسکرین لاک سیٹ کریں"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"اسکرین لاک سیٹ کریں"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"اپنی نجی اسپیس استعمال کرنے کیلئے، اس آلہ پر اسکرین لاک سیٹ کریں"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"پرائیویٹ اسپیس استعمال کرنے کیلئے، اس آلہ پر اسکرین لاک سیٹ کریں"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ایپ دستیاب نہیں ہے"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ابھی دستیاب نہیں ہے۔"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> دستیاب نہیں ہے"</string>
@@ -2415,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"سیکیورٹی کے مد نظر ایپ کا مواد اسکرین کے اشتراک سے چھپا ہوا ہے"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"سٹلائٹ سے خودکار طور پر منسلک ہے"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏آپ موبائل یا Wi-Fi نیٹ ورک کے بغیر پیغامات بھیج اور موصول کر سکتے ہیں"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"سیٹلائٹ پیغام رسانی کا استعمال کریں؟"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏موبائل یا Wi-Fi نیٹ ورک کے بغیر پیغامات بھیجیں اور موصول کریں"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"پیغامات ایپ کو کھولیں"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"اس کے کام کرنے کا طریقہ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"زیر التواء..."</string>
@@ -2427,4 +2439,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"آپ کے چہرے کا ماڈل مزید پہچانا نہیں جا سکتا۔ فیس اَن لاک کو دوبارہ سیٹ اپ کریں۔"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"سیٹ اپ کریں"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ابھی نہیں"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> کیلئے الارم"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"صارف سوئچ کریں"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"خاموش کریں"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"آواز کو خاموش کرنے کے لیے تھپتھپائیں"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"براؤزر"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"رابطے"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"ای میل"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"موسیقی"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"کیلنڈر"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"کیلکولیٹر"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"نقشے"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ایپلیکیشنز"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"آپ کے فنگر پرنٹس کو مزید پہچانا نہیں جا سکتا۔ فنگر پرنٹ اَن لاک کو دوبارہ سیٹ اپ کریں۔"</string>
 </resources>

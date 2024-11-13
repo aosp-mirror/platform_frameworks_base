@@ -24,6 +24,9 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Begin to cleanup after CL merges
+
 filegroup {
     name: "FlickerTestsOtherCommon-src",
     srcs: ["src/**/ActivityEmbeddingTestBase.kt"],
@@ -82,3 +85,123 @@ android_test {
         ":FlickerTestsOtherCommon-src",
     ],
 }
+
+// End to cleanup after CL merges
+////////////////////////////////////////////////////////////////////////////////
+
+android_test {
+    name: "FlickerTestsActivityEmbedding",
+    defaults: ["FlickerTestsDefault"],
+    manifest: "AndroidManifest.xml",
+    package_name: "com.android.server.wm.flicker",
+    instrumentation_target_package: "com.android.server.wm.flicker",
+    test_config_template: "AndroidTestTemplate.xml",
+    srcs: ["src/**/*"],
+    static_libs: [
+        "FlickerTestsBase",
+        "FlickerTestsOtherCommon",
+    ],
+    data: ["trace_config/*"],
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Begin breakdowns for FlickerTestsActivityEmbedding module
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-CatchAll",
+    base: "FlickerTestsActivityEmbedding",
+    exclude_filters: [
+        "com.android.server.wm.flicker.activityembedding.close.CloseSecondaryActivityInSplitTest",
+        "com.android.server.wm.flicker.activityembedding.layoutchange.HorizontalSplitChangeRatioTest",
+        "com.android.server.wm.flicker.activityembedding.open.MainActivityStartsSecondaryWithAlwaysExpandTest",
+        "com.android.server.wm.flicker.activityembedding.open.OpenActivityEmbeddingPlaceholderSplitTest",
+        "com.android.server.wm.flicker.activityembedding.open.OpenActivityEmbeddingSecondaryToSplitTest",
+        "com.android.server.wm.flicker.activityembedding.open.OpenThirdActivityOverSplitTest",
+        "com.android.server.wm.flicker.activityembedding.open.OpenTrampolineActivityTest",
+        "com.android.server.wm.flicker.activityembedding.pip.SecondaryActivityEnterPipTest",
+        "com.android.server.wm.flicker.activityembedding.rotation.RotateSplitNoChangeTest",
+        "com.android.server.wm.flicker.activityembedding.rtl.RTLStartSecondaryWithPlaceholderTest",
+        "com.android.server.wm.flicker.activityembedding.splitscreen.EnterSystemSplitTest",
+    ],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Close-CloseSecondaryActivityInSplitTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.close.CloseSecondaryActivityInSplitTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-LayoutChange-HorizontalSplitChangeRatioTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.layoutchange.HorizontalSplitChangeRatioTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Open-MainActivityStartsSecondaryWithAlwaysExpandTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.open.MainActivityStartsSecondaryWithAlwaysExpandTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Open-OpenActivityEmbeddingPlaceholderSplitTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.open.OpenActivityEmbeddingPlaceholderSplitTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Open-OpenActivityEmbeddingSecondaryToSplitTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.open.OpenActivityEmbeddingSecondaryToSplitTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Open-OpenThirdActivityOverSplitTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.open.OpenThirdActivityOverSplitTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Open-OpenTrampolineActivityTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.open.OpenTrampolineActivityTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Pip-SecondaryActivityEnterPipTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.pip.SecondaryActivityEnterPipTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Rotation-RotateSplitNoChangeTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.rotation.RotateSplitNoChangeTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-Rtl-RTLStartSecondaryWithPlaceholderTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.rtl.RTLStartSecondaryWithPlaceholderTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsActivityEmbedding-SplitScreen-EnterSystemSplitTest",
+    base: "FlickerTestsActivityEmbedding",
+    include_filters: ["com.android.server.wm.flicker.activityembedding.splitscreen.EnterSystemSplitTest"],
+    test_suites: ["device-tests"],
+}
+
+// End breakdowns for FlickerTestsActivityEmbedding module
+////////////////////////////////////////////////////////////////////////////////

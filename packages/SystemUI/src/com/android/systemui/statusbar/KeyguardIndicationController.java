@@ -207,8 +207,8 @@ public class KeyguardIndicationController {
     protected boolean mPowerPluggedInWireless;
     protected boolean mPowerPluggedInDock;
     protected int mChargingSpeed;
+    protected boolean mPowerCharged;
 
-    private boolean mPowerCharged;
     /** Whether the battery defender is triggered. */
     private boolean mBatteryDefender;
     /** Whether the battery defender is triggered with the device plugged. */
@@ -384,6 +384,11 @@ public class KeyguardIndicationController {
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
 
         mStatusBarStateListener.onDozingChanged(mStatusBarStateController.isDozing());
+    }
+
+    @Nullable
+    public ViewGroup getIndicationArea() {
+        return mIndicationArea;
     }
 
     public void setIndicationArea(ViewGroup indicationArea) {
@@ -780,7 +785,8 @@ public class KeyguardIndicationController {
 
     private void updateLockScreenAdaptiveAuthMsg(int userId) {
         final boolean deviceLocked = mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(userId);
-        if (deviceLocked) {
+        final boolean canSkipBouncer = mKeyguardUpdateMonitor.getUserCanSkipBouncer(userId);
+        if (deviceLocked && !canSkipBouncer) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_ADAPTIVE_AUTH,
                     new KeyguardIndication.Builder()
@@ -1094,14 +1100,15 @@ public class KeyguardIndicationController {
             String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
             return mContext.getResources().getString(
                     R.string.keyguard_plugged_in_incompatible_charger, percentage);
-        } else if (mPowerCharged) {
-            return mContext.getResources().getString(R.string.keyguard_charged);
         }
 
         return computePowerChargingStringIndication();
     }
 
     protected String computePowerChargingStringIndication() {
+        if (mPowerCharged) {
+            return mContext.getResources().getString(R.string.keyguard_charged);
+        }
         final boolean hasChargingTime = mChargingTimeRemaining > 0;
         int chargingId;
         if (mPowerPluggedInWired) {
@@ -1271,7 +1278,7 @@ public class KeyguardIndicationController {
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedInWireless = status.isPluggedInWireless() && isChargingOrFull;
             mPowerPluggedInDock = status.isPluggedInDock() && isChargingOrFull;
-            mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
+            mPowerPluggedIn = isPowerPluggedIn(status, isChargingOrFull);
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mContext);
@@ -1557,6 +1564,11 @@ public class KeyguardIndicationController {
         return status.isBatteryDefender();
     }
 
+    /** Return true if the device has power plugged in. */
+    protected boolean isPowerPluggedIn(BatteryStatus status, boolean isChargingOrFull) {
+        return status.isPluggedIn() && isChargingOrFull;
+    }
+
     private boolean isCurrentUser(int userId) {
         return getCurrentUser() == userId;
     }
@@ -1664,11 +1676,6 @@ public class KeyguardIndicationController {
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
-        @Override
-        public void onStateChanged(int newState) {
-            setVisible(newState == StatusBarState.KEYGUARD);
-        }
-
         @Override
         public void onDozingChanged(boolean dozing) {
             if (mDozing == dozing) {

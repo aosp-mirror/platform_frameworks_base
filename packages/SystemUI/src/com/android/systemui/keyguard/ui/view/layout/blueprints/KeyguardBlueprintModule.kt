@@ -42,12 +42,6 @@ abstract class KeyguardBlueprintModule {
     ): KeyguardBlueprint
 
     @Binds
-    @IntoSet
-    abstract fun bindShortcutsBesideUdfpsLockscreenBlueprint(
-        shortcutsBesideUdfpsLockscreenBlueprint: ShortcutsBesideUdfpsKeyguardBlueprint
-    ): KeyguardBlueprint
-
-    @Binds
     @IntoMap
     @ClassKey(KeyguardBlueprintInteractor::class)
     abstract fun bindsKeyguardBlueprintInteractor(

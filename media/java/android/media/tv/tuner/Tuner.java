@@ -18,6 +18,7 @@ package android.media.tv.tuner;
 
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -32,6 +33,7 @@ import android.hardware.tv.tuner.Constant64Bit;
 import android.hardware.tv.tuner.FrontendScanType;
 import android.media.MediaCodec;
 import android.media.tv.TvInputService;
+import android.media.tv.flags.Flags;
 import android.media.tv.tuner.dvr.DvrPlayback;
 import android.media.tv.tuner.dvr.DvrRecorder;
 import android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener;
@@ -288,6 +290,7 @@ public class Tuner implements AutoCloseable  {
     private static int sTunerVersion = TunerVersionChecker.TUNER_VERSION_UNKNOWN;
     private DemuxInfo mDesiredDemuxInfo = new DemuxInfo(Filter.TYPE_UNDEFINED);
 
+    private boolean mClosed = false;
     private Frontend mFrontend;
     private EventHandler mHandler;
     @Nullable
@@ -813,6 +816,9 @@ public class Tuner implements AutoCloseable  {
      */
     @Override
     public void close() {
+        if (mClosed) {
+            return;
+        }
         acquireTRMSLock("close()");
         try {
             releaseAll();
@@ -820,6 +826,7 @@ public class Tuner implements AutoCloseable  {
             TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
         } finally {
             releaseTRMSLock();
+            mClosed = true;
         }
     }
 
@@ -888,19 +895,14 @@ public class Tuner implements AutoCloseable  {
         try {
             if (mFrontendCiCamHandle != null) {
                 if (DEBUG) {
-                    Log.d(TAG, "unlinking CiCam : " + mFrontendCiCamHandle + " for " +  mClientId);
+                    Log.d(TAG, "releasing CiCam : " + mFrontendCiCamHandle + " for " +  mClientId);
                 }
-                int result = nativeUnlinkCiCam(mFrontendCiCamId);
-                if (result == RESULT_SUCCESS) {
-                    mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
-                    replicateCiCamSettings(null);
-                } else {
-                    Log.e(TAG, "nativeUnlinkCiCam(" + mFrontendCiCamHandle + ") for mClientId:"
-                            + mClientId + "failed with result:" + result);
-                }
+                nativeUnlinkCiCam(mFrontendCiCamId);
+                mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                replicateCiCamSettings(null);
             } else {
                 if (DEBUG) {
-                    Log.d(TAG, "NOT unlinking CiCam : " + mClientId);
+                    Log.d(TAG, "NOT releasing CiCam : " + mClientId);
                 }
             }
         } finally {
@@ -1665,11 +1667,9 @@ public class Tuner implements AutoCloseable  {
                 if (mFrontendCiCamHandle != null && mFrontendCiCamId != null
                         && mFrontendCiCamId == ciCamId) {
                     int result = nativeUnlinkCiCam(ciCamId);
-                    if (result == RESULT_SUCCESS) {
-                        mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
-                        mFrontendCiCamId = null;
-                        mFrontendCiCamHandle = null;
-                    }
+                    mTunerResourceManager.releaseCiCam(mFrontendCiCamHandle, mClientId);
+                    mFrontendCiCamId = null;
+                    mFrontendCiCamHandle = null;
                     return result;
                 }
             }
@@ -2520,6 +2520,53 @@ public class Tuner implements AutoCloseable  {
             if (DEBUG) {
                 Log.d(TAG, "Applying frontend with type " + mFrontendType + ", id "
                         + mDesiredFrontendId);
+            }
+            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, mFrontendLock)) {
+                return RESULT_UNAVAILABLE;
+            }
+            return RESULT_SUCCESS;
+        } finally {
+            mFrontendLock.unlock();
+        }
+    }
+
+    /**
+     * Request a frontend by frontend type.
+     *
+     * <p> This API is used (before {@link #tune(FrontendSettings)}) if the applications want to
+     * select a frontend of a particular type for {@link #tune(FrontendSettings)} when there are
+     * multiple frontends of the same type present, allowing the system to select which one is
+     * applied. The applied frontend will be one of the not-in-use frontends. If all frontends are
+     * in-use, this API will reclaim and apply the frontend owned by the lowest priority client if
+     * current client has higher priority. Otherwise, this API will not apply any frontend and
+     * return {@link #RESULT_UNAVAILABLE}.
+     *
+     * @param desiredFrontendType the Type of the desired fronted. Should be one of
+     *                            {@link android.media.tv.tuner.frontend.FrontendSettings.Type}
+     * @return result status of open operation.
+     * @see #applyFrontend(FrontendInfo)
+     * @see #tune(FrontendSettings)
+     */
+    @Result
+    @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
+    @RequiresPermission(
+        allOf = {"android.permission.TUNER_RESOURCE_ACCESS", "android.permission.ACCESS_TV_TUNER"})
+    public int applyFrontendByType(@FrontendSettings.Type int desiredFrontendType) {
+        mFrontendLock.lock();
+        try {
+            if (mFeOwnerTuner != null) {
+                Log.e(TAG, "Operation connot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
+            if (mFrontendHandle != null) {
+                Log.e(TAG, "A frontend has been opened before");
+                return RESULT_INVALID_STATE;
+            }
+
+            mDesiredFrontendId = null;
+            mFrontendType = desiredFrontendType;
+            if (DEBUG) {
+                Log.d(TAG, "Applying frontend with type " + mFrontendType);
             }
             if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, mFrontendLock)) {
                 return RESULT_UNAVAILABLE;

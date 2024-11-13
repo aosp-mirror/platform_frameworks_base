@@ -21,11 +21,18 @@ import static android.text.Layout.Alignment.ALIGN_NORMAL;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.text.method.OffsetMapping;
+import android.text.style.UpdateLayout;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
+import com.android.text.flags.Flags;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,6 +42,9 @@ import org.junit.runner.RunWith;
 public class DynamicLayoutOffsetMappingTest {
     private static final int WIDTH = 10000;
     private static final TextPaint sTextPaint = new TextPaint();
+
+    @Rule
+    public CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Test
     public void textWithOffsetMapping() {
@@ -107,6 +117,84 @@ public class DynamicLayoutOffsetMappingTest {
         final String text = "abcdef";
         final SpannableStringBuilder spannable = new SpannableStringBuilder(text);
         final CharSequence transformedText = new TestOffsetMapping(spannable, 3, "\n\n");
+
+        final DynamicLayout layout = DynamicLayout.Builder.obtain(spannable, sTextPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setDisplayText(transformedText)
+                .build();
+
+        spannable.replace(2, 4, "xx");
+        assertThat(transformedText.toString()).isEqualTo("abxx\n\nef");
+        assertLineRange(layout, /* lineBreaks */ 0, 5, 6, 8);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_CRASH_UPDATE_LAYOUT_SPAN)
+    public void textWithOffsetMapping_deletion_withUpdateLayoutSpan() {
+        final String text = "abcdef";
+        final SpannableStringBuilder spannable = new SpannableStringBuilder(text);
+        // UpdateLayout span covers the letter 'd'.
+        spannable.setSpan(new UpdateLayout() {}, 3, 4, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        final CharSequence transformedText =
+                new TestOffsetMapping(spannable, 3, "\n\n");
+
+        final DynamicLayout layout = DynamicLayout.Builder.obtain(spannable, sTextPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setDisplayText(transformedText)
+                .build();
+
+        // delete character 'c', original text becomes "abdef"
+        spannable.delete(2, 3);
+        assertThat(transformedText.toString()).isEqualTo("ab\n\ndef");
+        assertLineRange(layout, /* lineBreaks */ 0, 3, 4, 7);
+
+        // delete character 'd', original text becomes "abef"
+        spannable.delete(2, 3);
+        assertThat(transformedText.toString()).isEqualTo("ab\n\nef");
+        assertLineRange(layout, /* lineBreaks */ 0, 3, 4, 6);
+
+        // delete "be", original text becomes "af"
+        spannable.delete(1, 3);
+        assertThat(transformedText.toString()).isEqualTo("a\n\nf");
+        assertLineRange(layout, /* lineBreaks */ 0, 2, 3, 4);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_CRASH_UPDATE_LAYOUT_SPAN)
+    public void textWithOffsetMapping_insert_withUpdateLayoutSpan() {
+        final String text = "abcdef";
+        final SpannableStringBuilder spannable = new SpannableStringBuilder(text);
+        final CharSequence transformedText = new TestOffsetMapping(spannable, 3, "\n\n");
+
+        // UpdateLayout span covers the letter 'de'.
+        spannable.setSpan(new UpdateLayout() {}, 3, 5, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        final DynamicLayout layout = DynamicLayout.Builder.obtain(spannable, sTextPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setDisplayText(transformedText)
+                .build();
+
+        spannable.insert(3, "x");
+        assertThat(transformedText.toString()).isEqualTo("abcx\n\ndef");
+        assertLineRange(layout, /* lineBreaks */ 0, 5, 6, 9);
+
+        spannable.insert(5, "x");
+        assertThat(transformedText.toString()).isEqualTo("abcx\n\ndxef");
+        assertLineRange(layout, /* lineBreaks */ 0, 5, 6, 10);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_CRASH_UPDATE_LAYOUT_SPAN)
+    public void textWithOffsetMapping_replace_withUpdateLayoutSpan() {
+        final String text = "abcdef";
+        final SpannableStringBuilder spannable = new SpannableStringBuilder(text);
+        final CharSequence transformedText = new TestOffsetMapping(spannable, 3, "\n\n");
+        // UpdateLayout span covers the letter 'de'.
+        spannable.setSpan(new UpdateLayout() {}, 3, 5, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
         final DynamicLayout layout = DynamicLayout.Builder.obtain(spannable, sTextPaint, WIDTH)
                 .setAlignment(ALIGN_NORMAL)

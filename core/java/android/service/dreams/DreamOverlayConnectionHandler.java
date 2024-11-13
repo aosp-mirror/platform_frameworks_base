@@ -27,7 +27,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ObservableServiceConnection;
-import com.android.internal.util.PersistentServiceConnection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,22 +47,20 @@ public final class DreamOverlayConnectionHandler {
     private static final int MSG_OVERLAY_CLIENT_READY = 3;
 
     private final Handler mHandler;
-    private final PersistentServiceConnection<IDreamOverlay> mConnection;
+    private final ObservableServiceConnection<IDreamOverlay> mConnection;
     // Retrieved Client
     private IDreamOverlayClient mClient;
     // A list of pending requests to execute on the overlay.
     private final List<Consumer<IDreamOverlayClient>> mConsumers = new ArrayList<>();
     private final OverlayConnectionCallback mCallback;
+    private final Runnable mOnDisconnected;
 
     DreamOverlayConnectionHandler(
             Context context,
             Looper looper,
             Intent serviceIntent,
-            int minConnectionDurationMs,
-            int maxReconnectAttempts,
-            int baseReconnectDelayMs) {
-        this(context, looper, serviceIntent, minConnectionDurationMs, maxReconnectAttempts,
-                baseReconnectDelayMs, new Injector());
+            Runnable onDisconnected) {
+        this(context, looper, serviceIntent, onDisconnected, new Injector());
     }
 
     @VisibleForTesting
@@ -71,20 +68,15 @@ public final class DreamOverlayConnectionHandler {
             Context context,
             Looper looper,
             Intent serviceIntent,
-            int minConnectionDurationMs,
-            int maxReconnectAttempts,
-            int baseReconnectDelayMs,
+            Runnable onDisconnected,
             Injector injector) {
         mCallback = new OverlayConnectionCallback();
         mHandler = new Handler(looper, new OverlayHandlerCallback());
+        mOnDisconnected = onDisconnected;
         mConnection = injector.buildConnection(
                 context,
                 mHandler,
-                serviceIntent,
-                minConnectionDurationMs,
-                maxReconnectAttempts,
-                baseReconnectDelayMs
-        );
+                serviceIntent);
     }
 
     /**
@@ -201,10 +193,14 @@ public final class DreamOverlayConnectionHandler {
         @Override
         public void onDisconnected(ObservableServiceConnection<IDreamOverlay> connection,
                 int reason) {
+            Log.i(TAG, "Dream overlay disconnected, reason: " + reason);
             mClient = null;
             // Cancel any pending messages about the overlay being ready, since it is no
             // longer ready.
             mHandler.removeMessages(MSG_OVERLAY_CLIENT_READY);
+            if (mOnDisconnected != null) {
+                mOnDisconnected.run();
+            }
         }
     }
 
@@ -217,25 +213,18 @@ public final class DreamOverlayConnectionHandler {
          * Returns milliseconds since boot, not counting time spent in deep sleep. Can be overridden
          * in tests with a fake clock.
          */
-        public PersistentServiceConnection<IDreamOverlay> buildConnection(
+        public ObservableServiceConnection<IDreamOverlay> buildConnection(
                 Context context,
                 Handler handler,
-                Intent serviceIntent,
-                int minConnectionDurationMs,
-                int maxReconnectAttempts,
-                int baseReconnectDelayMs) {
+                Intent serviceIntent) {
             final Executor executor = handler::post;
             final int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
-            return new PersistentServiceConnection<>(
+            return new ObservableServiceConnection<>(
                     context,
                     executor,
-                    handler,
                     IDreamOverlay.Stub::asInterface,
                     serviceIntent,
-                    flags,
-                    minConnectionDurationMs,
-                    maxReconnectAttempts,
-                    baseReconnectDelayMs
+                    flags
             );
         }
     }

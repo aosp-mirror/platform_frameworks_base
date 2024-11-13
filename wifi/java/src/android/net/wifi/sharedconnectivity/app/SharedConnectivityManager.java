@@ -98,6 +98,18 @@ public class SharedConnectivityManager {
         }
 
         @Override
+        public void onServiceDisconnected() {
+            if (mCallback != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onServiceDisconnected());
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
         public void onHotspotNetworksUpdated(@NonNull List<HotspotNetwork> networks) {
             if (mCallback != null) {
                 final long token = Binder.clearCallingIdentity();
@@ -161,6 +173,10 @@ public class SharedConnectivityManager {
                 }
             }
         }
+
+        Executor getExecutor() {
+            return mExecutor;
+        }
     }
 
     private ISharedConnectivityService mService;
@@ -176,7 +192,7 @@ public class SharedConnectivityManager {
     private final String mServicePackageName;
     private final String mIntentAction;
     private ServiceConnection mServiceConnection;
-    private UserManager mUserManager;
+    private final UserManager mUserManager;
 
     /**
      * Creates a new instance of {@link SharedConnectivityManager}.
@@ -247,13 +263,13 @@ public class SharedConnectivityManager {
                 mService = null;
                 synchronized (mProxyDataLock) {
                     if (!mCallbackProxyCache.isEmpty()) {
-                        mCallbackProxyCache.keySet().forEach(
-                                SharedConnectivityClientCallback::onServiceDisconnected);
+                        mCallbackProxyCache.values().forEach(
+                                SharedConnectivityCallbackProxy::onServiceDisconnected);
                         mCallbackProxyCache.clear();
                     }
                     if (!mProxyMap.isEmpty()) {
-                        mProxyMap.keySet().forEach(
-                                SharedConnectivityClientCallback::onServiceDisconnected);
+                        mProxyMap.values().forEach(
+                                SharedConnectivityCallbackProxy::onServiceDisconnected);
                         mProxyMap.clear();
                     }
                 }
@@ -304,15 +320,19 @@ public class SharedConnectivityManager {
 
     private void registerCallbackInternal(SharedConnectivityClientCallback callback,
             SharedConnectivityCallbackProxy proxy) {
-        try {
-            mService.registerCallback(proxy);
-            synchronized (mProxyDataLock) {
-                mProxyMap.put(callback, proxy);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception in registerCallback", e);
-            callback.onRegisterCallbackFailed(e);
-        }
+        proxy.getExecutor().execute(
+                () -> {
+                    try {
+                        mService.registerCallback(proxy);
+                        synchronized (mProxyDataLock) {
+                            mProxyMap.put(callback, proxy);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Exception in registerCallback", e);
+                        callback.onRegisterCallbackFailed(e);
+                    }
+                }
+        );
     }
 
     /**

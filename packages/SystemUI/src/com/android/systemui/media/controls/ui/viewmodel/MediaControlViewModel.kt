@@ -33,13 +33,9 @@ import com.android.systemui.media.controls.domain.pipeline.interactor.MediaContr
 import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaControlModel
-import com.android.systemui.media.controls.ui.animation.accentPrimaryFromScheme
-import com.android.systemui.media.controls.ui.animation.surfaceFromScheme
-import com.android.systemui.media.controls.ui.animation.textPrimaryFromScheme
-import com.android.systemui.media.controls.ui.util.MediaArtworkHelper
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.media.controls.util.MediaUiEventLogger
-import com.android.systemui.monet.ColorScheme
-import com.android.systemui.monet.Style
 import com.android.systemui.res.R
 import java.util.concurrent.Executor
 import kotlinx.coroutines.CoroutineDispatcher
@@ -67,42 +63,44 @@ class MediaControlViewModel(
                     mediaControl?.let { toViewModel(it) }
                 }
             }
-            .distinctUntilChanged()
+            .distinctUntilChanged { old, new ->
+                (new == null && old == null) || new?.contentEquals(old) ?: false
+            }
             .flowOn(backgroundDispatcher)
 
     private var isPlaying = false
     private var isAnyButtonClicked = false
+    private var location = -1
+    private var playerViewModel: MediaPlayerViewModel? = null
+
+    fun isNewPlayer(viewModel: MediaPlayerViewModel): Boolean {
+        val contentEquals = playerViewModel?.contentEquals(viewModel) ?: false
+        return (!contentEquals).also { playerViewModel = viewModel }
+    }
+
+    fun onMediaControlIsBound(artistName: CharSequence, titleName: CharSequence) {
+        interactor.logMediaControlIsBound(artistName, titleName)
+    }
 
     private fun onDismissMediaData(
         token: Token?,
         uid: Int,
         packageName: String,
-        instanceId: InstanceId
+        instanceId: InstanceId,
     ) {
         logger.logLongPressDismiss(uid, packageName, instanceId)
-        interactor.removeMediaControl(token, instanceId, MEDIA_PLAYER_ANIMATION_DELAY)
+        interactor.removeMediaControl(
+            token,
+            instanceId,
+            MEDIA_PLAYER_ANIMATION_DELAY,
+            SMARTSPACE_CARD_DISMISS_EVENT,
+            location,
+        )
     }
 
-    private suspend fun toViewModel(model: MediaControlModel): MediaPlayerViewModel? {
+    private fun toViewModel(model: MediaControlModel): MediaPlayerViewModel {
         val mediaController = model.token?.let { MediaController(applicationContext, it) }
-        val wallpaperColors =
-            MediaArtworkHelper.getWallpaperColor(
-                applicationContext,
-                backgroundDispatcher,
-                model.artwork,
-                TAG
-            )
-        val scheme =
-            wallpaperColors?.let { ColorScheme(it, true, Style.CONTENT) }
-                ?: MediaArtworkHelper.getColorScheme(
-                    applicationContext,
-                    model.packageName,
-                    TAG,
-                    Style.CONTENT
-                )
-                    ?: return null
-
-        val gutsViewModel = toGutsViewModel(model, scheme)
+        val gutsViewModel = toGutsViewModel(model)
 
         // Set playing state
         val wasPlaying = isPlaying
@@ -122,7 +120,7 @@ class MediaControlViewModel(
                         R.string.controls_media_playing_item_description,
                         model.songName,
                         model.artistName,
-                        model.appName
+                        model.appName,
                     )
                 }
             },
@@ -133,8 +131,6 @@ class MediaControlViewModel(
             artistName = model.artistName ?: "",
             titleName = model.songName ?: "",
             isExplicitVisible = model.showExplicit,
-            shouldAddGradient = wallpaperColors != null,
-            colorScheme = scheme,
             canShowTime = canShowScrubbingTimeViews(model.semanticActionButtons),
             playTurbulenceNoise = isPlaying && !wasPlaying && wasButtonClicked,
             useSemanticActions = model.semanticActionButtons != null,
@@ -144,8 +140,12 @@ class MediaControlViewModel(
             onClicked = { expandable ->
                 model.clickIntent?.let { clickIntent ->
                     logger.logTapContentView(model.uid, model.packageName, model.instanceId)
-                    // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT)
-                    interactor.startClickIntent(expandable, clickIntent)
+                    interactor.startClickIntent(
+                        expandable,
+                        clickIntent,
+                        SMARTSPACE_CARD_CLICK_EVENT,
+                        location,
+                    )
                 }
             },
             onLongClicked = {
@@ -153,7 +153,7 @@ class MediaControlViewModel(
             },
             onSeek = {
                 logger.logSeek(model.uid, model.packageName, model.instanceId)
-                // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT)
+                interactor.logSmartspaceUserEvent(SMARTSPACE_CARD_CLICK_EVENT, location)
             },
             onBindSeekbar = { seekBarViewModel ->
                 if (model.isResume && model.resumeProgress != null) {
@@ -163,7 +163,8 @@ class MediaControlViewModel(
                         seekBarViewModel.updateController(mediaController)
                     }
                 }
-            }
+            },
+            onLocationChanged = { location = it },
         )
     }
 
@@ -177,10 +178,9 @@ class MediaControlViewModel(
             device?.name?.let {
                 TextUtils.equals(
                     it,
-                    applicationContext.getString(R.string.broadcasting_description_is_broadcasting)
+                    applicationContext.getString(R.string.broadcasting_description_is_broadcasting),
                 )
-            }
-                ?: false
+            } ?: false
         val useDisabledAlpha =
             if (showBroadcastButton) {
                 !isCurrentBroadcastApp
@@ -197,7 +197,8 @@ class MediaControlViewModel(
         return MediaOutputSwitcherViewModel(
             isTapEnabled = showBroadcastButton || !useDisabledAlpha,
             deviceString = deviceString,
-            deviceIcon = device?.icon?.let { Icon.Loaded(it, null) }
+            deviceIcon =
+                device?.icon?.let { Icon.Loaded(it, null) }
                     ?: if (showBroadcastButton) {
                         Icon.Resource(R.drawable.settings_input_antenna, null)
                     } else {
@@ -222,19 +223,19 @@ class MediaControlViewModel(
                         logger.logOpenBroadcastDialog(
                             model.uid,
                             model.packageName,
-                            model.instanceId
+                            model.instanceId,
                         )
                         interactor.startBroadcastDialog(
                             expandable,
                             device?.name.toString(),
-                            model.packageName
+                            model.packageName,
                         )
                     } else {
                         logger.logOpenOutputSwitcher(model.uid, model.packageName, model.instanceId)
                         interactor.startMediaOutputDialog(
                             expandable,
                             model.packageName,
-                            model.token
+                            model.token,
                         )
                     }
                 } else {
@@ -243,27 +244,24 @@ class MediaControlViewModel(
                         ?: interactor.startMediaOutputDialog(
                             expandable,
                             model.packageName,
-                            model.token
+                            model.token,
                         )
                 }
-            }
+            },
         )
     }
 
-    private fun toGutsViewModel(model: MediaControlModel, scheme: ColorScheme): GutsViewModel {
+    private fun toGutsViewModel(model: MediaControlModel): GutsViewModel {
         return GutsViewModel(
             gutsText =
                 if (model.isDismissible) {
                     applicationContext.getString(
                         R.string.controls_media_close_session,
-                        model.appName
+                        model.appName,
                     )
                 } else {
                     applicationContext.getString(R.string.controls_media_active_session)
                 },
-            textPrimaryColor = textPrimaryFromScheme(scheme),
-            accentPrimaryColor = accentPrimaryFromScheme(scheme),
-            surfaceColor = surfaceFromScheme(scheme),
             isDismissEnabled = model.isDismissible,
             onDismissClicked = {
                 onDismissMediaData(model.token, model.uid, model.packageName, model.instanceId)
@@ -290,7 +288,7 @@ class MediaControlViewModel(
                         model,
                         mediaButton.getActionById(buttonId),
                         buttonId,
-                        isScrubbingTimeEnabled
+                        isScrubbingTimeEnabled,
                     )
                 }
             }
@@ -305,7 +303,7 @@ class MediaControlViewModel(
         model: MediaControlModel,
         mediaAction: MediaAction?,
         buttonId: Int,
-        canShowScrubbingTimeViews: Boolean
+        canShowScrubbingTimeViews: Boolean,
     ): MediaActionViewModel {
         val showInCollapsed = SEMANTIC_ACTIONS_COMPACT.contains(buttonId)
         val hideWhenScrubbing = SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.contains(buttonId)
@@ -339,7 +337,7 @@ class MediaControlViewModel(
     private fun toNotifActionViewModel(
         model: MediaControlModel,
         mediaAction: MediaAction,
-        index: Int
+        index: Int,
     ): MediaActionViewModel {
         return MediaActionViewModel(
             icon = mediaAction.icon,
@@ -361,10 +359,10 @@ class MediaControlViewModel(
         uid: Int,
         packageName: String,
         instanceId: InstanceId,
-        action: Runnable
+        action: Runnable,
     ) {
         logger.logTapAction(id, uid, packageName, instanceId)
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT)
+        interactor.logSmartspaceUserEvent(SMARTSPACE_CARD_CLICK_EVENT, location)
         isAnyButtonClicked = true
         action.run()
     }
@@ -385,8 +383,7 @@ class MediaControlViewModel(
             SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.stream().allMatch { id: Int ->
                 semanticActions.getActionById(id) != null
             }
-        }
-            ?: false
+        } ?: false
     }
 
     companion object {
@@ -411,7 +408,7 @@ class MediaControlViewModel(
                 R.id.actionPrev,
                 R.id.actionNext,
                 R.id.action0,
-                R.id.action1
+                R.id.action1,
             )
 
         const val TURBULENCE_NOISE_PLAY_MS_DURATION = 7500L

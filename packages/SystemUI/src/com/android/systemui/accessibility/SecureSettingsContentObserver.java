@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,7 @@ public abstract class SecureSettingsContentObserver<T> {
     private final UserTracker mUserTracker;
     @VisibleForTesting
     final ContentObserver mContentObserver;
+    private final SecureSettings mSecureSettings;
 
     private final String mKey;
 
@@ -55,7 +57,7 @@ public abstract class SecureSettingsContentObserver<T> {
     final List<T> mListeners = new ArrayList<>();
 
     protected SecureSettingsContentObserver(Context context, UserTracker userTracker,
-            String secureSettingsKey) {
+            SecureSettings secureSettings, String secureSettingsKey) {
         mKey = secureSettingsKey;
         mContentResolver = context.getContentResolver();
         mUserTracker = userTracker;
@@ -65,6 +67,7 @@ public abstract class SecureSettingsContentObserver<T> {
                 updateValueChanged();
             }
         };
+        mSecureSettings = secureSettings;
     }
 
     /**
@@ -80,9 +83,8 @@ public abstract class SecureSettingsContentObserver<T> {
         }
 
         if (mListeners.size() == 1) {
-            mContentResolver.registerContentObserver(
-                    Settings.Secure.getUriFor(mKey), /* notifyForDescendants= */
-                    false, mContentObserver, UserHandle.USER_ALL);
+            mSecureSettings.registerContentObserverForUserAsync(Settings.Secure.getUriFor(mKey),
+                    /* notifyForDescendants= */ false, mContentObserver, UserHandle.USER_ALL);
         }
     }
 
@@ -97,7 +99,7 @@ public abstract class SecureSettingsContentObserver<T> {
         mListeners.remove(listener);
 
         if (mListeners.isEmpty()) {
-            mContentResolver.unregisterContentObserver(mContentObserver);
+            mSecureSettings.unregisterContentObserverAsync(mContentObserver);
         }
     }
 

@@ -42,13 +42,14 @@ import androidx.annotation.Nullable;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.notification.EnableZenModeDialog;
+import com.android.settingslib.notification.modes.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.modes.shared.ModesUi;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -105,6 +106,10 @@ public class DndTile extends QSTileImpl<BooleanState> {
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
+
+        // If the flag is on, this shouldn't run at all since the modes tile replaces the DND tile.
+        ModesUi.assertInLegacyMode();
+
         mController = zenModeController;
         mSharedPreferences = sharedPreferences;
         mController.observe(getLifecycle(), mZenCallback);
@@ -253,18 +258,20 @@ public class DndTile extends QSTileImpl<BooleanState> {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.contentDescription =
                         mContext.getString(R.string.accessibility_quick_settings_dnd) + ", "
-                        + state.secondaryLabel;
+                                + state.secondaryLabel;
                 break;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 state.contentDescription =
                         mContext.getString(R.string.accessibility_quick_settings_dnd) + ", " +
-                        mContext.getString(R.string.accessibility_quick_settings_dnd_none_on)
+                                mContext.getString(
+                                        R.string.accessibility_quick_settings_dnd_none_on)
                                 + ", " + state.secondaryLabel;
                 break;
             case ZEN_MODE_ALARMS:
                 state.contentDescription =
                         mContext.getString(R.string.accessibility_quick_settings_dnd) + ", " +
-                        mContext.getString(R.string.accessibility_quick_settings_dnd_alarms_on)
+                                mContext.getString(
+                                        R.string.accessibility_quick_settings_dnd_alarms_on)
                                 + ", " + state.secondaryLabel;
                 break;
             default:

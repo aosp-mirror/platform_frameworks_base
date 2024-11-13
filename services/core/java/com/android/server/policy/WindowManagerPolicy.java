@@ -82,6 +82,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.IDisplayFoldListener;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants;
@@ -312,12 +313,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         }
 
         /**
-         * Hint to window manager that the user has started a navigation action that should
-         * abort animations that have no timeout, in case they got stuck.
-         */
-        void triggerAnimationFailsafe();
-
-        /**
          * The keyguard showing state has changed
          */
         void onKeyguardShowingAndNotOccludedChanged();
@@ -367,6 +362,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Invoked when a screenshot is taken of the given display to notify registered listeners.
          */
         List<ComponentName> notifyScreenshotListeners(int displayId);
+
+        /**
+         * Returns whether the given UID is the owner of a virtual device, which the given display
+         * belongs to.
+         */
+        boolean isCallerVirtualDeviceOwner(int displayId, int callingUid);
     }
 
     /**
@@ -426,6 +427,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param packageName package name
      * @param outAppOp First element will be filled with the app op corresponding to
      *                 this window, or OP_NONE.
+     * @param displayId The display on which this window is being added.
      *
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed;
      *      else an error code, usually
@@ -434,7 +436,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @see WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY
      */
     int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
-            int[] outAppOp);
+            int[] outAppOp, int displayId);
 
     /**
      * After the window manager has computed the current configuration based
@@ -696,6 +698,15 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
+
+    /**
+     * Return the set of applicaition launch keyboard shortcuts the system supports.
+     *
+     * @param deviceId The id of the {@link InputDevice} that will trigger the shortcut.
+     *
+     * @return {@link KeyboardShortcutGroup} containing the shortcuts.
+     */
+    KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
 
     /**
      * Called from the input reader thread before a motion is enqueued when the device is in a
@@ -1064,12 +1075,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * this point the display is active.
      */
     public void enableScreenAfterBoot();
-
-    /**
-     * Call from application to perform haptic feedback on its window.
-     */
-    public boolean performHapticFeedback(int uid, String packageName, int effectId,
-            boolean always, String reason, boolean fromIme);
 
     /**
      * Called when we have started keeping the screen on because a window

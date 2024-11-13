@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <GrAHardwareBufferUtils.h>
-#include <GrBackendSurface.h>
 #include <SkImage.h>
 #include <android/hardware_buffer.h>
+#include <include/android/GrAHardwareBufferUtils.h>
+#include <include/gpu/ganesh/GrBackendSurface.h>
 #include <system/graphics.h>
 
 namespace android {

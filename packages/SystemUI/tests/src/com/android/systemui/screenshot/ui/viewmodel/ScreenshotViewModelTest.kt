@@ -17,12 +17,15 @@
 package com.android.systemui.screenshot.ui.viewmodel
 
 import android.view.accessibility.AccessibilityManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ScreenshotViewModelTest {
     private val accessibilityManager: AccessibilityManager = mock(AccessibilityManager::class.java)
     private val appearance = ActionButtonAppearance(null, "Label", "Description")

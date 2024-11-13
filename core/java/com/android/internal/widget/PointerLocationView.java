@@ -16,14 +16,19 @@
 
 package com.android.internal.widget;
 
+import static java.lang.Float.NaN;
+
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
@@ -65,11 +70,14 @@ public class PointerLocationView extends View implements InputDeviceListener,
     private static final PointerState EMPTY_POINTER_STATE = new PointerState();
 
     public static class PointerState {
-        // Trace of previous points.
-        private float[] mTraceX = new float[32];
-        private float[] mTraceY = new float[32];
-        private boolean[] mTraceCurrent = new boolean[32];
-        private int mTraceCount;
+        private float mCurrentX = NaN;
+        private float mCurrentY = NaN;
+        private float mPreviousX = NaN;
+        private float mPreviousY = NaN;
+        private float mFirstX = NaN;
+        private float mFirstY = NaN;
+        private boolean mPreviousPointIsHistorical;
+        private boolean mCurrentPointIsHistorical;
 
         // True if the pointer is down.
         @UnsupportedAppUsage
@@ -96,31 +104,20 @@ public class PointerLocationView extends View implements InputDeviceListener,
         public PointerState() {
         }
 
-        public void clearTrace() {
-            mTraceCount = 0;
-        }
-
-        public void addTrace(float x, float y, boolean current) {
-            int traceCapacity = mTraceX.length;
-            if (mTraceCount == traceCapacity) {
-                traceCapacity *= 2;
-                float[] newTraceX = new float[traceCapacity];
-                System.arraycopy(mTraceX, 0, newTraceX, 0, mTraceCount);
-                mTraceX = newTraceX;
-
-                float[] newTraceY = new float[traceCapacity];
-                System.arraycopy(mTraceY, 0, newTraceY, 0, mTraceCount);
-                mTraceY = newTraceY;
-
-                boolean[] newTraceCurrent = new boolean[traceCapacity];
-                System.arraycopy(mTraceCurrent, 0, newTraceCurrent, 0, mTraceCount);
-                mTraceCurrent= newTraceCurrent;
+        public void addTrace(float x, float y, boolean isHistorical) {
+            if (Float.isNaN(mFirstX)) {
+                mFirstX = x;
+            }
+            if (Float.isNaN(mFirstY)) {
+                mFirstY = y;
             }
 
-            mTraceX[mTraceCount] = x;
-            mTraceY[mTraceCount] = y;
-            mTraceCurrent[mTraceCount] = current;
-            mTraceCount += 1;
+            mPreviousX = mCurrentX;
+            mPreviousY = mCurrentY;
+            mCurrentX = x;
+            mCurrentY = y;
+            mPreviousPointIsHistorical = mCurrentPointIsHistorical;
+            mCurrentPointIsHistorical = isHistorical;
         }
     }
 
@@ -148,6 +145,12 @@ public class PointerLocationView extends View implements InputDeviceListener,
     @UnsupportedAppUsage
     private final SparseArray<PointerState> mPointers = new SparseArray<PointerState>();
     private final PointerCoords mTempCoords = new PointerCoords();
+
+    // Draw the trace of all pointers in the current gesture in a separate layer
+    // that is not cleared on every frame so that we don't have to re-draw the
+    // entire trace on each frame.
+    private final Bitmap mTraceBitmap;
+    private final Canvas mTraceCanvas;
 
     private final Region mSystemGestureExclusion = new Region();
     private final Region mSystemGestureExclusionRejected = new Region();
@@ -196,6 +199,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
         mPathPaint.setAntiAlias(false);
         mPathPaint.setARGB(255, 0, 96, 255);
         mPathPaint.setStyle(Paint.Style.STROKE);
+
+        mTraceBitmap = Bitmap.createBitmap(getResources().getDisplayMetrics().widthPixels,
+                getResources().getDisplayMetrics().heightPixels, Bitmap.Config.ARGB_8888);
+        mTraceCanvas = new Canvas(mTraceBitmap);
 
         configureDensityDependentFactors();
 
@@ -256,7 +263,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mTextPaint.getFontMetricsInt(mTextMetrics);
-        mHeaderBottom = mHeaderPaddingTop-mTextMetrics.ascent+mTextMetrics.descent+2;
+        mHeaderBottom = mHeaderPaddingTop - mTextMetrics.ascent + mTextMetrics.descent + 2;
         if (false) {
             Log.i("foo", "Metrics: ascent=" + mTextMetrics.ascent
                     + " descent=" + mTextMetrics.descent
@@ -269,6 +276,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
     // Draw an oval.  When angle is 0 radians, orients the major axis vertically,
     // angles less than or greater than 0 radians rotate the major axis left or right.
     private RectF mReusableOvalRect = new RectF();
+
     private void drawOval(Canvas canvas, float x, float y, float major, float minor,
             float angle, Paint paint) {
         canvas.save(Canvas.MATRIX_SAVE_FLAG);
@@ -284,6 +292,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
     @Override
     protected void onDraw(Canvas canvas) {
         final int NP = mPointers.size();
+
+        canvas.drawBitmap(mTraceBitmap, 0, 0, null);
 
         if (!mSystemGestureExclusion.isEmpty()) {
             mSystemGestureExclusionPath.reset();
@@ -303,32 +313,9 @@ public class PointerLocationView extends View implements InputDeviceListener,
         // Pointer trace.
         for (int p = 0; p < NP; p++) {
             final PointerState ps = mPointers.valueAt(p);
+            float lastX = ps.mCurrentX, lastY = ps.mCurrentY;
 
-            // Draw path.
-            final int N = ps.mTraceCount;
-            float lastX = 0, lastY = 0;
-            boolean haveLast = false;
-            boolean drawn = false;
-            mPaint.setARGB(255, 128, 255, 255);
-            for (int i=0; i < N; i++) {
-                float x = ps.mTraceX[i];
-                float y = ps.mTraceY[i];
-                if (Float.isNaN(x) || Float.isNaN(y)) {
-                    haveLast = false;
-                    continue;
-                }
-                if (haveLast) {
-                    canvas.drawLine(lastX, lastY, x, y, mPathPaint);
-                    final Paint paint = ps.mTraceCurrent[i - 1] ? mCurrentPointPaint : mPaint;
-                    canvas.drawPoint(lastX, lastY, paint);
-                    drawn = true;
-                }
-                lastX = x;
-                lastY = y;
-                haveLast = true;
-            }
-
-            if (drawn) {
+            if (!Float.isNaN(lastX) && !Float.isNaN(lastY)) {
                 // Draw velocity vector.
                 mPaint.setARGB(255, 255, 64, 128);
                 float xVel = ps.mXVelocity * (1000 / 60);
@@ -353,7 +340,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                         Math.max(getHeight(), getWidth()), mTargetPaint);
 
                 // Draw current point.
-                int pressureLevel = (int)(ps.mCoords.pressure * 255);
+                int pressureLevel = (int) (ps.mCoords.pressure * 255);
                 mPaint.setARGB(255, pressureLevel, 255, 255 - pressureLevel);
                 canvas.drawPoint(ps.mCoords.x, ps.mCoords.y, mPaint);
 
@@ -424,8 +411,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 .append(" / ").append(mMaxNumPointers)
                 .toString(), 1, base, mTextPaint);
 
-        final int count = ps.mTraceCount;
-        if ((mCurDown && ps.mCurDown) || count == 0) {
+        if ((mCurDown && ps.mCurDown) || Float.isNaN(ps.mCurrentX)) {
             canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
                     mTextBackgroundPaint);
             canvas.drawText(mText.clear()
@@ -437,8 +423,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
                     .append("Y: ").append(ps.mCoords.y, 1)
                     .toString(), 1 + itemW * 2, base, mTextPaint);
         } else {
-            float dx = ps.mTraceX[count - 1] - ps.mTraceX[0];
-            float dy = ps.mTraceY[count - 1] - ps.mTraceY[0];
+            float dx = ps.mCurrentX - ps.mFirstX;
+            float dy = ps.mCurrentY - ps.mFirstY;
             canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
                     Math.abs(dx) < mVC.getScaledTouchSlop()
                             ? mTextBackgroundPaint : mTextLevelPaint);
@@ -565,9 +551,9 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 .append(" TouchMinor=").append(coords.touchMinor, 3)
                 .append(" ToolMajor=").append(coords.toolMajor, 3)
                 .append(" ToolMinor=").append(coords.toolMinor, 3)
-                .append(" Orientation=").append((float)(coords.orientation * 180 / Math.PI), 1)
+                .append(" Orientation=").append((float) (coords.orientation * 180 / Math.PI), 1)
                 .append("deg")
-                .append(" Tilt=").append((float)(
+                .append(" Tilt=").append((float) (
                         coords.getAxisValue(MotionEvent.AXIS_TILT) * 180 / Math.PI), 1)
                 .append("deg")
                 .append(" Distance=").append(coords.getAxisValue(MotionEvent.AXIS_DISTANCE), 1)
@@ -598,6 +584,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 mCurNumPointers = 0;
                 mMaxNumPointers = 0;
                 mVelocity.clear();
+                mTraceCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                 if (mAltVelocity != null) {
                     mAltVelocity.clear();
                 }
@@ -646,7 +633,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
                     logCoords("Pointer", action, i, coords, id, event);
                 }
                 if (ps != null) {
-                    ps.addTrace(coords.x, coords.y, false);
+                    ps.addTrace(coords.x, coords.y, true);
+                    updateDrawTrace(ps);
                 }
             }
         }
@@ -659,7 +647,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 logCoords("Pointer", action, i, coords, id, event);
             }
             if (ps != null) {
-                ps.addTrace(coords.x, coords.y, true);
+                ps.addTrace(coords.x, coords.y, false);
+                updateDrawTrace(ps);
                 ps.mXVelocity = mVelocity.getXVelocity(id);
                 ps.mYVelocity = mVelocity.getYVelocity(id);
                 if (mAltVelocity != null) {
@@ -702,11 +691,24 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 if (mActivePointerId == id) {
                     mActivePointerId = event.getPointerId(index == 0 ? 1 : 0);
                 }
-                ps.addTrace(Float.NaN, Float.NaN, false);
+                ps.addTrace(Float.NaN, Float.NaN, true);
             }
         }
 
         invalidate();
+    }
+
+    private void updateDrawTrace(PointerState ps) {
+        mPaint.setARGB(255, 128, 255, 255);
+        float x = ps.mCurrentX;
+        float y = ps.mCurrentY;
+        float lastX = ps.mPreviousX;
+        float lastY = ps.mPreviousY;
+        if (!Float.isNaN(x) && !Float.isNaN(y) && !Float.isNaN(lastX) && !Float.isNaN(lastY)) {
+            mTraceCanvas.drawLine(lastX, lastY, x, y, mPathPaint);
+            Paint paint = ps.mPreviousPointIsHistorical ? mPaint : mCurrentPointPaint;
+            mTraceCanvas.drawPoint(lastX, lastY, paint);
+        }
     }
 
     @Override
@@ -767,7 +769,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 return true;
             default:
                 return KeyEvent.isGamepadButton(keyCode)
-                    || KeyEvent.isModifierKey(keyCode);
+                        || KeyEvent.isModifierKey(keyCode);
         }
     }
 
@@ -887,7 +889,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         public FasterStringBuilder append(int value, int zeroPadWidth) {
             final boolean negative = value < 0;
             if (negative) {
-                value = - value;
+                value = -value;
                 if (value < 0) {
                     append("-2147483648");
                     return this;
@@ -973,26 +975,27 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     private ISystemGestureExclusionListener mSystemGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
-        @Override
-        public void onSystemGestureExclusionChanged(int displayId, Region systemGestureExclusion,
-                Region systemGestureExclusionUnrestricted) {
-            Region exclusion = Region.obtain(systemGestureExclusion);
-            Region rejected = Region.obtain();
-            if (systemGestureExclusionUnrestricted != null) {
-                rejected.set(systemGestureExclusionUnrestricted);
-                rejected.op(exclusion, Region.Op.DIFFERENCE);
-            }
-            Handler handler = getHandler();
-            if (handler != null) {
-                handler.post(() -> {
-                    mSystemGestureExclusion.set(exclusion);
-                    mSystemGestureExclusionRejected.set(rejected);
-                    exclusion.recycle();
-                    invalidate();
-                });
-            }
-        }
-    };
+                @Override
+                public void onSystemGestureExclusionChanged(int displayId,
+                        Region systemGestureExclusion,
+                        Region systemGestureExclusionUnrestricted) {
+                    Region exclusion = Region.obtain(systemGestureExclusion);
+                    Region rejected = Region.obtain();
+                    if (systemGestureExclusionUnrestricted != null) {
+                        rejected.set(systemGestureExclusionUnrestricted);
+                        rejected.op(exclusion, Region.Op.DIFFERENCE);
+                    }
+                    Handler handler = getHandler();
+                    if (handler != null) {
+                        handler.post(() -> {
+                            mSystemGestureExclusion.set(exclusion);
+                            mSystemGestureExclusionRejected.set(rejected);
+                            exclusion.recycle();
+                            invalidate();
+                        });
+                    }
+                }
+            };
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {

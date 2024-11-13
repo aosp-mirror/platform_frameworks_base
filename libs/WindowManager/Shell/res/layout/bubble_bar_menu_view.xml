@@ -17,6 +17,7 @@
 <com.android.wm.shell.bubbles.bar.BubbleBarMenuView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
@@ -51,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault" />
 
         <ImageView
@@ -61,7 +62,7 @@
             android:layout_marginStart="8dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_expand_less"
-            app:tint="?android:attr/textColorPrimary" />
+            app:tint="?androidprv:attr/materialColorOnSurface" />
 
     </LinearLayout>
 
@@ -71,6 +72,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="@dimen/bubble_bar_manage_menu_section_spacing"
+        android:clipChildren="true"
+        android:clipToOutline="true"
         android:background="@drawable/bubble_manage_menu_bg"
         android:elevation="@dimen/bubble_manage_menu_elevation" />
 

@@ -442,7 +442,7 @@ import java.util.Objects;
     @Nullable
     private MediaRoute2Info createMediaRoute2Info(
             @Nullable String routeId,
-            int audioDeviceInfoType,
+            @AudioDeviceInfo.AudioDeviceType int audioDeviceInfoType,
             @Nullable CharSequence deviceName,
             @Nullable String address) {
         SystemRouteInfo systemRouteInfo =
@@ -490,7 +490,8 @@ import java.util.Objects;
         public final boolean mCorrespondsToInactiveBluetoothRoute;
 
         public static MediaRoute2InfoHolder createForAudioManagerRoute(
-                MediaRoute2Info mediaRoute2Info, int audioDeviceInfoType) {
+                MediaRoute2Info mediaRoute2Info,
+                @AudioDeviceInfo.AudioDeviceType int audioDeviceInfoType) {
             return new MediaRoute2InfoHolder(
                     mediaRoute2Info,
                     audioDeviceInfoType,
@@ -509,7 +510,7 @@ import java.util.Objects;
 
         private MediaRoute2InfoHolder(
                 MediaRoute2Info mediaRoute2Info,
-                int audioDeviceInfoType,
+                @AudioDeviceInfo.AudioDeviceType int audioDeviceInfoType,
                 boolean correspondsToInactiveBluetoothRoute) {
             mMediaRoute2Info = mediaRoute2Info;
             mAudioDeviceInfoType = audioDeviceInfoType;

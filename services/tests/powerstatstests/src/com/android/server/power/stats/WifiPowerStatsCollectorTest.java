@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.NetworkStats;
 import android.net.wifi.WifiManager;
@@ -40,12 +41,14 @@ import android.os.BatteryStatsManager;
 import android.os.Handler;
 import android.os.WorkSource;
 import android.os.connectivity.WifiActivityEnergyInfo;
+import android.os.connectivity.WifiBatteryStats;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.IndentingPrintWriter;
 import android.util.SparseArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.WifiPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -56,7 +59,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class WifiPowerStatsCollectorTest {
@@ -153,11 +155,6 @@ public class WifiPowerStatsCollectorTest {
         }
 
         @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> 3500;
-        }
-
-        @Override
         public Supplier<NetworkStats> getWifiNetworkStatsSupplier() {
             return mNetworkStatsSupplier;
         }
@@ -186,6 +183,7 @@ public class WifiPowerStatsCollectorTest {
                 return uid;
             }
         });
+        when(mContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mWifiManager);
         mBatteryStats = mStatsRule.getBatteryStats();
     }
 
@@ -319,12 +317,54 @@ public class WifiPowerStatsCollectorTest {
                         + " scan: 234 batched-scan: 345");
     }
 
+    @Test
+    public void getWifiBatteryStats() throws Throwable {
+        when(mWifiManager.isEnhancedPowerReportingSupported()).thenReturn(true);
+        mBatteryStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_WIFI,
+                true);
+
+        mockWifiActivityInfo(1000, 600, 100, 2000, 3000);
+        mockNetworkStats(1000);
+        mockNetworkStatsEntry(APP_UID1, 4321, 321, 1234, 23);
+        mockNetworkStatsEntry(APP_UID2, 4000, 40, 2000, 20);
+        mockWifiScanTimes(APP_UID1, 1000, 2000);
+        mockWifiScanTimes(APP_UID2, 3000, 4000);
+
+        // This should trigger a baseline sample collection
+        mBatteryStats.onSystemReady(mContext);
+        mStatsRule.waitForBackgroundThread();
+
+        mockWifiActivityInfo(1100, 6600, 1100, 2200, 3300);
+        mockNetworkStats(1100);
+        mockNetworkStatsEntry(APP_UID1, 5321, 421, 3234, 223);
+        mockNetworkStatsEntry(APP_UID2, 8000, 80, 4000, 40);
+        mockWifiScanTimes(APP_UID1, 1234, 2345);
+        mockWifiScanTimes(APP_UID2, 3100, 4200);
+
+        mStatsRule.setTime(30000, 30000);
+        mBatteryStats.getPowerStatsCollector(BatteryConsumer.POWER_COMPONENT_WIFI)
+                .schedule();
+        mStatsRule.waitForBackgroundThread();
+
+        WifiBatteryStats stats = mBatteryStats.getWifiBatteryStats();
+        assertThat(stats.getNumPacketsRx()).isEqualTo(501);
+        assertThat(stats.getNumBytesRx()).isEqualTo(13321);
+        assertThat(stats.getNumPacketsTx()).isEqualTo(263);
+        assertThat(stats.getNumBytesTx()).isEqualTo(7234);
+        assertThat(stats.getScanTimeMillis()).isEqualTo(200);
+        assertThat(stats.getRxTimeMillis()).isEqualTo(6000);
+        assertThat(stats.getTxTimeMillis()).isEqualTo(1000);
+        assertThat(stats.getIdleTimeMillis()).isEqualTo(300);
+        assertThat(stats.getSleepTimeMillis()).isEqualTo(30000 - 6000 - 1000 - 300);
+    }
+
     private PowerStats collectPowerStats(boolean hasPowerReporting) {
         when(mWifiManager.isEnhancedPowerReportingSupported()).thenReturn(hasPowerReporting);
 
-        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector);
+        WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(3500);
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.WIFI))
                 .thenReturn(new int[]{777});
 
@@ -342,8 +382,8 @@ public class WifiPowerStatsCollectorTest {
         mockWifiScanTimes(APP_UID2, 3000, 4000);
         mockWifiScanTimes(ISOLATED_UID, 5000, 6000);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{10000});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{777})))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(10_000)});
 
         collector.collectStats();
 
@@ -361,11 +401,17 @@ public class WifiPowerStatsCollectorTest {
         mockWifiScanTimes(APP_UID2, 3100, 4200);
         mockWifiScanTimes(ISOLATED_UID, 5300, 6400);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{64321});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{777})))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(64_321)});
 
         mStatsRule.setTime(20000, 20000);
         return collector.collectStats();
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private void mockWifiActivityInfo(long timestamp, long rxTimeMs, long txTimeMs, int scanTimeMs,
@@ -389,6 +435,7 @@ public class WifiPowerStatsCollectorTest {
         } else {
             mNetworkStats = new NetworkStats(elapsedRealtime, 1);
         }
+        mBatteryStats.setNetworkStats(mNetworkStats);
         when(mNetworkStatsSupplier.get()).thenReturn(mNetworkStats);
     }
 
@@ -411,6 +458,7 @@ public class WifiPowerStatsCollectorTest {
                     .addEntry(new NetworkStats.Entry("wifi", uid, 0, 0,
                             METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, rxBytes, rxPackets,
                             txBytes, txPackets, 100));
+            mBatteryStats.setNetworkStats(mNetworkStats);
             reset(mNetworkStatsSupplier);
             when(mNetworkStatsSupplier.get()).thenReturn(mNetworkStats);
         }

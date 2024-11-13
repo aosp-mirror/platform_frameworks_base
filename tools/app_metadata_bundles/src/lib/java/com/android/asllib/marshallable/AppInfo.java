@@ -39,6 +39,14 @@ public class AppInfo implements AslMarshallable {
     private final String mEmail;
     private final String mWebsite;
 
+    private final Boolean mApsCompliant;
+    private final String mDeveloperId;
+    private final String mApplicationId;
+
+    // private final String mPrivacyPolicy;
+    // private final List<String> mFirstPartyEndpoints;
+    // private final List<String> mServiceProviderEndpoints;
+
     public AppInfo(
             String title,
             String description,
@@ -52,7 +60,10 @@ public class AppInfo implements AslMarshallable {
             List<String> serviceProviderEndpoints,
             String category,
             String email,
-            String website) {
+            String website,
+            Boolean apsCompliant,
+            String developerId,
+            String applicationId) {
         this.mTitle = title;
         this.mDescription = description;
         this.mContainsAds = containsAds;
@@ -66,12 +77,15 @@ public class AppInfo implements AslMarshallable {
         this.mCategory = category;
         this.mEmail = email;
         this.mWebsite = website;
+        this.mApsCompliant = apsCompliant;
+        this.mDeveloperId = developerId;
+        this.mApplicationId = applicationId;
     }
 
     /** Creates an on-device DOM element from the {@link SafetyLabels}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element appInfoEle = XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_APP_INFO);
+
         if (this.mTitle != null) {
             appInfoEle.appendChild(XmlUtils.createOdStringEle(doc, XmlUtils.OD_NAME_TITLE, mTitle));
         }
@@ -109,7 +123,7 @@ public class AppInfo implements AslMarshallable {
                     XmlUtils.createOdArray(
                             doc,
                             XmlUtils.OD_TAG_STRING_ARRAY,
-                            XmlUtils.OD_NAME_SECURITY_ENDPOINT,
+                            XmlUtils.OD_NAME_SECURITY_ENDPOINTS,
                             mSecurityEndpoints));
         }
         if (this.mFirstPartyEndpoints != null) {
@@ -117,7 +131,7 @@ public class AppInfo implements AslMarshallable {
                     XmlUtils.createOdArray(
                             doc,
                             XmlUtils.OD_TAG_STRING_ARRAY,
-                            XmlUtils.OD_NAME_FIRST_PARTY_ENDPOINT,
+                            XmlUtils.OD_NAME_FIRST_PARTY_ENDPOINTS,
                             mFirstPartyEndpoints));
         }
         if (this.mServiceProviderEndpoints != null) {
@@ -125,7 +139,7 @@ public class AppInfo implements AslMarshallable {
                     XmlUtils.createOdArray(
                             doc,
                             XmlUtils.OD_TAG_STRING_ARRAY,
-                            XmlUtils.OD_NAME_SERVICE_PROVIDER_ENDPOINT,
+                            XmlUtils.OD_NAME_SERVICE_PROVIDER_ENDPOINTS,
                             mServiceProviderEndpoints));
         }
         if (this.mCategory != null) {
@@ -140,13 +154,28 @@ public class AppInfo implements AslMarshallable {
             appInfoEle.appendChild(
                     XmlUtils.createOdStringEle(doc, XmlUtils.OD_NAME_WEBSITE, this.mWebsite));
         }
-        return XmlUtils.listOf(appInfoEle);
+
+        if (this.mApsCompliant != null) {
+            appInfoEle.appendChild(
+                    XmlUtils.createOdBooleanEle(
+                            doc, XmlUtils.OD_NAME_APS_COMPLIANT, mApsCompliant));
+        }
+        if (this.mDeveloperId != null) {
+            appInfoEle.appendChild(
+                    XmlUtils.createOdStringEle(doc, XmlUtils.OD_NAME_DEVELOPER_ID, mDeveloperId));
+        }
+        if (this.mApplicationId != null) {
+            appInfoEle.appendChild(
+                    XmlUtils.createOdStringEle(
+                            doc, XmlUtils.OD_NAME_APPLICATION_ID, mApplicationId));
+        }
+        return appInfoEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element appInfoEle = doc.createElement(XmlUtils.HR_TAG_APP_INFO);
+
         if (this.mTitle != null) {
             appInfoEle.setAttribute(XmlUtils.HR_ATTR_TITLE, this.mTitle);
         }
@@ -176,16 +205,6 @@ public class AppInfo implements AslMarshallable {
             appInfoEle.setAttribute(
                     XmlUtils.HR_ATTR_SECURITY_ENDPOINTS, String.join("|", this.mSecurityEndpoints));
         }
-        if (this.mFirstPartyEndpoints != null) {
-            appInfoEle.setAttribute(
-                    XmlUtils.HR_ATTR_FIRST_PARTY_ENDPOINTS,
-                    String.join("|", this.mFirstPartyEndpoints));
-        }
-        if (this.mServiceProviderEndpoints != null) {
-            appInfoEle.setAttribute(
-                    XmlUtils.HR_ATTR_SERVICE_PROVIDER_ENDPOINTS,
-                    String.join("|", this.mServiceProviderEndpoints));
-        }
         if (this.mCategory != null) {
             appInfoEle.setAttribute(XmlUtils.HR_ATTR_CATEGORY, this.mCategory);
         }
@@ -195,6 +214,30 @@ public class AppInfo implements AslMarshallable {
         if (this.mWebsite != null) {
             appInfoEle.setAttribute(XmlUtils.HR_ATTR_WEBSITE, this.mWebsite);
         }
-        return XmlUtils.listOf(appInfoEle);
+
+        if (this.mApsCompliant != null) {
+            appInfoEle.setAttribute(
+                    XmlUtils.HR_ATTR_APS_COMPLIANT, String.valueOf(this.mApsCompliant));
+        }
+        if (this.mFirstPartyEndpoints != null) {
+            appInfoEle.appendChild(
+                    XmlUtils.createHrArray(
+                            doc, XmlUtils.HR_TAG_FIRST_PARTY_ENDPOINTS, mFirstPartyEndpoints));
+        }
+        if (this.mServiceProviderEndpoints != null) {
+            appInfoEle.appendChild(
+                    XmlUtils.createHrArray(
+                            doc,
+                            XmlUtils.HR_TAG_SERVICE_PROVIDER_ENDPOINTS,
+                            mServiceProviderEndpoints));
+        }
+        if (this.mDeveloperId != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_DEVELOPER_ID, this.mDeveloperId);
+        }
+        if (this.mApplicationId != null) {
+            appInfoEle.setAttribute(XmlUtils.HR_ATTR_APPLICATION_ID, this.mApplicationId);
+        }
+
+        return appInfoEle;
     }
 }

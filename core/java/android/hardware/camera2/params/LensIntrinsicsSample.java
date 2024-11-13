@@ -31,7 +31,6 @@ import java.util.Arrays;
  * Immutable class to store an
  * {@link CaptureResult#STATISTICS_LENS_INTRINSICS_SAMPLES lens intrinsics intra-frame sample}.
  */
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public final class LensIntrinsicsSample {
     /**
      * Create a new {@link LensIntrinsicsSample}.
@@ -46,7 +45,6 @@ public final class LensIntrinsicsSample {
      *
      * @throws IllegalArgumentException if lensIntrinsics length is different from 5
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public LensIntrinsicsSample(final long timestampNs, @NonNull final float[] lensIntrinsics) {
         mTimestampNs = timestampNs;
         Preconditions.checkArgument(lensIntrinsics.length == 5);
@@ -61,7 +59,6 @@ public final class LensIntrinsicsSample {
      *
      * @return a long value (guaranteed to be finite)
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public long getTimestampNanos() {
         return mTimestampNs;
     }
@@ -72,7 +69,6 @@ public final class LensIntrinsicsSample {
      * @return a floating point value (guaranteed to be finite)
      * @see CaptureResult#LENS_INTRINSIC_CALIBRATION
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public float[] getLensIntrinsics() {
         return mLensIntrinsics;

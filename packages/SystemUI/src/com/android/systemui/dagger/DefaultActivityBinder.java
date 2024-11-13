@@ -29,7 +29,6 @@ import com.android.systemui.screenshot.scroll.LongScreenshotActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.telephony.ui.activity.SwitchToManagedProfileForCallActivity;
-import com.android.systemui.touchpad.tutorial.ui.view.TouchpadTutorialActivity;
 import com.android.systemui.tuner.TunerActivity;
 import com.android.systemui.usb.UsbAccessoryUriActivity;
 import com.android.systemui.usb.UsbConfirmActivity;
@@ -157,10 +156,4 @@ public abstract class DefaultActivityBinder {
     @ClassKey(SwitchToManagedProfileForCallActivity.class)
     public abstract Activity bindSwitchToManagedProfileForCallActivity(
             SwitchToManagedProfileForCallActivity activity);
-
-    /** Inject into TouchpadTutorialActivity. */
-    @Binds
-    @IntoMap
-    @ClassKey(TouchpadTutorialActivity.class)
-    public abstract Activity bindTouchpadTutorialActivity(TouchpadTutorialActivity activity);
 }

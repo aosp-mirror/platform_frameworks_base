@@ -204,4 +204,9 @@
     <dimen name="progress_bar_size_small">16dip</dimen>
     <dimen name="progress_bar_size_medium">48dp</dimen>
     <dimen name="progress_bar_size_large">76dp</dimen>
+
+    <dimen name="tooltip_corner_radius_material">4dp</dimen>
+    <dimen name="tooltip_horizontal_padding_material">8dp</dimen>
+    <dimen name="tooltip_vertical_padding_material">4dp</dimen>
+    <dimen name="tooltip_font_size_material">12sp</dimen>
 </resources>

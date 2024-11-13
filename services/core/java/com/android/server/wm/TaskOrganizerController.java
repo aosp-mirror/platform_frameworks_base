@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.CameraCompatTaskInfo.cameraCompatControlStateToString;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NONE;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
@@ -57,7 +56,7 @@ import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
@@ -391,7 +390,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 t.mTaskAppearedSent = false;
             }
             if (removeFromSystem) {
-                mService.removeTask(t.mTaskId);
+                mService.removeTask(t);
             }
             return taskAppearedSent;
         }
@@ -685,7 +684,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 removalInfo.playRevealAnimation = false;
             } else if (removalInfo.playRevealAnimation && playShiftUpAnimation) {
                 removalInfo.roundedCornerRadius =
-                        topActivity.mLetterboxUiController.getRoundedCornersRadius(mainWindow);
+                        topActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                                .getRoundedCornersRadius(mainWindow);
                 removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                 removalInfo.mainFrame = new Rect(mainWindow.getFrame());
                 removalInfo.mainFrame.offsetTo(mainWindow.mSurfacePosition.x,
@@ -1121,35 +1121,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 final ActivityRecord activity = task.getTopNonFinishingActivity();
                 if (activity != null) {
                     activity.restartProcessIfVisible();
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public void updateCameraCompatControlState(WindowContainerToken token, int state) {
-        enforceTaskPermission("updateCameraCompatControlState()");
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final WindowContainer wc = WindowContainer.fromBinder(token.asBinder());
-                if (wc == null) {
-                    Slog.w(TAG, "Could not resolve window from token");
-                    return;
-                }
-                final Task task = wc.asTask();
-                if (task == null) {
-                    Slog.w(TAG, "Could not resolve task from token");
-                    return;
-                }
-                ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
-                        "Update camera compat control state to %s for taskId=%d",
-                        cameraCompatControlStateToString(state), task.mTaskId);
-                final ActivityRecord activity = task.getTopNonFinishingActivity();
-                if (activity != null) {
-                    activity.updateCameraCompatStateFromUser(state);
                 }
             }
         } finally {

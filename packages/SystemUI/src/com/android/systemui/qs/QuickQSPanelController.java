@@ -34,6 +34,7 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.leak.RotationUtils;
 
@@ -77,9 +78,11 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     @Override
     protected void onInit() {
         super.onInit();
-        updateMediaExpansion();
-        mMediaHost.setShowsOnlyActiveMedia(true);
-        mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
+        if (!SceneContainerFlag.isEnabled()) {
+            updateMediaExpansion();
+            mMediaHost.setShowsOnlyActiveMedia(true);
+            mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
+        }
     }
 
     @Override
@@ -125,7 +128,9 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         if (newMaxTiles != mView.getNumQuickTiles()) {
             setMaxTiles(newMaxTiles);
         }
-        updateMediaExpansion();
+        if (!SceneContainerFlag.isEnabled()) {
+            updateMediaExpansion();
+        }
     }
 
     @Override

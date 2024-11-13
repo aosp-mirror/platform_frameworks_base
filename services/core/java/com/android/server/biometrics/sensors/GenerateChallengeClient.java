@@ -37,7 +37,7 @@ public abstract class GenerateChallengeClient<T> extends HalClientMonitor<T> {
             int userId, @NonNull String owner, int sensorId,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                biometricLogger, biometricContext);
+                biometricLogger, biometricContext, false /* isMandatoryBiometrics */);
     }
 
     @Override

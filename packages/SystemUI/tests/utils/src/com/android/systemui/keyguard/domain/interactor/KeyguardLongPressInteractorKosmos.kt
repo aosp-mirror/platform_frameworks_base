@@ -20,14 +20,16 @@ import android.content.applicationContext
 import android.view.accessibility.accessibilityManagerWrapper
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.broadcast.broadcastDispatcher
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.shade.pulsingGestureListener
 
-val Kosmos.keyguardLongPressInteractor by
+val Kosmos.keyguardTouchHandlingInteractor by
     Kosmos.Fixture {
-        KeyguardLongPressInteractor(
+        KeyguardTouchHandlingInteractor(
             appContext = applicationContext,
             scope = applicationCoroutineScope,
             transitionInteractor = keyguardTransitionInteractor,
@@ -36,5 +38,7 @@ val Kosmos.keyguardLongPressInteractor by
             featureFlags = featureFlagsClassic,
             broadcastDispatcher = broadcastDispatcher,
             accessibilityManager = accessibilityManagerWrapper,
+            pulsingGestureListener = pulsingGestureListener,
+            faceAuthInteractor = deviceEntryFaceAuthInteractor,
         )
     }

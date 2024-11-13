@@ -31,11 +31,12 @@ interface IDreamOverlayClient {
     * @param callback The {@link IDreamOverlayCallback} for requesting actions such as exiting the
     *                dream.
     * @param dreamComponent The component name of the dream service requesting overlay.
+    * @param isPreview Whether the dream is in preview mode.
     * @param shouldShowComplications Whether the dream overlay should show complications, e.g. clock
     *                and weather.
     */
     void startDream(in LayoutParams params, in IDreamOverlayCallback callback,
-        in String dreamComponent, in boolean shouldShowComplications);
+        in String dreamComponent, in boolean isPreview, in boolean shouldShowComplications);
 
     /** Called when the dream is waking, to do any exit animations */
     void wakeUp();

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_BIG_BUFFER_H
-#define _ANDROID_BIG_BUFFER_H
+#pragma once
 
-#include <cstring>
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "android-base/logging.h"
@@ -150,22 +149,9 @@ inline size_t BigBuffer::block_size() const {
 
 template <typename T>
 inline T* BigBuffer::NextBlock(size_t count) {
-  static_assert(std::is_standard_layout<T>::value, "T must be standard_layout type");
+  static_assert(std::is_standard_layout_v<T>, "T must be standard_layout type");
   CHECK(count != 0);
   return reinterpret_cast<T*>(NextBlockImpl(sizeof(T) * count));
-}
-
-inline void BigBuffer::BackUp(size_t count) {
-  Block& block = blocks_.back();
-  block.size -= count;
-  size_ -= count;
-}
-
-inline void BigBuffer::AppendBuffer(BigBuffer&& buffer) {
-  std::move(buffer.blocks_.begin(), buffer.blocks_.end(), std::back_inserter(blocks_));
-  size_ += buffer.size_;
-  buffer.blocks_.clear();
-  buffer.size_ = 0;
 }
 
 inline void BigBuffer::Pad(size_t bytes) {
@@ -188,5 +174,3 @@ inline BigBuffer::const_iterator BigBuffer::end() const {
 }
 
 }  // namespace android
-
-#endif  // _ANDROID_BIG_BUFFER_H

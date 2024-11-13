@@ -44,6 +44,7 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -64,6 +65,7 @@ class AudioRepositoryTest {
     @Mock private lateinit var communicationDevice: AudioDeviceInfo
     @Mock private lateinit var contentResolver: ContentResolver
 
+    private val logger = FakeAudioRepositoryLogger()
     private val eventsReceiver = FakeAudioManagerEventsReceiver()
     private val volumeByStream: MutableMap<Int, Int> = mutableMapOf()
     private val isAffectedByRingerModeByStream: MutableMap<Int, Boolean> = mutableMapOf()
@@ -71,6 +73,8 @@ class AudioRepositoryTest {
     private val testScope = TestScope()
 
     private lateinit var underTest: AudioRepository
+
+    private var ringerModeInternal: RingerMode = RingerMode(AudioManager.RINGER_MODE_NORMAL)
 
     @Before
     fun setup() {
@@ -80,7 +84,7 @@ class AudioRepositoryTest {
         `when`(audioManager.communicationDevice).thenReturn(communicationDevice)
         `when`(audioManager.getStreamMinVolume(anyInt())).thenReturn(MIN_VOLUME)
         `when`(audioManager.getStreamMaxVolume(anyInt())).thenReturn(MAX_VOLUME)
-        `when`(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)
+        `when`(audioManager.ringerModeInternal).then { ringerModeInternal.value }
         `when`(audioManager.setStreamVolume(anyInt(), anyInt(), anyInt())).then {
             val streamType = it.arguments[0] as Int
             volumeByStream[it.arguments[0] as Int] = it.arguments[1] as Int
@@ -101,6 +105,10 @@ class AudioRepositoryTest {
         `when`(audioManager.isStreamMute(anyInt())).thenAnswer {
             isMuteByStream.getOrDefault(it.arguments[0] as Int, false)
         }
+        `when`(audioManager.setRingerModeInternal(anyInt())).then {
+            ringerModeInternal = RingerMode(it.arguments[0] as Int)
+            Unit
+        }
 
         underTest =
             AudioRepositoryImpl(
@@ -109,6 +117,8 @@ class AudioRepositoryTest {
                 contentResolver,
                 testScope.testScheduler,
                 testScope.backgroundScope,
+                logger,
+                true,
             )
     }
 
@@ -133,7 +143,7 @@ class AudioRepositoryTest {
             underTest.ringerMode.onEach { modes.add(it) }.launchIn(backgroundScope)
             runCurrent()
 
-            `when`(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_SILENT)
+            ringerModeInternal = RingerMode(AudioManager.RINGER_MODE_SILENT)
             triggerEvent(AudioManagerEvent.InternalRingerModeChanged)
             runCurrent()
 
@@ -142,6 +152,19 @@ class AudioRepositoryTest {
                     RingerMode(AudioManager.RINGER_MODE_NORMAL),
                     RingerMode(AudioManager.RINGER_MODE_SILENT),
                 )
+        }
+    }
+
+    @Test
+    fun changingRingerMode_changesRingerModeInternal() {
+        testScope.runTest {
+            underTest.setRingerModeInternal(
+                AudioStream(AudioManager.STREAM_SYSTEM),
+                RingerMode(AudioManager.RINGER_MODE_SILENT),
+            )
+            runCurrent()
+
+            assertThat(ringerModeInternal).isEqualTo(RingerMode(AudioManager.RINGER_MODE_SILENT))
         }
     }
 
@@ -173,6 +196,15 @@ class AudioRepositoryTest {
             underTest.setVolume(audioStream, 50)
             runCurrent()
 
+            assertThat(logger.logs)
+                .isEqualTo(
+                    listOf(
+                        "onVolumeUpdateReceived audioStream=STREAM_SYSTEM",
+                        "onSetVolumeRequested audioStream=STREAM_SYSTEM",
+                        "onVolumeUpdateReceived audioStream=STREAM_SYSTEM",
+                        "onVolumeUpdateReceived audioStream=STREAM_SYSTEM",
+                    )
+                )
             assertThat(streamModel)
                 .isEqualTo(
                     AudioStreamModel(
@@ -250,13 +282,34 @@ class AudioRepositoryTest {
     @Test
     fun getBluetoothAudioDeviceCategory() {
         testScope.runTest {
-            `when`(audioManager.getBluetoothAudioDeviceCategory("12:34:56:78")).thenReturn(
-                AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
+            `when`(audioManager.getBluetoothAudioDeviceCategory("12:34:56:78"))
+                .thenReturn(AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
 
             val category = underTest.getBluetoothAudioDeviceCategory("12:34:56:78")
             runCurrent()
 
             assertThat(category).isEqualTo(AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
+        }
+    }
+
+    @Test
+    fun useVolumeControllerDisabled_setVolumeController_notCalled() {
+        testScope.runTest {
+            underTest =
+                AudioRepositoryImpl(
+                    eventsReceiver,
+                    audioManager,
+                    contentResolver,
+                    testScope.testScheduler,
+                    testScope.backgroundScope,
+                    logger,
+                    false,
+                )
+
+            underTest.volumeControllerEvents.launchIn(backgroundScope)
+            runCurrent()
+
+            verify(audioManager, never()).volumeController = any()
         }
     }
 

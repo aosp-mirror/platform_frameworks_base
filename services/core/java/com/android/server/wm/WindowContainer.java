@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -34,6 +35,7 @@ import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
+import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -50,7 +52,6 @@ import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -100,18 +101,16 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.common.LogLevel;
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
@@ -179,7 +178,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
-    protected final WindowList<E> mChildren = new WindowList<E>();
+    protected final ArrayList<E> mChildren = new ArrayList<E>();
 
     // The specified orientation for this window container.
     // Shouldn't be accessed directly since subclasses can override getOverrideOrientation.
@@ -202,8 +201,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     private int mLastLayer = 0;
     private SurfaceControl mLastRelativeToLayer = null;
 
-    // TODO(b/132320879): Remove this from WindowContainers except DisplayContent.
-    private final Transaction mPendingTransaction;
+    private Transaction mPendingTransaction;
 
     /**
      * Windows that clients are waiting to have drawn.
@@ -237,12 +235,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Total number of elements in this subtree, including our own hierarchy element. */
     private int mTreeWeight = 1;
-
-    /**
-     * Indicates whether we are animating and have committed the transaction to reparent our
-     * surface to the animation leash
-     */
-    private boolean mCommittedReparentToAnimationLeash;
 
     private int mSyncTransactionCommitCallbackDepth = 0;
 
@@ -358,7 +350,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mTransitionController = mWmService.mAtmService.getTransitionController();
-        mPendingTransaction = wms.mTransactionFactory.get();
         mSyncTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
         mSurfaceFreezer = new SurfaceFreezer(this, wms);
@@ -466,6 +457,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         source.setFrame(provider.getArbitraryRectangle())
                 .updateSideHint(getBounds())
                 .setBoundingRects(provider.getBoundingRects());
+        if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()) {
+            source.setFlags(provider.getFlags());
+        }
         mLocalInsetsSources.put(id, source);
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
     }
@@ -580,6 +574,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
+        if (mParent == null) {
+            // Avoid unnecessary surface operation before attaching to a parent.
+            return;
+        }
         updateSurfacePositionNonOrganized();
         scheduleAnimation();
         if (mOverlayHost != null) {
@@ -707,7 +705,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastSurfacePosition.set(0, 0);
         mLastDeltaRotation = Surface.ROTATION_0;
 
-        final Builder b = mWmService.makeSurfaceBuilder(null)
+        final Builder b = mWmService.makeSurfaceBuilder()
                 .setContainerLayer()
                 .setName(getName());
 
@@ -859,7 +857,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         while (!mChildren.isEmpty()) {
-            final E child = mChildren.peekLast();
+            final E child = mChildren.getLast();
             child.removeImmediately();
             // Need to do this after calling remove on the child because the child might try to
             // remove/detach itself from its parent which will cause an exception if we remove
@@ -983,7 +981,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         switch (position) {
             case POSITION_TOP:
-                if (mChildren.peekLast() != child) {
+                if (getTopChild() != child) {
                     mChildren.remove(child);
                     mChildren.add(child);
                     onChildPositionChanged(child);
@@ -994,7 +992,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 }
                 break;
             case POSITION_BOTTOM:
-                if (mChildren.peekFirst() != child) {
+                if (getBottomChild() != child) {
                     mChildren.remove(child);
                     mChildren.addFirst(child);
                     onChildPositionChanged(child);
@@ -1074,8 +1072,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         mDisplayContent = dc;
-        if (dc != null && dc != this) {
+        if (dc != null && dc != this && mPendingTransaction != null) {
             dc.getPendingTransaction().merge(mPendingTransaction);
+            mPendingTransaction = null;
         }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
@@ -1241,8 +1240,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     boolean inTransitionSelfOrParent() {
         if (!mTransitionController.isShellTransitionsEnabled()) {
-            return isAnimating(PARENTS | TRANSITION,
-                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+            return isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_APP_TRANSITION);
         }
         return inTransition();
     }
@@ -1448,7 +1446,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Returns the top child container. */
     E getTopChild() {
-        return mChildren.peekLast();
+        final int n = mChildren.size();
+        return n == 0 ? null : mChildren.get(n - 1);
+    }
+
+    E getBottomChild() {
+        final int n = mChildren.size();
+        return n == 0 ? null : mChildren.get(0);
     }
 
     /**
@@ -1605,8 +1609,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *
      * @param orientation the specified orientation.
      */
-    void setOrientation(@ScreenOrientation int orientation) {
-        setOrientation(orientation, null /* requestingContainer */);
+    protected void setOrientation(@ScreenOrientation int orientation) {
+        setOrientation(orientation, null /* requesting */);
     }
 
     /**
@@ -1726,13 +1730,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         last time {@link #getOrientation(int) was called.
      */
     @Nullable
-    WindowContainer getLastOrientationSource() {
-        final WindowContainer source = mLastOrientationSource;
-        if (source != null && source != this) {
-            final WindowContainer nextSource = source.getLastOrientationSource();
-            if (nextSource != null) {
-                return nextSource;
-            }
+    final WindowContainer<?> getLastOrientationSource() {
+        if (mLastOrientationSource == null) {
+            return null;
+        }
+        WindowContainer<?> source = this;
+        while (source != source.mLastOrientationSource && source.mLastOrientationSource != null) {
+            source = source.mLastOrientationSource;
         }
         return source;
     }
@@ -2553,7 +2557,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         if (mParent != null && mParent == other.mParent) {
-            final WindowList<WindowContainer> list = mParent.mChildren;
+            final ArrayList<WindowContainer> list = mParent.mChildren;
             return list.indexOf(this) > list.indexOf(other) ? 1 : -1;
         }
 
@@ -2576,8 +2580,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             // Containers don't belong to the same hierarchy???
             if (commonAncestor == null) {
-                throw new IllegalArgumentException("No in the same hierarchy this="
-                        + thisParentChain + " other=" + otherParentChain);
+                final int thisZ = getPrefixOrderIndex();
+                final int otherZ = other.getPrefixOrderIndex();
+                Slog.w(TAG, "Compare not in the same hierarchy this="
+                        + thisParentChain + " thisZ=" + thisZ + " other="
+                        + otherParentChain + " otherZ=" + otherZ);
+                return Integer.compare(thisZ, otherZ);
             }
 
             // Children are always considered greater than their parents, so if one of the containers
@@ -2590,7 +2598,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             // The position of the first non-common ancestor in the common ancestor list determines
             // which is greater the which.
-            final WindowList<WindowContainer> list = commonAncestor.mChildren;
+            final ArrayList<WindowContainer> list = commonAncestor.mChildren;
             return list.indexOf(thisParentChain.peekLast()) > list.indexOf(otherParentChain.peekLast())
                     ? 1 : -1;
         } finally {
@@ -2651,13 +2659,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         return true;
-    }
-
-    SurfaceSession getSession() {
-        if (getParent() != null) {
-            return getParent().getSession();
-        }
-        return null;
     }
 
     void assignLayer(Transaction t, int layer) {
@@ -2774,9 +2775,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @CallSuper
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         boolean isVisible = isVisible();
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible) {
             return;
         }
 
@@ -2868,20 +2869,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void prepareSurfaces() {
-        // If a leash has been set when the transaction was committed, then the leash reparent has
-        // been committed.
-        mCommittedReparentToAnimationLeash = mSurfaceAnimator.hasLeash();
         for (int i = 0; i < mChildren.size(); i++) {
             mChildren.get(i).prepareSurfaces();
         }
     }
 
     /**
-     * @return true if the reparent to animation leash transaction has been committed, false
-     * otherwise.
+     * Go through the hierarchy to allow windows to request a dim if needed
      */
-    boolean hasCommittedReparentToAnimationLeash() {
-        return mCommittedReparentToAnimationLeash;
+    void adjustDims() {
+        for (int i = 0; i < mChildren.size(); i++) {
+            mChildren.get(i).adjustDims();
+        }
     }
 
     /**
@@ -2922,14 +2921,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     @Override
     public Transaction getPendingTransaction() {
-        final DisplayContent displayContent = getDisplayContent();
-        if (displayContent != null && displayContent != this) {
-            return displayContent.getPendingTransaction();
+        final WindowContainer<?> dc = mDisplayContent;
+        if (dc != null && dc.mPendingTransaction != null) {
+            return dc.mPendingTransaction;
         }
         // This WindowContainer has not attached to a display yet or this is a DisplayContent, so we
         // let the caller to save the surface operations within the local mPendingTransaction.
         // If this is not a DisplayContent, we will merge it to the pending transaction of its
         // display once it attaches to it.
+        if (mPendingTransaction == null) {
+            mPendingTransaction = mWmService.mTransactionFactory.get();
+        }
         return mPendingTransaction;
     }
 
@@ -2995,12 +2997,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Make sure display isn't a part of the transition already - needed for legacy transitions.
         if (mDisplayContent.inTransition()) return false;
 
-        if (!ActivityTaskManagerService.isPip2ExperimentEnabled()) {
-            // Screenshots are turned off when PiP is undergoing changes.
-            return !inPinnedWindowingMode() && getParent() != null
-                    && !getParent().inPinnedWindowingMode();
-        }
-        return true;
+        // Screenshots are turned off when PiP is undergoing changes.
+        return ActivityTaskManagerService.isPip2ExperimentEnabled() || !isPipChange();
+    }
+
+    /** Returns true if WC is pinned and undergoing changes. */
+    private boolean isPipChange() {
+        final boolean isExitingPip = this.asTaskFragment() != null
+                && mTransitionController.getWindowingModeAtStart(this) == WINDOWING_MODE_PINNED
+                && !inPinnedWindowingMode();
+
+        return isExitingPip || inPinnedWindowingMode()
+                || (getParent() != null && getParent().inPinnedWindowingMode());
     }
 
     /**
@@ -3762,6 +3770,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }, true /* traverseTopToBottom */);
     }
 
+    @Deprecated
     Dimmer getDimmer() {
         if (mParent == null) {
             return null;
@@ -3980,6 +3989,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Returns {@code true} if this window container belongs to a different sync group than the
+     * given group.
+     */
+    boolean isDifferentSyncGroup(@Nullable BLASTSyncEngine.SyncGroup group) {
+        if (group == null) return false;
+        final BLASTSyncEngine.SyncGroup thisGroup = getSyncGroup();
+        if (thisGroup == null || group == thisGroup) return false;
+        Slog.d(TAG, this + " uses a different SyncGroup, current=" + thisGroup.mSyncId
+                + " given=" + group.mSyncId);
+        return true;
+    }
+
+    /**
      * Recursively finishes/cleans-up sync state of this subtree and collects all the sync
      * transactions into `outMergedTransaction`.
      * @param outMergedTransaction A transaction to merge all the recorded sync operations into.
@@ -3988,10 +4010,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void finishSync(Transaction outMergedTransaction, @Nullable BLASTSyncEngine.SyncGroup group,
             boolean cancel) {
-        if (mSyncState == SYNC_STATE_NONE) return;
-        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
-        // If it's null, then we need to clean-up anyways.
-        if (syncGroup != null && group != syncGroup) return;
+        if (mSyncState == SYNC_STATE_NONE) {
+            if (mSyncGroup != null) {
+                Slog.e(TAG, "finishSync: stale group " + mSyncGroup.mSyncId + " of " + this);
+                mSyncGroup = null;
+            }
+            return;
+        }
+        if (isDifferentSyncGroup(group)) return;
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "finishSync cancel=%b for %s", cancel, this);
         outMergedTransaction.merge(mSyncTransaction);
         for (int i = mChildren.size() - 1; i >= 0; --i) {
@@ -4325,4 +4351,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         t.merge(mSyncTransaction);
     }
 
+    int getSyncTransactionCommitCallbackDepth() {
+        return mSyncTransactionCommitCallbackDepth;
+    }
 }

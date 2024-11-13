@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.satellite.data.demo
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -29,8 +30,10 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DemoDeviceBasedSatelliteRepositoryTest : SysuiTestCase() {
 
     private val testDispatcher = StandardTestDispatcher()

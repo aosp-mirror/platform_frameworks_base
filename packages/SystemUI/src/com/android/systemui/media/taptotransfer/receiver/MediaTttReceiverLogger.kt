@@ -19,6 +19,7 @@ package com.android.systemui.media.taptotransfer.receiver
 import android.app.StatusBarManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.media.taptotransfer.common.MediaTttLoggerUtils
 import com.android.systemui.temporarydisplay.TemporaryViewLogger
 import javax.inject.Inject
@@ -48,6 +49,15 @@ constructor(
     /** Logs that we couldn't find information for [packageName]. */
     fun logPackageNotFound(packageName: String) {
         MediaTttLoggerUtils.logPackageNotFound(buffer, TAG, packageName)
+    }
+
+    fun logRippleAnimationEnd(id: Int) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            { int1 = id },
+            { "ripple animation for view with id: $int1 is ended" }
+        )
     }
 
     companion object {

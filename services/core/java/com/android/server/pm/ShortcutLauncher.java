@@ -282,6 +282,12 @@ class ShortcutLauncher extends ShortcutPackageItem {
             for (int j = 0; j < idSize; j++) {
                 ShortcutService.writeTagValue(out, TAG_PIN, ids.valueAt(j));
             }
+            if (ShortcutService.DEBUG_REBOOT) {
+                Slog.d(TAG, "Persist shortcut ids pinned by "
+                    + getPackageName() + " from "
+                    + up.userId + "@" + up.packageName + " ids=["
+                    + String.join(", ", ids) + "]");
+            }
             out.endTag(null, TAG_PACKAGE);
         }
 

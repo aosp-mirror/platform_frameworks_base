@@ -16,6 +16,9 @@
 
 package com.android.server.display.brightness.strategy;
 
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.Sensor;
@@ -23,7 +26,6 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.IndentingPrintWriter;
-import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.BrightnessMappingStrategy;
@@ -53,7 +55,7 @@ public final class AutoBrightnessFallbackStrategy implements DisplayBrightnessSt
     Sensor mScreenOffBrightnessSensor;
 
     // Indicates if the associated LogicalDisplay is enabled or not.
-    private boolean mIsEnabled;
+    private boolean mIsDisplayEnabled;
 
     // Represents if the associated display is a lead display or not. If not, the variable
     // represents the lead display ID
@@ -75,7 +77,6 @@ public final class AutoBrightnessFallbackStrategy implements DisplayBrightnessSt
         brightnessReason.setReason(BrightnessReason.REASON_SCREEN_OFF_BRIGHTNESS_SENSOR);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
-                .setSdrBrightness(brightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(getName())
                 .setShouldUpdateScreenBrightnessSetting(brightness
@@ -98,7 +99,8 @@ public final class AutoBrightnessFallbackStrategy implements DisplayBrightnessSt
     public void dump(PrintWriter writer) {
         writer.println("AutoBrightnessFallbackStrategy:");
         writer.println("  mLeadDisplayId=" + mLeadDisplayId);
-        writer.println("  mIsEnabled=" + mIsEnabled);
+        writer.println("  mIsDisplayEnabled=" + mIsDisplayEnabled);
+        writer.println("");
         if (mScreenOffBrightnessSensorController != null) {
             IndentingPrintWriter ipw = new IndentingPrintWriter(writer, " ");
             mScreenOffBrightnessSensorController.dump(ipw);
@@ -109,11 +111,10 @@ public final class AutoBrightnessFallbackStrategy implements DisplayBrightnessSt
     public void strategySelectionPostProcessor(
             StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
         if (mScreenOffBrightnessSensorController != null) {
-            int targetDisplayState = strategySelectionNotifyRequest.getTargetDisplayState();
+            int policy = strategySelectionNotifyRequest.getDisplayPowerRequest().policy;
             mScreenOffBrightnessSensorController.setLightSensorEnabled(
-                    strategySelectionNotifyRequest.isAutoBrightnessEnabled() && mIsEnabled
-                            && (targetDisplayState == Display.STATE_OFF
-                            || (targetDisplayState == Display.STATE_DOZE
+                    strategySelectionNotifyRequest.isAutoBrightnessEnabled() && mIsDisplayEnabled
+                            && (policy == POLICY_OFF || (policy == POLICY_DOZE
                             && !strategySelectionNotifyRequest
                             .isAllowAutoBrightnessWhileDozingConfig()))
                             && mLeadDisplayId == Layout.NO_LEAD_DISPLAY);
@@ -133,9 +134,9 @@ public final class AutoBrightnessFallbackStrategy implements DisplayBrightnessSt
      */
     public void setupAutoBrightnessFallbackSensor(SensorManager sensorManager,
             DisplayDeviceConfig displayDeviceConfig, Handler handler,
-            BrightnessMappingStrategy brightnessMappingStrategy, boolean isEnabled,
+            BrightnessMappingStrategy brightnessMappingStrategy, boolean isDisplayEnabled,
             int leadDisplayId) {
-        mIsEnabled = isEnabled;
+        mIsDisplayEnabled = isDisplayEnabled;
         mLeadDisplayId = leadDisplayId;
         if (mScreenOffBrightnessSensorController != null) {
             mScreenOffBrightnessSensorController.stop();

@@ -25,5 +25,5 @@ interface IAssociationRequestCallback {
 
     oneway void onAssociationCreated(in AssociationInfo associationInfo);
 
-    oneway void onFailure(in CharSequence error);
+    oneway void onFailure(in int errorCode, in CharSequence error);
 }

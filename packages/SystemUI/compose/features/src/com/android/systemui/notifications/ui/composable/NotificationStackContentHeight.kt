@@ -24,7 +24,9 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.invalidateMeasurement
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 
 /**
@@ -32,14 +34,16 @@ import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScr
  * by the legacy Notification stack scroll view in [NotificationScrollView.intrinsicStackHeight].
  *
  * @param view Notification stack scroll view
- * @param padding extra padding in pixels to be added to the received content height.
+ * @param totalVerticalPadding extra padding to be added to the received stack content height.
  */
-fun Modifier.notificationStackHeight(view: NotificationScrollView, padding: Int = 0) =
-    this then StackLayoutElement(view, padding)
+fun Modifier.notificationStackHeight(
+    view: NotificationScrollView,
+    totalVerticalPadding: Dp = 0.dp,
+) = this then StackLayoutElement(view, totalVerticalPadding)
 
 private data class StackLayoutElement(
     val view: NotificationScrollView,
-    val padding: Int,
+    val padding: Dp,
 ) : ModifierNodeElement<StackLayoutNode>() {
 
     override fun create(): StackLayoutNode = StackLayoutNode(view, padding)
@@ -53,7 +57,7 @@ private data class StackLayoutElement(
     }
 }
 
-private class StackLayoutNode(val view: NotificationScrollView, var padding: Int) :
+private class StackLayoutNode(val view: NotificationScrollView, var padding: Dp) :
     LayoutModifierNode, Modifier.Node() {
 
     private val stackHeightChangedListener = Runnable { invalidateMeasureIfAttached() }
@@ -72,7 +76,7 @@ private class StackLayoutNode(val view: NotificationScrollView, var padding: Int
         measurable: Measurable,
         constraints: Constraints
     ): MeasureResult {
-        val contentHeight = padding + view.intrinsicStackHeight
+        val contentHeight = padding.roundToPx() + view.intrinsicStackHeight
         val placeable =
             measurable.measure(
                 constraints.copy(minHeight = contentHeight, maxHeight = contentHeight)

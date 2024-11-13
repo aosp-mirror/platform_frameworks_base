@@ -21,16 +21,25 @@ import android.content.Context
 import android.provider.Settings
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
-fun Context.settingsGlobalBoolean(name: String, defaultValue: Boolean = false):
-    ReadWriteProperty<Any?, Boolean> = SettingsGlobalBooleanDelegate(this, name, defaultValue)
+fun Context.settingsGlobalBoolean(
+    name: String,
+    defaultValue: Boolean = false,
+): ReadWriteProperty<Any?, Boolean> = SettingsGlobalBooleanDelegate(this, name, defaultValue)
 
 fun Context.settingsGlobalBooleanFlow(name: String, defaultValue: Boolean = false): Flow<Boolean> {
     val value by settingsGlobalBoolean(name, defaultValue)
-    return settingsGlobalChangeFlow(name).map { value }.distinctUntilChanged()
+    return settingsGlobalChangeFlow(name)
+        .map { value }
+        .distinctUntilChanged()
+        .conflate()
+        .flowOn(Dispatchers.Default)
 }
 
 private class SettingsGlobalBooleanDelegate(

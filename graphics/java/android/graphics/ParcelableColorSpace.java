@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 /**
  * A {@link Parcelable} wrapper for a {@link ColorSpace}. In order to enable parceling, the
@@ -27,6 +28,7 @@ import android.os.Parcelable;
  * {@link ColorSpace.Rgb} instance that has an ICC parametric transfer function as returned by
  * {@link ColorSpace.Rgb#getTransferParameters()}.
  */
+@RavenwoodKeepWholeClass
 public final class ParcelableColorSpace implements Parcelable {
     private final ColorSpace mColorSpace;
 

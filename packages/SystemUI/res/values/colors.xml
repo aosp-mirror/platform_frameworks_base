@@ -18,7 +18,6 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
            xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <drawable name="notification_number_text_color">#ffffffff</drawable>
     <drawable name="system_bar_background">@color/system_bar_background_opaque</drawable>
     <color name="system_bar_background_opaque">#ff000000</color>
     <color name="system_bar_background_transparent">#00000000</color>
@@ -30,7 +29,7 @@
     <color name="status_bar_icons_hover_color_dark">#38000000</color> <!-- 22% black -->
 
     <!-- The dark background color behind the shade -->
-    <color name="shade_scrim_background_dark">@*android:color/black</color>
+    <color name="shade_scrim_background_dark">@androidprv:color/system_under_surface_light</color>
 
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">#F5F5F5</color>
@@ -161,8 +160,8 @@
 
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#EA4335</color>
-    <color name="GM2_red_600">#B3261E</color>
     <color name="GM2_red_700">#C5221F</color>
+    <color name="GM2_red_800">#B3261E</color>
 
     <color name="GM2_blue_300">#8AB4F8</color>
 

@@ -130,6 +130,25 @@ public final class XmlReader {
     }
 
     /**
+     * Read the next element, ignoring comments and ignorable whitespace, and returns only if it's a
+     * {@link XmlPullParser#TEXT}. Any other tag will fail this check.
+     *
+     * <p>The parser will be pointing to the first next element after skipping comments,
+     * instructions and ignorable whitespace.
+     */
+    public static void readNextText(TypedXmlPullParser parser, String tagName)
+            throws XmlParserException, IOException {
+        try {
+            int type = parser.next(); // skips comments, instruction tokens and ignorable whitespace
+            XmlValidator.checkParserCondition(type == XmlPullParser.TEXT,
+                    "Unexpected event %s of type %d, expected text event inside tag %s",
+                    parser.getName(), type, tagName);
+        } catch (XmlPullParserException e) {
+            throw XmlParserException.createFromPullParserException("text event", e);
+        }
+    }
+
+    /**
      * Check parser has a {@link XmlPullParser#END_TAG} as the next tag, with no nested tags.
      *
      * <p>The parser will be pointing to the end tag after this method.

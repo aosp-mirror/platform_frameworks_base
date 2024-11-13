@@ -23,6 +23,8 @@ import android.graphics.PixelFormat;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.util.settings.SecureSettings;
 
 /**
@@ -30,13 +32,15 @@ import com.android.systemui.util.settings.SecureSettings;
  * of {@link IAccessibilityFloatingMenu}.
  */
 class MenuViewLayerController implements IAccessibilityFloatingMenu {
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private final MenuViewLayer mMenuViewLayer;
     private boolean mIsShowing;
 
     MenuViewLayerController(Context context, WindowManager windowManager,
-            AccessibilityManager accessibilityManager, SecureSettings secureSettings) {
-        mWindowManager = windowManager;
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
+            AccessibilityManager accessibilityManager, SecureSettings secureSettings,
+            NavigationModeController navigationModeController) {
+        mWindowManager = viewCaptureAwareWindowManager;
 
         MenuViewModel menuViewModel = new MenuViewModel(
                 context, accessibilityManager, secureSettings);
@@ -47,7 +51,8 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
                 menuViewAppearance,
                 new MenuView(context, menuViewModel, menuViewAppearance, secureSettings),
                 this,
-                secureSettings);
+                secureSettings,
+                navigationModeController);
     }
 
     @Override

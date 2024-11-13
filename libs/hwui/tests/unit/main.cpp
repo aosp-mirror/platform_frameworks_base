@@ -15,6 +15,7 @@
  */
 
 #include <getopt.h>
+#include <log/log.h>
 #include <signal.h>
 
 #include "Properties.h"
@@ -63,6 +64,19 @@ static RenderPipelineType parseRenderer(const char* renderer) {
         return RenderPipelineType::SkiaVulkan;
     }
     return RenderPipelineType::SkiaGL;
+}
+
+static constexpr const char* renderPipelineTypeName(const RenderPipelineType renderPipelineType) {
+    switch (renderPipelineType) {
+        case RenderPipelineType::SkiaGL:
+            return "SkiaGL";
+        case RenderPipelineType::SkiaVulkan:
+            return "SkiaVulkan";
+        case RenderPipelineType::SkiaCpu:
+            return "SkiaCpu";
+        case RenderPipelineType::NotInitialized:
+            return "NotInitialized";
+    }
 }
 
 struct Options {
@@ -118,6 +132,7 @@ int main(int argc, char* argv[]) {
 
     auto opts = parseOptions(argc, argv);
     Properties::overrideRenderPipelineType(opts.renderer);
+    ALOGI("Starting HWUI unit tests with %s pipeline", renderPipelineTypeName(opts.renderer));
 
     // Run the tests
     testing::InitGoogleTest(&argc, argv);

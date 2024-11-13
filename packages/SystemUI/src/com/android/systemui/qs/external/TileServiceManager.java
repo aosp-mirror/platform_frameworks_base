@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Manages the priority which lets {@link TileServices} make decisions about which tiles
  * to bind.  Also holds on to and manages the {@link TileLifecycleManager}, informing it
- * of when it is allowed to bind based on decisions frome the {@link TileServices}.
+ * of when it is allowed to bind based on decisions from the {@link TileServices}.
  */
 public class TileServiceManager {
 
@@ -217,7 +217,11 @@ public class TileServiceManager {
             Log.e(TAG, "Service already bound");
             return;
         }
-        mPendingBind = true;
+        if (!mStateManager.isBound()) {
+            // If we are bound, we don't need to set a pending bind. There's either one already or
+            // we are fully bound.
+            mPendingBind = true;
+        }
         mBound = true;
         mJustBound = true;
         mHandler.postDelayed(mJustBoundOver, MIN_BIND_TIME);

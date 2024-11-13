@@ -73,7 +73,7 @@ open class YouTubeEnterPipToOtherOrientationTest(flicker: LegacyFlickerTest) :
         setup {
             standardAppHelper.launchViaIntent(
                 wmHelper,
-                YouTubeAppHelper.getYoutubeVideoIntent("HPcEAtoXXLA"),
+                YouTubeAppHelper.getYoutubeVideoIntent("3KtWfp0UopM"),
                 ComponentNameMatcher(YouTubeAppHelper.PACKAGE_NAME, "")
             )
             standardAppHelper.enterFullscreen()
@@ -88,7 +88,7 @@ open class YouTubeEnterPipToOtherOrientationTest(flicker: LegacyFlickerTest) :
     @Postsubmit
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() {
-        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeTrue(usesTaskbar)
         // YouTube starts in immersive fullscreen mode, so taskbar bar is not visible at start
         flicker.assertLayersStart { this.isInvisible(ComponentNameMatcher.TASK_BAR) }
         flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.TASK_BAR) }

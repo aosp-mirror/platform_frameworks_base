@@ -53,7 +53,6 @@ val Kosmos.dozeServiceHost: DozeServiceHost by
             notificationShadeWindowController,
             notificationWakeUpCoordinator,
             authController,
-            notificationIconAreaController,
             shadeLockscreenInteractor,
             dozeInteractor,
         )

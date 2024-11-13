@@ -24,8 +24,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
+import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,6 +56,117 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             assertThat(count).isEqualTo(5)
             assertThat(underTest.allNotificationsCountValue).isEqualTo(5)
+        }
+
+    @Test
+    fun ongoingCallNotification_noCallNotifs_null() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.ongoingCallNotification)
+
+            val normalNotifs =
+                listOf(
+                    activeNotificationModel(
+                        key = "notif1",
+                        callType = CallType.None,
+                    ),
+                    activeNotificationModel(
+                        key = "notif2",
+                        callType = CallType.None,
+                    )
+                )
+
+            activeNotificationListRepository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply { normalNotifs.forEach(::addIndividualNotif) }
+                    .build()
+
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun ongoingCallNotification_incomingCallNotif_null() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.ongoingCallNotification)
+
+            activeNotificationListRepository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "incomingNotif",
+                                callType = CallType.Incoming,
+                            )
+                        )
+                    }
+                    .build()
+
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun ongoingCallNotification_screeningCallNotif_null() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.ongoingCallNotification)
+
+            activeNotificationListRepository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "screeningNotif",
+                                callType = CallType.Screening,
+                            )
+                        )
+                    }
+                    .build()
+
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun ongoingCallNotification_ongoingCallNotif_hasNotif() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.ongoingCallNotification)
+
+            val ongoingNotif =
+                activeNotificationModel(
+                    key = "ongoingNotif",
+                    callType = CallType.Ongoing,
+                )
+
+            activeNotificationListRepository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply { addIndividualNotif(ongoingNotif) }
+                    .build()
+
+            assertThat(latest).isEqualTo(ongoingNotif)
+        }
+
+    @Test
+    fun ongoingCallNotification_multipleCallNotifs_usesEarlierNotif() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.ongoingCallNotification)
+
+            val earlierOngoingNotif =
+                activeNotificationModel(
+                    key = "earlierOngoingNotif",
+                    callType = CallType.Ongoing,
+                    whenTime = 45L,
+                )
+            val laterOngoingNotif =
+                activeNotificationModel(
+                    key = "laterOngoingNotif",
+                    callType = CallType.Ongoing,
+                    whenTime = 55L,
+                )
+
+            activeNotificationListRepository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply { addIndividualNotif(earlierOngoingNotif) }
+                    .apply { addIndividualNotif(laterOngoingNotif) }
+                    .build()
+
+            assertThat(latest).isEqualTo(earlierOngoingNotif)
         }
 
     @Test

@@ -70,7 +70,6 @@ public class RavenwoodServicesTest {
     }
 
     @Test
-    @DisabledOnRavenwood(reason="AOSP is missing resources support")
     public void testSimple() {
         // Verify that we can obtain a manager, and talk to the backend service, and that no
         // serial ports are configured by default

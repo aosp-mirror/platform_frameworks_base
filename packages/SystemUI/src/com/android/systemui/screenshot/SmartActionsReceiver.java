@@ -17,10 +17,6 @@
 package com.android.systemui.screenshot;
 
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
-import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT;
-import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT_FILLIN;
-import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_TYPE;
-import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
 
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -36,6 +32,15 @@ import javax.inject.Inject;
  */
 public class SmartActionsReceiver extends BroadcastReceiver {
     private static final String TAG = "SmartActionsReceiver";
+    // These strings are used for communicating the action invoked to
+    // ScreenshotNotificationSmartActionsProvider.
+    public static final String EXTRA_ACTION_TYPE = "android:screenshot_action_type";
+    public static final String EXTRA_ID = "android:screenshot_id";
+    public static final String EXTRA_SMART_ACTIONS_ENABLED = "android:smart_actions_enabled";
+    public static final String EXTRA_ACTION_INTENT = "android:screenshot_action_intent";
+    public static final String EXTRA_ACTION_INTENT_FILLIN =
+            "android:screenshot_action_intent_fillin";
+
 
     private final ScreenshotSmartActions mScreenshotSmartActions;
 

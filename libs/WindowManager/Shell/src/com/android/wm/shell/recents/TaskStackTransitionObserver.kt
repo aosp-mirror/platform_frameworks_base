@@ -23,8 +23,8 @@ import android.util.ArrayMap
 import android.view.SurfaceControl
 import android.view.WindowManager
 import android.window.TransitionInfo
-import com.android.window.flags.Flags.enableTaskStackObserverInShell
 import com.android.wm.shell.shared.TransitionUtil
+import android.window.flags.DesktopModeFlags
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import dagger.Lazy
@@ -62,7 +62,7 @@ class TaskStackTransitionObserver(
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction
     ) {
-        if (enableTaskStackObserverInShell()) {
+        if (DesktopModeFlags.ENABLE_TASK_STACK_OBSERVER_IN_SHELL.isTrue) {
             val taskInfoList = mutableListOf<RunningTaskInfo>()
             val transitionTypeList = mutableListOf<Int>()
 
@@ -76,21 +76,40 @@ class TaskStackTransitionObserver(
                     continue
                 }
 
+                // Filter out changes that we care about
                 if (change.mode == WindowManager.TRANSIT_OPEN) {
                     change.taskInfo?.let { taskInfoList.add(it) }
                     transitionTypeList.add(change.mode)
                 }
             }
-            transitionToTransitionChanges.put(
-                transition,
-                TransitionChanges(taskInfoList, transitionTypeList)
-            )
+            // Only add the transition to map if it has a change we care about
+            if (taskInfoList.isNotEmpty()) {
+                transitionToTransitionChanges.put(
+                    transition,
+                    TransitionChanges(taskInfoList, transitionTypeList)
+                )
+            }
         }
     }
 
     override fun onTransitionStarting(transition: IBinder) {}
 
-    override fun onTransitionMerged(merged: IBinder, playing: IBinder) {}
+    override fun onTransitionMerged(merged: IBinder, playing: IBinder) {
+        val mergedTransitionChanges =
+            transitionToTransitionChanges.get(merged)
+                ?:
+                // We are adding changes of the merged transition to changes of the playing
+                // transition so if there is no changes nothing to do.
+                return
+
+        transitionToTransitionChanges.remove(merged)
+        val playingTransitionChanges = transitionToTransitionChanges.get(playing)
+        if (playingTransitionChanges != null) {
+            playingTransitionChanges.merge(mergedTransitionChanges)
+        } else {
+            transitionToTransitionChanges.put(playing, mergedTransitionChanges)
+        }
+    }
 
     override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
         val taskInfoList =
@@ -138,6 +157,11 @@ class TaskStackTransitionObserver(
 
     private data class TransitionChanges(
         val taskInfoList: MutableList<RunningTaskInfo> = ArrayList(),
-        val transitionTypeList: MutableList<Int> = ArrayList()
-    )
+        val transitionTypeList: MutableList<Int> = ArrayList(),
+    ) {
+        fun merge(transitionChanges: TransitionChanges) {
+            taskInfoList.addAll(transitionChanges.taskInfoList)
+            transitionTypeList.addAll(transitionChanges.transitionTypeList)
+        }
+    }
 }

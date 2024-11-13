@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -41,7 +40,6 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository;
 import com.android.systemui.statusbar.domain.interactor.SilentNotificationStatusIconsVisibilityInteractor;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -148,31 +146,5 @@ public class NotificationListenerTest extends SysuiTestCase {
         verify(mNotificationHandler).onNotificationRankingUpdate(eq(ranking2));
         verify(mNotificationHandler).onNotificationRankingUpdate(eq(ranking3));
         verifyNoMoreInteractions(mNotificationHandler);
-    }
-
-    @Test
-    public void testOnConnectReadStatusBarSetting() {
-        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME);
-        NotificationListener.NotificationSettingsListener settingsListener =
-                mock(NotificationListener.NotificationSettingsListener.class);
-        mListener.addNotificationSettingsListener(settingsListener);
-
-        when(mNotificationManager.shouldHideSilentStatusBarIcons()).thenReturn(true);
-
-        mListener.onListenerConnected();
-
-        verify(settingsListener).onStatusBarIconsBehaviorChanged(true);
-    }
-
-    @Test
-    public void testOnStatusBarIconsBehaviorChanged() {
-        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME);
-        NotificationListener.NotificationSettingsListener settingsListener =
-                mock(NotificationListener.NotificationSettingsListener.class);
-        mListener.addNotificationSettingsListener(settingsListener);
-
-        mListener.onSilentStatusBarIconsVisibilityChanged(true);
-
-        verify(settingsListener).onStatusBarIconsBehaviorChanged(true);
     }
 }

@@ -17,21 +17,21 @@
 package com.android.systemui.settings.brightness.ui.viewModel
 
 import android.content.res.Resources
+import android.util.Log
 import android.view.View
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.settings.brightness.ToggleSlider
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
-import javax.inject.Inject
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-@SysUISingleton
 class BrightnessMirrorViewModel
-@Inject
+@AssistedInject
 constructor(
     private val brightnessMirrorShowingInteractor: BrightnessMirrorShowingInteractor,
     @Main private val resources: Resources,
@@ -67,14 +67,29 @@ constructor(
     override fun setLocationAndSize(view: View) {
         view.getLocationInWindow(tempPosition)
         val padding = resources.getDimensionPixelSize(R.dimen.rounded_slider_background_padding)
-        _toggleSlider?.rootView?.setPadding(padding, padding, padding, padding)
         // Account for desired padding
         _locationAndSize.value =
             LocationAndSize(
-                yOffset = tempPosition[1] - padding,
+                yOffsetFromContainer = view.findTopFromContainer() - padding,
+                yOffsetFromWindow = tempPosition[1] - padding,
                 width = view.measuredWidth + 2 * padding,
                 height = view.measuredHeight + 2 * padding,
             )
+    }
+
+    private fun View.findTopFromContainer(): Int {
+        var out = 0
+        var view = this
+        while (view.id != R.id.quick_settings_container) {
+            out += view.top
+            val parent = view.parent as? View
+            if (parent == null) {
+                Log.wtf(TAG, "Couldn't find container in parents of $this")
+                break
+            }
+            view = parent
+        }
+        return out
     }
 
     // Callbacks are used for indicating reinflation when the config changes in some ways (like
@@ -82,10 +97,20 @@ constructor(
     override fun addCallback(listener: MirrorController.BrightnessMirrorListener) {}
 
     override fun removeCallback(listener: MirrorController.BrightnessMirrorListener) {}
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): BrightnessMirrorViewModel
+    }
+
+    companion object {
+        private const val TAG = "BrightnessMirrorViewModel"
+    }
 }
 
 data class LocationAndSize(
-    val yOffset: Int = 0,
+    val yOffsetFromContainer: Int = 0,
+    val yOffsetFromWindow: Int = 0,
     val width: Int = 0,
     val height: Int = 0,
 )

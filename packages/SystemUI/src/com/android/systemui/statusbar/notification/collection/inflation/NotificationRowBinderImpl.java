@@ -20,6 +20,7 @@ import static com.android.server.notification.Flags.screenshareNotificationHidin
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_SINGLE_LINE;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_GROUP_SUMMARY_HEADER;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER;
@@ -54,6 +55,7 @@ import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
+import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
 import javax.inject.Inject;
@@ -253,10 +255,11 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.requireContentViews(FLAG_CONTENT_VIEW_EXPANDED);
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseMinimized(isMinimized);
-
-        if (screenshareNotificationHiding()
+        boolean needsRedaction = screenshareNotificationHiding()
                 ? inflaterParams.getNeedsRedaction()
-                : mNotificationLockscreenUserManager.needsRedaction(entry)) {
+                : mNotificationLockscreenUserManager.needsRedaction(entry);
+
+        if (needsRedaction) {
             params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
         } else {
             params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
@@ -269,6 +272,14 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
                 // TODO(b/217799515): here we decide whether to free the single-line view
                 //  when the group status changes
                 params.markContentViewsFreeable(FLAG_CONTENT_VIEW_SINGLE_LINE);
+            }
+        }
+
+        if (LockscreenOtpRedaction.isEnabled()) {
+            if (inflaterParams.isChildInGroup() && needsRedaction) {
+                params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);
+            } else {
+                params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);
             }
         }
 

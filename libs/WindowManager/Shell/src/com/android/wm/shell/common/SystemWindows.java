@@ -42,7 +42,6 @@ import android.view.InsetsState;
 import android.view.ScrollCaptureResponse;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -311,7 +310,7 @@ public class SystemWindows {
         @Override
         protected SurfaceControl getParentSurface(IWindow window,
                 WindowManager.LayoutParams attrs) {
-            SurfaceControl leash = new SurfaceControl.Builder(new SurfaceSession())
+            SurfaceControl leash = new SurfaceControl.Builder()
                   .setContainerLayer()
                   .setName("SystemWindowLeash")
                   .setHidden(false)

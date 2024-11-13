@@ -16,10 +16,10 @@
 
 package com.android.settingslib.collapsingtoolbar;
 
+import android.os.Build;
+
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceFragmentCompat;
-
-import com.android.settingslib.utils.BuildCompatUtils;
 
 import com.google.android.material.appbar.AppBarLayout;
 
@@ -58,7 +58,7 @@ public abstract class BasePreferencesFragment extends PreferenceFragmentCompat {
         if (activity != null) {
             activity.setTitle(getTitle());
 
-            if (BuildCompatUtils.isAtLeastS()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 AppBarLayout appBarLayout = (AppBarLayout) activity.findViewById(R.id.app_bar);
 
                 if (appBarLayout != null) {

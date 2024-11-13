@@ -16,14 +16,16 @@
 
 package com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,17 +35,19 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
+import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@RunWith(AndroidJUnit4::class)
 class AirplaneModeViewModelImplTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     private lateinit var underTest: AirplaneModeViewModelImpl
 
-    @Mock private lateinit var logger: TableLogBuffer
+    private val logger = logcatTableLogBuffer(kosmos, "AirplaneModeViewModelImplTest")
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var interactor: AirplaneModeInteractor
@@ -58,7 +62,7 @@ class AirplaneModeViewModelImplTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 airplaneModeRepository,
                 connectivityRepository,
-                FakeMobileConnectionsRepository(),
+                kosmos.fakeMobileConnectionsRepository,
             )
         scope = CoroutineScope(IMMEDIATE)
 

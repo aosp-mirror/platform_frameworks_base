@@ -32,7 +32,7 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Switch;
+import android.widget.Button;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -59,12 +59,12 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
-import kotlinx.coroutines.Job;
-
 import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.Job;
 
 /** Quick settings tile: Bluetooth **/
 public class BluetoothTile extends QSTileImpl<BooleanState> {
@@ -114,7 +114,9 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     public BooleanState newTileState() {
-        return new BooleanState();
+        BooleanState s = new BooleanState();
+        s.handlesSecondaryClick = true;
+        return s;
     }
 
     @Override
@@ -141,12 +143,11 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             mDialogViewModel.showDialog(expandable);
         } else {
             // Secondary clicks are header clicks, just toggle.
-            final boolean isEnabled = mState.value;
-            // Immediately enter transient enabling state when turning bluetooth on.
-            refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
-            mController.setBluetoothEnabled(!isEnabled);
+            toggleBluetooth();
         }
     }
+
+
 
     @Override
     public Intent getLongClickIntent() {
@@ -160,9 +161,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS), 0);
             return;
         }
-        if (!mState.value) {
-            mController.setBluetoothEnabled(true);
-        }
+        toggleBluetooth();
     }
 
     @Override
@@ -224,8 +223,15 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             state.state = Tile.STATE_INACTIVE;
         }
 
-        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
         state.forceExpandIcon = mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG);
+    }
+
+    private void toggleBluetooth() {
+        final boolean isEnabled = mState.value;
+        // Immediately enter transient enabling state when turning bluetooth on.
+        refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
+        mController.setBluetoothEnabled(!isEnabled);
     }
 
     /**

@@ -280,13 +280,6 @@ public class Process {
      */
     public static final int INET_GID = 3003;
 
-    /**
-     * Defines the UID/GID for the vendor based data process.
-     * This is used to register AIDL service from vendor app context.
-     * @hide
-     */
-    public static final int VENDOR_DATA_UID = 2918;
-
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 
@@ -601,6 +594,12 @@ public class Process {
      * @hide
      **/
     public static final int THREAD_GROUP_RESTRICTED = 7;
+
+    /**
+     * Thread group for foreground apps in multi-window mode
+     * @hide
+     **/
+    public static final int THREAD_GROUP_FOREGROUND_WINDOW = 8;
 
     /** @hide */
     public static final int SIGNAL_DEFAULT = 0;

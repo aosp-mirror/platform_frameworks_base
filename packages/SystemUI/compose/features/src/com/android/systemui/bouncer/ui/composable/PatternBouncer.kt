@@ -16,7 +16,6 @@
 
 package com.android.systemui.bouncer.ui.composable
 
-import android.view.HapticFeedbackConstants
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -133,10 +132,7 @@ fun PatternBouncer(
         // Perform haptic feedback, but only if the current dot is not null, so we don't perform it
         // when the UI first shows up or when the user lifts their pointer/finger.
         if (currentDot != null) {
-            view.performHapticFeedback(
-                HapticFeedbackConstants.VIRTUAL_KEY,
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
-            )
+            viewModel.performDotFeedback(view)
         }
 
         if (!isAnimationEnabled) {
@@ -206,10 +202,7 @@ fun PatternBouncer(
     // Show the failure animation if the user entered the wrong input.
     LaunchedEffect(animateFailure) {
         if (animateFailure) {
-            showFailureAnimation(
-                dots = dots,
-                scalingAnimatables = dotScalingAnimatables,
-            )
+            showFailureAnimation(dots = dots, scalingAnimatables = dotScalingAnimatables)
             viewModel.onFailureAnimationShown()
         }
     }
@@ -358,15 +351,10 @@ fun PatternBouncer(
                     (1 - checkNotNull(dotAppearMoveUpAnimatables[dot]).value) * initialOffset
                 drawCircle(
                     center =
-                        pixelOffset(
-                            dot,
-                            spacing,
-                            horizontalOffset,
-                            verticalOffset + appearOffset,
-                        ),
+                        pixelOffset(dot, spacing, horizontalOffset, verticalOffset + appearOffset),
                     color =
                         dotColor.copy(alpha = checkNotNull(dotAppearFadeInAnimatables[dot]).value),
-                    radius = dotRadius * checkNotNull(dotScalingAnimatables[dot]).value
+                    radius = dotRadius * checkNotNull(dotScalingAnimatables[dot]).value,
                 )
             }
         }
@@ -387,7 +375,7 @@ private suspend fun showEntryAnimation(
                             delayMillis = 33 * dot.y,
                             durationMillis = 450,
                             easing = Easings.LegacyDecelerate,
-                        )
+                        ),
                 )
             }
         }
@@ -400,7 +388,7 @@ private suspend fun showEntryAnimation(
                             delayMillis = 0,
                             durationMillis = 450 + (33 * dot.y),
                             easing = Easings.StandardDecelerate,
-                        )
+                        ),
                 )
             }
         }
@@ -511,7 +499,7 @@ private const val DOT_DIAMETER_DP = 14
 private const val SELECTED_DOT_DIAMETER_DP = (DOT_DIAMETER_DP * 1.5).toInt()
 private const val SELECTED_DOT_REACTION_ANIMATION_DURATION_MS = 83
 private const val SELECTED_DOT_RETRACT_ANIMATION_DURATION_MS = 750
-private const val LINE_STROKE_WIDTH_DP = DOT_DIAMETER_DP
+private const val LINE_STROKE_WIDTH_DP = 22
 private const val FAILURE_ANIMATION_DOT_DIAMETER_DP = (DOT_DIAMETER_DP * 0.81f).toInt()
 private const val FAILURE_ANIMATION_DOT_SHRINK_ANIMATION_DURATION_MS = 50
 private const val FAILURE_ANIMATION_DOT_SHRINK_STAGGER_DELAY_MS = 33

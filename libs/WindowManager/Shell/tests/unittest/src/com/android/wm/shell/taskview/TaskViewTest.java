@@ -49,7 +49,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
-import android.view.SurfaceSession;
 import android.view.ViewTreeObserver;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -95,7 +94,6 @@ public class TaskViewTest extends ShellTestCase {
     Looper mViewLooper;
     TestHandler mViewHandler;
 
-    SurfaceSession mSession;
     SurfaceControl mLeash;
 
     Context mContext;
@@ -106,7 +104,7 @@ public class TaskViewTest extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mLeash = new SurfaceControl.Builder(mSession)
+        mLeash = new SurfaceControl.Builder()
                 .setName("test")
                 .build();
 
@@ -294,16 +292,6 @@ public class TaskViewTest extends ShellTestCase {
     }
 
     @Test
-    public void testUnsetOnBackPressedOnTaskRoot_legacyTransitions() {
-        assumeFalse(Transitions.ENABLE_SHELL_TRANSITIONS);
-        mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
-        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(true));
-
-        mTaskViewTaskController.onTaskVanished(mTaskInfo);
-        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(false));
-    }
-
-    @Test
     public void testOnNewTask_noSurface() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -440,19 +428,6 @@ public class TaskViewTest extends ShellTestCase {
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(true));
-    }
-
-    @Test
-    public void testUnsetOnBackPressedOnTaskRoot() {
-        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
-                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
-                mLeash, wct);
-        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(true));
-
-        mTaskViewTaskController.prepareCloseAnimation();
-        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(false));
     }
 
     @Test
@@ -712,5 +687,27 @@ public class TaskViewTest extends ShellTestCase {
         mTaskView.setResizeBgColor(tx, Color.BLUE);
         verify(mViewHandler).post(any());
         verify(mTaskView).setResizeBackgroundColor(eq(Color.BLUE));
+    }
+
+    @Test
+    public void testOnAppeared_setsTrimmableTask() {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+
+        assertThat(wct.getHierarchyOps().get(0).isTrimmableFromRecents()).isFalse();
+    }
+
+    @Test
+    public void testMoveToFullscreen_callsTaskRemovalStarted() {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        mTaskViewTaskController.moveToFullscreen();
+
+        verify(mViewListener).onTaskRemovalStarted(eq(mTaskInfo.taskId));
     }
 }

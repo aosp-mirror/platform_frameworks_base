@@ -38,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.launcher3.Flags.enableRefactorTaskThumbnail;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
@@ -61,7 +62,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Environment;
 import android.os.IBinder;
@@ -76,11 +76,10 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.InsetsState;
 import android.view.MotionEvent;
-import android.view.WindowInsets;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
 
@@ -1495,12 +1494,20 @@ class RecentTasks {
             if (isExcludeFromRecents) {
                 if (DEBUG_RECENTS_TRIM_TASKS) {
                     Slog.d(TAG,
-                            "\texcludeFromRecents=true, taskIndex = " + taskIndex
-                                    + ", isOnHomeDisplay: " + task.isOnHomeDisplay());
+                            "\texcludeFromRecents=true,"
+                                + " taskIndex: " + taskIndex
+                                + " getTopVisibleActivity: " + task.getTopVisibleActivity()
+                                + " isOnHomeDisplay: " + task.isOnHomeDisplay());
                 }
                 // The Recents is only supported on default display now, we should only keep the
                 // most recent task of home display.
-                return (task.isOnHomeDisplay() && taskIndex == 0);
+                boolean isMostRecentTask;
+                if (enableRefactorTaskThumbnail()) {
+                    isMostRecentTask = task.getTopVisibleActivity() != null;
+                } else {
+                    isMostRecentTask = taskIndex == 0;
+                }
+                return (task.isOnHomeDisplay() && isMostRecentTask);
             }
         }
 
@@ -1534,6 +1541,11 @@ class RecentTasks {
         // The task was detached, just trim it.
         if (!task.isAttached()) {
             return true;
+        }
+
+        // The task is marked as non-trimmable. Don't trim the task.
+        if (!task.mIsTrimmableFromRecents) {
+            return false;
         }
 
         // Ignore tasks from different displays

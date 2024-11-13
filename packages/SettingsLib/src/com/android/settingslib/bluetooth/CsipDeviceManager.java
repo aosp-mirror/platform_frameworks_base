@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeBroadcastMetadata;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.os.Build;
@@ -178,7 +179,7 @@ public class CsipDeviceManager {
         }
         log("updateRelationshipOfGroupDevices: mCachedDevices list =" + mCachedDevices.toString());
 
-        // Get the preferred main device by getPreferredMainDeviceWithoutConectionState
+        // Get the preferred main device by getPreferredMainDeviceWithoutConnectionState
         List<CachedBluetoothDevice> groupDevicesList = getGroupDevicesFromAllOfDevicesList(groupId);
         CachedBluetoothDevice preferredMainDevice =
                 getPreferredMainDevice(groupId, groupDevicesList);
@@ -261,9 +262,9 @@ public class CsipDeviceManager {
         }
 
         CachedBluetoothDevice dualModeDevice = groupDevicesList.stream()
-                .filter(cachedDevice -> cachedDevice.getConnectableProfiles().stream()
+                .filter(cachedDevice -> cachedDevice.getUiAccessibleProfiles().stream()
                         .anyMatch(profile -> profile instanceof LeAudioProfile))
-                .filter(cachedDevice -> cachedDevice.getConnectableProfiles().stream()
+                .filter(cachedDevice -> cachedDevice.getUiAccessibleProfiles().stream()
                         .anyMatch(profile -> profile instanceof A2dpProfile
                                 || profile instanceof HeadsetProfile))
                 .findFirst().orElse(null);
@@ -356,6 +357,8 @@ public class CsipDeviceManager {
         final CachedBluetoothDeviceManager deviceManager = mBtManager.getCachedDeviceManager();
         preferredMainDevice = deviceManager.findDevice(bluetoothDeviceOfPreferredMainDevice);
         if (haveMultiMainDevicesInAllOfDevicesList) {
+            log("addMemberDevicesIntoMainDevice: haveMultiMainDevicesInAllOfDevicesList. "
+                    + "Combine them and also keep the preferred main device as main device.");
             // put another devices into main device.
             for (CachedBluetoothDevice deviceItem : topLevelOfGroupDevicesList) {
                 if (deviceItem.getDevice() == null || deviceItem.getDevice().equals(
@@ -373,14 +376,51 @@ public class CsipDeviceManager {
                 preferredMainDevice.addMemberDevice(deviceItem);
                 mCachedDevices.remove(deviceItem);
                 mBtManager.getEventManager().dispatchDeviceRemoved(deviceItem);
+                preferredMainDevice.refresh();
                 hasChanged = true;
             }
+            syncAudioSharingSourceIfNeeded(preferredMainDevice);
         }
         if (hasChanged) {
             log("addMemberDevicesIntoMainDevice: After changed, CachedBluetoothDevice list: "
                     + mCachedDevices);
         }
         return hasChanged;
+    }
+
+    private void syncAudioSharingSourceIfNeeded(CachedBluetoothDevice mainDevice) {
+        boolean isAudioSharingEnabled = BluetoothUtils.isAudioSharingEnabled();
+        if (isAudioSharingEnabled) {
+            boolean hasBroadcastSource = BluetoothUtils.isBroadcasting(mBtManager)
+                    && BluetoothUtils.hasConnectedBroadcastSource(
+                    mainDevice, mBtManager);
+            if (hasBroadcastSource) {
+                LocalBluetoothLeBroadcast broadcast = mBtManager == null ? null
+                        : mBtManager.getProfileManager().getLeAudioBroadcastProfile();
+                BluetoothLeBroadcastMetadata metadata = broadcast == null ? null :
+                        broadcast.getLatestBluetoothLeBroadcastMetadata();
+                LocalBluetoothLeBroadcastAssistant assistant = mBtManager == null ? null
+                        : mBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+                if (metadata != null && assistant != null) {
+                    log("addMemberDevicesIntoMainDevice: sync audio sharing source after "
+                            + "combining the top level devices.");
+                    Set<CachedBluetoothDevice> deviceSet = new HashSet<>();
+                    deviceSet.add(mainDevice);
+                    deviceSet.addAll(mainDevice.getMemberDevice());
+                    Set<BluetoothDevice> sinksToSync = deviceSet.stream()
+                            .map(CachedBluetoothDevice::getDevice)
+                            .filter(device ->
+                                    !BluetoothUtils.hasConnectedBroadcastSourceForBtDevice(
+                                            device, mBtManager))
+                            .collect(Collectors.toSet());
+                    for (BluetoothDevice device : sinksToSync) {
+                        log("addMemberDevicesIntoMainDevice: sync audio sharing source to "
+                                + device.getAnonymizedAddress());
+                        assistant.addSource(device, metadata, /* isGroupOp= */ false);
+                    }
+                }
+            }
+        }
     }
 
     private void log(String msg) {

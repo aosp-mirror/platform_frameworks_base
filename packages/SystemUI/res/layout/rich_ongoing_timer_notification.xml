@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<com.android.systemui.statusbar.notification.row.ui.view.TimerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topBaseline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="22sp"
+        />
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        app:tint="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/label"
+        android:baseline="18dp"
+        app:layout_constraintBaseline_toTopOf="@id/topBaseline"
+        />
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/icon"
+        app:layout_constraintEnd_toStartOf="@id/chronoRemaining"
+        android:singleLine="true"
+        tools:text="15s Timer"
+        app:layout_constraintBaseline_toTopOf="@id/topBaseline"
+        android:paddingEnd="4dp"
+        />
+    <Chronometer
+        android:id="@+id/chronoRemaining"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textSize="20sp"
+        android:gravity="end"
+        tools:text="0:12"
+        app:layout_constraintBaseline_toTopOf="@id/topBaseline"
+        app:layout_constraintEnd_toStartOf="@id/pausedTimeRemaining"
+        app:layout_constraintStart_toEndOf="@id/label"
+        android:countDown="true"
+        android:paddingEnd="4dp"
+        />
+    <TextView
+        android:id="@+id/pausedTimeRemaining"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textSize="20sp"
+        android:gravity="end"
+        tools:text="0:12"
+        app:layout_constraintBaseline_toTopOf="@id/topBaseline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/chronoRemaining"
+        android:paddingEnd="4dp"
+        />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/bottomOfTop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="icon,label,chronoRemaining,pausedTimeRemaining"
+        />
+
+    <com.android.systemui.statusbar.notification.row.ui.view.TimerButtonView
+        style="@*android:style/NotificationEmphasizedAction"
+        android:id="@+id/mainButton"
+        android:layout_width="124dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/altButton"
+        app:layout_constraintTop_toBottomOf="@id/bottomOfTop"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        android:paddingEnd="4dp"
+        />
+
+    <com.android.systemui.statusbar.notification.row.ui.view.TimerButtonView
+        style="@*android:style/NotificationEmphasizedAction"
+        android:id="@+id/altButton"
+        android:layout_width="124dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/bottomOfTop"
+        app:layout_constraintStart_toEndOf="@id/mainButton"
+        app:layout_constraintEnd_toEndOf="@id/resetButton"
+        android:paddingEnd="4dp"
+        />
+
+    <com.android.systemui.statusbar.notification.row.ui.view.TimerButtonView
+        style="@*android:style/NotificationEmphasizedAction"
+        android:id="@+id/resetButton"
+        android:layout_width="124dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/bottomOfTop"
+        app:layout_constraintStart_toEndOf="@id/altButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingEnd="4dp"
+        />
+</com.android.systemui.statusbar.notification.row.ui.view.TimerView>

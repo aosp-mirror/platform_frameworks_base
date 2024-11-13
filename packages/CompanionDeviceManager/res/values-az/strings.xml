@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"izləyin"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; tərəfindən idarə ediləcək cihaz seçin"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Ayarlamaq üçün <xliff:g id="PROFILE_NAME">%1$s</xliff:g> seçin"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"Bu tətbiq zəng edənin adı kimi məlumatları sinxronlaşdıra, <xliff:g id="DEVICE_NAME">%1$s</xliff:g> bu icazələrə daxil ola biləcək"</string>
+    <string name="summary_watch" msgid="8134580124808507407">"Bu tətbiq zəng edənin adı kimi məlumatları sinxronlaşdıra, <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> cihazında bu icazələrə daxil ola biləcək"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; tətbiqinə &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; cihazını idarə etmək icazəsi verilsin?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"cihazda"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"Bu tətbiq <xliff:g id="DEVICE_NAME">%1$s</xliff:g> bu icazələrə daxil ola biləcək"</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; tətbiqinə telefonunuzdan bu məlumata giriş icazəsi verin"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; tətbiqinə telefon tətbiqlərini yayımlamaq icazəsi verilsin?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s audio, foto, parol və mesajlar daxil olmaqla telefonda görünən və ya oxudulan məzmuna giriş əldə edəcək.&lt;br/&gt;&lt;br/&gt;%1$s bu icazəyə giriş silinənədək tətbiqləri yayımlayacaq."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Cihazlararası xidmətlər"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> adından cihazlar arasında tətbiqləri yayımlamaq icazəsi istəyir"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqləri göstərmək və cihazlar arasında yayımlamaq üçün <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> əvəzinə icazə tələb edir"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"Bu tətbiq <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> cihazında bu icazələrə daxil ola biləcək"</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; üçün <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> tətbiqlərini &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt; cihazına sinxronlaşdırmaq icazəsi verilsin?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> audio, foto, parol və mesajlar daxil olmaqla <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> cihazında görünən və ya oxudulan kontentə giriş əldə edəcək.&lt;br/&gt;&lt;br/&gt;Siz bu icazəyə girişi silənə qədər <xliff:g id="APP_NAME_1">%1$s</xliff:g>tətbiqləri <xliff:g id="DEVICE_NAME">%3$s</xliff:g> cihazına yayımlaya biləcək."</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqləri göstərmək və cihazlar arasında yayımlamaq üçün <xliff:g id="DEVICE_NAME">%2$s</xliff:g> adından icazə tələb edir"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; tətbiqinə telefonunuzdan bu məlumata giriş icazəsi verin"</string>
+    <string name="title_computer" msgid="4782923323932440751">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; tətbiqinə <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> cihazından əldə edilən bu məlumata giriş icazəsi verin"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play xidmətləri"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> adından telefonun foto, media və bildirişlərinə giriş icazəsi istəyir"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; cihazına bu əməliyyatı yerinə yetirmək icazəsi verilsin?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; tətbiqinə telefon tətbiqlərini və sistem funksiyalarını yayımlamaq icazəsi verilsin?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s audio, foto, ödəniş məlumatı, parol və mesajlar daxil olmaqla telefonda görünən və ya oxudulan məzmuna giriş əldə edəcək.&lt;br/&gt;&lt;br/&gt;%1$s bu icazəyə giriş silinənədək tətbiqləri və sistem funksiyalarını yayımlayacaq."</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="DEVICE_NAME">%2$s</xliff:g> adından tətbiq və digər sistem funksiyalarını yaxınlıqdakı cihazlara yayımlamaq icazəsi sitəyir"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="DEVICE_TYPE">%3$s</xliff:g> üzrə foto, media və bildirişlərə daxil olmaq üçün <xliff:g id="DEVICE_NAME">%2$s</xliff:g> adından icazə tələb edir"</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"&lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; üçün <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> tətbiq və sistem funksiyalarını &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt; cihazına yayımlamaq icazəsi verilsin?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> audio, foto, ödəniş məlumatı, parol və mesajlar daxil olmaqla <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> cihazında görünən və ya işə salınan kontentə giriş əldə edəcək.&lt;br/&gt;&lt;br/&gt;Siz bu icazəyə girişi silənə qədər <xliff:g id="APP_NAME_1">%1$s</xliff:g> tətbiq və sistem funksiyalarını <xliff:g id="DEVICE_NAME">%3$s</xliff:g> cihazına yayımlaya biləcək."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"<xliff:g id="APP_NAME">%1$s</xliff:g> cihazlar arasında tətbiqləri və digər sistem funksiyalarını yayımlamaq üçün <xliff:g id="DEVICE_NAME">%2$s</xliff:g> adından icazə tələb edir"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"cihaz"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Tətbiq zəng edənin adı kimi məlumatları telefon ilə seçilmiş cihaz arasında sinxronlaşdıracaq"</string>
     <string name="consent_yes" msgid="8344487259618762872">"İcazə verin"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Media çıxışını dəyişin"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Foto və media"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Bildirişlər"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"Tətbiqlər"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Yayım"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"Telefon zənglərinin edilməsi və idarəsi"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"Telefon zəng siyahısının oxunması və yazılması"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"SMS mesajlarının göndərilməsi və onlara baxmaq"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Yaxınlıqdakı cihazların tapılması, onlara qoşulmaq və nisbi mövqelərinin təyin edilməsi"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Kontakt, mesaj və foto kimi məlumatlar daxil olmaqla bütün bildirişlərin oxunması"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• Kontakt, mesaj və foto kimi məlumatlar daxil olmaqla bütün bildirişlərin oxunması&lt;br/&gt;• Bildirişlərin göndərilməsi&lt;br/&gt;&lt;br/&gt;Bu tətbiqin bildirişləri oxumaq və göndərmək imkanını Ayarlar &gt; Bildirişlər bölməsində idarə edə bilərsiniz."</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefonunuzun tətbiqlərini yayımlayın"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Telefondan tətbiq və digər sistem funksiyalarını yayımlayın"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Əlçatan cihazların siyahısına daxil olun, digər tətbiqlərdən audio və ya video yayımlayacaq cihazı idarə edin"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefonda"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"planşetdə"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"tv"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"cihaz"</string>
 </resources>

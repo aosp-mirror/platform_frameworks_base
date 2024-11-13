@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.domain.interactor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardOcclusionInteractor
+import com.android.systemui.keyguard.domain.interactor.internalKeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -34,5 +35,6 @@ val Kosmos.keyguardOcclusionInteractor by
             transitionInteractor = keyguardTransitionInteractor,
             keyguardInteractor = keyguardInteractor,
             deviceUnlockedInteractor = { deviceUnlockedInteractor },
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
         )
     }

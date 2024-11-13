@@ -50,6 +50,9 @@ import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.FakeLogBuffer;
+import com.android.systemui.privacy.PrivacyItem;
+import com.android.systemui.privacy.PrivacyItemController;
+import com.android.systemui.privacy.PrivacyType;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository;
@@ -66,8 +69,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -107,6 +112,8 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
     DreamOverlayStateController mDreamOverlayStateController;
     @Mock
     UserTracker mUserTracker;
+    @Mock
+    PrivacyItemController mPrivacyItemController;
 
     LogBuffer mLogBuffer = FakeLogBuffer.Factory.Companion.create();
 
@@ -146,8 +153,10 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
                 mDreamOverlayStateController,
                 mUserTracker,
                 mKosmos.getWifiInteractor(),
+                mPrivacyItemController,
                 mKosmos.getCommunalSceneInteractor(),
                 mLogBuffer);
+        mController.onInit();
     }
 
     @Test
@@ -159,6 +168,7 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
         verify(mDreamOverlayNotificationCountProvider).addCallback(any());
         verify(mDreamOverlayStatusBarItemsProvider).addCallback(any());
         verify(mDreamOverlayStateController).addCallback(any());
+        verify(mPrivacyItemController).addCallback(any());
     }
 
     @Test
@@ -168,6 +178,52 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
 
         verify(mView).showIcon(
                 AmbientStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, true, null);
+    }
+
+    @Test
+    public void testLocationIconShownWhenLocationActive() {
+        mController.onViewAttached();
+        final ArgumentCaptor<PrivacyItemController.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(PrivacyItemController.Callback.class);
+        verify(mPrivacyItemController).addCallback(callbackCaptor.capture());
+
+        final PrivacyItem item = Mockito.mock(PrivacyItem.class);
+        when(item.getPrivacyType()).thenReturn(PrivacyType.TYPE_LOCATION);
+        callbackCaptor.getValue().onPrivacyItemsChanged(Arrays.asList(item));
+
+        verify(mView).showIcon(
+                eq(AmbientStatusBarView.STATUS_ICON_LOCATION_ACTIVE), eq(true), any());
+    }
+
+    @Test
+    public void testLocationIconNotShownForOtherPrivacyItems() {
+        mController.onViewAttached();
+        final ArgumentCaptor<PrivacyItemController.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(PrivacyItemController.Callback.class);
+        verify(mPrivacyItemController).addCallback(callbackCaptor.capture());
+
+        final PrivacyItem item = Mockito.mock(PrivacyItem.class);
+        when(item.getPrivacyType()).thenReturn(PrivacyType.TYPE_CAMERA);
+        callbackCaptor.getValue().onPrivacyItemsChanged(Arrays.asList(item));
+
+        verify(mView, never()).showIcon(
+                eq(AmbientStatusBarView.STATUS_ICON_LOCATION_ACTIVE), eq(true), any());
+    }
+
+    @Test
+    public void testLocationIconNotShownForNoItems() {
+        mController.onViewAttached();
+        final ArgumentCaptor<PrivacyItemController.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(PrivacyItemController.Callback.class);
+        verify(mPrivacyItemController).addCallback(callbackCaptor.capture());
+
+        verify(mView, never()).showIcon(
+                eq(AmbientStatusBarView.STATUS_ICON_LOCATION_ACTIVE), eq(true), any());
+
+        callbackCaptor.getValue().onPrivacyItemsChanged(Arrays.asList());
+
+        verify(mView, never()).showIcon(
+                eq(AmbientStatusBarView.STATUS_ICON_LOCATION_ACTIVE), eq(true), any());
     }
 
     @Test
@@ -273,6 +329,7 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
                 mDreamOverlayStateController,
                 mUserTracker,
                 mKosmos.getWifiInteractor(),
+                mPrivacyItemController,
                 mKosmos.getCommunalSceneInteractor(),
                 mLogBuffer);
         controller.onViewAttached();
@@ -515,6 +572,15 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
         mController.onViewDetached();
         verify(mDreamOverlayStateController).setDreamOverlayStatusBarVisible(false);
+    }
+
+    @Test
+    public void testStatusBarWindowStateControllerListenerLifecycle() {
+        ArgumentCaptor<StatusBarWindowStateListener> listenerCaptor =
+                ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(listenerCaptor.capture());
+        mController.destroy();
+        verify(mStatusBarWindowStateController).removeListener(eq(listenerCaptor.getValue()));
     }
 
     private StatusBarWindowStateListener updateStatusBarWindowState(boolean show) {

@@ -78,7 +78,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
     @Test
     fun ssid_inactiveNetwork_outputsNull() =
         testScope.runTest {
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive())
 
             var latest: String? = "default"
             val job = underTest.ssid.onEach { latest = it }.launchIn(this)
@@ -93,7 +93,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun ssid_carrierMergedNetwork_outputsNull() =
         testScope.runTest {
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.CarrierMerged(networkId = 1, subscriptionId = 2, level = 1)
+                WifiNetworkModel.CarrierMerged.of(subscriptionId = 2, level = 1)
             )
 
             var latest: String? = "default"
@@ -106,53 +106,10 @@ class WifiInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun ssid_isPasspointAccessPoint_outputsPasspointName() =
-        testScope.runTest {
-            wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(
-                    networkId = 1,
-                    level = 1,
-                    isPasspointAccessPoint = true,
-                    passpointProviderFriendlyName = "friendly",
-                )
-            )
-
-            var latest: String? = null
-            val job = underTest.ssid.onEach { latest = it }.launchIn(this)
-            runCurrent()
-
-            assertThat(latest).isEqualTo("friendly")
-
-            job.cancel()
-        }
-
-    @Test
-    fun ssid_isOnlineSignUpForPasspoint_outputsPasspointName() =
-        testScope.runTest {
-            wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(
-                    networkId = 1,
-                    level = 1,
-                    isOnlineSignUpForPasspointAccessPoint = true,
-                    passpointProviderFriendlyName = "friendly",
-                )
-            )
-
-            var latest: String? = null
-            val job = underTest.ssid.onEach { latest = it }.launchIn(this)
-            runCurrent()
-
-            assertThat(latest).isEqualTo("friendly")
-
-            job.cancel()
-        }
-
-    @Test
     fun ssid_unknownSsid_outputsNull() =
         testScope.runTest {
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(
-                    networkId = 1,
+                WifiNetworkModel.Active.of(
                     level = 1,
                     ssid = WifiManager.UNKNOWN_SSID,
                 )
@@ -171,8 +128,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun ssid_validSsid_outputsSsid() =
         testScope.runTest {
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(
-                    networkId = 1,
+                WifiNetworkModel.Active.of(
                     level = 1,
                     ssid = "MyAwesomeWifiNetwork",
                 )
@@ -233,12 +189,10 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun wifiNetwork_matchesRepoWifiNetwork() =
         testScope.runTest {
             val wifiNetwork =
-                WifiNetworkModel.Active(
-                    networkId = 45,
+                WifiNetworkModel.Active.of(
                     isValidated = true,
                     level = 3,
                     ssid = "AB",
-                    passpointProviderFriendlyName = "friendly"
                 )
             wifiRepository.setWifiNetwork(wifiNetwork)
 
@@ -309,7 +263,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.areNetworksAvailable)
 
             wifiRepository.wifiScanResults.value = emptyList()
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive())
 
             assertThat(latest).isFalse()
         }
@@ -326,7 +280,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
                     WifiScanEntry(ssid = "ssid 3"),
                 )
 
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive())
 
             assertThat(latest).isTrue()
         }
@@ -344,9 +298,8 @@ class WifiInteractorImplTest : SysuiTestCase() {
                 )
 
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(
+                WifiNetworkModel.Active.of(
                     ssid = "ssid 2",
-                    networkId = 1,
                     level = 2,
                 )
             )
@@ -365,9 +318,8 @@ class WifiInteractorImplTest : SysuiTestCase() {
                 )
 
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.Active(
+                WifiNetworkModel.Active.of(
                     ssid = "ssid 2",
-                    networkId = 1,
                     level = 2,
                 )
             )

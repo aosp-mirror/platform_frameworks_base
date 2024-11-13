@@ -57,6 +57,7 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
     protected boolean mInvalidationInProgress;
     protected final Context mContext;
     protected final File mFile;
+    private boolean mIsInvalidBiometricState = false;
 
     private final Runnable mWriteStateRunnable = this::doWriteStateInternal;
 
@@ -102,7 +103,7 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
             serializer.endDocument();
             destination.finishWrite(out);
         } catch (Throwable t) {
-            Slog.wtf(TAG, "Failed to write settings, restoring backup", t);
+            Slog.e(TAG, "Failed to write settings, restoring backup", t);
             destination.failWrite(out);
             throw new IllegalStateException("Failed to write to file: " + mFile.toString(), t);
         } finally {
@@ -192,6 +193,29 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
         }
     }
 
+    /**
+     * Return true if the biometric file is correctly read. Otherwise return false.
+     */
+    public boolean isInvalidBiometricState() {
+        return mIsInvalidBiometricState;
+    }
+
+    /**
+     * Delete the file of the biometric state.
+     */
+    public void deleteBiometricFile() {
+        synchronized (this) {
+            if (!mFile.exists()) {
+                return;
+            }
+            if (mFile.delete()) {
+                Slog.i(TAG, mFile + " is deleted successfully");
+            } else {
+                Slog.i(TAG, "Failed to delete " + mFile);
+            }
+        }
+    }
+
     private boolean isUnique(String name) {
         for (T identifier : mBiometrics) {
             if (identifier.getName().equals(name)) {
@@ -218,7 +242,8 @@ public abstract class BiometricUserState<T extends BiometricAuthenticator.Identi
         try {
             in = new FileInputStream(mFile);
         } catch (FileNotFoundException fnfe) {
-            Slog.i(TAG, "No fingerprint state");
+            Slog.i(TAG, "No fingerprint state", fnfe);
+            mIsInvalidBiometricState = true;
             return;
         }
         try {

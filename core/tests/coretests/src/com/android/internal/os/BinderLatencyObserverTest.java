@@ -29,8 +29,8 @@ import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArrayMap;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderInternal.CallSession;
 import com.android.internal.os.BinderLatencyObserver.LatencyDims;

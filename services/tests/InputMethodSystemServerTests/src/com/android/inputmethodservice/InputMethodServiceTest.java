@@ -21,6 +21,7 @@ import static android.view.WindowInsets.Type.captionBar;
 import static com.android.compatibility.common.util.SystemUtil.eventually;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -32,19 +33,25 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.os.RemoteException;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.Until;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
+import android.view.WindowManagerPolicyConstants;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.Until;
 
 import com.android.apps.inputmethod.simpleime.ims.InputMethodServiceWrapper;
 import com.android.apps.inputmethod.simpleime.testing.TestActivity;
@@ -53,10 +60,12 @@ import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -66,6 +75,10 @@ public class InputMethodServiceTest {
     private static final String TAG = "SimpleIMSTest";
     private static final String INPUT_METHOD_SERVICE_NAME = ".SimpleInputMethodService";
     private static final String EDIT_TEXT_DESC = "Input box";
+    private static final String INPUT_METHOD_NAV_BACK_ID =
+            "android:id/input_method_nav_back";
+    private static final String INPUT_METHOD_NAV_IME_SWITCHER_ID =
+            "android:id/input_method_nav_ime_switcher";
     private static final long TIMEOUT_IN_SECONDS = 3;
     private static final String ENABLE_SHOW_IME_WITH_HARD_KEYBOARD_CMD =
             "settings put secure " + Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD + " 1";
@@ -80,6 +93,9 @@ public class InputMethodServiceTest {
     private InputMethodServiceWrapper mInputMethodService;
     private String mInputMethodId;
     private boolean mShowImeWithHardKeyboardEnabled;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -98,6 +114,12 @@ public class InputMethodServiceTest {
             mInputMethodService =
                     InputMethodServiceWrapper.getInputMethodServiceWrapperForTesting();
             assertThat(mInputMethodService).isNotNull();
+
+            // The activity gets focus.
+            assertThat(mActivity.hasWindowFocus()).isTrue();
+            assertThat(mInputMethodService.getCurrentInputEditorInfo()).isNotNull();
+            assertThat(mInputMethodService.getCurrentInputEditorInfo().packageName)
+                    .isEqualTo(mTargetPackageName);
 
             // The editor won't bring up keyboard by default.
             assertThat(mInputMethodService.getCurrentInputStarted()).isTrue();
@@ -141,7 +163,13 @@ public class InputMethodServiceTest {
                 () -> assertThat(mUiDevice.pressHome()).isTrue(),
                 true /* expected */,
                 false /* inputViewStarted */);
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        if (Flags.refactorInsetsController()) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
     }
 
     /**
@@ -168,8 +196,13 @@ public class InputMethodServiceTest {
 
     /**
      * This checks the result of calling IMS#requestShowSelf and IMS#requestHideSelf.
+     *
+     * With the refactor in b/298172246, all calls to IMMS#{show,hide}MySoftInputLocked
+     * will be just apply the requested visibility (by using the callback). Therefore, we will
+     * lose flags like HIDE_IMPLICIT_ONLY.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowHideSelf() throws Exception {
         setShowImeWithHardKeyboard(true /* enabled */);
 
@@ -361,8 +394,13 @@ public class InputMethodServiceTest {
     /**
      * This checks that an implicit show request when the IME is not previously shown,
      * and it should be shown in fullscreen mode, results in the IME not being shown.
+     *
+     * With the refactor in b/298172246, all calls from InputMethodManager#{show,hide}SoftInput
+     * will be redirected to InsetsController#{show,hide}. Therefore, we will lose flags like
+     * SHOW_IMPLICIT.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowSoftInputImplicitly_fullScreenMode() throws Exception {
         setShowImeWithHardKeyboard(true /* enabled */);
 
@@ -411,8 +449,13 @@ public class InputMethodServiceTest {
     /**
      * This checks that an implicit show request when a hard keyboard is connected,
      * results in the IME not being shown.
+     *
+     * With the refactor in b/298172246, all calls from InputMethodManager#{show,hide}SoftInput
+     * will be redirected to InsetsController#{show,hide}. Therefore, we will lose flags like
+     * SHOW_IMPLICIT.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowSoftInputImplicitly_withHardKeyboard() throws Exception {
         setShowImeWithHardKeyboard(false /* enabled */);
 
@@ -470,8 +513,13 @@ public class InputMethodServiceTest {
      * This checks that an implicit show request followed by connecting a hard keyboard
      * and a configuration change, does not trigger IMS#onFinishInputView,
      * but results in the IME being hidden.
+     *
+     * With the refactor in b/298172246, all calls from InputMethodManager#{show,hide}SoftInput
+     * will be redirected to InsetsController#{show,hide}. Therefore, we will lose flags like
+     * SHOW_IMPLICIT.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowSoftInputImplicitly_thenConfigurationChanged() throws Exception {
         setShowImeWithHardKeyboard(false /* enabled */);
 
@@ -553,8 +601,13 @@ public class InputMethodServiceTest {
      * This checks that a forced show request directly followed by an explicit show request,
      * and then a hide not always request, still results in the IME being shown
      * (i.e. the explicit show request retains the forced state).
+     *
+     * With the refactor in b/298172246, all calls from InputMethodManager#{show,hide}SoftInput
+     * will be redirected to InsetsController#{show,hide}. Therefore, we will lose flags like
+     * HIDE_NOT_ALWAYS.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowSoftInputForced_testShowSoftInputExplicitly_thenHideSoftInputNotAlways()
             throws Exception {
         setShowImeWithHardKeyboard(true /* enabled */);
@@ -689,6 +742,173 @@ public class InputMethodServiceTest {
                 .getInsetsController().show(captionBar()));
         mInstrumentation.waitForIdleSync();
         assertThat(mInputMethodService.isImeNavigationBarShownForTesting()).isFalse();
+    }
+
+    /**
+     * Verifies that clicking on the IME navigation bar back button hides the IME.
+     */
+    @Test
+    public void testBackButtonClick() throws Exception {
+        boolean hasNavigationBar = WindowManagerGlobal.getWindowManagerService()
+                .hasNavigationBar(mInputMethodService.getDisplayId());
+        assumeTrue("Must have a navigation bar", hasNavigationBar);
+        assumeTrue("Must be in gesture navigation mode", isGestureNavEnabled());
+
+        setShowImeWithHardKeyboard(true /* enabled */);
+
+        verifyInputViewStatusOnMainSync(
+                () -> {
+                    // Ensure the IME navigation bar and the IME switch button are drawn.
+                    mInputMethodService.getInputMethodInternal().onNavButtonFlagsChanged(
+                            InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR
+                                    | InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN
+                    );
+                    assertThat(mActivity.showImeWithWindowInsetsController()).isTrue();
+                },
+                true /* expected */,
+                true /* inputViewStarted */);
+        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+
+        final var backButtonUiObject = getUiObjectById(INPUT_METHOD_NAV_BACK_ID);
+        backButtonUiObject.click();
+        mInstrumentation.waitForIdleSync();
+
+        if (Flags.refactorInsetsController()) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
+    }
+
+    /**
+     * Verifies that long clicking on the IME navigation bar back button hides the IME.
+     */
+    @Test
+    public void testBackButtonLongClick() throws Exception {
+        boolean hasNavigationBar = WindowManagerGlobal.getWindowManagerService()
+                .hasNavigationBar(mInputMethodService.getDisplayId());
+        assumeTrue("Must have a navigation bar", hasNavigationBar);
+        assumeTrue("Must be in gesture navigation mode", isGestureNavEnabled());
+
+        setShowImeWithHardKeyboard(true /* enabled */);
+
+        verifyInputViewStatusOnMainSync(
+                () -> {
+                    // Ensure the IME navigation bar and the IME switch button are drawn.
+                    mInputMethodService.getInputMethodInternal().onNavButtonFlagsChanged(
+                            InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR
+                                    | InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN
+                    );
+                    assertThat(mActivity.showImeWithWindowInsetsController()).isTrue();
+                },
+                true /* expected */,
+                true /* inputViewStarted */);
+        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+
+        final var backButtonUiObject = getUiObjectById(INPUT_METHOD_NAV_BACK_ID);
+        backButtonUiObject.longClick();
+        mInstrumentation.waitForIdleSync();
+
+        if (Flags.refactorInsetsController()) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
+    }
+
+    /**
+     * Verifies that clicking on the IME switch button either shows the Input Method Switcher Menu,
+     * or switches the input method.
+     */
+    @Test
+    public void testImeSwitchButtonClick() throws Exception {
+        boolean hasNavigationBar = WindowManagerGlobal.getWindowManagerService()
+                .hasNavigationBar(mInputMethodService.getDisplayId());
+        assumeTrue("Must have a navigation bar", hasNavigationBar);
+        assumeTrue("Must be in gesture navigation mode", isGestureNavEnabled());
+
+        setShowImeWithHardKeyboard(true /* enabled */);
+
+        verifyInputViewStatusOnMainSync(
+                () -> {
+                    // Ensure the IME navigation bar and the IME switch button are drawn.
+                    mInputMethodService.getInputMethodInternal().onNavButtonFlagsChanged(
+                            InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR
+                                    | InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN
+                    );
+                    assertThat(mActivity.showImeWithWindowInsetsController()).isTrue();
+                },
+                true /* expected */,
+                true /* inputViewStarted */);
+        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+
+        final var imm = mContext.getSystemService(InputMethodManager.class);
+        final var initialInfo = imm.getCurrentInputMethodInfo();
+
+        final var imeSwitchButtonUiObject = getUiObjectById(INPUT_METHOD_NAV_IME_SWITCHER_ID);
+        imeSwitchButtonUiObject.click();
+        mInstrumentation.waitForIdleSync();
+
+        final var newInfo = imm.getCurrentInputMethodInfo();
+
+        assertWithMessage("Input Method Switcher Menu is shown or input method was switched")
+                .that(isInputMethodPickerShown(imm) || !Objects.equals(initialInfo, newInfo))
+                .isTrue();
+
+        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+
+        // Hide the Picker menu before finishing.
+        mUiDevice.pressBack();
+    }
+
+    /**
+     * Verifies that long clicking on the IME switch button shows the Input Method Switcher Menu.
+     */
+    @Test
+    public void testImeSwitchButtonLongClick() throws Exception {
+        boolean hasNavigationBar = WindowManagerGlobal.getWindowManagerService()
+                .hasNavigationBar(mInputMethodService.getDisplayId());
+        assumeTrue("Must have a navigation bar", hasNavigationBar);
+        assumeTrue("Must be in gesture navigation mode", isGestureNavEnabled());
+
+        setShowImeWithHardKeyboard(true /* enabled */);
+
+        verifyInputViewStatusOnMainSync(
+                () -> {
+                    // Ensure the IME navigation bar and the IME switch button are drawn.
+                    mInputMethodService.getInputMethodInternal().onNavButtonFlagsChanged(
+                            InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR
+                                    | InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN
+                    );
+                    assertThat(mActivity.showImeWithWindowInsetsController()).isTrue();
+                },
+                true /* expected */,
+                true /* inputViewStarted */);
+        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+
+        final var imm = mContext.getSystemService(InputMethodManager.class);
+
+        final var imeSwitchButtonUiObject = getUiObjectById(INPUT_METHOD_NAV_IME_SWITCHER_ID);
+        imeSwitchButtonUiObject.longClick();
+        mInstrumentation.waitForIdleSync();
+
+        assertWithMessage("Input Method Switcher Menu is shown")
+                .that(isInputMethodPickerShown(imm))
+                .isTrue();
+        if (Flags.refactorInsetsController()) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isTrue();
+        }
+
+        // Hide the Picker menu before finishing.
+        mUiDevice.pressBack();
     }
 
     private void verifyInputViewStatus(
@@ -836,6 +1056,32 @@ public class InputMethodServiceTest {
     private String executeShellCommand(String cmd) throws IOException {
         Log.i(TAG, "Run command: " + cmd);
         return SystemUtil.runShellCommandOrThrow(cmd);
+    }
+
+    /**
+     * Checks if the Input Method Switcher Menu is shown. This runs by adopting the Shell's
+     * permission to ensure we have TEST_INPUT_METHOD permission.
+     */
+    private static boolean isInputMethodPickerShown(@NonNull InputMethodManager imm) {
+        return SystemUtil.runWithShellPermissionIdentity(imm::isInputMethodPickerShown);
+    }
+
+    @NonNull
+    private UiObject2 getUiObjectById(@NonNull String id) {
+        final var uiObject = mUiDevice.wait(
+                Until.findObject(By.res(id)),
+                TimeUnit.SECONDS.toMillis(TIMEOUT_IN_SECONDS));
+        assertThat(uiObject).isNotNull();
+        return uiObject;
+    }
+
+    /**
+     * Returns {@code true} if the navigation mode is gesture nav, and {@code false} otherwise.
+     */
+    private boolean isGestureNavEnabled() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_navBarInteractionMode)
+                == WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
     }
 
     private void clickOnEditorText() {

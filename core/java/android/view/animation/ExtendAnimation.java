@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Insets;
 import android.util.AttributeSet;
+import android.view.WindowInsets;
 
 /**
  * An animation that controls the outset of an object.
@@ -151,9 +152,12 @@ public class ExtendAnimation extends Animation {
 
     /** @hide */
     @Override
-    public boolean hasExtension() {
-        return mFromInsets.left < 0 || mFromInsets.top < 0 || mFromInsets.right < 0
-                || mFromInsets.bottom < 0;
+    @WindowInsets.Side.InsetsSide
+    public int getExtensionEdges() {
+        return (mFromInsets.left < 0 || mToInsets.left < 0 ?  WindowInsets.Side.LEFT : 0)
+            | (mFromInsets.right < 0 || mToInsets.right < 0 ?  WindowInsets.Side.RIGHT : 0)
+            | (mFromInsets.top < 0 || mToInsets.top < 0 ?  WindowInsets.Side.TOP : 0)
+            | (mFromInsets.bottom < 0 || mToInsets.bottom < 0 ? WindowInsets.Side.BOTTOM : 0);
     }
 
     @Override

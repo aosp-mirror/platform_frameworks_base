@@ -612,9 +612,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader(),
                     Surface.class);
             if (parcelableArray != null) {
-                if (Flags.surfaceLeakFix()) {
-                    mReleaseSurfaces = true;
-                }
+                mReleaseSurfaces = true;
                 for (Parcelable p : parcelableArray) {
                     Surface s = (Surface) p;
                     mSurfaceSet.add(s);
@@ -798,7 +796,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     }
 
     @SuppressWarnings("Finalize")
-    @FlaggedApi(Flags.FLAG_SURFACE_LEAK_FIX)
     @Override
     protected void finalize() {
         if (mReleaseSurfaces) {
@@ -1537,9 +1534,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * be made, and for firing pre-capture flash pulses to estimate
      * scene brightness and required final capture flash power, when
      * the flash is enabled.</p>
-     * <p>Normally, this entry should be set to START for only a
-     * single request, and the application should wait until the
-     * sequence completes before starting a new one.</p>
+     * <p>Flash is enabled during precapture sequence when:</p>
+     * <ul>
+     * <li>AE mode is ON_ALWAYS_FLASH</li>
+     * <li>AE mode is ON_AUTO_FLASH and the scene is deemed too dark without flash, or</li>
+     * <li>AE mode is ON and flash mode is TORCH or SINGLE</li>
+     * </ul>
+     * <p>Normally, this entry should be set to START for only single request, and the
+     * application should wait until the sequence completes before starting a new one.</p>
      * <p>When a precapture metering sequence is finished, the camera device
      * may lock the auto-exposure routine internally to be able to accurately expose the
      * subsequent still capture image (<code>{@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} == STILL_CAPTURE</code>).
@@ -2705,6 +2707,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * in {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL android.flash.singleStrengthDefaultLevel}.
      * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of <code>ON_AUTO_FLASH</code>, <code>ON_ALWAYS_FLASH</code>,
      * <code>ON_AUTO_FLASH_REDEYE</code>, <code>ON_EXTERNAL_FLASH</code> values, then the strengthLevel will be ignored.</p>
+     * <p>When AE mode is ON and flash mode is TORCH or SINGLE, the application should make sure
+     * the AE mode, flash mode, and flash strength level remain the same between precapture
+     * trigger request and final capture request. The flash strength level being set during
+     * precapture sequence is used by the camera device as a reference. The actual strength
+     * may be less, and the auto-exposure routine makes sure proper conversions of sensor
+     * exposure time and sensitivities between precapture and final capture for the specified
+     * strength level.</p>
      * <p><b>Range of valid values:</b><br>
      * <code>[1-{@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel}]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to TORCH;
@@ -2721,7 +2730,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_STRENGTH_LEVEL =
             new Key<Integer>("android.flash.strengthLevel", int.class);
 
@@ -4315,146 +4323,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @NonNull
     public static final Key<Integer> EXTENSION_STRENGTH =
             new Key<Integer>("android.extension.strength", int.class);
-
-    /**
-     * <p>Used to apply an additional digital zoom factor for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>For the {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * feature, an additional zoom factor is applied on top of the existing {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}.
-     * This additional zoom factor serves as a buffer to provide more flexibility for the
-     * {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED }
-     * mode. If android.efv.paddingZoomFactor is not set, the default will be used.
-     * The effectiveness of the stabilization may be influenced by the amount of padding zoom
-     * applied. A higher padding zoom factor can stabilize the target region more effectively
-     * with greater flexibility but may potentially impact image quality. Conversely, a lower
-     * padding zoom factor may be used to prioritize preserving image quality, albeit with less
-     * leeway in stabilizing the target region. It is recommended to set the
-     * android.efv.paddingZoomFactor to at least 1.5.</p>
-     * <p>If android.efv.autoZoom is enabled, the requested android.efv.paddingZoomFactor will be overridden.
-     * android.efv.maxPaddingZoomFactor can be checked for more details on controlling the
-     * padding zoom factor during android.efv.autoZoom.</p>
-     * <p><b>Range of valid values:</b><br>
-     * android.efv.paddingZoomFactorRange</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     *
-     * @see CaptureRequest#CONTROL_ZOOM_RATIO
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Float> EFV_PADDING_ZOOM_FACTOR =
-            new Key<Float>("android.efv.paddingZoomFactor", float.class);
-
-    /**
-     * <p>Used to enable or disable auto zoom for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>Turn on auto zoom to let the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * feature decide at any given point a combination of
-     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} and android.efv.paddingZoomFactor
-     * to keep the target region in view and stabilized. The combination chosen by the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * will equal the requested {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} multiplied with the requested
-     * android.efv.paddingZoomFactor. A limit can be set on the padding zoom if wanting
-     * to control image quality further using android.efv.maxPaddingZoomFactor.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     *
-     * @see CaptureRequest#CONTROL_ZOOM_RATIO
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Boolean> EFV_AUTO_ZOOM =
-            new Key<Boolean>("android.efv.autoZoom", boolean.class);
-
-    /**
-     * <p>Used to limit the android.efv.paddingZoomFactor if
-     * android.efv.autoZoom is enabled for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>If android.efv.autoZoom is enabled, this key can be used to set a limit
-     * on the android.efv.paddingZoomFactor chosen by the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode
-     * to control image quality.</p>
-     * <p><b>Range of valid values:</b><br>
-     * The range of android.efv.paddingZoomFactorRange. Use a value greater than or equal to
-     * the android.efv.paddingZoomFactor to effectively utilize this key.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Float> EFV_MAX_PADDING_ZOOM_FACTOR =
-            new Key<Float>("android.efv.maxPaddingZoomFactor", float.class);
-
-    /**
-     * <p>Set the stabilization mode for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension</p>
-     * <p>The desired stabilization mode. Gimbal stabilization mode provides simple, non-locked
-     * video stabilization. Locked mode uses the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * stabilization feature to fixate on the current region, utilizing it as the target area for
-     * stabilization.</p>
-     * <p><b>Possible values:</b></p>
-     * <ul>
-     *   <li>{@link #EFV_STABILIZATION_MODE_OFF OFF}</li>
-     *   <li>{@link #EFV_STABILIZATION_MODE_GIMBAL GIMBAL}</li>
-     *   <li>{@link #EFV_STABILIZATION_MODE_LOCKED LOCKED}</li>
-     * </ul>
-     *
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @see #EFV_STABILIZATION_MODE_OFF
-     * @see #EFV_STABILIZATION_MODE_GIMBAL
-     * @see #EFV_STABILIZATION_MODE_LOCKED
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Integer> EFV_STABILIZATION_MODE =
-            new Key<Integer>("android.efv.stabilizationMode", int.class);
-
-    /**
-     * <p>Used to update the target region for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>A android.util.Pair<Integer,Integer> that represents the desired
-     * <Horizontal,Vertical> shift of the current locked view (or target region) in
-     * pixels. Negative values indicate left and upward shifts, while positive values indicate
-     * right and downward shifts in the active array coordinate system.</p>
-     * <p><b>Range of valid values:</b><br>
-     * android.util.Pair<Integer,Integer> represents the
-     * <Horizontal,Vertical> shift. The range for the horizontal shift is
-     * [-max(android.efv.paddingRegion-left), max(android.efv.paddingRegion-right)].
-     * The range for the vertical shift is
-     * [-max(android.efv.paddingRegion-top), max(android.efv.paddingRegion-bottom)]</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<android.util.Pair<Integer,Integer>> EFV_TRANSLATE_VIEWPORT =
-            new Key<android.util.Pair<Integer,Integer>>("android.efv.translateViewport", new TypeReference<android.util.Pair<Integer,Integer>>() {{ }});
-
-    /**
-     * <p>Representing the desired clockwise rotation
-     * of the target region in degrees for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>Value representing the desired clockwise rotation of the target
-     * region in degrees.</p>
-     * <p><b>Range of valid values:</b><br>
-     * 0 to 360</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Float> EFV_ROTATE_VIEWPORT =
-            new Key<Float>("android.efv.rotateViewport", float.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code

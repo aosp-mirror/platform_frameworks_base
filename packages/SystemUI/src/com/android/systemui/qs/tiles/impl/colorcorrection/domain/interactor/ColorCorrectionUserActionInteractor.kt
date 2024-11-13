@@ -49,6 +49,7 @@ constructor(
                         Intent(Settings.ACTION_COLOR_CORRECTION_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

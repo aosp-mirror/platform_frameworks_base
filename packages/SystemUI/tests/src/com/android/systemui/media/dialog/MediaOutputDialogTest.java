@@ -54,14 +54,18 @@ import com.android.settingslib.flags.Flags;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestCaseExtKt;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.kosmos.Kosmos;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractor;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractorKosmosKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -83,6 +87,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
+    private final Kosmos mKosmos = SysuiTestCaseExtKt.testKosmos(this);
 
     // Mock
     private final MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
@@ -113,7 +119,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private MediaOutputDialog mMediaOutputDialog;
-    private MediaOutputController mMediaOutputController;
+    private MediaSwitchingController mMediaSwitchingController;
     private final List<String> mFeatures = new ArrayList<>();
 
     @Override
@@ -136,9 +142,12 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         when(mMediaSessionManager.getActiveSessionsForUser(any(),
                 Mockito.eq(userHandle))).thenReturn(
                 mMediaControllers);
+        VolumePanelGlobalStateInteractor volumePanelGlobalStateInteractor =
+                VolumePanelGlobalStateInteractorKosmosKt.getVolumePanelGlobalStateInteractor(
+                        mKosmos);
 
-        mMediaOutputController =
-                new MediaOutputController(
+        mMediaSwitchingController =
+                new MediaSwitchingController(
                         mContext,
                         TEST_PACKAGE,
                         mContext.getUser(),
@@ -153,9 +162,10 @@ public class MediaOutputDialogTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        volumePanelGlobalStateInteractor,
                         mUserTracker);
-        mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
-        mMediaOutputDialog = makeTestDialog(mMediaOutputController);
+        mMediaSwitchingController.mLocalMediaManager = mLocalMediaManager;
+        mMediaOutputDialog = makeTestDialog(mMediaSwitchingController);
         mMediaOutputDialog.show();
 
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice);
@@ -378,12 +388,15 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     public void getStopButtonText_notSupportsBroadcast_returnsDefaultText() {
         String stopText = mContext.getText(
                 R.string.media_output_dialog_button_stop_casting).toString();
-        MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
-        when(mockMediaOutputController.isBroadcastSupported()).thenReturn(false);
+        MediaSwitchingController mockMediaSwitchingController =
+                mock(MediaSwitchingController.class);
+        when(mockMediaSwitchingController.isBroadcastSupported()).thenReturn(false);
 
-        withTestDialog(mockMediaOutputController, testDialog -> {
-            assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
-        });
+        withTestDialog(
+                mockMediaSwitchingController,
+                testDialog -> {
+                    assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
+                });
     }
 
     @Test
@@ -391,28 +404,35 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     public void getStopButtonText_supportsBroadcast_returnsBroadcastText() {
         String stopText = mContext.getText(R.string.media_output_broadcast).toString();
         MediaDevice mMediaDevice = mock(MediaDevice.class);
-        MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
-        when(mockMediaOutputController.isBroadcastSupported()).thenReturn(true);
-        when(mockMediaOutputController.getCurrentConnectedMediaDevice()).thenReturn(mMediaDevice);
-        when(mockMediaOutputController.isBluetoothLeDevice(any())).thenReturn(true);
-        when(mockMediaOutputController.isPlaying()).thenReturn(true);
-        when(mockMediaOutputController.isBluetoothLeBroadcastEnabled()).thenReturn(false);
-        withTestDialog(mockMediaOutputController, testDialog -> {
-            assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
-        });
+        MediaSwitchingController mockMediaSwitchingController =
+                mock(MediaSwitchingController.class);
+        when(mockMediaSwitchingController.isBroadcastSupported()).thenReturn(true);
+        when(mockMediaSwitchingController.getCurrentConnectedMediaDevice())
+                .thenReturn(mMediaDevice);
+        when(mockMediaSwitchingController.isBluetoothLeDevice(any())).thenReturn(true);
+        when(mockMediaSwitchingController.isPlaying()).thenReturn(true);
+        when(mockMediaSwitchingController.isBluetoothLeBroadcastEnabled()).thenReturn(false);
+        withTestDialog(
+                mockMediaSwitchingController,
+                testDialog -> {
+                    assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
+                });
     }
 
     @Test
     public void onStopButtonClick_notPlaying_releaseSession() {
-        MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
-        when(mockMediaOutputController.isBroadcastSupported()).thenReturn(false);
-        when(mockMediaOutputController.getCurrentConnectedMediaDevice()).thenReturn(null);
-        when(mockMediaOutputController.isPlaying()).thenReturn(false);
-        withTestDialog(mockMediaOutputController, testDialog -> {
-            testDialog.onStopButtonClick();
-        });
+        MediaSwitchingController mockMediaSwitchingController =
+                mock(MediaSwitchingController.class);
+        when(mockMediaSwitchingController.isBroadcastSupported()).thenReturn(false);
+        when(mockMediaSwitchingController.getCurrentConnectedMediaDevice()).thenReturn(null);
+        when(mockMediaSwitchingController.isPlaying()).thenReturn(false);
+        withTestDialog(
+                mockMediaSwitchingController,
+                testDialog -> {
+                    testDialog.onStopButtonClick();
+                });
 
-        verify(mockMediaOutputController).releaseSession();
+        verify(mockMediaSwitchingController).releaseSession();
         verify(mDialogTransitionAnimator).disableAllCurrentDialogsExitAnimations();
     }
 
@@ -420,14 +440,14 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     // Check the visibility metric logging by creating a new MediaOutput dialog,
     // and verify if the calling times increases.
     public void onCreate_ShouldLogVisibility() {
-        withTestDialog(mMediaOutputController, testDialog -> {});
+        withTestDialog(mMediaSwitchingController, testDialog -> {});
 
         verify(mUiEventLogger, times(2))
                 .log(MediaOutputDialog.MediaOutputEvent.MEDIA_OUTPUT_DIALOG_SHOW);
     }
 
     @NonNull
-    private MediaOutputDialog makeTestDialog(MediaOutputController controller) {
+    private MediaOutputDialog makeTestDialog(MediaSwitchingController controller) {
         return new MediaOutputDialog(
                 mContext,
                 false,
@@ -438,7 +458,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
                 true);
     }
 
-    private void withTestDialog(MediaOutputController controller, Consumer<MediaOutputDialog> c) {
+    private void withTestDialog(
+            MediaSwitchingController controller, Consumer<MediaOutputDialog> c) {
         MediaOutputDialog testDialog = makeTestDialog(controller);
         testDialog.show();
         c.accept(testDialog);

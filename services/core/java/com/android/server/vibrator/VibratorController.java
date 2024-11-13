@@ -20,8 +20,11 @@ import android.annotation.Nullable;
 import android.hardware.vibrator.IVibrator;
 import android.os.Binder;
 import android.os.IVibratorStateListener;
+import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.Trace;
+import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -121,21 +124,26 @@ final class VibratorController {
 
     /** Reruns the query to the vibrator to load the {@link VibratorInfo}, if not yet successful. */
     public void reloadVibratorInfoIfNeeded() {
-        // Early check outside lock, for quick return.
-        if (mVibratorInfoLoadSuccessful) {
-            return;
-        }
-        synchronized (mLock) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#reloadVibratorInfoIfNeeded");
+        try {
+            // Early check outside lock, for quick return.
             if (mVibratorInfoLoadSuccessful) {
                 return;
             }
-            int vibratorId = mVibratorInfo.getId();
-            VibratorInfo.Builder vibratorInfoBuilder = new VibratorInfo.Builder(vibratorId);
-            mVibratorInfoLoadSuccessful = mNativeWrapper.getInfo(vibratorInfoBuilder);
-            mVibratorInfo = vibratorInfoBuilder.build();
-            if (!mVibratorInfoLoadSuccessful) {
-                Slog.e(TAG, "Failed retry of HAL getInfo for vibrator " + vibratorId);
+            synchronized (mLock) {
+                if (mVibratorInfoLoadSuccessful) {
+                    return;
+                }
+                int vibratorId = mVibratorInfo.getId();
+                VibratorInfo.Builder vibratorInfoBuilder = new VibratorInfo.Builder(vibratorId);
+                mVibratorInfoLoadSuccessful = mNativeWrapper.getInfo(vibratorInfoBuilder);
+                mVibratorInfo = vibratorInfoBuilder.build();
+                if (!mVibratorInfoLoadSuccessful) {
+                    Slog.e(TAG, "Failed retry of HAL getInfo for vibrator " + vibratorId);
+                }
             }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -191,8 +199,13 @@ final class VibratorController {
 
     /** Return {@code true} if the underlying vibrator is currently available, false otherwise. */
     public boolean isAvailable() {
-        synchronized (mLock) {
-            return mNativeWrapper.isAvailable();
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#isAvailable");
+        try {
+            synchronized (mLock) {
+                return mNativeWrapper.isAvailable();
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -202,12 +215,17 @@ final class VibratorController {
      * <p>This will affect the state of {@link #isUnderExternalControl()}.
      */
     public void setExternalControl(boolean externalControl) {
-        if (!mVibratorInfo.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
-            return;
-        }
-        synchronized (mLock) {
-            mIsUnderExternalControl = externalControl;
-            mNativeWrapper.setExternalControl(externalControl);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "setExternalControl(" + externalControl + ")");
+        try {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
+                return;
+            }
+            synchronized (mLock) {
+                mIsUnderExternalControl = externalControl;
+                mNativeWrapper.setExternalControl(externalControl);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -216,28 +234,38 @@ final class VibratorController {
      * if given {@code effect} is {@code null}.
      */
     public void updateAlwaysOn(int id, @Nullable PrebakedSegment prebaked) {
-        if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
-            return;
-        }
-        synchronized (mLock) {
-            if (prebaked == null) {
-                mNativeWrapper.alwaysOnDisable(id);
-            } else {
-                mNativeWrapper.alwaysOnEnable(id, prebaked.getEffectId(),
-                        prebaked.getEffectStrength());
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#updateAlwaysOn");
+        try {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
+                return;
             }
+            synchronized (mLock) {
+                if (prebaked == null) {
+                    mNativeWrapper.alwaysOnDisable(id);
+                } else {
+                    mNativeWrapper.alwaysOnEnable(id, prebaked.getEffectId(),
+                            prebaked.getEffectStrength());
+                }
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
     /** Set the vibration amplitude. This will NOT affect the state of {@link #isVibrating()}. */
     public void setAmplitude(float amplitude) {
-        synchronized (mLock) {
-            if (mVibratorInfo.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
-                mNativeWrapper.setAmplitude(amplitude);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#setAmplitude");
+        try {
+            synchronized (mLock) {
+                if (mVibratorInfo.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
+                    mNativeWrapper.setAmplitude(amplitude);
+                }
+                if (mIsVibrating) {
+                    mCurrentAmplitude = amplitude;
+                }
             }
-            if (mIsVibrating) {
-                mCurrentAmplitude = amplitude;
-            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -251,13 +279,49 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(long milliseconds, long vibrationId) {
-        synchronized (mLock) {
-            long duration = mNativeWrapper.on(milliseconds, vibrationId);
-            if (duration > 0) {
-                mCurrentAmplitude = -1;
-                notifyListenerOnVibrating(true);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on");
+        try {
+            synchronized (mLock) {
+                long duration = mNativeWrapper.on(milliseconds, vibrationId);
+                if (duration > 0) {
+                    mCurrentAmplitude = -1;
+                    notifyListenerOnVibrating(true);
+                }
+                return duration;
             }
-            return duration;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+        }
+    }
+
+    /**
+     * Plays vendor vibration effect, using {@code vibrationId} for completion callback to
+     * {@link OnVibrationCompleteListener}.
+     *
+     * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
+     */
+    public long on(VibrationEffect.VendorEffect vendorEffect, long vibrationId) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on (vendor)");
+        synchronized (mLock) {
+            Parcel vendorData = Parcel.obtain();
+            try {
+                vendorEffect.getVendorData().writeToParcel(vendorData, /* flags= */ 0);
+                vendorData.setDataPosition(0);
+                long duration = mNativeWrapper.performVendorEffect(vendorData,
+                        vendorEffect.getEffectStrength(), vendorEffect.getScale(),
+                        vendorEffect.getAdaptiveScale(), vibrationId);
+                if (duration > 0) {
+                    mCurrentAmplitude = -1;
+                    notifyListenerOnVibrating(true);
+                }
+                return duration;
+            } finally {
+                vendorData.recycle();
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
         }
     }
 
@@ -271,14 +335,19 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(PrebakedSegment prebaked, long vibrationId) {
-        synchronized (mLock) {
-            long duration = mNativeWrapper.perform(prebaked.getEffectId(),
-                    prebaked.getEffectStrength(), vibrationId);
-            if (duration > 0) {
-                mCurrentAmplitude = -1;
-                notifyListenerOnVibrating(true);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on (Prebaked)");
+        try {
+            synchronized (mLock) {
+                long duration = mNativeWrapper.perform(prebaked.getEffectId(),
+                        prebaked.getEffectStrength(), vibrationId);
+                if (duration > 0) {
+                    mCurrentAmplitude = -1;
+                    notifyListenerOnVibrating(true);
+                }
+                return duration;
             }
-            return duration;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -292,16 +361,21 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(PrimitiveSegment[] primitives, long vibrationId) {
-        if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
-            return 0;
-        }
-        synchronized (mLock) {
-            long duration = mNativeWrapper.compose(primitives, vibrationId);
-            if (duration > 0) {
-                mCurrentAmplitude = -1;
-                notifyListenerOnVibrating(true);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on (Primitive)");
+        try {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+                return 0;
             }
-            return duration;
+            synchronized (mLock) {
+                long duration = mNativeWrapper.compose(primitives, vibrationId);
+                if (duration > 0) {
+                    mCurrentAmplitude = -1;
+                    notifyListenerOnVibrating(true);
+                }
+                return duration;
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -314,17 +388,22 @@ final class VibratorController {
      * @return The duration of the effect playing, or 0 if unsupported.
      */
     public long on(RampSegment[] primitives, long vibrationId) {
-        if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
-            return 0;
-        }
-        synchronized (mLock) {
-            int braking = mVibratorInfo.getDefaultBraking();
-            long duration = mNativeWrapper.composePwle(primitives, braking, vibrationId);
-            if (duration > 0) {
-                mCurrentAmplitude = -1;
-                notifyListenerOnVibrating(true);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on (PWLE)");
+        try {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
+                return 0;
             }
-            return duration;
+            synchronized (mLock) {
+                int braking = mVibratorInfo.getDefaultBraking();
+                long duration = mNativeWrapper.composePwle(primitives, braking, vibrationId);
+                if (duration > 0) {
+                    mCurrentAmplitude = -1;
+                    notifyListenerOnVibrating(true);
+                }
+                return duration;
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -334,10 +413,15 @@ final class VibratorController {
      * <p>This will affect the state of {@link #isVibrating()}.
      */
     public void off() {
-        synchronized (mLock) {
-            mNativeWrapper.off();
-            mCurrentAmplitude = 0;
-            notifyListenerOnVibrating(false);
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#off");
+        try {
+            synchronized (mLock) {
+                mNativeWrapper.off();
+                mCurrentAmplitude = 0;
+                notifyListenerOnVibrating(false);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -427,6 +511,9 @@ final class VibratorController {
         private static native long performEffect(long nativePtr, long effect, long strength,
                 long vibrationId);
 
+        private static native long performVendorEffect(long nativePtr, Parcel vendorData,
+                long strength, float scale, float adaptiveScale, long vibrationId);
+
         private static native long performComposedEffect(long nativePtr, PrimitiveSegment[] effect,
                 long vibrationId);
 
@@ -480,6 +567,13 @@ final class VibratorController {
         /** Turns vibrator on to perform one of the supported effects. */
         public long perform(long effect, long strength, long vibrationId) {
             return performEffect(mNativePtr, effect, strength, vibrationId);
+        }
+
+        /** Turns vibrator on to perform a vendor-specific effect. */
+        public long performVendorEffect(Parcel vendorData, long strength, float scale,
+                float adaptiveScale, long vibrationId) {
+            return performVendorEffect(mNativePtr, vendorData, strength, scale, adaptiveScale,
+                    vibrationId);
         }
 
         /** Turns vibrator on to perform effect composed of give primitives effect. */

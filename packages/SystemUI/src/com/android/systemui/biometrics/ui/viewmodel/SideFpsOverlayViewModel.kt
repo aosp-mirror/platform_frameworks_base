@@ -28,7 +28,6 @@ import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
 import com.airbnb.lottie.model.KeyPath
-import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
@@ -152,21 +151,6 @@ constructor(
             ->
             val topLeft = Point(sensorLocation.left, sensorLocation.top)
 
-            if (!constraintBp()) {
-                if (sensorLocation.isSensorVerticalInDefaultOrientation) {
-                    if (displayRotation == DisplayRotation.ROTATION_0) {
-                        topLeft.x -= bounds!!.width()
-                    } else if (displayRotation == DisplayRotation.ROTATION_270) {
-                        topLeft.y -= bounds!!.height()
-                    }
-                } else {
-                    if (displayRotation == DisplayRotation.ROTATION_180) {
-                        topLeft.y -= bounds!!.height()
-                    } else if (displayRotation == DisplayRotation.ROTATION_270) {
-                        topLeft.x -= bounds!!.width()
-                    }
-                }
-            }
             defaultOverlayViewParams.apply {
                 x = topLeft.x
                 y = topLeft.y

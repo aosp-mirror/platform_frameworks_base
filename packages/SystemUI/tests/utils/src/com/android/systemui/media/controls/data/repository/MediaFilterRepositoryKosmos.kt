@@ -18,6 +18,7 @@ package com.android.systemui.media.controls.data.repository
 
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.media.controls.util.mediaSmartspaceLogger
 import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.util.time.systemClock
 
@@ -26,6 +27,7 @@ val Kosmos.mediaFilterRepository by
         MediaFilterRepository(
             applicationContext = applicationContext,
             systemClock = systemClock,
-            configurationController = configurationController
+            configurationController = configurationController,
+            smartspaceLogger = mediaSmartspaceLogger,
         )
     }

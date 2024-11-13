@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
 /**
  * Represent a logical device of type TV residing in Android system.
  */
-public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
+public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDeviceTv";
 
     // Whether ARC is available or not. "true" means that ARC is established between TV and
@@ -112,6 +112,18 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // discovered yet. The buffered commands are taken out and when they are ready to
     // handle.
     private final DelayedMessageBuffer mDelayedMessageBuffer = new DelayedMessageBuffer(this);
+
+    private boolean mWasActiveSourceSetToConnectedDevice = false;
+
+    @VisibleForTesting
+    protected boolean getWasActivePathSetToConnectedDevice() {
+        return mWasActiveSourceSetToConnectedDevice;
+    }
+
+    protected void setWasActivePathSetToConnectedDevice(
+            boolean wasActiveSourceSetToConnectedDevice) {
+        mWasActiveSourceSetToConnectedDevice = wasActiveSourceSetToConnectedDevice;
+    }
 
     // Defines the callback invoked when TV input framework is updated with input status.
     // We are interested in the notification for HDMI input addition event, in order to
@@ -393,6 +405,15 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    @Override
+    void setActivePath(int path) {
+        super.setActivePath(path);
+        if (path != Constants.INVALID_PHYSICAL_ADDRESS
+                && path != Constants.TV_PHYSICAL_ADDRESS) {
+            setWasActivePathSetToConnectedDevice(true);
+        }
+    }
+
     @ServiceThreadOnly
     void updateActiveInput(int path, boolean notifyInputChange) {
         assertRunOnServiceThread();
@@ -516,13 +537,16 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleStandby(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
-        // Ignore <Standby> from non-active source device.
-        if (getActiveSource().logicalAddress != message.getSource()) {
+        // If the TV has previously changed the active path, ignore <Standby> from non-active
+        // source.
+        if (getWasActivePathSetToConnectedDevice()
+                && getActiveSource().logicalAddress != message.getSource()) {
             Slog.d(TAG, "<Standby> was not sent by the current active source, ignoring."
                     + " Current active source has logical address "
                     + getActiveSource().logicalAddress);
             return Constants.HANDLED;
         }
+        setWasActivePathSetToConnectedDevice(false);
         return super.handleStandby(message);
     }
 
@@ -1127,6 +1151,13 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return Constants.ABORT_REFUSED;
         }
 
+        if (mArcEstablished) {
+            HdmiLogger.debug("ARC is already established.");
+            HdmiCecMessage command = HdmiCecMessageBuilder.buildReportArcInitiated(
+                getDeviceInfo().getLogicalAddress(), message.getSource());
+            mService.sendCecCommand(command);
+            return Constants.HANDLED;
+        }
         // In case where <Initiate Arc> is started by <Request ARC Initiation>, this message is
         // handled in RequestArcInitiationAction as well.
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
@@ -1210,11 +1241,15 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         boolean avrSystemAudioMode = HdmiUtils.parseCommandParamSystemAudioStatus(message);
         // Set System Audio Mode according to TV's settings.
         // Handle <System Audio Mode Status> here only when
-        // SystemAudioAutoInitiationAction timeout
+        // SystemAudioAutoInitiationAction timeout.
+        // If AVR reports SAM on and it is in standby, the action SystemAudioActionFromTv
+        // triggers a <SAM Request> that will wake-up the AVR.
         HdmiDeviceInfo avr = getAvrDeviceInfo();
         if (avr == null) {
             setSystemAudioMode(false);
-        } else if (avrSystemAudioMode != tvSystemAudioMode) {
+        } else if (avrSystemAudioMode != tvSystemAudioMode
+                    || (avrSystemAudioMode && avr.getDevicePowerStatus()
+                        == HdmiControlManager.POWER_STATUS_STANDBY)) {
             addAndStartAction(new SystemAudioActionFromTv(this, avr.getLogicalAddress(),
                     tvSystemAudioMode, null));
         } else {
@@ -1491,6 +1526,7 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeStandbyCompletedCallback(callback);
             return;
         }
+        setWasActivePathSetToConnectedDevice(false);
         boolean sendStandbyOnSleep =
                 mService.getHdmiCecConfig().getIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP)

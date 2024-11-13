@@ -23,6 +23,7 @@ import android.content.pm.ResolveInfo
 import android.os.PowerManager
 import android.os.Process
 import android.os.UserHandle
+import android.os.UserManager
 import android.testing.TestableContext
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -34,6 +35,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
@@ -108,6 +110,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock private lateinit var navModeController: NavigationModeController
     @Mock private lateinit var statusBarWinController: NotificationShadeWindowController
     @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var sysuiUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock
@@ -118,6 +121,9 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     private lateinit var unfoldTransitionProgressForwarder:
         Optional<UnfoldTransitionProgressForwarder>
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+
+    @Mock
+    private lateinit var keyboardTouchpadEduStatsInteractor: KeyboardTouchpadEduStatsInteractor
 
     @Before
     fun setUp() {
@@ -140,9 +146,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
         whenever(packageManager.resolveServiceAsUser(any(), anyInt(), anyInt()))
             .thenReturn(mock(ResolveInfo::class.java))
 
-        mSetFlagsRule.disableFlags(
-            com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
-        )
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
 
         subject = createOverviewProxyService(context)
     }
@@ -199,11 +203,12 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun connectToOverviewService_primaryUser_expectBindService() {
+    fun connectToOverviewService_primaryUserNoVisibleBgUsersSupported_expectBindService() {
         val mockitoSession =
             ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
         try {
             `when`(Process.myUserHandle()).thenReturn(UserHandle.SYSTEM)
+            `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(false)
             val spyContext = spy(context)
             val ops = createOverviewProxyService(spyContext)
             ops.startConnectionToCurrentUser()
@@ -214,11 +219,46 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun connectToOverviewService_nonPrimaryUser_expectNoBindService() {
+    fun connectToOverviewService_nonPrimaryUserNoVisibleBgUsersSupported_expectNoBindService() {
         val mockitoSession =
             ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
         try {
             `when`(Process.myUserHandle()).thenReturn(UserHandle.of(12345))
+            `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(false)
+            val spyContext = spy(context)
+            val ops = createOverviewProxyService(spyContext)
+            ops.startConnectionToCurrentUser()
+            verify(spyContext, times(0)).bindServiceAsUser(any(), any(), anyInt(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    @Test
+    fun connectToOverviewService_nonPrimaryBgUserVisibleBgUsersSupported_expectBindService() {
+        val mockitoSession =
+            ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
+        try {
+            `when`(Process.myUserHandle()).thenReturn(UserHandle.of(12345))
+            `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(true)
+            `when`(userManager.isUserForeground()).thenReturn(false)
+            val spyContext = spy(context)
+            val ops = createOverviewProxyService(spyContext)
+            ops.startConnectionToCurrentUser()
+            verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(), anyInt(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    @Test
+    fun connectToOverviewService_nonPrimaryFgUserVisibleBgUsersSupported_expectNoBindService() {
+        val mockitoSession =
+            ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
+        try {
+            `when`(Process.myUserHandle()).thenReturn(UserHandle.of(12345))
+            `when`(userManager.isVisibleBackgroundUsersSupported()).thenReturn(true)
+            `when`(userManager.isUserForeground()).thenReturn(true)
             val spyContext = spy(context)
             val ops = createOverviewProxyService(spyContext)
             ops.startConnectionToCurrentUser()
@@ -241,7 +281,9 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             statusBarWinController,
             sysUiState,
             mock(),
+            mock(),
             userTracker,
+            userManager,
             wakefulnessLifecycle,
             uiEventLogger,
             displayTracker,
@@ -250,7 +292,8 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             assistUtils,
             dumpManager,
             unfoldTransitionProgressForwarder,
-            broadcastDispatcher
+            broadcastDispatcher,
+            keyboardTouchpadEduStatsInteractor,
         )
     }
 }

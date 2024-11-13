@@ -5,14 +5,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
-import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.text.TextFlags;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -217,11 +215,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
         mSubMenuHoverHandler = new Handler();
 
-        mItemLayout = AppGlobals.getIntCoreSetting(
-                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
-                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0
-                ? com.android.internal.R.layout.cascading_menu_item_layout_material
-                : com.android.internal.R.layout.cascading_menu_item_layout;
+        mItemLayout = com.android.internal.R.layout.cascading_menu_item_layout_material;
     }
 
     @Override

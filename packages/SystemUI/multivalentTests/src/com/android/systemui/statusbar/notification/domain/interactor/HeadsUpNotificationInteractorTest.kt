@@ -18,11 +18,11 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
-import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -31,9 +31,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.notificationsKeyguardViewStateRepository
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
-import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -45,7 +43,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+@EnableSceneContainer
 class HeadsUpNotificationInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {

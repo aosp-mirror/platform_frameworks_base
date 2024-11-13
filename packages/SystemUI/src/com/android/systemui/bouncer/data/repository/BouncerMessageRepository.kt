@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.data.repository
 
+import android.hardware.biometrics.BiometricSourceType
 import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
@@ -26,7 +27,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 interface BouncerMessageRepository {
     val bouncerMessage: Flow<BouncerMessageModel>
 
-    fun setMessage(message: BouncerMessageModel)
+    fun setMessage(message: BouncerMessageModel, source: BiometricSourceType? = null)
+
+    /**
+     * Return the source of the current [bouncerMessage] if it was set from a biometric. Else, null.
+     */
+    fun getMessageSource(): BiometricSourceType?
 }
 
 @SysUISingleton
@@ -34,8 +40,14 @@ class BouncerMessageRepositoryImpl @Inject constructor() : BouncerMessageReposit
 
     private val _bouncerMessage = MutableStateFlow(BouncerMessageModel())
     override val bouncerMessage: Flow<BouncerMessageModel> = _bouncerMessage
+    private var messageSource: BiometricSourceType? = null
 
-    override fun setMessage(message: BouncerMessageModel) {
+    override fun setMessage(message: BouncerMessageModel, source: BiometricSourceType?) {
         _bouncerMessage.value = message
+        messageSource = source
+    }
+
+    override fun getMessageSource(): BiometricSourceType? {
+        return messageSource
     }
 }

@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"úr"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Veldu tæki sem &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; á að stjórna"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Veldu <xliff:g id="PROFILE_NAME">%1$s</xliff:g> til að setja upp"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"Þetta forrit fær heimild til að samstilla upplýsingar, t.d. nafn þess sem hringir, og fær aðgang að eftirfarandi heimildum í <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="summary_watch" msgid="8134580124808507407">"Þetta forrit fær heimild til að samstilla upplýsingar, t.d. nafn þess sem hringir, og fær aðgang að eftirfarandi heimildum í <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Leyfa &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; að stjórna &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"tæki"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"Þetta forrit fær aðgang að eftirfarandi heimildum í <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"Veita &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aðgang að þessum upplýsingum úr símanum þínum"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Leyfa &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; að streyma forritum símans?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s fær aðgang að öllu sem er sýnilegt eða spilað í símanum, þ.m.t. hljóði, myndum, aðgangsorðum og skilaboðum.&lt;br/&gt;&lt;br/&gt;%1$s getur streymt forritum þar til þú fjarlægir aðgang að þessari heimild."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Þjónustur á milli tækja"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> biður um heimild fyrir <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> til að streyma forritum á milli tækjanna þinna"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> biður um heimild fyrir <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> til að birta og streyma forritum á milli tækjanna þinna"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"Þetta forrit fær aðgang að eftirfarandi heimildum í <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"Leyfa &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; að streyma forritum í <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> í ;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> fær aðgang að öllu sem er sýnilegt eða spilað í <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>, þ.m.t. hljóði, myndum, greiðsluupplýsingum, aðgangsorðum og skilaboðum.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_1">%1$s</xliff:g> getur streymt forritum í <xliff:g id="DEVICE_NAME">%3$s</xliff:g> þar til þú fjarlægir aðgang að þessari heimild."</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"<xliff:g id="APP_NAME">%1$s</xliff:g> biður um heimild fyrir <xliff:g id="DEVICE_NAME">%2$s</xliff:g> til að birta og streyma forritum á milli tækjanna þinna"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Veita &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aðgang að þessum upplýsingum úr símanum þínum"</string>
+    <string name="title_computer" msgid="4782923323932440751">"Veita &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aðgang að þessum upplýsingum úr <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Þjónusta Google Play"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> sendir beiðni um aðgang að myndum, margmiðlunarefni og tilkynningum símans þíns fyrir hönd <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Leyfa &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; að framkvæma þessa aðgerð?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Leyfa &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; að streyma forritum og kerfiseiginleikum símans?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s fær aðgang að öllu sem er sýnilegt eða spilað í símanum, þ.m.t. hljóði, myndum, greiðsluupplýsingum, aðgangsorðum og skilaboðum.&lt;br/&gt;&lt;br/&gt;%1$s getur streymt forritum og kerfiseiginleikum þar til þú fjarlægir aðgang að þessari heimild."</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> biður um heimild fyrir <xliff:g id="DEVICE_NAME">%2$s</xliff:g> til að streyma forritum og öðrum kerfiseiginleikum í nálægum tækjum"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"<xliff:g id="APP_NAME">%1$s</xliff:g> biður um heimild fyrir <xliff:g id="DEVICE_NAME">%2$s</xliff:g> vegna aðgangs að myndum, margmiðlunarefni og tilkynningum í <xliff:g id="DEVICE_TYPE">%3$s</xliff:g>"</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"Leyfa &lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; að streyma forritum og kerfiseiginleikum í <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> í &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> fær aðgang að öllu sem er sýnilegt eða spilað í <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>, þ.m.t. hljóði, myndum, greiðsluupplýsingum, aðgangsorðum og skilaboðum.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_1">%1$s</xliff:g> getur streymt forritum og kerfiseiginleikum í <xliff:g id="DEVICE_NAME">%3$s</xliff:g> þar til þú fjarlægir aðgang að þessari heimild."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"<xliff:g id="APP_NAME">%1$s</xliff:g> biður um heimild fyrir <xliff:g id="DEVICE_NAME">%2$s</xliff:g> til að streyma forritum og öðrum kerfiseiginleikum á milli tækjanna þinna"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"tæki"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Þetta forrit mun geta samstillt upplýsingar, t.d. nafn þess sem hringir, á milli símans og valins tækis"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Leyfa"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Breyta margmiðlunarúttaki"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Myndir og efni"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Tilkynningar"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"Forrit"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streymi"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"Hringja og stjórna símtölum"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"Lesa og skrifa símtalaskrá símans"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"Senda og skoða SMS-skilaboð"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Finna, tengjast og áætla staðsetningu nálægra tækja"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Lesa allar tilkynningar, þar á meðal upplýsingar á borð við tengiliði, skilaboð og myndir"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• Lesa allar tilkynningar, þ.m.t. upplýsingar á borð við tengiliði, skilaboð og myndir&lt;br/&gt;• Senda tilkynningar&lt;br/&gt;&lt;br/&gt;Þú getur stjórnað getu forritsins til að lesa og senda tilkynningar hvenær sem er í „Stillingar &gt; Tilkynningar“."</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streymdu forritum símans"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Streymdu forritum og öðrum kerfiseiginleikum úr símanum"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Fá aðgang að lista yfir tæki sem eru í boði og stjórna hver þeirra geta streymt og sent út hljóð og vídeó úr öðrum forritum"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"símanum"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"spjaldtölvunni"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"sjónvarp"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"tæki"</string>
 </resources>

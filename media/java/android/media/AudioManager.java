@@ -56,6 +56,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes.AttributeSystemUsage;
+import android.media.AudioDeviceInfo;
 import android.media.CallbackUtil.ListenerInfo;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
@@ -84,6 +85,7 @@ import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1026,7 +1028,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
-     * unless the app has been granted Do Not Disturb Access.
+     * unless the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      *
      * @param streamType The stream type to adjust. One of {@link #STREAM_VOICE_CALL},
@@ -1378,7 +1380,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
-     * unless the app has been granted Do Not Disturb Access.
+     * unless the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * @param ringerMode The ringer mode, one of {@link #RINGER_MODE_NORMAL},
      *            {@link #RINGER_MODE_SILENT}, or {@link #RINGER_MODE_VIBRATE}.
@@ -1402,7 +1404,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * <p>From N onward, volume adjustments that would toggle Do Not Disturb are not allowed unless
-     * the app has been granted Do Not Disturb Access.
+     * the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * @param streamType The stream whose volume index should be set.
      * @param index The volume index to set. See
@@ -4069,8 +4071,10 @@ public class AudioManager {
     private boolean delegateSoundEffectToVdm(@SystemSoundEffect int effectType) {
         if (hasCustomPolicyVirtualDeviceContext()) {
             VirtualDeviceManager vdm = getVirtualDeviceManager();
-            vdm.playSoundEffect(mOriginalContextDeviceId, effectType);
-            return true;
+            if (vdm != null) {
+                vdm.playSoundEffect(mOriginalContextDeviceId, effectType);
+                return true;
+            }
         }
         return false;
     }
@@ -4281,7 +4285,7 @@ public class AudioManager {
                                     final OnAudioFocusChangeListener listener =
                                             fri.mRequest.getOnAudioFocusChangeListener();
                                     if (listener != null) {
-                                        Log.d(TAG, "dispatching onAudioFocusChange("
+                                        Slog.i(TAG, "dispatching onAudioFocusChange("
                                                 + msg.arg1 + ") to " + msg.obj);
                                         listener.onAudioFocusChange(msg.arg1);
                                     }
@@ -4564,8 +4568,8 @@ public class AudioManager {
      *     when the request is flagged with {@link #AUDIOFOCUS_FLAG_DELAY_OK}.
      * @param requestAttributes non null {@link AudioAttributes} describing the main reason for
      *     requesting audio focus.
-     * @param durationHint use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
-     *      is temporary, and focus will be abandonned shortly. Examples of transient requests are
+     * @param focusReqType use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
+     *      is temporary, and focus will be abandoned shortly. Examples of transient requests are
      *      for the playback of driving directions, or notifications sounds.
      *      Use {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} to indicate also that it's ok for
      *      the previous focus owner to keep playing if it ducks its audio output.
@@ -4590,13 +4594,13 @@ public class AudioManager {
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public int requestAudioFocus(OnAudioFocusChangeListener l,
             @NonNull AudioAttributes requestAttributes,
-            int durationHint,
+            int focusReqType,
             int flags) throws IllegalArgumentException {
         if (flags != (flags & AUDIOFOCUS_FLAGS_APPS)) {
             throw new IllegalArgumentException("Invalid flags 0x"
                     + Integer.toHexString(flags).toUpperCase());
         }
-        return requestAudioFocus(l, requestAttributes, durationHint,
+        return requestAudioFocus(l, requestAttributes, focusReqType,
                 flags & AUDIOFOCUS_FLAGS_APPS,
                 null /* no AudioPolicy*/);
     }
@@ -4611,7 +4615,7 @@ public class AudioManager {
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
      * @param requestAttributes non null {@link AudioAttributes} describing the main reason for
      *     requesting audio focus.
-     * @param durationHint see the description of the same parameter in
+     * @param focusReqType see the description of the same parameter in
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
      * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK},
      *     {@link #AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS}, and {@link #AUDIOFOCUS_FLAG_LOCK}.
@@ -4633,14 +4637,14 @@ public class AudioManager {
     })
     public int requestAudioFocus(OnAudioFocusChangeListener l,
             @NonNull AudioAttributes requestAttributes,
-            int durationHint,
+            int focusReqType,
             int flags,
             AudioPolicy ap) throws IllegalArgumentException {
         // parameter checking
         if (requestAttributes == null) {
             throw new IllegalArgumentException("Illegal null AudioAttributes argument");
         }
-        if (!AudioFocusRequest.isValidFocusGain(durationHint)) {
+        if (!AudioFocusRequest.isValidFocusGain(focusReqType)) {
             throw new IllegalArgumentException("Invalid duration hint");
         }
         if (flags != (flags & AUDIOFOCUS_FLAGS_SYSTEM)) {
@@ -4661,7 +4665,7 @@ public class AudioManager {
                     "Illegal null audio policy when locking audio focus");
         }
 
-        final AudioFocusRequest afr = new AudioFocusRequest.Builder(durationHint)
+        final AudioFocusRequest afr = new AudioFocusRequest.Builder(focusReqType)
                 .setOnAudioFocusChangeListenerInt(l, null /* no Handler for this legacy API */)
                 .setAudioAttributes(requestAttributes)
                 .setAcceptsDelayedFocusGain((flags & AUDIOFOCUS_FLAG_DELAY_OK)
@@ -5022,16 +5026,16 @@ public class AudioManager {
      * to identify this use case.
      * @param streamType use STREAM_RING for focus requests when ringing, VOICE_CALL for
      *    the establishment of the call
-     * @param durationHint the type of focus request. AUDIOFOCUS_GAIN_TRANSIENT is recommended so
+     * @param focusReqType the type of focus request. AUDIOFOCUS_GAIN_TRANSIENT is recommended so
      *    media applications resume after a call
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void requestAudioFocusForCall(int streamType, int durationHint) {
+    public void requestAudioFocusForCall(int streamType, int focusReqType) {
         final IAudioService service = getService();
         try {
             service.requestAudioFocus(new AudioAttributes.Builder()
                         .setInternalLegacyStreamType(streamType).build(),
-                    durationHint, mICallBack, null,
+                    focusReqType, mICallBack, null,
                     AudioSystem.IN_VOICE_COMM_FOCUS_ID,
                     getContext().getOpPackageName(),
                     getContext().getAttributionTag(),
@@ -6314,7 +6318,14 @@ public class AudioManager {
     /**
      * @hide
      * Get the audio devices that would be used for the routing of the given audio attributes.
-     * @param attributes the {@link AudioAttributes} for which the routing is being queried
+     * @param attributes the {@link AudioAttributes} for which the routing is being queried.
+     *   For queries about output devices (playback use cases), a valid usage must be specified in
+     *   the audio attributes via AudioAttributes.Builder.setUsage(). The capture preset MUST NOT
+     *   be changed from default.
+     *   For queries about input devices (capture use case), a valid capture preset MUST be
+     *   specified in the audio attributes via AudioAttributes.Builder.setCapturePreset(). If a
+     *   capture preset is present, then this has precedence over any usage or content type also
+     *   present in the audio attrirutes.
      * @return an empty list if there was an issue with the request, a list of audio devices
      *   otherwise (typically one device, except for duplicated paths).
      */
@@ -6981,6 +6992,27 @@ public class AudioManager {
     }
 
     /**
+     * Test method for enabling/disabling the volume controller long press timeout for checking
+     * whether two consecutive volume adjustments should be treated as a volume long press.
+     *
+     * <p>Used only for testing
+     *
+     * @param enable true for enabling, otherwise will be disabled (test mode)
+     *
+     * @hide
+     **/
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setVolumeControllerLongPressTimeoutEnabled(boolean enable) {
+        try {
+            getService().setVolumeControllerLongPressTimeoutEnabled(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Only useful for volume controllers.
      * @hide
      */
@@ -7427,6 +7459,21 @@ public class AudioManager {
     public void setVolumePolicy(VolumePolicy policy) {
         try {
             getService().setVolumePolicy(policy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Queries the volume policy
+     * @return the volume policy currently in use
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public @NonNull VolumePolicy getVolumePolicy() {
+        try {
+            return getService().getVolumePolicy();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8118,7 +8165,7 @@ public class AudioManager {
      * @hide
      */
     public static MicrophoneInfo microphoneInfoFromAudioDeviceInfo(AudioDeviceInfo deviceInfo) {
-        int deviceType = deviceInfo.getType();
+        @AudioDeviceInfo.AudioDeviceType int deviceType = deviceInfo.getType();
         int micLocation = (deviceType == AudioDeviceInfo.TYPE_BUILTIN_MIC
                 || deviceType == AudioDeviceInfo.TYPE_TELEPHONY) ? MicrophoneInfo.LOCATION_MAINBODY
                 : deviceType == AudioDeviceInfo.TYPE_UNKNOWN ? MicrophoneInfo.LOCATION_UNKNOWN
@@ -8811,7 +8858,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
-     * unless the app has been granted Do Not Disturb Access.
+     * unless the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * <p>This API checks if the caller has the necessary permissions based on the provided
      * component name, uid, and pid values.
@@ -8852,7 +8899,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * <p>From N onward, volume adjustments that would toggle Do Not Disturb are not allowed unless
-     * the app has been granted Do Not Disturb Access.
+     * the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * <p>This API checks if the caller has the necessary permissions based on the provided
      * component name, uid, and pid values.
@@ -10107,6 +10154,24 @@ public class AudioManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * @hide
+     * Blocks until permission updates have propagated through the audio system.
+     * Only useful in tests, where adoptShellPermissions can change the permission state of
+     * an app without the app being killed.
+     */
+    @TestApi
+    @SuppressWarnings("UnflaggedApi") // @TestApi without associated feature.
+    public void permissionUpdateBarrier() {
+        final IAudioService service = getService();
+        try {
+            service.permissionUpdateBarrier();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 
     /**
      * @hide

@@ -33,9 +33,10 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
+import android.view.WindowInsets;
 import android.window.InputTransferToken;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.input.InputManagerService;
 
 /**
@@ -180,21 +181,29 @@ class EmbeddedWindowController {
         return true;
     }
 
-    boolean transferToHost(@NonNull InputTransferToken embeddedWindowToken,
+    boolean transferToHost(int callingUid, @NonNull InputTransferToken embeddedWindowToken,
             @NonNull WindowState transferToHostWindowState) {
         EmbeddedWindow ew = getByInputTransferToken(embeddedWindowToken);
         if (!isValidTouchGestureParams(transferToHostWindowState, ew)) {
             return false;
         }
+        if (callingUid != ew.mOwnerUid) {
+            throw new SecurityException(
+                    "Transfer request must originate from owner of transferFromToken");
+        }
         return mInputManagerService.transferTouchGesture(ew.getInputChannelToken(),
                 transferToHostWindowState.mInputChannelToken);
     }
 
-    boolean transferToEmbedded(WindowState hostWindowState,
+    boolean transferToEmbedded(int callingUid, WindowState hostWindowState,
             @NonNull InputTransferToken transferToToken) {
         final EmbeddedWindowController.EmbeddedWindow ew = getByInputTransferToken(transferToToken);
         if (!isValidTouchGestureParams(hostWindowState, ew)) {
             return false;
+        }
+        if (callingUid != hostWindowState.mOwnerUid) {
+            throw new SecurityException(
+                    "Transfer request must originate from owner of transferFromToken");
         }
         return mInputManagerService.transferTouchGesture(hostWindowState.mInputChannelToken,
                 ew.getInputChannelToken());
@@ -221,6 +230,10 @@ class EmbeddedWindowController {
         private final InputTransferToken mInputTransferToken;
 
         private boolean mIsFocusable;
+
+        // The EmbeddedWindow can only request the IME. All other insets types are requested by
+        // the host window.
+        private @WindowInsets.Type.InsetsType int mRequestedVisibleTypes = 0;
 
         /**
          * @param session  calling session to check ownership of the window
@@ -311,6 +324,27 @@ class EmbeddedWindowController {
         }
 
         @Override
+        public boolean isRequestedVisible(@WindowInsets.Type.InsetsType int types) {
+            return (mRequestedVisibleTypes & types) != 0;
+        }
+
+        @Override
+        public @WindowInsets.Type.InsetsType int getRequestedVisibleTypes() {
+            return mRequestedVisibleTypes;
+        }
+
+        /**
+         * Only the IME can be requested from the EmbeddedWindow.
+         * @param requestedVisibleTypes other types than {@link WindowInsets.Type.IME} are
+         *                              not sent to system server via WindowlessWindowManager.
+         */
+        void setRequestedVisibleTypes(@WindowInsets.Type.InsetsType int requestedVisibleTypes) {
+            if (mRequestedVisibleTypes != requestedVisibleTypes) {
+                mRequestedVisibleTypes = requestedVisibleTypes;
+            }
+        }
+
+        @Override
         public int getPid() {
             return mOwnerPid;
         }
@@ -375,6 +409,11 @@ class EmbeddedWindowController {
 
         @Override
         public boolean shouldControlIme() {
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // EmbeddedWindow should never be able to control the IME directly, but only the
+                // RemoteInsetsControlTarget.
+                return false;
+            }
             return mHostWindowState != null;
         }
 
@@ -403,7 +442,7 @@ class EmbeddedWindowController {
 
         @Override
         public void dumpProto(ProtoOutputStream proto, long fieldId,
-                              @WindowTraceLogLevel int logLevel) {
+                              @WindowTracingLogLevel int logLevel) {
             final long token = proto.start(fieldId);
 
             final long token2 = proto.start(IDENTIFIER);

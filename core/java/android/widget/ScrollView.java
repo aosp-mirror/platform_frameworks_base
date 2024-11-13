@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.enableTouchScrollFeedback;
 import static android.view.flags.Flags.viewVelocityApi;
 
 import android.annotation.ColorInt;
@@ -846,6 +847,8 @@ public class ScrollView extends FrameLayout {
                         deltaY += mTouchSlop;
                     }
                 }
+                boolean hitTopLimit = false;
+                boolean hitBottomLimit = false;
                 if (mIsBeingDragged) {
                     // Scroll to follow the motion event
                     mLastMotionY = y - mScrollOffset[1];
@@ -889,17 +892,33 @@ public class ScrollView extends FrameLayout {
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
+                            hitTopLimit = true;
                         } else if (pulledToY > range) {
                             mEdgeGlowBottom.onPullDistance((float) deltaY / getHeight(),
                                     1.f - displacement);
                             if (!mEdgeGlowTop.isFinished()) {
                                 mEdgeGlowTop.onRelease();
                             }
+                            hitBottomLimit = true;
                         }
                         if (shouldDisplayEdgeEffects()
                                 && (!mEdgeGlowTop.isFinished() || !mEdgeGlowBottom.isFinished())) {
                             postInvalidateOnAnimation();
                         }
+                    }
+                }
+
+                // TODO: b/360198915 - Add unit tests.
+                if (enableTouchScrollFeedback()) {
+                    if (hitTopLimit || hitBottomLimit) {
+                        initHapticScrollFeedbackProviderIfNotExists();
+                        mHapticScrollFeedbackProvider.onScrollLimit(vtev.getDeviceId(),
+                                vtev.getSource(), MotionEvent.AXIS_Y,
+                                /* isStart= */ hitTopLimit);
+                    } else if (Math.abs(deltaY) != 0) {
+                        initHapticScrollFeedbackProviderIfNotExists();
+                        mHapticScrollFeedbackProvider.onScrollProgress(vtev.getDeviceId(),
+                                vtev.getSource(), MotionEvent.AXIS_Y, deltaY);
                     }
                 }
                 break;

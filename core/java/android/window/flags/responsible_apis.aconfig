@@ -56,3 +56,26 @@ flag {
     description: "Improved metrics."
     bug: "339245692"
 }
+
+flag {
+    name: "bal_additional_start_modes"
+    namespace: "responsible_apis"
+    description: "Introduce additional start modes."
+    bug: "352182359"
+}
+
+flag {
+    name: "bal_send_intent_with_options"
+    namespace: "responsible_apis"
+    description: "Add options parameter to IntentSender.sendIntent."
+    bug: "339720406"
+}
+
+flag {
+    name: "bal_reduce_grace_period"
+    namespace: "responsible_apis"
+    description: "Changes to reduce or ideally remove the grace period exemption."
+    bug: "362575865"
+}
+
+

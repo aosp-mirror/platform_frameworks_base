@@ -66,7 +66,8 @@ public class EditTextActivity extends Activity
                     @Override
                     public WindowInsets onApplyWindowInsets(@NonNull View view,
                             @NonNull WindowInsets windowInsets) {
-                        Insets insets = windowInsets.getInsets(WindowInsets.Type.systemBars());
+                        Insets insets = windowInsets.getInsets(
+                                WindowInsets.Type.systemBars() | WindowInsets.Type.ime());
                         ViewGroup.MarginLayoutParams layoutParams =
                                 (ViewGroup.MarginLayoutParams) view.getLayoutParams();
                         layoutParams.leftMargin = insets.left;

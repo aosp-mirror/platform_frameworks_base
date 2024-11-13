@@ -52,28 +52,17 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeViewStateProvider;
-import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository;
-import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.phone.ui.TintedIconManager;
@@ -82,13 +71,10 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.statusbar.ui.viewmodel.KeyguardStatusBarViewModel;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
-
-import kotlinx.coroutines.test.TestScope;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -150,11 +136,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private KeyguardStatusBarViewController mController;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private final FakeExecutor mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
-    private final TestScope mTestScope = TestScopeProvider.getTestScope();
-    private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
-    private KeyguardInteractor mKeyguardInteractor;
-    private KeyguardStatusBarViewModel mViewModel;
 
     @Before
     public void setup() throws Exception {
@@ -163,28 +145,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
-        KeyguardTransitionInteractor keyguardTransitionInteractor =
-                mKosmos.getKeyguardTransitionInteractor();
-        mKeyguardInteractor = new KeyguardInteractor(
-                mKeyguardRepository,
-                mCommandQueue,
-                PowerInteractorFactory.create().getPowerInteractor(),
-                new FakeKeyguardBouncerRepository(),
-                new ConfigurationInteractor(new FakeConfigurationRepository()),
-                new FakeShadeRepository(),
-                keyguardTransitionInteractor,
-                () -> mKosmos.getSceneInteractor(),
-                () -> mKosmos.getFromGoneTransitionInteractor(),
-                () -> mKosmos.getFromLockscreenTransitionInteractor(),
-                () -> mKosmos.getSharedNotificationContainerInteractor(),
-                mTestScope);
-        mViewModel =
-                new KeyguardStatusBarViewModel(
-                        mTestScope.getBackgroundScope(),
-                        mKosmos.getHeadsUpNotificationInteractor(),
-                        mKeyguardInteractor,
-                        new KeyguardStatusBarInteractor(new FakeKeyguardStatusBarRepository()),
-                        mBatteryController);
 
         allowTestableLooperAsMainThread();
         TestableLooper.get(this).runWithLooper(() -> {
@@ -212,7 +172,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mKeyguardUpdateMonitor,
-                mViewModel,
+                mKosmos.getKeyguardStatusBarViewModel(),
                 mBiometricUnlockController,
                 mStatusBarStateController,
                 mStatusBarContentInsetsProvider,
@@ -356,6 +316,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void setBatteryListening_true_callbackAdded() {
         mController.setBatteryListening(true);
 
@@ -363,6 +324,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void setBatteryListening_false_callbackRemoved() {
         // First set to true so that we know setting to false is a change in state.
         mController.setBatteryListening(true);
@@ -373,6 +335,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void setBatteryListening_trueThenTrue_callbackAddedOnce() {
         mController.setBatteryListening(true);
         mController.setBatteryListening(true);
@@ -412,6 +375,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_alphaAndVisibilityGiven_viewUpdated() {
         // Verify the initial values so we know the method triggers changes.
         assertThat(mKeyguardStatusBarView.getAlpha()).isEqualTo(1f);
@@ -426,6 +390,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_paramVisibleButIsDisabled_viewIsInvisible() {
         mController.onViewAttached();
         setDisableSystemIcons(true);
@@ -437,6 +402,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_notKeyguardState_nothingUpdated() {
         mController.onViewAttached();
         updateStateToNotKeyguard();
@@ -449,6 +415,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_bypassEnabledAndShouldListenForFace_viewHidden() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -464,6 +431,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_bypassNotEnabled_viewShown() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -478,6 +446,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_shouldNotListenForFace_viewShown() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -492,6 +461,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_panelExpandedHeightZero_viewHidden() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -504,6 +474,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_dragProgressOne_viewHidden() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -516,6 +487,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_disableSystemInfoFalse_viewShown() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -527,6 +499,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_disableSystemInfoTrue_viewHidden() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -538,6 +511,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_disableSystemIconsFalse_viewShown() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -549,6 +523,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_disableSystemIconsTrue_viewHidden() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -648,6 +623,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void setAlpha_explicitAlpha_setsExplicitAlpha() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -658,6 +634,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void setAlpha_explicitAlpha_thenMinusOneAlpha_setsAlphaBasedOnDefaultCriteria() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -672,6 +649,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     // TODO(b/195442899): Add more tests for #updateViewState once CLs are finalized.
 
     @Test
+    @DisableSceneContainer
     public void updateForHeadsUp_headsUpShouldBeVisible_viewHidden() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -684,6 +662,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateForHeadsUp_headsUpShouldNotBeVisible_viewShown() {
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -773,6 +752,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void animateKeyguardStatusBarIn_isDisabled_viewStillHidden() {
         mController.onViewAttached();
         updateStateToKeyguard();

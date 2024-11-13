@@ -22,6 +22,9 @@ import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PEN
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
+import static com.android.systemui.Flags.FLAG_QS_QUICK_REBIND_ACTIVE_TILES;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -50,6 +53,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -72,6 +76,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import com.google.common.truth.Truth;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -92,7 +98,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
-        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX,
+                FLAG_QS_QUICK_REBIND_ACTIVE_TILES);
     }
 
     private final PackageManagerAdapter mMockPackageManagerAdapter =
@@ -151,7 +158,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mUser,
                 mActivityManager,
                 mDeviceIdleController,
-                mExecutor);
+                mExecutor,
+                mClock);
     }
 
     @After
@@ -166,12 +174,12 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mStateManager.handleDestroy();
     }
 
-    private void setPackageEnabled(boolean enabled) throws Exception {
+    private void setPackageEnabledAndActive(boolean enabled, boolean active) throws Exception {
         ServiceInfo defaultServiceInfo = null;
         if (enabled) {
             defaultServiceInfo = new ServiceInfo();
             defaultServiceInfo.metaData = new Bundle();
-            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_ACTIVE_TILE, true);
+            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_ACTIVE_TILE, active);
             defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_TOGGLEABLE_TILE, true);
         }
         when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), anyInt()))
@@ -181,6 +189,44 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         PackageInfo defaultPackageInfo = new PackageInfo();
         when(mMockPackageManagerAdapter.getPackageInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(defaultPackageInfo);
+    }
+
+    private void setPackageEnabled(boolean enabled) throws Exception {
+        setPackageEnabledAndActive(enabled, true);
+    }
+
+    private void setPackageInstalledForUser(
+            boolean installed,
+            boolean active,
+            boolean toggleable,
+            int user
+    ) throws Exception {
+        ServiceInfo defaultServiceInfo = null;
+        if (installed) {
+            defaultServiceInfo = new ServiceInfo();
+            defaultServiceInfo.metaData = new Bundle();
+            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_ACTIVE_TILE, active);
+            defaultServiceInfo.metaData
+                    .putBoolean(TileService.META_DATA_TOGGLEABLE_TILE, toggleable);
+            when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), eq(user)))
+                    .thenReturn(defaultServiceInfo);
+            if (user == 0) {
+                when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt()))
+                        .thenReturn(defaultServiceInfo);
+            }
+            PackageInfo defaultPackageInfo = new PackageInfo();
+            when(mMockPackageManagerAdapter.getPackageInfoAsUser(anyString(), anyInt(), eq(user)))
+                    .thenReturn(defaultPackageInfo);
+        } else {
+            when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), eq(user)))
+                    .thenReturn(null);
+            if (user == 0) {
+                when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt()))
+                        .thenThrow(new PackageManager.NameNotFoundException());
+            }
+            when(mMockPackageManagerAdapter.getPackageInfoAsUser(anyString(), anyInt(), eq(user)))
+                    .thenThrow(new PackageManager.NameNotFoundException());
+        }
     }
 
     private void verifyBind(int times) {
@@ -359,18 +405,125 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testKillProcess() throws Exception {
+    public void testKillProcessWhenTileServiceIsNotActive() throws Exception {
+        setPackageEnabledAndActive(true, false);
         mStateManager.onStartListening();
         mStateManager.executeSetBindService(true);
         mExecutor.runAllReady();
+        verifyBind(1);
+        verify(mMockTileService, times(1)).onStartListening();
+
         mStateManager.onBindingDied(mTileServiceComponentName);
         mExecutor.runAllReady();
-        mClock.advanceTime(5000);
+        mClock.advanceTime(1000);
+        mExecutor.runAllReady();
+
+        // still 4 seconds left because non active tile service rebind time is 5 seconds
+        Truth.assertThat(mContext.isBound(mTileServiceComponentName)).isFalse();
+
+        mClock.advanceTime(4000); // 5 seconds delay for nonActive service rebinding
+        mExecutor.runAllReady();
+        verifyBind(2);
+        verify(mMockTileService, times(2)).onStartListening();
+    }
+
+    @EnableFlags(FLAG_QS_QUICK_REBIND_ACTIVE_TILES)
+    @Test
+    public void testKillProcessWhenTileServiceIsActive_withRebindFlagOn() throws Exception {
+        mStateManager.onStartListening();
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+        verifyBind(1);
+        verify(mMockTileService, times(1)).onStartListening();
+
+        mStateManager.onBindingDied(mTileServiceComponentName);
+        mExecutor.runAllReady();
+        mClock.advanceTime(1000);
         mExecutor.runAllReady();
 
         // Two calls: one for the first bind, one for the restart.
         verifyBind(2);
         verify(mMockTileService, times(2)).onStartListening();
+    }
+
+    @DisableFlags(FLAG_QS_QUICK_REBIND_ACTIVE_TILES)
+    @Test
+    public void testKillProcessWhenTileServiceIsActive_withRebindFlagOff() throws Exception {
+        mStateManager.onStartListening();
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+        verifyBind(1);
+        verify(mMockTileService, times(1)).onStartListening();
+
+        mStateManager.onBindingDied(mTileServiceComponentName);
+        mExecutor.runAllReady();
+        mClock.advanceTime(1000);
+        mExecutor.runAllReady();
+        verifyBind(0); // the rebind happens after 4 more seconds
+
+        mClock.advanceTime(4000);
+        mExecutor.runAllReady();
+        verifyBind(1);
+    }
+
+    @EnableFlags(FLAG_QS_QUICK_REBIND_ACTIVE_TILES)
+    @Test
+    public void testKillProcessWhenTileServiceIsActiveTwice_withRebindFlagOn_delaysSecondRebind()
+            throws Exception {
+        mStateManager.onStartListening();
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+        verifyBind(1);
+        verify(mMockTileService, times(1)).onStartListening();
+
+        mStateManager.onBindingDied(mTileServiceComponentName);
+        mExecutor.runAllReady();
+        mClock.advanceTime(1000);
+        mExecutor.runAllReady();
+
+        // Two calls: one for the first bind, one for the restart.
+        verifyBind(2);
+        verify(mMockTileService, times(2)).onStartListening();
+
+        mStateManager.onBindingDied(mTileServiceComponentName);
+        mExecutor.runAllReady();
+        mClock.advanceTime(1000);
+        mExecutor.runAllReady();
+        // because active tile will take 5 seconds to bind the second time, not 1
+        verifyBind(0);
+
+        mClock.advanceTime(4000);
+        mExecutor.runAllReady();
+        verifyBind(1);
+    }
+
+    @DisableFlags(FLAG_QS_QUICK_REBIND_ACTIVE_TILES)
+    @Test
+    public void testKillProcessWhenTileServiceIsActiveTwice_withRebindFlagOff_rebindsFromFirstKill()
+            throws Exception {
+        mStateManager.onStartListening();
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+        verifyBind(1);
+        verify(mMockTileService, times(1)).onStartListening();
+
+        mStateManager.onBindingDied(mTileServiceComponentName); // rebind scheduled for 5 seconds
+        mExecutor.runAllReady();
+        mClock.advanceTime(1000);
+        mExecutor.runAllReady();
+
+        verifyBind(0); // it would bind in 4 more seconds
+
+        mStateManager.onBindingDied(mTileServiceComponentName); // this does not affect the rebind
+        mExecutor.runAllReady();
+        mClock.advanceTime(1000);
+        mExecutor.runAllReady();
+
+        verifyBind(0); // only 2 seconds passed from first kill
+
+        mClock.advanceTime(3000);
+        mExecutor.runAllReady();
+        verifyBind(1); // the rebind scheduled 5 seconds from the first kill should now happen
     }
 
     @Test
@@ -473,7 +626,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mUser,
                 mActivityManager,
                 mDeviceIdleController,
-                mExecutor);
+                mExecutor,
+                mClock);
 
         manager.executeSetBindService(true);
         mExecutor.runAllReady();
@@ -496,7 +650,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mUser,
                 mActivityManager,
                 mDeviceIdleController,
-                mExecutor);
+                mExecutor,
+                mClock);
 
         manager.executeSetBindService(true);
         mExecutor.runAllReady();
@@ -519,7 +674,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mUser,
                 mActivityManager,
                 mDeviceIdleController,
-                mExecutor);
+                mExecutor,
+                mClock);
 
         manager.executeSetBindService(true);
         mExecutor.runAllReady();
@@ -544,7 +700,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mUser,
                 mActivityManager,
                 mDeviceIdleController,
-                mExecutor);
+                mExecutor,
+                mClock);
 
         manager.executeSetBindService(true);
         mExecutor.runAllReady();
@@ -555,6 +712,105 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         captor.getValue().onNullBinding(mTileServiceComponentName);
         mExecutor.runAllReady();
         verify(mockContext).unbindService(captor.getValue());
+    }
+
+    @Test
+    public void testIsActive_user0_packageInstalled() throws Exception {
+        setPackageInstalledForUser(true, true, false, 0);
+        mUser = UserHandle.of(0);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor,
+                mClock);
+
+        assertThat(manager.isActiveTile()).isTrue();
+    }
+
+    @Test
+    public void testIsActive_user10_packageInstalled_notForUser0() throws Exception {
+        setPackageInstalledForUser(true, true, false, 10);
+        setPackageInstalledForUser(false, false, false, 0);
+        mUser = UserHandle.of(10);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor,
+                mClock);
+
+        assertThat(manager.isActiveTile()).isTrue();
+    }
+
+    @Test
+    public void testIsToggleable_user0_packageInstalled() throws Exception {
+        setPackageInstalledForUser(true, false, true, 0);
+        mUser = UserHandle.of(0);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor,
+                mClock);
+
+        assertThat(manager.isToggleableTile()).isTrue();
+    }
+
+    @Test
+    public void testIsToggleable_user10_packageInstalled_notForUser0() throws Exception {
+        setPackageInstalledForUser(true, false, true, 10);
+        setPackageInstalledForUser(false, false, false, 0);
+        mUser = UserHandle.of(10);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor,
+                mClock);
+
+        assertThat(manager.isToggleableTile()).isTrue();
+    }
+
+    @Test
+    public void testIsToggleableActive_installedForDifferentUser() throws Exception {
+        setPackageInstalledForUser(true, false, false, 10);
+        setPackageInstalledForUser(false, true, true, 0);
+        mUser = UserHandle.of(10);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor,
+                mClock);
+
+        assertThat(manager.isToggleableTile()).isFalse();
+        assertThat(manager.isActiveTile()).isFalse();
     }
 
     private void mockChangeEnabled(long changeId, boolean enabled) {

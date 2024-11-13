@@ -89,6 +89,7 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockSettingsStateListener;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.servicewatcher.CurrentUserServiceSupplier;
 import com.android.server.servicewatcher.ServiceWatcher;
 import com.android.server.utils.Slogf;
@@ -170,6 +171,7 @@ public class TrustManagerService extends SystemService {
     private final ActivityManager mActivityManager;
     private FingerprintManager mFingerprintManager;
     private FaceManager mFaceManager;
+    private UserManagerInternal mUserManagerInternal;
 
     private enum TrustState {
         // UNTRUSTED means that TrustManagerService is currently *not* giving permission for the
@@ -1064,6 +1066,8 @@ public class TrustManagerService extends SystemService {
                     Log.w(TAG, "Unable to check keyguard lock state", e);
                 }
                 currentUserIsUnlocked = unlockedUser == id;
+            } else if (isVisibleBackgroundUser(id)) {
+                showingKeyguard = !mUserManager.isUserUnlocked(id);
             }
             final boolean deviceLocked = secure && showingKeyguard && !trusted
                     && !biometricAuthenticated;
@@ -1093,6 +1097,16 @@ public class TrustManagerService extends SystemService {
                 }
             }
         }
+    }
+
+    private boolean isVisibleBackgroundUser(int userId) {
+        if (!mUserManager.isVisibleBackgroundUsersSupported()) {
+            return false;
+        }
+        if (mUserManagerInternal == null) {
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUserManagerInternal.isVisibleBackgroundFullUser(userId);
     }
 
     private void notifyTrustAgentsOfDeviceLockState(int userId, boolean isLocked) {

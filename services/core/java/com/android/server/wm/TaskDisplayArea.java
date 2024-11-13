@@ -28,6 +28,7 @@ import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -37,6 +38,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.ColorInt;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
@@ -52,10 +54,11 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import java.io.PrintWriter;
@@ -142,13 +145,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * current focused root task.
      */
     Task mLastFocusedRootTask;
-    /**
-     * All of the root tasks on this display. Order matters, topmost root task is in front of all
-     * other root tasks, bottommost behind. Accessed directly by ActivityManager package classes.
-     * Any calls changing the list should also call {@link #onRootTaskOrderChanged(Task)}.
-     */
-    private ArrayList<OnRootTaskOrderChangedListener> mRootTaskOrderChangedCallbacks =
-            new ArrayList<>();
 
     /**
      * The task display area is removed from the system and we are just waiting for all activities
@@ -331,7 +327,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded("addChildTask");
 
         mAtmService.updateSleepIfNeededLocked();
-        onRootTaskOrderChanged(task);
     }
 
     @Override
@@ -423,10 +418,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
         // Update the top resumed activity because the preferred top focusable task may be changed.
         mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded("positionChildTaskAt");
-
-        if (mChildren.indexOf(child) != oldPosition) {
-            onRootTaskOrderChanged(child);
-        }
     }
 
     void onLeafTaskRemoved(int taskId) {
@@ -435,7 +426,19 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
     }
 
-    void onLeafTaskMoved(Task t, boolean toTop, boolean toBottom) {
+    void onTaskMoved(@NonNull Task t, boolean toTop, boolean toBottom) {
+        if (toBottom && !t.isLeafTask()) {
+            // Return early when a non-leaf task moved to bottom, to prevent sending duplicated
+            // leaf task movement callback if the leaf task is moved along with its parent tasks.
+            // Unless, we also track the task id, like `mLastLeafTaskToFrontId`.
+            return;
+        }
+
+        final Task topLeafTask = t.getTopLeafTask();
+        onLeafTaskMoved(topLeafTask, toTop, toBottom);
+    }
+
+    void onLeafTaskMoved(@NonNull Task t, boolean toTop, boolean toBottom) {
         if (toBottom) {
             mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
                     t.getTaskInfo());
@@ -831,7 +834,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             mLaunchAdjacentFlagRootTask = null;
         }
         mDisplayContent.releaseSelfIfNeeded();
-        onRootTaskOrderChanged(rootTask);
     }
 
     /**
@@ -923,7 +925,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             if (windowingMode != WINDOWING_MODE_UNDEFINED && candidateTask.isRootTask()
                     && candidateTask.getWindowingMode() != windowingMode) {
                 candidateTask.mTransitionController.collect(candidateTask);
-                candidateTask.setWindowingMode(windowingMode);
+                candidateTask.setRootTaskWindowingMode(windowingMode);
             }
             return candidateTask.getRootTask();
         }
@@ -1079,8 +1081,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Use launch-adjacent-flag-root if launching with launch-adjacent flag.
         if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
                 && mLaunchAdjacentFlagRootTask != null) {
-            if (sourceTask != null && sourceTask == candidateTask) {
-                // Do nothing when task that is getting opened is same as the source.
+            if (sourceTask != null && (sourceTask == candidateTask
+                    || sourceTask.topRunningActivity() == null)) {
+                // Do nothing when task that is getting opened is same as the source or when
+                // the source is no-longer valid.
+                Slog.w(TAG_WM, "Ignoring LAUNCH_ADJACENT because adjacent source is gone.");
             } else if (sourceTask != null
                     && mLaunchAdjacentFlagRootTask.getAdjacentTask() != null
                     && (sourceTask == mLaunchAdjacentFlagRootTask
@@ -1727,35 +1732,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         return mRemoved;
     }
 
-    /**
-     * Adds a listener to be notified whenever the root task order in the display changes. Currently
-     * only used by the {@link RecentsAnimation} to determine whether to interrupt and cancel the
-     * current animation when the system state changes.
-     */
-    void registerRootTaskOrderChangedListener(OnRootTaskOrderChangedListener listener) {
-        if (!mRootTaskOrderChangedCallbacks.contains(listener)) {
-            mRootTaskOrderChangedCallbacks.add(listener);
-        }
-    }
-
-    /**
-     * Removes a previously registered root task order change listener.
-     */
-    void unregisterRootTaskOrderChangedListener(OnRootTaskOrderChangedListener listener) {
-        mRootTaskOrderChangedCallbacks.remove(listener);
-    }
-
-    /**
-     * Notifies of a root task order change
-     *
-     * @param rootTask The root task which triggered the order change
-     */
-    void onRootTaskOrderChanged(Task rootTask) {
-        for (int i = mRootTaskOrderChangedCallbacks.size() - 1; i >= 0; i--) {
-            mRootTaskOrderChangedCallbacks.get(i).onRootTaskOrderChanged(rootTask);
-        }
-    }
-
     @Override
     boolean canCreateRemoteAnimationTarget() {
         // In the legacy transition system, promoting animation target from TaskFragment to
@@ -1768,13 +1744,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     boolean canHostHomeTask() {
         return mDisplayContent.isHomeSupported() && mCanHostHomeTask;
-    }
-
-    /**
-     * Callback for when the order of the root tasks in the display changes.
-     */
-    interface OnRootTaskOrderChangedListener {
-        void onRootTaskOrderChanged(Task rootTask);
     }
 
     void ensureActivitiesVisible(ActivityRecord starting, boolean notifyClients) {
@@ -1794,10 +1763,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * @return last reparented root task, or {@code null} if the root tasks had to be destroyed.
      */
     Task remove() {
+        final TaskDisplayArea toDisplayArea = getReparentToTaskDisplayArea(getFocusedRootTask());
         mPreferredTopFocusableRootTask = null;
         // TODO(b/153090332): Allow setting content removal mode per task display area
         final boolean destroyContentOnRemoval = mDisplayContent.shouldDestroyContentOnRemove();
-        final TaskDisplayArea toDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         Task lastReparentedRootTask = null;
 
         // Root tasks could be reparented from the removed display area to other display area. After
@@ -1861,6 +1830,41 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         mRemoved = true;
 
         return lastReparentedRootTask;
+    }
+
+    /**
+     * Returns the {@link TaskDisplayArea} to which root tasks should be reparented.
+     *
+     * <p>In the automotive multi-user multi-display environment where background users have
+     * UI access on their assigned displays (a.k.a. visible background users), it's not allowed to
+     * launch an activity on an unassigned display. If an activity is attempted to launch on an
+     * unassigned display, it throws an exception.
+     * <p>This method determines the appropriate {@link TaskDisplayArea} for reparenting root tasks
+     * when a display is removed, in order to avoid the exception. If the root task is null,
+     * the visible background user is not supported or the user associated with the root task is
+     * not a visible background user, it returns the default {@link TaskDisplayArea} of the default
+     * display. Otherwise, it returns the default {@link TaskDisplayArea} of the main display
+     * assigned to the user.
+     *
+     * @param rootTask The root task whose {@link TaskDisplayArea} needs to be determined.
+     * @return The {@link TaskDisplayArea} where the root tasks should be reparented to.
+     */
+    private TaskDisplayArea getReparentToTaskDisplayArea(Task rootTask) {
+        final TaskDisplayArea defaultTaskDisplayArea =
+                mRootWindowContainer.getDefaultTaskDisplayArea();
+        if (rootTask == null) {
+            return defaultTaskDisplayArea;
+        }
+        UserManagerInternal userManagerInternal = mAtmService.mWindowManager.mUmInternal;
+        if (!userManagerInternal.isVisibleBackgroundFullUser(rootTask.mUserId)) {
+            return defaultTaskDisplayArea;
+        }
+        int toDisplayId = userManagerInternal.getMainDisplayAssignedToUser(rootTask.mUserId);
+        if (toDisplayId == INVALID_DISPLAY) {
+            return defaultTaskDisplayArea;
+        }
+        DisplayContent dc = mRootWindowContainer.getDisplayContent(toDisplayId);
+        return dc != null ? dc.getDefaultTaskDisplayArea() : defaultTaskDisplayArea;
     }
 
     /** Whether this task display area can request orientation. */

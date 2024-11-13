@@ -38,13 +38,24 @@ import java.util.Objects;
 
 /**
  * New intent message.
+ *
  * @hide
  */
 public class NewIntentItem extends ActivityTransactionItem {
 
+    // TODO(b/170729553): Mark this with @NonNull and final once @UnsupportedAppUsage removed.
+    //  We cannot do it now to avoid app compatibility regression.
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private List<ReferrerIntent> mIntents;
-    private boolean mResume;
+
+    private final boolean mResume;
+
+    public NewIntentItem(@NonNull IBinder activityToken,
+            @NonNull List<ReferrerIntent> intents, boolean resume) {
+        super(activityToken);
+        mIntents = new ArrayList<>(intents);
+        mResume = resume;
+    }
 
     @Override
     public int getPostExecutionState() {
@@ -59,36 +70,9 @@ public class NewIntentItem extends ActivityTransactionItem {
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    // ObjectPoolItem implementation
-
-    private NewIntentItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static NewIntentItem obtain(@NonNull IBinder activityToken,
-            @NonNull List<ReferrerIntent> intents, boolean resume) {
-        NewIntentItem instance = ObjectPool.obtain(NewIntentItem.class);
-        if (instance == null) {
-            instance = new NewIntentItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mIntents = new ArrayList<>(intents);
-        instance.mResume = resume;
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mIntents = null;
-        mResume = false;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
@@ -96,10 +80,11 @@ public class NewIntentItem extends ActivityTransactionItem {
         dest.writeTypedList(mIntents, flags);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private NewIntentItem(@NonNull Parcel in) {
         super(in);
         mResume = in.readBoolean();
+        // TODO(b/170729553): Wrap with requireNonNull once @UnsupportedAppUsage removed.
         mIntents = in.createTypedArrayList(ReferrerIntent.CREATOR);
     }
 

@@ -36,10 +36,10 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.DebugLogger.debugLog
+import com.android.systemui.res.R
 import com.android.systemui.shared.hardware.hasInputDevice
 import com.android.systemui.shared.hardware.isAnyStylusSource
 import com.android.systemui.util.NotificationChannels
@@ -65,8 +65,10 @@ constructor(
     private var batteryCapacity = 1.0f
     private var suppressed = false
     private var instanceId: InstanceId? = null
-    @VisibleForTesting var inputDeviceId: Int? = null
-      private set
+    @VisibleForTesting
+    var inputDeviceId: Int? = null
+        private set
+
     @VisibleForTesting var instanceIdSequence = InstanceIdSequence(1 shl 13)
 
     fun init() {
@@ -113,7 +115,7 @@ constructor(
             inputDeviceId = deviceId
             if (batteryState.capacity == batteryCapacity || batteryState.capacity <= 0f)
                 return@updateBattery
-
+            // Note that batteryState.capacity == NaN will fall through to here
             batteryCapacity = batteryState.capacity
             debugLog {
                 "Updating notification battery state to $batteryCapacity " +
@@ -172,7 +174,7 @@ constructor(
     }
 
     private fun isBatteryBelowThreshold(): Boolean {
-        return batteryCapacity <= LOW_BATTERY_THRESHOLD
+        return !batteryCapacity.isNaN() && batteryCapacity <= LOW_BATTERY_THRESHOLD
     }
 
     private fun hasConnectedBluetoothStylus(): Boolean {

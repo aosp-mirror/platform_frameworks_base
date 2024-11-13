@@ -778,8 +778,18 @@ public class LauncherApps {
     public List<LauncherActivityInfo> getActivityList(String packageName, UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            return convertToActivityList(mService.getLauncherActivities(mContext.getPackageName(),
-                    packageName, user), user);
+            final List<LauncherActivityInfo> activityList = convertToActivityList(
+                    mService.getLauncherActivities(
+                            mContext.getPackageName(),
+                            packageName,
+                            user
+                    ), user);
+            if (activityList.isEmpty()) {
+                // b/350144057
+                Log.d(TAG, "getActivityList: No launchable activities found for"
+                        + "packageName=" + packageName + ", user=" + user);
+            }
+            return activityList;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -935,12 +945,11 @@ public class LauncherApps {
      *
      * @return {@link IntentSender} object which launches the Private Space Settings Activity, if
      * successful, null otherwise.
-     * @hide
      */
     // Alternatively, a system app can access this api for private profile if they've been granted
     // with the {@code android.Manifest.permission#ACCESS_HIDDEN_PROFILES_FULL} permission.
     @Nullable
-    @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @FlaggedApi(Flags.FLAG_GET_PRIVATE_SPACE_SETTINGS)
     @RequiresPermission(conditional = true,
             anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
     public IntentSender getPrivateSpaceSettingsIntent() {

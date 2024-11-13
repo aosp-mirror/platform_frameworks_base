@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Debug;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;

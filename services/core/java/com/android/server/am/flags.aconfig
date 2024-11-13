@@ -125,6 +125,14 @@ flag {
 }
 
 flag {
+    name: "trace_update_app_freeze_state_lsp"
+    namespace: "backstage_power"
+    description: "Output process oom adj and other metadata to trace in updateAppFreezeStateLSP"
+    bug: "345547733"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "simplify_process_traversal"
     namespace: "backstage_power"
     description: "Simplify the OomAdjuster's process traversal mechanism."
@@ -148,6 +156,41 @@ flag {
     namespace: "backstage_power"
     description: "Schedule follow up OomAdjuster updates for time sensitive states."
     bug: "333450932"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "collect_logcat_on_run_synchronously"
+    namespace: "stability"
+    description: "Allow logcat collection on synchronous dropbox collection"
+    bug: "324222683"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_dropbox_watchdog_headers"
+    namespace: "stability"
+    description: "Add watchdog-specific dropbox headers"
+    bug: "330682397"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "defer_binders_when_paused"
+    namespace: "system_performance"
+    is_fixed_read_only: true
+    description: "Defer submitting binder calls to paused processes."
+    bug: "327038797"
+}
+
+flag {
+    name: "log_broadcast_sent_event"
+    namespace: "backstage_power"
+    description: "Log the broadcast send event to Statsd"
+    bug: "355261986"
+    is_fixed_read_only: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }

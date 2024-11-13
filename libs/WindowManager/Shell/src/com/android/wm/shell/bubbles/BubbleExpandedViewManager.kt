@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles
 
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation
+
 /** Manager interface for bubble expanded views. */
 interface BubbleExpandedViewManager {
 
@@ -30,6 +32,7 @@ interface BubbleExpandedViewManager {
     fun isStackExpanded(): Boolean
     fun isShowingAsBubbleBar(): Boolean
     fun hideCurrentInputMethod()
+    fun updateBubbleBarLocation(location: BubbleBarLocation)
 
     companion object {
         /**
@@ -77,6 +80,10 @@ interface BubbleExpandedViewManager {
 
                 override fun hideCurrentInputMethod() {
                     controller.hideCurrentInputMethod()
+                }
+
+                override fun updateBubbleBarLocation(location: BubbleBarLocation) {
+                    controller.bubbleBarLocation = location
                 }
             }
         }

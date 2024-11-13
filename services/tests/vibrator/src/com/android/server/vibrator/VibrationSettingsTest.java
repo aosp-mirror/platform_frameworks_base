@@ -23,6 +23,7 @@ import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
 import static android.os.VibrationAttributes.USAGE_HARDWARE_FEEDBACK;
+import static android.os.VibrationAttributes.USAGE_IME_FEEDBACK;
 import static android.os.VibrationAttributes.USAGE_MEDIA;
 import static android.os.VibrationAttributes.USAGE_NOTIFICATION;
 import static android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION;
@@ -69,9 +70,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
-import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
@@ -82,6 +81,8 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
+import com.android.server.vibrator.VibrationSession.CallerInfo;
+import com.android.server.vibrator.VibrationSession.Status;
 
 import org.junit.After;
 import org.junit.Before;
@@ -120,6 +121,7 @@ public class VibrationSettingsTest {
             USAGE_PHYSICAL_EMULATION,
             USAGE_RINGTONE,
             USAGE_TOUCH,
+            USAGE_IME_FEEDBACK
     };
 
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -292,7 +294,7 @@ public class VibrationSettingsTest {
             if (expectedAllowedVibrations.contains(usage)) {
                 assertVibrationNotIgnoredForUsage(usage);
             } else {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_BACKGROUND);
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_BACKGROUND);
             }
         }
     }
@@ -350,7 +352,7 @@ public class VibrationSettingsTest {
         createSystemReadyVibrationSettings();
 
         for (int usage : ALL_USAGES) {
-            assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_ON_WIRELESS_CHARGER);
+            assertVibrationIgnoredForUsage(usage, Status.IGNORED_ON_WIRELESS_CHARGER);
         }
     }
 
@@ -365,7 +367,7 @@ public class VibrationSettingsTest {
         mRegisteredBatteryBroadcastReceiver.onReceive(mContextSpy, wirelessChargingIntent);
 
         for (int usage : ALL_USAGES) {
-            assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_ON_WIRELESS_CHARGER);
+            assertVibrationIgnoredForUsage(usage, Status.IGNORED_ON_WIRELESS_CHARGER);
         }
     }
 
@@ -377,7 +379,7 @@ public class VibrationSettingsTest {
         createSystemReadyVibrationSettings();
         // Check that initially, all usages are ignored due to the wireless charging.
         for (int usage : ALL_USAGES) {
-            assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_ON_WIRELESS_CHARGER);
+            assertVibrationIgnoredForUsage(usage, Status.IGNORED_ON_WIRELESS_CHARGER);
         }
 
         Intent nonWirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_USB);
@@ -404,7 +406,7 @@ public class VibrationSettingsTest {
             if (expectedAllowedVibrations.contains(usage)) {
                 assertVibrationNotIgnoredForUsage(usage);
             } else {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_POWER);
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_FOR_POWER);
             }
         }
     }
@@ -426,7 +428,7 @@ public class VibrationSettingsTest {
 
         for (int usage : ALL_USAGES) {
             if (usage == USAGE_RINGTONE || usage == USAGE_NOTIFICATION) {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_RINGER_MODE);
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_FOR_RINGER_MODE);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
@@ -470,7 +472,7 @@ public class VibrationSettingsTest {
             if (usage == USAGE_ACCESSIBILITY) {
                 assertVibrationNotIgnoredForUsage(usage);
             } else {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_FOR_SETTINGS);
             }
             assertVibrationNotIgnoredForUsageAndFlags(usage,
                     VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
@@ -512,7 +514,7 @@ public class VibrationSettingsTest {
 
         for (int usage : ALL_USAGES) {
             if (usage == USAGE_TOUCH) {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_FOR_SETTINGS);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
@@ -526,8 +528,8 @@ public class VibrationSettingsTest {
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
 
         for (int usage : ALL_USAGES) {
-            if (usage == USAGE_TOUCH) {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
+            if (usage == USAGE_TOUCH || usage == USAGE_IME_FEEDBACK) {
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_FOR_SETTINGS);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
@@ -542,7 +544,7 @@ public class VibrationSettingsTest {
 
         for (int usage : ALL_USAGES) {
             if (usage == USAGE_HARDWARE_FEEDBACK || usage == USAGE_PHYSICAL_EMULATION) {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_FOR_SETTINGS);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
@@ -557,7 +559,7 @@ public class VibrationSettingsTest {
 
         for (int usage : ALL_USAGES) {
             if (usage == USAGE_NOTIFICATION) {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_FOR_SETTINGS);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
@@ -574,7 +576,7 @@ public class VibrationSettingsTest {
 
         for (int usage : ALL_USAGES) {
             if (usage == USAGE_RINGTONE) {
-                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
+                assertVibrationIgnoredForUsage(usage, Status.IGNORED_FOR_SETTINGS);
             } else {
                 assertVibrationNotIgnoredForUsage(usage);
             }
@@ -597,69 +599,62 @@ public class VibrationSettingsTest {
         mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
 
-        assertVibrationIgnoredForUsage(USAGE_RINGTONE, Vibration.Status.IGNORED_FOR_RINGER_MODE);
+        assertVibrationIgnoredForUsage(USAGE_RINGTONE, Status.IGNORED_FOR_RINGER_MODE);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
     public void shouldIgnoreVibration_withKeyboardSettingsOff_shouldIgnoreKeyboardVibration() {
+        setKeyboardVibrationSettingsSupported(true);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 0 /* OFF*/);
-        setHasFixedKeyboardAmplitudeIntensity(true);
 
         // Keyboard touch ignored.
         assertVibrationIgnoredForAttributes(
                 new VibrationAttributes.Builder()
-                        .setUsage(USAGE_TOUCH)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setUsage(USAGE_IME_FEEDBACK)
                         .build(),
-                Vibration.Status.IGNORED_FOR_SETTINGS);
+                Status.IGNORED_FOR_SETTINGS);
 
         // General touch and keyboard touch with bypass flag not ignored.
         assertVibrationNotIgnoredForUsage(USAGE_TOUCH);
         assertVibrationNotIgnoredForAttributes(
                 new VibrationAttributes.Builder()
-                        .setUsage(USAGE_TOUCH)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setUsage(USAGE_IME_FEEDBACK)
                         .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
                         .build());
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
     public void shouldIgnoreVibration_withKeyboardSettingsOn_shouldNotIgnoreKeyboardVibration() {
+        setKeyboardVibrationSettingsSupported(true);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1 /* ON */);
-        setHasFixedKeyboardAmplitudeIntensity(true);
 
         // General touch ignored.
-        assertVibrationIgnoredForUsage(USAGE_TOUCH, Vibration.Status.IGNORED_FOR_SETTINGS);
+        assertVibrationIgnoredForUsage(USAGE_TOUCH, Status.IGNORED_FOR_SETTINGS);
 
         // Keyboard touch not ignored.
         assertVibrationNotIgnoredForAttributes(
                 new VibrationAttributes.Builder()
-                        .setUsage(USAGE_TOUCH)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setUsage(USAGE_IME_FEEDBACK)
                         .build());
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_KEYBOARD_CATEGORY_ENABLED)
-    public void shouldIgnoreVibration_noFixedKeyboardAmplitude_ignoresKeyboardTouchVibration() {
+    public void shouldIgnoreVibration_notSupportKeyboardVibration_followsTouchFeedbackSettings() {
+        setKeyboardVibrationSettingsSupported(false);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         setUserSetting(Settings.System.KEYBOARD_VIBRATION_ENABLED, 1 /* ON */);
-        setHasFixedKeyboardAmplitudeIntensity(false);
 
         // General touch ignored.
-        assertVibrationIgnoredForUsage(USAGE_TOUCH, Vibration.Status.IGNORED_FOR_SETTINGS);
+        assertVibrationIgnoredForUsage(USAGE_TOUCH, Status.IGNORED_FOR_SETTINGS);
 
         // Keyboard touch ignored.
         assertVibrationIgnoredForAttributes(
                 new VibrationAttributes.Builder()
-                        .setUsage(USAGE_TOUCH)
-                        .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                        .setUsage(USAGE_IME_FEEDBACK)
                         .build(),
-                Vibration.Status.IGNORED_FOR_SETTINGS);
+                Status.IGNORED_FOR_SETTINGS);
     }
 
     @Test
@@ -675,7 +670,7 @@ public class VibrationSettingsTest {
         // Ignore the vibration when the coming device id represents a virtual device.
         for (int usage : ALL_USAGES) {
             assertVibrationIgnoredForUsageAndDevice(usage, VIRTUAL_DEVICE_ID,
-                    Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE);
+                    Status.IGNORED_FROM_VIRTUAL_DEVICE);
         }
     }
 
@@ -893,6 +888,22 @@ public class VibrationSettingsTest {
     }
 
     @Test
+    public void getCurrentIntensity_ImeFeedbackValueReflectsToKeyboardVibrationSettings() {
+        setDefaultIntensity(USAGE_IME_FEEDBACK, VIBRATION_INTENSITY_MEDIUM);
+        setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_HIGH);
+
+        setKeyboardVibrationSettingsSupported(false);
+        mVibrationSettings.update();
+        assertEquals(VIBRATION_INTENSITY_HIGH,
+                mVibrationSettings.getCurrentIntensity(USAGE_IME_FEEDBACK));
+
+        setKeyboardVibrationSettingsSupported(true);
+        mVibrationSettings.update();
+        assertEquals(VIBRATION_INTENSITY_MEDIUM,
+                mVibrationSettings.getCurrentIntensity(USAGE_IME_FEEDBACK));
+    }
+
+    @Test
     public void getFallbackEffect_returnsEffectsFromSettings() {
         assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_TICK));
         assertNotNull(mVibrationSettings.getFallbackEffect(VibrationEffect.EFFECT_TEXTURE_TICK));
@@ -902,22 +913,21 @@ public class VibrationSettingsTest {
     }
 
     private void assertVibrationIgnoredForUsage(@VibrationAttributes.Usage int usage,
-            Vibration.Status expectedStatus) {
+            Status expectedStatus) {
         assertVibrationIgnoredForUsageAndDevice(usage, Context.DEVICE_ID_DEFAULT, expectedStatus);
     }
 
     private void assertVibrationIgnoredForUsageAndDevice(@VibrationAttributes.Usage int usage,
-            int deviceId, Vibration.Status expectedStatus) {
-        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(
+            int deviceId, Status expectedStatus) {
+        CallerInfo callerInfo = new CallerInfo(
                 VibrationAttributes.createForUsage(usage), UID, deviceId, null, null);
         assertEquals(errorMessageForUsage(usage), expectedStatus,
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
 
     private void assertVibrationIgnoredForAttributes(VibrationAttributes attrs,
-            Vibration.Status expectedStatus) {
-        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(attrs, UID,
-                Context.DEVICE_ID_DEFAULT, null, null);
+            Status expectedStatus) {
+        CallerInfo callerInfo = new CallerInfo(attrs, UID, Context.DEVICE_ID_DEFAULT, null, null);
         assertEquals(errorMessageForAttributes(attrs), expectedStatus,
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
@@ -939,7 +949,7 @@ public class VibrationSettingsTest {
     private void assertVibrationNotIgnoredForUsageAndFlagsAndDevice(
             @VibrationAttributes.Usage int usage, int deviceId,
             @VibrationAttributes.Flag int flags) {
-        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(
+        CallerInfo callerInfo = new CallerInfo(
                 new VibrationAttributes.Builder().setUsage(usage).setFlags(flags).build(), UID,
                 deviceId, null, null);
         assertNull(errorMessageForUsage(usage),
@@ -947,7 +957,7 @@ public class VibrationSettingsTest {
     }
 
     private void assertVibrationNotIgnoredForAttributes(VibrationAttributes attrs) {
-        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(attrs, UID,
+        CallerInfo callerInfo = new CallerInfo(attrs, UID,
                 Context.DEVICE_ID_DEFAULT, null, null);
         assertNull(errorMessageForAttributes(attrs),
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
@@ -974,8 +984,8 @@ public class VibrationSettingsTest {
         when(mVibrationConfigMock.ignoreVibrationsOnWirelessCharger()).thenReturn(ignore);
     }
 
-    private void setHasFixedKeyboardAmplitudeIntensity(boolean hasFixedAmplitude) {
-        when(mVibrationConfigMock.hasFixedKeyboardAmplitude()).thenReturn(hasFixedAmplitude);
+    private void setKeyboardVibrationSettingsSupported(boolean supported) {
+        when(mVibrationConfigMock.isKeyboardVibrationSettingsSupported()).thenReturn(supported);
     }
 
     private void deleteUserSetting(String settingName) {
@@ -1008,10 +1018,10 @@ public class VibrationSettingsTest {
                 new PowerManager.SleepData(sleepTime, reason));
     }
 
-    private Vibration.CallerInfo createCallerInfo(int uid, String opPkg,
+    private CallerInfo createCallerInfo(int uid, String opPkg,
             @VibrationAttributes.Usage int usage) {
         VibrationAttributes attrs = VibrationAttributes.createForUsage(usage);
-        return new Vibration.CallerInfo(attrs, uid, VIRTUAL_DEVICE_ID, opPkg, null);
+        return new CallerInfo(attrs, uid, VIRTUAL_DEVICE_ID, opPkg, null);
     }
 
     private void setBatteryReceiverRegistrationResult(Intent result) {

@@ -54,4 +54,11 @@ public class HandlerExecutor implements ShellExecutor {
     public boolean hasCallback(Runnable r) {
         return mHandler.hasCallbacks(r);
     }
+
+    @Override
+    public void assertCurrentThread() {
+        if (!mHandler.getLooper().isCurrentThread()) {
+            throw new IllegalStateException("must be called on " + mHandler);
+        }
+    }
 }

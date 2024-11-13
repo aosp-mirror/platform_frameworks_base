@@ -29,6 +29,8 @@ sealed interface ShadeMode {
     /**
      * The split shade where, on large screens and unfolded foldables, the QS and notification parts
      * are placed side-by-side and expand/collapse as a single panel.
+     *
+     * Note: This isn't the only mode where the shade is wide.
      */
     data object Split : ShadeMode
 

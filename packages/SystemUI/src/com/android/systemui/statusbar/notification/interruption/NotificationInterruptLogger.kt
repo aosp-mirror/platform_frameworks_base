@@ -193,6 +193,14 @@ class NotificationInterruptLogger @Inject constructor(
         })
     }
 
+    fun logNoAlertingSilentNotification(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "No alerting: suppressed due to silent notification: $str1"
+        })
+    }
+
     fun logNoAlertingSuppressedBy(
         entry: NotificationEntry,
         suppressor: NotificationInterruptSuppressor,

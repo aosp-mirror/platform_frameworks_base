@@ -810,6 +810,8 @@
     <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
     <!-- The amount to translate lockscreen elements on the GONE->AOD transition -->
     <dimen name="keyguard_enter_from_top_translation_y">-100dp</dimen>
+    <!-- The amount to translate lockscreen elements on the GONE->AOD transition, on device fold -->
+    <dimen name="keyguard_enter_from_side_translation_x">-100dp</dimen>
 
     <dimen name="notification_scrim_corner_radius">32dp</dimen>
 
@@ -1321,6 +1323,7 @@
     <dimen name="magnifier_drag_handle_padding">3dp</dimen>
     <!-- Magnification settings panel -->
     <dimen name="magnification_setting_view_margin">24dp</dimen>
+    <dimen name="magnification_setting_view_item_horizontal_spacing">12dp</dimen>
     <dimen name="magnification_setting_text_size">18sp</dimen>
     <dimen name="magnification_setting_background_padding">24dp</dimen>
     <dimen name="magnification_setting_background_corner_radius">28dp</dimen>
@@ -1726,10 +1729,18 @@
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
     <!-- Ongoing activity chip -->
+    <!-- The activity chip side padding, used with the default phone icon. -->
     <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
+    <!-- The activity chip side padding, used with an icon that has embedded padding (e.g. if the icon comes from the notification's smallIcon field). If the icon has padding, the chip itself can have less padding. -->
+    <dimen name="ongoing_activity_chip_side_padding_for_embedded_padding_icon">6dp</dimen>
+    <!-- The icon size, used with the default phone icon. -->
     <dimen name="ongoing_activity_chip_icon_size">16dp</dimen>
-    <!-- The padding between the icon and the text. -->
+    <!-- The icon size, used with an icon that has embedded padding. (If the icon has embedded padding, we need to make the whole icon larger so the icon itself doesn't look small.) -->
+    <dimen name="ongoing_activity_chip_embedded_padding_icon_size">22dp</dimen>
+    <!-- The padding between the icon and the text. Only used if the default phone icon is used. -->
     <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
+    <!-- The end padding for the timer text view. Only used if an embedded padding icon is used. -->
+    <dimen name="ongoing_activity_chip_text_end_padding_for_embedded_padding_icon">6dp</dimen>
     <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
@@ -1740,6 +1751,7 @@
 
     <!-- System UI Dialog -->
     <dimen name="dialog_title_text_size">24sp</dimen>
+    <dimen name="dialog_button_side_margin">8dp</dimen>
 
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_max_height">662dp</dimen>
@@ -1964,6 +1976,14 @@
     <dimen name="backlight_indicator_step_small_radius">4dp</dimen>
     <dimen name="backlight_indicator_step_large_radius">28dp</dimen>
 
+    <!-- Touchpad gestures tutorial-->
+    <!-- This value is in unit of dp/ms
+        TriggerSwipeUpTouchTracker (which is base for gesture tutorial implementation) uses value
+        of 0.5dp but from manual testing it's too high and doesn't really feel like it's forcing
+        slowing down. Also for tutorial it should be fine to lean to the side of being more strict
+        rather than not strict enough and not teaching user the proper gesture as a result.-->
+    <dimen name="touchpad_recent_apps_gesture_velocity_threshold">0.05dp</dimen>
+
     <!-- Broadcast dialog -->
     <dimen name="broadcast_dialog_title_img_margin_top">18dp</dimen>
     <dimen name="broadcast_dialog_title_text_size">24sp</dimen>
@@ -1990,10 +2010,10 @@
     <!-- Shadow for dream overlay status bar complications -->
     <dimen name="dream_overlay_status_bar_key_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_key_text_shadow_dy">0.5dp</dimen>
-    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">1dp</dimen>
+    <dimen name="dream_overlay_status_bar_key_text_shadow_radius">3dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dy">0.5dp</dimen>
-    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">2dp</dimen>
+    <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">3dp</dimen>
     <dimen name="dream_overlay_icon_inset_dimen">0dp</dimen>
 
     <!-- Default device corner radius, used for assist UI -->

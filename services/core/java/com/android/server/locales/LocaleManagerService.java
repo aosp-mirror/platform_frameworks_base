@@ -48,6 +48,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FrameworkStatsLog;
@@ -100,6 +101,7 @@ public class LocaleManagerService extends SystemService {
 
     private LocaleManagerBackupHelper mBackupHelper;
 
+    @KeepForWeakReference
     private final PackageMonitor mPackageMonitor;
 
     private final Object mWriteLock = new Object();
@@ -614,9 +616,10 @@ public class LocaleManagerService extends SystemService {
             LocaleConfig resLocaleConfig = null;
             try {
                 resLocaleConfig = LocaleConfig.fromContextIgnoringOverride(
-                        mContext.createPackageContext(appPackageName, 0));
+                        mContext.createPackageContextAsUser(appPackageName, /* flags= */ 0,
+                                UserHandle.of(userId)));
             } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "Unknown package name " + appPackageName);
+                Slog.e(TAG, "Unknown package name " + appPackageName + " for user " + userId);
                 return;
             }
             final File file = getXmlFileNameForUser(appPackageName, userId);

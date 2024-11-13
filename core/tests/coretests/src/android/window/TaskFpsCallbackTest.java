@@ -24,9 +24,9 @@ import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

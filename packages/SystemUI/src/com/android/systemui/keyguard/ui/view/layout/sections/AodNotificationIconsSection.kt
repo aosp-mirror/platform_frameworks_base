@@ -37,8 +37,6 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDi
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import com.android.systemui.util.ui.value
@@ -53,7 +51,6 @@ constructor(
     private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
-    private val notificationIconAreaController: NotificationIconAreaController,
     private val systemBarUtilsState: SystemBarUtilsState,
     private val rootViewModel: KeyguardRootViewModel,
 ) : KeyguardSection() {
@@ -86,20 +83,16 @@ constructor(
             return
         }
 
-        if (NotificationIconContainerRefactor.isEnabled) {
-            nicBindingDisposable?.dispose()
-            nicBindingDisposable =
-                NotificationIconContainerViewBinder.bindWhileAttached(
-                    nic,
-                    nicAodViewModel,
-                    configurationState,
-                    systemBarUtilsState,
-                    iconBindingFailureTracker,
-                    nicAodIconViewStore,
-                )
-        } else {
-            notificationIconAreaController.setupAodIcons(nic)
-        }
+        nicBindingDisposable?.dispose()
+        nicBindingDisposable =
+            NotificationIconContainerViewBinder.bindWhileAttached(
+                nic,
+                nicAodViewModel,
+                configurationState,
+                systemBarUtilsState,
+                iconBindingFailureTracker,
+                nicAodIconViewStore,
+            )
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {

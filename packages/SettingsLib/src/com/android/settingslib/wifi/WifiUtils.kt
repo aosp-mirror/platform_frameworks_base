@@ -498,7 +498,7 @@ open class WifiUtils {
         ): Job =
             coroutineScope.launch {
                 val wifiManager = context.getSystemService(WifiManager::class.java) ?: return@launch
-                if (wifiManager.queryWepAllowed()) {
+                if (wifiManager.isWepSupported == true && wifiManager.queryWepAllowed()) {
                     onAllowed()
                 } else {
                     val intent = Intent(Intent.ACTION_MAIN).apply {

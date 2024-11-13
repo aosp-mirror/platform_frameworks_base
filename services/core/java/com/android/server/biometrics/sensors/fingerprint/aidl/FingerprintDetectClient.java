@@ -71,7 +71,8 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
             boolean isStrongBiometric) {
         super(context, lazyDaemon, token, listener, options.getUserId(),
                 options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
-                true /* shouldVibrate */, biometricLogger, biometricContext);
+                true /* shouldVibrate */, biometricLogger, biometricContext,
+                false /* isMandatoryBiometrics */);
         setRequestId(requestId);
         mAuthenticationStateListeners = authenticationStateListeners;
         mIsStrongBiometric = isStrongBiometric;

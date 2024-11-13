@@ -17,8 +17,8 @@
 package com.android.systemui.media.taptotransfer.receiver
 
 import android.animation.TimeInterpolator
-import android.annotation.SuppressLint
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.StatusBarManager
 import android.content.Context
 import android.graphics.Rect
@@ -29,15 +29,15 @@ import android.os.Handler
 import android.os.PowerManager
 import android.view.Gravity
 import android.view.View
+import android.view.View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
+import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
-import android.view.View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
-import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
-import com.android.internal.widget.CachingIconView
-import com.android.systemui.res.R
 import com.android.app.animation.Interpolators
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.logging.InstanceId
+import com.android.internal.widget.CachingIconView
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
@@ -46,6 +46,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttIcon
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
@@ -71,7 +72,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         private val commandQueue: CommandQueue,
         context: Context,
         logger: MediaTttReceiverLogger,
-        windowManager: WindowManager,
+        viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
@@ -88,7 +89,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 ) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttReceiverLogger>(
         context,
         logger,
-        windowManager,
+        viewCaptureAwareWindowManager,
         mainExecutor,
         accessibilityManager,
         configurationController,

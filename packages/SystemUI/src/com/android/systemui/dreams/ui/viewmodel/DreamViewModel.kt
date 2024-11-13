@@ -20,9 +20,9 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
@@ -51,6 +51,7 @@ constructor(
     fromGlanceableHubTransitionInteractor: GlanceableHubToDreamingTransitionViewModel,
     toGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
     private val toLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    private val fromDreamingTransitionInteractor: FromDreamingTransitionInteractor,
     private val communalInteractor: CommunalInteractor,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val userTracker: UserTracker,
@@ -61,11 +62,9 @@ constructor(
         val showGlanceableHub =
             communalInteractor.isCommunalEnabled.value &&
                 !keyguardUpdateMonitor.isEncryptedOrLockdown(userTracker.userId)
-        if (showGlanceableHub && !glanceableHubAllowKeyguardWhenDreaming()) {
-            communalInteractor.changeScene(CommunalScenes.Communal)
-        } else {
-            toLockscreenTransitionViewModel.startTransition()
-        }
+        fromDreamingTransitionInteractor.startToLockscreenOrGlanceableHubTransition(
+            showGlanceableHub && !glanceableHubAllowKeyguardWhenDreaming()
+        )
     }
 
     val dreamOverlayTranslationX: Flow<Float> =

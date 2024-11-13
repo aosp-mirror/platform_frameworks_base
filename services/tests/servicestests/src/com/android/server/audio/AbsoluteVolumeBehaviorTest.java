@@ -101,7 +101,7 @@ public class AbsoluteVolumeBehaviorTest {
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
                 mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy,
                 mTestLooper.getLooper(), mock(AppOpsManager.class), mock(PermissionEnforcer.class),
-                mock(AudioServerPermissionProvider.class)) {
+                mock(AudioServerPermissionProvider.class), r -> r.run()) {
             @Override
             public int getDeviceForStream(int stream) {
                 return AudioSystem.DEVICE_OUT_SPEAKER;

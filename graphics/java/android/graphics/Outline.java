@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.drawable.Drawable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,6 +36,7 @@ import java.lang.annotation.RetentionPolicy;
  * @see android.view.View#setOutlineProvider(android.view.ViewOutlineProvider)
  * @see Drawable#getOutline(Outline)
  */
+@RavenwoodKeepWholeClass
 public final class Outline {
     private static final float RADIUS_UNDEFINED = Float.NEGATIVE_INFINITY;
 

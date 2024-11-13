@@ -202,6 +202,24 @@ public interface ImeTracker {
             PHASE_IME_HIDE_WINDOW,
             PHASE_IME_PRIVILEGED_OPERATIONS,
             PHASE_SERVER_CURRENT_ACTIVE_IME,
+            PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES,
+            PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY,
+            PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED,
+            PHASE_CLIENT_HANDLE_DISPATCH_IME_VISIBILITY_CHANGED,
+            PHASE_CLIENT_NOTIFY_IME_VISIBILITY_CHANGED,
+            PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES,
+            PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SET_REQUESTED_VISIBILITY,
+            PHASE_WM_GET_CONTROL_WITH_LEASH,
+            PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES,
+            PHASE_SERVER_SET_VISIBILITY_ON_FOCUSED_WINDOW,
+            PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY,
+            PHASE_CLIENT_SET_IME_VISIBILITY,
+            PHASE_WM_DISPATCH_IME_REQUESTED_CHANGED,
+            PHASE_CLIENT_NO_ONGOING_USER_ANIMATION,
+            PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT,
+            PHASE_WM_POSTING_CHANGED_IME_VISIBILITY,
+            PHASE_WM_INVOKING_IME_REQUESTED_LISTENER,
+            PHASE_CLIENT_ALREADY_HIDDEN,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
@@ -350,6 +368,62 @@ public interface ImeTracker {
 
     /** Checked that the calling IME is the currently active IME. */
     int PHASE_SERVER_CURRENT_ACTIVE_IME = ImeProtoEnums.PHASE_SERVER_CURRENT_ACTIVE_IME;
+
+    /** Reporting the new requested visible types. */
+    int PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES =
+            ImeProtoEnums.PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES;
+    /** Setting the IME visibility for the RemoteInsetsControlTarget. */
+    int PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY =
+            ImeProtoEnums.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY;
+    /** IME has no insets pending and is server visible. Notify about changed controls. */
+    int PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED =
+            ImeProtoEnums.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED;
+    /** Handling the dispatch of the IME visibility change. */
+    int PHASE_CLIENT_HANDLE_DISPATCH_IME_VISIBILITY_CHANGED =
+            ImeProtoEnums.PHASE_CLIENT_HANDLE_DISPATCH_IME_VISIBILITY_CHANGED;
+    /** Dispatching the IME visibility change. */
+    int PHASE_CLIENT_NOTIFY_IME_VISIBILITY_CHANGED =
+            ImeProtoEnums.PHASE_CLIENT_NOTIFY_IME_VISIBILITY_CHANGED;
+    /** Updating the requested visible types. */
+    int PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES =
+            ImeProtoEnums.PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES;
+    /** Reached the remote insets control target's setImeInputTargetRequestedVisibility method. */
+    int PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SET_REQUESTED_VISIBILITY =
+            ImeProtoEnums.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SET_REQUESTED_VISIBILITY;
+    /** Received a new insets source control with a leash. */
+    int PHASE_WM_GET_CONTROL_WITH_LEASH =
+            ImeProtoEnums.PHASE_WM_GET_CONTROL_WITH_LEASH;
+    /**
+     * Updating the requested visible types in the WindowState and sending them to state
+     * controller.
+     */
+    int PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES =
+            ImeProtoEnums.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES;
+    /** Setting the requested IME visibility of a window. */
+    int PHASE_SERVER_SET_VISIBILITY_ON_FOCUSED_WINDOW =
+            ImeProtoEnums.PHASE_SERVER_SET_VISIBILITY_ON_FOCUSED_WINDOW;
+    /** Reached the redirect of InputMethodManager to InsetsController show/hide. */
+    int PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY =
+            ImeProtoEnums.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY;
+    /** Reached the InputMethodManager Handler call to send the visibility. */
+    int PHASE_CLIENT_SET_IME_VISIBILITY = ImeProtoEnums.PHASE_CLIENT_SET_IME_VISIBILITY;
+    /** Calling into the listener to show/hide the IME from the ImeInsetsSourceProvider. */
+    int PHASE_WM_DISPATCH_IME_REQUESTED_CHANGED =
+            ImeProtoEnums.PHASE_WM_DISPATCH_IME_REQUESTED_CHANGED;
+    /** An ongoing user animation will not be interrupted by a IMM#showSoftInput. */
+    int PHASE_CLIENT_NO_ONGOING_USER_ANIMATION =
+            ImeProtoEnums.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION;
+    /** Dispatching the token to the ImeInsetsSourceProvider. */
+    int PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT =
+            ImeProtoEnums.PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT;
+    /** Now posting the IME visibility to the WMS handler. */
+    int PHASE_WM_POSTING_CHANGED_IME_VISIBILITY =
+            ImeProtoEnums.PHASE_WM_POSTING_CHANGED_IME_VISIBILITY;
+    /** Inside the WMS handler calling into the listener that calls into IMMS show/hide. */
+    int PHASE_WM_INVOKING_IME_REQUESTED_LISTENER =
+            ImeProtoEnums.PHASE_WM_INVOKING_IME_REQUESTED_LISTENER;
+    /** IME is requested to be hidden, but already hidden. Don't hide to avoid another animation. */
+    int PHASE_CLIENT_ALREADY_HIDDEN = ImeProtoEnums.PHASE_CLIENT_ALREADY_HIDDEN;
 
     /**
      * Called when an IME request is started.
@@ -846,7 +920,8 @@ public interface ImeTracker {
             final Configuration.Builder builder = Configuration.Builder.withSurface(
                             cujType,
                             jankContext.getDisplayContext(),
-                            jankContext.getTargetSurfaceControl())
+                            jankContext.getTargetSurfaceControl(),
+                            jankContext.getDisplayContext().getMainThreadHandler())
                     .setTag(String.format(Locale.US, "%d@%d@%s", animType,
                             useSeparatedThread ? 0 : 1, jankContext.getHostPackageName()));
             InteractionJankMonitor.getInstance().begin(builder);

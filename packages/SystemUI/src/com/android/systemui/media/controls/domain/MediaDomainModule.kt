@@ -22,7 +22,7 @@ import com.android.systemui.media.controls.domain.pipeline.LegacyMediaDataManage
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.domain.pipeline.MediaDataProcessor
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
-import com.android.systemui.media.controls.util.MediaFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -51,9 +51,8 @@ interface MediaDomainModule {
         fun providesMediaDataManager(
             legacyProvider: Provider<LegacyMediaDataManagerImpl>,
             newProvider: Provider<MediaCarouselInteractor>,
-            mediaFlags: MediaFlags,
         ): MediaDataManager {
-            return if (mediaFlags.isSceneContainerEnabled()) {
+            return if (SceneContainerFlag.isEnabled) {
                 newProvider.get()
             } else {
                 legacyProvider.get()

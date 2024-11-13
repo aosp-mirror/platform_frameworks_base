@@ -1,0 +1,437 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless optional by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+option java_multiple_files = true;
+
+package android.widget;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/content/res/color_state_list.proto";
+
+/**
+ * An android.widget.RemoteViews object. This is used by RemoteViews.createPreviewFromProto
+ * and RemoteViews.writePreviewToProto.
+ *
+ * Any addition of fields here will require an update to the parsing code in RemoteViews.java.
+ * Otherwise the field will be ignored when parsing (with a logged warning).
+ *
+ * Do not change the tag number or type of any fields in order to maintain compatibility with
+ * previous versions. If a field is deleted, use `reserved` to mark its tag number.
+ */
+message RemoteViewsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional int32 mode = 1;
+    optional string package_name = 2;
+    optional string layout_id = 3;
+    optional string light_background_layout_id = 4;
+    optional string view_id = 5;
+    optional SizeFProto ideal_size = 6;
+    optional int32 apply_flags = 7;
+    optional int64 provider_instance_id = 8;
+    // RemoteViews for different sizes (created with RemoteViews(Map<SizeF, RemoteViews)
+    // constructor).
+    repeated RemoteViewsProto sized_remoteviews = 9;
+    // RemoteViews for portrait/landscape (created with RemoteViews(RemoteViews, RemoteViews)i
+    // constructor).
+    optional RemoteViewsProto portrait_remoteviews = 10;
+    optional RemoteViewsProto landscape_remoteviews = 11;
+    optional bool is_root = 12;
+    optional bool has_draw_instructions = 13;
+    repeated bytes bitmap_cache = 14;
+    optional RemoteCollectionCache remote_collection_cache = 15;
+    repeated Action actions = 16;
+
+    message RemoteCollectionCache {
+        message Entry {
+            optional int64 id = 1;
+            optional string uri = 2;
+            optional RemoteCollectionItems items = 3;
+        }
+
+        repeated Entry entries = 1;
+    }
+
+    message RemoteCollectionItems {
+        repeated int64 ids = 1 [packed = true];
+        repeated RemoteViewsProto views = 2;
+        optional bool has_stable_ids = 3;
+        optional int32 view_type_count = 4;
+        optional bool attached = 5;
+    }
+
+    /**
+     * An android.graphics.drawable Icon.
+     */
+    message Icon {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional int32 blend_mode = 1;
+        optional android.content.res.ColorStateListProto tint_list = 2;
+        oneof icon {
+            bytes bitmap = 3;
+            string resource = 4;
+            bytes data = 5;
+            string uri = 6;
+            string uri_adaptive_bitmap = 7;
+            bytes adaptive_bitmap = 8;
+        };
+    }
+
+    /**
+     * Represents a CharSequence with Spans.
+     */
+    message CharSequence {
+        optional string text = 1;
+        repeated Span spans = 2;
+
+        message Span {
+            optional int32 start = 1;
+            optional int32 end = 2;
+            optional int32 flags = 3;
+            // We use `repeated` for the following fields so that ProtoOutputStream does not omit
+            // empty messages (e.g. EasyEdit, Superscript). In practice, only one of the following
+            // fields will be written per Span message. We cannot use `oneof` here because
+            // ProtoOutputStream will omit empty messages.
+            repeated AbsoluteSize absolute_size = 4;
+            repeated AccessibilityClickable accessibility_clickable = 5;
+            repeated AccessibilityReplacement accessibility_replacement = 6;
+            repeated AccessibilityUrl accessibility_url = 7;
+            repeated Alignment alignment = 8;
+            repeated Annotation annotation = 9;
+            repeated BackgroundColor background_color = 10;
+            repeated Bullet bullet = 11;
+            repeated EasyEdit easy_edit = 12;
+            repeated ForegroundColor foreground_color = 13;
+            repeated LeadingMargin leading_margin = 14;
+            repeated LineBackground line_background = 15;
+            repeated LineBreak line_break = 16;
+            repeated LineHeight line_height = 17;
+            repeated Locale locale = 18;
+            repeated Quote quote = 19;
+            repeated RelativeSize relative_size = 20;
+            repeated ScaleX scale_x = 21;
+            repeated SpellCheck spell_check = 22;
+            repeated Strikethrough strikethrough = 23;
+            repeated Style style = 24;
+            repeated Subscript subscript = 25;
+            repeated Suggestion suggestion = 26;
+            repeated SuggestionRange suggestion_range = 27;
+            repeated Superscript superscript = 28;
+            repeated TextAppearance text_appearance = 29;
+            repeated Tts tts = 30;
+            repeated Typeface typeface = 31;
+            repeated Underline underline = 32;
+            repeated Url url = 33;
+
+            message AbsoluteSize {
+                optional int32 size = 1;
+                optional bool dip = 2;
+            }
+
+            message AccessibilityClickable {
+                optional int32 original_clickable_span_id = 1;
+            }
+
+            message AccessibilityReplacement {
+                optional CharSequence content_description = 1;
+            }
+
+            message AccessibilityUrl {
+                optional string url = 1;
+            }
+
+            message Alignment {
+                optional string alignment = 1;
+            }
+
+            message Annotation {
+                optional string key = 1;
+                optional string value = 2;
+            }
+
+            message BackgroundColor {
+                optional int32 color = 1;
+            }
+
+            message Bullet {
+                optional int32 gap_width = 1;
+                optional int32 color = 2;
+                optional int32 bullet_radius = 3;
+                optional bool want_color = 4;
+            }
+
+            message EasyEdit {}
+
+            message ForegroundColor {
+                optional int32 color = 1;
+            }
+
+            message LeadingMargin {
+                optional int32 first = 1;
+                optional int32 rest = 2;
+            }
+
+            message LineBackground {
+                optional int32 color = 1;
+            }
+
+            message LineBreak {
+                optional int32 line_break_style = 1;
+                optional int32 line_break_word_style = 2;
+                optional int32 hyphenation = 3;
+            }
+
+            message LineHeight {
+                optional int32 height = 1;
+            }
+
+            message Locale {
+                optional string language_tags = 1;
+            }
+
+            message Quote {
+                optional int32 color = 1;
+                optional int32 stripe_width = 2;
+                optional int32 gap_width = 3;
+            }
+
+            message RelativeSize {
+                optional float proportion = 1;
+            }
+
+            message ScaleX {
+                optional float proportion = 1;
+            }
+
+            message SpellCheck {
+                optional bool in_progress = 1;
+            }
+
+            message Strikethrough {}
+
+            message Style {
+                optional int32 style = 1;
+                optional int32 font_weight_adjustment = 2;
+            }
+
+            message Subscript {}
+
+            message Suggestion {
+                repeated string suggestions = 1;
+                optional int32 flags = 2;
+                optional string locale_string_for_compatibility = 3;
+                optional string language_tag = 4;
+                optional int32 hash_code = 5;
+                optional int32 easy_correct_underline_color = 6;
+                optional float easy_correct_underline_thickness = 7;
+                optional int32 misspelled_underline_color = 8;
+                optional float misspelled_underline_thickness = 9;
+                optional int32 auto_correction_underline_color = 10;
+                optional float auto_correction_underline_thickness = 11;
+                optional int32 grammar_error_underline_color = 12;
+                optional float grammar_error_underline_thickness = 13;
+            }
+
+            message SuggestionRange {
+                optional int32 background_color = 1;
+            }
+
+            message Superscript {}
+
+            // Typeface is omitted
+            message TextAppearance {
+                optional string family_name = 1;
+                optional int32 style = 2;
+                optional int32 text_size = 3;
+                optional android.content.res.ColorStateListProto text_color = 4;
+                optional android.content.res.ColorStateListProto text_color_link = 5;
+                optional int32 text_font_weight = 7;
+                optional string text_locale = 8;
+                optional float shadow_radius = 9;
+                optional float shadow_dx = 10;
+                optional float shadow_dy = 11;
+                optional int32 shadow_color = 12;
+                optional bool has_elegant_text_height_field = 13;
+                optional bool elegant_text_height = 14;
+                optional bool has_letter_spacing_field = 15;
+                optional float letter_spacing = 16;
+                optional string font_feature_settings = 17;
+                optional string font_variation_settings = 18;
+            }
+
+            message Tts {
+                optional string type = 1;
+                optional string args = 2;
+            }
+
+            message Typeface {
+                optional string family = 1;
+            }
+
+            message Underline {}
+
+            message Url {
+                optional string url = 1;
+            }
+        }
+    }
+
+    message Action {
+        oneof action {
+            AttributeReflectionAction attribute_reflection_action = 1;
+            BitmapReflectionAction bitmap_reflection_action = 2;
+            ComplexUnitDimensionReflectionAction complex_unit_dimension_reflection_action = 3;
+            LayoutParamAction layout_param_action = 4;
+            NightModeReflectionAction night_mode_reflection_action = 5;
+            ReflectionAction reflection_action = 6;
+            RemoveFromParentAction remove_from_parent_action = 7;
+            ResourceReflectionAction resource_reflection_action = 8;
+            SetCompoundButtonCheckedAction set_compound_button_checked_action = 9;
+            SetDrawableTintAction set_drawable_tint_action = 10;
+            SetEmptyViewAction set_empty_view_action = 11;
+            SetIntTagAction set_int_tag_action = 12;
+            SetRadioGroupCheckedAction set_radio_group_checked_action = 13;
+            SetRemoteCollectionItemListAdapterAction set_remote_collection_item_list_adapter_action = 14;
+            SetRippleDrawableColorAction set_ripple_drawable_color_action = 15;
+        }
+    }
+
+    message AttributeReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        optional int32 resource_type = 4;
+        optional string attribute_id = 5;
+    }
+
+    message BitmapReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 bitmap_id = 3;
+    }
+
+    message ComplexUnitDimensionReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        optional float dimension_value = 4;
+        optional int32 unit = 5;
+    }
+
+    message LayoutParamAction {
+        optional string view_id = 1;
+        optional int32 property = 2;
+        optional int32 layout_value = 3;
+        optional int32 value_type = 4;
+    }
+
+    message NightModeReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        oneof light {
+            Icon light_icon = 4;
+            android.content.res.ColorStateListProto light_color_state_list = 5;
+            int32 light_int = 6;
+        }
+        oneof dark {
+            Icon dark_icon = 7;
+            android.content.res.ColorStateListProto dark_color_state_list = 8;
+            int32 dark_int = 9;
+        }
+    }
+
+    message ReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 parameter_type = 3;
+        oneof reflection_value {
+            bool boolean_value = 4;
+            bytes byte_value = 5;
+            int32 short_value = 6;
+            int32 int_value = 7;
+            int64 long_value = 8;
+            float float_value = 9;
+            double double_value = 10;
+            int32 char_value = 11;
+            string string_value = 12;
+            CharSequence char_sequence_value = 13;
+            string uri_value = 14;
+            bytes bitmap_value = 15;
+            android.content.res.ColorStateListProto color_state_list_value = 16;
+            Icon icon_value = 17;
+            int32 blend_mode_value = 18;
+            // Intent and Bundle values are excluded.
+        }
+    }
+
+    message RemoveFromParentAction {
+        optional string view_id = 1;
+    }
+
+    message ResourceReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 resource_type = 3;
+        optional string res_id = 4;
+        optional int32 parameter_type = 5;
+    }
+
+    message SetCompoundButtonCheckedAction {
+        optional string view_id = 1;
+        optional bool checked = 2;
+    }
+
+    message SetDrawableTintAction {
+        optional string view_id = 1;
+        optional bool target_background = 2;
+        optional int32 color_filter = 3;
+        optional int32 filter_mode = 4;
+    }
+
+    message SetEmptyViewAction {
+        optional string view_id = 1;
+        optional string empty_view_id = 2;
+    }
+
+    message SetIntTagAction {
+        optional string view_id = 1;
+        optional string key = 2;
+        optional int32 tag = 3;
+    }
+
+    message SetRadioGroupCheckedAction {
+        optional string view_id = 1;
+        optional string checked_id = 2;
+    }
+
+    message SetRemoteCollectionItemListAdapterAction {
+        optional string view_id = 1;
+        optional RemoteCollectionItems items = 2;
+    }
+
+    message SetRippleDrawableColorAction {
+        optional string view_id = 1;
+        optional android.content.res.ColorStateListProto color_state_list = 2;
+    }
+}
+
+
+message SizeFProto {
+    optional float width = 1;
+    optional float height = 2;
+}

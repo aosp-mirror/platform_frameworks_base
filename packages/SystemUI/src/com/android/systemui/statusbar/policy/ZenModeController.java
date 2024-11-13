@@ -24,7 +24,14 @@ import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 
 import com.android.systemui.statusbar.policy.ZenModeController.Callback;
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor;
 
+/**
+ * Callback-based controller for listening to (or making) zen mode changes. Please prefer using the
+ * Flow-based {@link ZenModeInteractor} for new code instead of this.
+ *
+ * TODO(b/308591859): This should eventually be replaced by ZenModeInteractor/ZenModeRepository.
+ */
 public interface ZenModeController extends CallbackController<Callback> {
     void setZen(int zen, Uri conditionId, String reason);
     int getZen();

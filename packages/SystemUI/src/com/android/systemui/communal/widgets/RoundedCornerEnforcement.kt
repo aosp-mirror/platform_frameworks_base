@@ -24,6 +24,7 @@ import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.BuildCompat.isAtLeastS
+import com.android.systemui.communal.util.DensityUtils
 import com.android.systemui.res.R
 import kotlin.math.min
 
@@ -82,7 +83,8 @@ internal object RoundedCornerEnforcement {
     /** Get the radius of the rounded rectangle defined in the host's resource. */
     private fun getOwnedEnforcedRadius(context: Context): Float {
         val res: Resources = context.resources
-        return res.getDimension(R.dimen.communal_enforced_rounded_corner_max_radius)
+        return res.getDimension(R.dimen.communal_enforced_rounded_corner_max_radius) *
+            DensityUtils.scalingAdjustment
     }
 
     /**

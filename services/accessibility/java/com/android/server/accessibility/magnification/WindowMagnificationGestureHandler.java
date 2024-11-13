@@ -147,7 +147,15 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     }
 
     @Override
+    void handleMouseOrStylusEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        // Window Magnification viewport doesn't move with mouse events (yet).
+    }
+
+    @Override
     void onMotionEventInternal(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (event.getSource() != SOURCE_TOUCHSCREEN) {
+            return;
+        }
         // To keep InputEventConsistencyVerifiers within GestureDetectors happy.
         mObservePanningScalingState.mPanningScalingHandler.onTouchEvent(event);
         mCurrentState.onMotionEvent(event, rawEvent, policyFlags);
@@ -470,12 +478,14 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                         mDetectSingleFingerTripleTap
                                 ? MagnificationGestureMatcher.GESTURE_TRIPLE_TAP
                                 : MagnificationGestureMatcher.GESTURE_SINGLE_TAP,
+                        MagnificationGestureMatcher.getMagnificationMultiTapTimeout(mContext),
                         null));
                 mGestureMatchers.add(new MultiTapAndHold(context,
                         mDetectSingleFingerTripleTap ? 3 : 1,
                         mDetectSingleFingerTripleTap
                                 ? MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD
                                 : MagnificationGestureMatcher.GESTURE_SINGLE_TAP_AND_HOLD,
+                        MagnificationGestureMatcher.getMagnificationMultiTapTimeout(mContext),
                         null));
                 mGestureMatchers.add(new TwoFingersDownOrSwipe(context));
 
@@ -495,12 +505,16 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                         mDetectSingleFingerTripleTap ? 3 : 1,
                         mDetectSingleFingerTripleTap
                                 ? MagnificationGestureMatcher.GESTURE_TRIPLE_TAP
-                                : MagnificationGestureMatcher.GESTURE_SINGLE_TAP, null);
+                                : MagnificationGestureMatcher.GESTURE_SINGLE_TAP,
+                        MagnificationGestureMatcher.getMagnificationMultiTapTimeout(mContext),
+                        null);
                 final MultiTapAndHold multiTapAndHold = new MultiTapAndHold(context,
                         mDetectSingleFingerTripleTap ? 3 : 1,
                         mDetectSingleFingerTripleTap
                                 ? MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD
-                                : MagnificationGestureMatcher.GESTURE_SINGLE_TAP_AND_HOLD, null);
+                                : MagnificationGestureMatcher.GESTURE_SINGLE_TAP_AND_HOLD,
+                        MagnificationGestureMatcher.getMagnificationMultiTapTimeout(mContext),
+                        null);
                 mGesturesObserver = new MagnificationGesturesObserver(this,
                         new SimpleSwipe(context),
                         multiTap,

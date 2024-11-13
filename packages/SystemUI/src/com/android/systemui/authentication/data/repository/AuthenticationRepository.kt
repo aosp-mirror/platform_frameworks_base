@@ -32,11 +32,11 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.onSubscriberAdded
@@ -254,7 +254,7 @@ constructor(
     override val hasLockoutOccurred: StateFlow<Boolean> = _hasLockoutOccurred.asStateFlow()
 
     init {
-        if (SceneContainerFlag.isEnabled) {
+        if (ComposeBouncerFlags.isComposeBouncerOrSceneContainerEnabled()) {
             // Hydrate failedAuthenticationAttempts initially and whenever the selected user
             // changes.
             applicationScope.launch {
@@ -288,6 +288,7 @@ constructor(
     override suspend fun reportAuthenticationAttempt(isSuccessful: Boolean) {
         withContext(backgroundDispatcher) {
             if (isSuccessful) {
+                lockPatternUtils.userPresent(selectedUserId)
                 lockPatternUtils.reportSuccessfulPasswordAttempt(selectedUserId)
                 _hasLockoutOccurred.value = false
             } else {

@@ -18,10 +18,12 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.log.table.logcatTableLogBuffer
 
 val Kosmos.fakeMobileConnectionsRepository by Fixture {
-    FakeMobileConnectionsRepository(tableLogBuffer = mock())
+    FakeMobileConnectionsRepository(
+        tableLogBuffer = logcatTableLogBuffer(this, "FakeMobileConnectionsRepository"),
+    )
 }
 
 val Kosmos.mobileConnectionsRepository by

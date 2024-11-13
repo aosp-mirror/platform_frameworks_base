@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.satellite.domain.interactor
 
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.telephony.flags.Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG
 import com.android.systemui.SysuiTestCase
@@ -38,8 +39,10 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
     private lateinit var underTest: DeviceBasedSatelliteInteractor
 
@@ -67,6 +70,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 wifiInteractor,
                 testScope.backgroundScope,
                 FakeLogBuffer.Factory.create(),
+                mock(),
             )
     }
 
@@ -110,6 +114,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.isSatelliteAllowed)
@@ -158,6 +163,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.connectionState)
@@ -214,6 +220,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.signalStrength)
@@ -532,6 +539,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
@@ -566,7 +574,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.isWifiActive)
 
             // WHEN wifi is active
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = 0, level = 1))
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(level = 1))
 
             // THEN the interactor returns true due to the wifi network being active
             assertThat(latest).isTrue()

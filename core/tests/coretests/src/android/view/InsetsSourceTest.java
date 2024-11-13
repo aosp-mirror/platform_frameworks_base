@@ -32,7 +32,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -16,8 +16,10 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.Flags;
@@ -27,7 +29,11 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
+import android.view.InputDevice;
 
+import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.XmlUtils;
 import com.android.internal.vibrator.persistence.XmlParserException;
 import com.android.internal.vibrator.persistence.XmlReader;
 import com.android.internal.vibrator.persistence.XmlValidator;
@@ -39,6 +45,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.util.Locale;
 
 /**
  * Class that loads custom {@link VibrationEffect} to be performed for each
@@ -89,66 +97,187 @@ final class HapticFeedbackCustomization {
     private static final String ATTRIBUTE_ID = "id";
 
     /**
-     * Parses the haptic feedback vibration customization XML file for the device, and provides a
-     * mapping of the customized effect IDs to their respective {@link VibrationEffect}s.
-     *
-     * <p>This is potentially expensive, so avoid calling repeatedly. One call is enough, and the
-     * caller should process the returned mapping (if any) for further queries.
-     *
-     * @param res {@link Resources} object to be used for reading the device's resources.
-     * @return a {@link SparseArray} that maps each customized haptic feedback effect ID to its
-     *      respective {@link VibrationEffect}, or {@code null}, if the device has not configured
-     *      a file for haptic feedback constants customization.
-     * @throws {@link IOException} if an IO error occurs while parsing the customization XML.
-     * @throws {@link CustomizationParserException} for any non-IO error that occurs when parsing
-     *      the XML, like an invalid XML content or an invalid haptic feedback constant.
+     * A {@link SparseArray} that maps each customized haptic feedback effect ID to its
+     * respective {@link VibrationEffect}. If this is empty, system's default vibration will be
+     * used.
      */
-    @Nullable
-    static SparseArray<VibrationEffect> loadVibrations(Resources res, VibratorInfo vibratorInfo)
-            throws CustomizationParserException, IOException {
-        try {
-            return loadVibrationsInternal(res, vibratorInfo);
-        } catch (VibrationXmlParser.VibrationXmlParserException
-                | XmlParserException
-                | XmlPullParserException e) {
-            throw new CustomizationParserException(
-                    "Error parsing haptic feedback customization file.", e);
+    @NonNull
+    private final SparseArray<VibrationEffect> mHapticCustomizations;
+
+    /**
+     * A {@link SparseArray} similar to {@link mHapticCustomizations} but for rotary input source
+     * specific customization.
+     */
+    @NonNull
+    private final SparseArray<VibrationEffect> mHapticCustomizationsForSourceRotary;
+
+    /**
+     * A {@link SparseArray} similar to {@link mHapticCustomizations} but for touch screen input
+     * source specific customization.
+     */
+    @NonNull
+    private final SparseArray<VibrationEffect> mHapticCustomizationsForSourceTouchScreen;
+
+    HapticFeedbackCustomization(Resources res, VibratorInfo vibratorInfo) {
+        if (!Flags.hapticFeedbackVibrationOemCustomizationEnabled()) {
+            Slog.d(TAG, "Haptic feedback customization feature is not enabled.");
+            mHapticCustomizations = new SparseArray<>();
+            mHapticCustomizationsForSourceRotary = new SparseArray<>();
+            mHapticCustomizationsForSourceTouchScreen = new SparseArray<>();
+            return;
+        }
+
+        // Load base customizations.
+        SparseArray<VibrationEffect> hapticCustomizations;
+        hapticCustomizations = loadCustomizedFeedbackVibrationFromFile(res, vibratorInfo);
+        if (hapticCustomizations.size() == 0) {
+            // Input source customized haptic feedback was directly added in res. So, no need to old
+            // loading path.
+            hapticCustomizations = loadCustomizedFeedbackVibrationFromRes(res, vibratorInfo,
+                    R.xml.haptic_feedback_customization);
+        }
+        mHapticCustomizations = hapticCustomizations;
+
+        // Load customizations specified by input sources.
+        if (android.os.vibrator.Flags.hapticFeedbackInputSourceCustomizationEnabled()) {
+            mHapticCustomizationsForSourceRotary =
+                    loadCustomizedFeedbackVibrationFromRes(res, vibratorInfo,
+                            R.xml.haptic_feedback_customization_source_rotary_encoder);
+            mHapticCustomizationsForSourceTouchScreen =
+                    loadCustomizedFeedbackVibrationFromRes(res, vibratorInfo,
+                            R.xml.haptic_feedback_customization_source_touchscreen);
+        } else {
+            mHapticCustomizationsForSourceRotary = new SparseArray<>();
+            mHapticCustomizationsForSourceTouchScreen = new SparseArray<>();
         }
     }
 
+    @VisibleForTesting
+    HapticFeedbackCustomization(@NonNull SparseArray<VibrationEffect> hapticCustomizations,
+            @NonNull SparseArray<VibrationEffect> hapticCustomizationsForSourceRotary,
+            @NonNull SparseArray<VibrationEffect> hapticCustomizationsForSourceTouchScreen) {
+        mHapticCustomizations = hapticCustomizations;
+        mHapticCustomizationsForSourceRotary = hapticCustomizationsForSourceRotary;
+        mHapticCustomizationsForSourceTouchScreen = hapticCustomizationsForSourceTouchScreen;
+    }
+
     @Nullable
-    private static SparseArray<VibrationEffect> loadVibrationsInternal(
-            Resources res, VibratorInfo vibratorInfo) throws
-                    CustomizationParserException,
-                    IOException,
-                    VibrationXmlParser.VibrationXmlParserException,
-                    XmlParserException,
-                    XmlPullParserException {
-        if (!Flags.hapticFeedbackVibrationOemCustomizationEnabled()) {
-            Slog.d(TAG, "Haptic feedback customization feature is not enabled.");
-            return null;
-        }
-        String customizationFile =
-                res.getString(
-                        com.android.internal.R.string.config_hapticFeedbackCustomizationFile);
-        if (TextUtils.isEmpty(customizationFile)) {
-            Slog.d(TAG, "Customization file not configured.");
-            return null;
-        }
+    VibrationEffect getEffect(int effectId) {
+        return mHapticCustomizations.get(effectId);
+    }
 
-        FileReader fileReader;
+    @Nullable
+    VibrationEffect getEffect(int effectId, int inputSource) {
+        VibrationEffect resultVibration = null;
+        if ((InputDevice.SOURCE_ROTARY_ENCODER & inputSource) != 0) {
+            resultVibration = mHapticCustomizationsForSourceRotary.get(effectId);
+        } else if ((InputDevice.SOURCE_TOUCHSCREEN & inputSource) != 0) {
+            resultVibration = mHapticCustomizationsForSourceTouchScreen.get(effectId);
+        }
+        if (resultVibration == null) {
+            resultVibration = mHapticCustomizations.get(effectId);
+        }
+        return resultVibration;
+    }
+
+    /**
+     * Parses the haptic feedback vibration customization XML file for the device whose directory is
+     * specified by config. See {@link R.string.config_hapticFeedbackCustomizationFile}.
+     *
+     * @return Return a mapping of the customized effect IDs to their respective
+     * {@link VibrationEffect}s.
+     */
+    @NonNull
+    private static SparseArray<VibrationEffect> loadCustomizedFeedbackVibrationFromFile(
+            Resources res, VibratorInfo vibratorInfo) {
         try {
-            fileReader = new FileReader(customizationFile);
-        } catch (FileNotFoundException e) {
-            Slog.d(TAG, "Specified customization file not found.");
-            return  null;
+            TypedXmlPullParser parser = readCustomizationFile(res);
+            if (parser == null) {
+                Slog.d(TAG, "No loadable haptic feedback customization from file.");
+                return new SparseArray<>();
+            }
+            return parseVibrations(parser, vibratorInfo);
+        } catch (XmlPullParserException | XmlParserException | IOException e) {
+            Slog.e(TAG, "Error parsing haptic feedback customizations from file", e);
+            return new SparseArray<>();
+        }
+    }
+
+    /**
+     * Parses the haptic feedback vibration customization XML resource for the device.
+     *
+     * @return Return a mapping of the customized effect IDs to their respective
+     * {@link VibrationEffect}s.
+     */
+    @NonNull
+    private static SparseArray<VibrationEffect> loadCustomizedFeedbackVibrationFromRes(
+            Resources res, VibratorInfo vibratorInfo, int xmlResId) {
+        try {
+            TypedXmlPullParser parser = readCustomizationResources(res, xmlResId);
+            if (parser == null) {
+                Slog.d(TAG, "No loadable haptic feedback customization from res.");
+                return new SparseArray<>();
+            }
+            return parseVibrations(parser, vibratorInfo);
+        } catch (XmlPullParserException | XmlParserException | IOException e) {
+            Slog.e(TAG, "Error parsing haptic feedback customizations from res", e);
+            return new SparseArray<>();
+        }
+    }
+
+    // TODO(b/356412421): deprecate old path related files.
+    private static TypedXmlPullParser readCustomizationFile(Resources res)
+            throws XmlPullParserException {
+        String customizationFile;
+        try {
+            customizationFile = res.getString(
+                    R.string.config_hapticFeedbackCustomizationFile);
+        } catch (Resources.NotFoundException e) {
+            Slog.e(TAG, "Customization file directory config not found.", e);
+            return null;
         }
 
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-        parser.setInput(fileReader);
+        if (TextUtils.isEmpty(customizationFile)) {
+            return null;
+        }
 
-        XmlReader.readDocumentStartTag(parser, TAG_CONSTANTS);
+        final Reader customizationReader;
+        try {
+            customizationReader = new FileReader(customizationFile);
+        } catch (FileNotFoundException e) {
+            Slog.e(TAG, "Specified customization file not found.", e);
+            return null;
+        }
+
+        final TypedXmlPullParser parser;
+        parser = Xml.newFastPullParser();
+        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+        parser.setInput(customizationReader);
+        Slog.d(TAG, "Successfully opened customization file.");
+        return parser;
+    }
+
+    @Nullable
+    private static TypedXmlPullParser readCustomizationResources(Resources res, int xmlResId) {
+        if (!Flags.loadHapticFeedbackVibrationCustomizationFromResources()) {
+            return null;
+        }
+        final XmlResourceParser resParser;
+        try {
+            resParser = res.getXml(xmlResId);
+        } catch (Resources.NotFoundException e) {
+            Slog.e(TAG, "Haptic customization resource not found.", e);
+            return null;
+        }
+        Slog.d(TAG, "Successfully opened customization resource.");
+        return XmlUtils.makeTyped(resParser);
+    }
+
+    @NonNull
+    private static SparseArray<VibrationEffect> parseVibrations(TypedXmlPullParser parser,
+            VibratorInfo vibratorInfo)
+            throws XmlPullParserException, IOException, XmlParserException {
+        XmlUtils.beginDocument(parser, TAG_CONSTANTS);
         XmlValidator.checkTagHasNoUnexpectedAttributes(parser);
         int rootDepth = parser.getDepth();
 
@@ -161,8 +290,8 @@ final class HapticFeedbackCustomization {
             XmlValidator.checkTagHasNoUnexpectedAttributes(parser, ATTRIBUTE_ID);
             int effectId = XmlReader.readAttributeIntNonNegative(parser, ATTRIBUTE_ID);
             if (mapping.contains(effectId)) {
-                throw new CustomizationParserException(
-                        "Multiple customizations found for effect " + effectId);
+                Slog.e(TAG, "Multiple customizations found for effect " + effectId);
+                return new SparseArray<>();
             }
 
             // Move the parser one step into the `<constant>` tag.
@@ -172,16 +301,13 @@ final class HapticFeedbackCustomization {
 
             ParsedVibration parsedVibration = VibrationXmlParser.parseElement(
                     parser, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS);
-            if (parsedVibration == null) {
-                throw new CustomizationParserException(
-                        "Unable to parse vibration element for effect " + effectId);
-            }
             VibrationEffect effect = parsedVibration.resolve(vibratorInfo);
             if (effect != null) {
                 if (effect.getDuration() == Long.MAX_VALUE) {
-                    throw new CustomizationParserException(String.format(
+                    Slog.e(TAG, String.format(Locale.getDefault(),
                             "Vibration for effect ID %d is repeating, which is not allowed as a"
-                            + " haptic feedback: %s", effectId, effect));
+                                    + " haptic feedback: %s", effectId, effect));
+                    return new SparseArray<>();
                 }
                 mapping.put(effectId, effect);
             }
@@ -194,18 +320,5 @@ final class HapticFeedbackCustomization {
         XmlReader.readDocumentEndTag(parser);
 
         return mapping;
-    }
-
-    /**
-     * Represents an error while parsing a haptic feedback customization XML.
-     */
-    static final class CustomizationParserException extends Exception {
-        private CustomizationParserException(String message) {
-            super(message);
-        }
-
-        private CustomizationParserException(String message, Throwable cause) {
-            super(message, cause);
-        }
     }
 }

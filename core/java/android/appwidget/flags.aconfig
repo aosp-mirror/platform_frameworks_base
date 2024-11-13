@@ -50,3 +50,17 @@ flag {
       purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "remote_views_proto"
+  namespace: "app_widgets"
+  description: "Enable support for persisting RemoteViews previews to Protobuf"
+  bug: "306546610"
+}
+
+flag {
+  name: "remote_document_support"
+  namespace: "app_widgets"
+  description: "Remote document support features in Q2 2025 release"
+  bug: "339721781"
+}

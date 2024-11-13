@@ -26,14 +26,32 @@ import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
 data class StatusBarVisibilityModel(
     val showClock: Boolean,
     val showNotificationIcons: Boolean,
-    val showOngoingActivityChip: Boolean,
+    val showPrimaryOngoingActivityChip: Boolean,
+    val showSecondaryOngoingActivityChip: Boolean,
     val showSystemInfo: Boolean,
 ) {
+    fun isOngoingActivityStatusDifferentFrom(other: StatusBarVisibilityModel): Boolean {
+        return this.showPrimaryOngoingActivityChip != other.showPrimaryOngoingActivityChip ||
+            this.showSecondaryOngoingActivityChip != other.showSecondaryOngoingActivityChip
+    }
+
     companion object {
         /** Creates the default model. */
         @JvmStatic
         fun createDefaultModel(): StatusBarVisibilityModel {
             return createModelFromFlags(DISABLE_NONE, DISABLE2_NONE)
+        }
+
+        /** Creates a model that hides every piece of the status bar. */
+        @JvmStatic
+        fun createHiddenModel(): StatusBarVisibilityModel {
+            return StatusBarVisibilityModel(
+                showClock = false,
+                showNotificationIcons = false,
+                showPrimaryOngoingActivityChip = false,
+                showSecondaryOngoingActivityChip = false,
+                showSystemInfo = false,
+            )
         }
 
         /**
@@ -48,7 +66,8 @@ data class StatusBarVisibilityModel(
                 showNotificationIcons = (disabled1 and DISABLE_NOTIFICATION_ICONS) == 0,
                 // TODO(b/279899176): [CollapsedStatusBarFragment] always overwrites this with the
                 //  value of [OngoingCallController]. Do we need to process the flag here?
-                showOngoingActivityChip = (disabled1 and DISABLE_ONGOING_CALL_CHIP) == 0,
+                showPrimaryOngoingActivityChip = (disabled1 and DISABLE_ONGOING_CALL_CHIP) == 0,
+                showSecondaryOngoingActivityChip = (disabled1 and DISABLE_ONGOING_CALL_CHIP) == 0,
                 showSystemInfo =
                     (disabled1 and DISABLE_SYSTEM_INFO) == 0 &&
                         (disabled2 and DISABLE2_SYSTEM_ICONS) == 0

@@ -46,6 +46,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.ImageView;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.res.R;
@@ -76,6 +77,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
     private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private final ImageView mImageView;
     private final Runnable mWindowInsetChangeRunnable;
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
@@ -99,17 +101,21 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         void onClick(int displayId);
     }
 
-    MagnificationModeSwitch(@UiContext Context context, ClickListener clickListener) {
-        this(context, createView(context), new SfVsyncFrameCallbackProvider(), clickListener);
+    MagnificationModeSwitch(@UiContext Context context, ClickListener clickListener,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
+        this(context, createView(context), new SfVsyncFrameCallbackProvider(), clickListener,
+                viewCaptureAwareWindowManager);
     }
 
     @VisibleForTesting
     MagnificationModeSwitch(Context context, @NonNull ImageView imageView,
-            SfVsyncFrameCallbackProvider sfVsyncFrameProvider, ClickListener clickListener) {
+            SfVsyncFrameCallbackProvider sfVsyncFrameProvider, ClickListener clickListener,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context;
         mConfiguration = new Configuration(context.getResources().getConfiguration());
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = mContext.getSystemService(WindowManager.class);
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mClickListener = clickListener;
         mParams = createLayoutParams(context);
@@ -276,7 +282,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         mImageView.animate().cancel();
         mIsFadeOutAnimating = false;
         mImageView.setAlpha(0f);
-        mWindowManager.removeView(mImageView);
+        mViewCaptureAwareWindowManager.removeView(mImageView);
         mContext.unregisterComponentCallbacks(this);
         mIsVisible = false;
     }
@@ -310,7 +316,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                 mParams.y = mDraggableWindowBounds.bottom;
                 mToLeftScreenEdge = false;
             }
-            mWindowManager.addView(mImageView, mParams);
+            mViewCaptureAwareWindowManager.addView(mImageView, mParams);
             // Exclude magnification switch button from system gesture area.
             setSystemGestureExclusion();
             mIsVisible = true;

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -74,6 +75,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
          * @param locale    the locale picked.
          */
         void onLocaleSelected(LocaleStore.LocaleInfo locale);
+        default void onParentLocaleSelected(LocaleStore.LocaleInfo locale) {}
     }
 
     /**
@@ -264,6 +266,11 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     public void onListItemClick(ListView parent, View v, int position, long id) {
         final LocaleStore.LocaleInfo locale =
                 (LocaleStore.LocaleInfo) parent.getAdapter().getItem(position);
+         if (locale == null) {
+            Log.d(TAG, "Can not get the locale.");
+            return;
+        }
+
         // Special case for resetting the app locale to equal the system locale.
         boolean isSystemLocale = locale.isSystemLocale();
         boolean isRegionLocale = locale.getParent() != null;
@@ -292,7 +299,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
                         mListener, locale, mTranslatedOnly /* translate only */,
                         mOnActionExpandListener, this.mLocalePickerCollector);
             }
-
+            mListener.onParentLocaleSelected(locale);
             if (selector != null) {
                 getFragmentManager().beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)

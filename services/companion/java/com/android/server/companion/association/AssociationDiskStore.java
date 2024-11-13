@@ -454,10 +454,10 @@ public final class AssociationDiskStore {
             @NonNull Associations associations)
             throws IOException {
         final XmlSerializer serializer = parent.startTag(null, XML_TAG_ASSOCIATIONS);
+        writeIntAttribute(serializer, XML_ATTR_MAX_ID, associations.getMaxId());
         for (AssociationInfo association : associations.getAssociations()) {
             writeAssociation(serializer, association);
         }
-        writeIntAttribute(serializer, XML_ATTR_MAX_ID, associations.getMaxId());
         serializer.endTag(null, XML_TAG_ASSOCIATIONS);
     }
 

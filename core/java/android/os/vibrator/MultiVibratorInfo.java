@@ -59,7 +59,13 @@ public final class MultiVibratorInfo extends VibratorInfo {
                 integerLimitIntersection(vibrators, VibratorInfo::getPwlePrimitiveDurationMax),
                 integerLimitIntersection(vibrators, VibratorInfo::getPwleSizeMax),
                 floatPropertyIntersection(vibrators, VibratorInfo::getQFactor),
-                mergedProfile);
+                mergedProfile,
+                integerLimitIntersection(vibrators,
+                        VibratorInfo::getMaxEnvelopeEffectSize),
+                integerLimitIntersection(vibrators,
+                        VibratorInfo::getMinEnvelopeEffectControlPointDurationMillis),
+                integerLimitIntersection(vibrators,
+                        VibratorInfo::getMaxEnvelopeEffectControlPointDurationMillis));
     }
 
     private static int capabilitiesIntersection(VibratorInfo[] infos,

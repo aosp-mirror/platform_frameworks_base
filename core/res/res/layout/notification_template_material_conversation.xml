@@ -107,13 +107,20 @@
         >
         <!--expand_button_container is dynamically placed between here and at the end of the
         layout. It starts here since only FrameLayout layout params have gravity-->
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/expand_button_container"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="end|top"
             android:clipChildren="false"
-            android:clipToPadding="false">
+            android:clipToPadding="false"
+            android:orientation="vertical">
+            <include layout="@layout/notification_close_button"
+                android:layout_width="@dimen/notification_close_button_size"
+                android:layout_height="@dimen/notification_close_button_size"
+                android:layout_gravity="end"
+                android:layout_marginEnd="20dp"
+                />
             <!--expand_button_touch_container makes sure that we can nicely center the expand
             content in the collapsed layout while the parent makes sure that we're never laid out
             bigger than the messaging content.-->
@@ -145,6 +152,6 @@
                     android:layout_gravity="center"
                     />
             </LinearLayout>
-        </FrameLayout>
+        </LinearLayout>
     </FrameLayout>
 </com.android.internal.widget.ConversationLayout>

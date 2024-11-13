@@ -96,4 +96,11 @@ public interface ShellExecutor extends Executor {
      * See {@link android.os.Handler#hasCallbacks(Runnable)}.
      */
     boolean hasCallback(Runnable runnable);
+
+    /**
+     * May throw if the caller is not on the same thread as the executor.
+     */
+    default void assertCurrentThread() {
+       return;
+    }
 }

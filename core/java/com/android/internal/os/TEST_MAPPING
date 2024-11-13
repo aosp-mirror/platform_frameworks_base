@@ -14,7 +14,7 @@
         "Kernel[^/]*\\.java",
         "[^/]*Power[^/]*\\.java"
       ],
-      "name": "BatteryUsageStatsProtoTests"
+      "name": "PowerStatsTests"
     },
     {
       "file_patterns": [

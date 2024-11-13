@@ -59,7 +59,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -152,9 +151,7 @@ public class SnapshotDrawerUtils {
         @VisibleForTesting
         public void setFrames(Rect frame, Rect systemBarInsets) {
             mFrame.set(frame);
-            final Rect letterboxInsets = mSnapshot.getLetterboxInsets();
-            mSizeMismatch = (mFrame.width() != mSnapshotW || mFrame.height() != mSnapshotH)
-                    || letterboxInsets.left != 0 || letterboxInsets.top != 0;
+            mSizeMismatch = (mFrame.width() != mSnapshotW || mFrame.height() != mSnapshotH);
             if (!Flags.drawSnapshotAspectRatioMatch() && systemBarInsets != null) {
                 mSystemBarInsets.set(systemBarInsets);
                 mSystemBarBackgroundPainter.setInsets(systemBarInsets);
@@ -189,7 +186,6 @@ public class SnapshotDrawerUtils {
 
         private void drawSizeMismatchSnapshot() {
             final HardwareBuffer buffer = mSnapshot.getHardwareBuffer();
-            final SurfaceSession session = new SurfaceSession();
 
             // We consider nearly matched dimensions as there can be rounding errors and the user
             // won't notice very minute differences from scaling one dimension more than the other
@@ -197,7 +193,7 @@ public class SnapshotDrawerUtils {
                     && !Flags.drawSnapshotAspectRatioMatch();
 
             // Keep a reference to it such that it doesn't get destroyed when finalized.
-            SurfaceControl childSurfaceControl = new SurfaceControl.Builder(session)
+            SurfaceControl childSurfaceControl = new SurfaceControl.Builder()
                     .setName(mTitle + " - task-snapshot-surface")
                     .setBLASTLayer()
                     .setFormat(buffer.getFormat())
@@ -419,8 +415,7 @@ public class SnapshotDrawerUtils {
         final WindowManager.LayoutParams attrs = Flags.drawSnapshotAspectRatioMatch()
                 ? info.mainWindowLayoutParams : info.topOpaqueWindowLayoutParams;
         final WindowManager.LayoutParams mainWindowParams = info.mainWindowLayoutParams;
-        final InsetsState topWindowInsetsState = info.topOpaqueWindowInsetsState;
-        if (attrs == null || mainWindowParams == null || topWindowInsetsState == null) {
+        if (attrs == null || mainWindowParams == null) {
             Log.w(TAG, "unable to create taskSnapshot surface ");
             return null;
         }
@@ -463,7 +458,10 @@ public class SnapshotDrawerUtils {
         return layoutParams;
     }
 
-    static Rect getSystemBarInsets(Rect frame, InsetsState state) {
+    static Rect getSystemBarInsets(Rect frame, @Nullable InsetsState state) {
+        if (state == null) {
+            return new Rect();
+        }
         return state.calculateInsets(frame, WindowInsets.Type.systemBars(),
                 false /* ignoreVisibility */).toRect();
     }

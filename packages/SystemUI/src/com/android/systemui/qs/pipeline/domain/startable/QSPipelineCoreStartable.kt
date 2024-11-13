@@ -18,8 +18,6 @@ package com.android.systemui.qs.pipeline.domain.startable
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.flags.NewQsUI
-import com.android.systemui.qs.panels.domain.interactor.GridConsistencyInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.AccessibilityTilesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.AutoAddInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -36,18 +34,11 @@ constructor(
     private val autoAddInteractor: AutoAddInteractor,
     private val featureFlags: QSPipelineFlagsRepository,
     private val restoreReconciliationInteractor: RestoreReconciliationInteractor,
-    private val gridConsistencyInteractor: GridConsistencyInteractor,
 ) : CoreStartable {
 
     override fun start() {
-        if (featureFlags.pipelineEnabled) {
-            accessibilityTilesInteractor.init(currentTilesInteractor)
-            autoAddInteractor.init(currentTilesInteractor)
-            restoreReconciliationInteractor.start()
-
-            if (NewQsUI.isEnabled) {
-                gridConsistencyInteractor.start()
-            }
-        }
+        accessibilityTilesInteractor.init(currentTilesInteractor)
+        autoAddInteractor.init(currentTilesInteractor)
+        restoreReconciliationInteractor.start()
     }
 }

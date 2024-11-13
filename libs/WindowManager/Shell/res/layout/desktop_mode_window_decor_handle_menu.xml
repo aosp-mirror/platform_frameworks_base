@@ -17,8 +17,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/handle_menu"
     android:layout_width="@dimen/desktop_mode_handle_menu_width"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingBottom="@dimen/desktop_mode_handle_menu_pill_elevation"
+    android:paddingRight="@dimen/desktop_mode_handle_menu_pill_elevation"
     android:orientation="vertical">
 
     <LinearLayout
@@ -27,7 +32,7 @@
         android:layout_height="@dimen/desktop_mode_handle_menu_app_info_pill_height"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_margin_top"
         android:layout_marginStart="1dp"
-        android:elevation="1dp"
+        android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
         android:orientation="horizontal"
         android:background="@drawable/desktop_mode_decor_handle_menu_background"
         android:gravity="center_vertical">
@@ -38,13 +43,15 @@
             android:layout_height="@dimen/desktop_mode_caption_icon_radius"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="12dp"
-            android:contentDescription="@string/app_icon_text"/>
+            android:contentDescription="@string/app_icon_text"
+            android:importantForAccessibility="no"/>
 
         <TextView
             android:id="@+id/application_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="Gmail"
+            android:importantForAccessibility="no"
             android:textColor="?androidprv:attr/materialColorOnSurface"
             android:textSize="14sp"
             android:textFontWeight="500"
@@ -73,7 +80,7 @@
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
         android:layout_marginStart="1dp"
         android:orientation="horizontal"
-        android:elevation="1dp"
+        android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
         android:background="@drawable/desktop_mode_decor_handle_menu_background"
         android:gravity="center_vertical">
 
@@ -120,11 +127,11 @@
     <LinearLayout
         android:id="@+id/more_actions_pill"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/desktop_mode_handle_menu_more_actions_pill_height"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
         android:layout_marginStart="1dp"
         android:orientation="vertical"
-        android:elevation="1dp"
+        android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
         android:background="@drawable/desktop_mode_decor_handle_menu_background">
 
         <Button
@@ -132,6 +139,41 @@
             android:contentDescription="@string/screenshot_text"
             android:text="@string/screenshot_text"
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_screenshot"
+            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            style="@style/DesktopModeHandleMenuActionButton"/>
+
+        <Button
+            android:id="@+id/new_window_button"
+            android:contentDescription="@string/new_window_text"
+            android:text="@string/new_window_text"
+            android:drawableStart="@drawable/desktop_mode_ic_handle_menu_new_window"
+            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            style="@style/DesktopModeHandleMenuActionButton" />
+
+        <Button
+            android:id="@+id/manage_windows_button"
+            android:contentDescription="@string/manage_windows_text"
+            android:text="@string/manage_windows_text"
+            android:drawableStart="@drawable/desktop_mode_ic_handle_menu_manage_windows"
+            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            style="@style/DesktopModeHandleMenuActionButton" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/open_in_browser_pill"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/desktop_mode_handle_menu_open_in_browser_pill_height"
+        android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
+        android:layout_marginStart="1dp"
+        android:orientation="vertical"
+        android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
+        android:background="@drawable/desktop_mode_decor_handle_menu_background">
+
+        <Button
+            android:id="@+id/open_in_browser_button"
+            android:contentDescription="@string/open_in_browser_text"
+            android:text="@string/open_in_browser_text"
+            android:drawableStart="@drawable/desktop_mode_ic_handle_menu_open_in_browser"
             android:drawableTint="?androidprv:attr/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton"/>
     </LinearLayout>

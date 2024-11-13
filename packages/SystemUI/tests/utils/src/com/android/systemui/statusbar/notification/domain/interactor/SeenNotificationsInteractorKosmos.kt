@@ -16,12 +16,32 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import android.os.UserHandle
+import android.provider.Settings
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.util.settings.fakeSettings
 
 val Kosmos.seenNotificationsInteractor by Fixture {
     SeenNotificationsInteractor(
+        bgDispatcher = testDispatcher,
         notificationListRepository = activeNotificationListRepository,
+        secureSettings = fakeSettings,
     )
 }
+
+var Kosmos.lockScreenShowOnlyUnseenNotificationsSetting: Boolean
+    get() =
+        fakeSettings.getIntForUser(
+            Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+            UserHandle.USER_CURRENT,
+        ) == 1
+    set(value) {
+        fakeSettings.putIntForUser(
+            Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+            if (value) 1 else 2,
+            UserHandle.USER_CURRENT,
+        )
+    }

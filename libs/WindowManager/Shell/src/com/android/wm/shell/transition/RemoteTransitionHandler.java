@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.transition;
 
-import static com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary;
+import static com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,7 +39,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
@@ -257,7 +257,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     @Override
     public Transitions.TransitionHandler getHandlerForTakeover(
             @NonNull IBinder transition, @NonNull TransitionInfo info) {
-        if (!returnAnimationFrameworkLibrary()) {
+        if (!returnAnimationFrameworkLongLived()) {
             return null;
         }
 

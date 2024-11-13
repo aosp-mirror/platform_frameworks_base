@@ -16,10 +16,12 @@
 
 package com.android.server.location.contexthub;
 
+import android.chre.flags.Flags;
 import android.hardware.location.NanoAppMessage;
 import android.util.Log;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * A class to log events and useful metrics within the Context Hub service.
@@ -149,10 +151,20 @@ public class ContextHubEventLogger {
          */
         public final NanoAppMessage message;
 
+        /**
+         * the error code for the message
+         */
+        public Optional<Byte> errorCode;
+
         public NanoappMessageEvent(long mTimeStampInMs, int mContextHubId,
                                    NanoAppMessage mMessage, boolean mSuccess) {
             super(mTimeStampInMs, mContextHubId, 0, mSuccess);
             message = mMessage;
+            errorCode = Optional.empty();
+        }
+
+        public void setErrorCode(byte errorCode) {
+            this.errorCode = Optional.of(errorCode);
         }
 
         @Override
@@ -165,6 +177,8 @@ public class ContextHubEventLogger {
             sb.append(message.toString());
             sb.append(", success = ");
             sb.append(success ? "true" : "false");
+            sb.append(", errorCode = ");
+            sb.append(errorCode.isPresent() ? errorCode.get() : "null");
             sb.append(']');
             return sb.toString();
         }
@@ -308,6 +322,28 @@ public class ContextHubEventLogger {
         boolean status = mMessageToNanoappQueue.add(event);
         if (!status) {
             Log.e(TAG, "Unable to add message to nanoapp event to queue: " + event);
+        }
+    }
+
+    /**
+     * Logs the status of a reliable message
+     *
+     * @param messageSequenceNumber the message sequence number
+     * @param errorCode the error code
+     */
+    public synchronized void logReliableMessageToNanoappStatus(
+            int messageSequenceNumber, byte errorCode) {
+        if (!Flags.reliableMessage()) {
+            return;
+        }
+
+        for (NanoappMessageEvent event : mMessageToNanoappQueue) {
+            if (event.message.isReliable()
+                    && event.message.getMessageSequenceNumber()
+                            == messageSequenceNumber) {
+                event.setErrorCode(errorCode);
+                break;
+            }
         }
     }
 

@@ -74,7 +74,6 @@ public abstract class ClockRegistryModule {
                 clockBuffers,
                 /* keepAllLoaded = */ false,
                 /* subTag = */ "System",
-                /* isTransitClockEnabled = */ featureFlags.isEnabled(Flags.TRANSIT_CLOCK),
                 new ThreadAssert());
         registry.registerListeners();
         return registry;

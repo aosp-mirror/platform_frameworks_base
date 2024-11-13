@@ -48,3 +48,30 @@ flag {
        purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+   name: "create_work_chain_by_default"
+   namespace: "backstage_power"
+   description: "Create a workchain by default when acquiring a wakelock"
+   bug: "352676818"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "remove_user_during_user_switch"
+   namespace: "backstage_power"
+   description: "Remove started user if user will be stopped due to user switch"
+   bug: "321598070"
+}
+
+flag {
+   name: "use_correct_process_state_for_logging"
+   namespace: "backstage_power"
+   description: "Use correct process state for statsd logging"
+   bug: "361308212"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}

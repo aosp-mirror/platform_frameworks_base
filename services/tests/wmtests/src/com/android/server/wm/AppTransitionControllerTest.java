@@ -94,6 +94,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     public void setUp() throws Exception {
         assumeFalse(WindowManagerService.sEnableShellTransitions);
         mAppTransitionController = new AppTransitionController(mWm, mDisplayContent);
+        mWm.mAnimator.ready();
     }
 
     @Test
@@ -855,7 +856,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(activity, null /* closingActivity */, taskFragment);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // Animation run by the remote handler.
         assertTrue(remoteAnimationRunner.isAnimationStarted());
@@ -886,7 +887,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Prepare and start transition.
         prepareAndTriggerAppTransition(openingActivity, closingActivity,
                 null /* changingTaskFragment */);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // Animation is not run by the remote handler because the activity is filling the Task.
         assertFalse(remoteAnimationRunner.isAnimationStarted());
@@ -921,7 +922,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Prepare and start transition.
         prepareAndTriggerAppTransition(openingActivity, closingActivity,
                 null /* changingTaskFragment */);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // Animation run by the remote handler.
         assertTrue(remoteAnimationRunner.isAnimationStarted());
@@ -946,7 +947,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // Animation run by the remote handler.
         assertTrue(remoteAnimationRunner.isAnimationStarted());
@@ -973,7 +974,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment1);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // Animation run by the remote handler.
         assertTrue(remoteAnimationRunner.isAnimationStarted());
@@ -997,7 +998,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // Animation not run by the remote handler.
         assertFalse(remoteAnimationRunner.isAnimationStarted());
@@ -1024,7 +1025,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // Animation should not run by the remote handler when there are non-embedded activities of
         // different UID.
@@ -1051,7 +1052,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(activity, null /* closingActivity */, taskFragment);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // Animation should not run by the remote handler when there is wallpaper in the transition.
         assertFalse(remoteAnimationRunner.isAnimationStarted());
@@ -1085,7 +1086,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(activity1, null /* closingActivity */, taskFragment);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // The animation will be animated remotely by client and all activities are input disabled
         // for untrusted animation.
@@ -1136,7 +1137,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(activity, null /* closingActivity */, taskFragment);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // The animation will be animated remotely by client and all activities are input disabled
         // for untrusted animation.
@@ -1178,7 +1179,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         // Prepare and start transition.
         prepareAndTriggerAppTransition(activity, null /* closingActivity */, taskFragment);
-        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+        waitUntilWindowAnimatorIdle();
 
         // The animation will be animated remotely by client, but input should not be dropped for
         // fully trusted.

@@ -22,6 +22,7 @@ import static android.app.StatusBarManager.SESSION_KEYGUARD;
 
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -36,6 +37,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
@@ -63,6 +65,7 @@ public class SessionTracker implements CoreStartable {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final UiEventLogger mUiEventLogger;
+    private final ProcessWrapper mProcessWrapper;
     private final Map<Integer, InstanceId> mSessionToInstanceId = new HashMap<>();
 
     private boolean mKeyguardSessionStarted;
@@ -73,13 +76,15 @@ public class SessionTracker implements CoreStartable {
             AuthController authController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardStateController keyguardStateController,
-            UiEventLogger uiEventLogger
+            UiEventLogger uiEventLogger,
+            ProcessWrapper processWrapper
     ) {
         mStatusBarManagerService = statusBarService;
         mAuthController = authController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardStateController = keyguardStateController;
         mUiEventLogger = uiEventLogger;
+        mProcessWrapper = processWrapper;
     }
 
     @Override
@@ -109,6 +114,16 @@ public class SessionTracker implements CoreStartable {
 
         final InstanceId instanceId = mInstanceIdGenerator.newInstanceId();
         mSessionToInstanceId.put(type, instanceId);
+
+        if (UserManager.isVisibleBackgroundUsersEnabled() && !mProcessWrapper.isSystemUser()
+                && !mProcessWrapper.isForegroundUser()) {
+            // TODO: b/341604160 - Support visible background users properly.
+            if (DEBUG) {
+                Log.d(TAG, "Status bar manager is disabled for visible background users");
+            }
+            return;
+        }
+
         try {
             if (DEBUG) {
                 Log.d(TAG, "Session start for [" + getString(type) + "] id=" + instanceId);
@@ -138,6 +153,14 @@ public class SessionTracker implements CoreStartable {
             }
             if (endSessionUiEvent != null) {
                 mUiEventLogger.log(endSessionUiEvent, instanceId);
+            }
+            if (UserManager.isVisibleBackgroundUsersEnabled() && !mProcessWrapper.isSystemUser()
+                    && !mProcessWrapper.isForegroundUser()) {
+                // TODO: b/341604160 - Support visible background users properly.
+                if (DEBUG) {
+                    Log.d(TAG, "Status bar manager is disabled for visible background users");
+                }
+                return;
             }
             mStatusBarManagerService.onSessionEnded(type, instanceId);
         } catch (RemoteException e) {

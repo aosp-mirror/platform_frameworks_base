@@ -165,7 +165,7 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
 
         assertTrue(resultContains(
                 callShellCommand("reset-throttling", "--user", "10"),
-                "User 10 is not running or locked"));
+                "User (with userId=10) is not running or locked"));
 
         mRunningUsers.put(USER_10, true);
 

@@ -3,8 +3,8 @@ package com.android.systemui.shade
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.view.DisplayCutout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -21,7 +21,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class QsBatteryModeControllerTest : SysuiTestCase() {
 
     private companion object {

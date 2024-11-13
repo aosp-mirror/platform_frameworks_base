@@ -20,6 +20,7 @@ import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -31,7 +32,8 @@ import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.Cuj.CujType;
-import com.android.wm.shell.common.InteractionJankMonitorUtils;
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import java.lang.ref.WeakReference;
 
@@ -48,6 +50,8 @@ public class BackAnimationRunner {
     private final IRemoteAnimationRunner mRunner;
     private final @CujType int mCujType;
     private final Context mContext;
+    @ShellMainThread
+    private final Handler mHandler;
 
     // Whether we are waiting to receive onAnimationStart
     private boolean mWaitingAnimation;
@@ -59,18 +63,35 @@ public class BackAnimationRunner {
             @NonNull IOnBackInvokedCallback callback,
             @NonNull IRemoteAnimationRunner runner,
             @NonNull Context context,
-            @CujType int cujType) {
+            @CujType int cujType,
+            @ShellMainThread Handler handler) {
         mCallback = callback;
         mRunner = runner;
         mCujType = cujType;
         mContext = context;
+        mHandler = handler;
     }
 
     public BackAnimationRunner(
             @NonNull IOnBackInvokedCallback callback,
             @NonNull IRemoteAnimationRunner runner,
-            @NonNull Context context) {
-        this(callback, runner, context, NO_CUJ);
+            @NonNull Context context,
+            @ShellMainThread Handler handler
+    ) {
+        this(callback, runner, context, NO_CUJ, handler);
+    }
+
+    /**
+     * @deprecated Use {@link BackAnimationRunner} constructor providing an handler for the ui
+     * thread of the animation.
+     */
+    @Deprecated
+    public BackAnimationRunner(
+            @NonNull IOnBackInvokedCallback callback,
+            @NonNull IRemoteAnimationRunner runner,
+            @NonNull Context context
+    ) {
+        this(callback, runner, context, NO_CUJ, context.getMainThreadHandler());
     }
 
     /** Returns the registered animation runner */
@@ -102,7 +123,7 @@ public class BackAnimationRunner {
                 return;
             }
             if (runner.shouldMonitorCUJ(runner.mApps)) {
-                InteractionJankMonitorUtils.endTracing(runner.mCujType);
+                InteractionJankMonitor.getInstance().end(runner.mCujType);
             }
 
             runner.mFinishedCallback.run();
@@ -123,13 +144,14 @@ public class BackAnimationRunner {
      */
     void startAnimation(RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
             RemoteAnimationTarget[] nonApps, Runnable finishedCallback) {
+        InteractionJankMonitor interactionJankMonitor = InteractionJankMonitor.getInstance();
         mFinishedCallback = finishedCallback;
         mApps = apps;
         if (mRemoteCallback == null) mRemoteCallback = new RemoteAnimationFinishedStub(this);
         mWaitingAnimation = false;
         if (shouldMonitorCUJ(apps)) {
-            InteractionJankMonitorUtils.beginTracing(
-                    mCujType, mContext, apps[0].leash, /* tag */ null);
+            interactionJankMonitor.begin(
+                    apps[0].leash, mContext, mHandler, mCujType);
         }
         try {
             getRunner().onAnimationStart(TRANSIT_OLD_UNSET, apps, wallpapers,

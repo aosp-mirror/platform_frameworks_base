@@ -140,6 +140,22 @@ public class FingerprintUtils implements BiometricUtils<Fingerprint> {
         return getStateForUser(context, userId).isInvalidationInProgress();
     }
 
+    @Override
+    public boolean hasValidBiometricUserState(Context context, int userId) {
+        return getStateForUser(context, userId).isInvalidBiometricState();
+    }
+
+    @Override
+    public void deleteStateForUser(int userId) {
+        synchronized (this) {
+            FingerprintUserState state = mUserStates.get(userId);
+            if (state != null) {
+                state.deleteBiometricFile();
+                mUserStates.delete(userId);
+            }
+        }
+    }
+
     private FingerprintUserState getStateForUser(Context ctx, int userId) {
         synchronized (this) {
             FingerprintUserState state = mUserStates.get(userId);

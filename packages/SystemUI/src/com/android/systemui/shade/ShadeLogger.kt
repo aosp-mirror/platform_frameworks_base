@@ -72,79 +72,78 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             },
             {
                 "QsTrackingNotStarted: downTime=$str1,initTouchY=$int1,y=$int2,h=$long1," +
-                        "slop=$double1,qsExpanded=$bool1,keyguardShowing=$bool2,qsExpansion=$bool3"
+                    "slop=$double1,qsExpanded=$bool1,keyguardShowing=$bool2,qsExpansion=$bool3"
             }
         )
     }
 
     fun logMotionEvent(event: MotionEvent, message: String) {
         buffer.log(
-                TAG,
-                LogLevel.VERBOSE,
-                {
-                    str1 = message
-                    long1 = event.eventTime
-                    long2 = event.downTime
-                    int1 = event.action
-                    int2 = event.classification
-                },
-                {
-                    "$str1: eventTime=$long1,downTime=$long2,action=$int1,class=$int2"
-                }
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                long1 = event.eventTime
+                long2 = event.downTime
+                int1 = event.action
+                int2 = event.classification
+            },
+            { "$str1: eventTime=$long1,downTime=$long2,action=$int1,class=$int2" }
         )
     }
 
     /** Logs motion event dispatch results from NotificationShadeWindowViewController. */
     fun logShadeWindowDispatch(event: MotionEvent, message: String, result: Boolean?) {
         buffer.log(
-                TAG,
-                LogLevel.VERBOSE,
-                {
-                    str1 = message
-                    long1 = event.eventTime
-                    long2 = event.downTime
-                },
-                {
-                    val prefix = when (result) {
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                long1 = event.eventTime
+                long2 = event.downTime
+            },
+            {
+                val prefix =
+                    when (result) {
                         true -> "SHADE TOUCH REROUTED"
                         false -> "SHADE TOUCH BLOCKED"
                         null -> "SHADE TOUCH DISPATCHED"
                     }
-                    "$prefix: eventTime=$long1,downTime=$long2, reason=$str1"
-                }
+                "$prefix: eventTime=$long1,downTime=$long2, reason=$str1"
+            }
         )
     }
 
     fun logMotionEventStatusBarState(event: MotionEvent, statusBarState: Int, message: String) {
         buffer.log(
-                TAG,
-                LogLevel.VERBOSE,
-                {
-                    str1 = message
-                    long1 = event.eventTime
-                    long2 = event.downTime
-                    int1 = event.action
-                    int2 = statusBarState
-                    double1 = event.y.toDouble()
-                },
-                {
-                    "$str1\neventTime=$long1,downTime=$long2,y=$double1,action=$int1," +
-                            "statusBarState=${when (int2) {
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                long1 = event.eventTime
+                long2 = event.downTime
+                int1 = event.action
+                int2 = statusBarState
+                double1 = event.y.toDouble()
+            },
+            {
+                "$str1\neventTime=$long1,downTime=$long2,y=$double1,action=$int1," +
+                    "statusBarState=${when (int2) {
                                 0 -> "SHADE"
                                 1 -> "KEYGUARD"
                                 2 -> "SHADE_LOCKED"
                                 else -> "UNKNOWN:$int2"
                             }}"
-                }
+            }
         )
     }
 
     fun logExpansionChanged(
-            message: String,
-            fraction: Float,
-            expanded: Boolean,
-            tracking: Boolean,
-            dragDownPxAmount: Float,
+        message: String,
+        fraction: Float,
+        expanded: Boolean,
+        tracking: Boolean,
+        dragDownPxAmount: Float,
     ) {
         buffer.log(
             TAG,
@@ -158,7 +157,8 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             },
             {
                 "$str1 fraction=$double1,expanded=$bool1," +
-                    "tracking=$bool2," + "dragDownPxAmount=$dragDownPxAmount"
+                    "tracking=$bool2," +
+                    "dragDownPxAmount=$dragDownPxAmount"
             }
         )
     }
@@ -176,24 +176,17 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
     }
 
     fun logQsExpandImmediateChanged(newValue: Boolean) {
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                bool1 = newValue
-            },
-            { "qsExpandImmediate=$bool1" }
-        )
+        buffer.log(TAG, LogLevel.VERBOSE, { bool1 = newValue }, { "qsExpandImmediate=$bool1" })
     }
 
     fun logQsExpansionChanged(
-            message: String,
-            qsExpanded: Boolean,
-            qsMinExpansionHeight: Int,
-            qsMaxExpansionHeight: Int,
-            stackScrollerOverscrolling: Boolean,
-            qsAnimatorExpand: Boolean,
-            animatingQs: Boolean
+        message: String,
+        qsExpanded: Boolean,
+        qsMinExpansionHeight: Int,
+        qsMaxExpansionHeight: Int,
+        stackScrollerOverscrolling: Boolean,
+        qsAnimatorExpand: Boolean,
+        animatingQs: Boolean
     ) {
         buffer.log(
             TAG,
@@ -227,8 +220,10 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             },
             {
                 "PulsingGestureListener#onSingleTapUp all of this must true for single " +
-               "tap to be detected: isDozing: $bool1, singleTapEnabled: $bool2, isNotDocked: $bool3"
-        })
+                    "tap to be detected: isDozing: $bool1, singleTapEnabled: $bool2," +
+                    " isNotDocked: $bool3"
+            }
+        )
     }
 
     fun logSingleTapUpFalsingState(proximityIsNotNear: Boolean, isNotFalseTap: Boolean) {
@@ -247,9 +242,9 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
     }
 
     fun logNotInterceptingTouchInstantExpanding(
-            instantExpanding: Boolean,
-            notificationsDragEnabled: Boolean,
-            touchDisabled: Boolean
+        instantExpanding: Boolean,
+        notificationsDragEnabled: Boolean,
+        touchDisabled: Boolean
     ) {
         buffer.log(
             TAG,
@@ -276,12 +271,12 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
     }
 
     fun logFlingExpands(
-            vel: Float,
-            vectorVel: Float,
-            interactionType: Int,
-            minVelocityPxPerSecond: Float,
-            expansionOverHalf: Boolean,
-            allowExpandForSmallExpansion: Boolean
+        vel: Float,
+        vectorVel: Float,
+        interactionType: Int,
+        minVelocityPxPerSecond: Float,
+        expansionOverHalf: Boolean,
+        allowExpandForSmallExpansion: Boolean
     ) {
         buffer.log(
             TAG,
@@ -294,9 +289,11 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 bool1 = expansionOverHalf
                 bool2 = allowExpandForSmallExpansion
             },
-            { "NPVC flingExpands called with vel: $long1, vectorVel: $long2, " +
+            {
+                "NPVC flingExpands called with vel: $long1, vectorVel: $long2, " +
                     "interactionType: $int1, minVelocityPxPerSecond: $double1 " +
-                    "expansionOverHalf: $bool1, allowExpandForSmallExpansion: $bool2" }
+                    "expansionOverHalf: $bool1, allowExpandForSmallExpansion: $bool2"
+            }
         )
     }
 
@@ -338,9 +335,7 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
-            {
-                str1 = panelState.panelStateToString()
-            },
+            { str1 = panelState.panelStateToString() },
             { "New panel State: $str1" }
         )
     }
@@ -357,12 +352,13 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
-    private fun flingTypeToString(flingType: Int) = when (flingType) {
-        FLING_EXPAND -> "FLING_EXPAND"
-        FLING_COLLAPSE -> "FLING_COLLAPSE"
-        FLING_HIDE -> "FLING_HIDE"
-        else -> "UNKNOWN"
-    }
+    private fun flingTypeToString(flingType: Int) =
+        when (flingType) {
+            FLING_EXPAND -> "FLING_EXPAND"
+            FLING_COLLAPSE -> "FLING_COLLAPSE"
+            FLING_HIDE -> "FLING_HIDE"
+            else -> "UNKNOWN"
+        }
 
     fun logSplitShadeChanged(splitShadeEnabled: Boolean) {
         buffer.log(
@@ -392,8 +388,51 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             },
             {
                 "CentralSurfaces updateNotificationPanelTouchState set disabled to: $bool1\n" +
-                        "isGoingToSleep: $bool2, !shouldControlScreenOff: $bool3," +
-                        "!mDeviceInteractive: $bool4, !isPulsing: $str1"
+                    "isGoingToSleep: $bool2, !shouldControlScreenOff: $bool3," +
+                    "!mDeviceInteractive: $bool4, !isPulsing: $str1"
+            }
+        )
+    }
+
+    fun logNoTouchDispatch(
+        isTrackingBarGesture: Boolean,
+        isExpandAnimationRunning: Boolean,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                bool1 = isTrackingBarGesture
+                bool2 = isExpandAnimationRunning
+            },
+            {
+                "NSWVC: touch not dispatched: isTrackingBarGesture: $bool1, " +
+                    "isExpandAnimationRunning: $bool2"
+            }
+        )
+    }
+
+    fun logKeyguardStatudBarVisibiliy(
+        visibility: Boolean,
+        isOnAod: Boolean,
+        animatingUnlockedShadeToKeyguardBypass: Boolean,
+        oldShadeState: Int,
+        newShadeState: Int,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                bool1 = visibility
+                bool2 = isOnAod
+                bool3 = animatingUnlockedShadeToKeyguardBypass
+                int1 = oldShadeState
+                int2 = newShadeState
+            },
+            {
+                "Setting keyguard status bar visibility to: $bool1, isOnAod: $bool2" +
+                    "oldShadeState: $int1, newShadeState: $int2," +
+                    "animatingUnlockedShadeToKeyguardBypass: $bool3"
             }
         )
     }

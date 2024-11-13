@@ -159,6 +159,8 @@ public class Environment {
     @UnsupportedAppUsage
     private static UserEnvironment sCurrentUser;
     private static boolean sUserRequired;
+    private static Boolean sLegacyStorageAppOp;
+    private static Boolean sNoIsolatedStorageAppOp;
 
     static {
         initForCurrentUser();
@@ -413,7 +415,7 @@ public class Environment {
      * Returns the base directory for per-user system directory, device encrypted.
      * {@hide}
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
     @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY)
     public static @NonNull File getDataSystemDeDirectory() {
         return buildPath(getDataDirectory(), "system_de");
@@ -1459,15 +1461,23 @@ public class Environment {
         final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
         final String opPackageName = context.getOpPackageName();
 
-        if (appOps.noteOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE, uid,
-                opPackageName) == AppOpsManager.MODE_ALLOWED) {
-            return true;
+        if (sLegacyStorageAppOp == null) {
+            sLegacyStorageAppOp =
+              appOps.checkOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE, uid, opPackageName) ==
+                              AppOpsManager.MODE_ALLOWED;
+        }
+        if (sLegacyStorageAppOp) {
+            return sLegacyStorageAppOp;
         }
 
         // Legacy external storage access is granted to instrumentations invoked with
         // "--no-isolated-storage" flag.
-        return appOps.noteOpNoThrow(AppOpsManager.OP_NO_ISOLATED_STORAGE, uid,
-                opPackageName) == AppOpsManager.MODE_ALLOWED;
+        if (sNoIsolatedStorageAppOp == null) {
+            sNoIsolatedStorageAppOp =
+              appOps.checkOpNoThrow(AppOpsManager.OP_NO_ISOLATED_STORAGE, uid,
+                                    opPackageName) == AppOpsManager.MODE_ALLOWED;
+        }
+        return sNoIsolatedStorageAppOp;
     }
 
     private static boolean isScopedStorageEnforced(boolean defaultScopedStorage,

@@ -145,4 +145,37 @@
             line="7158"/>
     </issue>
 
+    <issue
+        id="FlaggedApi"
+        message="Method `recordSmartReplied()` is a flagged API and should be inside an `if (Flags.lifetimeExtensionRefactor())` check (or annotate the surrounding method `onNotificationSmartReplySent` with `@FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR) to transfer requirement to caller`)"
+        errorLine1="                    r.recordSmartReplied();"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/NotificationManagerService.java"
+            line="1591"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Method `getPackageImportanceWithIdentity()` is a flagged API and should be inside an `if (Flags.lifetimeExtensionRefactor())` check (or annotate the surrounding method `enqueueNotificationInternal` with `@FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR) to transfer requirement to caller`)"
+        errorLine1="        final int packageImportance = getPackageImportanceWithIdentity(pkg);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/NotificationManagerService.java"
+            line="7546"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Method `getPackageImportanceWithIdentity()` is a flagged API and should be inside an `if (Flags.lifetimeExtensionRefactor())` check (or annotate the surrounding method `onShortcutRemoved` with `@FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR) to transfer requirement to caller`)"
+        errorLine1="                    final int packageImportance = getPackageImportanceWithIdentity(packageName);"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/NotificationManagerService.java"
+            line="7916"
+            column="51"/>
+    </issue>
+
 </issues>

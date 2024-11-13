@@ -60,6 +60,9 @@ public class VibratorInfo implements Parcelable {
     private final int mPwleSizeMax;
     private final float mQFactor;
     private final FrequencyProfile mFrequencyProfile;
+    private final int mMaxEnvelopeEffectSize;
+    private final int mMinEnvelopeEffectControlPointDurationMillis;
+    private final int mMaxEnvelopeEffectControlPointDurationMillis;
 
     VibratorInfo(Parcel in) {
         mId = in.readInt();
@@ -73,6 +76,9 @@ public class VibratorInfo implements Parcelable {
         mPwleSizeMax = in.readInt();
         mQFactor = in.readFloat();
         mFrequencyProfile = FrequencyProfile.CREATOR.createFromParcel(in);
+        mMaxEnvelopeEffectSize = in.readInt();
+        mMinEnvelopeEffectControlPointDurationMillis = in.readInt();
+        mMaxEnvelopeEffectControlPointDurationMillis = in.readInt();
     }
 
     public VibratorInfo(int id, @NonNull VibratorInfo baseVibratorInfo) {
@@ -80,7 +86,10 @@ public class VibratorInfo implements Parcelable {
                 baseVibratorInfo.mSupportedBraking, baseVibratorInfo.mSupportedPrimitives,
                 baseVibratorInfo.mPrimitiveDelayMax, baseVibratorInfo.mCompositionSizeMax,
                 baseVibratorInfo.mPwlePrimitiveDurationMax, baseVibratorInfo.mPwleSizeMax,
-                baseVibratorInfo.mQFactor, baseVibratorInfo.mFrequencyProfile);
+                baseVibratorInfo.mQFactor, baseVibratorInfo.mFrequencyProfile,
+                baseVibratorInfo.mMaxEnvelopeEffectSize,
+                baseVibratorInfo.mMinEnvelopeEffectControlPointDurationMillis,
+                baseVibratorInfo.mMaxEnvelopeEffectControlPointDurationMillis);
     }
 
     /**
@@ -111,7 +120,9 @@ public class VibratorInfo implements Parcelable {
             @Nullable SparseBooleanArray supportedBraking,
             @NonNull SparseIntArray supportedPrimitives, int primitiveDelayMax,
             int compositionSizeMax, int pwlePrimitiveDurationMax, int pwleSizeMax,
-            float qFactor, @NonNull FrequencyProfile frequencyProfile) {
+            float qFactor, @NonNull FrequencyProfile frequencyProfile,
+            int maxEnvelopeEffectSize, int minEnvelopeEffectControlPointDurationMillis,
+            int maxEnvelopeEffectControlPointDurationMillis) {
         Preconditions.checkNotNull(supportedPrimitives);
         Preconditions.checkNotNull(frequencyProfile);
         mId = id;
@@ -125,6 +136,11 @@ public class VibratorInfo implements Parcelable {
         mPwleSizeMax = pwleSizeMax;
         mQFactor = qFactor;
         mFrequencyProfile = frequencyProfile;
+        mMaxEnvelopeEffectSize = maxEnvelopeEffectSize;
+        mMinEnvelopeEffectControlPointDurationMillis =
+                minEnvelopeEffectControlPointDurationMillis;
+        mMaxEnvelopeEffectControlPointDurationMillis =
+                maxEnvelopeEffectControlPointDurationMillis;
     }
 
     @Override
@@ -140,6 +156,9 @@ public class VibratorInfo implements Parcelable {
         dest.writeInt(mPwleSizeMax);
         dest.writeFloat(mQFactor);
         mFrequencyProfile.writeToParcel(dest, flags);
+        dest.writeInt(mMaxEnvelopeEffectSize);
+        dest.writeInt(mMinEnvelopeEffectControlPointDurationMillis);
+        dest.writeInt(mMaxEnvelopeEffectControlPointDurationMillis);
     }
 
     @Override
@@ -186,7 +205,12 @@ public class VibratorInfo implements Parcelable {
                 && Objects.equals(mSupportedEffects, that.mSupportedEffects)
                 && Objects.equals(mSupportedBraking, that.mSupportedBraking)
                 && Objects.equals(mQFactor, that.mQFactor)
-                && Objects.equals(mFrequencyProfile, that.mFrequencyProfile);
+                && Objects.equals(mFrequencyProfile, that.mFrequencyProfile)
+                && mMaxEnvelopeEffectSize == that.mMaxEnvelopeEffectSize
+                && mMinEnvelopeEffectControlPointDurationMillis
+                == that.mMinEnvelopeEffectControlPointDurationMillis
+                && mMaxEnvelopeEffectControlPointDurationMillis
+                == that.mMaxEnvelopeEffectControlPointDurationMillis;
     }
 
     @Override
@@ -215,6 +239,11 @@ public class VibratorInfo implements Parcelable {
                 + ", mPwleSizeMax=" + mPwleSizeMax
                 + ", mQFactor=" + mQFactor
                 + ", mFrequencyProfile=" + mFrequencyProfile
+                + ", mMaxEnvelopeEffectSize=" + mMaxEnvelopeEffectSize
+                + ", mMinEnvelopeEffectControlPointDurationMillis="
+                + mMinEnvelopeEffectControlPointDurationMillis
+                + ", mMaxEnvelopeEffectControlPointDurationMillis="
+                + mMaxEnvelopeEffectControlPointDurationMillis
                 + '}';
     }
 
@@ -234,6 +263,11 @@ public class VibratorInfo implements Parcelable {
         pw.println("pwleSizeMax = " + mPwleSizeMax);
         pw.println("q-factor = " + mQFactor);
         pw.println("frequencyProfile = " + mFrequencyProfile);
+        pw.println("mMaxEnvelopeEffectSize = " + mMaxEnvelopeEffectSize);
+        pw.println("mMinEnvelopeEffectControlPointDurationMillis = "
+                + mMinEnvelopeEffectControlPointDurationMillis);
+        pw.println("mMaxEnvelopeEffectControlPointDurationMillis = "
+                + mMaxEnvelopeEffectControlPointDurationMillis);
         pw.decreaseIndent();
     }
 
@@ -414,6 +448,58 @@ public class VibratorInfo implements Parcelable {
     }
 
     /**
+     * Check whether the vibrator supports the creation of envelope effects.
+     *
+     * <p>See {@link Vibrator#areEnvelopeEffectsSupported()} for more information on envelope
+     * effects.
+     *
+     * @return True if the hardware supports creating envelope effects, false otherwise.
+     */
+    public boolean areEnvelopeEffectsSupported() {
+        return hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+    }
+
+    /**
+     * Calculates the maximum allowed duration for an envelope effect, measured in milliseconds.
+     *
+     * @return The maximum duration (in milliseconds) that an envelope effect can have.
+     */
+    public int getMaxEnvelopeEffectDurationMillis() {
+        return mMaxEnvelopeEffectSize * mMaxEnvelopeEffectControlPointDurationMillis;
+    }
+
+    /**
+     * Gets the maximum number of control points supported for envelope effects on this device.
+     *
+     * @return The maximum number of control points that can be used to define an envelope effect.
+     */
+    public int getMaxEnvelopeEffectSize() {
+        return mMaxEnvelopeEffectSize;
+    }
+
+    /**
+     * Gets the minimum allowed duration for any individual segment within an envelope effect,
+     * measured in milliseconds.
+     *
+     * @return The minimum duration (in milliseconds) that a segment within an envelope effect
+     * can have.
+     */
+    public int getMinEnvelopeEffectControlPointDurationMillis() {
+        return mMinEnvelopeEffectControlPointDurationMillis;
+    }
+
+    /**
+     * Gets the maximum allowed duration for any individual segment within an envelope effect,
+     * measured in milliseconds.
+     *
+     * @return The maximum duration (in milliseconds) that a segment within an envelope effect
+     * can have.
+     */
+    public int getMaxEnvelopeEffectControlPointDurationMillis() {
+        return mMaxEnvelopeEffectControlPointDurationMillis;
+    }
+
+    /**
      * Check against this vibrator capabilities.
      *
      * @param capability one of IVibrator.CAP_*
@@ -488,6 +574,9 @@ public class VibratorInfo implements Parcelable {
         }
         if (hasCapability(IVibrator.CAP_EXTERNAL_AMPLITUDE_CONTROL)) {
             names.add("EXTERNAL_AMPLITUDE_CONTROL");
+        }
+        if (hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2)) {
+            names.add("CAP_COMPOSE_PWLE_EFFECTS_V2");
         }
         return names.toArray(new String[names.size()]);
     }
@@ -745,6 +834,9 @@ public class VibratorInfo implements Parcelable {
         private float mQFactor = Float.NaN;
         private FrequencyProfile mFrequencyProfile =
                 new FrequencyProfile(Float.NaN, Float.NaN, Float.NaN, null);
+        private int mMaxEnvelopeEffectSize;
+        private int mMinEnvelopeEffectControlPointDurationMillis;
+        private int mMaxEnvelopeEffectControlPointDurationMillis;
 
         /** A builder class for a {@link VibratorInfo}. */
         public Builder(int id) {
@@ -821,12 +913,46 @@ public class VibratorInfo implements Parcelable {
             return this;
         }
 
+        /**
+         * Configure the maximum number of control points supported for envelope effects on this
+         * device.
+         */
+        @NonNull
+        public Builder setMaxEnvelopeEffectSize(int maxEnvelopeEffectSize) {
+            mMaxEnvelopeEffectSize = maxEnvelopeEffectSize;
+            return this;
+        }
+
+        /**
+         * Configure the minimum supported duration for any individual segment within an
+         * envelope effect in milliseconds.
+         */
+        @NonNull
+        public Builder setMinEnvelopeEffectControlPointDurationMillis(
+                int minEnvelopeEffectControlPointDuration) {
+            mMinEnvelopeEffectControlPointDurationMillis = minEnvelopeEffectControlPointDuration;
+            return this;
+        }
+
+        /**
+         * Configure the maximum supported duration for any individual segment within an
+         * envelope effect in milliseconds.
+         */
+        @NonNull
+        public Builder setMaxEnvelopeEffectControlPointDurationMillis(
+                int maxEnvelopeEffectControlPointDuration) {
+            mMaxEnvelopeEffectControlPointDurationMillis = maxEnvelopeEffectControlPointDuration;
+            return this;
+        }
+
         /** Build the configured {@link VibratorInfo}. */
         @NonNull
         public VibratorInfo build() {
             return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
                     mSupportedPrimitives, mPrimitiveDelayMax, mCompositionSizeMax,
-                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyProfile);
+                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyProfile,
+                    mMaxEnvelopeEffectSize, mMinEnvelopeEffectControlPointDurationMillis,
+                    mMaxEnvelopeEffectControlPointDurationMillis);
         }
 
         /**

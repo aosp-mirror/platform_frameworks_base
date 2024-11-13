@@ -20,10 +20,12 @@ import android.content.ContentResolver
 import android.content.Context
 import android.media.AudioManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.statusbar.notification.domain.interactor.NotificationsSoundPolicyInteractor
+import com.android.settingslib.flags.Flags
+import com.android.settingslib.notification.domain.interactor.NotificationsSoundPolicyInteractor
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
 import com.android.settingslib.volume.data.repository.AudioSharingRepository
+import com.android.settingslib.volume.data.repository.AudioSharingRepositoryEmptyImpl
 import com.android.settingslib.volume.data.repository.AudioSharingRepositoryImpl
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
@@ -32,6 +34,7 @@ import com.android.settingslib.volume.shared.AudioManagerEventsReceiverImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.volume.shared.VolumeLogger
 import dagger.Module
 import dagger.Provides
 import kotlin.coroutines.CoroutineContext
@@ -58,6 +61,7 @@ interface AudioModule {
             contentResolver: ContentResolver,
             @Background coroutineContext: CoroutineContext,
             @Application coroutineScope: CoroutineScope,
+            volumeLogger: VolumeLogger,
         ): AudioRepository =
             AudioRepositoryImpl(
                 intentsReceiver,
@@ -65,15 +69,30 @@ interface AudioModule {
                 contentResolver,
                 coroutineContext,
                 coroutineScope,
+                volumeLogger,
+                com.android.systemui.Flags.useVolumeController(),
             )
 
         @Provides
         @SysUISingleton
         fun provideAudioSharingRepository(
+            contentResolver: ContentResolver,
             localBluetoothManager: LocalBluetoothManager?,
+            @Application coroutineScope: CoroutineScope,
             @Background coroutineContext: CoroutineContext,
+            volumeLogger: VolumeLogger
         ): AudioSharingRepository =
-            AudioSharingRepositoryImpl(localBluetoothManager, coroutineContext)
+            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+                AudioSharingRepositoryImpl(
+                    contentResolver,
+                    localBluetoothManager,
+                    coroutineScope,
+                    coroutineContext,
+                    volumeLogger
+                )
+            } else {
+                AudioSharingRepositoryEmptyImpl()
+            }
 
         @Provides
         @SysUISingleton

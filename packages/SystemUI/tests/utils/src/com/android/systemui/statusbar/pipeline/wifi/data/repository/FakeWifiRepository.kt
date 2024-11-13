@@ -32,7 +32,7 @@ class FakeWifiRepository : WifiRepository {
     override val isWifiDefault: StateFlow<Boolean> = _isWifiDefault
 
     private val _wifiNetwork: MutableStateFlow<WifiNetworkModel> =
-        MutableStateFlow(WifiNetworkModel.Inactive)
+        MutableStateFlow(WifiNetworkModel.Inactive())
     override val wifiNetwork: StateFlow<WifiNetworkModel> = _wifiNetwork
 
     override val secondaryNetworks = MutableStateFlow<List<WifiNetworkModel>>(emptyList())

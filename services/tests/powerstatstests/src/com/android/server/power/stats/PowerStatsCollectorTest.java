@@ -114,13 +114,15 @@ public class PowerStatsCollectorTest {
         mockEnergyConsumers(powerStatsInternal);
 
         PowerStatsCollector.ConsumedEnergyRetrieverImpl retriever =
-                new PowerStatsCollector.ConsumedEnergyRetrieverImpl(powerStatsInternal);
+                new PowerStatsCollector.ConsumedEnergyRetrieverImpl(powerStatsInternal, ()-> 3500);
         int[] energyConsumerIds = retriever.getEnergyConsumerIds(EnergyConsumerType.CPU_CLUSTER);
         assertThat(energyConsumerIds).isEqualTo(new int[]{1, 2});
-        long[] energy = retriever.getConsumedEnergyUws(energyConsumerIds);
-        assertThat(energy).isEqualTo(new long[]{1000, 2000});
-        energy = retriever.getConsumedEnergyUws(energyConsumerIds);
-        assertThat(energy).isEqualTo(new long[]{1500, 2700});
+        EnergyConsumerResult[] energy = retriever.getConsumedEnergy(energyConsumerIds);
+        assertThat(energy[0].energyUWs).isEqualTo(1000);
+        assertThat(energy[1].energyUWs).isEqualTo(2000);
+        energy = retriever.getConsumedEnergy(energyConsumerIds);
+        assertThat(energy[0].energyUWs).isEqualTo(1500);
+        assertThat(energy[1].energyUWs).isEqualTo(2700);
     }
 
     @SuppressWarnings("unchecked")
@@ -176,4 +178,11 @@ public class PowerStatsCollectorTest {
                 .thenReturn(future1)
                 .thenReturn(future2);
     }
+
+    private EnergyConsumerResult mockEnergyConsumerResult(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
+    }
+
 }

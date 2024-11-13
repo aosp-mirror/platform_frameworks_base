@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Паказваць візуалізацыю дакрананняў"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Паказваць націсканні"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Паказваць візуальны водгук пры націсканні клавіш"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Паказваць увод з сэнсарнай панэлі"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Экранная накладка, якая паказвае ўвод даных з сэнсарнай панэлі і распазнаныя жэсты"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Абнаўленне паверхні"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Падсвяціць паверхню акна пры абнаўленні"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Паказаць абнаўленні"</string>
@@ -408,6 +410,12 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Загружаць слаі адладкі GPU для праграм адладкі"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Уключыць падрабязны журнал пастаўшчыка"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Дадаваць у справаздачы пра памылкі дадатковыя журналы пастаўшчыка для пэўнай прылады (могуць утрымлівацца прыватныя даныя, можа павышацца выкарыстанне акумулятара і/ці памяці)."</string>
+    <string name="enable_verbose_vendor_logging_checkbox" msgid="3864578373293835530">"Адключыць праз адзін дзень"</string>
+    <string name="verbose_vendor_logging_notification_title" msgid="6811217272559843592">"Вядзенне дэталёвага журнала пастаўшчыка завершана"</string>
+    <string name="verbose_vendor_logging_notification_summary" msgid="5226524769774370942">"Уключана на адзін дзень"</string>
+    <string name="verbose_vendor_logging_notification_action" msgid="1190831050259046071">"Уключыць яшчэ на адзін дзень"</string>
+    <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"Будзе адключана праз адзін дзень"</string>
+    <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"Уключана без абмежавання па часе"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Маштаб анімацыі акна"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Маштаб перадачы анімацыі"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Працягласць анімацыі"</string>
@@ -425,7 +433,6 @@
     <string name="force_resizable_activities" msgid="7143612144399959606">"Зрабіць вокны дзеянняў даступнымі для змены памеру"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Зрабіць усе віды дзейнасці даступнымі для змены памеру ў рэжыме некалькіх вокнаў, незалежна ад значэнняў маніфеста."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Уключыць адвольную форму вокнаў"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Уключыць падтрымку для эксперыментальнай адвольнай формы акна."</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Пароль для рэз. копіі ПК"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Поўнае рэзервовае капіраванне працоўнага стала зараз не абаронена"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Краніце, каб змяніць або выдаліць пароль для поўнага рэзервовага капіравання працоўнага стала"</string>
@@ -490,7 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Да поўнай зарадкі засталося <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – да поўнай зарадкі засталося: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Зарадка аптымізавана"</string>
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарадка прыпынена, каб абараніць акумулятар"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – зараджаецца"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Прылада зарадзіцца поўнасцю да <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Прылада зарадзіцца поўнасцю да <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -557,6 +564,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будзільнікі і напаміны"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Дазвольце гэтай праграме ўключаць будзільнікі і задаваць час дзеянняў. З такім дазволам праграма можа працаваць у фонавым рэжыме і ў выніку хутчэй разраджаць акумулятар.\n\nКалі вы не ўключыце гэты дазвол, існуючыя будзільнікі і запланаваны праграмай час падзей не будуць працаваць."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"расклад, будзільнік, напамін, гадзіннік"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Не турбаваць"</string>
+    <string name="zen_mode_settings_title" msgid="7374070457626419755">"Не турбаваць"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Уключыць"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Уключэнне рэжыму \"Не турбаваць\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Ніколі"</string>
@@ -569,11 +578,15 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Працягласць"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Заўсёды пытацца"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Пакуль не выключыце"</string>
+    <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Без назвы)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Толькі што"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Гэты тэлефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Гэты планшэт"</string>
+    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
+    <skip />
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Мікрафон (унутраны)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Дынамік док-станцыі"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Знешняя прылада"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Падключаная прылада"</string>
@@ -674,7 +687,14 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Выключана"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Уключана"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Перазагрузіце прыладу, каб прымяніць гэта змяненне. Перазагрузіце ці скасуйце."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Правадныя навушнікі"</string>
+    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
+    <skip />
+    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
+    <skip />
+    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
+    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Раздым для мікрафона"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"Мікрафон USB"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Уключана"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Выключана"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Змяненне аператара сеткі"</string>

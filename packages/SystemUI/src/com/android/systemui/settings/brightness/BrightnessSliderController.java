@@ -16,8 +16,6 @@
 
 package com.android.systemui.settings.brightness;
 
-import static com.android.systemui.Flags.hapticBrightnessSlider;
-
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -317,9 +315,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             SeekbarHapticPlugin plugin = new SeekbarHapticPlugin(
                     mVibratorHelper,
                     mSystemClock);
-            if (hapticBrightnessSlider()) {
-                HapticSliderViewBinder.bind(viewRoot, plugin);
-            }
+            HapticSliderViewBinder.bind(viewRoot, plugin);
             return new BrightnessSliderController(
                     root, mFalsingManager, mUiEventLogger, plugin, mActivityStarter);
         }

@@ -17,13 +17,12 @@
 package com.android.systemui.biometrics.ui.viewmodel
 
 import android.app.ActivityManager.RunningTaskInfo
-import android.app.ActivityTaskManager
 import android.content.ComponentName
+import android.content.applicationContext
+import android.content.packageManager
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.graphics.Rect
@@ -36,32 +35,26 @@ import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
-import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.Surface
 import androidx.test.filters.SmallTest
-import com.android.internal.widget.LockPatternUtils
-import com.android.launcher3.icons.IconProvider
-import com.android.systemui.Flags.FLAG_BP_TALKBACK
-import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
+import com.android.app.activityTaskManager
+import com.android.keyguard.AuthInteractionProperties
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils.toBitmap
-import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
-import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
-import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
-import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
+import com.android.systemui.biometrics.authController
+import com.android.systemui.biometrics.data.repository.biometricStatusRepository
+import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
-import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
+import com.android.systemui.biometrics.domain.interactor.promptSelectorInteractor
+import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
 import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
@@ -69,18 +62,20 @@ import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.DisplayRotation
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.shared.model.toSensorStrength
 import com.android.systemui.biometrics.shared.model.toSensorType
+import com.android.systemui.biometrics.udfpsUtils
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.display.data.repository.FakeDisplayRepository
+import com.android.systemui.display.data.repository.displayStateRepository
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.user.domain.interactor.SelectedUserInteractor
-import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.mockito.withArgCaptor
+import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -95,7 +90,10 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
@@ -103,9 +101,10 @@ private const val USER_ID = 4
 private const val REQUEST_ID = 4L
 private const val CHALLENGE = 2L
 private const val DELAY = 1000L
-private const val OP_PACKAGE_NAME = "biometric.testapp"
+private const val OP_PACKAGE_NAME_WITH_APP_LOGO = "biometric.testapp"
 private const val OP_PACKAGE_NAME_NO_ICON = "biometric.testapp.noicon"
 private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
+private const val OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO = "should.use.activiy.logo"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -114,29 +113,23 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
-    @Mock private lateinit var lockPatternUtils: LockPatternUtils
-    @Mock private lateinit var fingerprintManager: FingerprintManager
     @Mock private lateinit var authController: AuthController
-    @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
-    @Mock private lateinit var udfpsUtils: UdfpsUtils
-    @Mock private lateinit var packageManager: PackageManager
-    @Mock private lateinit var iconProvider: IconProvider
-    @Mock private lateinit var applicationInfoWithIcon: ApplicationInfo
-    @Mock private lateinit var applicationInfoNoIcon: ApplicationInfo
-    @Mock private lateinit var activityTaskManager: ActivityTaskManager
+    @Mock private lateinit var applicationInfoWithIconAndDescription: ApplicationInfo
+    @Mock private lateinit var applicationInfoNoIconOrDescription: ApplicationInfo
     @Mock private lateinit var activityInfo: ActivityInfo
     @Mock private lateinit var runningTaskInfo: RunningTaskInfo
 
-    private val fakeExecutor = FakeExecutor(FakeSystemClock())
-    private val testScope = TestScope()
-    private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
-    private val defaultLogoIconWithOverrides = context.getDrawable(R.drawable.ic_add)
+    private val defaultLogoIconFromAppInfo = context.getDrawable(R.drawable.ic_android)
+    private val defaultLogoIconFromActivityInfo = context.getDrawable(R.drawable.ic_add)
     private val logoResFromApp = R.drawable.ic_cake
     private val logoDrawableFromAppRes = context.getDrawable(logoResFromApp)
     private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
-    private val defaultLogoDescription = "Test Android App"
+    private val defaultLogoDescriptionFromAppInfo = "Test Android App"
+    private val defaultLogoDescriptionFromActivityInfo = "Test Coke App"
     private val logoDescriptionFromApp = "Test Cake App"
     private val packageNameForLogoWithOverrides = "should.use.overridden.logo"
+    private val authInteractionProperties = AuthInteractionProperties()
+
     /** Prompt panel size padding */
     private val smallHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
@@ -158,28 +151,93 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         context.resources.getDimensionPixelSize(
             R.dimen.biometric_prompt_two_pane_medium_horizontal_guideline_padding
         )
+    private val mockFaceIconSize = 200
+    private val mockFingerprintIconWidth = 300
+    private val mockFingerprintIconHeight = 300
 
-    private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
-    private lateinit var promptRepository: FakePromptRepository
-    private lateinit var displayStateRepository: FakeDisplayStateRepository
-    private lateinit var biometricStatusRepository: FakeBiometricStatusRepository
-    private lateinit var displayRepository: FakeDisplayRepository
-    private lateinit var displayStateInteractor: DisplayStateInteractor
-    private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
-    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
+    /** Mock [UdfpsOverlayParams] for a test. */
+    private fun mockUdfpsOverlayParams(isLandscape: Boolean = false): UdfpsOverlayParams =
+        UdfpsOverlayParams(
+            sensorBounds = Rect(400, 1600, 600, 1800),
+            overlayBounds = Rect(0, 1200, 1000, 2400),
+            naturalDisplayWidth = 1000,
+            naturalDisplayHeight = 3000,
+            scaleFactor = 1f,
+            rotation = if (isLandscape) Surface.ROTATION_90 else Surface.ROTATION_0
+        )
 
-    private lateinit var selector: PromptSelectorInteractor
-    private lateinit var viewModel: PromptViewModel
-    private lateinit var iconViewModel: PromptIconViewModel
     private lateinit var promptContentView: PromptContentView
     private lateinit var promptContentViewWithMoreOptionsButton:
         PromptContentViewWithMoreOptionsButton
 
+    private val kosmos = Kosmos()
+
     @Before
     fun setup() {
-        fingerprintRepository = FakeFingerprintPropertyRepository()
+        // Set up default logo info and app customized info
+        whenever(kosmos.packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_NO_ICON), anyInt()))
+            .thenReturn(applicationInfoNoIconOrDescription)
+        whenever(
+                kosmos.packageManager.getApplicationInfo(
+                    eq(OP_PACKAGE_NAME_WITH_APP_LOGO),
+                    anyInt()
+                )
+            )
+            .thenReturn(applicationInfoWithIconAndDescription)
+        whenever(
+                kosmos.packageManager.getApplicationInfo(
+                    eq(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO),
+                    anyInt()
+                )
+            )
+            .thenReturn(applicationInfoWithIconAndDescription)
+        whenever(
+                kosmos.packageManager.getApplicationInfo(
+                    eq(OP_PACKAGE_NAME_CAN_NOT_BE_FOUND),
+                    anyInt()
+                )
+            )
+            .thenThrow(NameNotFoundException())
+
+        whenever(kosmos.packageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo)
+        whenever(kosmos.iconProvider.getIcon(activityInfo))
+            .thenReturn(defaultLogoIconFromActivityInfo)
+        whenever(activityInfo.loadLabel(kosmos.packageManager))
+            .thenReturn(defaultLogoDescriptionFromActivityInfo)
+
+        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoWithIconAndDescription))
+            .thenReturn(defaultLogoIconFromAppInfo)
+        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoWithIconAndDescription))
+            .thenReturn(defaultLogoDescriptionFromAppInfo)
+        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoNoIconOrDescription))
+            .thenReturn(null)
+        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoNoIconOrDescription))
+            .thenReturn("")
+        whenever(kosmos.packageManager.getUserBadgedIcon(any(), any())).then { it.getArgument(0) }
+        whenever(kosmos.packageManager.getUserBadgedLabel(any(), any())).then { it.getArgument(0) }
+
+        context.setMockPackageManager(kosmos.packageManager)
+        overrideResource(logoResFromApp, logoDrawableFromAppRes)
+        overrideResource(
+            R.array.config_useActivityLogoForBiometricPrompt,
+            arrayOf(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO)
+        )
+
+        overrideResource(R.dimen.biometric_dialog_fingerprint_icon_width, mockFingerprintIconWidth)
+        overrideResource(
+            R.dimen.biometric_dialog_fingerprint_icon_height,
+            mockFingerprintIconHeight
+        )
+        overrideResource(R.dimen.biometric_dialog_face_icon_size, mockFaceIconSize)
+
+        kosmos.applicationContext = context
+
+        if (testCase.fingerprint?.isAnyUdfpsType == true) {
+            kosmos.authController = authController
+        }
+
         testCase.fingerprint?.let {
-            fingerprintRepository.setProperties(
+            kosmos.fakeFingerprintPropertyRepository.setProperties(
                 it.sensorId,
                 it.sensorStrength.toSensorStrength(),
                 it.sensorType.toSensorType(),
@@ -188,32 +246,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 }
             )
         }
-        promptRepository = FakePromptRepository()
-        displayStateRepository = FakeDisplayStateRepository()
-        displayRepository = FakeDisplayRepository()
-        displayStateInteractor =
-            DisplayStateInteractorImpl(
-                testScope.backgroundScope,
-                mContext,
-                fakeExecutor,
-                displayStateRepository,
-                displayRepository,
-            )
-        udfpsOverlayInteractor =
-            UdfpsOverlayInteractor(
-                context,
-                authController,
-                selectedUserInteractor,
-                fingerprintManager,
-                testScope.backgroundScope
-            )
-        biometricStatusRepository = FakeBiometricStatusRepository()
-        biometricStatusInteractor =
-            BiometricStatusInteractorImpl(
-                activityTaskManager,
-                biometricStatusRepository,
-                fingerprintRepository
-            )
+
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
+        testCase.fingerprint?.isAnySidefpsType.let {
+            kosmos.displayStateRepository.setIsInRearDisplayMode(testCase.isInRearDisplayMode)
+        }
 
         promptContentView =
             PromptVerticalListContentView.Builder()
@@ -224,47 +261,25 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         promptContentViewWithMoreOptionsButton =
             PromptContentViewWithMoreOptionsButton.Builder()
                 .setDescription("test")
-                .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
+                .setMoreOptionsButtonListener(kosmos.fakeExecutor) { _, _ -> }
                 .build()
-
-        // Set up default logo info and app customized info
-        whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_NO_ICON), anyInt()))
-            .thenReturn(applicationInfoNoIcon)
-        whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME), anyInt()))
-            .thenReturn(applicationInfoWithIcon)
-        whenever(packageManager.getApplicationInfo(eq(packageNameForLogoWithOverrides), anyInt()))
-            .thenReturn(applicationInfoWithIcon)
-        whenever(packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_CAN_NOT_BE_FOUND), anyInt()))
-            .thenThrow(NameNotFoundException())
-
-        whenever(packageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo)
-        whenever(iconProvider.getIcon(activityInfo)).thenReturn(defaultLogoIconWithOverrides)
-        whenever(packageManager.getApplicationIcon(applicationInfoWithIcon))
-            .thenReturn(defaultLogoIcon)
-        whenever(packageManager.getApplicationLabel(applicationInfoWithIcon))
-            .thenReturn(defaultLogoDescription)
-        whenever(packageManager.getUserBadgedIcon(any(), any())).then { it.getArgument(0) }
-        whenever(packageManager.getUserBadgedLabel(any(), any())).then { it.getArgument(0) }
-
-        context.setMockPackageManager(packageManager)
-        val resources = context.getOrCreateTestableResources()
-        resources.addOverride(logoResFromApp, logoDrawableFromAppRes)
-        resources.addOverride(
-            R.array.biometric_dialog_package_names_for_logo_with_overrides,
-            arrayOf(packageNameForLogoWithOverrides)
-        )
     }
 
     @Test
     fun start_idle_and_show_authenticating() =
         runGenericTest(doNotStart = true) {
-            val expectedSize =
+            var expectedPromptSize =
                 if (testCase.shouldStartAsImplicitFlow) PromptSize.SMALL else PromptSize.MEDIUM
-            val authenticating by collectLastValue(viewModel.isAuthenticating)
-            val authenticated by collectLastValue(viewModel.isAuthenticated)
-            val modalities by collectLastValue(viewModel.modalities)
-            val message by collectLastValue(viewModel.message)
-            val size by collectLastValue(viewModel.size)
+            val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+            val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+            val modalities by collectLastValue(kosmos.promptViewModel.modalities)
+            val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+            val shouldAnimateIconView by
+                collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+            val iconContentDescriptionId by
+                collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+            val message by collectLastValue(kosmos.promptViewModel.message)
+            val size by collectLastValue(kosmos.promptViewModel.size)
 
             assertThat(authenticating).isFalse()
             assertThat(authenticated?.isNotAuthenticated).isTrue()
@@ -272,17 +287,382 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 assertThat(hasFace).isEqualTo(testCase.face != null)
                 assertThat(hasFingerprint).isEqualTo(testCase.fingerprint != null)
             }
+
             assertThat(message).isEqualTo(PromptMessage.Empty)
-            assertThat(size).isEqualTo(expectedSize)
+            assertThat(size).isEqualTo(expectedPromptSize)
+
+            val forceExplicitFlow =
+                testCase.isCoex && testCase.confirmationRequested ||
+                    testCase.authenticatedByFingerprint
+
+            if ((testCase.isCoex && !forceExplicitFlow) || testCase.isFaceOnly) {
+                // Face-only or implicit co-ex auth
+                assertThat(iconAsset).isEqualTo(R.raw.face_dialog_idle_static)
+                assertThat(shouldAnimateIconView).isEqualTo(false)
+            }
+
+            if (forceExplicitFlow) {
+                expectedPromptSize = PromptSize.MEDIUM
+                kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = true)
+            }
 
             val startMessage = "here we go"
-            viewModel.showAuthenticating(startMessage, isRetry = false)
+            kosmos.promptViewModel.showAuthenticating(startMessage, isRetry = false)
+            verifyIconSize(forceExplicitFlow)
+
+            // Icon asset assertions
+            if ((testCase.isCoex && !forceExplicitFlow) || testCase.isFaceOnly) {
+                // Face-only or implicit co-ex auth
+                assertThat(iconAsset).isEqualTo(R.raw.face_dialog_authenticating)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticating)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+            } else if ((testCase.isCoex && forceExplicitFlow) || testCase.isFingerprintOnly) {
+                // Fingerprint-only or explicit co-ex auth
+                if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                    assertThat(iconAsset).isEqualTo(getSfpsAsset_fingerprintAuthenticating())
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                } else {
+                    assertThat(iconAsset)
+                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                    assertThat(shouldAnimateIconView).isEqualTo(false)
+                }
+            }
 
             assertThat(message).isEqualTo(PromptMessage.Help(startMessage))
             assertThat(authenticating).isTrue()
             assertThat(authenticated?.isNotAuthenticated).isTrue()
-            assertThat(size).isEqualTo(expectedSize)
-            assertButtonsVisible(negative = expectedSize != PromptSize.SMALL)
+            assertThat(size).isEqualTo(expectedPromptSize)
+            assertButtonsVisible(negative = expectedPromptSize != PromptSize.SMALL)
+        }
+
+    @Test
+    fun start_authenticating_show_and_clear_error() = runGenericTest {
+        val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+        val iconContentDescriptionId by
+            collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+        val shouldAnimateIconView by
+            collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+
+        var forceExplicitFlow =
+            testCase.isCoex && testCase.confirmationRequested || testCase.authenticatedByFingerprint
+        if (forceExplicitFlow) {
+            kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = true)
+        }
+        verifyIconSize(forceExplicitFlow)
+
+        val errorJob = launch {
+            kosmos.promptViewModel.showTemporaryError(
+                "so sad",
+                messageAfterError = "",
+                authenticateAfterError = testCase.isFingerprintOnly || testCase.isCoex,
+            )
+            forceExplicitFlow = true
+            // Usually done by binder
+            kosmos.promptViewModel.iconViewModel.setPreviousIconWasError(true)
+        }
+
+        assertThat(message?.isError).isEqualTo(true)
+        assertThat(message?.message).isEqualTo("so sad")
+
+        // Icon asset assertions
+        if (testCase.isFaceOnly) {
+            // Face-only auth
+            assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_error)
+            assertThat(iconContentDescriptionId).isEqualTo(R.string.keyguard_face_failed)
+            assertThat(shouldAnimateIconView).isEqualTo(true)
+
+            // Clear error, go to idle
+            errorJob.join()
+
+            assertThat(iconAsset).isEqualTo(R.raw.face_dialog_error_to_idle)
+            assertThat(iconContentDescriptionId)
+                .isEqualTo(R.string.biometric_dialog_face_icon_description_idle)
+            assertThat(shouldAnimateIconView).isEqualTo(true)
+        } else if ((testCase.isCoex && forceExplicitFlow) || testCase.isFingerprintOnly) {
+            // Fingerprint-only or explicit co-ex auth
+            if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                assertThat(iconAsset).isEqualTo(getSfpsAsset_fingerprintToError())
+                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+            } else {
+                assertThat(iconAsset)
+                    .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
+                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+            }
+
+            // Clear error, restart authenticating
+            errorJob.join()
+
+            if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                assertThat(iconAsset).isEqualTo(getSfpsAsset_errorToFingerprint())
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+            } else {
+                assertThat(iconAsset)
+                    .isEqualTo(R.raw.fingerprint_dialogue_error_to_fingerprint_lottie)
+                assertThat(iconContentDescriptionId)
+                    .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                assertThat(shouldAnimateIconView).isEqualTo(true)
+            }
+        }
+    }
+
+    @Test
+    fun shows_error_to_unlock_or_success() {
+        // Face-only auth does not use error -> unlock or error -> success assets
+        if (testCase.isFingerprintOnly || testCase.isCoex) {
+            runGenericTest {
+                // Distinct asset for error -> success only applicable for fingerprint-only /
+                // explicit co-ex auth
+                val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+                val iconContentDescriptionId by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+                val shouldAnimateIconView by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+
+                var forceExplicitFlow =
+                    testCase.isCoex && testCase.confirmationRequested ||
+                        testCase.authenticatedByFingerprint
+                if (forceExplicitFlow) {
+                    kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = true)
+                }
+                verifyIconSize(forceExplicitFlow)
+
+                kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = true)
+                kosmos.promptViewModel.iconViewModel.setPreviousIconWasError(true)
+
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY
+                )
+
+                // SFPS test cases
+                if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                    // Covers (1) fingerprint-only (2) co-ex, authenticated by fingerprint
+                    if (testCase.authenticatedByFingerprint) {
+                        assertThat(iconAsset).isEqualTo(R.raw.biometricprompt_sfps_error_to_success)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    } else { // Covers co-ex, authenticated by face
+                        assertThat(iconAsset).isEqualTo(R.raw.biometricprompt_sfps_error_to_unlock)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+
+                        // Confirm authentication
+                        kosmos.promptViewModel.confirmAuthenticated()
+
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.biometricprompt_sfps_unlock_to_success)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    }
+                } else { // Non-SFPS (UDFPS / rear-FPS) test cases
+                    // Covers (1) fingerprint-only (2) co-ex, authenticated by fingerprint
+                    if (testCase.authenticatedByFingerprint) {
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_error_to_success_lottie)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    } else { //  co-ex, authenticated by face
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_error_to_unlock_lottie)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.biometric_dialog_confirm)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+
+                        // Confirm authentication
+                        kosmos.promptViewModel.confirmAuthenticated()
+
+                        assertThat(iconAsset)
+                            .isEqualTo(
+                                R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
+                            )
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun shows_authenticated_no_errors_no_confirmation_required() {
+        if (!testCase.confirmationRequested) {
+            runGenericTest {
+                val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+                val iconContentDescriptionId by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+                val shouldAnimateIconView by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+                val message by collectLastValue(kosmos.promptViewModel.message)
+                verifyIconSize()
+
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY,
+                    "TEST"
+                )
+
+                if (testCase.isFingerprintOnly) {
+                    // Fingerprint icon asset assertions
+                    if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                        assertThat(iconAsset).isEqualTo(getSfpsAsset_fingerprintToSuccess())
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    } else {
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_success_lottie)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    }
+                } else if (testCase.isFaceOnly || testCase.isCoex) {
+                    // Face icon asset assertions
+                    // If co-ex, use implicit flow (explicit flow always requires confirmation)
+                    assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                    assertThat(message).isEqualTo(PromptMessage.Empty)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun shows_pending_confirmation() {
+        if (testCase.authenticatedByFace && testCase.confirmationRequested) {
+            runGenericTest {
+                val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+                val iconContentDescriptionId by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+                val shouldAnimateIconView by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+
+                val forceExplicitFlow = testCase.isCoex && testCase.confirmationRequested
+                verifyIconSize(forceExplicitFlow = forceExplicitFlow)
+
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY
+                )
+
+                if (testCase.isFaceOnly) {
+                    assertThat(iconAsset).isEqualTo(R.raw.face_dialog_wink_from_dark)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                } else if (testCase.isCoex) { // explicit flow, confirmation requested
+                    if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                        assertThat(iconAsset).isEqualTo(getSfpsAsset_fingerprintToUnlock())
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    } else {
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie)
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.biometric_dialog_confirm)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun shows_authenticated_explicitly_confirmed() {
+        if (testCase.authenticatedByFace && testCase.confirmationRequested) {
+            runGenericTest {
+                val iconAsset by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
+                val iconContentDescriptionId by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.contentDescriptionId)
+                val shouldAnimateIconView by
+                    collectLastValue(kosmos.promptViewModel.iconViewModel.shouldAnimateIconView)
+                val forceExplicitFlow = testCase.isCoex && testCase.confirmationRequested
+                verifyIconSize(forceExplicitFlow = forceExplicitFlow)
+
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY
+                )
+
+                kosmos.promptViewModel.confirmAuthenticated()
+
+                if (testCase.isFaceOnly) {
+                    assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
+                    assertThat(iconContentDescriptionId)
+                        .isEqualTo(R.string.biometric_dialog_face_icon_description_confirmed)
+                    assertThat(shouldAnimateIconView).isEqualTo(true)
+                }
+
+                // explicit flow because confirmation requested
+                if (testCase.isCoex) {
+                    if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
+                        assertThat(iconAsset)
+                            .isEqualTo(R.raw.biometricprompt_sfps_unlock_to_success)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    } else {
+                        assertThat(iconAsset)
+                            .isEqualTo(
+                                R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
+                            )
+                        assertThat(iconContentDescriptionId)
+                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(shouldAnimateIconView).isEqualTo(true)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getSfpsAsset_fingerprintAuthenticating(): Int =
+        if (testCase.isInRearDisplayMode) {
+            R.raw.biometricprompt_sfps_rear_display_fingerprint_authenticating
+        } else {
+            R.raw.biometricprompt_sfps_fingerprint_authenticating
+        }
+
+    private fun getSfpsAsset_fingerprintToError(): Int =
+        if (testCase.isInRearDisplayMode) {
+            R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error
+        } else {
+            R.raw.biometricprompt_sfps_fingerprint_to_error
+        }
+
+    private fun getSfpsAsset_fingerprintToUnlock(): Int =
+        if (testCase.isInRearDisplayMode) {
+            R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock
+        } else {
+            R.raw.biometricprompt_sfps_fingerprint_to_unlock
+        }
+
+    private fun getSfpsAsset_errorToFingerprint(): Int =
+        if (testCase.isInRearDisplayMode) {
+            R.raw.biometricprompt_sfps_rear_display_error_to_fingerprint
+        } else {
+            R.raw.biometricprompt_sfps_error_to_fingerprint
+        }
+
+    private fun getSfpsAsset_fingerprintToSuccess(): Int =
+        if (testCase.isInRearDisplayMode) {
+            R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success
+        } else {
+            R.raw.biometricprompt_sfps_fingerprint_to_success
         }
 
     @Test
@@ -292,9 +672,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val forceError = testCase.isCoex && testCase.authenticatedByFingerprint
 
         if (forceError) {
-            assertThat(viewModel.fingerprintStartMode.first())
+            assertThat(kosmos.promptViewModel.fingerprintStartMode.first())
                 .isEqualTo(FingerprintStartMode.Pending)
-            viewModel.ensureFingerprintHasStarted(isDelayed = true)
+            kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = true)
         }
 
         showAuthenticated(
@@ -303,477 +683,196 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         )
     }
 
+    // Verifies expected icon sizes for all modalities
+    private fun TestScope.verifyIconSize(forceExplicitFlow: Boolean = false) {
+        val iconSize by collectLastValue(kosmos.promptViewModel.iconSize)
+        if ((testCase.isCoex && !forceExplicitFlow) || testCase.isFaceOnly) {
+            // Face-only or implicit co-ex auth
+            assertThat(iconSize).isEqualTo(Pair(mockFaceIconSize, mockFaceIconSize))
+        } else if ((testCase.isCoex && forceExplicitFlow) || testCase.isFingerprintOnly) {
+            // Fingerprint-only or explicit co-ex auth
+            if (testCase.fingerprint?.isAnyUdfpsType == true) {
+                val udfpsOverlayParams by
+                    collectLastValue(kosmos.promptViewModel.udfpsOverlayParams)
+                val expectedUdfpsOverlayParams = mockUdfpsOverlayParams()
+                assertThat(udfpsOverlayParams).isEqualTo(expectedUdfpsOverlayParams)
+
+                assertThat(iconSize)
+                    .isEqualTo(
+                        Pair(
+                            expectedUdfpsOverlayParams.sensorBounds.width(),
+                            expectedUdfpsOverlayParams.sensorBounds.height()
+                        )
+                    )
+            } else {
+                assertThat(iconSize)
+                    .isEqualTo(Pair(mockFingerprintIconWidth, mockFingerprintIconHeight))
+            }
+        }
+    }
+
     @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun set_haptic_on_confirm_when_confirmation_required_otherwise_on_authenticated() =
         runGenericTest {
             val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
-            viewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
+            kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
 
-            val confirmHaptics by collectLastValue(viewModel.hapticsToPlay)
-            assertThat(confirmHaptics?.hapticFeedbackConstant)
-                .isEqualTo(
-                    if (expectConfirmation) HapticFeedbackConstants.NO_HAPTICS
-                    else HapticFeedbackConstants.CONFIRM
-                )
-            assertThat(confirmHaptics?.flag)
-                .isEqualTo(
-                    if (expectConfirmation) null
-                    else HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
-                )
+            val hapticsPreConfirm by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+            if (expectConfirmation) {
+                assertThat(hapticsPreConfirm).isEqualTo(PromptViewModel.HapticsToPlay.None)
+            } else {
+                val confirmHaptics =
+                    hapticsPreConfirm as PromptViewModel.HapticsToPlay.HapticConstant
+                assertThat(confirmHaptics.constant)
+                    .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
+                assertThat(confirmHaptics.flag).isNull()
+            }
 
             if (expectConfirmation) {
-                viewModel.confirmAuthenticated()
+                kosmos.promptViewModel.confirmAuthenticated()
             }
 
-            val confirmedHaptics by collectLastValue(viewModel.hapticsToPlay)
-            assertThat(confirmedHaptics?.hapticFeedbackConstant)
-                .isEqualTo(HapticFeedbackConstants.CONFIRM)
-            assertThat(confirmedHaptics?.flag)
-                .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            val hapticsPostConfirm by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+            val confirmedHaptics =
+                hapticsPostConfirm as PromptViewModel.HapticsToPlay.HapticConstant
+            assertThat(confirmedHaptics.constant)
+                .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
+            assertThat(confirmedHaptics.flag).isNull()
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun set_msdl_haptic_on_confirm_when_confirmation_required_otherwise_on_authenticated() =
+        runGenericTest {
+            val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+
+            kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
+
+            val hapticsPreConfirm by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+
+            if (expectConfirmation) {
+                assertThat(hapticsPreConfirm).isEqualTo(PromptViewModel.HapticsToPlay.None)
+            } else {
+                val confirmHaptics = hapticsPreConfirm as PromptViewModel.HapticsToPlay.MSDL
+                assertThat(confirmHaptics.token).isEqualTo(MSDLToken.UNLOCK)
+                assertThat(confirmHaptics.properties).isEqualTo(authInteractionProperties)
+            }
+
+            if (expectConfirmation) {
+                kosmos.promptViewModel.confirmAuthenticated()
+            }
+
+            val hapticsPostConfirm by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+            val confirmedHaptics = hapticsPostConfirm as PromptViewModel.HapticsToPlay.MSDL
+            assertThat(confirmedHaptics.token).isEqualTo(MSDLToken.UNLOCK)
+            assertThat(confirmedHaptics.properties).isEqualTo(authInteractionProperties)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun playSuccessHaptic_SetsConfirmConstant() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
-        viewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
 
         if (expectConfirmation) {
-            viewModel.confirmAuthenticated()
+            kosmos.promptViewModel.confirmAuthenticated()
         }
 
-        val currentHaptics by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(currentHaptics?.hapticFeedbackConstant)
-            .isEqualTo(HapticFeedbackConstants.CONFIRM)
-        assertThat(currentHaptics?.flag)
-            .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val currentHaptics = haptics as PromptViewModel.HapticsToPlay.HapticConstant
+        assertThat(currentHaptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
+        assertThat(currentHaptics.flag).isNull()
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playSuccessHaptic_SetsUnlockMSDLFeedback() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
+
+        if (expectConfirmation) {
+            kosmos.promptViewModel.confirmAuthenticated()
+        }
+
+        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val currentHaptics = haptics as PromptViewModel.HapticsToPlay.MSDL
+        assertThat(currentHaptics.token).isEqualTo(MSDLToken.UNLOCK)
+        assertThat(currentHaptics.properties).isEqualTo(authInteractionProperties)
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun playErrorHaptic_SetsRejectConstant() = runGenericTest {
-        viewModel.showTemporaryError("test", "messageAfterError", false)
+        kosmos.promptViewModel.showTemporaryError("test", "messageAfterError", false)
 
-        val currentHaptics by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(currentHaptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
-        assertThat(currentHaptics?.flag)
-            .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val currentHaptics = haptics as PromptViewModel.HapticsToPlay.HapticConstant
+        assertThat(currentHaptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+        assertThat(currentHaptics.flag).isNull()
     }
 
     @Test
-    fun start_idle_and_show_authenticating_iconUpdate() =
-        runGenericTest(doNotStart = true) {
-            val currentRotation by collectLastValue(displayStateInteractor.currentRotation)
-            val iconAsset by collectLastValue(iconViewModel.iconAsset)
-            val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
-            val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playErrorHaptic_SetsFailureMSDLFeedback() = runGenericTest {
+        kosmos.promptViewModel.showTemporaryError("test", "messageAfterError", false)
 
-            val forceExplicitFlow = testCase.isCoex && testCase.authenticatedByFingerprint
-            if (forceExplicitFlow) {
-                viewModel.ensureFingerprintHasStarted(isDelayed = true)
-            }
-
-            val startMessage = "here we go"
-            viewModel.showAuthenticating(startMessage, isRetry = false)
-
-            if (testCase.isFingerprintOnly) {
-                val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
-                val shouldAnimateIconOverlay by
-                    collectLastValue(iconViewModel.shouldAnimateIconOverlay)
-
-                if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                    val expectedOverlayAsset =
-                        when (currentRotation) {
-                            DisplayRotation.ROTATION_0 ->
-                                R.raw.biometricprompt_fingerprint_to_error_landscape
-                            DisplayRotation.ROTATION_90 ->
-                                R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft
-                            DisplayRotation.ROTATION_180 ->
-                                R.raw.biometricprompt_fingerprint_to_error_landscape
-                            DisplayRotation.ROTATION_270 ->
-                                R.raw
-                                    .biometricprompt_symbol_fingerprint_to_error_portrait_bottomright
-                            else -> throw Exception("invalid rotation")
-                        }
-                    assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
-                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-                } else {
-                    assertThat(iconAsset)
-                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
-                    assertThat(iconOverlayAsset).isEqualTo(-1)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
-                    assertThat(shouldAnimateIconView).isEqualTo(false)
-                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-                }
-            }
-
-            if (testCase.isFaceOnly) {
-                val expectedIconAsset = R.raw.face_dialog_authenticating
-                assertThat(iconAsset).isEqualTo(expectedIconAsset)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticating)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-            }
-
-            if (testCase.isCoex) {
-                if (testCase.confirmationRequested || forceExplicitFlow) {
-                    // explicit flow
-                    val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
-                    val shouldAnimateIconOverlay by
-                        collectLastValue(iconViewModel.shouldAnimateIconOverlay)
-
-                    // TODO: Update when SFPS co-ex is implemented
-                    if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                        assertThat(iconAsset)
-                            .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
-                        assertThat(iconOverlayAsset).isEqualTo(-1)
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
-                        assertThat(shouldAnimateIconView).isEqualTo(false)
-                        assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-                    }
-                } else {
-                    // implicit flow
-                    val expectedIconAsset = R.raw.face_dialog_authenticating
-                    assertThat(iconAsset).isEqualTo(expectedIconAsset)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticating)
-                    assertThat(shouldAnimateIconView).isEqualTo(true)
-                }
-            }
-        }
-
-    @Test
-    fun start_authenticating_show_and_clear_error_iconUpdate() = runGenericTest {
-        val currentRotation by collectLastValue(displayStateInteractor.currentRotation)
-
-        val iconAsset by collectLastValue(iconViewModel.iconAsset)
-        val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
-        val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
-
-        val forceExplicitFlow = testCase.isCoex && testCase.authenticatedByFingerprint
-        if (forceExplicitFlow) {
-            viewModel.ensureFingerprintHasStarted(isDelayed = true)
-        }
-
-        val errorJob = launch {
-            viewModel.showTemporaryError(
-                "so sad",
-                messageAfterError = "",
-                authenticateAfterError = testCase.isFingerprintOnly || testCase.isCoex,
-            )
-            // Usually done by binder
-            iconViewModel.setPreviousIconWasError(true)
-            iconViewModel.setPreviousIconOverlayWasError(true)
-        }
-
-        if (testCase.isFingerprintOnly) {
-            val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
-            val shouldAnimateIconOverlay by collectLastValue(iconViewModel.shouldAnimateIconOverlay)
-
-            if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                val expectedOverlayAsset =
-                    when (currentRotation) {
-                        DisplayRotation.ROTATION_0 ->
-                            R.raw.biometricprompt_fingerprint_to_error_landscape
-                        DisplayRotation.ROTATION_90 ->
-                            R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft
-                        DisplayRotation.ROTATION_180 ->
-                            R.raw.biometricprompt_fingerprint_to_error_landscape
-                        DisplayRotation.ROTATION_270 ->
-                            R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright
-                        else -> throw Exception("invalid rotation")
-                    }
-                assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
-                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(true)
-            } else {
-                assertThat(iconAsset)
-                    .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
-                assertThat(iconOverlayAsset).isEqualTo(-1)
-                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-            }
-
-            // Clear error, restart authenticating
-            errorJob.join()
-
-            if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                val expectedOverlayAsset =
-                    when (currentRotation) {
-                        DisplayRotation.ROTATION_0 ->
-                            R.raw.biometricprompt_symbol_error_to_fingerprint_landscape
-                        DisplayRotation.ROTATION_90 ->
-                            R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_topleft
-                        DisplayRotation.ROTATION_180 ->
-                            R.raw.biometricprompt_symbol_error_to_fingerprint_landscape
-                        DisplayRotation.ROTATION_270 ->
-                            R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_bottomright
-                        else -> throw Exception("invalid rotation")
-                    }
-                assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(true)
-            } else {
-                assertThat(iconAsset)
-                    .isEqualTo(R.raw.fingerprint_dialogue_error_to_fingerprint_lottie)
-                assertThat(iconOverlayAsset).isEqualTo(-1)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-            }
-        }
-
-        if (testCase.isFaceOnly) {
-            assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_error)
-            assertThat(iconContentDescriptionId).isEqualTo(R.string.keyguard_face_failed)
-            assertThat(shouldAnimateIconView).isEqualTo(true)
-
-            // Clear error, go to idle
-            errorJob.join()
-
-            assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_error_to_idle)
-            assertThat(iconContentDescriptionId)
-                .isEqualTo(R.string.biometric_dialog_face_icon_description_idle)
-            assertThat(shouldAnimateIconView).isEqualTo(true)
-        }
-
-        if (testCase.isCoex) {
-            val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
-            val shouldAnimateIconOverlay by collectLastValue(iconViewModel.shouldAnimateIconOverlay)
-
-            // TODO: Update when SFPS co-ex is implemented
-            if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                assertThat(iconAsset)
-                    .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
-                assertThat(iconOverlayAsset).isEqualTo(-1)
-                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-            }
-
-            // Clear error, restart authenticating
-            errorJob.join()
-
-            if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                assertThat(iconAsset)
-                    .isEqualTo(R.raw.fingerprint_dialogue_error_to_fingerprint_lottie)
-                assertThat(iconOverlayAsset).isEqualTo(-1)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-                assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-            }
-        }
+        val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val currentHaptics = haptics as PromptViewModel.HapticsToPlay.MSDL
+        assertThat(currentHaptics.token).isEqualTo(MSDLToken.FAILURE)
+        assertThat(currentHaptics.properties).isEqualTo(authInteractionProperties)
     }
 
+    // biometricprompt_sfps_fingerprint_authenticating reused across rotations
+    // Other SFPS assets change across rotations, testing authenticated asset
     @Test
-    fun shows_authenticated_no_errors_no_confirmation_required_iconUpdate() = runGenericTest {
-        if (!testCase.confirmationRequested) {
-            val currentRotation by collectLastValue(displayStateInteractor.currentRotation)
-
-            val iconAsset by collectLastValue(iconViewModel.iconAsset)
-            val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
-            val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
-
-            viewModel.showAuthenticated(
-                modality = testCase.authenticatedModality,
-                dismissAfterDelay = DELAY
-            )
-
-            if (testCase.isFingerprintOnly) {
-                val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
-                val shouldAnimateIconOverlay by
-                    collectLastValue(iconViewModel.shouldAnimateIconOverlay)
-
-                if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                    val expectedOverlayAsset =
-                        when (currentRotation) {
-                            DisplayRotation.ROTATION_0 ->
-                                R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
-                            DisplayRotation.ROTATION_90 ->
-                                R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_topleft
-                            DisplayRotation.ROTATION_180 ->
-                                R.raw.biometricprompt_symbol_fingerprint_to_success_landscape
-                            DisplayRotation.ROTATION_270 ->
-                                R.raw
-                                    .biometricprompt_symbol_fingerprint_to_success_portrait_bottomright
-                            else -> throw Exception("invalid rotation")
-                        }
-                    assertThat(iconOverlayAsset).isEqualTo(expectedOverlayAsset)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
-                    assertThat(shouldAnimateIconOverlay).isEqualTo(true)
-                } else {
-                    val isAuthenticated by collectLastValue(viewModel.isAuthenticated)
-                    assertThat(iconAsset)
-                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_success_lottie)
-                    assertThat(iconOverlayAsset).isEqualTo(-1)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
-                    assertThat(shouldAnimateIconView).isEqualTo(true)
-                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-                }
-            }
-
-            // If co-ex, using implicit flow (explicit flow always requires confirmation)
-            if (testCase.isFaceOnly || testCase.isCoex) {
-                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_checkmark)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-            }
-        }
-    }
-
-    @Test
-    fun shows_pending_confirmation_iconUpdate() = runGenericTest {
-        if (
-            (testCase.isFaceOnly || testCase.isCoex) &&
-                testCase.authenticatedByFace &&
-                testCase.confirmationRequested
-        ) {
-            val iconAsset by collectLastValue(iconViewModel.iconAsset)
-            val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
-            val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
-
-            viewModel.showAuthenticated(
-                modality = testCase.authenticatedModality,
-                dismissAfterDelay = DELAY
-            )
-
-            if (testCase.isFaceOnly) {
-                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_wink_from_dark)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-            }
-
-            // explicit flow because confirmation requested
-            if (testCase.isCoex) {
-                val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
-                val shouldAnimateIconOverlay by
-                    collectLastValue(iconViewModel.shouldAnimateIconOverlay)
-
-                // TODO: Update when SFPS co-ex is implemented
-                if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                    assertThat(iconAsset)
-                        .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie)
-                    assertThat(iconOverlayAsset).isEqualTo(-1)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
-                    assertThat(shouldAnimateIconView).isEqualTo(true)
-                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-                }
-            }
-        }
-    }
-
-    @Test
-    fun shows_authenticated_explicitly_confirmed_iconUpdate() = runGenericTest {
-        if (
-            (testCase.isFaceOnly || testCase.isCoex) &&
-                testCase.authenticatedByFace &&
-                testCase.confirmationRequested
-        ) {
-            val iconAsset by collectLastValue(iconViewModel.iconAsset)
-            val iconContentDescriptionId by collectLastValue(iconViewModel.contentDescriptionId)
-            val shouldAnimateIconView by collectLastValue(iconViewModel.shouldAnimateIconView)
-
-            viewModel.showAuthenticated(
-                modality = testCase.authenticatedModality,
-                dismissAfterDelay = DELAY
-            )
-
-            viewModel.confirmAuthenticated()
-
-            if (testCase.isFaceOnly) {
-                assertThat(iconAsset).isEqualTo(R.drawable.face_dialog_dark_to_checkmark)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.biometric_dialog_face_icon_description_confirmed)
-                assertThat(shouldAnimateIconView).isEqualTo(true)
-            }
-
-            // explicit flow because confirmation requested
-            if (testCase.isCoex) {
-                val iconOverlayAsset by collectLastValue(iconViewModel.iconOverlayAsset)
-                val shouldAnimateIconOverlay by
-                    collectLastValue(iconViewModel.shouldAnimateIconOverlay)
-
-                // TODO: Update when SFPS co-ex is implemented
-                if (testCase.sensorType != FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-                    assertThat(iconAsset)
-                        .isEqualTo(R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie)
-                    assertThat(iconOverlayAsset).isEqualTo(-1)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
-                    assertThat(shouldAnimateIconView).isEqualTo(true)
-                    assertThat(shouldAnimateIconOverlay).isEqualTo(false)
-                }
-            }
-        }
-    }
-
-    @Test
-    fun sfpsIconUpdates_onConfigurationChanged() = runGenericTest {
+    fun sfpsAuthenticatedIconUpdates_onRotation() {
         if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-            val testConfig = Configuration()
-            val folded = INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP - 1
-            val unfolded = INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP + 1
-            val currentIcon by collectLastValue(iconViewModel.iconAsset)
+            runGenericTest {
+                val currentIcon by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
 
-            testConfig.smallestScreenWidthDp = folded
-            iconViewModel.onConfigurationChanged(testConfig)
-            val foldedIcon = currentIcon
+                kosmos.promptViewModel.showAuthenticated(
+                    modality = testCase.authenticatedModality,
+                    dismissAfterDelay = DELAY
+                )
 
-            testConfig.smallestScreenWidthDp = unfolded
-            iconViewModel.onConfigurationChanged(testConfig)
-            val unfoldedIcon = currentIcon
+                kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
+                val iconRotation0 = currentIcon
 
-            assertThat(foldedIcon).isNotEqualTo(unfoldedIcon)
+                kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+                val iconRotation90 = currentIcon
+
+                kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+                val iconRotation180 = currentIcon
+
+                kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+                val iconRotation270 = currentIcon
+
+                assertThat(iconRotation0).isNotEqualTo(iconRotation90)
+                assertThat(iconRotation0).isNotEqualTo(iconRotation180)
+                assertThat(iconRotation0).isNotEqualTo(iconRotation270)
+                assertThat(iconRotation90).isNotEqualTo(iconRotation180)
+                assertThat(iconRotation90).isNotEqualTo(iconRotation270)
+                assertThat(iconRotation180).isNotEqualTo(iconRotation270)
+            }
         }
     }
 
     @Test
-    fun sfpsIconUpdates_onRotation() = runGenericTest {
+    fun sfpsIconUpdates_onRearDisplayMode() {
         if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-            val currentIcon by collectLastValue(iconViewModel.iconAsset)
+            runGenericTest {
+                val currentIcon by collectLastValue(kosmos.promptViewModel.iconViewModel.iconAsset)
 
-            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
-            val iconRotation0 = currentIcon
+                kosmos.displayStateRepository.setIsInRearDisplayMode(false)
+                val iconNotRearDisplayMode = currentIcon
 
-            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
-            val iconRotation90 = currentIcon
+                kosmos.displayStateRepository.setIsInRearDisplayMode(true)
+                val iconRearDisplayMode = currentIcon
 
-            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
-            val iconRotation180 = currentIcon
-
-            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
-            val iconRotation270 = currentIcon
-
-            assertThat(iconRotation0).isEqualTo(iconRotation180)
-            assertThat(iconRotation0).isNotEqualTo(iconRotation90)
-            assertThat(iconRotation0).isNotEqualTo(iconRotation270)
-        }
-    }
-
-    @Test
-    fun sfpsIconUpdates_onRearDisplayMode() = runGenericTest {
-        if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
-            val currentIcon by collectLastValue(iconViewModel.iconAsset)
-
-            displayStateRepository.setIsInRearDisplayMode(false)
-            val iconNotRearDisplayMode = currentIcon
-
-            displayStateRepository.setIsInRearDisplayMode(true)
-            val iconRearDisplayMode = currentIcon
-
-            assertThat(iconNotRearDisplayMode).isNotEqualTo(iconRearDisplayMode)
+                assertThat(iconNotRearDisplayMode).isNotEqualTo(iconRearDisplayMode)
+            }
         }
     }
 
@@ -781,10 +880,10 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         authenticatedModality: BiometricModality,
         expectConfirmation: Boolean,
     ) {
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val fpStartMode by collectLastValue(viewModel.fingerprintStartMode)
-        val size by collectLastValue(viewModel.size)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val fpStartMode by collectLastValue(kosmos.promptViewModel.fingerprintStartMode)
+        val size by collectLastValue(kosmos.promptViewModel.size)
 
         val authWithSmallPrompt =
             testCase.shouldStartAsImplicitFlow &&
@@ -794,7 +893,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(size).isEqualTo(if (authWithSmallPrompt) PromptSize.SMALL else PromptSize.MEDIUM)
         assertButtonsVisible(negative = !authWithSmallPrompt)
 
-        viewModel.showAuthenticated(authenticatedModality, DELAY)
+        kosmos.promptViewModel.showAuthenticated(authenticatedModality, DELAY)
 
         assertThat(authenticated?.isAuthenticated).isTrue()
         assertThat(authenticated?.delay).isEqualTo(DELAY)
@@ -824,52 +923,109 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun set_haptic_on_errors() = runGenericTest {
-        viewModel.showTemporaryError(
+        kosmos.promptViewModel.showTemporaryError(
             "so sad",
             messageAfterError = "",
             authenticateAfterError = false,
             hapticFeedback = true,
         )
 
-        val haptics by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
-        assertThat(haptics?.flag).isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val haptics = hapticsToPlay as PromptViewModel.HapticsToPlay.HapticConstant
+        assertThat(haptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+        assertThat(haptics.flag).isNull()
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun set_msdl_haptic_on_errors() = runGenericTest {
+        kosmos.promptViewModel.showTemporaryError(
+            "so sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = true,
+        )
+
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val haptics = hapticsToPlay as PromptViewModel.HapticsToPlay.MSDL
+        assertThat(haptics.token).isEqualTo(MSDLToken.FAILURE)
+        assertThat(haptics.properties).isEqualTo(authInteractionProperties)
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun plays_haptic_on_errors_unless_skipped() = runGenericTest {
-        viewModel.showTemporaryError(
+        kosmos.promptViewModel.showTemporaryError(
             "still sad",
             messageAfterError = "",
             authenticateAfterError = false,
             hapticFeedback = false,
         )
 
-        val haptics by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        assertThat(hapticsToPlay).isEqualTo(PromptViewModel.HapticsToPlay.None)
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun plays_msdl_haptic_on_errors_unless_skipped() = runGenericTest {
+        kosmos.promptViewModel.showTemporaryError(
+            "still sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = false,
+        )
+
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        assertThat(hapticsToPlay).isEqualTo(PromptViewModel.HapticsToPlay.None)
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun plays_haptic_on_error_after_auth_when_confirmation_needed() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
-        viewModel.showTemporaryError(
+        kosmos.promptViewModel.showTemporaryError(
             "still sad",
             messageAfterError = "",
             authenticateAfterError = false,
             hapticFeedback = true,
         )
 
-        val haptics by collectLastValue(viewModel.hapticsToPlay)
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val haptics = hapticsToPlay as PromptViewModel.HapticsToPlay.HapticConstant
         if (expectConfirmation) {
-            assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
-            assertThat(haptics?.flag).isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            assertThat(haptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+            assertThat(haptics.flag).isNull()
         } else {
-            assertThat(haptics?.hapticFeedbackConstant)
-                .isEqualTo(HapticFeedbackConstants.CONFIRM)
+            assertThat(haptics.constant).isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
         }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun plays_msdl_haptic_on_error_after_auth_when_confirmation_needed() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        kosmos.promptViewModel.showTemporaryError(
+            "still sad",
+            messageAfterError = "",
+            authenticateAfterError = false,
+            hapticFeedback = true,
+        )
+
+        val hapticsToPlay by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
+        val haptics = hapticsToPlay as PromptViewModel.HapticsToPlay.MSDL
+        if (expectConfirmation) {
+            assertThat(haptics.token).isEqualTo(MSDLToken.FAILURE)
+        } else {
+            assertThat(haptics.token).isEqualTo(MSDLToken.UNLOCK)
+        }
+        assertThat(haptics.properties).isEqualTo(authInteractionProperties)
     }
 
     private suspend fun TestScope.showTemporaryErrors(
@@ -878,15 +1034,15 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         block: suspend TestScope.() -> Unit = {},
     ) {
         val errorMessage = "oh no!"
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val message by collectLastValue(viewModel.message)
-        val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
-        val size by collectLastValue(viewModel.size)
-        val canTryAgainNow by collectLastValue(viewModel.canTryAgainNow)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val messageVisible by collectLastValue(kosmos.promptViewModel.isIndicatorMessageVisible)
+        val size by collectLastValue(kosmos.promptViewModel.size)
+        val canTryAgainNow by collectLastValue(kosmos.promptViewModel.canTryAgainNow)
 
         val errorJob = launch {
-            viewModel.showTemporaryError(
+            kosmos.promptViewModel.showTemporaryError(
                 errorMessage,
                 authenticateAfterError = restart,
                 messageAfterError = helpAfterError,
@@ -916,13 +1072,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun no_errors_or_temporary_help_after_authenticated() = runGenericTest {
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val message by collectLastValue(viewModel.message)
-        val messageIsShowing by collectLastValue(viewModel.isIndicatorMessageVisible)
-        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val messageIsShowing by collectLastValue(kosmos.promptViewModel.isIndicatorMessageVisible)
+        val canTryAgain by collectLastValue(kosmos.promptViewModel.canTryAgainNow)
 
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
         val verifyNoError = {
             assertThat(authenticating).isFalse()
@@ -932,7 +1088,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
         val errorJob = launch {
-            viewModel.showTemporaryError(
+            kosmos.promptViewModel.showTemporaryError(
                 "error",
                 messageAfterError = "",
                 authenticateAfterError = false,
@@ -942,14 +1098,14 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         errorJob.join()
         verifyNoError()
 
-        val helpJob = launch { viewModel.showTemporaryHelp("hi") }
+        val helpJob = launch { kosmos.promptViewModel.showTemporaryHelp("hi") }
         verifyNoError()
         helpJob.join()
         verifyNoError()
 
         // persistent help is allowed
         val stickyHelpMessage = "blah"
-        viewModel.showHelp(stickyHelpMessage)
+        kosmos.promptViewModel.showHelp(stickyHelpMessage)
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
         assertThat(message).isEqualTo(PromptMessage.Help(stickyHelpMessage))
@@ -958,11 +1114,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun suppress_temporary_error() = runGenericTest {
-        val messages by collectValues(viewModel.message)
+        val messages by collectValues(kosmos.promptViewModel.message)
 
         for (error in listOf("never", "see", "me")) {
             launch {
-                viewModel.showTemporaryError(
+                kosmos.promptViewModel.showTemporaryError(
                     error,
                     messageAfterError = "or me",
                     authenticateAfterError = false,
@@ -987,11 +1143,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val errors = listOf("woot", "oh yeah", "nope")
         val afterSuffix = "(after)"
         val expectedErrorMessage = if (suppress) errors.first() else errors.last()
-        val messages by collectValues(viewModel.message)
+        val messages by collectValues(kosmos.promptViewModel.message)
 
         for (error in errors) {
             launch {
-                viewModel.showTemporaryError(
+                kosmos.promptViewModel.showTemporaryError(
                     error,
                     messageAfterError = "$error $afterSuffix",
                     authenticateAfterError = false,
@@ -1020,15 +1176,15 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun authenticated_at_most_once_same_modality() = runGenericTest {
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
 
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
 
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
@@ -1036,15 +1192,15 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun authenticating_cannot_restart_after_authenticated() = runGenericTest {
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
 
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
 
-        viewModel.showAuthenticating("again!")
+        kosmos.promptViewModel.showAuthenticating("again!")
 
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
@@ -1054,13 +1210,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     fun confirm_authentication() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val message by collectLastValue(viewModel.message)
-        val size by collectLastValue(viewModel.size)
-        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val size by collectLastValue(kosmos.promptViewModel.size)
+        val canTryAgain by collectLastValue(kosmos.promptViewModel.canTryAgainNow)
 
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
         if (expectConfirmation) {
@@ -1070,7 +1226,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 confirm = true,
             )
 
-            viewModel.confirmAuthenticated()
+            kosmos.promptViewModel.confirmAuthenticated()
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertButtonsVisible()
         }
@@ -1084,13 +1240,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     fun second_authentication_acts_as_confirmation() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val message by collectLastValue(viewModel.message)
-        val size by collectLastValue(viewModel.size)
-        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val size by collectLastValue(kosmos.promptViewModel.size)
+        val canTryAgain by collectLastValue(kosmos.promptViewModel.canTryAgainNow)
 
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
         if (expectConfirmation) {
@@ -1101,7 +1257,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             )
 
             if (testCase.modalities.hasSfps) {
-                viewModel.showAuthenticated(BiometricModality.Fingerprint, 0)
+                kosmos.promptViewModel.showAuthenticated(BiometricModality.Fingerprint, 0)
                 assertThat(message).isEqualTo(PromptMessage.Empty)
                 assertButtonsVisible()
             }
@@ -1117,15 +1273,15 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
         if (testCase.isCoex) {
-            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
+            kosmos.promptViewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
         }
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val message by collectLastValue(viewModel.message)
-        val size by collectLastValue(viewModel.size)
-        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val size by collectLastValue(kosmos.promptViewModel.size)
+        val canTryAgain by collectLastValue(kosmos.promptViewModel.canTryAgainNow)
 
         assertThat(authenticating).isFalse()
         assertThat(canTryAgain).isFalse()
@@ -1139,7 +1295,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     confirm = true,
                 )
 
-                viewModel.confirmAuthenticated()
+                kosmos.promptViewModel.confirmAuthenticated()
             } else if (testCase.isCoex) {
                 assertThat(authenticated?.isAuthenticatedAndConfirmed).isTrue()
             }
@@ -1153,16 +1309,16 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
         if (testCase.isCoex) {
-            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
-            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_UP))
+            kosmos.promptViewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
+            kosmos.promptViewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_UP))
         }
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val message by collectLastValue(viewModel.message)
-        val size by collectLastValue(viewModel.size)
-        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val size by collectLastValue(kosmos.promptViewModel.size)
+        val canTryAgain by collectLastValue(kosmos.promptViewModel.canTryAgainNow)
 
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
         if (expectConfirmation) {
@@ -1172,7 +1328,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 confirm = true,
             )
 
-            viewModel.confirmAuthenticated()
+            kosmos.promptViewModel.confirmAuthenticated()
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertButtonsVisible()
         }
@@ -1184,18 +1340,18 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun cannot_confirm_unless_authenticated() = runGenericTest {
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
 
-        viewModel.confirmAuthenticated()
+        kosmos.promptViewModel.confirmAuthenticated()
         assertThat(authenticating).isTrue()
         assertThat(authenticated?.isNotAuthenticated).isTrue()
 
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
 
         // reconfirm should be a no-op
-        viewModel.confirmAuthenticated()
-        viewModel.confirmAuthenticated()
+        kosmos.promptViewModel.confirmAuthenticated()
+        kosmos.promptViewModel.confirmAuthenticated()
 
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isNotAuthenticated).isFalse()
@@ -1204,36 +1360,36 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Test
     fun shows_help_before_authenticated() = runGenericTest {
         val helpMessage = "please help yourself to some cookies"
-        val message by collectLastValue(viewModel.message)
-        val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
-        val size by collectLastValue(viewModel.size)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val messageVisible by collectLastValue(kosmos.promptViewModel.isIndicatorMessageVisible)
+        val size by collectLastValue(kosmos.promptViewModel.size)
 
-        viewModel.showHelp(helpMessage)
+        kosmos.promptViewModel.showHelp(helpMessage)
 
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
         assertThat(message).isEqualTo(PromptMessage.Help(helpMessage))
         assertThat(messageVisible).isTrue()
 
-        assertThat(viewModel.isAuthenticating.first()).isFalse()
-        assertThat(viewModel.isAuthenticated.first().isNotAuthenticated).isTrue()
+        assertThat(kosmos.promptViewModel.isAuthenticating.first()).isFalse()
+        assertThat(kosmos.promptViewModel.isAuthenticated.first().isNotAuthenticated).isTrue()
     }
 
     @Test
     fun shows_help_after_authenticated() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
         val helpMessage = "more cookies please"
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val message by collectLastValue(viewModel.message)
-        val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
-        val size by collectLastValue(viewModel.size)
-        val confirmationRequired by collectLastValue(viewModel.isConfirmationRequired)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val messageVisible by collectLastValue(kosmos.promptViewModel.isIndicatorMessageVisible)
+        val size by collectLastValue(kosmos.promptViewModel.size)
+        val confirmationRequired by collectLastValue(kosmos.promptViewModel.isConfirmationRequired)
 
         if (testCase.isCoex && testCase.authenticatedByFingerprint) {
-            viewModel.ensureFingerprintHasStarted(isDelayed = true)
+            kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = true)
         }
-        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
-        viewModel.showHelp(helpMessage)
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.showHelp(helpMessage)
 
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
 
@@ -1253,15 +1409,15 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val errorMessage = "bad"
         val helpMessage = "again?"
         val expectTryAgainButton = testCase.isFaceOnly
-        val authenticating by collectLastValue(viewModel.isAuthenticating)
-        val authenticated by collectLastValue(viewModel.isAuthenticated)
-        val message by collectLastValue(viewModel.message)
-        val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
-        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+        val authenticating by collectLastValue(kosmos.promptViewModel.isAuthenticating)
+        val authenticated by collectLastValue(kosmos.promptViewModel.isAuthenticated)
+        val message by collectLastValue(kosmos.promptViewModel.message)
+        val messageVisible by collectLastValue(kosmos.promptViewModel.isIndicatorMessageVisible)
+        val canTryAgain by collectLastValue(kosmos.promptViewModel.canTryAgainNow)
 
-        viewModel.showAuthenticating("go")
+        kosmos.promptViewModel.showAuthenticating("go")
         val errorJob = launch {
-            viewModel.showTemporaryError(
+            kosmos.promptViewModel.showTemporaryError(
                 errorMessage,
                 messageAfterError = helpMessage,
                 authenticateAfterError = false,
@@ -1286,7 +1442,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertButtonsVisible(negative = true, tryAgain = expectTryAgainButton)
 
         val helpMessage2 = "foo"
-        viewModel.showAuthenticating(helpMessage2, isRetry = true)
+        kosmos.promptViewModel.showAuthenticating(helpMessage2, isRetry = true)
         assertThat(authenticating).isTrue()
         assertThat(authenticated?.isAuthenticated).isFalse()
         assertThat(message).isEqualTo(PromptMessage.Help(helpMessage2))
@@ -1296,26 +1452,25 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun switch_to_credential_fallback() = runGenericTest {
-        val size by collectLastValue(viewModel.size)
+        val size by collectLastValue(kosmos.promptViewModel.size)
 
         // TODO(b/251476085): remove Spaghetti, migrate logic, and update this test
-        viewModel.onSwitchToCredential()
+        kosmos.promptViewModel.onSwitchToCredential()
 
         assertThat(size).isEqualTo(PromptSize.LARGE)
     }
 
     @Test
-    @EnableFlags(FLAG_BP_TALKBACK)
     fun hint_for_talkback_guidance() = runGenericTest {
-        val hint by collectLastValue(viewModel.accessibilityHint)
+        val hint by collectLastValue(kosmos.promptViewModel.accessibilityHint)
 
         // Touches should fall outside of sensor area
-        whenever(udfpsUtils.getTouchInNativeCoordinates(any(), any(), any()))
+        whenever(kosmos.udfpsUtils.getTouchInNativeCoordinates(any(), any(), any()))
             .thenReturn(Point(0, 0))
-        whenever(udfpsUtils.onTouchOutsideOfSensorArea(any(), any(), any(), any(), any()))
+        whenever(kosmos.udfpsUtils.onTouchOutsideOfSensorArea(any(), any(), any(), any(), any()))
             .thenReturn("Direction")
 
-        viewModel.onAnnounceAccessibilityHint(
+        kosmos.promptViewModel.onAnnounceAccessibilityHint(
             obtainMotionEvent(MotionEvent.ACTION_HOVER_ENTER),
             true
         )
@@ -1328,172 +1483,205 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    fun no_hint_for_talkback_guidance_after_auth() = runGenericTest {
+        val hint by collectLastValue(kosmos.promptViewModel.accessibilityHint)
+
+        kosmos.promptViewModel.showAuthenticated(testCase.authenticatedModality, 0)
+        kosmos.promptViewModel.confirmAuthenticated()
+
+        // Touches should fall outside of sensor area
+        whenever(kosmos.udfpsUtils.getTouchInNativeCoordinates(any(), any(), any()))
+            .thenReturn(Point(0, 0))
+        whenever(kosmos.udfpsUtils.onTouchOutsideOfSensorArea(any(), any(), any(), any(), any()))
+            .thenReturn("Direction")
+
+        kosmos.promptViewModel.onAnnounceAccessibilityHint(
+            obtainMotionEvent(MotionEvent.ACTION_HOVER_ENTER),
+            true
+        )
+
+        assertThat(hint.isNullOrBlank()).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionOverriddenByVerticalListContentView() =
         runGenericTest(description = "test description", contentView = promptContentView) {
-            val contentView by collectLastValue(viewModel.contentView)
-            val description by collectLastValue(viewModel.description)
+            val contentView by collectLastValue(kosmos.promptViewModel.contentView)
+            val description by collectLastValue(kosmos.promptViewModel.description)
 
             assertThat(description).isEqualTo("")
             assertThat(contentView).isEqualTo(promptContentView)
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionOverriddenByContentViewWithMoreOptionsButton() =
         runGenericTest(
             description = "test description",
             contentView = promptContentViewWithMoreOptionsButton
         ) {
-            val contentView by collectLastValue(viewModel.contentView)
-            val description by collectLastValue(viewModel.description)
+            val contentView by collectLastValue(kosmos.promptViewModel.contentView)
+            val description by collectLastValue(kosmos.promptViewModel.description)
 
             assertThat(description).isEqualTo("")
             assertThat(contentView).isEqualTo(promptContentViewWithMoreOptionsButton)
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionWithoutContentView() =
         runGenericTest(description = "test description") {
-            val contentView by collectLastValue(viewModel.contentView)
-            val description by collectLastValue(viewModel.description)
+            val contentView by collectLastValue(kosmos.promptViewModel.contentView)
+            val description by collectLastValue(kosmos.promptViewModel.description)
 
             assertThat(description).isEqualTo("test description")
             assertThat(contentView).isNull()
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_nullIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
-            val logo by collectLastValue(viewModel.logo)
-            assertThat(logo).isNull()
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo).isNotNull()
+            assertThat(logoInfo!!.first).isNull()
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
-    fun logo_defaultWithOverrides() =
-        runGenericTest(packageName = packageNameForLogoWithOverrides) {
-            val logo by collectLastValue(viewModel.logo)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+    fun logo_defaultFromActivityInfo() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) {
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
 
-            // 1. PM.getApplicationInfo(packageNameForLogoWithOverrides) is set to return
-            // applicationInfoWithIcon with defaultLogoIcon,
-            // 2. iconProvider.getIcon() is set to return defaultLogoIconForGMSCore
-            // For the apps with packageNameForLogoWithOverrides, 2 should be called instead of 1
-            assertThat(logo).isEqualTo(defaultLogoIconWithOverrides)
+            // 1. PM.getApplicationInfo(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) is set to return
+            // applicationInfoWithIconAndDescription with "defaultLogoIconFromAppInfo",
+            // 2. iconProvider.getIcon(activityInfo) is set to return
+            // "defaultLogoIconFromActivityInfo"
+            // For the apps with OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO, 2 should be called instead of 1
+            assertThat(logoInfo).isNotNull()
+            assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconFromActivityInfo)
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_defaultIsNull() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            val logo by collectLastValue(viewModel.logo)
-            assertThat(logo).isNull()
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo).isNotNull()
+            assertThat(logoInfo!!.first).isNull()
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_default() = runGenericTest {
-        val logo by collectLastValue(viewModel.logo)
-        assertThat(logo).isEqualTo(defaultLogoIcon)
+        val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+        assertThat(logoInfo).isNotNull()
+        assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconFromAppInfo)
     }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_resSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
             val expectedBitmap = context.getDrawable(logoResFromApp).toBitmap()
-            val logo by collectLastValue(viewModel.logo)
-            assertThat((logo as BitmapDrawable).bitmap.sameAs(expectedBitmap)).isTrue()
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo).isNotNull()
+            assertThat((logoInfo!!.first as BitmapDrawable).bitmap.sameAs(expectedBitmap)).isTrue()
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_bitmapSetByApp() =
         runGenericTest(logoBitmap = logoBitmapFromApp) {
-            val logo by collectLastValue(viewModel.logo)
-            assertThat((logo as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat((logoInfo!!.first as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_emptyIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
-            val logoDescription by collectLastValue(viewModel.logoDescription)
-            assertThat(logoDescription).isEqualTo("")
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo!!.second).isEqualTo("")
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+    fun logoDescription_defaultFromActivityInfo() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) {
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            // 1. PM.getApplicationInfo(packageNameForLogoWithOverrides) is set to return
+            // applicationInfoWithIconAndDescription with defaultLogoDescription,
+            // 2. activityInfo.loadLabel() is set to return defaultLogoDescriptionWithOverrides
+            // For the apps with packageNameForLogoWithOverrides, 2 should be called instead of 1
+            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromActivityInfo)
+        }
+
+    @Test
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_defaultIsEmpty() =
         runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            val logoDescription by collectLastValue(viewModel.logoDescription)
-            assertThat(logoDescription).isEqualTo("")
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo!!.second).isEqualTo("")
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_default() = runGenericTest {
-        val logoDescription by collectLastValue(viewModel.logoDescription)
-        assertThat(logoDescription).isEqualTo(defaultLogoDescription)
+        val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+        assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromAppInfo)
     }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT, FLAG_CONSTRAINT_BP)
+    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_setByApp() =
         runGenericTest(logoDescription = logoDescriptionFromApp) {
-            val logoDescription by collectLastValue(viewModel.logoDescription)
-            assertThat(logoDescription).isEqualTo(logoDescriptionFromApp)
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo!!.second).isEqualTo(logoDescriptionFromApp)
         }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_bottom_rotation0() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
-        val position by collectLastValue(viewModel.position)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
+        val position by collectLastValue(kosmos.promptViewModel.position)
         assertThat(position).isEqualTo(PromptPosition.Bottom)
     } // TODO(b/335278136): Add test for no sensor landscape
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_bottom_forceLarge() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
-        viewModel.onSwitchToCredential()
-        val position by collectLastValue(viewModel.position)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+        kosmos.promptViewModel.onSwitchToCredential()
+        val position by collectLastValue(kosmos.promptViewModel.position)
         assertThat(position).isEqualTo(PromptPosition.Bottom)
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_bottom_largeScreen() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
-        displayStateRepository.setIsLargeScreen(true)
-        val position by collectLastValue(viewModel.position)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+        kosmos.displayStateRepository.setIsLargeScreen(true)
+        val position by collectLastValue(kosmos.promptViewModel.position)
         assertThat(position).isEqualTo(PromptPosition.Bottom)
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_right_rotation90() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
-        val position by collectLastValue(viewModel.position)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+        val position by collectLastValue(kosmos.promptViewModel.position)
         assertThat(position).isEqualTo(PromptPosition.Right)
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_left_rotation270() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
-        val position by collectLastValue(viewModel.position)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+        val position by collectLastValue(kosmos.promptViewModel.position)
         assertThat(position).isEqualTo(PromptPosition.Left)
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun position_top_rotation180() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
-        val position by collectLastValue(viewModel.position)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+        val position by collectLastValue(kosmos.promptViewModel.position)
         if (testCase.modalities.hasUdfps) {
             assertThat(position).isEqualTo(PromptPosition.Top)
         } else {
@@ -1502,20 +1690,18 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_bottom() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
-        val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
+        val guidelineBounds by collectLastValue(kosmos.promptViewModel.guidelineBounds)
         assertThat(guidelineBounds).isEqualTo(Rect(0, mediumTopGuidelinePadding, 0, 0))
     } // TODO(b/335278136): Add test for no sensor landscape
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_right() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
 
         val isSmall = testCase.shouldStartAsImplicitFlow
-        val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+        val guidelineBounds by collectLastValue(kosmos.promptViewModel.guidelineBounds)
 
         if (isSmall) {
             assertThat(guidelineBounds).isEqualTo(Rect(-smallHorizontalGuidelinePadding, 0, 0, 0))
@@ -1527,13 +1713,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_right_onlyShortTitle() =
         runGenericTest(subtitle = "") {
-            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+            kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
 
             val isSmall = testCase.shouldStartAsImplicitFlow
-            val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+            val guidelineBounds by collectLastValue(kosmos.promptViewModel.guidelineBounds)
 
             if (!isSmall && testCase.modalities.hasUdfps) {
                 assertThat(guidelineBounds)
@@ -1542,12 +1727,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_left() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
 
         val isSmall = testCase.shouldStartAsImplicitFlow
-        val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+        val guidelineBounds by collectLastValue(kosmos.promptViewModel.guidelineBounds)
 
         if (isSmall) {
             assertThat(guidelineBounds).isEqualTo(Rect(0, 0, -smallHorizontalGuidelinePadding, 0))
@@ -1559,13 +1743,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_left_onlyShortTitle() =
         runGenericTest(subtitle = "") {
-            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
+            kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_270)
 
             val isSmall = testCase.shouldStartAsImplicitFlow
-            val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+            val guidelineBounds by collectLastValue(kosmos.promptViewModel.guidelineBounds)
 
             if (!isSmall && testCase.modalities.hasUdfps) {
                 assertThat(guidelineBounds)
@@ -1574,10 +1757,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CONSTRAINT_BP)
     fun guideline_top() = runGenericTest {
-        displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
-        val guidelineBounds by collectLastValue(viewModel.guidelineBounds)
+        kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+        val guidelineBounds by collectLastValue(kosmos.promptViewModel.guidelineBounds)
         if (testCase.modalities.hasUdfps) {
             assertThat(guidelineBounds).isEqualTo(Rect(0, 0, 0, 0))
         }
@@ -1585,11 +1767,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun iconViewLoaded() = runGenericTest {
-        val isIconViewLoaded by collectLastValue(viewModel.isIconViewLoaded)
+        val isIconViewLoaded by collectLastValue(kosmos.promptViewModel.isIconViewLoaded)
         // TODO(b/328677869): Add test for noIcon logic.
         assertThat(isIconViewLoaded).isFalse()
 
-        viewModel.setIsIconViewLoaded(true)
+        kosmos.promptViewModel.setIsIconViewLoaded(true)
 
         assertThat(isIconViewLoaded).isTrue()
     }
@@ -1603,11 +1785,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         credential: Boolean = false,
     ) {
         runCurrent()
-        assertThat(viewModel.isTryAgainButtonVisible.first()).isEqualTo(tryAgain)
-        assertThat(viewModel.isConfirmButtonVisible.first()).isEqualTo(confirm)
-        assertThat(viewModel.isCancelButtonVisible.first()).isEqualTo(cancel)
-        assertThat(viewModel.isNegativeButtonVisible.first()).isEqualTo(negative)
-        assertThat(viewModel.isCredentialButtonVisible.first()).isEqualTo(credential)
+        assertThat(kosmos.promptViewModel.isTryAgainButtonVisible.first()).isEqualTo(tryAgain)
+        assertThat(kosmos.promptViewModel.isConfirmButtonVisible.first()).isEqualTo(confirm)
+        assertThat(kosmos.promptViewModel.isCancelButtonVisible.first()).isEqualTo(cancel)
+        assertThat(kosmos.promptViewModel.isNegativeButtonVisible.first()).isEqualTo(negative)
+        assertThat(kosmos.promptViewModel.isCredentialButtonVisible.first()).isEqualTo(credential)
     }
 
     private fun runGenericTest(
@@ -1619,35 +1801,15 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         logoRes: Int = 0,
         logoBitmap: Bitmap? = null,
         logoDescription: String? = null,
-        packageName: String = OP_PACKAGE_NAME,
+        packageName: String = OP_PACKAGE_NAME_WITH_APP_LOGO,
         block: suspend TestScope.() -> Unit,
     ) {
         val topActivity = ComponentName(packageName, "test app")
         runningTaskInfo.topActivity = topActivity
-        whenever(activityTaskManager.getTasks(1)).thenReturn(listOf(runningTaskInfo))
-        selector =
-            PromptSelectorInteractorImpl(
-                fingerprintRepository,
-                displayStateInteractor,
-                promptRepository,
-                lockPatternUtils
-            )
-        selector.resetPrompt(REQUEST_ID)
+        whenever(kosmos.activityTaskManager.getTasks(1)).thenReturn(listOf(runningTaskInfo))
+        kosmos.promptSelectorInteractor.resetPrompt(REQUEST_ID)
 
-        viewModel =
-            PromptViewModel(
-                displayStateInteractor,
-                selector,
-                mContext,
-                udfpsOverlayInteractor,
-                biometricStatusInteractor,
-                udfpsUtils,
-                iconProvider,
-                activityTaskManager
-            )
-        iconViewModel = viewModel.iconViewModel
-
-        selector.initializePrompt(
+        kosmos.promptSelectorInteractor.initializePrompt(
             requireConfirmation = testCase.confirmationRequested,
             allowCredentialFallback = allowCredentialFallback,
             fingerprint = testCase.fingerprint,
@@ -1661,12 +1823,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             packageName = packageName,
         )
 
-        biometricStatusRepository.setFingerprintAcquiredStatus(
+        kosmos.biometricStatusRepository.setFingerprintAcquiredStatus(
             AcquiredFingerprintAuthenticationStatus(
                 AuthenticationReason.BiometricPromptAuthentication,
                 BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN
             )
         )
+
         // put the view model in the initial authenticating state, unless explicitly skipped
         val startMode =
             when {
@@ -1676,18 +1839,31 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             }
         when (startMode) {
             FingerprintStartMode.Normal -> {
-                viewModel.ensureFingerprintHasStarted(isDelayed = false)
-                viewModel.showAuthenticating()
+                kosmos.promptViewModel.ensureFingerprintHasStarted(isDelayed = false)
+                kosmos.promptViewModel.showAuthenticating()
             }
             FingerprintStartMode.Delayed -> {
-                viewModel.showAuthenticating()
+                kosmos.promptViewModel.showAuthenticating()
             }
             else -> {
                 /* skip */
             }
         }
 
-        testScope.runTest { block() }
+        if (testCase.fingerprint?.isAnyUdfpsType == true) {
+            kosmos.testScope.collectLastValue(kosmos.udfpsOverlayInteractor.udfpsOverlayParams)
+            kosmos.testScope.runCurrent()
+            overrideUdfpsOverlayParams()
+        }
+
+        kosmos.testScope.runTest { block() }
+    }
+
+    private fun overrideUdfpsOverlayParams(isLandscape: Boolean = false) {
+        val authControllerCallback = authController.captureCallback()
+        authControllerCallback.onUdfpsLocationChanged(
+            mockUdfpsOverlayParams(isLandscape = isLandscape)
+        )
     }
 
     /** Obtain a MotionEvent with the specified MotionEvent action constant */
@@ -1708,11 +1884,30 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 TestCase(
                     fingerprint =
                         fingerprintSensorPropertiesInternal(
+                                sensorType = FingerprintSensorProperties.TYPE_REAR
+                            )
+                            .first(),
+                    authenticatedModality = BiometricModality.Fingerprint,
+                ),
+                TestCase(
+                    fingerprint =
+                        fingerprintSensorPropertiesInternal(
                                 strong = true,
                                 sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
                             )
                             .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
+                    isInRearDisplayMode = false,
+                ),
+                TestCase(
+                    fingerprint =
+                        fingerprintSensorPropertiesInternal(
+                                strong = true,
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                            )
+                            .first(),
+                    authenticatedModality = BiometricModality.Fingerprint,
+                    isInRearDisplayMode = true,
                 ),
                 TestCase(
                     fingerprint =
@@ -1786,6 +1981,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 internal data class TestCase(
     val fingerprint: FingerprintSensorPropertiesInternal? = null,
     val face: FaceSensorPropertiesInternal? = null,
+    val isInRearDisplayMode: Boolean = false,
     val authenticatedModality: BiometricModality,
     val confirmationRequested: Boolean = false,
 ) {
@@ -1794,12 +1990,15 @@ internal data class TestCase(
             when {
                 fingerprint != null && face != null -> "coex"
                 fingerprint != null && fingerprint.isAnySidefpsType -> "fingerprint only, sideFps"
-                fingerprint != null && !fingerprint.isAnySidefpsType ->
-                    "fingerprint only, non-sideFps"
+                fingerprint != null && fingerprint.isAnyUdfpsType -> "fingerprint only, udfps"
+                fingerprint != null &&
+                    fingerprint.sensorType == FingerprintSensorProperties.TYPE_REAR ->
+                    "fingerprint only, rearFps"
                 face != null -> "face only"
                 else -> "?"
             }
-        return "[$modality, by: $authenticatedModality, confirm: $confirmationRequested]"
+        return "[$modality, isInRearDisplayMode: $isInRearDisplayMode, by: " +
+            "$authenticatedModality, confirm: $confirmationRequested]"
     }
 
     fun expectConfirmation(atLeastOneFailure: Boolean): Boolean =
@@ -1846,7 +2045,7 @@ private fun PromptSelectorInteractor.initializePrompt(
     logoResFromApp: Int = 0,
     logoBitmapFromApp: Bitmap? = null,
     logoDescriptionFromApp: String? = null,
-    packageName: String = OP_PACKAGE_NAME,
+    packageName: String = OP_PACKAGE_NAME_WITH_APP_LOGO,
 ) {
     val info =
         PromptInfo().apply {
@@ -1875,4 +2074,7 @@ private fun PromptSelectorInteractor.initializePrompt(
     )
 }
 
-internal const val INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP = 600
+private fun AuthController.captureCallback() =
+    withArgCaptor<AuthController.Callback> {
+        Mockito.verify(this@captureCallback).addCallback(capture())
+    }

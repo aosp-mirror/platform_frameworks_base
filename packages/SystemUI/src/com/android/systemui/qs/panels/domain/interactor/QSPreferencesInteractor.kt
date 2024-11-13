@@ -18,14 +18,20 @@ package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.data.repository.QSPreferencesRepository
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
 @SysUISingleton
 class QSPreferencesInteractor @Inject constructor(private val repo: QSPreferencesRepository) {
     val showLabels: Flow<Boolean> = repo.showLabels
+    val largeTilesSpecs: Flow<Set<TileSpec>> = repo.largeTilesSpecs
 
     fun setShowLabels(showLabels: Boolean) {
         repo.setShowLabels(showLabels)
+    }
+
+    fun setLargeTilesSpecs(specs: Set<TileSpec>) {
+        repo.setLargeTilesSpecs(specs)
     }
 }

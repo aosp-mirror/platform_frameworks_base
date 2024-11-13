@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.accessibility.hearingaid.HearingDevicesUiEventLogger.LAUNCH_SOURCE_QS_TILE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -151,7 +153,7 @@ public class HearingDevicesTileTest extends SysuiTestCase {
         mTile.handleClick(expandable);
         mTestableLooper.processAllMessages();
 
-        verify(mHearingDevicesDialogManager).showDialog(expandable);
+        verify(mHearingDevicesDialogManager).showDialog(expandable, LAUNCH_SOURCE_QS_TILE);
     }
 
     @Test

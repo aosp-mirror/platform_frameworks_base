@@ -116,8 +116,8 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mPipSnapAlgorithm = new PipSnapAlgorithm();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState, mPipSnapAlgorithm,
                 new PipKeepClearAlgorithmInterface() {}, mPipDisplayLayoutState, mSizeSpecSource);
-        PipMotionHelper pipMotionHelper = new PipMotionHelper(mContext, mPipBoundsState,
-                mPipTaskOrganizer, mPhonePipMenuController, mPipSnapAlgorithm,
+        PipMotionHelper pipMotionHelper = new PipMotionHelper(mContext, mMainExecutor,
+                mPipBoundsState, mPipTaskOrganizer, mPhonePipMenuController, mPipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator,
                 Optional.empty() /* pipPerfHintControllerOptional */);
         mPipTouchHandler = new PipTouchHandler(mContext, mShellInit, mPhonePipMenuController,

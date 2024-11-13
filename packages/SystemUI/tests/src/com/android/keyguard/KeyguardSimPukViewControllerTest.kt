@@ -29,8 +29,10 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.res.R
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import org.junit.Before
@@ -63,6 +65,9 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
+    @Mock private lateinit var mUserActivityNotifier: UserActivityNotifier
+
+    private val kosmos = testKosmos()
 
     @Before
     fun setup() {
@@ -96,7 +101,9 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
                 emergencyButtonController,
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
-                keyguardKeyboardInteractor
+                keyguardKeyboardInteractor,
+                kosmos.bouncerHapticPlayer,
+                mUserActivityNotifier,
             )
         underTest.init()
     }

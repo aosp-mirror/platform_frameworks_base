@@ -113,6 +113,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import com.android.server.utils.AlarmQueue;
 
@@ -1063,6 +1064,16 @@ public class UsageStatsService extends SystemService implements
         synchronized (mReportedEvents) {
             LinkedList<Event> events = mReportedEvents.get(userId);
             if (events == null) {
+                // Callers of this API should verify that the userId passed to this method exists.
+                // The logic below should only remain as a last-resort catch-all fix.
+                final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+                if (umi == null || (umi != null && !umi.exists(userId))) {
+                    // The userId passed is a non-existent user so don't report the event.
+                    Slog.wtf(TAG, "Attempted to report event for non-existent user " + userId
+                            + " (" + event.mPackage + "/" + event.mClass
+                            + " eventType:" + event.mEventType + ")");
+                    return;
+                }
                 events = new LinkedList<>();
                 mReportedEvents.put(userId, events);
             }
@@ -3223,6 +3234,18 @@ public class UsageStatsService extends SystemService implements
             Event event = new Event(eventType, SystemClock.elapsedRealtime());
             event.mPackage = packageName;
             reportEventOrAddToQueue(userId, event);
+        }
+
+        @Override
+        public void reportEventForAllUsers(String packageName, int eventType) {
+            if (packageName == null) {
+                Slog.w(TAG, "Event reported without a package name, eventType:" + eventType);
+                return;
+            }
+
+            Event event = new Event(eventType, SystemClock.elapsedRealtime());
+            event.mPackage = packageName;
+            reportEventToAllUserId(event);
         }
 
         @Override

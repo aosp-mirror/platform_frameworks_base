@@ -17,15 +17,19 @@ package com.android.systemui.statusbar.disableflags.data.repository
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
 import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
+import android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS
 import android.app.StatusBarManager.DISABLE_CLOCK
 import android.app.StatusBarManager.DISABLE_NONE
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ALERTS
+import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
+import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
 import android.content.res.Configuration
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
@@ -42,10 +46,12 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class DisableFlagsRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: DisableFlagsRepository
@@ -79,7 +85,7 @@ class DisableFlagsRepositoryTest : SysuiTestCase() {
     @Test
     fun disableFlags_initialValue_none() {
         assertThat(underTest.disableFlags.value)
-            .isEqualTo(DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE))
+            .isEqualTo(DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE, animate = false))
     }
 
     @Test
@@ -179,12 +185,7 @@ class DisableFlagsRepositoryTest : SysuiTestCase() {
     fun disableFlags_quickSettingsDisabled_quickSettingsEnabledFalse() =
         testScope.runTest {
             getCommandQueueCallback()
-                .disable(
-                    DISPLAY_ID,
-                    DISABLE_NONE,
-                    DISABLE2_QUICK_SETTINGS,
-                    /* animate= */ false,
-                )
+                .disable(DISPLAY_ID, DISABLE_NONE, DISABLE2_QUICK_SETTINGS, /* animate= */ false)
 
             assertThat(underTest.disableFlags.value.isQuickSettingsEnabled()).isFalse()
         }
@@ -214,21 +215,84 @@ class DisableFlagsRepositoryTest : SysuiTestCase() {
             configuration.orientation = Configuration.ORIENTATION_LANDSCAPE
             mContext.orCreateTestableResources.addOverride(
                 R.bool.config_use_split_notification_shade,
-                /* value= */ false
+                /* value= */ false,
             )
             remoteInputQuickSettingsDisabler.setRemoteInputActive(true)
             remoteInputQuickSettingsDisabler.onConfigChanged(configuration)
 
             getCommandQueueCallback()
+                .disable(DISPLAY_ID, DISABLE_NONE, DISABLE2_NONE, /* animate= */ false)
+
+            // THEN quick settings is disabled (even if the disable flags don't say so)
+            assertThat(underTest.disableFlags.value.isQuickSettingsEnabled()).isFalse()
+        }
+
+    @Test
+    fun disableFlags_clockDisabled() =
+        testScope.runTest {
+            getCommandQueueCallback()
+                .disable(DISPLAY_ID, DISABLE_CLOCK, DISABLE2_NONE, /* animate= */ false)
+
+            assertThat(underTest.disableFlags.value.isClockEnabled).isFalse()
+        }
+
+    @Test
+    fun disableFlags_clockEnabled() =
+        testScope.runTest {
+            getCommandQueueCallback()
+                .disable(DISPLAY_ID, DISABLE_NONE, DISABLE2_NONE, /* animate= */ false)
+
+            assertThat(underTest.disableFlags.value.isClockEnabled).isTrue()
+        }
+
+    @Test
+    fun disableFlags_notificationIconsDisabled() =
+        testScope.runTest {
+            getCommandQueueCallback()
                 .disable(
                     DISPLAY_ID,
-                    DISABLE_NONE,
+                    DISABLE_NOTIFICATION_ICONS,
                     DISABLE2_NONE,
                     /* animate= */ false,
                 )
 
-            // THEN quick settings is disabled (even if the disable flags don't say so)
-            assertThat(underTest.disableFlags.value.isQuickSettingsEnabled()).isFalse()
+            assertThat(underTest.disableFlags.value.areNotificationIconsEnabled).isFalse()
+        }
+
+    @Test
+    fun disableFlags_notificationIconsEnabled() =
+        testScope.runTest {
+            getCommandQueueCallback()
+                .disable(DISPLAY_ID, DISABLE_NONE, DISABLE2_NONE, /* animate= */ false)
+
+            assertThat(underTest.disableFlags.value.areNotificationIconsEnabled).isTrue()
+        }
+
+    @Test
+    fun disableFlags_systemInfoDisabled_viaDisable1() =
+        testScope.runTest {
+            getCommandQueueCallback()
+                .disable(DISPLAY_ID, DISABLE_SYSTEM_INFO, DISABLE2_NONE, /* animate= */ false)
+
+            assertThat(underTest.disableFlags.value.isSystemInfoEnabled).isFalse()
+        }
+
+    @Test
+    fun disableFlags_systemInfoDisabled_viaDisable2() =
+        testScope.runTest {
+            getCommandQueueCallback()
+                .disable(DISPLAY_ID, DISABLE_NONE, DISABLE2_SYSTEM_ICONS, /* animate= */ false)
+
+            assertThat(underTest.disableFlags.value.isSystemInfoEnabled).isFalse()
+        }
+
+    @Test
+    fun disableFlags_systemInfoEnabled() =
+        testScope.runTest {
+            getCommandQueueCallback()
+                .disable(DISPLAY_ID, DISABLE_NONE, DISABLE2_NONE, /* animate= */ false)
+
+            assertThat(underTest.disableFlags.value.isSystemInfoEnabled).isTrue()
         }
 
     @Test
@@ -262,6 +326,34 @@ class DisableFlagsRepositoryTest : SysuiTestCase() {
             assertThat(underTest.disableFlags.value.areNotificationAlertsEnabled()).isFalse()
             assertThat(underTest.disableFlags.value.isShadeEnabled()).isFalse()
             assertThat(underTest.disableFlags.value.isQuickSettingsEnabled()).isFalse()
+        }
+
+    @Test
+    fun disableFlags_animateFalse() =
+        testScope.runTest {
+            getCommandQueueCallback()
+                .disable(
+                    DISPLAY_ID,
+                    DISABLE_NOTIFICATION_ALERTS,
+                    DISABLE2_NONE,
+                    /* animate= */ false,
+                )
+
+            assertThat(underTest.disableFlags.value.animate).isFalse()
+        }
+
+    @Test
+    fun disableFlags_animateTrue() =
+        testScope.runTest {
+            getCommandQueueCallback()
+                .disable(
+                    DISPLAY_ID,
+                    DISABLE_NOTIFICATION_ALERTS,
+                    DISABLE2_NONE,
+                    /* animate= */ true,
+                )
+
+            assertThat(underTest.disableFlags.value.animate).isTrue()
         }
 
     private fun getCommandQueueCallback(): CommandQueue.Callbacks {

@@ -525,7 +525,7 @@ public class TarBackupReaderTest {
 
     @Test
     public void
-    chooseRestorePolicy_flagOnNotRestoreAnyVersionVToURestoreAndInAllowlist_returnsIgnore()
+    chooseRestorePolicy_flagOnNotRestoreAnyVersionVToURestoreAndInAllowlist_returnsAccept()
             throws Exception {
 
         mSetFlagsRule.enableFlags(
@@ -540,7 +540,8 @@ public class TarBackupReaderTest {
         FileMetadata info = new FileMetadata();
         info.version = Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1;
 
-        PackageInfo packageInfo = createNonRestoreAnyVersionUPackage();
+        PackageInfo packageInfo = createNonRestoreAnyVersionPackage(
+                Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
         PackageManagerStub.sPackageInfo = packageInfo;
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
@@ -559,7 +560,7 @@ public class TarBackupReaderTest {
 
     @Test
     public void
-    chooseRestorePolicy_flagOffNotRestoreAnyVersionVToURestoreAndInAllowlist_returnsAccept()
+    chooseRestorePolicy_flagOffNotRestoreAnyVersionVToURestoreAndInAllowlist_returnsIgnore()
             throws Exception {
 
         mSetFlagsRule.disableFlags(
@@ -574,7 +575,8 @@ public class TarBackupReaderTest {
         FileMetadata info = new FileMetadata();
         info.version = Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1;
 
-        PackageInfo packageInfo = createNonRestoreAnyVersionUPackage();
+        PackageInfo packageInfo = createNonRestoreAnyVersionPackage(
+                Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
         PackageManagerStub.sPackageInfo = packageInfo;
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
@@ -608,7 +610,8 @@ public class TarBackupReaderTest {
         FileMetadata info = new FileMetadata();
         info.version = Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1;
 
-        PackageInfo packageInfo = createNonRestoreAnyVersionUPackage();
+        PackageInfo packageInfo = createNonRestoreAnyVersionPackage(
+                Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
         PackageManagerStub.sPackageInfo = packageInfo;
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
@@ -716,6 +719,36 @@ public class TarBackupReaderTest {
                 LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER);
     }
 
+    @Test
+    public void
+    chooseRestorePolicy_allowlistNotSetNotRestoreAnyVersionVersionMismatch_returnsIgnore()
+            throws Exception {
+        mSetFlagsRule.disableFlags(
+                Flags.FLAG_ENABLE_V_TO_U_RESTORE_FOR_SYSTEM_COMPONENTS_IN_ALLOWLIST);
+
+        TarBackupReader tarBackupReader = createTarBackupReader();
+
+        Signature[] signatures = new Signature[]{FAKE_SIGNATURE_1};
+        FileMetadata info = new FileMetadata();
+        info.version = Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 2;
+
+        PackageInfo packageInfo = createNonRestoreAnyVersionPackage(
+                Build.VERSION_CODES.UPSIDE_DOWN_CAKE + 1);
+        PackageManagerStub.sPackageInfo = packageInfo;
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
+                packageInfo.packageName);
+        RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
+                false /* allowApks */, info, signatures, mMockPackageManagerInternal,
+                mUserId, mContext);
+
+        assertThat(policy).isEqualTo(RestorePolicy.IGNORE);
+        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mBackupManagerMonitorMock).onEvent(bundleCaptor.capture());
+        assertThat(bundleCaptor.getValue().get(EXTRA_LOG_EVENT_ID)).isEqualTo(
+                LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER);
+    }
+
     private TarBackupReader createTarBackupReader() throws Exception {
         InputStream inputStream = mContext.getResources().openRawResource(
                 R.raw.backup_telephony_no_password);
@@ -726,7 +759,7 @@ public class TarBackupReaderTest {
         return tarBackupReader;
     }
 
-    private PackageInfo createNonRestoreAnyVersionUPackage(){
+    private PackageInfo createNonRestoreAnyVersionPackage(int versionCode) {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -740,7 +773,7 @@ public class TarBackupReaderTest {
                         SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
-        packageInfo.versionCode = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+        packageInfo.versionCode = versionCode;
         return packageInfo;
     }
 }

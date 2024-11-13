@@ -17,18 +17,34 @@
 package com.android.systemui.bouncer.shared.flag
 
 import com.android.systemui.Flags
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import dagger.Module
-import dagger.Provides
 
-interface ComposeBouncerFlags {
+object ComposeBouncerFlags {
+
+    /** @see [isComposeBouncerOrSceneContainerEnabled] */
+    val isEnabled: Boolean
+        get() = isComposeBouncerOrSceneContainerEnabled()
 
     /**
      * Returns `true` if the Compose bouncer is enabled or if the scene container framework is
      * enabled; `false` otherwise.
      */
-    fun isComposeBouncerOrSceneContainerEnabled(): Boolean
+    fun isComposeBouncerOrSceneContainerEnabled(): Boolean {
+        return SceneContainerFlag.isEnabled || Flags.composeBouncer()
+    }
+
+    /**
+     * Called to ensure code is only run when the flag is enabled. This protects users from the
+     * unintended behaviors caused by accidentally running new logic, while also crashing on an eng
+     * build to ensure that the refactor author catches issues in testing.
+     */
+    @JvmStatic
+    fun isUnexpectedlyInLegacyMode() =
+        RefactorFlagUtils.isUnexpectedlyInLegacyMode(
+            isEnabled,
+            "SceneContainerFlag || ComposeBouncerFlag"
+        )
 
     /**
      * Returns `true` if only compose bouncer is enabled and scene container framework is not
@@ -39,30 +55,7 @@ interface ComposeBouncerFlags {
             "that includes compose bouncer in legacy keyguard.",
         replaceWith = ReplaceWith("isComposeBouncerOrSceneContainerEnabled()")
     )
-    fun isOnlyComposeBouncerEnabled(): Boolean
-}
-
-class ComposeBouncerFlagsImpl() : ComposeBouncerFlags {
-
-    override fun isComposeBouncerOrSceneContainerEnabled(): Boolean {
-        return SceneContainerFlag.isEnabled || Flags.composeBouncer()
-    }
-
-    @Deprecated(
-        "Avoid using this, this is meant to be used only by the glue code " +
-            "that includes compose bouncer in legacy keyguard.",
-        replaceWith = ReplaceWith("isComposeBouncerOrSceneContainerEnabled()")
-    )
-    override fun isOnlyComposeBouncerEnabled(): Boolean {
+    fun isOnlyComposeBouncerEnabled(): Boolean {
         return !SceneContainerFlag.isEnabled && Flags.composeBouncer()
-    }
-}
-
-@Module
-object ComposeBouncerFlagsModule {
-    @Provides
-    @SysUISingleton
-    fun impl(): ComposeBouncerFlags {
-        return ComposeBouncerFlagsImpl()
     }
 }

@@ -16,20 +16,19 @@
 
 package android.database;
 
-import static android.database.DatabaseUtils.bindSelection;
-import static android.database.DatabaseUtils.getSqlStatementType;
-import static android.database.DatabaseUtils.getSqlStatementTypeExtended;
-import static android.database.DatabaseUtils.STATEMENT_COMMENT;
 import static android.database.DatabaseUtils.STATEMENT_CREATE;
 import static android.database.DatabaseUtils.STATEMENT_DDL;
 import static android.database.DatabaseUtils.STATEMENT_OTHER;
 import static android.database.DatabaseUtils.STATEMENT_SELECT;
 import static android.database.DatabaseUtils.STATEMENT_UPDATE;
 import static android.database.DatabaseUtils.STATEMENT_WITH;
+import static android.database.DatabaseUtils.bindSelection;
+import static android.database.DatabaseUtils.getSqlStatementType;
+import static android.database.DatabaseUtils.getSqlStatementTypeExtended;
 
 import static org.junit.Assert.assertEquals;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

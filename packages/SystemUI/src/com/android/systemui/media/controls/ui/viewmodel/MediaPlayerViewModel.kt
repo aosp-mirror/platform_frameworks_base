@@ -18,7 +18,6 @@ package com.android.systemui.media.controls.ui.viewmodel
 
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.monet.ColorScheme
 
 /** Models UI state for media player. */
 data class MediaPlayerViewModel(
@@ -30,8 +29,6 @@ data class MediaPlayerViewModel(
     val artistName: CharSequence,
     val titleName: CharSequence,
     val isExplicitVisible: Boolean,
-    val shouldAddGradient: Boolean,
-    val colorScheme: ColorScheme,
     val canShowTime: Boolean,
     val playTurbulenceNoise: Boolean,
     val useSemanticActions: Boolean,
@@ -42,4 +39,30 @@ data class MediaPlayerViewModel(
     val onLongClicked: () -> Unit,
     val onSeek: () -> Unit,
     val onBindSeekbar: (SeekBarViewModel) -> Unit,
-)
+    val onLocationChanged: (Int) -> Unit,
+) {
+    fun contentEquals(other: MediaPlayerViewModel?): Boolean {
+        return other?.let {
+            other.backgroundCover == backgroundCover &&
+                appIcon == other.appIcon &&
+                useGrayColorFilter == other.useGrayColorFilter &&
+                artistName == other.artistName &&
+                titleName == other.titleName &&
+                isExplicitVisible == other.isExplicitVisible &&
+                canShowTime == other.canShowTime &&
+                playTurbulenceNoise == other.playTurbulenceNoise &&
+                useSemanticActions == other.useSemanticActions &&
+                areActionsEqual(other.actionButtons) &&
+                outputSwitcher.contentEquals(other.outputSwitcher)
+        } ?: false
+    }
+
+    private fun areActionsEqual(other: List<MediaActionViewModel>): Boolean {
+        actionButtons.forEachIndexed { index, mediaActionViewModel ->
+            if (!mediaActionViewModel.contentEquals(other[index])) {
+                return false
+            }
+        }
+        return true
+    }
+}

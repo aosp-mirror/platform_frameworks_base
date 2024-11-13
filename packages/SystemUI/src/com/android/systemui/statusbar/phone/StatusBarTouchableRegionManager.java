@@ -29,6 +29,8 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
@@ -68,7 +70,10 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private boolean mIsStatusBarExpanded = false;
-    private boolean mIsIdleOnGone = true;
+    // Whether the scene container has no UI to render, i.e. is in idle state on the Gone scene and
+    // without any overlays to display.
+    private boolean mIsSceneContainerUiEmpty = true;
+    private boolean mIsRemoteUserInteractionOngoing = false;
     private boolean mShouldAdjustInsets = false;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
@@ -132,7 +137,10 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         if (SceneContainerFlag.isEnabled()) {
             javaAdapter.alwaysCollectFlow(
                     sceneInteractor.get().getTransitionState(),
-                    this::onSceneChanged);
+                    this::onSceneContainerTransition);
+            javaAdapter.alwaysCollectFlow(
+                    sceneInteractor.get().isRemoteUserInteractionOngoing(),
+                    this::onRemoteUserInteractionOngoingChanged);
         } else {
             javaAdapter.alwaysCollectFlow(
                     shadeInteractor.isAnyExpanded(),
@@ -167,14 +175,23 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         }
     }
 
-    private void onSceneChanged(ObservableTransitionState transitionState) {
-        boolean isIdleOnGone = transitionState.isIdle(Scenes.Gone);
-        if (isIdleOnGone != mIsIdleOnGone) {
-            mIsIdleOnGone = isIdleOnGone;
-            if (!isIdleOnGone) {
+    private void onSceneContainerTransition(ObservableTransitionState transitionState) {
+        boolean isSceneContainerUiEmpty = transitionState.isIdle(Scenes.Gone)
+                && ((ObservableTransitionState.Idle) transitionState).getCurrentOverlays()
+                .isEmpty();
+        if (isSceneContainerUiEmpty != mIsSceneContainerUiEmpty) {
+            mIsSceneContainerUiEmpty = isSceneContainerUiEmpty;
+            if (!isSceneContainerUiEmpty) {
                 // make sure our state is sensible
                 mForceCollapsedUntilLayout = false;
             }
+            updateTouchableRegion();
+        }
+    }
+
+    private void onRemoteUserInteractionOngoingChanged(Boolean ongoing) {
+        if (ongoing != mIsRemoteUserInteractionOngoing) {
+            mIsRemoteUserInteractionOngoing = ongoing;
             updateTouchableRegion();
         }
     }
@@ -276,13 +293,15 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
      * Helper to let us know when calculating the region is not needed because we know the entire
      * screen needs to be touchable.
      */
-    private boolean shouldMakeEntireScreenTouchable() {
+    @VisibleForTesting
+    boolean shouldMakeEntireScreenTouchable() {
         // The touchable region is always the full area when expanded, whether we're showing the
         // shade or the bouncer. It's also fully touchable when the screen off animation is playing
         // since we don't want stray touches to go through the light reveal scrim to whatever is
         // underneath.
         return mIsStatusBarExpanded
-                || (SceneContainerFlag.isEnabled() && !mIsIdleOnGone)
+                || (SceneContainerFlag.isEnabled()
+                && (!mIsSceneContainerUiEmpty || mIsRemoteUserInteractionOngoing))
                 || mPrimaryBouncerInteractor.isShowing().getValue()
                 || mAlternateBouncerInteractor.isVisibleState()
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();

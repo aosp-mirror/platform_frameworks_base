@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTestTaskContainer;
 
 import static org.junit.Assert.assertEquals;
@@ -82,7 +83,7 @@ public class TaskContainerTest {
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */));
 
         assertEquals(WINDOWING_MODE_MULTI_WINDOW,
@@ -90,7 +91,7 @@ public class TaskContainerTest {
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */));
 
         assertEquals(WINDOWING_MODE_FREEFORM,
@@ -111,14 +112,14 @@ public class TaskContainerTest {
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */));
 
         assertFalse(taskContainer.isInPictureInPicture());
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */));
 
         assertTrue(taskContainer.isInPictureInPicture());

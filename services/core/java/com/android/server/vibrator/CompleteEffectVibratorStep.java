@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
@@ -35,8 +36,7 @@ final class CompleteEffectVibratorStep extends AbstractVibratorStep {
 
     CompleteEffectVibratorStep(VibrationStepConductor conductor, long startTime, boolean cancelled,
             VibratorController controller, long pendingVibratorOffDeadline) {
-        super(conductor, startTime, controller, /* effect= */ null, /* index= */ -1,
-                pendingVibratorOffDeadline);
+        super(conductor, startTime, controller, pendingVibratorOffDeadline);
         mCancelled = cancelled;
     }
 
@@ -47,6 +47,7 @@ final class CompleteEffectVibratorStep extends AbstractVibratorStep {
         return mCancelled;
     }
 
+    @NonNull
     @Override
     public List<Step> cancel() {
         if (mCancelled) {
@@ -57,6 +58,7 @@ final class CompleteEffectVibratorStep extends AbstractVibratorStep {
         return super.cancel();
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "CompleteEffectVibratorStep");

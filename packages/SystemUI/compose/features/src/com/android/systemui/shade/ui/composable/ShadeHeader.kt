@@ -59,11 +59,11 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateElementFloatAsState
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.settingslib.Utils
@@ -73,6 +73,7 @@ import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -93,8 +94,8 @@ object ShadeHeader {
         val ExpandedContent = ElementKey("ShadeHeaderExpandedContent")
         val CollapsedContentStart = ElementKey("ShadeHeaderCollapsedContentStart")
         val CollapsedContentEnd = ElementKey("ShadeHeaderCollapsedContentEnd")
-        val PrivacyChip = ElementKey("PrivacyChip", scenePicker = LowestZIndexScenePicker)
-        val Clock = ElementKey("ShadeHeaderClock", scenePicker = LowestZIndexScenePicker)
+        val PrivacyChip = ElementKey("PrivacyChip", contentPicker = LowestZIndexContentPicker)
+        val Clock = ElementKey("ShadeHeaderClock", contentPicker = LowestZIndexContentPicker)
         val ShadeCarrierGroup = ElementKey("ShadeCarrierGroup")
     }
 
@@ -110,6 +111,7 @@ object ShadeHeader {
     object Colors {
         val ColorScheme.shadeHeaderText: Color
             get() = Color.White
+
         val ColorScheme.onScrimDim: Color
             get() = Color.DarkGray
     }
@@ -121,12 +123,13 @@ object ShadeHeader {
 
 @Composable
 fun SceneScope.CollapsedShadeHeader(
-    viewModel: ShadeHeaderViewModel,
+    viewModelFactory: ShadeHeaderViewModel.Factory,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = rememberViewModel("CollapsedShadeHeader") { viewModelFactory.create() }
     val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
@@ -148,8 +151,8 @@ fun SceneScope.CollapsedShadeHeader(
         }
 
     val isLargeScreenLayout =
-            LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Medium ||
-                    LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
+        LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Medium ||
+            LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
 
     val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsStateWithLifecycle()
 
@@ -197,8 +200,8 @@ fun SceneScope.CollapsedShadeHeader(
                         ) {
                             if (isLargeScreenLayout) {
                                 ShadeCarrierGroup(
-                                        viewModel = viewModel,
-                                        modifier = Modifier.align(Alignment.CenterVertically),
+                                    viewModel = viewModel,
+                                    modifier = Modifier.align(Alignment.CenterVertically),
                                 )
                             }
                             SystemIconContainer(
@@ -278,12 +281,13 @@ fun SceneScope.CollapsedShadeHeader(
 
 @Composable
 fun SceneScope.ExpandedShadeHeader(
-    viewModel: ShadeHeaderViewModel,
+    viewModelFactory: ShadeHeaderViewModel.Factory,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = rememberViewModel("ExpandedShadeHeader") { viewModelFactory.create() }
     val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
@@ -552,19 +556,20 @@ private fun SystemIconContainer(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    val hoverModifier = Modifier
-            .clip(RoundedCornerShape(CollapsedHeight / 4))
+    val hoverModifier =
+        Modifier.clip(RoundedCornerShape(CollapsedHeight / 4))
             .background(MaterialTheme.colorScheme.onScrimDim)
 
     Row(
-        modifier = modifier
+        modifier =
+            modifier
                 .height(CollapsedHeight)
                 .padding(vertical = CollapsedHeight / 4)
                 .thenIf(isClickable) {
                     Modifier.clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = { viewModel.onSystemIconContainerClicked() },
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = { viewModel.onSystemIconContainerClicked() },
                     )
                 }
                 .thenIf(isHovered) { hoverModifier },

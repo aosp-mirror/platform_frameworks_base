@@ -62,6 +62,9 @@ option java_package android.view
 # following other view events defined in system/logging/logcat/event.logtags
 # ViewRoot Draw Events
 60004 viewroot_draw_event (window|3),(event|3)
+# SurfaceView Events
+60005 surfaceview_layout (window|3),(format|1),(width|1),(height|1),(z|1),(sizeFrom|3),(attached|1),(lifecycleStrategy|1),(viewVisible|1)
+60006 surfaceview_callback (window|3),(callback|3)
 
 
 # NOTE - the range 1000000-2000000 is reserved for partners and others who

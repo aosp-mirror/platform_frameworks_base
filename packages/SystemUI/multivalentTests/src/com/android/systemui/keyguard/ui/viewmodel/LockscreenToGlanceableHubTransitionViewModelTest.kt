@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.res.Configuration
+import android.util.LayoutDirection
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -34,6 +36,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -82,6 +87,9 @@ class LockscreenToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
                 R.dimen.lockscreen_to_hub_transition_lockscreen_translation_x,
                 -100
             )
+            val configuration = mock<Configuration>()
+            whenever(configuration.layoutDirection).thenReturn(LayoutDirection.LTR)
+            configurationRepository.onConfigurationChange(configuration)
             val values by collectValues(underTest.keyguardTranslationX)
             assertThat(values).isEmpty()
 

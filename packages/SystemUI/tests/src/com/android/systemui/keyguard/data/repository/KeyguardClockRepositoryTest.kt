@@ -25,15 +25,14 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.shared.clocks.ClockRegistry
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth
 import kotlin.test.Test
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -44,12 +43,12 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class KeyguardClockRepositoryTest : SysuiTestCase() {
 
-    private lateinit var scheduler: TestCoroutineScheduler
-    private lateinit var dispatcher: CoroutineDispatcher
-    private lateinit var scope: TestScope
+    private val kosmos = testKosmos()
+    private val dispatcher = kosmos.testDispatcher
+    private val scope = kosmos.testScope
+    private val fakeSettings = kosmos.fakeSettings
 
     private lateinit var underTest: KeyguardClockRepository
-    private lateinit var fakeSettings: FakeSettings
     @Mock private lateinit var clockRegistry: ClockRegistry
     @Mock private lateinit var clockEventController: ClockEventController
     private val fakeFeatureFlagsClassic = FakeFeatureFlagsClassic()
@@ -57,10 +56,6 @@ class KeyguardClockRepositoryTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        fakeSettings = FakeSettings()
-        scheduler = TestCoroutineScheduler()
-        dispatcher = StandardTestDispatcher(scheduler)
-        scope = TestScope(dispatcher)
         underTest =
             KeyguardClockRepositoryImpl(
                 fakeSettings,

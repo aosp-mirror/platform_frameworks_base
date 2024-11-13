@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
@@ -109,14 +108,6 @@ public interface StatusBarFragmentModule {
     @StatusBarFragmentScope
     static Clock provideClock(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.clock);
-    }
-
-    /** */
-    @Provides
-    @StatusBarFragmentScope
-    static StatusBarUserSwitcherContainer provideStatusBarUserSwitcherContainer(
-            @RootView PhoneStatusBarView view) {
-        return view.findViewById(R.id.user_switcher_container);
     }
 
     /** */

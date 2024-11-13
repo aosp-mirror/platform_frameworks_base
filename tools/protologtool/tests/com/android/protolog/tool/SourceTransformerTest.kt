@@ -76,7 +76,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -86,7 +86,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -4447034859795564700L, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -4447034859795564700L, 9, protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -98,8 +98,8 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
-                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -109,7 +109,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { org.example.ProtoLogImpl.w(TEST_GROUP, 3218600869538902408L, 0, "test", (Object[]) null); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { org.example.ProtoLogImpl.w(TEST_GROUP, 3218600869538902408L, 0, (Object[]) null); }
                 }
             }
             """.trimIndent()
@@ -119,7 +119,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, null, protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -1473209266730422156L, 9, protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -129,7 +129,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -4447034859795564700L, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogImpl.Cache.TEST_GROUP_enabled[3]) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -4447034859795564700L, 9, protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -172,13 +172,12 @@ class SourceTransformerTest {
         Truth.assertThat(protoLogCalls).hasSize(1)
         val methodCall = protoLogCalls[0] as MethodCallExpr
         assertEquals("w", methodCall.name.asString())
-        assertEquals(6, methodCall.arguments.size)
+        assertEquals(5, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
         assertEquals("-1473209266730422156L", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
-        assertEquals("\"test %d %f\"", methodCall.arguments[3].toString())
-        assertEquals("protoLogParam0", methodCall.arguments[4].toString())
-        assertEquals("protoLogParam1", methodCall.arguments[5].toString())
+        assertEquals("protoLogParam0", methodCall.arguments[3].toString())
+        assertEquals("protoLogParam1", methodCall.arguments[4].toString())
         assertEquals(TRANSFORMED_CODE_TEXT_ENABLED, out)
     }
 
@@ -214,13 +213,12 @@ class SourceTransformerTest {
         Truth.assertThat(protoLogCalls).hasSize(3)
         val methodCall = protoLogCalls[0] as MethodCallExpr
         assertEquals("w", methodCall.name.asString())
-        assertEquals(6, methodCall.arguments.size)
+        assertEquals(5, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
         assertEquals("-1473209266730422156L", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
-        assertEquals("\"test %d %f\"", methodCall.arguments[3].toString())
-        assertEquals("protoLogParam0", methodCall.arguments[4].toString())
-        assertEquals("protoLogParam1", methodCall.arguments[5].toString())
+        assertEquals("protoLogParam0", methodCall.arguments[3].toString())
+        assertEquals("protoLogParam1", methodCall.arguments[4].toString())
         assertEquals(TRANSFORMED_CODE_MULTICALL_TEXT, out)
     }
 
@@ -252,13 +250,13 @@ class SourceTransformerTest {
         Truth.assertThat(protoLogCalls).hasSize(1)
         val methodCall = protoLogCalls[0] as MethodCallExpr
         assertEquals("w", methodCall.name.asString())
-        assertEquals(7, methodCall.arguments.size)
+        assertEquals(6, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
         assertEquals("-4447034859795564700L", methodCall.arguments[1].toString())
         assertEquals(0b001001.toString(), methodCall.arguments[2].toString())
-        assertEquals("protoLogParam0", methodCall.arguments[4].toString())
-        assertEquals("protoLogParam1", methodCall.arguments[5].toString())
-        assertEquals("protoLogParam2", methodCall.arguments[6].toString())
+        assertEquals("protoLogParam0", methodCall.arguments[3].toString())
+        assertEquals("protoLogParam1", methodCall.arguments[4].toString())
+        assertEquals("protoLogParam2", methodCall.arguments[5].toString())
         assertEquals(TRANSFORMED_CODE_MULTILINE_TEXT_ENABLED, out)
     }
 
@@ -289,7 +287,7 @@ class SourceTransformerTest {
         Truth.assertThat(protoLogCalls).hasSize(1)
         val methodCall = protoLogCalls[0] as MethodCallExpr
         assertEquals("w", methodCall.name.asString())
-        assertEquals(5, methodCall.arguments.size)
+        assertEquals(4, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
         assertEquals("3218600869538902408L", methodCall.arguments[1].toString())
         assertEquals(0.toString(), methodCall.arguments[2].toString())
@@ -323,13 +321,12 @@ class SourceTransformerTest {
         Truth.assertThat(protoLogCalls).hasSize(1)
         val methodCall = protoLogCalls[0] as MethodCallExpr
         assertEquals("w", methodCall.name.asString())
-        assertEquals(6, methodCall.arguments.size)
+        assertEquals(5, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
         assertEquals("-1473209266730422156L", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
-        assertEquals("null", methodCall.arguments[3].toString())
-        assertEquals("protoLogParam0", methodCall.arguments[4].toString())
-        assertEquals("protoLogParam1", methodCall.arguments[5].toString())
+        assertEquals("protoLogParam0", methodCall.arguments[3].toString())
+        assertEquals("protoLogParam1", methodCall.arguments[4].toString())
         assertEquals(TRANSFORMED_CODE_TEXT_DISABLED, out)
     }
 
@@ -361,14 +358,13 @@ class SourceTransformerTest {
         Truth.assertThat(protoLogCalls).hasSize(1)
         val methodCall = protoLogCalls[0] as MethodCallExpr
         assertEquals("w", methodCall.name.asString())
-        assertEquals(7, methodCall.arguments.size)
+        assertEquals(6, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
         assertEquals("-4447034859795564700L", methodCall.arguments[1].toString())
         assertEquals(0b001001.toString(), methodCall.arguments[2].toString())
-        assertEquals("null", methodCall.arguments[3].toString())
-        assertEquals("protoLogParam0", methodCall.arguments[4].toString())
-        assertEquals("protoLogParam1", methodCall.arguments[5].toString())
-        assertEquals("protoLogParam2", methodCall.arguments[6].toString())
+        assertEquals("protoLogParam0", methodCall.arguments[3].toString())
+        assertEquals("protoLogParam1", methodCall.arguments[4].toString())
+        assertEquals("protoLogParam2", methodCall.arguments[5].toString())
         assertEquals(TRANSFORMED_CODE_MULTILINE_TEXT_DISABLED, out)
     }
 }

@@ -106,7 +106,7 @@ public:
 
 private:
     sk_sp<SkColorFilter> createInstance() override {
-        return SkColorFilters::Matrix(mMatrix.data());
+        return SkColorFilters::Matrix(mMatrix.data(), SkColorFilters::Clamp::kNo);
     }
 
 private:

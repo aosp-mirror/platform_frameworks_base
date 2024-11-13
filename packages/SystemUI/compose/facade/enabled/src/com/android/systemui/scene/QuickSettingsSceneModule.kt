@@ -17,7 +17,7 @@
 package com.android.systemui.scene
 
 import com.android.systemui.qs.ui.composable.QuickSettingsScene
-import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.ui.composable.Scene
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet

@@ -16,10 +16,12 @@
 
 package com.android.wm.shell.pip;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 
 import com.android.wm.shell.shared.annotations.ExternalThread;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -69,9 +71,10 @@ public interface Pip {
     default void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
 
     /**
-     * @return {@link PipTransitionController} instance.
+     * Register {@link PipTransitionController.PipTransitionCallback} to listen on PiP transition
+     * started / finished callbacks.
      */
-    default PipTransitionController getPipTransitionController() {
-        return null;
-    }
+    default void registerPipTransitionCallback(
+            @NonNull PipTransitionController.PipTransitionCallback callback,
+            @NonNull Executor executor) { }
 }

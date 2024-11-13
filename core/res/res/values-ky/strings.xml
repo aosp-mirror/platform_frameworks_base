@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Сырсөз киргизилүүчү жерге кол менен жаза албайсыз"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Артка"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Киргизүү ыкмасын өзгөртүү"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Киргизүү ыкмасын тандоо"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Параметрлер"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Айрым функциялар иштебеши мүмкүн"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Системада сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
@@ -1411,6 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоону өчүрүңүз."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Сыноо программасынын режими иштетилди"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Сыноо программасынын режимин өчүрүү үчүн баштапкы параметрлерге кайтарыңыз."</string>
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"HSUM курама конфигурациясы туура эмес"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"Бул түзмөктөгү Консолдук системаны колдонуучу режиминин абалы курама конфигурациядан айырмаланып турат. Түзмөктү баштапкы абалга кайтарыңыз."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Сериялык консоль иштетилди"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Майнаптуулугуна таасири тиет. Өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Cынамык MTE иштетилди"</string>
@@ -1426,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"БӨЛҮШҮҮ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ЧЕТКЕ КАГУУ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Дайын киргизүү ыкмасын тандаңыз"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"Тил параметрлери"</string>
     <string name="show_ime" msgid="6406112007347443383">"Баскычтоп иштетилгенде экранда көрүнүп турат"</string>
     <string name="hardware" msgid="3611039921284836033">"Экрандагы баскычтопту колдонуу"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> түзмөгүн конфигурациялоо"</string>
@@ -1741,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Колдонмо уруксат суроону жашырып койгондуктан, жообуңузду ырастоо мүмкүн эмес."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны колдонуп баштоо үчүн аны таптап коюңуз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Атайын мүмкүнчүлүктөр баскычы менен колдонгуңуз келген функцияларды тандаңыз"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Үндү катуулатуу/акырындатуу баскычтары менен кайсы функцияларды иштеткиңиз келет?"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Үн баскычтары менен кайсы функцияларды иштеткиңиз келет?"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> өчүрүлдү"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Кыска жолдорду түзөтүү"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Бүттү"</string>
@@ -1755,12 +1760,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> күйгүзүлдү."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Үн баскычтарын коё бериңиз. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> кызматын күйгүзүү үчүн үн баскычтарын кайра 3 секунд коё бербей басып туруңуз."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Атайын мүмкүнчүлүктөр баскычын таптаганыңызда иштей турган функцияны тандаңыз:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Атайын мүмкүнчүлүктөр жаңсоосу үчүн функцияны тандаңыз (эки манжаңыз менен экранды ылдыйдан өйдө сүрүңүз):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Атайын мүмкүнчүлүктөр жаңсоосу аркылуу иштетиле турган функцияны тандаңыз (үч манжаңыз менен экранды ылдыйдан өйдө сүрүңүз):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Функцияларды которуштуруу үчүн, Атайын мүмкүнчүлүктөр баскычын басып, кармап туруңуз."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Функцияларды которуштуруу үчүн, эки манжаңыз менен өйдө сүрүп, кармап туруңуз."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Башка функцияга которулуу үчүн үч манжаңыз менен экранды өйдө сүрүп, кармап туруңуз."</string>
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Функция тандаңыз"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Функция тандаңыз"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Функция тандаңыз"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"Эми функция атайын мүмкүнчүлүктөр баскычын басканыңызда ачылат"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Эми функция ушул ыкчам баскыч менен ачылат. Экранды 2 манжаңыз менен ылдыйдан өйдө карай сүрүп, тез коё бериңиз."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Эми функция ушул ыкчам баскыч менен ачылат. Экранды 3 манжаңыз менен ылдыйдан өйдө карай сүрүп, тез коё бериңиз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Чоңойтуу"</string>
     <string name="user_switched" msgid="7249833311585228097">"Учурдагы колдонуучу <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> дегенге которулууда…"</string>
@@ -1975,6 +1980,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Учурдагы чалуу"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Кирүүчү чалууну иргөө"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Категорияларга бөлүнгөн эмес"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"Промоакциялар"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"Коомдук тармактар"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"Жаңылыктар"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"Cунуштар"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Бул эскертмелердин маанилүүлүгүн белгиледиңиз."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Булар сиз үчүн маанилүү адамдар."</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Колдонмонун ыңгайлаштырылган билдирмеси"</string>
@@ -2001,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Экран кулпусун коюп алыңыз"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Экран кулпусун коюу"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Жеке мейкиндикти колдонуу үчүн бул түзмөктүн экранын кулпулаңыз"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Жеке мейкиндикти өчүрүү үчүн бул түзмөктө экран кулпусун коюңуз"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Колдонмо учурда жеткиликсиз"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> жеткиликсиз"</string>
@@ -2415,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Коопсуздук үчүн колдонмодогу контент бөлүшүлгөн экрандан жашырылды"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Спутникке автоматтык түрдө туташтырылган"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Сиз мобилдик же Wi-Fi тармагы жок эле билдирүүлөрдү жөнөтүп, ала аласыз"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Спутник аркылуу байланышасызбы?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Мобилдик же Wi-Fi тармагына туташпай эле билдирүүлөрдү жөнөтүп, алыңыз"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ал кантип иштейт"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Кезекте турат..."</string>
@@ -2427,4 +2439,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Жүзүңүздүн үлгүсү мындан ары таанылбайт. Жүзүнөн таанып ачуу функциясын кайрадан тууралаңыз."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Тууралоо"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Азыр эмес"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> үчүн ойготкуч"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Башка колдонуучуга которулуу"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Үнүн басуу"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Үнүн басуу үчүн таптап коюңуз"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"Серепчи"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Байланыштар"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Электрондук почта"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Музыка"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Жылнаама"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Эсептегич"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Карталар"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Колдонмолор"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Манжаңыздын изи мындан ары таанылбайт. Манжа изи менен ачуу функциясын кайрадан тууралаңыз."</string>
 </resources>

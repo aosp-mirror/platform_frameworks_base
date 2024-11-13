@@ -139,6 +139,35 @@ public class VibratorInfoTest {
     }
 
     @Test
+    public void testAreEnvelopeEffectsSupported() {
+        VibratorInfo noCapabilities = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
+        assertFalse(noCapabilities.areEnvelopeEffectsSupported());
+        VibratorInfo envelopeEffectCapability = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
+                .setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2)
+                .build();
+        assertTrue(envelopeEffectCapability.areEnvelopeEffectsSupported());
+    }
+
+    @Test
+    public void testEnvelopeEffectLimits() {
+        VibratorInfo info = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
+                .setMaxEnvelopeEffectSize(16)
+                .setMinEnvelopeEffectControlPointDurationMillis(20)
+                .setMaxEnvelopeEffectControlPointDurationMillis(1_000)
+                .build();
+        assertEquals(16, info.getMaxEnvelopeEffectSize());
+        assertEquals(20, info.getMinEnvelopeEffectControlPointDurationMillis());
+        assertEquals(1_000, info.getMaxEnvelopeEffectControlPointDurationMillis());
+        assertEquals(16_000, info.getMaxEnvelopeEffectDurationMillis());
+
+        VibratorInfo emptyInfo = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
+        assertEquals(0, emptyInfo.getMaxEnvelopeEffectSize());
+        assertEquals(0, emptyInfo.getMinEnvelopeEffectControlPointDurationMillis());
+        assertEquals(0, emptyInfo.getMaxEnvelopeEffectControlPointDurationMillis());
+        assertEquals(0, emptyInfo.getMaxEnvelopeEffectDurationMillis());
+    }
+
+    @Test
     public void testGetDefaultBraking_returnsFirstSupportedBraking() {
         assertEquals(Braking.NONE, new VibratorInfo.Builder(
                 TEST_VIBRATOR_ID).build().getDefaultBraking());
@@ -262,17 +291,20 @@ public class VibratorInfoTest {
         VibratorInfo.Builder completeBuilder2 = new VibratorInfo.Builder(TEST_VIBRATOR_ID + 2);
 
         for (VibratorInfo.Builder builder :
-                new VibratorInfo.Builder[] {completeBuilder, completeBuilder2}) {
+                new VibratorInfo.Builder[]{completeBuilder, completeBuilder2}) {
             builder.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
-                .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
-                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
-                .setPrimitiveDelayMax(100)
-                .setCompositionSizeMax(10)
-                .setSupportedBraking(Braking.CLAB)
-                .setPwlePrimitiveDurationMax(50)
-                .setPwleSizeMax(20)
-                .setQFactor(2f)
-                .setFrequencyProfile(TEST_FREQUENCY_PROFILE);
+                    .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
+                    .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
+                    .setPrimitiveDelayMax(100)
+                    .setCompositionSizeMax(10)
+                    .setSupportedBraking(Braking.CLAB)
+                    .setPwlePrimitiveDurationMax(50)
+                    .setPwleSizeMax(20)
+                    .setQFactor(2f)
+                    .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
+                    .setMaxEnvelopeEffectSize(16)
+                    .setMinEnvelopeEffectControlPointDurationMillis(20)
+                    .setMaxEnvelopeEffectControlPointDurationMillis(1_000);
         }
         VibratorInfo complete = completeBuilder.build();
 

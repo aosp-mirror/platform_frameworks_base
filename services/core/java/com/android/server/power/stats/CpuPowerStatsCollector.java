@@ -31,11 +31,10 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.CpuPowerStatsLayout;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Locale;
-import java.util.function.IntSupplier;
 
 /**
  * Collects snapshots of power-related system statistics.
@@ -46,7 +45,6 @@ import java.util.function.IntSupplier;
 public class CpuPowerStatsCollector extends PowerStatsCollector {
     private static final String TAG = "CpuPowerStatsCollector";
     private static final long NANOS_PER_MILLIS = 1000000;
-    private static final long ENERGY_UNSPECIFIED = -1;
     private static final int DEFAULT_CPU_POWER_BRACKETS = 3;
     private static final int DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER = 2;
 
@@ -58,7 +56,6 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         PowerProfile getPowerProfile();
         KernelCpuStatsReader getKernelCpuStatsReader();
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
-        IntSupplier getVoltageSupplier();
         long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
 
         default int getDefaultCpuPowerBrackets() {
@@ -76,8 +73,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private CpuScalingPolicies mCpuScalingPolicies;
     private PowerProfile mPowerProfile;
     private KernelCpuStatsReader mKernelCpuStatsReader;
-    private ConsumedEnergyRetriever mConsumedEnergyRetriever;
-    private IntSupplier mVoltageSupplier;
+    private ConsumedEnergyHelper mConsumedEnergyHelper;
     private int mDefaultCpuPowerBrackets;
     private int mDefaultCpuPowerBracketsPerEnergyConsumer;
     private long[] mCpuTimeByScalingStep;
@@ -85,15 +81,12 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private long[] mTempUidStats;
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
     private boolean mIsPerUidTimeInStateSupported;
-    private int[] mCpuEnergyConsumerIds = new int[0];
     private PowerStats.Descriptor mPowerStatsDescriptor;
     // Reusable instance
     private PowerStats mCpuPowerStats;
     private CpuPowerStatsLayout mLayout;
     private long mLastUpdateTimestampNanos;
     private long mLastUpdateUptimeMillis;
-    private int mLastVoltageMv;
-    private long[] mLastConsumedEnergyUws;
 
     CpuPowerStatsCollector(Injector injector) {
         super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
@@ -115,31 +108,22 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mCpuScalingPolicies = mInjector.getCpuScalingPolicies();
         mPowerProfile = mInjector.getPowerProfile();
         mKernelCpuStatsReader = mInjector.getKernelCpuStatsReader();
-        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
-        mVoltageSupplier = mInjector.getVoltageSupplier();
         mDefaultCpuPowerBrackets = mInjector.getDefaultCpuPowerBrackets();
         mDefaultCpuPowerBracketsPerEnergyConsumer =
                 mInjector.getDefaultCpuPowerBracketsPerEnergyConsumer();
 
         mIsPerUidTimeInStateSupported = mKernelCpuStatsReader.isSupportedFeature();
-        mCpuEnergyConsumerIds =
-                mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.CPU_CLUSTER);
-        mLastConsumedEnergyUws = new long[mCpuEnergyConsumerIds.length];
-        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
+
+        mConsumedEnergyHelper = new ConsumedEnergyHelper(mInjector.getConsumedEnergyRetriever(),
+                EnergyConsumerType.CPU_CLUSTER);
 
         int cpuScalingStepCount = mCpuScalingPolicies.getScalingStepCount();
         mCpuTimeByScalingStep = new long[cpuScalingStepCount];
         mTempCpuTimeByScalingStep = new long[cpuScalingStepCount];
         int[] scalingStepToPowerBracketMap = initPowerBrackets();
 
-        mLayout = new CpuPowerStatsLayout();
-        mLayout.addDeviceSectionCpuTimeByScalingStep(cpuScalingStepCount);
-        mLayout.addDeviceSectionCpuTimeByCluster(mCpuScalingPolicies.getPolicies().length);
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionEnergyConsumers(mCpuEnergyConsumerIds.length);
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidSectionCpuTimeByPowerBracket(scalingStepToPowerBracketMap);
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new CpuPowerStatsLayout(mConsumedEnergyHelper.getEnergyConsumerCount(),
+                mCpuScalingPolicies.getPolicies().length, scalingStepToPowerBracketMap);
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);
@@ -158,16 +142,18 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private int[] initPowerBrackets() {
         if (mPowerProfile.getCpuPowerBracketCount() != PowerProfile.POWER_BRACKETS_UNSPECIFIED) {
             return initPowerBracketsFromPowerProfile();
-        } else if (mCpuEnergyConsumerIds.length == 0 || mCpuEnergyConsumerIds.length == 1) {
+        } else if (mConsumedEnergyHelper.getEnergyConsumerCount() == 0
+                || mConsumedEnergyHelper.getEnergyConsumerCount() == 1) {
             return initDefaultPowerBrackets(mDefaultCpuPowerBrackets);
-        } else if (mCpuScalingPolicies.getPolicies().length == mCpuEnergyConsumerIds.length) {
+        } else if (mCpuScalingPolicies.getPolicies().length
+                == mConsumedEnergyHelper.getEnergyConsumerCount()) {
             return initPowerBracketsByCluster(mDefaultCpuPowerBracketsPerEnergyConsumer);
         } else {
             Slog.i(TAG, "Assigning a single power brackets to each CPU_CLUSTER energy consumer."
                         + " Number of CPU clusters ("
                         + mCpuScalingPolicies.getPolicies().length
                         + ") does not match the number of energy consumers ("
-                        + mCpuEnergyConsumerIds.length + "). "
+                        + mConsumedEnergyHelper.getEnergyConsumerCount() + "). "
                         + " Using default power bucket assignment.");
             return initDefaultPowerBrackets(mDefaultCpuPowerBrackets);
         }
@@ -368,39 +354,9 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         }
         mLayout.setUsageDuration(mCpuPowerStats.stats, uptimeDelta);
 
-        if (mCpuEnergyConsumerIds.length != 0) {
-            collectEnergyConsumers();
-        }
+        mConsumedEnergyHelper.collectConsumedEnergy(mCpuPowerStats, mLayout);
 
         return mCpuPowerStats;
-    }
-
-    private void collectEnergyConsumers() {
-        int voltageMv = mVoltageSupplier.getAsInt();
-        if (voltageMv <= 0) {
-            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
-                          + " mV) when querying energy consumers");
-            return;
-        }
-
-        int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
-        mLastVoltageMv = voltageMv;
-
-        long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mCpuEnergyConsumerIds);
-        if (energyUws == null) {
-            return;
-        }
-
-        for (int i = energyUws.length - 1; i >= 0; i--) {
-            long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
-                    ? energyUws[i] - mLastConsumedEnergyUws[i] : 0;
-            if (energyDelta < 0) {
-                // Likely, restart of powerstats HAL
-                energyDelta = 0;
-            }
-            mLayout.setConsumedEnergy(mCpuPowerStats.stats, i, uJtoUc(energyDelta, averageVoltage));
-            mLastConsumedEnergyUws[i] = energyUws[i];
-        }
     }
 
     @VisibleForNative

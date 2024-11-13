@@ -35,9 +35,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -45,9 +43,6 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
-import android.view.IRecentsAnimationController;
-import android.view.IRecentsAnimationRunner;
-import android.view.RemoteAnimationTarget;
 import android.window.TaskSnapshot;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
@@ -55,7 +50,6 @@ import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 public class ActivityManagerWrapper {
 
@@ -190,69 +184,13 @@ public class ActivityManagerWrapper {
     }
 
     /**
-     * Starts the recents activity. The caller should manage the thread on which this is called.
+     * Preloads the recents activity. The caller should manage the thread on which this is called.
      */
-    public void startRecentsActivity(Intent intent, long eventTime,
-            final RecentsAnimationListener animationHandler, final Consumer<Boolean> resultCallback,
-            Handler resultCallbackHandler) {
-        boolean result = startRecentsActivity(intent, eventTime, animationHandler);
-        if (resultCallback != null && resultCallbackHandler != null) {
-            resultCallbackHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    resultCallback.accept(result);
-                }
-            });
-        }
-    }
-
-    /**
-     * Starts the recents activity. The caller should manage the thread on which this is called.
-     */
-    public boolean startRecentsActivity(
-            Intent intent, long eventTime, RecentsAnimationListener animationHandler) {
+    public void preloadRecentsActivity(Intent intent) {
         try {
-            IRecentsAnimationRunner runner = null;
-            if (animationHandler != null) {
-                runner = new IRecentsAnimationRunner.Stub() {
-                    @Override
-                    public void onAnimationStart(IRecentsAnimationController controller,
-                            RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
-                            Rect homeContentInsets, Rect minimizedHomeBounds,
-                            Bundle extras) {
-                        final RecentsAnimationControllerCompat controllerCompat =
-                                new RecentsAnimationControllerCompat(controller);
-                        animationHandler.onAnimationStart(controllerCompat, apps,
-                                wallpapers, homeContentInsets, minimizedHomeBounds, extras);
-                    }
-
-                    @Override
-                    public void onAnimationCanceled(int[] taskIds, TaskSnapshot[] taskSnapshots) {
-                        animationHandler.onAnimationCanceled(
-                                ThumbnailData.wrap(taskIds, taskSnapshots));
-                    }
-
-                    @Override
-                    public void onTasksAppeared(RemoteAnimationTarget[] apps) {
-                        animationHandler.onTasksAppeared(apps);
-                    }
-                };
-            }
-            getService().startRecentsActivity(intent, eventTime, runner);
-            return true;
+            getService().preloadRecentsActivity(intent);
         } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
-     * Cancels the remote recents animation started from {@link #startRecentsActivity}.
-     */
-    public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
-        try {
-            getService().cancelRecentsAnimation(restoreHomeRootTaskPosition);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to cancel recents animation", e);
+            Log.w(TAG, "Failed to preload recents activity", e);
         }
     }
 
@@ -344,7 +282,7 @@ public class ActivityManagerWrapper {
      * Shows a voice session identified by {@code token}
      * @return true if the session was shown, false otherwise
      */
-    public boolean showVoiceSession(@NonNull IBinder token, @NonNull Bundle args, int flags,
+    public boolean showVoiceSession(IBinder token, @NonNull Bundle args, int flags,
             @Nullable String attributionTag) {
         IVoiceInteractionManagerService service = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));

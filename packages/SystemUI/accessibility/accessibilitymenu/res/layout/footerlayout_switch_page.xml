@@ -22,7 +22,7 @@
       android:orientation="horizontal">
 
     <ImageButton
-        android:id="@+id/menu_prev_button"
+        android:id="@+id/menu_left_button"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -38,7 +38,7 @@
         android:background="?android:attr/listDivider"/>
 
     <ImageButton
-        android:id="@+id/menu_next_button"
+        android:id="@+id/menu_right_button"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"

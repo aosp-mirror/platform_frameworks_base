@@ -34,16 +34,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
 /** Holds business logic for the Bluetooth Dialog after clicking on the Bluetooth QS tile. */
 @SysUISingleton
-internal class DeviceItemInteractor
+class DeviceItemInteractor
 @Inject
 constructor(
     private val bluetoothTileDialogRepository: BluetoothTileDialogRepository,
@@ -58,8 +60,12 @@ constructor(
 
     private val mutableDeviceItemUpdate: MutableSharedFlow<List<DeviceItem>> =
         MutableSharedFlow(extraBufferCapacity = 1)
-    internal val deviceItemUpdate
+    val deviceItemUpdate
         get() = mutableDeviceItemUpdate.asSharedFlow()
+
+    private val mutableShowSeeAllUpdate: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val showSeeAllUpdate
+        get() = mutableShowSeeAllUpdate.asStateFlow()
 
     internal val deviceItemUpdateRequest: SharedFlow<Unit> =
         conflatedCallbackFlow {
@@ -112,6 +118,7 @@ constructor(
         listOf(
             ActiveMediaDeviceItemFactory(),
             AudioSharingMediaDeviceItemFactory(localBluetoothManager),
+            AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager),
             AvailableMediaDeviceItemFactory(),
             ConnectedDeviceItemFactory(),
             SavedDeviceItemFactory()
@@ -121,6 +128,7 @@ constructor(
         listOf(
             DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
+            DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
             DeviceItemType.SAVED_BLUETOOTH_DEVICE,
@@ -139,7 +147,8 @@ constructor(
                     .sort(displayPriority, bluetoothAdapter?.mostRecentlyConnectedDevices)
             // Only emit when the job is not cancelled
             if (isActive) {
-                mutableDeviceItemUpdate.tryEmit(deviceItems)
+                mutableDeviceItemUpdate.tryEmit(deviceItems.take(MAX_DEVICE_ITEM_ENTRY))
+                mutableShowSeeAllUpdate.tryEmit(deviceItems.size > MAX_DEVICE_ITEM_ENTRY)
                 logger.logDeviceFetch(
                     JobStatus.FINISHED,
                     trigger,
@@ -177,5 +186,6 @@ constructor(
 
     companion object {
         private const val TAG = "DeviceItemInteractor"
+        private const val MAX_DEVICE_ITEM_ENTRY = 3
     }
 }

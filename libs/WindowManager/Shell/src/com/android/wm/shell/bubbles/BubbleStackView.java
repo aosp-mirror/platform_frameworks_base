@@ -19,15 +19,15 @@ package com.android.wm.shell.bubbles;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
-import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
 import static com.android.wm.shell.bubbles.BubblePositioner.StackPinnedEdge.LEFT;
 import static com.android.wm.shell.bubbles.BubblePositioner.StackPinnedEdge.RIGHT;
-import static com.android.wm.shell.common.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -78,11 +78,10 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.bubbles.BubblesNavBarMotionEventHandler.MotionEventListener;
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix;
 import com.android.wm.shell.bubbles.animation.ExpandedAnimationController;
@@ -92,10 +91,11 @@ import com.android.wm.shell.bubbles.animation.PhysicsAnimationLayout;
 import com.android.wm.shell.bubbles.animation.StackAnimationController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.bubbles.DismissView;
-import com.android.wm.shell.common.bubbles.RelativeTouchListener;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.shared.bubbles.DismissView;
+import com.android.wm.shell.shared.bubbles.RelativeTouchListener;
+import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -339,6 +339,7 @@ public class BubbleStackView extends FrameLayout
         pw.println(mExpandedViewContainer.getAnimationMatrix());
         pw.print("  stack visibility :       "); pw.println(getVisibility());
         pw.print("  temporarilyInvisible:    "); pw.println(mTemporarilyInvisible);
+        pw.print("  expandedViewTemporarilyHidden: "); pw.println(mExpandedViewTemporarilyHidden);
         mStackAnimationController.dump(pw);
         mExpandedAnimationController.dump(pw);
 
@@ -1127,6 +1128,8 @@ public class BubbleStackView extends FrameLayout
                 if (expandedView != null) {
                     // We need to be Z ordered on top in order for alpha animations to work.
                     expandedView.setSurfaceZOrderedOnTop(true);
+                    ProtoLog.d(WM_SHELL_BUBBLES, "expandedViewAlphaAnimation - start=%s",
+                            expandedView.getBubbleKey());
                     expandedView.setAnimating(true);
                     mExpandedViewContainer.setVisibility(VISIBLE);
                 }
@@ -1142,6 +1145,8 @@ public class BubbleStackView extends FrameLayout
                         // = 0f remains in effect.
                         && !mExpandedViewTemporarilyHidden) {
                     expandedView.setSurfaceZOrderedOnTop(false);
+                    ProtoLog.d(WM_SHELL_BUBBLES, "expandedViewAlphaAnimation - end=%s",
+                            expandedView.getBubbleKey());
                     expandedView.setAnimating(false);
                 }
             }
@@ -1374,7 +1379,6 @@ public class BubbleStackView extends FrameLayout
         // The menu itself should respect locale direction so the icons are on the correct side.
         mManageMenu.setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
         addView(mManageMenu);
-        updateManageButtonListener();
     }
 
     /**
@@ -1602,6 +1606,11 @@ public class BubbleStackView extends FrameLayout
                 getResources().getColor(android.R.color.system_neutral1_1000)));
         mManageMenuScrim.setBackgroundDrawable(new ColorDrawable(
                 getResources().getColor(android.R.color.system_neutral1_1000)));
+        if (mShowingManage) {
+            // the manage menu location depends on the manage button location which may need a
+            // layout pass, so post this to the looper
+            post(() -> showManageMenu(true));
+        }
     }
 
     /**
@@ -2005,6 +2014,7 @@ public class BubbleStackView extends FrameLayout
             // and then remove our views (removing the icon view triggers the removal of the
             // bubble window so do that at the end of the animation so we see the scrim animate).
             BadgedImageView iconView = bubble.getIconView();
+            final BubbleViewProvider expandedBubbleBeforeScrim = mExpandedBubble;
             showScrim(false, () -> {
                 mRemovingLastBubbleWhileExpanded = false;
                 bubble.cleanupExpandedView();
@@ -2013,7 +2023,17 @@ public class BubbleStackView extends FrameLayout
                 }
                 bubble.cleanupViews(); // cleans up the icon view
                 updateExpandedView(); // resets state for no expanded bubble
-                mExpandedBubble = null;
+                // Bubble keys may not have changed if we receive an update to the same bubble.
+                // Compare bubble object instances to see if the expanded bubble has changed.
+                if (expandedBubbleBeforeScrim == mExpandedBubble) {
+                    // Only clear expanded bubble if it has not changed since the scrim animation
+                    // started.
+                    // Scrim animation can take some time run and it is possible for a new bubble
+                    // to be added while the animation is running. This causes the expanded
+                    // bubble to change. Make sure we only clear the expanded bubble if it did
+                    // not change between when the scrim animation started and completed.
+                    mExpandedBubble = null;
+                }
             });
             logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
             return;
@@ -2155,7 +2175,14 @@ public class BubbleStackView extends FrameLayout
         final BubbleViewProvider previouslySelected = mExpandedBubble;
         mExpandedBubble = bubbleToSelect;
         mExpandedViewAnimationController.setExpandedView(getExpandedView());
-
+        final String previouslySelectedKey = previouslySelected != null
+                ? previouslySelected.getKey()
+                : "null";
+        final String newlySelectedKey = mExpandedBubble != null
+                ? mExpandedBubble.getKey()
+                : "null";
+        ProtoLog.d(WM_SHELL_BUBBLES, "showNewlySelectedBubble b=%s, previouslySelected=%s,"
+                        + " mIsExpanded=%b", newlySelectedKey, previouslySelectedKey, mIsExpanded);
         if (mIsExpanded) {
             hideCurrentInputMethod();
 
@@ -2557,6 +2584,8 @@ public class BubbleStackView extends FrameLayout
             expandedView.setContentAlpha(0f);
             expandedView.setBackgroundAlpha(0f);
 
+            ProtoLog.d(WM_SHELL_BUBBLES, "animateBubbleExpansion, setAnimating true for bubble=%s",
+                    expandedView.getBubbleKey());
             // We'll be starting the alpha animation after a slight delay, so set this flag early
             // here.
             expandedView.setAnimating(true);
@@ -2720,6 +2749,11 @@ public class BubbleStackView extends FrameLayout
 
         mAnimatingOutSurfaceAlphaAnimator.reverse();
         mExpandedViewAlphaAnimator.start();
+
+        if (mExpandedBubble != null) {
+            ProtoLog.d(WM_SHELL_BUBBLES, "animateSwitchBubbles, switchingTo b=%s",
+                    mExpandedBubble.getKey());
+        }
 
         if (mPositioner.showBubblesVertically()) {
             float translationX = mStackAnimationController.isStackOnLeftSide()
@@ -3375,14 +3409,6 @@ public class BubbleStackView extends FrameLayout
             mExpandedViewContainer.setAlpha(0f);
             mExpandedViewContainer.addView(bev);
 
-            postDelayed(() -> {
-                // Set the Manage button click handler from postDelayed. This appears to resolve
-                // a race condition with adding the BubbleExpandedView view to the expanded view
-                // container. Due to the race condition the click handler sometimes is not set up
-                // correctly and is never called.
-                updateManageButtonListener();
-            }, 0);
-
             if (!mIsExpansionAnimating) {
                 mIsBubbleSwitchAnimating = true;
                 mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
@@ -3392,13 +3418,8 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    private void updateManageButtonListener() {
-        BubbleExpandedView bev = getExpandedView();
-        if (mIsExpanded && bev != null) {
-            bev.setManageClickListener((view) -> {
-                showManageMenu(true /* show */);
-            });
-        }
+    void onManageBubbleClicked() {
+        showManageMenu(true /* show */);
     }
 
     /**

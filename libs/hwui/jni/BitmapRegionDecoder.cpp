@@ -87,8 +87,17 @@ public:
                                            requireUnpremul, prefColorSpace);
     }
 
-    bool decodeGainmapRegion(sp<uirenderer::Gainmap>* outGainmap, int outWidth, int outHeight,
-                             const SkIRect& desiredSubset, int sampleSize, bool requireUnpremul) {
+    // Decodes the gainmap region. If decoding succeeded, returns true and
+    // populate outGainmap with the decoded gainmap. Otherwise, returns false.
+    //
+    // Note that the desiredSubset is the logical region within the source
+    // gainmap that we want to decode. This is used for scaling into the final
+    // bitmap, since we do not want to include portions of the gainmap outside
+    // of this region. desiredSubset is also _not_ guaranteed to be
+    // pixel-aligned, so it's not possible to simply resize the resulting
+    // bitmap to accomplish this.
+    bool decodeGainmapRegion(sp<uirenderer::Gainmap>* outGainmap, SkISize bitmapDimensions,
+                             const SkRect& desiredSubset, int sampleSize, bool requireUnpremul) {
         SkColorType decodeColorType = mGainmapBRD->computeOutputColorType(kN32_SkColorType);
         sk_sp<SkColorSpace> decodeColorSpace =
                 mGainmapBRD->computeOutputColorSpace(decodeColorType, nullptr);
@@ -107,13 +116,30 @@ public:
         // allocation type. RecyclingClippingPixelAllocator will populate this with the
         // actual alpha type in either allocPixelRef() or copyIfNecessary()
         sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(SkImageInfo::Make(
-                outWidth, outHeight, decodeColorType, kPremul_SkAlphaType, decodeColorSpace));
+                bitmapDimensions, decodeColorType, kPremul_SkAlphaType, decodeColorSpace));
         if (!nativeBitmap) {
             ALOGE("OOM allocating Bitmap for Gainmap");
             return false;
         }
-        RecyclingClippingPixelAllocator allocator(nativeBitmap.get(), false);
-        if (!mGainmapBRD->decodeRegion(&bm, &allocator, desiredSubset, sampleSize, decodeColorType,
+
+        // Round out the subset so that we decode a slightly larger region, in
+        // case the subset has fractional components.
+        SkIRect roundedSubset = desiredSubset.roundOut();
+
+        // Map the desired subset to the space of the decoded gainmap. The
+        // subset is repositioned relative to the resulting bitmap, and then
+        // scaled to respect the sampleSize.
+        // This assumes that the subset will not be modified by the decoder, which is true
+        // for existing gainmap formats.
+        SkRect logicalSubset = desiredSubset.makeOffset(-std::floorf(desiredSubset.left()),
+                                                        -std::floorf(desiredSubset.top()));
+        logicalSubset.fLeft /= sampleSize;
+        logicalSubset.fTop /= sampleSize;
+        logicalSubset.fRight /= sampleSize;
+        logicalSubset.fBottom /= sampleSize;
+
+        RecyclingClippingPixelAllocator allocator(nativeBitmap.get(), false, logicalSubset);
+        if (!mGainmapBRD->decodeRegion(&bm, &allocator, roundedSubset, sampleSize, decodeColorType,
                                        requireUnpremul, decodeColorSpace)) {
             ALOGE("Error decoding Gainmap region");
             return false;
@@ -130,16 +156,31 @@ public:
         return true;
     }
 
-    SkIRect calculateGainmapRegion(const SkIRect& mainImageRegion, int* inOutWidth,
-                                   int* inOutHeight) {
+    struct Projection {
+        SkRect srcRect;
+        SkISize destSize;
+    };
+    Projection calculateGainmapRegion(const SkIRect& mainImageRegion, SkISize dimensions) {
         const float scaleX = ((float)mGainmapBRD->width()) / mMainImageBRD->width();
         const float scaleY = ((float)mGainmapBRD->height()) / mMainImageBRD->height();
-        *inOutWidth *= scaleX;
-        *inOutHeight *= scaleY;
-        // TODO: Account for rounding error?
-        return SkIRect::MakeLTRB(mainImageRegion.left() * scaleX, mainImageRegion.top() * scaleY,
-                                 mainImageRegion.right() * scaleX,
-                                 mainImageRegion.bottom() * scaleY);
+
+        if (uirenderer::Properties::resampleGainmapRegions) {
+            const auto srcRect = SkRect::MakeLTRB(
+                    mainImageRegion.left() * scaleX, mainImageRegion.top() * scaleY,
+                    mainImageRegion.right() * scaleX, mainImageRegion.bottom() * scaleY);
+            // Request a slightly larger destination size so that the gainmap
+            // subset we want fits entirely in this size.
+            const auto destSize = SkISize::Make(std::ceil(dimensions.width() * scaleX),
+                                                std::ceil(dimensions.height() * scaleY));
+            return Projection{.srcRect = srcRect, .destSize = destSize};
+        } else {
+            const auto srcRect = SkRect::Make(SkIRect::MakeLTRB(
+                    mainImageRegion.left() * scaleX, mainImageRegion.top() * scaleY,
+                    mainImageRegion.right() * scaleX, mainImageRegion.bottom() * scaleY));
+            const auto destSize =
+                    SkISize::Make(dimensions.width() * scaleX, dimensions.height() * scaleY);
+            return Projection{.srcRect = srcRect, .destSize = destSize};
+        }
     }
 
     bool hasGainmap() { return mGainmapBRD != nullptr; }
@@ -327,16 +368,16 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     sp<uirenderer::Gainmap> gainmap;
     bool hasGainmap = brd->hasGainmap();
     if (hasGainmap) {
-        int gainmapWidth = bitmap.width();
-        int gainmapHeight = bitmap.height();
+        SkISize gainmapDims = SkISize::Make(bitmap.width(), bitmap.height());
         if (javaBitmap) {
             // If we are recycling we must match the inBitmap's relative dimensions
-            gainmapWidth = recycledBitmap->width();
-            gainmapHeight = recycledBitmap->height();
+            gainmapDims.fWidth = recycledBitmap->width();
+            gainmapDims.fHeight = recycledBitmap->height();
         }
-        SkIRect gainmapSubset = brd->calculateGainmapRegion(subset, &gainmapWidth, &gainmapHeight);
-        if (!brd->decodeGainmapRegion(&gainmap, gainmapWidth, gainmapHeight, gainmapSubset,
-                                      sampleSize, requireUnpremul)) {
+        BitmapRegionDecoderWrapper::Projection gainmapProjection =
+                brd->calculateGainmapRegion(subset, gainmapDims);
+        if (!brd->decodeGainmapRegion(&gainmap, gainmapProjection.destSize,
+                                      gainmapProjection.srcRect, sampleSize, requireUnpremul)) {
             // If there is an error decoding Gainmap - we don't fail. We just don't provide Gainmap
             hasGainmap = false;
         }

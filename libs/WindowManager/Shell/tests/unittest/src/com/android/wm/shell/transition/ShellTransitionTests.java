@@ -76,10 +76,8 @@ import android.os.RemoteException;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.view.IRecentsAnimationRunner;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.IWindowContainerToken;
@@ -108,12 +106,13 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.recents.IRecentsAnimationRunner;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.shared.ShellSharedConstants;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.util.StubTransaction;
 
 import org.junit.Before;
@@ -333,6 +332,35 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
+    public void testTransitionFilterTaskFragmentToken() {
+        final IBinder taskFragmentToken = new Binder();
+
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+        filter.mRequirements[0].mTaskFragmentToken = taskFragmentToken;
+
+        // Transition with the same token should match.
+        final TransitionInfo infoHasTaskFragmentToken = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskFragmentToken).build();
+        assertTrue(filter.matches(infoHasTaskFragmentToken));
+
+        // Transition with a different token should not match.
+        final IBinder differentTaskFragmentToken = new Binder();
+        final TransitionInfo infoDifferentTaskFragmentToken =
+                new TransitionInfoBuilder(TRANSIT_OPEN)
+                        .addChange(TRANSIT_OPEN, differentTaskFragmentToken).build();
+        assertFalse(filter.matches(infoDifferentTaskFragmentToken));
+
+        // Transition without a token should not match.
+        final TransitionInfo infoNoTaskFragmentToken = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, createTaskInfo(
+                        1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD)).build();
+        assertFalse(filter.matches(infoNoTaskFragmentToken));
+    }
+
+    @Test
     public void testTransitionFilterMultiRequirement() {
         // filter that requires at-least one opening and one closing app
         TransitionFilter filter = new TransitionFilter();
@@ -443,6 +471,27 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
+    public void testTransitionFilterAnimOverride() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mCustomAnimation = true;
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        final RunningTaskInfo taskInf = createTaskInfo(1);
+        final TransitionInfo openTask = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        assertFalse(filter.matches(openTask));
+
+        final TransitionInfo.AnimationOptions overOpts =
+                TransitionInfo.AnimationOptions.makeCustomAnimOptions("pakname", 0, 0, 0, true);
+        final TransitionInfo openTaskOpts = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        openTaskOpts.getChanges().get(0).setAnimationOptions(overOpts);
+        assertTrue(filter.matches(openTaskOpts));
+    }
+
+    @Test
     public void testRegisteredRemoteTransition() {
         Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
@@ -537,7 +586,7 @@ public class ShellTransitionTests extends ShellTestCase {
         mMainExecutor.flushAll();
 
         // Takeover shouldn't happen when the flag is disabled.
-        setFlagsRule.disableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY);
+        setFlagsRule.disableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED);
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
@@ -552,7 +601,7 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any());
 
         // Takeover should happen when the flag is enabled.
-        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY);
+        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED);
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         info = new TransitionInfoBuilder(TRANSIT_OPEN)
@@ -1191,7 +1240,7 @@ public class ShellTransitionTests extends ShellTestCase {
                         mTransactionPool, createTestDisplayController(), mMainExecutor,
                         mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
         final RecentsTransitionHandler recentsHandler =
-                new RecentsTransitionHandler(shellInit, transitions,
+                new RecentsTransitionHandler(shellInit, mock(ShellTaskOrganizer.class), transitions,
                         mock(RecentTasksController.class), mock(HomeTransitionObserver.class));
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
         shellInit.init();
@@ -1614,43 +1663,6 @@ public class ShellTransitionTests extends ShellTestCase {
                 eq(R.styleable.WindowAnimation_activityCloseEnterAnimation), anyBoolean());
     }
 
-    class ChangeBuilder {
-        final TransitionInfo.Change mChange;
-
-        ChangeBuilder(@WindowManager.TransitionType int mode) {
-            mChange = new TransitionInfo.Change(null /* token */, createMockSurface(true));
-            mChange.setMode(mode);
-        }
-
-        ChangeBuilder setFlags(@TransitionInfo.ChangeFlags int flags) {
-            mChange.setFlags(flags);
-            return this;
-        }
-
-        ChangeBuilder setTask(RunningTaskInfo taskInfo) {
-            mChange.setTaskInfo(taskInfo);
-            return this;
-        }
-
-        ChangeBuilder setRotate(int anim) {
-            return setRotate(Surface.ROTATION_90, anim);
-        }
-
-        ChangeBuilder setRotate() {
-            return setRotate(ROTATION_ANIMATION_UNSPECIFIED);
-        }
-
-        ChangeBuilder setRotate(@Surface.Rotation int target, int anim) {
-            mChange.setRotation(Surface.ROTATION_0, target);
-            mChange.setRotationAnimation(anim);
-            return this;
-        }
-
-        TransitionInfo.Change build() {
-            return mChange;
-        }
-    }
-
     class TestTransitionHandler implements Transitions.TransitionHandler {
         ArrayList<Pair<IBinder, Transitions.TransitionFinishCallback>> mFinishes =
                 new ArrayList<>();
@@ -1737,12 +1749,6 @@ public class ShellTransitionTests extends ShellTestCase {
     private static TransitionInfo createTransitionInfo() {
         return new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-    }
-
-    private static SurfaceControl createMockSurface(boolean valid) {
-        SurfaceControl sc = mock(SurfaceControl.class);
-        doReturn(valid).when(sc).isValid();
-        return sc;
     }
 
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode, int activityType) {

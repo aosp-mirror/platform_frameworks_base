@@ -15,7 +15,7 @@
  */
 package com.android.systemui.surfaceeffects.turbulencenoise
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE
@@ -25,7 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class TurbulenceNoiseShaderTest : SysuiTestCase() {
 
     private lateinit var turbulenceNoiseShader: TurbulenceNoiseShader

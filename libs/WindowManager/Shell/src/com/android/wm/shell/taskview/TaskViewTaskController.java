@@ -17,6 +17,7 @@
 package com.android.wm.shell.taskview;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import android.annotation.NonNull;
@@ -254,6 +255,24 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                 null /* finishTransaction */, taskInfo, leash, wct);
         mTransaction.apply();
         mTaskViewTransitions.startInstantTransition(TRANSIT_CHANGE, wct);
+    }
+
+    /**
+     * Moves the current task in TaskView out of the view and back to fullscreen.
+     */
+    public void moveToFullscreen() {
+        if (mTaskToken == null) return;
+        mShellExecutor.execute(() -> {
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.setWindowingMode(mTaskToken, WINDOWING_MODE_UNDEFINED);
+            wct.setAlwaysOnTop(mTaskToken, false);
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
+            mTaskViewTransitions.moveTaskViewToFullscreen(wct, this);
+            if (mListener != null) {
+                // Task is being "removed" from the clients perspective
+                mListener.onTaskRemovalStarted(mTaskInfo.taskId);
+            }
+        });
     }
 
     private void prepareActivityOptions(ActivityOptions options, Rect launchBounds) {
@@ -535,7 +554,8 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         if (mCaptionInsets != null) {
             wct.addInsetsSource(mTaskToken, mCaptionInsetsOwner, 0,
-                    WindowInsets.Type.captionBar(), mCaptionInsets, null /* boundingRects */);
+                    WindowInsets.Type.captionBar(), mCaptionInsets, null /* boundingRects */,
+                    0 /* flags */);
         } else {
             wct.removeInsetsSource(mTaskToken, mCaptionInsetsOwner, 0,
                     WindowInsets.Type.captionBar());
@@ -584,7 +604,6 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                 });
             }
             mTaskViewBase.onTaskVanished(taskInfo);
-            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(taskInfo.token, false);
         }
     }
 
@@ -698,6 +717,9 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             mTaskViewBase.setResizeBgColor(startTransaction, backgroundColor);
         }
 
+        // After the embedded task has appeared, set it to non-trimmable. This is important
+        // to prevent recents from trimming and removing the embedded task.
+        wct.setTaskTrimmableFromRecents(taskInfo.token, false /* isTrimmableFromRecents */);
         mTaskViewBase.onTaskAppeared(mTaskInfo, mTaskLeash);
         if (mListener != null) {
             final int taskId = mTaskInfo.taskId;

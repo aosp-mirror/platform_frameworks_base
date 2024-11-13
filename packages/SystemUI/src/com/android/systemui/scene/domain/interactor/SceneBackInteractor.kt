@@ -58,29 +58,26 @@ constructor(
 
     fun onSceneChange(from: SceneKey, to: SceneKey) {
         check(from != to) { "from == to, from=${from.debugName}, to=${to.debugName}" }
-        when (stackOperation(from, to)) {
-            Clear -> {
-                _backStack.value = sceneStackOf()
-            }
-            Push -> {
-                _backStack.update { s -> s.push(from) }
-            }
-            Pop -> {
-                _backStack.update { s ->
-                    checkNotNull(s.pop()) { "Cannot pop ${from.debugName} when stack is empty" }
-                        .also {
-                            val popped = s.peek()
-                            check(popped == to) {
-                                "Expected to pop ${to.debugName} but instead popped ${popped?.debugName}"
-                            }
-                        }
-                }
+
+        _backStack.update { stack ->
+            when (stackOperation(from, to, stack)) {
+                null -> stack
+                Clear -> sceneStackOf()
+                Push -> stack.push(from)
+                Pop ->
+                    checkNotNull(stack.pop()) { "Cannot pop ${from.debugName} when stack is empty" }
             }
         }
         logger.logSceneBackStack(backStack.value.asIterable())
     }
 
-    private fun stackOperation(from: SceneKey, to: SceneKey): StackOperation {
+    /** Applies the given [transform] to the back stack. */
+    fun updateBackStack(transform: (SceneStack) -> SceneStack) {
+        _backStack.update { stack -> transform(stack) }
+        logger.logSceneBackStack(backStack.value.asIterable())
+    }
+
+    private fun stackOperation(from: SceneKey, to: SceneKey, stack: SceneStack): StackOperation? {
         val fromDistance =
             checkNotNull(sceneContainerConfig.navigationDistances[from]) {
                 "No distance mapping for scene \"${from.debugName}\"!"
@@ -93,6 +90,7 @@ constructor(
         return when {
             toDistance == 0 -> Clear
             toDistance > fromDistance -> Push
+            stack.peek() != to -> null
             toDistance < fromDistance -> Pop
             else ->
                 error(
@@ -103,7 +101,10 @@ constructor(
     }
 
     private sealed interface StackOperation
+
     private data object Clear : StackOperation
+
     private data object Push : StackOperation
+
     private data object Pop : StackOperation
 }

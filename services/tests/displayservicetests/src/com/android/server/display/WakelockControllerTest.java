@@ -64,6 +64,8 @@ public final class WakelockControllerTest {
                 "[" + DISPLAY_ID + "]prox negative");
         assertEquals(mWakelockController.getSuspendBlockerProxDebounceId(),
                 "[" + DISPLAY_ID + "]prox debounce");
+        assertEquals(mWakelockController.getSuspendBlockerOverrideDozeScreenState(),
+                "[" + DISPLAY_ID + "]override doze screen state");
     }
 
     @Test
@@ -159,6 +161,28 @@ public final class WakelockControllerTest {
         // Verify suspend blocker was released only once
         verify(mDisplayPowerCallbacks, times(1))
                 .releaseSuspendBlocker(mWakelockController.getSuspendBlockerProxDebounceId());
+    }
+
+    @Test
+    public void acquireOverrideDozeScreenStateSuspendBlocker() throws Exception {
+        // Acquire the suspend blocker
+        verifyWakelockAcquisitionAndReaquisition(WakelockController
+                        .WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE,
+                () -> mWakelockController.isOverrideDozeScreenStateAcquired());
+
+        // Verify acquire happened only once
+        verify(mDisplayPowerCallbacks, times(1))
+                .acquireSuspendBlocker(mWakelockController
+                        .getSuspendBlockerOverrideDozeScreenState());
+
+        // Release the suspend blocker
+        verifyWakelockReleaseAndRerelease(WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE,
+                () -> mWakelockController.isOverrideDozeScreenStateAcquired());
+
+        // Verify suspend blocker was released only once
+        verify(mDisplayPowerCallbacks, times(1))
+                .releaseSuspendBlocker(mWakelockController
+                        .getSuspendBlockerOverrideDozeScreenState());
     }
 
     @Test

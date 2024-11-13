@@ -172,7 +172,7 @@ public class ActivityTaskManager {
         }
     }
 
-    /** Removes root tasks of the activity types from the system. */
+    /** Removes root tasks of the activity types from the Default TDA of all displays. */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void removeRootTasksWithActivityTypes(@NonNull int[] activityTypes) {
         try {

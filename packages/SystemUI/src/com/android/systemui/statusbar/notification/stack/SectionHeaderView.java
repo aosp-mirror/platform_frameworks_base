@@ -68,6 +68,7 @@ public class SectionHeaderView extends StackScrollerDecorView {
         if (mLabelTextId != null) {
             mLabelView.setText(mLabelTextId);
         }
+        mLabelView.setAccessibilityHeading(true);
     }
 
     @Override

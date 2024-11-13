@@ -57,7 +57,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     private static final float DEVICE_CONNECTED_ALPHA = 1f;
     protected List<MediaItem> mMediaItemList = new CopyOnWriteArrayList<>();
 
-    public MediaOutputAdapter(MediaOutputController controller) {
+    public MediaOutputAdapter(MediaSwitchingController controller) {
         super(controller);
         setHasStableIds(true);
     }
@@ -531,8 +531,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     @RequiresApi(34)
     private static class Api34Impl {
         @DoNotInline
-        static View.OnClickListener getClickListenerBasedOnSelectionBehavior(MediaDevice device,
-                MediaOutputController controller, View.OnClickListener defaultTransferListener) {
+        static View.OnClickListener getClickListenerBasedOnSelectionBehavior(
+                MediaDevice device,
+                MediaSwitchingController controller,
+                View.OnClickListener defaultTransferListener) {
             switch (device.getSelectionBehavior()) {
                 case SELECTION_BEHAVIOR_NONE:
                     return null;

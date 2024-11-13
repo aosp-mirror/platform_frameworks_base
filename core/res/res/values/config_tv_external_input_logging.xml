@@ -24,27 +24,39 @@
      entries do not follow the convention, but all new entries should. -->
 
 <resources>
-    <bool name="config_tvExternalInputLoggingDisplayNameFilterEnabled">false</bool>
+    <bool name="config_tvExternalInputLoggingDisplayNameFilterEnabled">true</bool>
 
     <string-array name="config_tvExternalInputLoggingDeviceOnScreenDisplayNames">
-        <item>Chromecast</item>
+        <item>ADT-4</item>
         <item>Chromecast HD</item>
-        <item>SHIELD</item>
-        <item>Roku</item>
-        <item>Roku Express 4</item>
-        <item>Home Theater</item>
         <item>Fire TV Stick</item>
-        <item>PlayStation 5</item>
+        <item>Freebox Player</item>
+        <item>Home Theater</item>
+        <item>Jarvis</item>
         <item>NintendoSwitch</item>
+        <item>onn. 4K Plus S</item>
+        <item>onn. Streaming</item>
+        <item>PlayStation 4</item>
+        <item>PlayStation 5</item>
+        <item>Roku 3</item>
+        <item>Roku Express 4</item>
     </string-array>
 
     <string-array name="config_tvExternalInputLoggingDeviceBrandNames">
-        <item>Chromecast</item>
-        <item>SHIELD</item>
-        <item>Roku</item>
         <item>Apple</item>
+        <item>Chromecast</item>
         <item>Fire TV</item>
-        <item>PlayStation</item>
+        <item>Freebox</item>
+        <item>Google</item>
+        <item>MiBOX</item>
+        <item>Microsoft</item>
         <item>Nintendo</item>
+        <item>NVIDIA</item>
+        <item>onn.</item>
+        <item>PlayStation</item>
+        <item>Roku</item>
+        <item>SHIELD</item>
+        <item>Sony</item>
+        <item>XBOX</item>
     </string-array>
 </resources>

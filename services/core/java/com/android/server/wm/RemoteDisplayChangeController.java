@@ -28,7 +28,7 @@ import android.window.DisplayAreaInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,10 +104,9 @@ public class RemoteDisplayChangeController {
 
         final IDisplayChangeWindowCallback remoteCallback = createCallback(callback);
         try {
-            mService.mH.removeCallbacks(mTimeoutRunnable);
-            mService.mH.postDelayed(mTimeoutRunnable, REMOTE_DISPLAY_CHANGE_TIMEOUT_MS);
             mService.mDisplayChangeController.onDisplayChange(mDisplayContent.mDisplayId,
                     fromRotation, toRotation, newDisplayAreaInfo, remoteCallback);
+            mService.mH.postDelayed(mTimeoutRunnable, callback, REMOTE_DISPLAY_CHANGE_TIMEOUT_MS);
             return true;
         } catch (RemoteException e) {
             Slog.e(TAG, "Exception while dispatching remote display-change", e);
@@ -118,6 +117,7 @@ public class RemoteDisplayChangeController {
 
     private void onContinueTimedOut() {
         Slog.e(TAG, "RemoteDisplayChange timed-out, UI might get messed-up after this.");
+        mService.mH.removeCallbacks(mTimeoutRunnable);
         // timed-out, so run all continue callbacks and clear the list
         synchronized (mService.mGlobalLock) {
             for (int i = 0; i < mCallbacks.size(); ++i) {
@@ -172,9 +172,6 @@ public class RemoteDisplayChangeController {
             // The "toIndex" is exclusive, so it needs +1 to clear the current calling callback.
             mCallbacks.subList(0, idx + 1).clear();
             final boolean completed = mCallbacks.isEmpty();
-            if (completed) {
-                mService.mH.removeCallbacks(mTimeoutRunnable);
-            }
             callback.onContinueRemoteDisplayChange(transaction);
             if (completed) {
                 onCompleted();
@@ -198,6 +195,7 @@ public class RemoteDisplayChangeController {
                             }
                             mService.mH.post(() -> RemoteDisplayChangeController.this
                                     .continueDisplayChange(callback, t));
+                            mService.mH.removeCallbacks(mTimeoutRunnable, callback);
                         }
                     }
                 };

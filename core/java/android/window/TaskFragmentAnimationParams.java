@@ -171,7 +171,7 @@ public final class TaskFragmentAnimationParams implements Parcelable {
      */
     public boolean hasOverrideAnimation() {
         return mOpenAnimationResId != DEFAULT_ANIMATION_RESOURCES_ID
-                || mChangeAnimationResId != DEFAULT_ANIMATION_BACKGROUND_COLOR
+                || mChangeAnimationResId != DEFAULT_ANIMATION_RESOURCES_ID
                 || mCloseAnimationResId != DEFAULT_ANIMATION_RESOURCES_ID;
     }
 

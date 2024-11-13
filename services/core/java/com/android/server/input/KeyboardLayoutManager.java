@@ -22,6 +22,8 @@ import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECT
 import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD;
 import static android.hardware.input.KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEFAULT;
 
+import static com.android.hardware.input.Flags.keyboardLayoutManagerMultiUserImeSetup;
+
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -1066,9 +1068,15 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             for (InputMethodInfo imeInfo :
                     inputMethodManagerInternal.getEnabledInputMethodListAsUser(
                             userId)) {
-                for (InputMethodSubtype imeSubtype :
-                        inputMethodManager.getEnabledInputMethodSubtypeList(
-                                imeInfo, true /* allowsImplicitlyEnabledSubtypes */)) {
+                final List<InputMethodSubtype> imeSubtypes;
+                if (keyboardLayoutManagerMultiUserImeSetup()) {
+                    imeSubtypes = inputMethodManagerInternal.getEnabledInputMethodSubtypeListAsUser(
+                            imeInfo.getId(), true /* allowsImplicitlyEnabledSubtypes */, userId);
+                } else {
+                    imeSubtypes = inputMethodManager.getEnabledInputMethodSubtypeList(imeInfo,
+                            true /* allowsImplicitlyEnabledSubtypes */);
+                }
+                for (InputMethodSubtype imeSubtype : imeSubtypes) {
                     if (!imeSubtype.isSuitableForPhysicalKeyboardLayoutMapping()) {
                         continue;
                     }

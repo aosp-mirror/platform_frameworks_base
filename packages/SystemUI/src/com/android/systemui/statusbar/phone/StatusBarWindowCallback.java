@@ -26,5 +26,5 @@ public interface StatusBarWindowCallback {
      */
     void onStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
             boolean keyguardGoingAway, boolean bouncerShowing, boolean isDozing,
-            boolean panelExpanded, boolean isDreaming);
+            boolean panelExpanded, boolean isDreaming, boolean communalShowing);
 }

@@ -437,7 +437,7 @@ package android.location {
   }
 
   public class LocationManager {
-    method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void addProviderRequestChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.ChangedListener);
+    method @Deprecated @FlaggedApi("android.location.flags.deprecate_provider_request_apis") @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void addProviderRequestChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.ChangedListener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @Nullable public String getExtraLocationControllerPackage();
@@ -452,7 +452,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String, @Nullable String);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.UPDATE_APP_OPS_STATS}) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void removeProviderRequestChangedListener(@NonNull android.location.provider.ProviderRequest.ChangedListener);
+    method @Deprecated @FlaggedApi("android.location.flags.deprecate_provider_request_apis") @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void removeProviderRequestChangedListener(@NonNull android.location.provider.ProviderRequest.ChangedListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);

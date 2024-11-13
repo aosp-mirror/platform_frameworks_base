@@ -21,21 +21,32 @@ import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [DeviceEntryRepository] */
 @SysUISingleton
 class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
-    private var isLockscreenEnabled = true
+
+    private val _isLockscreenEnabled = MutableStateFlow(true)
+    override val isLockscreenEnabled: StateFlow<Boolean> = _isLockscreenEnabled.asStateFlow()
 
     private val _isBypassEnabled = MutableStateFlow(false)
     override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled
 
+    private var pendingLockscreenEnabled = _isLockscreenEnabled.value
+
     override suspend fun isLockscreenEnabled(): Boolean {
-        return isLockscreenEnabled
+        _isLockscreenEnabled.value = pendingLockscreenEnabled
+        return isLockscreenEnabled.value
     }
 
     fun setLockscreenEnabled(isLockscreenEnabled: Boolean) {
-        this.isLockscreenEnabled = isLockscreenEnabled
+        _isLockscreenEnabled.value = isLockscreenEnabled
+        pendingLockscreenEnabled = _isLockscreenEnabled.value
+    }
+
+    fun setPendingLockscreenEnabled(isLockscreenEnabled: Boolean) {
+        pendingLockscreenEnabled = isLockscreenEnabled
     }
 
     fun setBypassEnabled(isBypassEnabled: Boolean) {

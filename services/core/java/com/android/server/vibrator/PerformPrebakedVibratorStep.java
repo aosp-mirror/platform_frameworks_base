@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.Trace;
 import android.os.VibrationEffect;
 import android.os.vibrator.PrebakedSegment;
@@ -31,7 +32,7 @@ import java.util.List;
  * <p>This step automatically falls back by replacing the prebaked segment with
  * {@link VibrationSettings#getFallbackEffect(int)}, if available.
  */
-final class PerformPrebakedVibratorStep extends AbstractVibratorStep {
+final class PerformPrebakedVibratorStep extends AbstractComposedVibratorStep {
 
     PerformPrebakedVibratorStep(VibrationStepConductor conductor, long startTime,
             VibratorController controller, VibrationEffect.Composed effect, int index,
@@ -42,6 +43,7 @@ final class PerformPrebakedVibratorStep extends AbstractVibratorStep {
                 index, pendingVibratorOffDeadline);
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "PerformPrebakedVibratorStep");

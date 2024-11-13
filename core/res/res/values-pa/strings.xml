@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ਪਾਸਵਰਡ ਖੇਤਰਾਂ ਵਿੱਚ ਲਿਖਾਈ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ਪਿੱਛੇ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ਇਨਪੁੱਟ ਵਿਧੀ ਨੂੰ ਸਵਿੱਚ ਕਰੋ"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ਇਨਪੁੱਟ ਵਿਧੀ ਚੋਣਕਾਰ ਨੂੰ ਖੋਲ੍ਹੋ"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ਸਟੋਰੇਜ ਦੀ ਜਗ੍ਹਾ ਖਤਮ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ਕੁਝ ਸਿਸਟਮ ਫੰਕਸ਼ਨ ਕੰਮ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ਸਿਸਟਮ ਲਈ ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਕੋਲ 250MB ਖਾਲੀ ਜਗ੍ਹਾ ਹੈ ਅਤੇ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
@@ -1411,6 +1413,8 @@
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ਵਾਇਰਲੈੱਸ ਡੀਬੱਗਿੰਗ ਨੂੰ ਬੰਦ ਕਰਨ ਲਈ ਚੁਣੋ।"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਬੰਦ ਕਰਨ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ।"</string>
+    <string name="wrong_hsum_configuration_notification_title" msgid="7212758829332714385">"ਗਲਤ HSUM ਬਿਲਡ ਸੰਰੂਪਣ"</string>
+    <string name="wrong_hsum_configuration_notification_message" msgid="5353475441480684381">"ਇਸ ਡੀਵਾਈਸ ਦੀ ਹੈੱਡਲੈੱਸ ਸਿਸਟਮ ਯੂਜ਼ਰ ਮੋਡ ਸਥਿਤੀ ਇਸਦੇ ਬਿਲਡ ਸੰਰੂਪਣ ਤੋਂ ਵੱਖਰੀ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਡੀਵਾਈਸ ਨੂੰ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ।"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"ਸੀਰੀਅਲ ਕੰਸੋਲ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"ਕਾਰਗੁਜ਼ਾਰੀ ਪ੍ਰਭਾਵਿਤ ਹੋਈ ਹੈ। ਬੰਦ ਕਰਨ ਲਈ, ਬੂਟਲੋਡਰ ਦੇਖੋ।"</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"ਪ੍ਰਯੋਗਮਈ MTE ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
@@ -1426,6 +1430,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ਇਨਪੁਟ ਵਿਧੀ ਚੁਣੋ"</string>
+    <string name="input_method_language_settings" msgid="8069089418056819437">"ਭਾਸ਼ਾ ਸੈਟਿੰਗਾਂ"</string>
     <string name="show_ime" msgid="6406112007347443383">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>
     <string name="hardware" msgid="3611039921284836033">"ਆਨ-ਸਕ੍ਰੀਨ ਕੀ-ਬੋਰਡ ਨੂੰ ਵਰਤੋ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ਦਾ ਸੰਰੂਪਣ ਕਰੋ"</string>
@@ -1741,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ਕੋਈ ਐਪ ਇਜਾਜ਼ਤ ਸੰਬੰਧੀ ਬੇਨਤੀ ਨੂੰ ਅਸਪਸ਼ਟ ਕਰ ਰਹੀ ਹੈ, ਇਸ ਲਈ ਤੁਹਾਡੇ ਜਵਾਬ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ਕਿਸੇ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਉਸ \'ਤੇ ਟੈਪ ਕਰੋ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ਅਵਾਜ਼ ਕੁੰਜੀ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਦੇ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ਨੂੰ ਬੰਦ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ਸ਼ਾਰਟਕੱਟਾਂ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ਹੋ ਗਿਆ"</string>
@@ -1755,12 +1760,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ ਛੱਡੋ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ, ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦੁਬਾਰਾ ਦਬਾਈ ਰੱਖੋ।"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਟੈਪ ਕੀਤੇ ਜਾਣ \'ਤੇ ਵਰਤਣ ਲਈ ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ (ਦੋ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ਪਹੁੰਚਯੋਗਤਾ ਸੰਕੇਤ ਨਾਲ ਵਰਤਣ ਲਈ ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ (ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ \'ਤੇ ਸਪਰਸ਼ ਕਰਕੇ ਰੱਖੋ।"</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਦੋ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
+    <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ"</string>
+    <string name="accessibility_button_instructional_text" msgid="6831154884557881996">"ਅਗਲੀ ਵਾਰ ਜਦੋਂ ਤੁਸੀਂ ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਟੈਪ ਕਰੋਗੇ, ਤਾਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ"</string>
+    <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"ਅਗਲੀ ਵਾਰ ਜਦੋਂ ਤੁਸੀਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋਗੇ, ਤਾਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ। 2 ਉਂਗਲਾਂ ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰ ਕੇ ਤੁਰੰਤ ਛੱਡੋ।"</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"ਅਗਲੀ ਵਾਰ ਜਦੋਂ ਤੁਸੀਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋਗੇ, ਤਾਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ। 3 ਉਂਗਲਾਂ ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰ ਕੇ ਤੁਰੰਤ ਛੱਡੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
@@ -1975,6 +1980,10 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"ਜਾਰੀ ਕਾਲ"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ਇਨਕਮਿੰਗ ਕਾਲ ਦੀ ਸਕ੍ਰੀਨਿੰਗ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ਗੈਰ-ਸ਼੍ਰੇਣੀਕਿਰਤ"</string>
+    <string name="promotional_notification_channel_label" msgid="7414844730492860233">"ਪ੍ਰਮੋਸ਼ਨ"</string>
+    <string name="social_notification_channel_label" msgid="106520267132019945">"ਸੋਸ਼ਲ ਐਪਾਂ"</string>
+    <string name="news_notification_channel_label" msgid="4299937455247883311">"ਖਬਰਾਂ"</string>
+    <string name="recs_notification_channel_label" msgid="4945985121418684297">"ਸਿਫ਼ਾਰਸ਼ਾਂ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ਤੁਸੀਂ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਦੀ ਮਹੱਤਤਾ ਸੈੱਟ ਕੀਤੀ।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ਇਹ ਸ਼ਾਮਲ ਲੋਕਾਂ ਦੇ ਕਾਰਨ ਮਹੱਤਵਪੂਰਨ ਹੈ।"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ਵਿਉਂਤੀ ਐਪ ਸੂਚਨਾ"</string>
@@ -2001,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ਆਪਣੀ ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਵਰਤਣ ਲਈ, ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਨੂੰ ਮਿਟਾਉਣ ਲਈ, ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਇਸ ਵੇਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
@@ -2415,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ਐਪ ਸਮੱਗਰੀ ਨੂੰ ਸੁਰੱਖਿਆ ਲਈ ਸਕ੍ਰੀਨ ਸਾਂਝਾਕਰਨ ਤੋਂ ਲੁਕਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ਸੈਟੇਲਾਈਟ ਨਾਲ ਸਵੈ-ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ਤੁਸੀਂ ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ਕੀ ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ਵਿਚਾਰ-ਅਧੀਨ..."</string>
@@ -2427,4 +2439,18 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"ਤੁਹਾਡੇ ਚਿਹਰੇ ਦੇ ਮਾਡਲ ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ਹੁਣੇ ਨਹੀਂ"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> ਲਈ ਅਲਾਰਮ"</string>
+    <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"ਵਰਤੋਂਕਾਰ ਬਦਲੋ"</string>
+    <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"ਮਿਊਟ ਕਰੋ"</string>
+    <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"ਧੁਨੀ ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"ਬ੍ਰਾਊਜ਼ਰ"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contacts"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"Email"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Music"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendar"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ਐਪਲੀਕੇਸ਼ਨਾਂ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"ਤੁਹਾਡੇ ਫਿੰਗਰਪ੍ਰਿੰਟਾਂ ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
 </resources>

@@ -18,6 +18,8 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
@@ -33,13 +35,26 @@ import java.util.Objects;
 
 /**
  * Activity move to a different display message.
+ *
  * @hide
  */
 public class MoveToDisplayItem extends ActivityTransactionItem {
 
-    private int mTargetDisplayId;
-    private Configuration mConfiguration;
-    private ActivityWindowInfo mActivityWindowInfo;
+    private final int mTargetDisplayId;
+
+    @NonNull
+    private final Configuration mConfiguration;
+
+    @NonNull
+    private final ActivityWindowInfo mActivityWindowInfo;
+
+    public MoveToDisplayItem(@NonNull IBinder activityToken, int targetDisplayId,
+            @NonNull Configuration configuration, @NonNull ActivityWindowInfo activityWindowInfo) {
+        super(activityToken);
+        mTargetDisplayId = targetDisplayId;
+        mConfiguration = new Configuration(configuration);
+        mActivityWindowInfo = new ActivityWindowInfo(activityWindowInfo);
+    }
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
@@ -58,38 +73,9 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    // ObjectPoolItem implementation
-
-    private MoveToDisplayItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static MoveToDisplayItem obtain(@NonNull IBinder activityToken, int targetDisplayId,
-            @NonNull Configuration configuration, @NonNull ActivityWindowInfo activityWindowInfo) {
-        MoveToDisplayItem instance = ObjectPool.obtain(MoveToDisplayItem.class);
-        if (instance == null) {
-            instance = new MoveToDisplayItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mTargetDisplayId = targetDisplayId;
-        instance.mConfiguration = new Configuration(configuration);
-        instance.mActivityWindowInfo = new ActivityWindowInfo(activityWindowInfo);
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mTargetDisplayId = 0;
-        mConfiguration = null;
-        mActivityWindowInfo = null;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
@@ -98,12 +84,12 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         dest.writeTypedObject(mActivityWindowInfo, flags);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private MoveToDisplayItem(@NonNull Parcel in) {
         super(in);
         mTargetDisplayId = in.readInt();
-        mConfiguration = in.readTypedObject(Configuration.CREATOR);
-        mActivityWindowInfo = in.readTypedObject(ActivityWindowInfo.CREATOR);
+        mConfiguration = requireNonNull(in.readTypedObject(Configuration.CREATOR));
+        mActivityWindowInfo = requireNonNull(in.readTypedObject(ActivityWindowInfo.CREATOR));
     }
 
     public static final @NonNull Creator<MoveToDisplayItem> CREATOR = new Creator<>() {

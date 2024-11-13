@@ -519,7 +519,7 @@ public class TvInteractiveAppManagerService extends SystemService {
     }
 
     private void registerBroadcastReceivers() {
-        PackageMonitor monitor = new PackageMonitor() {
+        PackageMonitor monitor = new PackageMonitor(/* supportsPackageRestartQuery */ true) {
             private void buildTvInteractiveAppServiceList(String[] packages) {
                 int userId = getChangingUserId();
                 synchronized (mLock) {
@@ -2124,7 +2124,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         @Override
         public void setTeletextAppEnabled(IBinder sessionToken, boolean enable, int userId) {
             if (DEBUG) {
-                Slogf.d(TAG, "setTeletextAppEnabled(enable=%d)", enable);
+                Slogf.d(TAG, "setTeletextAppEnabled(enable=%b)", enable);
             }
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,

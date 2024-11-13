@@ -42,6 +42,7 @@ interface HeadsUpManager : Dumpable {
      *   should be ranked higher and 0 if they are equal.
      */
     fun compare(a: NotificationEntry?, b: NotificationEntry?): Int
+
     /**
      * Extends the lifetime of the currently showing pulsing notification so that the pulse lasts
      * longer.
@@ -95,9 +96,10 @@ interface HeadsUpManager : Dumpable {
      *
      * @param key the key of the notification to remove
      * @param releaseImmediately force a remove regardless of earliest removal time
+     * @param reason reason for removing the notification
      * @return true if notification is removed, false otherwise
      */
-    fun removeNotification(key: String, releaseImmediately: Boolean): Boolean
+    fun removeNotification(key: String, releaseImmediately: Boolean, reason: String): Boolean
 
     /**
      * Try to remove the notification. May not succeed if the notification has not been shown long
@@ -106,9 +108,15 @@ interface HeadsUpManager : Dumpable {
      * @param key the key of the notification to remove
      * @param releaseImmediately force a remove regardless of earliest removal time
      * @param animate if true, animate the removal
+     * @param reason reason for removing the notification
      * @return true if notification is removed, false otherwise
      */
-    fun removeNotification(key: String, releaseImmediately: Boolean, animate: Boolean): Boolean
+    fun removeNotification(
+        key: String,
+        releaseImmediately: Boolean,
+        animate: Boolean,
+        reason: String
+    ): Boolean
 
     /** Clears all managed notifications. */
     fun releaseAllImmediately()
@@ -184,6 +192,8 @@ interface HeadsUpManager : Dumpable {
     fun unpinAll(userUnPinned: Boolean)
 
     fun updateNotification(key: String, shouldHeadsUpAgain: Boolean)
+
+    fun onEntryAnimatingAwayEnded(entry: NotificationEntry)
 }
 
 /** Sets the animation state of the HeadsUpManager. */
@@ -204,41 +214,82 @@ interface OnHeadsUpPhoneListenerChange {
 /* No op impl of HeadsUpManager. */
 class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
     override val allEntries = Stream.empty<NotificationEntry>()
+
     override fun addHeadsUpPhoneListener(listener: OnHeadsUpPhoneListenerChange) {}
+
     override fun addListener(listener: OnHeadsUpChangedListener) {}
+
     override fun addSwipedOutNotification(key: String) {}
+
     override fun canRemoveImmediately(key: String) = false
+
     override fun compare(a: NotificationEntry?, b: NotificationEntry?) = 0
+
     override fun dump(pw: PrintWriter, args: Array<out String>) {}
+
     override fun extendHeadsUp() {}
+
     override fun getEarliestRemovalTime(key: String?) = 0L
+
     override fun getTouchableRegion(): Region? = null
+
     override fun getTopEntry() = null
+
     override fun hasPinnedHeadsUp() = false
+
     override fun isHeadsUpEntry(key: String) = false
+
     override fun isHeadsUpAnimatingAwayValue() = false
+
     override fun isSnoozed(packageName: String) = false
+
     override fun isSticky(key: String?) = false
+
     override fun isTrackingHeadsUp() = false
+
     override fun onExpandingFinished() {}
+
     override fun releaseAllImmediately() {}
+
     override fun removeListener(listener: OnHeadsUpChangedListener) {}
-    override fun removeNotification(key: String, releaseImmediately: Boolean) = false
-    override fun removeNotification(key: String, releaseImmediately: Boolean, animate: Boolean) =
+
+    override fun removeNotification(key: String, releaseImmediately: Boolean, reason: String) =
         false
+
+    override fun removeNotification(
+        key: String,
+        releaseImmediately: Boolean,
+        animate: Boolean,
+        reason: String
+    ) = false
+
     override fun setAnimationStateHandler(handler: AnimationStateHandler) {}
+
     override fun setExpanded(entry: NotificationEntry, expanded: Boolean) {}
+
     override fun setGutsShown(entry: NotificationEntry, gutsShown: Boolean) {}
+
     override fun setHeadsUpAnimatingAway(headsUpAnimatingAway: Boolean) {}
+
     override fun setRemoteInputActive(entry: NotificationEntry, remoteInputActive: Boolean) {}
+
     override fun setTrackingHeadsUp(tracking: Boolean) {}
+
     override fun setUser(user: Int) {}
+
     override fun setUserActionMayIndirectlyRemove(entry: NotificationEntry) {}
+
     override fun shouldSwallowClick(key: String): Boolean = false
+
     override fun showNotification(entry: NotificationEntry) {}
+
     override fun snooze() {}
+
     override fun unpinAll(userUnPinned: Boolean) {}
+
     override fun updateNotification(key: String, alert: Boolean) {}
+
+    override fun onEntryAnimatingAwayEnded(entry: NotificationEntry) {}
 }
 
 @Module

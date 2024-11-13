@@ -31,9 +31,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.whenever
@@ -58,14 +56,13 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>
-    @Mock private lateinit var tableLogger: TableLogBuffer
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val clock = FakeSystemClock()
     private val userRepository = FakeUserRepository()
-    private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
+    private val mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
 
     private lateinit var underTest: AuthenticationRepository
 
@@ -78,8 +75,6 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
         userRepository.setUserInfos(USER_INFOS)
         runBlocking { userRepository.setSelectedUserInfo(USER_INFOS[0]) }
         whenever(getSecurityMode.apply(anyInt())).thenAnswer { currentSecurityMode }
-        mobileConnectionsRepository =
-            FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), tableLogger)
 
         underTest =
             AuthenticationRepositoryImpl(

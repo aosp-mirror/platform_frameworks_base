@@ -38,6 +38,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.tracing.TraceReportService;
 import android.tracing.ITracingServiceProxy;
 import android.tracing.TraceReportParams;
@@ -87,6 +88,8 @@ public class TracingServiceProxy extends SystemService {
             TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_PERM_MISSING;
     private static final int REPORT_SVC_COMM_ERROR =
             TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_COMM_ERROR;
+    private static final String NOTIFY_SESSION_ENDED_SETTING = "should_notify_trace_session_ended";
+    private static final int ENABLED = 1;
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -97,10 +100,22 @@ public class TracingServiceProxy extends SystemService {
         /**
          * Notifies system tracing app that a tracing session has ended. sessionStolen is ignored,
          * as trace sessions are no longer stolen and are always cloned instead.
+         * <p>
+         * Cases exist where user-flows besides Traceur's QS Tile may end long-trace sessions. In
+         * these cases, a Global int will be set to flag the upcoming notifyTraceSessionEnded call
+         * as purposely muted once.
          */
         @Override
         public void notifyTraceSessionEnded(boolean sessionStolen /* unused */) {
-            TracingServiceProxy.this.notifyTraceur();
+            long identity = Binder.clearCallingIdentity();
+            if (Settings.Global.getInt(mContext.getContentResolver(),
+                    NOTIFY_SESSION_ENDED_SETTING, ENABLED) == ENABLED) {
+                TracingServiceProxy.this.notifyTraceur();
+            } else {
+                Settings.Global.putInt(mContext.getContentResolver(), NOTIFY_SESSION_ENDED_SETTING,
+                        ENABLED);
+            }
+            Binder.restoreCallingIdentity(identity);
         }
 
         @Override

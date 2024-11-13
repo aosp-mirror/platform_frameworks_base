@@ -37,6 +37,7 @@ public class SurfaceControlViewHostTest extends Activity implements SurfaceHolde
 
     protected void onCreate(Bundle savedInstanceState) {
         FrameLayout content = new FrameLayout(this);
+        content.setFitsSystemWindows(true);
         super.onCreate(savedInstanceState);
         mView = new SurfaceView(this);
         content.addView(mView, new FrameLayout.LayoutParams(

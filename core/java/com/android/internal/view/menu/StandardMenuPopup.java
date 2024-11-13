@@ -16,12 +16,9 @@
 
 package com.android.internal.view.menu;
 
-import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Parcelable;
-import android.text.ClientFlags;
-import android.text.TextFlags;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -120,16 +117,10 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     public StandardMenuPopup(Context context, MenuBuilder menu, View anchorView, int popupStyleAttr,
             int popupStyleRes, boolean overflowOnly) {
         mContext = Objects.requireNonNull(context);
-        boolean useNewContextMenu = AppGlobals.getIntCoreSetting(
-                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
-                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0;
-
         mMenu = menu;
         mOverflowOnly = overflowOnly;
         final LayoutInflater inflater = LayoutInflater.from(context);
-        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly,
-                ClientFlags.fixMisalignedContextMenu() && useNewContextMenu
-                        ? ITEM_LAYOUT_MATERIAL : ITEM_LAYOUT);
+        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly, ITEM_LAYOUT_MATERIAL);
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
 

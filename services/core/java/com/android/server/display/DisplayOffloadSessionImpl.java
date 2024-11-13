@@ -39,12 +39,12 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
 
     @Nullable
     private final DisplayManagerInternal.DisplayOffloader mDisplayOffloader;
-    private final DisplayPowerControllerInterface mDisplayPowerController;
+    private final DisplayPowerController mDisplayPowerController;
     private boolean mIsActive;
 
     public DisplayOffloadSessionImpl(
             @Nullable DisplayManagerInternal.DisplayOffloader displayOffloader,
-            DisplayPowerControllerInterface displayPowerController) {
+            DisplayPowerController displayPowerController) {
         mDisplayOffloader = displayOffloader;
         mDisplayPowerController = displayPowerController;
     }
@@ -81,6 +81,14 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
         }
         mDisplayOffloader.onBlockingScreenOn(unblocker);
         return true;
+    }
+
+    @Override
+    public void cancelBlockScreenOn() {
+        if (mDisplayOffloader == null) {
+            return;
+        }
+        mDisplayOffloader.cancelBlockScreenOn();
     }
 
     @Override

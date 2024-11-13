@@ -32,6 +32,8 @@ import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ApplicationInfoFlags
+import android.content.pm.PackageManager.PackageInfoFlags
 import android.content.pm.VersionedPackage
 import android.graphics.drawable.Icon
 import android.os.Build
@@ -51,6 +53,9 @@ import com.android.packageinstaller.v2.model.PackageUtil.getMaxTargetSdkVersionF
 import com.android.packageinstaller.v2.model.PackageUtil.getPackageNameForUid
 import com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted
 import com.android.packageinstaller.v2.model.PackageUtil.isProfileOfOrSame
+import com.android.packageinstaller.v2.model.UninstallAborted.Companion.ABORT_REASON_UNINSTALL_DONE
+import android.content.pm.Flags as PmFlags
+import android.multiuser.Flags as MultiuserFlags
 
 class UninstallRepository(private val context: Context) {
 
@@ -71,6 +76,7 @@ class UninstallRepository(private val context: Context) {
     private var uninstallFromAllUsers = false
     private var isClonedApp = false
     private var uninstallId = 0
+    private var deleteFlags = 0
 
     fun performPreUninstallChecks(intent: Intent, callerInfo: CallerInfo): UninstallStage {
         this.intent = intent
@@ -155,7 +161,9 @@ class UninstallRepository(private val context: Context) {
         try {
             targetAppInfo = packageManager.getApplicationInfo(
                 targetPackageName!!,
-                PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ANY_USER.toLong())
+                ApplicationInfoFlags.of(
+                    PackageManager.MATCH_ANY_USER.toLong() or PackageManager.MATCH_ARCHIVED_PACKAGES
+                )
             )
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(LOG_TAG, "Unable to get packageName")
@@ -180,7 +188,25 @@ class UninstallRepository(private val context: Context) {
             }
         }
 
+        parseDeleteFlags(intent)
+
         return UninstallReady()
+    }
+
+    /**
+     * Parses specific {@link android.content.pm.PackageManager.DeleteFlags} from {@link Intent}
+     * to archive an app if requested.
+     *
+     * Do not parse other flags because developers might pass here any flags which might cause
+     * unintended behaviour.
+     * For more context {@link com.android.server.pm.PackageArchiver#requestArchive}.
+     */
+    private fun parseDeleteFlags(intent: Intent) {
+        val flags = intent.getIntExtra(PackageInstaller.EXTRA_DELETE_FLAGS, 0)
+        val archive = flags and PackageManager.DELETE_ARCHIVE
+        val keepData = flags and PackageManager.DELETE_KEEP_DATA
+
+        deleteFlags = archive or keepData
     }
 
     fun generateUninstallDetails(): UninstallStage {
@@ -201,6 +227,8 @@ class UninstallRepository(private val context: Context) {
         }
 
         val isUpdate = (targetAppInfo!!.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+        val isArchive =
+            PmFlags.archiving() && ((deleteFlags and PackageManager.DELETE_ARCHIVE) != 0)
         val myUserHandle = Process.myUserHandle()
         val isSingleUser = isSingleUser()
 
@@ -215,34 +243,54 @@ class UninstallRepository(private val context: Context) {
                 )
             )
         } else if (uninstallFromAllUsers && !isSingleUser) {
-            messageBuilder.append(context.getString(R.string.uninstall_application_text_all_users))
+            val messageString = if (isArchive) {
+                context.getString(R.string.archive_application_text_all_users)
+            } else {
+                context.getString(R.string.uninstall_application_text_all_users)
+            }
+            messageBuilder.append(messageString)
         } else if (uninstalledUser != myUserHandle) {
             // Uninstalling user is issuing uninstall for another user
             val customUserManager = context.createContextAsUser(uninstalledUser!!, 0)
                 .getSystemService(UserManager::class.java)
             val userName = customUserManager!!.userName
-            var messageString = context.getString(
-                    R.string.uninstall_application_text_user,
-                userName
-            )
+
+            var messageString = if (isArchive) {
+                context.getString(R.string.archive_application_text_user, userName)
+            } else {
+                context.getString(R.string.uninstall_application_text_user, userName)
+            }
+
             if (userManager!!.isSameProfileGroup(myUserHandle, uninstalledUser!!)) {
                 if (customUserManager.isManagedProfile) {
-                    messageString = context.getString(
+                    messageString = if (isArchive) {
+                        context.getString(
+                            R.string.archive_application_text_current_user_work_profile, userName
+                        )
+                    } else {
+                        context.getString(
                             R.string.uninstall_application_text_current_user_work_profile, userName
-                    )
+                        )
+                    }
                 } else if (customUserManager.isCloneProfile){
                     isClonedApp = true
                     messageString = context.getString(
                             R.string.uninstall_application_text_current_user_clone_profile
                     )
                 } else if (Flags.allowPrivateProfile()
-                        && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                        && MultiuserFlags.enablePrivateSpaceFeatures()
                         && customUserManager.isPrivateProfile
                 ) {
                     // TODO(b/324244123): Get these Strings from a User Property API.
-                    messageString = context.getString(
+                    messageString = if (isArchive) {
+                        context.getString(
+                            R.string.archive_application_text_current_user_private_profile, userName
+                        )
+                    } else {
+                        context.getString(
                             R.string.uninstall_application_text_current_user_private_profile
-                    )
+                        )
+                    }
                 }
             }
             messageBuilder.append(messageString)
@@ -262,6 +310,8 @@ class UninstallRepository(private val context: Context) {
                     targetAppLabel
                 )
             )
+        } else if (isArchive) {
+            messageBuilder.append(context.getString(R.string.archive_application_text))
         } else {
             messageBuilder.append(context.getString(R.string.uninstall_application_text))
         }
@@ -270,15 +320,21 @@ class UninstallRepository(private val context: Context) {
 
         val title = if (isClonedApp) {
             context.getString(R.string.cloned_app_label, targetAppLabel)
+        } else if (isArchive) {
+            context.getString(R.string.archiving_app_label, targetAppLabel)
         } else {
             targetAppLabel.toString()
         }
 
         var suggestToKeepAppData = false
         try {
-            val pkgInfo = packageManager.getPackageInfo(targetPackageName!!, 0)
+            val pkgInfo = packageManager.getPackageInfo(
+                targetPackageName!!, PackageInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES)
+            )
             suggestToKeepAppData =
-                pkgInfo.applicationInfo != null && pkgInfo.applicationInfo!!.hasFragileUserData()
+                pkgInfo.applicationInfo != null
+                    && pkgInfo.applicationInfo!!.hasFragileUserData()
+                    && !isArchive
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(LOG_TAG, "Cannot check hasFragileUserData for $targetPackageName", e)
         }
@@ -291,7 +347,7 @@ class UninstallRepository(private val context: Context) {
             )
         }
 
-        return UninstallUserActionRequired(title, message, appDataSize)
+        return UninstallUserActionRequired(title, message, appDataSize, isArchive)
     }
 
     /**
@@ -444,10 +500,11 @@ class UninstallRepository(private val context: Context) {
             callback!!.onUninstallComplete(targetPackageName!!, legacyStatus, message)
 
             // Since the caller already received the results, just finish the app at this point
-            uninstallResult.value = null
+            uninstallResult.value = UninstallAborted(ABORT_REASON_UNINSTALL_DONE)
             return
         }
         val returnResult = intent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)
+
         if (returnResult || callingActivity != null) {
             val intent = Intent()
             intent.putExtra(Intent.EXTRA_INSTALL_RESULT, legacyStatus)
@@ -717,6 +774,7 @@ class UninstallRepository(private val context: Context) {
     ): Boolean {
         var flags = if (uninstallFromAllUsers) PackageManager.DELETE_ALL_USERS else 0
         flags = flags or if (keepData) PackageManager.DELETE_KEEP_DATA else 0
+        flags = flags or deleteFlags
 
         return try {
             context.createContextAsUser(targetUser, 0)

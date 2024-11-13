@@ -33,71 +33,169 @@ import org.junit.runner.RunWith;
 public class LauncherActivityInfoTest {
 
     @Test
-    public void testTrimStart() {
-        // Invisible case
-        assertThat(LauncherActivityInfo.trimStart("\u0009").toString()).isEmpty();
-        // It is not supported in the system font
-        assertThat(LauncherActivityInfo.trimStart("\u0FE1").toString()).isEmpty();
-        // Surrogates case
-        assertThat(LauncherActivityInfo.trimStart("\uD83E\uDD36").toString())
-                .isEqualTo("\uD83E\uDD36");
-        assertThat(LauncherActivityInfo.trimStart("\u0009\u0FE1\uD83E\uDD36A").toString())
-                .isEqualTo("\uD83E\uDD36A");
-        assertThat(LauncherActivityInfo.trimStart("\uD83E\uDD36A\u0009\u0FE1").toString())
-                .isEqualTo("\uD83E\uDD36A\u0009\u0FE1");
-        assertThat(LauncherActivityInfo.trimStart("A\uD83E\uDD36\u0009\u0FE1A").toString())
-                .isEqualTo("A\uD83E\uDD36\u0009\u0FE1A");
-        assertThat(LauncherActivityInfo.trimStart(
-                "A\uD83E\uDD36\u0009\u0FE1A\uD83E\uDD36").toString())
-                .isEqualTo("A\uD83E\uDD36\u0009\u0FE1A\uD83E\uDD36");
-        assertThat(LauncherActivityInfo.trimStart(
-                "\u0009\u0FE1\uD83E\uDD36A\u0009\u0FE1").toString())
-                .isEqualTo("\uD83E\uDD36A\u0009\u0FE1");
+    public void testIsVisible_normal() {
+        // normal
+        assertThat(LauncherActivityInfo.isVisible("label")).isTrue();
+        // 1 surrogates case
+        assertThat(LauncherActivityInfo.isVisible("\uD83E\uDD36")).isTrue();
     }
 
     @Test
-    public void testTrimEnd() {
-        // Invisible case
-        assertThat(LauncherActivityInfo.trimEnd("\u0009").toString()).isEmpty();
-        // It is not supported in the system font
-        assertThat(LauncherActivityInfo.trimEnd("\u0FE1").toString()).isEmpty();
-        // Surrogates case
-        assertThat(LauncherActivityInfo.trimEnd("\uD83E\uDD36").toString())
-                .isEqualTo("\uD83E\uDD36");
-        assertThat(LauncherActivityInfo.trimEnd("\u0009\u0FE1\uD83E\uDD36A").toString())
-                .isEqualTo("\u0009\u0FE1\uD83E\uDD36A");
-        assertThat(LauncherActivityInfo.trimEnd("\uD83E\uDD36A\u0009\u0FE1").toString())
-                .isEqualTo("\uD83E\uDD36A");
-        assertThat(LauncherActivityInfo.trimEnd("A\uD83E\uDD36\u0009\u0FE1A").toString())
-                .isEqualTo("A\uD83E\uDD36\u0009\u0FE1A");
-        assertThat(LauncherActivityInfo.trimEnd(
-                "A\uD83E\uDD36\u0009\u0FE1A\uD83E\uDD36").toString())
-                .isEqualTo("A\uD83E\uDD36\u0009\u0FE1A\uD83E\uDD36");
-        assertThat(LauncherActivityInfo.trimEnd(
-                "\u0009\u0FE1\uD83E\uDD36A\u0009\u0FE1").toString())
-                .isEqualTo("\u0009\u0FE1\uD83E\uDD36A");
+    public void testIsVisible_onlyInvisibleCharacter() {
+        // 1 invisible
+        assertThat(LauncherActivityInfo.isVisible("\u0009")).isFalse();
+        // 2 invisible
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u3164")).isFalse();
+        // 3 invisible
+        assertThat(LauncherActivityInfo.isVisible("\u3000\u0009\u3164")).isFalse();
+        // 4 invisible
+        assertThat(LauncherActivityInfo.isVisible("\u200F\u3000\u0009\u3164")).isFalse();
     }
 
     @Test
-    public void testTrim() {
-        // Invisible case
-        assertThat(LauncherActivityInfo.trim("\u0009").toString()).isEmpty();
-        // It is not supported in the system font
-        assertThat(LauncherActivityInfo.trim("\u0FE1").toString()).isEmpty();
-        // Surrogates case
-        assertThat(LauncherActivityInfo.trim("\uD83E\uDD36").toString())
-                .isEqualTo("\uD83E\uDD36");
-        assertThat(LauncherActivityInfo.trim("\u0009\u0FE1\uD83E\uDD36A").toString())
-                .isEqualTo("\uD83E\uDD36A");
-        assertThat(LauncherActivityInfo.trim("\uD83E\uDD36A\u0009\u0FE1").toString())
-                .isEqualTo("\uD83E\uDD36A");
-        assertThat(LauncherActivityInfo.trim("A\uD83E\uDD36\u0009\u0FE1A").toString())
-                .isEqualTo("A\uD83E\uDD36\u0009\u0FE1A");
-        assertThat(LauncherActivityInfo.trim(
-                "A\uD83E\uDD36\u0009\u0FE1A\uD83E\uDD36").toString())
-                .isEqualTo("A\uD83E\uDD36\u0009\u0FE1A\uD83E\uDD36");
-        assertThat(LauncherActivityInfo.trim(
-                "\u0009\u0FE1\uD83E\uDD36A\u0009\u0FE1").toString())
-                .isEqualTo("\uD83E\uDD36A");
+    public void testIsVisible_onlyNotSupportedCharacter() {
+        // 1 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1")).isFalse();
+        // 2 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0FE2")).isFalse();
+        // 3 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0FE2\u0FE3")).isFalse();
+        // 4 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0FE2\u0FE3\u0FE4")).isFalse();
+    }
+
+    @Test
+    public void testIsVisible_invisibleAndNotSupportedCharacter() {
+        // 1 invisible, 1 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u0FE1")).isFalse();
+        // 1 invisible, 2 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u0FE1\u0FE2")).isFalse();
+        // 1 invisible, 3 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u0FE1\u0FE2\u0FE3")).isFalse();
+        // 1 invisible, 4 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u0FE1\u0FE2\u0FE3\u0FE4")).isFalse();
+
+        // 2 invisible, 1 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u3164\u0FE1")).isFalse();
+        // 2 invisible, 2 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u3164\u0FE1\u0FE2")).isFalse();
+        // 2 invisible, 3 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u3164\u0FE1\u0FE2\u0FE3")).isFalse();
+        // 2 invisible, 4 not supported
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u0009\u3164\u0FE1\u0FE2\u0FE3\u0FE4")).isFalse();
+
+        // 3 invisible, 1 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u3000\u0009\u3164\u0FE1")).isFalse();
+        // 3 invisible, 2 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u3000\u0009\u3164\u0FE1\u0FE2")).isFalse();
+        // 3 invisible, 3 not supported
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u3000\u0009\u3164\u0FE1\u0FE2\u0FE3")).isFalse();
+        // 3 invisible, 4 not supported
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u3000\u0009\u3164\u0FE1\u0FE2\u0FE3\u0FE4")).isFalse();
+
+        // 4 invisible, 1 not supported
+        assertThat(LauncherActivityInfo.isVisible("\u200F\u3000\u0009\u3164\u0FE1")).isFalse();
+        // 4 invisible, 2 not supported
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u200F\u3000\u0009\u3164\u0FE1\u0FE2")).isFalse();
+        // 4 invisible, 3 not supported
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u200F\u3000\u0009\u3164\u0FE1\u0FE2\u0FE3")).isFalse();
+        // 4 invisible, 4 not supported
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u200F\u3000\u0009\u3164\u0FE1\u0FE2\u0FE3\u0FE4")).isFalse();
+
+        // 1 not supported, 1 invisible,
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0009")).isFalse();
+        // 1 not supported, 2 invisible
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0009\u3164")).isFalse();
+        // 1 not supported, 3 invisible
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u3000\u0009\u3164")).isFalse();
+        // 1 not supported, 4 invisible
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u200F\u3000\u0009\u3164")).isFalse();
+    }
+
+    @Test
+    public void testIsVisible_invisibleAndNormalCharacter() {
+        // 1 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0009\uD83E\uDD36")).isTrue();
+        // 2 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u3164\uD83E\uDD36")).isTrue();
+        // 3 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u3000\u0009\u3164\uD83E\uDD36")).isFalse();
+        // 4 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u200F\u3000\u0009\u3164\uD83E\uDD36")).isFalse();
+    }
+
+    @Test
+    public void testIsVisible_notSupportedAndNormalCharacter() {
+        // 1 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\uD83E\uDD36")).isTrue();
+        // 2 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0FE2\uD83E\uDD36")).isTrue();
+        // 3 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0FE2\u0FE3\uD83E\uDD36")).isTrue();
+        // 4 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u0FE1\u0FE2\u0FE3\u0FE4\uD83E\uDD36")).isTrue();
+    }
+
+    @Test
+    public void testIsVisible_mixAllCharacter() {
+        // 1 invisible, 1 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u0FE1\uD83E\uDD36")).isTrue();
+        // 1 invisible, 1 not supported, 1 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u0FE1\u3164\uD83E\uDD36")).isTrue();
+        // 1 invisible, 1 not supported, 2 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u0009\u0FE1\u3000\u3164\uD83E\uDD36")).isTrue();
+        // 1 invisible, 1 not supported, 3 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u0009\u0FE1\u200F\u3000\u3164\uD83E\uDD36")).isTrue();
+
+        // 2 invisible, 1 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0009\u3164\u0FE1\uD83E\uDD36")).isTrue();
+        // 2 invisible, 2 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u0009\u3164\u0FE1\u0FE2\uD83E\uDD36")).isTrue();
+
+        // 3 invisible, 1 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u3000\u0009\u3164\u0FE1\uD83E\uDD36")).isFalse();
+        // 3 invisible, 2 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u3000\u0009\u3164\u0FE1\u0FE2\uD83E\uDD36")).isFalse();
+        // 3 invisible, 3 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u3000\u0009\u3164\u0FE1\u0FE2\u0FE3\uD83E\uDD36")).isFalse();
+
+        // 4 invisible, 1 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u200F\u3000\u0009\u3164\u0FE1\uD83E\uDD36")).isFalse();
+        // 4 invisible, 2 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u200F\u3000\u0009\u3164\u0FE1\u0FE2\uD83E\uDD36")).isFalse();
+        // 4 invisible, 3 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u200F\u3000\u0009\u3164\u0FE1\u0FE2\u0FE3\uD83E\uDD36")).isFalse();
+        // 4 invisible, 4 not supported, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u200F\u3000\u0009\u3164\u0FE1\u0FE2\u0FE3\u0FE4\uD83E\uDD36")).isFalse();
+
+        // 1 not supported, 1 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0009\uD83E\uDD36")).isTrue();
+        // 1 not supported, 2 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible("\u0FE1\u0009\u3164\uD83E\uDD36")).isTrue();
+        // 1 not supported, 3 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u0FE1\u3000\u0009\u3164\uD83E\uDD36")).isTrue();
+        // 1 not supported, 4 invisible, 1 surrogates
+        assertThat(LauncherActivityInfo.isVisible(
+                "\u0FE1\u200F\u3000\u0009\u3164\uD83E\uDD36")).isTrue();
+
     }
 }

@@ -115,6 +115,17 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPrimaryDisplayUnchanged_whenWindowingModeAlreadySet_NoFreeformSupport() {
+        mPrimaryDisplay.getDefaultTaskDisplayArea().setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+
+        mDisplayWindowSettings.applySettingsToDisplayLocked(mPrimaryDisplay);
+
+        assertEquals(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW,
+                mPrimaryDisplay.getDefaultTaskDisplayArea().getWindowingMode());
+    }
+
+    @Test
     public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_NoDesktopMode() {
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
 
@@ -233,6 +244,19 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mWm.clearForcedDisplaySize(mSecondaryDisplay.getDisplayId());
         assertEquals(mSecondaryDisplay.mInitialDisplayWidth, mSecondaryDisplay.mBaseDisplayWidth);
         assertEquals(mSecondaryDisplay.mInitialDisplayHeight, mSecondaryDisplay.mBaseDisplayHeight);
+
+        // Forced size can be cleared even if the initial display size is smaller than max width.
+        final int maxWidth = mSecondaryDisplay.mInitialDisplayWidth - 20;
+        mSecondaryDisplay.setMaxUiWidth(maxWidth);
+        assertEquals(maxWidth, mSecondaryDisplay.mBaseDisplayWidth);
+        mSecondaryDisplay.setForcedSize(maxWidth - 10, maxWidth + 10);
+        assertNotEquals(maxWidth, mSecondaryDisplay.mBaseDisplayHeight);
+        assertTrue(mSecondaryDisplay.mIsSizeForced);
+
+        mWm.clearForcedDisplaySize(mSecondaryDisplay.mDisplayId);
+        assertFalse(mSecondaryDisplay.mIsSizeForced);
+        assertEquals(maxWidth, mSecondaryDisplay.mBaseDisplayWidth);
+        assertEquals(0, mSettingsProvider.getSettings(originalInfo).mForcedWidth);
     }
 
     @Test
@@ -298,6 +322,16 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     public void testPublicDisplayDefaultToMoveToPrimary() {
         assertEquals(REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
                 mDisplayWindowSettings.getRemoveContentModeLocked(mSecondaryDisplay));
+
+        // Sets the remove-content-mode and make sure the mode is updated.
+        mDisplayWindowSettings.setRemoveContentModeLocked(mSecondaryDisplay,
+                REMOVE_CONTENT_MODE_DESTROY);
+        final int removeContentMode = mDisplayWindowSettings.getRemoveContentModeLocked(
+                mSecondaryDisplay);
+        assertEquals(REMOVE_CONTENT_MODE_DESTROY, removeContentMode);
+
+        doReturn(removeContentMode).when(mSecondaryDisplay).getRemoveContentMode();
+        assertTrue(mSecondaryDisplay.shouldDestroyContentOnRemove());
     }
 
     @Test

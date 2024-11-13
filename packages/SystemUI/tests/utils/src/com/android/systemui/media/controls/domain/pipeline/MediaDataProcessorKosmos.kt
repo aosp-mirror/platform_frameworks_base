@@ -18,7 +18,6 @@ package com.android.systemui.media.controls.domain.pipeline
 
 import android.app.smartspace.SmartspaceManager
 import android.content.applicationContext
-import android.os.fakeExecutorHandler
 import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.concurrency.fakeExecutor
@@ -27,8 +26,9 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.media.controls.data.repository.mediaDataRepository
+import com.android.systemui.media.controls.shared.mediaLogger
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaDataProvider
-import com.android.systemui.media.controls.util.mediaControllerFactory
+import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
 import com.android.systemui.media.controls.util.mediaUiEventLogger
 import com.android.systemui.plugins.activityStarter
@@ -45,8 +45,8 @@ val Kosmos.mediaDataProcessor by
             backgroundExecutor = fakeExecutor,
             uiExecutor = fakeExecutor,
             foregroundExecutor = fakeExecutor,
-            handler = fakeExecutorHandler,
-            mediaControllerFactory = mediaControllerFactory,
+            mainDispatcher = testDispatcher,
+            mediaControllerFactory = fakeMediaControllerFactory,
             broadcastDispatcher = broadcastDispatcher,
             dumpManager = dumpManager,
             activityStarter = activityStarter,
@@ -60,5 +60,7 @@ val Kosmos.mediaDataProcessor by
             smartspaceManager = SmartspaceManager(applicationContext),
             keyguardUpdateMonitor = keyguardUpdateMonitor,
             mediaDataRepository = mediaDataRepository,
+            mediaDataLoader = { mediaDataLoader },
+            mediaLogger = mediaLogger,
         )
     }

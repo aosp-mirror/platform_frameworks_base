@@ -17,12 +17,12 @@
 package com.android.compose.animation.scene.transformation
 
 import androidx.compose.ui.geometry.Offset
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.Scale
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /**
  * Scales the draw size of an element. Note this will only scale the draw inside of an element,
@@ -37,9 +37,9 @@ internal class DrawScale(
 
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: SceneKey,
+        content: ContentKey,
         element: Element,
-        sceneState: Element.SceneState,
+        stateInContent: Element.State,
         transition: TransitionState.Transition,
         value: Scale,
     ): Scale {

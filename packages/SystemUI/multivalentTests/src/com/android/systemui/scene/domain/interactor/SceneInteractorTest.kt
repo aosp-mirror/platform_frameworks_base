@@ -21,11 +21,14 @@ package com.android.systemui.scene.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.ObservableTransitionState.Transition.ShowOrHideOverlay
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.Idle
@@ -33,8 +36,10 @@ import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.overlayKeys
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
@@ -47,6 +52,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -61,9 +67,19 @@ class SceneInteractorTest : SysuiTestCase() {
 
     private val underTest = kosmos.sceneInteractor
 
+    @Before
+    fun setUp() {
+        // Init lazy Fixtures. Accessing them once makes sure that the singletons are initialized
+        // and therefore starts to collect StateFlows eagerly (when there are any).
+        kosmos.deviceUnlockedInteractor
+        kosmos.keyguardEnabledInteractor
+    }
+
+    // TODO(b/356596436): Add tests for showing, hiding, and replacing overlays after we've defined
+    //  them.
     @Test
-    fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys()).isEqualTo(kosmos.sceneKeys)
+    fun allContentKeys() {
+        assertThat(underTest.allContentKeys).isEqualTo(kosmos.sceneKeys + kosmos.overlayKeys)
     }
 
     @Test
@@ -242,7 +258,7 @@ class SceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun transitioningTo() =
+    fun transitioningTo_sceneChange() =
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
@@ -275,6 +291,51 @@ class SceneInteractorTest : SysuiTestCase() {
             assertThat(transitionTo).isEqualTo(Scenes.Shade)
 
             transitionState.value = ObservableTransitionState.Idle(Scenes.Shade)
+            assertThat(transitionTo).isNull()
+        }
+
+    @Test
+    fun transitioningTo_overlayChange() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(underTest.currentScene.value)
+                )
+            underTest.setTransitionState(transitionState)
+
+            val transitionTo by collectLastValue(underTest.transitioningTo)
+            assertThat(transitionTo).isNull()
+
+            underTest.showOverlay(Overlays.NotificationsShade, "reason")
+            assertThat(transitionTo).isNull()
+
+            val progress = MutableStateFlow(0f)
+            transitionState.value =
+                ShowOrHideOverlay(
+                    overlay = Overlays.NotificationsShade,
+                    fromContent = underTest.currentScene.value,
+                    toContent = Overlays.NotificationsShade,
+                    currentScene = underTest.currentScene.value,
+                    currentOverlays = underTest.currentOverlays,
+                    progress = progress,
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            assertThat(transitionTo).isEqualTo(Overlays.NotificationsShade)
+
+            progress.value = 0.5f
+            assertThat(transitionTo).isEqualTo(Overlays.NotificationsShade)
+
+            progress.value = 1f
+            assertThat(transitionTo).isEqualTo(Overlays.NotificationsShade)
+
+            transitionState.value =
+                ObservableTransitionState.Idle(
+                    currentScene = underTest.currentScene.value,
+                    currentOverlays = setOf(Overlays.NotificationsShade),
+                )
             assertThat(transitionTo).isNull()
         }
 
@@ -390,10 +451,10 @@ class SceneInteractorTest : SysuiTestCase() {
             underTest.setVisible(false, "reason")
             val isVisible by collectLastValue(underTest.isVisible)
             assertThat(isVisible).isFalse()
-            underTest.onRemoteUserInteractionStarted("reason")
+            underTest.onRemoteUserInputStarted("reason")
             assertThat(isVisible).isTrue()
 
-            underTest.onUserInteractionFinished()
+            underTest.onUserInputFinished()
 
             assertThat(isVisible).isFalse()
         }
@@ -449,5 +510,17 @@ class SceneInteractorTest : SysuiTestCase() {
             )
             progress.value = 0.9f
             assertThat(transitionValue).isEqualTo(0f)
+        }
+
+    @Test
+    fun changeScene_toGone_whenKeyguardDisabled_doesNotThrow() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
+
+            underTest.changeScene(Scenes.Gone, "")
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 }

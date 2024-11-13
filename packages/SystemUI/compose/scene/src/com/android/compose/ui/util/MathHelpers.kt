@@ -27,7 +27,7 @@ import com.android.compose.animation.scene.Scale
 fun lerp(start: IntSize, stop: IntSize, fraction: Float): IntSize {
     return IntSize(
         lerp(start.width, stop.width, fraction),
-        lerp(start.height, stop.height, fraction)
+        lerp(start.height, stop.height, fraction),
     )
 }
 
@@ -43,6 +43,6 @@ fun lerp(start: Scale, stop: Scale, fraction: Float): Scale {
     return Scale(
         lerp(start.scaleX, stop.scaleX, fraction),
         lerp(start.scaleY, stop.scaleY, fraction),
-        pivot
+        pivot,
     )
 }

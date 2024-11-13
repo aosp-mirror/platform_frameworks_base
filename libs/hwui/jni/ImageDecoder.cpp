@@ -162,8 +162,8 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream,
 
 static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
         jobject fileDescriptor, jlong length, jboolean preferAnimation, jobject source) {
-#ifndef __ANDROID__ // LayoutLib for Windows does not support F_DUPFD_CLOEXEC
-    return throw_exception(env, kSourceException, "Only supported on Android", nullptr, source);
+#ifdef _WIN32  // LayoutLib for Windows does not support F_DUPFD_CLOEXEC
+    return throw_exception(env, kSourceException, "Not supported on Windows", nullptr, source);
 #else
     int descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
 

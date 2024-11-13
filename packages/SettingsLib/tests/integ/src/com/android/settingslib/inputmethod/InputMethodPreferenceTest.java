@@ -24,9 +24,9 @@ import android.os.UserHandle;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -109,7 +109,7 @@ public class InputMethodPreferenceTest {
             final boolean systemIme,
             final String name) {
         return new InputMethodPreference(
-                InstrumentationRegistry.getTargetContext(),
+                InstrumentationRegistry.getInstrumentation().getTargetContext(),
                 createInputMethodInfo(systemIme, name),
                 title,
                 true /* isAllowedByOrganization */,
@@ -119,7 +119,8 @@ public class InputMethodPreferenceTest {
 
     private static InputMethodInfo createInputMethodInfo(
             final boolean systemIme, final String name) {
-        final Context targetContext = InstrumentationRegistry.getTargetContext();
+        final Context targetContext =
+                InstrumentationRegistry.getInstrumentation().getTargetContext();
         final Locale systemLocale = targetContext
                 .getResources()
                 .getConfiguration()

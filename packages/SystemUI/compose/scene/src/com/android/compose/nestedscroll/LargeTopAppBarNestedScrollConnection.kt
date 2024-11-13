@@ -57,7 +57,7 @@ fun LargeTopAppBarNestedScrollConnection(
             minHeight() < currentHeight && currentHeight < maxHeight()
         },
         canScrollOnFling = true,
-        onStart = { /* do nothing */},
+        onStart = { /* do nothing */ },
         onScroll = { offsetAvailable ->
             val currentHeight = height()
             val amountConsumed =

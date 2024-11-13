@@ -15,7 +15,9 @@
 
 package com.android.systemui.statusbar.notification.shared
 
+import android.app.PendingIntent
 import android.graphics.drawable.Icon
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
 
 /**
@@ -32,6 +34,8 @@ data class ActiveNotificationModel(
     val key: String,
     /** Notification group key associated with this entry. */
     val groupKey: String?,
+    /** When this notification was posted. */
+    val whenTime: Long,
     /** Is this entry in the ambient / minimized section (lowest priority)? */
     val isAmbient: Boolean,
     /**
@@ -56,16 +60,22 @@ data class ActiveNotificationModel(
     val shelfIcon: Icon?,
     /** Icon to display in the status bar. */
     val statusBarIcon: Icon?,
+    /** Icon to display in the status bar chip. */
+    val statusBarChipIconView: StatusBarIconView?,
     /** The notifying app's [packageName]'s uid. */
     val uid: Int,
     /** The notifying app's packageName. */
     val packageName: String,
+    /** The intent to execute if UI related to this notification is clicked. */
+    val contentIntent: PendingIntent?,
     /** A small per-notification ID, used for statsd logging. */
     val instanceId: Int?,
     /** If this notification is the group summary for a group of notifications. */
     val isGroupSummary: Boolean,
     /** Indicates in which section the notification is displayed in. @see [PriorityBucket]. */
     @PriorityBucket val bucket: Int,
+    /** The call type set on the notification. */
+    val callType: CallType,
 ) : ActiveNotificationEntryModel()
 
 /** Model for a group of notifications. */
@@ -74,3 +84,17 @@ data class ActiveNotificationGroupModel(
     val summary: ActiveNotificationModel,
     val children: List<ActiveNotificationModel>,
 ) : ActiveNotificationEntryModel()
+
+/** Specifies the call type set on the notification. For most notifications, will be [None]. */
+enum class CallType {
+    /** This notification isn't a call-type notification. */
+    None,
+    /** See [android.app.Notification.CallStyle.CALL_TYPE_INCOMING]. */
+    Incoming,
+    /** See [android.app.Notification.CallStyle.CALL_TYPE_ONGOING]. */
+    Ongoing,
+    /** See [android.app.Notification.CallStyle.CALL_TYPE_SCREENING]. */
+    Screening,
+    /** See [android.app.Notification.CallStyle.CALL_TYPE_UNKNOWN]. */
+    Unknown,
+}

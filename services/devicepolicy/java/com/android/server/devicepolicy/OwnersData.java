@@ -361,9 +361,7 @@ class OwnersData {
 
         @Override
         boolean shouldWrite() {
-            return Flags.alwaysPersistDo()
-                    || (mDeviceOwner != null) || (mSystemUpdatePolicy != null)
-                    || (mSystemUpdateInfo != null);
+            return true;
         }
 
         @Override
@@ -410,9 +408,8 @@ class OwnersData {
             out.startTag(null, TAG_POLICY_ENGINE_MIGRATION);
             out.attributeBoolean(null, ATTR_MIGRATED_TO_POLICY_ENGINE, mMigratedToPolicyEngine);
             out.attributeBoolean(null, ATTR_MIGRATED_POST_UPGRADE, mPoliciesMigratedPostUpdate);
-            if (Flags.securityLogV2Enabled()) {
-                out.attributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, mSecurityLoggingMigrated);
-            }
+            out.attributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, mSecurityLoggingMigrated);
+
             if (Flags.unmanagedModeMigration()) {
                 out.attributeBoolean(null, ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED,
                         mRequiredPasswordComplexityMigrated);
@@ -483,8 +480,8 @@ class OwnersData {
                             null, ATTR_MIGRATED_TO_POLICY_ENGINE, false);
                     mPoliciesMigratedPostUpdate = parser.getAttributeBoolean(
                             null, ATTR_MIGRATED_POST_UPGRADE, false);
-                    mSecurityLoggingMigrated = Flags.securityLogV2Enabled()
-                            && parser.getAttributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, false);
+                    mSecurityLoggingMigrated =
+                            parser.getAttributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, false);
                     mRequiredPasswordComplexityMigrated = Flags.unmanagedModeMigration()
                             && parser.getAttributeBoolean(null,
                                     ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED, false);

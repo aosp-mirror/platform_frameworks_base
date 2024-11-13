@@ -31,6 +31,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.Surface;
 
 import java.util.Collections;
@@ -55,9 +56,10 @@ public final class VirtualDisplayConfig implements Parcelable {
     private final String mUniqueId;
     private final int mDisplayIdToMirror;
     private final boolean mWindowManagerMirroringEnabled;
-    private ArraySet<String> mDisplayCategories = null;
+    private final ArraySet<String> mDisplayCategories;
     private final float mRequestedRefreshRate;
     private final boolean mIsHomeSupported;
+    private final DisplayCutout mDisplayCutout;
 
     private VirtualDisplayConfig(
             @NonNull String name,
@@ -71,7 +73,8 @@ public final class VirtualDisplayConfig implements Parcelable {
             boolean windowManagerMirroringEnabled,
             @NonNull ArraySet<String> displayCategories,
             float requestedRefreshRate,
-            boolean isHomeSupported) {
+            boolean isHomeSupported,
+            @Nullable DisplayCutout displayCutout) {
         mName = name;
         mWidth = width;
         mHeight = height;
@@ -84,6 +87,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         mDisplayCategories = displayCategories;
         mRequestedRefreshRate = requestedRefreshRate;
         mIsHomeSupported = isHomeSupported;
+        mDisplayCutout = displayCutout;
     }
 
     /**
@@ -132,6 +136,21 @@ public final class VirtualDisplayConfig implements Parcelable {
     @Nullable
     public Surface getSurface() {
         return mSurface;
+    }
+
+    /**
+     * Returns the cutout of this display.
+     *
+     * @return the cutout of the display or {@code null} if none is specified.
+     *
+     * @see Builder#setDisplayCutout
+     * @hide
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_VIRTUAL_DISPLAY_INSETS)
+    @SystemApi
+    @Nullable
+    public DisplayCutout getDisplayCutout() {
+        return mDisplayCutout;
     }
 
     /**
@@ -207,6 +226,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         dest.writeArraySet(mDisplayCategories);
         dest.writeFloat(mRequestedRefreshRate);
         dest.writeBoolean(mIsHomeSupported);
+        DisplayCutout.ParcelableWrapper.writeCutoutToParcel(mDisplayCutout, dest, flags);
     }
 
     @Override
@@ -232,7 +252,8 @@ public final class VirtualDisplayConfig implements Parcelable {
                 && mWindowManagerMirroringEnabled == that.mWindowManagerMirroringEnabled
                 && Objects.equals(mDisplayCategories, that.mDisplayCategories)
                 && mRequestedRefreshRate == that.mRequestedRefreshRate
-                && mIsHomeSupported == that.mIsHomeSupported;
+                && mIsHomeSupported == that.mIsHomeSupported
+                && Objects.equals(mDisplayCutout, that.mDisplayCutout);
     }
 
     @Override
@@ -240,7 +261,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         int hashCode = Objects.hash(
                 mName, mWidth, mHeight, mDensityDpi, mFlags, mSurface, mUniqueId,
                 mDisplayIdToMirror, mWindowManagerMirroringEnabled, mDisplayCategories,
-                mRequestedRefreshRate, mIsHomeSupported);
+                mRequestedRefreshRate, mIsHomeSupported, mDisplayCutout);
         return hashCode;
     }
 
@@ -260,6 +281,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                 + " mDisplayCategories=" + mDisplayCategories
                 + " mRequestedRefreshRate=" + mRequestedRefreshRate
                 + " mIsHomeSupported=" + mIsHomeSupported
+                + " mDisplayCutout=" + mDisplayCutout
                 + ")";
     }
 
@@ -276,6 +298,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         mDisplayCategories = (ArraySet<String>) in.readArraySet(null);
         mRequestedRefreshRate = in.readFloat();
         mIsHomeSupported = in.readBoolean();
+        mDisplayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(in);
     }
 
     @NonNull
@@ -308,6 +331,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         private ArraySet<String> mDisplayCategories = new ArraySet<>();
         private float mRequestedRefreshRate = 0.0f;
         private boolean mIsHomeSupported = false;
+        private DisplayCutout mDisplayCutout = null;
 
         /**
          * Creates a new Builder.
@@ -469,6 +493,19 @@ public final class VirtualDisplayConfig implements Parcelable {
         }
 
         /**
+         * Sets the cutout of this display.
+         *
+         * @hide
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_VIRTUAL_DISPLAY_INSETS)
+        @SystemApi
+        @NonNull
+        public Builder setDisplayCutout(@Nullable DisplayCutout displayCutout) {
+            mDisplayCutout = displayCutout;
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDisplayConfig} instance.
          */
         @NonNull
@@ -485,7 +522,8 @@ public final class VirtualDisplayConfig implements Parcelable {
                     mWindowManagerMirroringEnabled,
                     mDisplayCategories,
                     mRequestedRefreshRate,
-                    mIsHomeSupported);
+                    mIsHomeSupported,
+                    mDisplayCutout);
         }
     }
 }

@@ -22,10 +22,10 @@ import static junit.framework.Assert.assertTrue;
 
 import android.app.RemoteInput;
 import android.provider.DeviceConfig;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -39,7 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class SmartReplyConstantsTest extends SysuiTestCase {

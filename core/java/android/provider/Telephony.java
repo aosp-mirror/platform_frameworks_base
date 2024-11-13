@@ -4940,7 +4940,7 @@ public final class Telephony {
          *
          * @hide
          */
-        public static final String COLUMN_IS_NTN = "is_ntn";
+        public static final String COLUMN_IS_ONLY_NTN = "is_only_ntn";
 
         /**
          * TelephonyProvider column name for transferred status
@@ -4975,6 +4975,25 @@ public final class Telephony {
          */
         public static final String COLUMN_SATELLITE_ENTITLEMENT_PLMNS =
                 "satellite_entitlement_plmns";
+
+        /**
+         * TelephonyProvider column name to indicate the satellite ESOS supported. The value of this
+         * column is set based on {@link CarrierConfigManager#KEY_SATELLITE_ESOS_SUPPORTED_BOOL}.
+         * By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_SATELLITE_ESOS_SUPPORTED = "satellite_esos_supported";
+
+        /**
+         * TelephonyProvider column name for satellite provisioned status. The value of this
+         * column is set based on whether carrier roaming or OEM-enabled NB-IOT satellite service is
+         * provisioned or not. By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM =
+                "is_satellite_provisioned_for_non_ip_datagram";
 
         /** All columns in {@link SimInfo} table. */
         private static final List<String> ALL_COLUMNS = List.of(
@@ -5047,11 +5066,13 @@ public final class Telephony {
                 COLUMN_USER_HANDLE,
                 COLUMN_SATELLITE_ENABLED,
                 COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER,
-                COLUMN_IS_NTN,
+                COLUMN_IS_ONLY_NTN,
                 COLUMN_SERVICE_CAPABILITIES,
                 COLUMN_TRANSFER_STATUS,
                 COLUMN_SATELLITE_ENTITLEMENT_STATUS,
-                COLUMN_SATELLITE_ENTITLEMENT_PLMNS
+                COLUMN_SATELLITE_ENTITLEMENT_PLMNS,
+                COLUMN_SATELLITE_ESOS_SUPPORTED,
+                COLUMN_IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM
         );
 
         /**

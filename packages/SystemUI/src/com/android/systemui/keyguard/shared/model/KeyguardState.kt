@@ -15,7 +15,9 @@
  */
 package com.android.systemui.keyguard.shared.model
 
+import android.util.Log
 import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 
 /** List of all possible states to transition to/from */
@@ -59,6 +61,11 @@ enum class KeyguardState {
      * The security screen prompt UI, containing PIN, Password, Pattern for the user to verify their
      * credentials.
      */
+    @Deprecated(
+        "This state won't exist anymore when scene container gets enabled. If you are " +
+            "writing prod code today, make sure to either use flag aware APIs in " +
+            "[KeyguardTransitionInteractor] or flag appropriately with [SceneContainerFlag]."
+    )
     PRIMARY_BOUNCER,
     /**
      * Device is actively displaying keyguard UI and is not in low-power mode. Device may be
@@ -70,12 +77,22 @@ enum class KeyguardState {
      * hub UI. From this state, the user can swipe from the left edge to go back to the lock screen
      * or dream, as well as swipe down for the notifications and up for the bouncer.
      */
+    @Deprecated(
+        "This state won't exist anymore when scene container gets enabled. If you are " +
+            "writing prod code today, make sure to either use flag aware APIs in " +
+            "[KeyguardTransitionInteractor] or flag appropriately with [SceneContainerFlag]."
+    )
     GLANCEABLE_HUB,
     /**
      * Keyguard is no longer visible. In most cases the user has just authenticated and keyguard is
      * being removed, but there are other cases where the user is swiping away keyguard, such as
      * with SWIPE security method or face unlock without bypass.
      */
+    @Deprecated(
+        "This state won't exist anymore when scene container gets enabled. If you are " +
+            "writing prod code today, make sure to either use flag aware APIs in " +
+            "[KeyguardTransitionInteractor] or flag appropriately with [SceneContainerFlag]."
+    )
     GONE,
     /**
      * Only used in scene framework. This means we are currently on any scene framework scene that
@@ -86,6 +103,22 @@ enum class KeyguardState {
     UNDEFINED,
     /** An activity is displaying over the keyguard. */
     OCCLUDED;
+
+    fun checkValidState() {
+        val isStateValid: Boolean
+        val isEnabled: String
+        if (SceneContainerFlag.isEnabled) {
+            isStateValid = this === mapToSceneContainerState()
+            isEnabled = "enabled"
+        } else {
+            isStateValid = this !== UNDEFINED
+            isEnabled = "disabled"
+        }
+
+        if (!isStateValid) {
+            Log.e("KeyguardState", "$this is not a valid state when scene container is $isEnabled")
+        }
+    }
 
     fun mapToSceneContainerState(): KeyguardState {
         return when (this) {
@@ -123,22 +156,12 @@ enum class KeyguardState {
 
     companion object {
 
-        /** Whether the lockscreen is visible when we're FINISHED in the given state. */
-        fun lockscreenVisibleInState(state: KeyguardState): Boolean {
-            return state != GONE
-        }
-
-        /** Whether either of the bouncers are visible when we're FINISHED in the given state. */
-        @JvmStatic
-        fun isBouncerState(state: KeyguardState): Boolean {
-            return state == PRIMARY_BOUNCER || state == ALTERNATE_BOUNCER
-        }
-
         /**
          * Whether the device is awake ([PowerInteractor.isAwake]) when we're FINISHED in the given
          * keyguard state.
          */
         fun deviceIsAwakeInState(state: KeyguardState): Boolean {
+            state.checkValidState()
             return when (state) {
                 OFF -> false
                 DOZING -> false

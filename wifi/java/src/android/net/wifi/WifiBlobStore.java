@@ -16,8 +16,11 @@
 
 package android.net.wifi;
 
+import android.os.Build;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.security.legacykeystore.ILegacyKeystore;
+import android.util.Log;
 
 import com.android.internal.net.ConnectivityBlobStore;
 
@@ -26,11 +29,42 @@ import com.android.internal.net.ConnectivityBlobStore;
  * @hide
  */
 public class WifiBlobStore extends ConnectivityBlobStore {
+    private static final String TAG = "WifiBlobStore";
     private static final String DB_NAME = "WifiBlobStore.db";
     private static final String LEGACY_KEYSTORE_SERVICE_NAME = "android.security.legacykeystore";
+    private static final boolean sIsVendorApiLevelGreaterThanT = isVendorApiLevelGreaterThanT();
     private static WifiBlobStore sInstance;
     private WifiBlobStore() {
         super(DB_NAME);
+    }
+
+    private static boolean isVendorApiLevelGreaterThanT() {
+        int androidT = Build.VERSION_CODES.TIRAMISU; // redefine to avoid errorprone build issue
+        String[] vendorApiLevelProps = {
+                "ro.board.api_level", "ro.board.first_api_level", "ro.vndk.version"};
+        for (String propertyName : vendorApiLevelProps) {
+            int apiLevel = SystemProperties.getInt(propertyName, -1);
+            if (apiLevel != -1) {
+                Log.i(TAG, "Retrieved API level property, value=" + apiLevel);
+                return apiLevel > androidT;
+            }
+        }
+        // If none of the properties are defined, we are using the current API level (> V)
+        Log.i(TAG, "No API level properties are defined");
+        return true;
+    }
+
+    /**
+     * Check whether supplicant can access values stored in WifiBlobstore.
+     *
+     * NonStandardCertCallback was added in Android U, allowing supplicant to access the
+     * WifiKeystore APIs, which access WifiBlobstore. Previously, supplicant used
+     * WifiKeystoreHalConnector to access values stored in Legacy Keystore.
+     *
+     * @hide
+     */
+    public static boolean supplicantCanAccessBlobstore() {
+        return sIsVendorApiLevelGreaterThanT;
     }
 
     /** Returns an instance of WifiBlobStore. */

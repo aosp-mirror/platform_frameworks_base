@@ -22,6 +22,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 import android.content.res.Resources.ThemeKey;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.ArrayMap;
 import android.util.LongSparseArray;
 
@@ -32,6 +33,7 @@ import java.lang.ref.WeakReference;
  *
  * @param <T> type of data to cache
  */
+@RavenwoodKeepWholeClass
 abstract class ThemedResourceCache<T> {
     public static final int UNDEFINED_GENERATION = -1;
     @UnsupportedAppUsage

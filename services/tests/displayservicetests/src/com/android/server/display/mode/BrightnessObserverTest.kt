@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.server.display.DisplayDeviceConfig
 import com.android.server.display.config.RefreshRateData
 import com.android.server.display.config.SupportedModeData
+import com.android.server.display.config.createRefreshRateData
 import com.android.server.display.feature.DisplayManagerFlags
 import com.android.server.display.mode.DisplayModeDirector.DisplayDeviceConfigProvider
 import com.android.server.testutils.TestHandler

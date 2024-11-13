@@ -19,6 +19,7 @@ package com.android.systemui.qrcodescanner.dagger
 import com.android.systemui.Flags
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.QRCodeScannerTile
 import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
@@ -51,7 +52,7 @@ interface QRCodeScannerModule {
     @IntoMap
     @StringKey(QR_CODE_SCANNER_TILE_SPEC)
     fun provideQrCodeScannerAvailabilityInteractor(
-            impl: QRCodeScannerTileDataInteractor
+        impl: QRCodeScannerTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     companion object {
@@ -69,6 +70,7 @@ interface QRCodeScannerModule {
                         labelRes = R.string.qr_code_scanner_title,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.UTILITIES,
             )
 
         /** Inject QR Code Scanner Tile into tileViewModelMap in QSModule. */

@@ -29,6 +29,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.vibrator.VibrationSession.Status;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -127,15 +128,20 @@ final class VibrationThread extends Thread {
      *  before the release callback.
      */
     boolean runVibrationOnVibrationThread(VibrationStepConductor conductor) {
-        synchronized (mLock) {
-            if (mRequestedActiveConductor != null) {
-                Slog.wtf(TAG, "Attempt to start vibration when one already running");
-                return false;
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runVibrationOnVibrationThread");
+        try {
+            synchronized (mLock) {
+                if (mRequestedActiveConductor != null) {
+                    Slog.wtf(TAG, "Attempt to start vibration when one already running");
+                    return false;
+                }
+                mRequestedActiveConductor = conductor;
+                mLock.notifyAll();
             }
-            mRequestedActiveConductor = conductor;
-            mLock.notifyAll();
+            return true;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
-        return true;
     }
 
     @Override
@@ -240,7 +246,7 @@ final class VibrationThread extends Thread {
                 runCurrentVibrationWithWakeLockAndDeathLink();
             } finally {
                 clientVibrationCompleteIfNotAlready(
-                        new Vibration.EndInfo(Vibration.Status.FINISHED_UNEXPECTED));
+                        new Vibration.EndInfo(Status.FINISHED_UNEXPECTED));
             }
         } finally {
             mWakeLock.release();
@@ -259,7 +265,7 @@ final class VibrationThread extends Thread {
         } catch (RemoteException e) {
             Slog.e(TAG, "Error linking vibration to token death", e);
             clientVibrationCompleteIfNotAlready(
-                    new Vibration.EndInfo(Vibration.Status.IGNORED_ERROR_TOKEN));
+                    new Vibration.EndInfo(Status.IGNORED_ERROR_TOKEN));
             return;
         }
         // Ensure that the unlink always occurs now.

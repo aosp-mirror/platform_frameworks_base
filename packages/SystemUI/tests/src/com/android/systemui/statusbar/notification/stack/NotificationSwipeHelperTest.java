@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import android.animation.Animator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.os.Handler;
+import android.platform.test.annotations.EnableFlags;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -52,6 +53,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -672,14 +674,29 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     }
 
     @Test
-    public void testForceResetSwipeStateDoesNothingIfTranslationIsZero() {
+    @EnableFlags(NotificationContentAlphaOptimization.FLAG_NAME)
+    public void testForceResetSwipeStateDoesNothingIfTranslationIsZeroAndAlphaIsOne() {
         doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
         doReturn(0f).when(mNotificationRow).getTranslationX();
+        doReturn(1f).when(mNotificationRow).getAlpha();
 
         mSwipeHelper.forceResetSwipeState(mNotificationRow);
 
         verify(mNotificationRow).getTranslationX();
+        verify(mNotificationRow).getAlpha();
         verifyNoMoreInteractions(mNotificationRow);
+    }
+
+    @Test
+    @EnableFlags(NotificationContentAlphaOptimization.FLAG_NAME)
+    public void testForceResetSwipeStateResetsAlphaIfTranslationIsZeroAndAlphaNotOne() {
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+        doReturn(0f).when(mNotificationRow).getTranslationX();
+        doReturn(0.5f).when(mNotificationRow).getAlpha();
+
+        mSwipeHelper.forceResetSwipeState(mNotificationRow);
+
+        verify(mNotificationRow).setContentAlpha(eq(1f));
     }
 
     @Test

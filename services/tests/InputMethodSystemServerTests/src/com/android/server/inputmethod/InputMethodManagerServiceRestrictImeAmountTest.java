@@ -122,8 +122,8 @@ public class InputMethodManagerServiceRestrictImeAmountTest extends
 
     private List<InputMethodInfo> filterInputMethodServices(List<ResolveInfo> resolveInfoList,
             List<String> enabledComponents) {
-        final InputMethodMap methodMap = InputMethodManagerService.filterInputMethodServices(
-                AdditionalSubtypeMap.EMPTY_MAP, enabledComponents, mContext, resolveInfoList);
+        final var methodMap = InputMethodManagerService.filterInputMethodServices(
+                enabledComponents, mContext, resolveInfoList);
         return methodMap.values();
     }
 

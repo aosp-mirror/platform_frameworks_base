@@ -2407,7 +2407,7 @@ public class LauncherAppsService extends SystemService {
                 final int callbackUserId = callbackUser.getIdentifier();
                 final int shortcutUserId = shortcutUser.getIdentifier();
 
-                if (shortcutUser == callbackUser) return true;
+                if ((shortcutUser.equals(callbackUser))) return true;
                 return mUserManagerInternal.isProfileAccessible(callbackUserId, shortcutUserId,
                         null, false);
             }
@@ -2441,16 +2441,28 @@ public class LauncherAppsService extends SystemService {
                                 final BroadcastCookie cookie =
                                         (BroadcastCookie) mListeners.getBroadcastCookie(i);
                                 if (!isEnabledProfileOf(cookie, user, "onPackageRemoved")) {
+                                    // b/350144057
+                                    Slog.d(TAG, "onPackageRemoved: Skipping - profile not enabled"
+                                            + " or not accessible for user=" + user
+                                            + ", packageName=" + packageName);
                                     continue;
                                 }
                                 if (!isCallingAppIdAllowed(appIdAllowList, UserHandle.getAppId(
                                         cookie.callingUid))) {
+                                    // b/350144057
+                                    Slog.d(TAG, "onPackageRemoved: Skipping - appId not allowed"
+                                            + " for user=" + user
+                                            + ", packageName=" + packageName);
                                     continue;
                                 }
                                 try {
+                                    // b/350144057
+                                    Slog.d(TAG, "onPackageRemoved: triggering onPackageRemoved"
+                                            + " for user=" + user
+                                            + ", packageName=" + packageName);
                                     listener.onPackageRemoved(user, packageName);
                                 } catch (RemoteException re) {
-                                    Slog.d(TAG, "Callback failed ", re);
+                                    Slog.d(TAG, "onPackageRemoved: Callback failed ", re);
                                 }
                             }
                         } finally {
@@ -2480,15 +2492,27 @@ public class LauncherAppsService extends SystemService {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
                         if (!isEnabledProfileOf(cookie, user, "onPackageAdded")) {
+                            // b/350144057
+                            Slog.d(TAG, "onPackageAdded: Skipping - profile not enabled"
+                                    + " or not accessible for user=" + user
+                                    + ", packageName=" + packageName);
                             continue;
                         }
                         if (!isPackageVisibleToListener(packageName, cookie, user)) {
+                            // b/350144057
+                            Slog.d(TAG, "onPackageAdded: Skipping - package filtered"
+                                    + " for user=" + user
+                                    + ", packageName=" + packageName);
                             continue;
                         }
                         try {
+                            // b/350144057
+                            Slog.d(TAG, "onPackageAdded: triggering onPackageAdded"
+                                    + " for user=" + user
+                                    + ", packageName=" + packageName);
                             listener.onPackageAdded(user, packageName);
                         } catch (RemoteException re) {
-                            Slog.d(TAG, "Callback failed ", re);
+                            Slog.d(TAG, "onPackageAdded: Callback failed ", re);
                         }
                     }
                 } finally {
@@ -2522,7 +2546,7 @@ public class LauncherAppsService extends SystemService {
                         try {
                             listener.onPackageChanged(user, packageName);
                         } catch (RemoteException re) {
-                            Slog.d(TAG, "Callback failed ", re);
+                            Slog.d(TAG, "onPackageChanged: Callback failed ", re);
                         }
                     }
                 } finally {

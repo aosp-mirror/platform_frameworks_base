@@ -1051,6 +1051,11 @@ public class BiometricSchedulerTest {
         public String getAttributionTag() {
             return null;
         }
+
+        @Override
+        public boolean isMandatoryBiometrics() {
+            return false;
+        }
     }
 
     private static class TestAuthenticationClient
@@ -1176,7 +1181,7 @@ public class BiometricSchedulerTest {
                 @NonNull Supplier<Object> lazyDaemon, int cookie, int protoEnum) {
             super(context, lazyDaemon, token /* token */, null /* listener */, 0 /* userId */, TAG,
                     cookie, TEST_SENSOR_ID, mock(BiometricLogger.class),
-                    mock(BiometricContext.class));
+                    mock(BiometricContext.class), false /* isMandatoryBiometrics */);
             mProtoEnum = protoEnum;
         }
 
@@ -1294,6 +1299,11 @@ public class BiometricSchedulerTest {
         protected void onAddUnknownTemplate(int userId,
                 @NonNull BiometricAuthenticator.Identifier identifier) {
             mFingerprints.add((Fingerprint) identifier);
+        }
+
+        @Override
+        protected int getModality() {
+            return 0;
         }
 
         public List<Fingerprint> getFingerprints() {

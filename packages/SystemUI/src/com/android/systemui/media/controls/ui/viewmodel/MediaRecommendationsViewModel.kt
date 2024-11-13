@@ -18,17 +18,10 @@ package com.android.systemui.media.controls.ui.viewmodel
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.Icon
-import android.graphics.drawable.LayerDrawable
 import android.os.Process
 import android.util.Log
-import androidx.appcompat.content.res.AppCompatResources
 import com.android.internal.logging.InstanceId
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
@@ -37,16 +30,12 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaRecommendationsInteractor
 import com.android.systemui.media.controls.shared.model.MediaRecModel
 import com.android.systemui.media.controls.shared.model.MediaRecommendationsModel
-import com.android.systemui.media.controls.ui.animation.accentPrimaryFromScheme
-import com.android.systemui.media.controls.ui.animation.surfaceFromScheme
-import com.android.systemui.media.controls.ui.animation.textPrimaryFromScheme
-import com.android.systemui.media.controls.ui.animation.textSecondaryFromScheme
+import com.android.systemui.media.controls.shared.model.NUM_REQUIRED_RECOMMENDATIONS
 import com.android.systemui.media.controls.ui.controller.MediaViewController.Companion.GUTS_ANIMATION_DURATION
-import com.android.systemui.media.controls.ui.util.MediaArtworkHelper
 import com.android.systemui.media.controls.util.MediaDataUtils
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.media.controls.util.MediaUiEventLogger
-import com.android.systemui.monet.ColorScheme
-import com.android.systemui.monet.Style
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -56,7 +45,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 
 /** Models UI state and handles user input for media recommendations */
 @SysUISingleton
@@ -78,6 +66,8 @@ constructor(
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 
+    private var location = -1
+
     /**
      * Called whenever the recommendation has been expired or removed by the user. This method
      * removes the recommendation card entirely from the carousel.
@@ -87,11 +77,16 @@ constructor(
         uid: Int,
         packageName: String,
         dismissIntent: Intent?,
-        instanceId: InstanceId?
+        instanceId: InstanceId?,
     ) {
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_DISMISS_EVENT).
         logger.logLongPressDismiss(uid, packageName, instanceId)
-        interactor.removeMediaRecommendations(key, dismissIntent, GUTS_DISMISS_DELAY_MS_DURATION)
+        interactor.removeMediaRecommendations(
+            key,
+            dismissIntent,
+            GUTS_DISMISS_DELAY_MS_DURATION,
+            SMARTSPACE_CARD_DISMISS_EVENT,
+            location,
+        )
     }
 
     private fun onClicked(
@@ -99,7 +94,7 @@ constructor(
         intent: Intent?,
         packageName: String,
         instanceId: InstanceId?,
-        index: Int
+        index: Int,
     ) {
         if (intent == null || intent.extras == null) {
             Log.e(TAG, "No tap action can be set up")
@@ -111,12 +106,18 @@ constructor(
         } else {
             logger.logRecommendationItemTap(packageName, instanceId, index)
         }
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT).
 
         // set the package name of the player added by recommendation once the media is loaded.
         interactor.switchToMediaControl(packageName)
 
-        interactor.startClickIntent(expandable, intent)
+        interactor.startClickIntent(
+            expandable,
+            intent,
+            SMARTSPACE_CARD_CLICK_EVENT,
+            location,
+            index,
+            NUM_REQUIRED_RECOMMENDATIONS,
+        )
     }
 
     private suspend fun toRecsViewModel(model: MediaRecommendationsModel): MediaRecsCardViewModel? {
@@ -129,22 +130,7 @@ constructor(
             return null
         }
 
-        val scheme =
-            MediaArtworkHelper.getColorScheme(applicationContext, model.packageName, TAG)
-                ?: return null
-
-        // Capture width & height from views in foreground for artwork scaling in background
-        val width =
-            applicationContext.resources.getDimensionPixelSize(R.dimen.qs_media_rec_album_width)
-        val height =
-            applicationContext.resources.getDimensionPixelSize(
-                R.dimen.qs_media_rec_album_height_expanded
-            )
-
-        val appIcon = applicationContext.packageManager.getApplicationIcon(model.packageName)
-        val textPrimaryColor = textPrimaryFromScheme(scheme)
-        val textSecondaryColor = textSecondaryFromScheme(scheme)
-        val backgroundColor = surfaceFromScheme(scheme)
+        val appIcon = getIconFromApp(model.packageName) ?: return null
 
         var areTitlesVisible = false
         var areSubtitlesVisible = false
@@ -157,17 +143,9 @@ constructor(
                     contentDescription =
                         setUpMediaRecContentDescription(mediaRecModel, model.appName),
                     title = mediaRecModel.title ?: "",
-                    titleColor = textPrimaryColor,
                     subtitle = mediaRecModel.subtitle ?: "",
-                    subtitleColor = textSecondaryColor,
                     progress = (progress * 100).toInt(),
-                    progressColor = textPrimaryColor,
-                    albumIcon =
-                        getRecCoverBackground(
-                            mediaRecModel.icon,
-                            width,
-                            height,
-                        ),
+                    albumIcon = mediaRecModel.icon,
                     appIcon = appIcon,
                     onClicked = { expandable, index ->
                         onClicked(
@@ -177,7 +155,7 @@ constructor(
                             model.instanceId,
                             index,
                         )
-                    }
+                    },
                 )
             }
         // Subtitles should only be visible if titles are visible.
@@ -188,21 +166,19 @@ constructor(
                 if (gutsVisible) {
                     applicationContext.getString(
                         R.string.controls_media_close_session,
-                        model.appName
+                        model.appName,
                     )
                 } else {
                     applicationContext.getString(R.string.controls_media_smartspace_rec_header)
                 }
             },
-            cardColor = backgroundColor,
-            cardTitleColor = textPrimaryColor,
             onClicked = { expandable ->
                 onClicked(
                     expandable,
                     model.dismissIntent,
                     model.packageName,
                     model.instanceId,
-                    index = -1
+                    index = -1,
                 )
             },
             onLongClicked = {
@@ -211,27 +187,22 @@ constructor(
             mediaRecs = mediaRecs,
             areTitlesVisible = areTitlesVisible,
             areSubtitlesVisible = areSubtitlesVisible,
-            gutsMenu = toGutsViewModel(model, scheme),
+            gutsMenu = toGutsViewModel(model),
+            onLocationChanged = { location = it },
         )
     }
 
-    private fun toGutsViewModel(
-        model: MediaRecommendationsModel,
-        scheme: ColorScheme
-    ): GutsViewModel {
+    private fun toGutsViewModel(model: MediaRecommendationsModel): GutsViewModel {
         return GutsViewModel(
             gutsText =
                 applicationContext.getString(R.string.controls_media_close_session, model.appName),
-            textPrimaryColor = textPrimaryFromScheme(scheme),
-            accentPrimaryColor = accentPrimaryFromScheme(scheme),
-            surfaceColor = surfaceFromScheme(scheme),
             onDismissClicked = {
                 onMediaRecommendationsDismissed(
                     model.key,
                     model.uid,
                     model.packageName,
                     model.dismissIntent,
-                    model.instanceId
+                    model.instanceId,
                 )
             },
             cancelTextBackground =
@@ -243,57 +214,9 @@ constructor(
         )
     }
 
-    /** Returns the recommendation album cover of [width]x[height] size. */
-    private suspend fun getRecCoverBackground(icon: Icon?, width: Int, height: Int): Drawable =
-        withContext(backgroundDispatcher) {
-            return@withContext MediaArtworkHelper.getWallpaperColor(
-                    applicationContext,
-                    backgroundDispatcher,
-                    icon,
-                    TAG,
-                )
-                ?.let { wallpaperColors ->
-                    addGradientToRecommendationAlbum(
-                        icon!!,
-                        ColorScheme(wallpaperColors, true, Style.CONTENT),
-                        width,
-                        height
-                    )
-                }
-                ?: ColorDrawable(Color.TRANSPARENT)
-        }
-
-    private fun addGradientToRecommendationAlbum(
-        artworkIcon: Icon,
-        mutableColorScheme: ColorScheme,
-        width: Int,
-        height: Int
-    ): LayerDrawable {
-        // First try scaling rec card using bitmap drawable.
-        // If returns null, set drawable bounds.
-        val albumArt =
-            getScaledRecommendationCover(artworkIcon, width, height)
-                ?: MediaArtworkHelper.getScaledBackground(
-                    applicationContext,
-                    artworkIcon,
-                    width,
-                    height
-                )
-        val gradient =
-            AppCompatResources.getDrawable(applicationContext, R.drawable.qs_media_rec_scrim)
-                ?.mutate() as GradientDrawable
-        return MediaArtworkHelper.setUpGradientColorOnDrawable(
-            albumArt,
-            gradient,
-            mutableColorScheme,
-            MEDIA_REC_SCRIM_START_ALPHA,
-            MEDIA_REC_SCRIM_END_ALPHA
-        )
-    }
-
     private fun setUpMediaRecContentDescription(
         mediaRec: MediaRecModel,
-        appName: CharSequence?
+        appName: CharSequence?,
     ): CharSequence {
         // Set up the accessibility label for the media item.
         val artistName = mediaRec.extras?.getString(KEY_SMARTSPACE_ARTIST_NAME, "")
@@ -301,35 +224,23 @@ constructor(
             applicationContext.getString(
                 R.string.controls_media_smartspace_rec_item_no_artist_description,
                 mediaRec.title,
-                appName
+                appName,
             )
         } else {
             applicationContext.getString(
                 R.string.controls_media_smartspace_rec_item_description,
                 mediaRec.title,
                 artistName,
-                appName
+                appName,
             )
         }
     }
 
-    /** Returns a [Drawable] of a given [artworkIcon] scaled to [width]x[height] size, . */
-    private fun getScaledRecommendationCover(
-        artworkIcon: Icon,
-        width: Int,
-        height: Int
-    ): Drawable? {
-        check(width > 0) { "Width must be a positive number but was $width" }
-        check(height > 0) { "Height must be a positive number but was $height" }
-
-        return if (
-            artworkIcon.type == Icon.TYPE_BITMAP || artworkIcon.type == Icon.TYPE_ADAPTIVE_BITMAP
-        ) {
-            artworkIcon.bitmap?.let {
-                val bitmap = Bitmap.createScaledBitmap(it, width, height, false)
-                BitmapDrawable(applicationContext.resources, bitmap)
-            }
-        } else {
+    private fun getIconFromApp(packageName: String): Drawable? {
+        return try {
+            applicationContext.packageManager.getApplicationIcon(packageName)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Cannot find icon for package $packageName", e)
             null
         }
     }
@@ -337,8 +248,6 @@ constructor(
     companion object {
         private const val TAG = "MediaRecommendationsViewModel"
         private const val KEY_SMARTSPACE_ARTIST_NAME = "artist_name"
-        private const val MEDIA_REC_SCRIM_START_ALPHA = 0.15f
-        private const val MEDIA_REC_SCRIM_END_ALPHA = 1.0f
         /**
          * Delay duration is based on [GUTS_ANIMATION_DURATION], it should have 100 ms increase in
          * order to let the animation end.

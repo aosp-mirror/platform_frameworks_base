@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -39,6 +40,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.util.ArrayMap;
@@ -59,7 +61,8 @@ public class TransitionUtil {
     public static boolean isOpeningType(@WindowManager.TransitionType int type) {
         return type == TRANSIT_OPEN
                 || type == TRANSIT_TO_FRONT
-                || type == TRANSIT_KEYGUARD_GOING_AWAY;
+                || type == TRANSIT_KEYGUARD_GOING_AWAY
+                || type == TRANSIT_PREPARE_BACK_NAVIGATION;
     }
 
     /** @return true if the transition was triggered by closing something vs opening something */
@@ -334,6 +337,52 @@ public class TransitionUtil {
                 (change.getFlags() & TransitionInfo.FLAG_WILL_IME_SHOWN) != 0);
         target.setRotationChange(change.getEndRotation() - change.getStartRotation());
         target.backgroundColor = change.getBackgroundColor();
+        return target;
+    }
+
+    /**
+     * Creates a new RemoteAnimationTarget from the provided change and leash
+     */
+    public static RemoteAnimationTarget newSyntheticTarget(ActivityManager.RunningTaskInfo taskInfo,
+            SurfaceControl leash, @TransitionInfo.TransitionMode int mode, int order,
+            boolean isTranslucent) {
+        int taskId;
+        boolean isNotInRecents;
+        WindowConfiguration windowConfiguration;
+
+        if (taskInfo != null) {
+            taskId = taskInfo.taskId;
+            isNotInRecents = !taskInfo.isRunning;
+            windowConfiguration = taskInfo.configuration.windowConfiguration;
+        } else {
+            taskId = INVALID_TASK_ID;
+            isNotInRecents = true;
+            windowConfiguration = new WindowConfiguration();
+        }
+
+        Rect localBounds = new Rect();
+        RemoteAnimationTarget target = new RemoteAnimationTarget(
+                taskId,
+                newModeToLegacyMode(mode),
+                // TODO: once we can properly sync transactions across process,
+                // then get rid of this leash.
+                leash,
+                isTranslucent,
+                null,
+                // TODO(shell-transitions): we need to send content insets? evaluate how its used.
+                new Rect(0, 0, 0, 0),
+                order,
+                null,
+                localBounds,
+                new Rect(),
+                windowConfiguration,
+                isNotInRecents,
+                null,
+                new Rect(),
+                taskInfo,
+                false,
+                INVALID_WINDOW_TYPE
+        );
         return target;
     }
 

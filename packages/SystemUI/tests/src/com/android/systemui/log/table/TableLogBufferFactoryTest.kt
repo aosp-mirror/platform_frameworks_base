@@ -16,26 +16,24 @@
 
 package com.android.systemui.log.table
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.log.LogcatEchoTrackerAlways
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class TableLogBufferFactoryTest : SysuiTestCase() {
     private val dumpManager: DumpManager = mock()
     private val systemClock = FakeSystemClock()
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
     private val underTest =
-        TableLogBufferFactory(dumpManager, systemClock, mock(), testDispatcher, testScope)
+        TableLogBufferFactory(dumpManager, systemClock, LogcatEchoTrackerAlways())
 
     @Test
     fun create_alwaysCreatesNewInstance() {

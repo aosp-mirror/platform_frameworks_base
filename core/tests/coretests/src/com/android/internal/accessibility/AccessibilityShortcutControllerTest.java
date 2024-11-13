@@ -71,6 +71,7 @@ import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.Voice;
 import android.test.mock.MockContentResolver;
+import android.view.Display;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -378,7 +379,8 @@ public class AccessibilityShortcutControllerTest {
         verify(mAlertDialog).show();
         verify(mAccessibilityManagerService, atLeastOnce()).getInstalledAccessibilityServiceList(
                 anyInt());
-        verify(mAccessibilityManagerService, times(0)).performAccessibilityShortcut(null);
+        verify(mAccessibilityManagerService, times(0)).performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE, null);
         verify(mFrameworkObjectProvider, times(0)).getTextToSpeech(any(), any());
     }
 
@@ -397,7 +399,8 @@ public class AccessibilityShortcutControllerTest {
         // assertEquals(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
         //        mLayoutParams.privateFlags
         //                & WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
-        verify(mAccessibilityManagerService, times(1)).performAccessibilityShortcut(null);
+        verify(mAccessibilityManagerService, times(1)).performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE, null);
     }
 
     @Test
@@ -630,7 +633,8 @@ public class AccessibilityShortcutControllerTest {
 
         verifyZeroInteractions(mAlertDialogBuilder, mAlertDialog);
         verify(mToast).show();
-        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE, null);
     }
 
     @Test
@@ -649,7 +653,8 @@ public class AccessibilityShortcutControllerTest {
         verify(mAccessibilityManagerService).enableShortcutsForTargets(
                 eq(true), eq(HARDWARE), mListCaptor.capture(), anyInt());
         assertThat(mListCaptor.getValue()).containsExactly(SERVICE_NAME_STRING);
-        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE, null);
     }
 
     @Test
@@ -666,7 +671,8 @@ public class AccessibilityShortcutControllerTest {
 
         assertThat(Settings.Secure.getString(mContentResolver,
                 ACCESSIBILITY_SHORTCUT_TARGET_SERVICE)).isEqualTo(SERVICE_NAME_STRING);
-        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE, null);
     }
 
     @Test
@@ -726,7 +732,8 @@ public class AccessibilityShortcutControllerTest {
         Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
                 AccessibilityShortcutController.DialogStatus.SHOWN);
         getController().performAccessibilityShortcut();
-        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE, null);
     }
 
     @Test
@@ -739,7 +746,8 @@ public class AccessibilityShortcutControllerTest {
         getController().performAccessibilityShortcut();
 
         verifyZeroInteractions(mToast);
-        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE, null);
     }
 
     @Test
@@ -755,7 +763,8 @@ public class AccessibilityShortcutControllerTest {
         getController().performAccessibilityShortcut();
 
         verifyZeroInteractions(mToast);
-        verify(mAccessibilityManagerService).performAccessibilityShortcut(null);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut(
+                Display.DEFAULT_DISPLAY, HARDWARE, null);
     }
 
     @Test

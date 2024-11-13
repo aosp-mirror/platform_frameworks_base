@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,6 +39,7 @@ import android.view.InsetsState;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayController.OnDisplaysChangedListener;
@@ -50,6 +50,10 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.compatui.api.CompatUIEvent;
+import com.android.wm.shell.compatui.api.CompatUIHandler;
+import com.android.wm.shell.compatui.api.CompatUIInfo;
+import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonClicked;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -64,6 +68,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -71,17 +76,7 @@ import java.util.function.Predicate;
  * activities are in compatibility mode.
  */
 public class CompatUIController implements OnDisplaysChangedListener,
-        DisplayImeController.ImePositionProcessor, KeyguardChangeListener {
-
-    /** Callback for compat UI interaction. */
-    public interface CompatUICallback {
-        /** Called when the size compat restart button appears. */
-        void onSizeCompatRestartButtonAppeared(int taskId);
-        /** Called when the size compat restart button is clicked. */
-        void onSizeCompatRestartButtonClicked(int taskId);
-        /** Called when the camera compat control state is updated. */
-        void onCameraControlStateUpdated(int taskId, @CameraCompatControlState int state);
-    }
+        DisplayImeController.ImePositionProcessor, KeyguardChangeListener, CompatUIHandler {
 
     private static final String TAG = "CompatUIController";
 
@@ -170,7 +165,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final Function<Integer, Integer> mDisappearTimeSupplier;
 
     @Nullable
-    private CompatUICallback mCompatUICallback;
+    private Consumer<CompatUIEvent> mCallback;
 
     // Indicates if the keyguard is currently showing, in which case compat UIs shouldn't
     // be shown.
@@ -193,6 +188,12 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     private boolean mIsFirstReachabilityEducationRunning;
 
+    @NonNull
+    private final CompatUIStatusManager mCompatUIStatusManager;
+
+    @NonNull
+    private final IntPredicate mInDesktopModePredicate;
+
     public CompatUIController(@NonNull Context context,
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -205,7 +206,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
             @NonNull DockStateReader dockStateReader,
             @NonNull CompatUIConfiguration compatUIConfiguration,
             @NonNull CompatUIShellCommandHandler compatUIShellCommandHandler,
-            @NonNull AccessibilityManager accessibilityManager) {
+            @NonNull AccessibilityManager accessibilityManager,
+            @NonNull CompatUIStatusManager compatUIStatusManager,
+            @NonNull IntPredicate isDesktopModeEnablePredicate) {
         mContext = context;
         mShellController = shellController;
         mDisplayController = displayController;
@@ -220,6 +223,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mCompatUIShellCommandHandler = compatUIShellCommandHandler;
         mDisappearTimeSupplier = flags -> accessibilityManager.getRecommendedTimeoutMillis(
                 DISAPPEAR_DELAY_MS, flags);
+        mCompatUIStatusManager = compatUIStatusManager;
+        mInDesktopModePredicate = isDesktopModeEnablePredicate;
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -230,21 +235,22 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mCompatUIShellCommandHandler.onInit();
     }
 
-    /** Sets the callback for Compat UI interactions. */
-    public void setCompatUICallback(@NonNull CompatUICallback compatUiCallback) {
-        mCompatUICallback = compatUiCallback;
+    /** Sets the callback for UI interactions. */
+    @Override
+    public void setCallback(@Nullable Consumer<CompatUIEvent> callback) {
+        mCallback = callback;
     }
 
     /**
      * Called when the Task info changed. Creates and updates the compat UI if there is an
      * activity in size compat, or removes the UI if there is no size compat activity.
      *
-     * @param taskInfo {@link TaskInfo} task the activity is in.
-     * @param taskListener listener to handle the Task Surface placement.
+     * @param compatUIInfo {@link CompatUIInfo} encapsulates information about the task and listener
      */
-    public void onCompatInfoChanged(@NonNull TaskInfo taskInfo,
-            @Nullable ShellTaskOrganizer.TaskListener taskListener) {
-        if (taskInfo != null && !taskInfo.appCompatTaskInfo.topActivityInSizeCompat) {
+    public void onCompatInfoChanged(@NonNull CompatUIInfo compatUIInfo) {
+        final TaskInfo taskInfo = compatUIInfo.getTaskInfo();
+        final ShellTaskOrganizer.TaskListener taskListener = compatUIInfo.getListener();
+        if (taskInfo != null && !taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat()) {
             mSetOfTaskIdsShowingRestartDialog.remove(taskInfo.taskId);
         }
 
@@ -252,7 +258,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
             updateActiveTaskInfo(taskInfo);
         }
 
-        if (taskInfo.configuration == null || taskListener == null) {
+        // We close all the Compat UI educations in case we're in desktop mode.
+        if (taskInfo.configuration == null || taskListener == null
+                || isInDesktopMode(taskInfo.displayId)) {
             // Null token means the current foreground activity is not in compatibility mode.
             removeLayouts(taskInfo.taskId);
             return;
@@ -262,16 +270,16 @@ public class CompatUIController implements OnDisplaysChangedListener,
         // basically cancel all the onboarding flow. We don't have to ignore events in case
         // the app is in size compat mode.
         if (mIsFirstReachabilityEducationRunning) {
-            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap
-                    && !taskInfo.appCompatTaskInfo.topActivityInSizeCompat) {
+            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap()
+                    && !taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat()) {
                 return;
             }
             mIsFirstReachabilityEducationRunning = false;
         }
-        if (taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed) {
-            if (taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled) {
+        if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed()) {
+            if (taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled()) {
                 createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
-            } else if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap) {
+            } else if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap()) {
                 // In this case the app is letterboxed and the letterbox education
                 // is disabled. In this case we need to understand if it's the first
                 // time we show the reachability education. When this is happening
@@ -288,7 +296,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                     // We activate the first reachability education if the double-tap is enabled.
                     // If the double tap is not enabled (e.g. thin letterbox) we just set the value
                     // of the education being seen.
-                    if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
+                    if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled()) {
                         mIsFirstReachabilityEducationRunning = true;
                         createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
                         return;
@@ -299,7 +307,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         createOrUpdateCompatLayout(taskInfo, taskListener);
         createOrUpdateRestartDialogLayout(taskInfo, taskListener);
         if (mCompatUIConfiguration.getHasSeenLetterboxEducation(taskInfo.userId)) {
-            if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
+            if (taskInfo.appCompatTaskInfo.isLetterboxDoubleTapEnabled()) {
                 createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
             }
             // The user aspect ratio button should not be handled when a new TaskInfo is
@@ -311,7 +319,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 }
                 return;
             }
-            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap) {
+            if (!taskInfo.appCompatTaskInfo.isFromLetterboxDoubleTap()) {
                 createOrUpdateUserAspectRatioSettingsLayout(taskInfo, taskListener);
             }
         }
@@ -350,7 +358,6 @@ public class CompatUIController implements OnDisplaysChangedListener,
         listener.unregister();
         mOnInsetsChangedListeners.remove(displayId);
     }
-
 
     @Override
     public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
@@ -466,7 +473,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
         return new CompatUIWindowManager(context,
-                taskInfo, mSyncQueue, mCompatUICallback, taskListener,
+                taskInfo, mSyncQueue, mCallback, taskListener,
                 mDisplayController.getDisplayLayout(taskInfo.displayId), mCompatUIHintsState,
                 mCompatUIConfiguration, this::onRestartButtonClicked);
     }
@@ -478,9 +485,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 taskInfoState.first)) {
             // We need to show the dialog
             mSetOfTaskIdsShowingRestartDialog.add(taskInfoState.first.taskId);
-            onCompatInfoChanged(taskInfoState.first, taskInfoState.second);
+            onCompatInfoChanged(new CompatUIInfo(taskInfoState.first, taskInfoState.second));
         } else {
-            mCompatUICallback.onSizeCompatRestartButtonClicked(taskInfoState.first.taskId);
+            mCallback.accept(new SizeCompatRestartButtonClicked(taskInfoState.first.taskId));
         }
     }
 
@@ -526,7 +533,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
                 mTransitionsLazy.get(),
                 stateInfo -> createOrUpdateReachabilityEduLayout(stateInfo.first, stateInfo.second),
-                mDockStateReader, mCompatUIConfiguration);
+                mDockStateReader, mCompatUIConfiguration, mCompatUIStatusManager);
     }
 
     private void createOrUpdateRestartDialogLayout(@NonNull TaskInfo taskInfo,
@@ -575,13 +582,13 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private void onRestartDialogCallback(
             Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
         mTaskIdToRestartDialogWindowManagerMap.remove(stateInfo.first.taskId);
-        mCompatUICallback.onSizeCompatRestartButtonClicked(stateInfo.first.taskId);
+        mCallback.accept(new SizeCompatRestartButtonClicked(stateInfo.first.taskId));
     }
 
     private void onRestartDialogDismissCallback(
             Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
         mSetOfTaskIdsShowingRestartDialog.remove(stateInfo.first.taskId);
-        onCompatInfoChanged(stateInfo.first, stateInfo.second);
+        onCompatInfoChanged(new CompatUIInfo(stateInfo.first, stateInfo.second));
     }
 
     private void createOrUpdateReachabilityEduLayout(@NonNull TaskInfo taskInfo,
@@ -693,7 +700,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mContext.startActivityAsUser(intent, userHandle);
     }
 
-    private void removeLayouts(int taskId) {
+    @VisibleForTesting
+    void removeLayouts(int taskId) {
         final CompatUIWindowManager compatLayout = mActiveCompatLayouts.get(taskId);
         if (compatLayout != null) {
             compatLayout.release();
@@ -823,7 +831,11 @@ public class CompatUIController implements OnDisplaysChangedListener,
      */
     static class CompatUIHintsState {
         boolean mHasShownSizeCompatHint;
-        boolean mHasShownCameraCompatHint;
         boolean mHasShownUserAspectRatioSettingsButtonHint;
+    }
+
+    private boolean isInDesktopMode(int displayId) {
+        return Flags.skipCompatUiEducationInDesktopMode()
+                && mInDesktopModePredicate.test(displayId);
     }
 }

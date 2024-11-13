@@ -21,71 +21,50 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 /** Safety Label representation containing zero or more {@link DataCategory} for data shared */
 public class SafetyLabels implements AslMarshallable {
-
-    private final Long mVersion;
     private final DataLabels mDataLabels;
     private final SecurityLabels mSecurityLabels;
     private final ThirdPartyVerification mThirdPartyVerification;
 
     public SafetyLabels(
-            Long version,
             DataLabels dataLabels,
             SecurityLabels securityLabels,
             ThirdPartyVerification thirdPartyVerification) {
-        this.mVersion = version;
         this.mDataLabels = dataLabels;
         this.mSecurityLabels = securityLabels;
         this.mThirdPartyVerification = thirdPartyVerification;
     }
 
-    /** Returns the data label for the safety label */
-    public DataLabels getDataLabel() {
-        return mDataLabels;
-    }
-
-    /** Gets the version of the {@link SafetyLabels}. */
-    public Long getVersion() {
-        return mVersion;
-    }
-
     /** Creates an on-device DOM element from the {@link SafetyLabels}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element safetyLabelsEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_SAFETY_LABELS);
-        safetyLabelsEle.appendChild(
-                XmlUtils.createOdLongEle(doc, XmlUtils.OD_NAME_VERSION, mVersion));
         if (mDataLabels != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toOdDomElements(doc));
+            safetyLabelsEle.appendChild(mDataLabels.toOdDomElement(doc));
         }
         if (mSecurityLabels != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mSecurityLabels.toOdDomElements(doc));
+            safetyLabelsEle.appendChild(mSecurityLabels.toOdDomElement(doc));
         }
         if (mThirdPartyVerification != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mThirdPartyVerification.toOdDomElements(doc));
+            safetyLabelsEle.appendChild(mThirdPartyVerification.toOdDomElement(doc));
         }
-        return XmlUtils.listOf(safetyLabelsEle);
+        return safetyLabelsEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element safetyLabelsEle = doc.createElement(XmlUtils.HR_TAG_SAFETY_LABELS);
-        safetyLabelsEle.setAttribute(XmlUtils.HR_ATTR_VERSION, String.valueOf(mVersion));
 
         if (mDataLabels != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toHrDomElements(doc));
+            safetyLabelsEle.appendChild(mDataLabels.toHrDomElement(doc));
         }
         if (mSecurityLabels != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mSecurityLabels.toHrDomElements(doc));
+            safetyLabelsEle.appendChild(mSecurityLabels.toHrDomElement(doc));
         }
         if (mThirdPartyVerification != null) {
-            XmlUtils.appendChildren(safetyLabelsEle, mThirdPartyVerification.toHrDomElements(doc));
+            safetyLabelsEle.appendChild(mThirdPartyVerification.toHrDomElement(doc));
         }
-        return XmlUtils.listOf(safetyLabelsEle);
+        return safetyLabelsEle;
     }
 }

@@ -30,9 +30,9 @@ import android.os.SystemClock;
 import android.view.Choreographer;
 import android.view.animation.LinearInterpolator;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;

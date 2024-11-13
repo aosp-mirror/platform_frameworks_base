@@ -142,3 +142,24 @@ flag {
   description: "This flag does not allow notifications older than 2 weeks old to be posted"
   bug: "339833083"
 }
+
+flag {
+  name: "notification_force_group_singletons"
+  namespace: "systemui"
+  description: "This flag enables forced auto-grouping singleton groups"
+  bug: "336488844"
+}
+
+flag {
+  name: "notification_force_group_conversations"
+  namespace: "systemui"
+  description: "This flag enables forced auto-grouping conversations"
+  bug: "336488844"
+}
+
+flag {
+  name: "notification_vibration_in_sound_uri"
+  namespace: "systemui"
+  description: "This flag enables sound uri with vibration source"
+  bug: "358524009"
+}

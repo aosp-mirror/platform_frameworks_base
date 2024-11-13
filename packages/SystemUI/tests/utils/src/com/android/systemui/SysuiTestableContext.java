@@ -19,6 +19,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -40,6 +41,7 @@ public class SysuiTestableContext extends TestableContext {
     @GuardedBy("mRegisteredReceivers")
     private final Set<BroadcastReceiver> mRegisteredReceivers = new ArraySet<>();
     private final Map<UserHandle, Context> mContextForUser = new HashMap<>();
+    private final Map<String, Context> mContextForPackage = new HashMap<>();
 
     public SysuiTestableContext(Context base) {
         super(base);
@@ -174,5 +176,23 @@ public class SysuiTestableContext extends TestableContext {
             return userContext;
         }
         return super.createContextAsUser(user, flags);
+    }
+
+    /**
+     * Sets a Context object that will be returned as the result of {@link #createPackageContext}
+     * for a specific {@code packageName}.
+     */
+    public void prepareCreatePackageContext(String packageName, Context context) {
+        mContextForPackage.put(packageName, context);
+    }
+
+    @Override
+    public Context createPackageContext(String packageName, int flags)
+            throws PackageManager.NameNotFoundException {
+        Context packageContext = mContextForPackage.get(packageName);
+        if (packageContext != null) {
+            return packageContext;
+        }
+        return super.createPackageContext(packageName, flags);
     }
 }

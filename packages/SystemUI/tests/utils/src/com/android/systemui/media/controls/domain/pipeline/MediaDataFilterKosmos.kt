@@ -21,11 +21,12 @@ import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
+import com.android.systemui.media.controls.shared.mediaLogger
 import com.android.systemui.media.controls.util.mediaFlags
 import com.android.systemui.media.controls.util.mediaUiEventLogger
 import com.android.systemui.settings.userTracker
 import com.android.systemui.statusbar.notificationLockscreenUserManager
-import com.android.systemui.util.time.systemClock
+import com.android.systemui.util.time.fakeSystemClock
 import com.android.systemui.util.wakelock.WakeLockFake
 
 val Kosmos.mediaDataFilter by
@@ -41,10 +42,10 @@ val Kosmos.mediaDataFilter by
                 ),
             lockscreenUserManager = notificationLockscreenUserManager,
             executor = fakeExecutor,
-            systemClock = systemClock,
+            systemClock = fakeSystemClock,
             logger = mediaUiEventLogger,
             mediaFlags = mediaFlags,
             mediaFilterRepository = mediaFilterRepository,
-            mediaLoadingLogger = mediaLoadingLogger,
+            mediaLogger = mediaLogger,
         )
     }

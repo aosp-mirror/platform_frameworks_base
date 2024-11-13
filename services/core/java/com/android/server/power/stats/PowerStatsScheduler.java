@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.Clock;
 import com.android.internal.os.MonotonicClock;
 
@@ -51,7 +52,8 @@ public class PowerStatsScheduler {
     private final Handler mHandler;
     private final Runnable mPowerStatsCollector;
     private final Supplier<Long> mEarliestAvailableBatteryHistoryTimeMs;
-    private final PowerStatsAggregator mPowerStatsAggregator;
+    private final BatteryStatsHistory mBatteryStatsHistory;
+    private final PowerAttributor mPowerAttributor;
     private long mLastSavedSpanEndMonotonicTime;
 
     /**
@@ -66,12 +68,13 @@ public class PowerStatsScheduler {
     }
 
     public PowerStatsScheduler(Runnable powerStatsCollector,
-            PowerStatsAggregator powerStatsAggregator,
+            BatteryStatsHistory batteryStatsHistory, PowerAttributor powerAttributor,
             @DurationMillisLong long aggregatedPowerStatsSpanDuration,
             @DurationMillisLong long powerStatsAggregationPeriod, PowerStatsStore powerStatsStore,
             AlarmScheduler alarmScheduler, Clock clock, MonotonicClock monotonicClock,
             Supplier<Long> earliestAvailableBatteryHistoryTimeMs, Handler handler) {
-        mPowerStatsAggregator = powerStatsAggregator;
+        mBatteryStatsHistory = batteryStatsHistory;
+        mPowerAttributor = powerAttributor;
         mAggregatedPowerStatsSpanDuration = aggregatedPowerStatsSpanDuration;
         mPowerStatsAggregationPeriod = powerStatsAggregationPeriod;
         mPowerStatsStore = powerStatsStore;
@@ -123,12 +126,8 @@ public class PowerStatsScheduler {
         long endTimeMs = alignToWallClock(startTime + mAggregatedPowerStatsSpanDuration,
                 mAggregatedPowerStatsSpanDuration, currentMonotonicTime, currentTimeMillis);
         while (endTimeMs <= currentMonotonicTime) {
-            mPowerStatsAggregator.aggregatePowerStats(startTime, endTimeMs,
-                    stats -> {
-                        storeAggregatedPowerStats(stats);
-                        mLastSavedSpanEndMonotonicTime = stats.getStartTime() + stats.getDuration();
-                    });
-
+            mLastSavedSpanEndMonotonicTime = mPowerAttributor.storeEstimatedPowerConsumption(
+                    mBatteryStatsHistory, startTime, endTimeMs);
             startTime = endTimeMs;
             endTimeMs += mAggregatedPowerStatsSpanDuration;
         }
@@ -153,15 +152,8 @@ public class PowerStatsScheduler {
             mPowerStatsStore.dump(ipw);
             // Aggregate the remainder of power stats and dump the results without storing them yet.
             long powerStoreEndMonotonicTime = getLastSavedSpanEndMonotonicTime();
-            mPowerStatsAggregator.aggregatePowerStats(powerStoreEndMonotonicTime,
-                    MonotonicClock.UNDEFINED,
-                    stats -> {
-                        // Create a PowerStatsSpan for consistency of the textual output
-                        PowerStatsSpan span = PowerStatsStore.createPowerStatsSpan(stats);
-                        if (span != null) {
-                            span.dump(ipw);
-                        }
-                    });
+            mPowerAttributor.dumpEstimatedPowerConsumption(ipw, mBatteryStatsHistory,
+                    powerStoreEndMonotonicTime, MonotonicClock.UNDEFINED);
         });
 
         awaitCompletion();
@@ -223,26 +215,11 @@ public class PowerStatsScheduler {
     }
 
     private long getLastSavedSpanEndMonotonicTime() {
-        if (mLastSavedSpanEndMonotonicTime != 0) {
-            return mLastSavedSpanEndMonotonicTime;
-        }
-
-        mLastSavedSpanEndMonotonicTime = -1;
-        for (PowerStatsSpan.Metadata metadata : mPowerStatsStore.getTableOfContents()) {
-            if (metadata.getSections().contains(AggregatedPowerStatsSection.TYPE)) {
-                for (PowerStatsSpan.TimeFrame timeFrame : metadata.getTimeFrames()) {
-                    long endMonotonicTime = timeFrame.startMonotonicTime + timeFrame.duration;
-                    if (endMonotonicTime > mLastSavedSpanEndMonotonicTime) {
-                        mLastSavedSpanEndMonotonicTime = endMonotonicTime;
-                    }
-                }
-            }
+        if (mLastSavedSpanEndMonotonicTime == 0) {
+            mLastSavedSpanEndMonotonicTime =
+                    mPowerAttributor.getLastSavedEstimatesPowerConsumptionTimestamp();
         }
         return mLastSavedSpanEndMonotonicTime;
-    }
-
-    private void storeAggregatedPowerStats(AggregatedPowerStats stats) {
-        mPowerStatsStore.storeAggregatedPowerStats(stats);
     }
 
     private void awaitCompletion() {

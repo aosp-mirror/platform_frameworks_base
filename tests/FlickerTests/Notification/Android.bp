@@ -32,3 +32,57 @@ android_test {
     static_libs: ["FlickerTestsBase"],
     data: ["trace_config/*"],
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Begin breakdowns for FlickerTestsNotification module
+
+test_module_config {
+    name: "FlickerTestsNotification-CatchAll",
+    base: "FlickerTestsNotification",
+    exclude_filters: [
+        "com.android.server.wm.flicker.notification.OpenAppFromLockscreenNotificationColdTest",
+        "com.android.server.wm.flicker.notification.OpenAppFromLockscreenNotificationWarmTest",
+        "com.android.server.wm.flicker.notification.OpenAppFromLockscreenNotificationWithOverlayAppTest",
+        "com.android.server.wm.flicker.notification.OpenAppFromNotificationColdTest",
+        "com.android.server.wm.flicker.notification.OpenAppFromNotificationWarmTest",
+    ],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsNotification-OpenAppFromLockscreenNotificationColdTest",
+    base: "FlickerTestsNotification",
+    include_filters: ["com.android.server.wm.flicker.notification.OpenAppFromLockscreenNotificationColdTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsNotification-OpenAppFromLockscreenNotificationWarmTest",
+    base: "FlickerTestsNotification",
+    include_filters: ["com.android.server.wm.flicker.notification.OpenAppFromLockscreenNotificationWarmTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsNotification-OpenAppFromLockscreenNotificationWithOverlayAppTest",
+    base: "FlickerTestsNotification",
+    include_filters: ["com.android.server.wm.flicker.notification.OpenAppFromLockscreenNotificationWithOverlayAppTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsNotification-OpenAppFromNotificationColdTest",
+    base: "FlickerTestsNotification",
+    include_filters: ["com.android.server.wm.flicker.notification.OpenAppFromNotificationColdTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsNotification-OpenAppFromNotificationWarmTest",
+    base: "FlickerTestsNotification",
+    include_filters: ["com.android.server.wm.flicker.notification.OpenAppFromNotificationWarmTest"],
+    test_suites: ["device-tests"],
+}
+
+// End breakdowns for FlickerTestsNotification module
+////////////////////////////////////////////////////////////////////////////////

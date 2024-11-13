@@ -39,6 +39,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 
 class HomeControlsDreamService
 @Inject
@@ -53,7 +54,7 @@ constructor(
 ) : DreamService() {
 
     private val serviceJob = SupervisorJob()
-    private val serviceScope = CoroutineScope(bgDispatcher + serviceJob)
+    private val serviceScope = CoroutineScope(bgDispatcher + serviceJob + createCoroutineTracingContext("HomeControlsDreamService"))
     private val logger = DreamLogger(logBuffer, TAG)
     private lateinit var taskFragmentComponent: TaskFragmentComponent
     private val wakeLock: WakeLock by lazy {

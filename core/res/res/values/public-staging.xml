@@ -114,7 +114,7 @@
     <public name="optional"/>
     <!-- @FlaggedApi("android.media.tv.flags.enable_ad_service_fw") -->
     <public name="adServiceTypes" />
-    <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp") -->
+    <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp_api") -->
     <public name="languageSettingsActivity"/>
     <!-- @FlaggedApi("android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM") -->
     <public name="dreamCategory"/>

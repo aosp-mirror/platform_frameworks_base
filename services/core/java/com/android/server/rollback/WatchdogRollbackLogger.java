@@ -16,6 +16,7 @@
 
 package com.android.server.rollback;
 
+import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
 import static com.android.server.crashrecovery.proto.CrashRecoveryStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH;
 import static com.android.server.crashrecovery.proto.CrashRecoveryStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING;
 import static com.android.server.crashrecovery.proto.CrashRecoveryStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_BOOT_LOOPING;
@@ -39,7 +40,7 @@ import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -47,7 +48,6 @@ import com.android.server.PackageWatchdog;
 import com.android.server.crashrecovery.proto.CrashRecoveryStatsLog;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * This class handles the logic for logging Watchdog-triggered rollback events.
@@ -101,22 +101,6 @@ public final class WatchdogRollbackLogger {
         return loggingParent;
     }
 
-
-    /**
-     * Gets the set of parent packages for a given set of failed package names. In the case that
-     * multiple sessions have failed, we want to log failure for each of the parent packages.
-     * Even if multiple failed packages have the same parent, we only log the parent package once.
-     */
-    private static Set<VersionedPackage> getLogPackages(Context context,
-            @NonNull List<String> failedPackageNames) {
-        Set<VersionedPackage> parentPackages = new ArraySet<>();
-        for (String failedPackageName: failedPackageNames) {
-            parentPackages.add(getLogPackage(context, new VersionedPackage(failedPackageName, 0)));
-        }
-        return parentPackages;
-    }
-
-
     static void logRollbackStatusOnBoot(Context context, int rollbackId, String logPackageName,
             List<RollbackInfo> recentlyCommittedRollbacks) {
         PackageInstaller packageInstaller = context.getPackageManager().getPackageInstaller();
@@ -165,25 +149,6 @@ public final class WatchdogRollbackLogger {
     }
 
     /**
-     * Logs that one or more apexd reverts have occurred, along with the crashing native process
-     * that caused apexd to revert during boot.
-     *
-     * @param context the context to use when determining the log packages
-     * @param failedPackageNames a list of names of packages which were reverted
-     * @param failingNativeProcess the crashing native process which caused a revert
-     */
-    public static void logApexdRevert(Context context, @NonNull List<String> failedPackageNames,
-            @NonNull String failingNativeProcess) {
-        Set<VersionedPackage> logPackages = getLogPackages(context, failedPackageNames);
-        for (VersionedPackage logPackage: logPackages) {
-            logEvent(logPackage,
-                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
-                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH_DURING_BOOT,
-                    failingNativeProcess);
-        }
-    }
-
-    /**
      * Log a Watchdog rollback event to statsd.
      *
      * @param logPackage the package to associate the rollback with.
@@ -193,10 +158,11 @@ public final class WatchdogRollbackLogger {
      */
     public static void logEvent(@Nullable VersionedPackage logPackage, int type,
             int rollbackReason, @NonNull String failingPackageName) {
-        Slog.i(TAG, "Watchdog event occurred with type: " + rollbackTypeToString(type)
+        String logMsg = "Watchdog event occurred with type: " + rollbackTypeToString(type)
                 + " logPackage: " + logPackage
                 + " rollbackReason: " + rollbackReasonToString(rollbackReason)
-                + " failedPackageName: " + failingPackageName);
+                + " failedPackageName: " + failingPackageName;
+        Slog.i(TAG, logMsg);
         if (logPackage != null) {
             CrashRecoveryStatsLog.write(
                     CrashRecoveryStatsLog.WATCHDOG_ROLLBACK_OCCURRED,
@@ -219,33 +185,19 @@ public final class WatchdogRollbackLogger {
                     new byte[]{});
         }
 
-        logTestProperties(logPackage, type, rollbackReason, failingPackageName);
+        logTestProperties(logMsg);
     }
 
     /**
      * Writes properties which will be used by rollback tests to check if particular rollback
      * events have occurred.
-     *
-     * persist.sys.rollbacktest.enabled: true if rollback tests are running
-     * persist.sys.rollbacktest.EVENT_TYPE: true if a particular rollback event has occurred
-     *   ex: persist.sys.rollbacktest.ROLLBACK_INITIATE is true if ROLLBACK_INITIATE has happened
-     * persist.sys.rollbacktest.EVENT_TYPE.logPackage: the package to associate the rollback with
-     * persist.sys.rollbacktest.EVENT_TYPE.rollbackReason: the reason Watchdog triggered a rollback
-     * persist.sys.rollbacktest.EVENT_TYPE.failedPackageName: the failing package or process which
-     *   triggered the rollback
      */
-    private static void logTestProperties(@Nullable VersionedPackage logPackage, int type,
-            int rollbackReason, @NonNull String failingPackageName) {
+    private static void logTestProperties(String logMsg) {
         // This property should be on only during the tests
-        final String prefix = "persist.sys.rollbacktest.";
-        if (!SystemProperties.getBoolean(prefix + "enabled", false)) {
+        if (!SystemProperties.getBoolean("persist.sys.rollbacktest.enabled", false)) {
             return;
         }
-        String key = prefix + rollbackTypeToString(type);
-        SystemProperties.set(key, String.valueOf(true));
-        SystemProperties.set(key + ".logPackage", logPackage != null ? logPackage.toString() : "");
-        SystemProperties.set(key + ".rollbackReason", rollbackReasonToString(rollbackReason));
-        SystemProperties.set(key + ".failedPackageName", failingPackageName);
+        logCrashRecoveryEvent(Log.DEBUG, logMsg);
     }
 
     @VisibleForTesting

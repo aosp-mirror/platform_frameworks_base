@@ -53,7 +53,7 @@ import android.window.SplashScreenView;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;

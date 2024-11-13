@@ -21,9 +21,12 @@ filegroup {
         "**/*.aidl",
         ":systemfeatures-gen-srcs",
         ":framework-nfc-non-updatable-sources",
+        ":messagequeue-gen",
         ":ranging_stack_mock_initializer",
     ],
+    // Exactly one MessageQueue.java will be added to srcs by messagequeue-gen
     exclude_srcs: [
+        "android/os/*MessageQueue/**/*.java",
         "android/ranging/**/*.java",
     ],
     visibility: ["//frameworks/base"],
@@ -63,6 +66,32 @@ ranging_stack_framework_mock_init {
             },
         },
     },
+}
+
+// Add selected MessageQueue.java implementation to srcs
+soong_config_module_type {
+    name: "release_package_messagequeue_implementation_srcs",
+    module_type: "genrule",
+    config_namespace: "messagequeue",
+    value_variables: ["release_package_messagequeue_implementation"],
+    properties: [
+        "srcs",
+    ],
+}
+
+// Output the selected android/os/MessageQueue.java implementation
+release_package_messagequeue_implementation_srcs {
+    name: "messagequeue-gen",
+    soong_config_variables: {
+        release_package_messagequeue_implementation: {
+            srcs: ["android/os/%s"],
+            conditions_default: {
+                srcs: ["android/os/LegacyMessageQueue/MessageQueue.java"],
+            },
+        },
+    },
+    cmd: "mkdir -p android/os/; cp $(in) $(out);",
+    out: ["android/os/MessageQueue.java"],
 }
 
 aidl_library {
@@ -619,7 +648,6 @@ filegroup {
 
 java_library {
     name: "protolog-lib",
-    platform_apis: true,
     srcs: [
         "com/android/internal/protolog/ProtoLogImpl.java",
         "com/android/internal/protolog/ProtoLogViewerConfigReader.java",

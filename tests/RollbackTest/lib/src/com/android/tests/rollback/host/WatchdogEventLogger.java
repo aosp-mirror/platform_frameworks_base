@@ -16,33 +16,26 @@
 
 package com.android.tests.rollback.host;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.log.LogUtil.CLog;
+
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Truth;
 
-import static com.google.common.truth.Truth.assertThat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WatchdogEventLogger {
-    private static final String[] ROLLBACK_EVENT_TYPES = {
-            "ROLLBACK_INITIATE", "ROLLBACK_BOOT_TRIGGERED", "ROLLBACK_SUCCESS"};
-    private static final String[] ROLLBACK_EVENT_ATTRS = {
-            "logPackage", "rollbackReason", "failedPackageName"};
-    private static final String PROP_PREFIX = "persist.sys.rollbacktest.";
 
     private ITestDevice mDevice;
 
-    private void resetProperties(boolean enabled) throws Exception {
+    private void updateTestSysProp(boolean enabled) throws Exception {
         try {
             mDevice.enableAdbRoot();
             assertThat(mDevice.setProperty(
-                    PROP_PREFIX + "enabled", String.valueOf(enabled))).isTrue();
-            for (String type : ROLLBACK_EVENT_TYPES) {
-                String key = PROP_PREFIX + type;
-                assertThat(mDevice.setProperty(key, "")).isTrue();
-                for (String attr : ROLLBACK_EVENT_ATTRS) {
-                    assertThat(mDevice.setProperty(key + "." + attr, "")).isTrue();
-                }
-            }
+                    "persist.sys.rollbacktest.enabled", String.valueOf(enabled))).isTrue();
         } finally {
             mDevice.disableAdbRoot();
         }
@@ -50,19 +43,17 @@ public class WatchdogEventLogger {
 
     public void start(ITestDevice device) throws Exception {
         mDevice = device;
-        resetProperties(true);
+        updateTestSysProp(true);
     }
 
     public void stop() throws Exception {
         if (mDevice != null) {
-            resetProperties(false);
+            updateTestSysProp(false);
         }
     }
 
-    private boolean matchProperty(String type, String attr, String expectedVal) throws Exception {
-        String key = PROP_PREFIX + type + "." + attr;
-        String val = mDevice.getProperty(key);
-        return expectedVal == null || expectedVal.equals(val);
+    private boolean verifyEventContainsVal(String watchdogEvent, String expectedVal) {
+        return expectedVal == null || watchdogEvent.contains(expectedVal);
     }
 
     /**
@@ -72,11 +63,33 @@ public class WatchdogEventLogger {
      * occurred, and return {@code true} if an event exists which matches all criteria.
      */
     public boolean watchdogEventOccurred(String type, String logPackage,
-            String rollbackReason, String failedPackageName) throws Exception {
-        return mDevice.getBooleanProperty(PROP_PREFIX + type, false)
-                && matchProperty(type, "logPackage", logPackage)
-                && matchProperty(type, "rollbackReason", rollbackReason)
-                && matchProperty(type, "failedPackageName", failedPackageName);
+            String rollbackReason, String failedPackageName) {
+        String watchdogEvent = getEventForRollbackType(type);
+        return (watchdogEvent != null)
+                && verifyEventContainsVal(watchdogEvent, logPackage)
+                && verifyEventContainsVal(watchdogEvent, rollbackReason)
+                && verifyEventContainsVal(watchdogEvent, failedPackageName);
+    }
+
+    /** Returns last matched event for rollbackType **/
+    private String getEventForRollbackType(String rollbackType) {
+        String lastMatchedEvent = null;
+        try {
+            String rollbackDump = mDevice.executeShellCommand("dumpsys rollback");
+            String eventRegex = ".*%s%s(.*)\\n";
+            String eventPrefix = "Watchdog event occurred with type: ";
+
+            final Pattern pattern = Pattern.compile(
+                    String.format(eventRegex, eventPrefix, rollbackType));
+            final Matcher matcher = pattern.matcher(rollbackDump);
+            while (matcher.find()) {
+                lastMatchedEvent = matcher.group(1);
+            }
+            CLog.d("Found watchdogEvent: " + lastMatchedEvent + " for type: " + rollbackType);
+        } catch (Exception e) {
+            CLog.e("Unable to find event for type: " + rollbackType, e);
+        }
+        return lastMatchedEvent;
     }
 
     static class Subject extends com.google.common.truth.Subject {
@@ -97,7 +110,7 @@ public class WatchdogEventLogger {
         }
 
         void eventOccurred(String type, String logPackage, String rollbackReason,
-                String failedPackageName) throws Exception {
+                String failedPackageName) {
             check("watchdogEventOccurred(type=%s, logPackage=%s, rollbackReason=%s, "
                     + "failedPackageName=%s)", type, logPackage, rollbackReason, failedPackageName)
                     .that(mActual.watchdogEventOccurred(type, logPackage, rollbackReason,

@@ -15,30 +15,36 @@
  */
 package com.android.credentialmanager.ui.screens.multiple
 
-import com.android.credentialmanager.ui.components.CredentialsScreenChip
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import com.android.credentialmanager.ui.components.CredentialsScreenChip
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.ui.components.WearButtonText
+import com.android.credentialmanager.ui.components.LockedProviderChip
 import com.android.credentialmanager.common.ui.components.WearSecondaryLabel
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
-import com.google.android.horologist.compose.layout.ScalingLazyColumnState
+import com.google.android.horologist.compose.layout.rememberColumnState
+import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
+import androidx.compose.ui.text.style.TextAlign
+import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 
 /**
  * Screen that shows multiple credentials to select from, grouped by accounts
  *
  * @param credentialSelectorUiState The app bar view model.
- * @param columnState ScalingLazyColumn configuration to be be applied
  * @param modifier styling for composable
  * @param flowEngine [FlowEngine] that updates ui state for this screen
  */
@@ -46,60 +52,122 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 @Composable
 fun MultiCredentialsFlattenScreen(
     credentialSelectorUiState: MultipleEntry,
-    columnState: ScalingLazyColumnState,
     flowEngine: FlowEngine,
 ) {
     val selectEntry = flowEngine.getEntrySelector()
-    ScalingLazyColumn(
-        columnState = columnState,
-        modifier = Modifier.fillMaxSize(),
-    ) {
+    Row {
+        Spacer(Modifier.weight(0.052f)) // 5.2% side margin
+        ScalingLazyColumn(
+            columnState = rememberColumnState(
+                ScalingLazyColumnDefaults.belowTimeText(horizontalAlignment = Alignment.Start),
+            ),
+            modifier = Modifier.weight(0.896f).fillMaxSize(), // 5.2% side margin
+        ) {
+
         item {
-            // make this credential specific if all credentials are same
-            WearButtonText(
-                text = stringResource(R.string.sign_in_options_title),
-                textAlign = TextAlign.Start,
-            )
+            Row {
+                Spacer(Modifier.weight(0.073f)) // 7.3% side margin
+                WearButtonText(
+                    text = stringResource(R.string.sign_in_options_title),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(0.854f).fillMaxSize(),
+                    maxLines = 2,
+                )
+                Spacer(Modifier.weight(0.073f)) // 7.3% side margin
+            }
         }
 
         credentialSelectorUiState.accounts.forEach { userNameEntries ->
             item {
-                WearSecondaryLabel(
-                    text = userNameEntries.userName,
-                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
-                )
+                Row {
+                    Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
+                    WearSecondaryLabel(
+                        text = userNameEntries.name,
+                        modifier = Modifier.padding(
+                            top = 12.dp,
+                            bottom = 4.dp,
+                            start = 0.dp,
+                            end = 0.dp
+                        ).fillMaxWidth(0.87f)
+                    )
+                    Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
+                }
             }
 
             userNameEntries.sortedCredentialEntryList.forEach { credential: CredentialEntryInfo ->
                 item {
                     CredentialsScreenChip(
-                        label = credential.userName,
+                        primaryText = {
+                            WearButtonText(
+                                text = credential.userName,
+                                textAlign = TextAlign.Start,
+                                maxLines = 2,
+                            )
+                        },
                         onClick = { selectEntry(credential, false) },
-                        secondaryLabel = credential.credentialTypeDisplayName,
+                        secondaryText =
+                        {
+                            WearSecondaryLabel(
+                                text = credential.credentialTypeDisplayName.ifEmpty {
+                                    credential.providerDisplayName
+                                },
+                                color = WearMaterialTheme.colors.onSurfaceVariant,
+                                maxLines = 2
+                            )
+                        },
                         icon = credential.icon,
-                        textAlign = TextAlign.Start
                     )
 
                     CredentialsScreenChipSpacer()
                 }
             }
+
+            credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
+                item {
+                    LockedProviderChip(authenticationEntryInfo, secondaryMaxLines = 2) {
+                        selectEntry(authenticationEntryInfo, false)
+                    }
+                    CredentialsScreenChipSpacer()
+                }
+            }
         }
-        item {
-            WearSecondaryLabel(
-                text = stringResource(R.string.provider_list_title),
-                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
-            )
-        }
-        credentialSelectorUiState.actionEntryList.forEach { actionEntry ->
+
+        if (credentialSelectorUiState.actionEntryList.isNotEmpty()) {
             item {
+                Row {
+                    Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
+                    WearSecondaryLabel(
+                        text = stringResource(R.string.provider_list_title),
+                        modifier = Modifier.padding(
+                            top = 12.dp,
+                            bottom = 4.dp,
+                            start = 0.dp,
+                            end = 0.dp
+                        ).fillMaxWidth(0.87f),
+                        maxLines = 2
+                )
+                    Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
+                }
+            }
+            credentialSelectorUiState.actionEntryList.forEach { actionEntry ->
+                item {
                     CredentialsScreenChip(
-                        label = actionEntry.title,
+                        primaryText = {
+                            WearButtonText(
+                                text = actionEntry.title,
+                                textAlign = TextAlign.Start,
+                                maxLines = 2
+                            )
+                        },
                         onClick = { selectEntry(actionEntry, false) },
-                        secondaryLabel = null,
+                        secondaryText = null,
                         icon = actionEntry.icon,
                     )
                     CredentialsScreenChipSpacer()
+                }
             }
         }
+    }
+    Spacer(Modifier.weight(0.052f)) // 5.2% side margin
     }
 }

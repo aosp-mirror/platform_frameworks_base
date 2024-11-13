@@ -23,7 +23,7 @@ import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
-import android.os.UserHandle
+import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.LongRunning
@@ -48,11 +48,11 @@ constructor(
     notificationManager: NotificationManager,
     userContextProvider: UserContextProvider,
     keyguardDismissUtil: KeyguardDismissUtil,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val panelInteractor: PanelInteractor,
-    private val traceurMessageSender: TraceurMessageSender,
+    dialogTransitionAnimator: DialogTransitionAnimator,
+    panelInteractor: PanelInteractor,
+    traceurMessageSender: TraceurMessageSender,
     private val issueRecordingState: IssueRecordingState,
-    private val iActivityManager: IActivityManager,
+    iActivityManager: IActivityManager,
 ) :
     RecordingService(
         controller,
@@ -64,6 +64,18 @@ constructor(
         keyguardDismissUtil
     ) {
 
+    private val commandHandler =
+        IssueRecordingServiceCommandHandler(
+            bgExecutor,
+            dialogTransitionAnimator,
+            panelInteractor,
+            traceurMessageSender,
+            issueRecordingState,
+            iActivityManager,
+            notificationManager,
+            userContextProvider,
+        )
+
     override fun getTag(): String = TAG
 
     override fun getChannelId(): String = CHANNEL_ID
@@ -71,12 +83,10 @@ constructor(
     override fun provideRecordingServiceStrings(): RecordingServiceStrings = IrsStrings(resources)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(getTag(), "handling action: ${intent?.action}")
         when (intent?.action) {
             ACTION_START -> {
-                bgExecutor.execute {
-                    traceurMessageSender.startTracing(issueRecordingState.traceType)
-                }
-                issueRecordingState.isRecording = true
+                commandHandler.handleStartCommand()
                 if (!issueRecordingState.recordScreen) {
                     // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
                     // will circumvent the RecordingService's screen recording start code.
@@ -84,32 +94,13 @@ constructor(
                 }
             }
             ACTION_STOP,
-            ACTION_STOP_NOTIF -> {
-                // ViewCapture needs to save it's data before it is disabled, or else the data will
-                // be lost. This is expected to change in the near future, and when that happens
-                // this line should be removed.
-                bgExecutor.execute { traceurMessageSender.stopTracing() }
-                issueRecordingState.isRecording = false
-            }
+            ACTION_STOP_NOTIF -> commandHandler.handleStopCommand(contentResolver)
             ACTION_SHARE -> {
-                bgExecutor.execute {
-                    mNotificationManager.cancelAsUser(
-                        null,
-                        mNotificationId,
-                        UserHandle(mUserContextTracker.userContext.userId)
-                    )
-
-                    val screenRecording = intent.getParcelableExtra(EXTRA_PATH, Uri::class.java)
-                    if (issueRecordingState.takeBugreport) {
-                        iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
-                    } else {
-                        traceurMessageSender.shareTraces(applicationContext, screenRecording)
-                    }
-                }
-
-                dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
-                panelInteractor.collapsePanels()
-
+                commandHandler.handleShareCommand(
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId),
+                    intent.getParcelableExtra(EXTRA_PATH, Uri::class.java),
+                    this
+                )
                 // Unlike all other actions, action_share has different behavior for the screen
                 // recording qs tile than it does for the record issue qs tile. Return sticky to
                 // avoid running any of the base class' code for this action.

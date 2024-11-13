@@ -27,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
@@ -36,7 +37,6 @@ import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
 import com.android.systemui.statusbar.notification.stack.DisplaySwitchNotificationsHiderTracker
@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.notification.stack.ui.view.NotificationSta
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.notification.ui.viewbinder.HeadsUpNotificationViewBinder
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.ui.isAnimating
@@ -74,7 +73,6 @@ constructor(
     private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
     private val hunBinder: HeadsUpNotificationViewBinder,
-    private val iconAreaController: NotificationIconAreaController,
     private val loggerOptional: Optional<NotificationStatsLogger>,
     private val metricsLogger: MetricsLogger,
     private val nicBinder: NotificationIconContainerShelfViewBinder,
@@ -95,7 +93,7 @@ constructor(
 
         view.repeatWhenAttached {
             lifecycleScope.launch {
-                if (NotificationsHeadsUpRefactor.isEnabled) {
+                if (SceneContainerFlag.isEnabled) {
                     launch { hunBinder.bindHeadsUpNotifications(view) }
                 }
                 launch { bindShelf(shelf) }
@@ -128,7 +126,6 @@ constructor(
             viewModel.shelf,
             falsingManager,
             nicBinder,
-            iconAreaController,
         )
     }
 
@@ -183,23 +180,34 @@ constructor(
                 launchNotificationSettings = { view ->
                     notificationActivityStarter
                         .get()
-                        .startHistoryIntent(view, /* showHistory = */ false)
+                        .startHistoryIntent(view, /* showHistory= */ false)
                 },
                 launchNotificationHistory = { view ->
                     notificationActivityStarter
                         .get()
-                        .startHistoryIntent(view, /* showHistory = */ true)
+                        .startHistoryIntent(view, /* showHistory= */ true)
                 },
             )
-        launch {
-            viewModel.shouldIncludeFooterView.collect { animatedVisibility ->
-                footerView.setVisible(
-                    /* visible = */ animatedVisibility.value,
-                    /* animate = */ animatedVisibility.isAnimating,
-                )
+        if (SceneContainerFlag.isEnabled) {
+            launch {
+                viewModel.shouldShowFooterView.collect { animatedVisibility ->
+                    footerView.setVisible(
+                        /* visible = */ animatedVisibility.value,
+                        /* animate = */ animatedVisibility.isAnimating,
+                    )
+                }
             }
+        } else {
+            launch {
+                viewModel.shouldIncludeFooterView.collect { animatedVisibility ->
+                    footerView.setVisible(
+                        /* visible = */ animatedVisibility.value,
+                        /* animate = */ animatedVisibility.isAnimating,
+                    )
+                }
+            }
+            launch { viewModel.shouldHideFooterView.collect { footerView.setShouldBeHidden(it) } }
         }
-        launch { viewModel.shouldHideFooterView.collect { footerView.setShouldBeHidden(it) } }
         disposableHandle.awaitCancellationThenDispose()
     }
 

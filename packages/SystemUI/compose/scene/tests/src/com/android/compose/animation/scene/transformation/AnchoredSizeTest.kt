@@ -25,22 +25,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.TransitionRecordingSpec
 import com.android.compose.animation.scene.featureOfElement
 import com.android.compose.animation.scene.recordTransition
+import org.junit.ClassRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.motion.compose.ComposeFeatureCaptures
 import platform.test.motion.compose.createComposeMotionTestRule
 import platform.test.motion.testing.createGoldenPathManager
+import platform.test.screenshot.ResetDeviceEmulationRule
 
 @RunWith(AndroidJUnit4::class)
 @MotionTest
 class AnchoredSizeTest {
+
+    companion object {
+        @JvmField @ClassRule val cleanupRule: ResetDeviceEmulationRule = ResetDeviceEmulationRule()
+    }
+
     private val goldenPaths =
         createGoldenPathManager("frameworks/base/packages/SystemUI/compose/scene/tests/goldens")
 
@@ -57,7 +64,7 @@ class AnchoredSizeTest {
             transition = {
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo)
-            }
+            },
         )
     }
 
@@ -73,7 +80,7 @@ class AnchoredSizeTest {
                 // Scale during 4 frames.
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo)
-            }
+            },
         )
     }
 
@@ -103,13 +110,13 @@ class AnchoredSizeTest {
             transition = {
                 spec = tween(16 * 4, easing = LinearEasing)
                 anchoredSize(TestElements.Bar, TestElements.Foo, anchorWidth = false)
-            }
+            },
         )
     }
 
     private fun assertBarSizeMatchesGolden(
-        fromSceneContent: @Composable SceneScope.() -> Unit,
-        toSceneContent: @Composable SceneScope.() -> Unit,
+        fromSceneContent: @Composable ContentScope.() -> Unit,
+        toSceneContent: @Composable ContentScope.() -> Unit,
         transition: TransitionBuilder.() -> Unit,
     ) {
         val recordingSpec =

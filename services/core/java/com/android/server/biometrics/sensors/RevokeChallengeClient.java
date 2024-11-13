@@ -32,7 +32,8 @@ public abstract class RevokeChallengeClient<T> extends HalClientMonitor<T> {
             @NonNull IBinder token, int userId, @NonNull String owner, int sensorId,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext) {
         super(context, lazyDaemon, token, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, biometricLogger, biometricContext);
+                0 /* cookie */, sensorId, biometricLogger, biometricContext,
+                false /* isMandatoryBiometrics */);
     }
 
     @Override

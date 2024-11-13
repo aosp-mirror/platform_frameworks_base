@@ -28,7 +28,7 @@ java_genrule {
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
-        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--protolog-class com.android.internal.protolog.ProtoLog " +
         "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
         "--loggroups-jar $(location :protolog-groups) " +
         // Used for the ProtoLogIntegrationTest, where don't test decoding or writing to file
@@ -57,6 +57,7 @@ android_test {
         "service-permission.stubs.system_server",
         "androidx.test.runner",
         "androidx.test.rules",
+        "flickerlib",
         "junit-params",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",

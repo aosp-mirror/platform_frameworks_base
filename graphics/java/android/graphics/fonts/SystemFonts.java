@@ -306,13 +306,7 @@ public final class SystemFonts {
             long lastModifiedDate,
             int configVersion
     ) {
-        final String fontsXml;
-        if (com.android.text.flags.Flags.newFontsFallbackXml()) {
-            fontsXml = FONTS_XML;
-        } else {
-            fontsXml = LEGACY_FONTS_XML;
-        }
-        return getSystemFontConfigInternal(fontsXml, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
+        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
                 updatableFontMap, lastModifiedDate, configVersion);
     }
 
@@ -337,13 +331,7 @@ public final class SystemFonts {
      * @hide
      */
     public static @NonNull FontConfig getSystemPreinstalledFontConfig() {
-        final String fontsXml;
-        if (com.android.text.flags.Flags.newFontsFallbackXml()) {
-            fontsXml = FONTS_XML;
-        } else {
-            fontsXml = LEGACY_FONTS_XML;
-        }
-        return getSystemFontConfigInternal(fontsXml, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null,
+        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null,
                 0, 0);
     }
 

@@ -39,7 +39,7 @@ class SupportedModesVoteTest {
     }
 
     @Test
-    fun `adds supported mode ids if supportedModeIds in summary is null`() {
+    fun addsSupportedModeIds_summaryHasNull() {
         val summary = createVotesSummary()
 
         supportedModesVote.updateSummary(summary)
@@ -48,7 +48,7 @@ class SupportedModesVoteTest {
     }
 
     @Test
-    fun `does not add supported mode ids if summary has empty list of modeIds`() {
+    fun doesNotAddSupportedModeIdes_summaryHasEmptyList() {
         val summary = createVotesSummary()
         summary.supportedModeIds = ArrayList()
 
@@ -58,7 +58,7 @@ class SupportedModesVoteTest {
     }
 
     @Test
-    fun `filters out modes that does not match vote`() {
+    fun filtersModeIdsThatDoesNotMatchVote() {
         val summary = createVotesSummary()
         summary.supportedModeIds = ArrayList(listOf(otherMode, supportedModes[0]))
 

@@ -18,7 +18,7 @@
 package com.android.wm.shell.bubbles
 
 import com.android.wm.shell.R
-import com.android.wm.shell.common.bubbles.DismissView
+import com.android.wm.shell.shared.bubbles.DismissView
 
 fun DismissView.setup() {
     setup(DismissView.Config(

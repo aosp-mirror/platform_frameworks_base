@@ -20,12 +20,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.AutomaticZenRule;
 import android.provider.Settings;
+import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.os.dnd.ActiveRuleType;
+import com.android.os.dnd.ChangeOrigin;
 import com.android.os.dnd.ChannelPolicy;
 import com.android.os.dnd.ConversationType;
 import com.android.os.dnd.PeopleType;
@@ -76,6 +78,11 @@ public class ZenEnumTest {
     @Test
     public void testEnum_zenPolicyPeopleType() {
         testEnum(ZenPolicy.class, "PEOPLE_TYPE", PeopleType.class, "PEOPLE");
+    }
+
+    @Test
+    public void testEnum_changeOrigin() {
+        testEnum(ZenModeConfig.class, "ORIGIN", ChangeOrigin.class, "ORIGIN");
     }
 
     /**

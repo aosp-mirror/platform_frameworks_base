@@ -25,8 +25,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.platform.test.ravenwood.RavenwoodRule;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Assume;
 import org.junit.Rule;

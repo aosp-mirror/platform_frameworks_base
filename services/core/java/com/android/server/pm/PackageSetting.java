@@ -42,6 +42,7 @@ import android.service.pm.PackageProto.UserInfoProto.ArchiveState.ArchiveActivit
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
@@ -97,6 +98,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 FORCE_QUERYABLE_OVERRIDE,
                 SCANNED_AS_STOPPED_SYSTEM_APP,
                 PENDING_RESTORE,
+                DEBUGGABLE,
+                IS_LEAVING_SHARED_USER,
         })
         public @interface Flags {
         }
@@ -105,6 +108,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         private static final int FORCE_QUERYABLE_OVERRIDE = 1 << 2;
         private static final int SCANNED_AS_STOPPED_SYSTEM_APP = 1 << 3;
         private static final int PENDING_RESTORE = 1 << 4;
+        private static final int DEBUGGABLE = 1 << 5;
+        private static final int IS_LEAVING_SHARED_USER = 1 << 6;
     }
     private int mBooleans;
 
@@ -231,6 +236,22 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     @Nullable
     private byte[] mRestrictUpdateHash;
+
+    // This is the copy of the same data stored in AndroidPackage. It is not null if the
+    // AndroidPackage is deleted in cases of DELETE_KEEP_DATA. When AndroidPackage is not null,
+    // the field will be null, and the getter method will return the data from AndroidPackage
+    // instead.
+    @Nullable
+    private String[] mSplitNames;
+
+    // This is the copy of the same data stored in AndroidPackage. It is not null if the
+    // AndroidPackage is deleted in cases of DELETE_KEEP_DATA. When AndroidPackage is not null,
+    // the field will be null, and the getter method will return the data from AndroidPackage
+    // instead.
+    @Nullable
+    private int[] mSplitRevisionCodes;
+
+    private int mBaseRevisionCode;
 
     /**
      * Snapshot support.
@@ -562,6 +583,90 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return getBoolean(Booleans.PENDING_RESTORE);
     }
 
+    /**
+     * @see PackageState#isDebuggable
+     */
+    public PackageSetting setDebuggable(boolean value) {
+        setBoolean(Booleans.DEBUGGABLE, value);
+        onChanged();
+        return this;
+    }
+
+    @Override
+    public boolean isDebuggable() {
+        return getBoolean(Booleans.DEBUGGABLE);
+    }
+
+    /**
+     * @see PackageState#isLeavingSharedUser
+     */
+    public PackageSetting setLeavingSharedUser(boolean value) {
+        setBoolean(Booleans.IS_LEAVING_SHARED_USER, value);
+        onChanged();
+        return this;
+    }
+
+    @Override
+    public boolean isLeavingSharedUser() {
+        return getBoolean(Booleans.IS_LEAVING_SHARED_USER);
+    }
+
+    /**
+     * @see AndroidPackage#getBaseRevisionCode
+     */
+    public PackageSetting setBaseRevisionCode(int value) {
+        mBaseRevisionCode = value;
+        onChanged();
+        return this;
+    }
+
+    /**
+     * @see AndroidPackage#getBaseRevisionCode
+     */
+    public int getBaseRevisionCode() {
+        return mBaseRevisionCode;
+    }
+
+    /**
+     * @see AndroidPackage#getSplitNames
+     */
+    public PackageSetting setSplitNames(String[] value) {
+        mSplitNames = value;
+        onChanged();
+        return this;
+    }
+
+    /**
+     * @see AndroidPackage#getSplitNames
+     */
+    @NonNull
+    public String[] getSplitNames() {
+        if (pkg != null) {
+            return pkg.getSplitNames();
+        }
+        return mSplitNames == null ? EmptyArray.STRING : mSplitNames;
+    }
+
+    /**
+     * @see AndroidPackage#getSplitRevisionCodes
+     */
+    public PackageSetting setSplitRevisionCodes(int[] value) {
+        mSplitRevisionCodes = value;
+        onChanged();
+        return this;
+    }
+
+    /**
+     * @see AndroidPackage#getSplitRevisionCodes
+     */
+    @NonNull
+    public int[] getSplitRevisionCodes() {
+        if (pkg != null) {
+            return pkg.getSplitRevisionCodes();
+        }
+        return mSplitRevisionCodes == null ? EmptyArray.INT : mSplitRevisionCodes;
+    }
+
     @Override
     public String toString() {
         return "PackageSetting{"
@@ -723,6 +828,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         mTargetSdkVersion = other.mTargetSdkVersion;
         mRestrictUpdateHash = other.mRestrictUpdateHash == null
                 ? null : other.mRestrictUpdateHash.clone();
+        mBaseRevisionCode = other.mBaseRevisionCode;
+        mSplitNames = other.mSplitNames != null
+                ? Arrays.copyOf(other.mSplitNames, other.mSplitNames.length) : null;
+        mSplitRevisionCodes = other.mSplitRevisionCodes != null
+                ? Arrays.copyOf(other.mSplitRevisionCodes, other.mSplitRevisionCodes.length) : null;
 
         usesSdkLibraries = other.usesSdkLibraries != null
                 ? Arrays.copyOf(other.usesSdkLibraries,
@@ -815,6 +925,18 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return PackageArchiver.isArchived(readUserState(userId));
     }
 
+    /**
+     * @return if the package is archived in any of the users
+     */
+    boolean isArchivedOnAnyUser(int[] userIds) {
+        for (int user : userIds) {
+            if (isArchived(user)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     int getInstallReason(int userId) {
         return readUserState(userId).getInstallReason();
     }
@@ -872,39 +994,23 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     int[] queryInstalledUsers(int[] users, boolean installed) {
-        int num = 0;
+        IntArray installedUsers = new IntArray(users.length);
         for (int user : users) {
             if (getInstalled(user) == installed) {
-                num++;
+                installedUsers.add(user);
             }
         }
-        int[] res = new int[num];
-        num = 0;
-        for (int user : users) {
-            if (getInstalled(user) == installed) {
-                res[num] = user;
-                num++;
-            }
-        }
-        return res;
+        return installedUsers.toArray();
     }
 
     int[] queryUsersInstalledOrHasData(int[] users) {
-        int num = 0;
+        IntArray usersInstalledOrHasData = new IntArray(users.length);
         for (int user : users) {
             if (getInstalled(user) || readUserState(user).dataExists()) {
-                num++;
+                usersInstalledOrHasData.add(user);
             }
         }
-        int[] res = new int[num];
-        num = 0;
-        for (int user : users) {
-            if (getInstalled(user) || readUserState(user).dataExists()) {
-                res[num] = user;
-                num++;
-            }
-        }
-        return res;
+        return usersInstalledOrHasData.toArray();
     }
 
     long getCeDataInode(int userId) {
@@ -1174,25 +1280,14 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     public int[] getNotInstalledUserIds() {
-        int count = 0;
         int userStateCount = mUserStates.size();
+        IntArray notInstalledUsers = new IntArray(userStateCount);
         for (int i = 0; i < userStateCount; i++) {
             if (!mUserStates.valueAt(i).isInstalled()) {
-                count++;
+                notInstalledUsers.add(mUserStates.keyAt(i));
             }
         }
-        if (count == 0) {
-            return EmptyArray.INT;
-        }
-
-        int[] excludedUserIds = new int[count];
-        int idx = 0;
-        for (int i = 0; i < userStateCount; i++) {
-            if (!mUserStates.valueAt(i).isInstalled()) {
-                excludedUserIds[idx++] = mUserStates.keyAt(i);
-            }
-        }
-        return excludedUserIds;
+        return notInstalledUsers.toArray();
     }
 
     /**

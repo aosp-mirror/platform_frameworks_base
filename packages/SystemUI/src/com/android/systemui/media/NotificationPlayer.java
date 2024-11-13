@@ -43,7 +43,7 @@ import java.util.LinkedList;
 public class NotificationPlayer implements OnCompletionListener, OnErrorListener {
     private static final int PLAY = 1;
     private static final int STOP = 2;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final class Command {
         int code;
@@ -158,7 +158,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                 }
                 if (mp != null) {
                     if (DEBUG) {
-                        Log.d(mTag, "mPlayer.pause+release piid:" + player.getPlayerIId());
+                        Log.d(mTag, "mp.pause+release piid:" + mp.getPlayerIId());
                     }
                     mp.pause();
                     try {

@@ -245,10 +245,6 @@ public interface ShadeController extends CoreStartable {
     /** */
     default void setNotificationPresenter(NotificationPresenter presenter) {}
 
-    /** */
-    default void setNotificationShadeWindowViewController(
-            NotificationShadeWindowViewController notificationShadeWindowViewController) {}
-
     /** Listens for shade visibility changes. */
     interface ShadeVisibilityListener {
         /** Called when shade expanded and visible state changed. */

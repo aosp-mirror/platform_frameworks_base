@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.phone.ui
 
+import android.graphics.drawable.ColorDrawable
 import android.os.UserHandle
+import android.platform.test.annotations.EnableFlags
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.systemui.SysuiTestCase
@@ -32,11 +35,13 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class StatusBarIconControllerImplTest : SysuiTestCase() {
 
     private lateinit var underTest: StatusBarIconControllerImpl
@@ -401,6 +406,41 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
         // THEN they are properly added to the list on init
         assertThat(iconList.getIconHolder("test_slot", 0))
             .isInstanceOf(StatusBarIconHolder.BindableIconHolder::class.java)
+    }
+
+    @Test
+    fun setIcon_setsIconInHolder() {
+        underTest.setIcon("slot", 123, "description")
+
+        val iconHolder = iconList.getIconHolder("slot", 0)
+        assertThat(iconHolder).isNotNull()
+        assertThat(iconHolder?.icon?.pkg).isEqualTo(mContext.packageName)
+        assertThat(iconHolder?.icon?.icon?.resId).isEqualTo(123)
+        assertThat(iconHolder?.icon?.icon?.resPackage).isEqualTo(mContext.packageName)
+        assertThat(iconHolder?.icon?.contentDescription).isEqualTo("description")
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_UI, android.app.Flags.FLAG_MODES_UI_ICONS)
+    fun setResourceIcon_setsIconAndPreloadedIconInHolder() {
+        val drawable = ColorDrawable(1)
+        underTest.setResourceIcon(
+            "slot",
+            "some.package",
+            123,
+            drawable,
+            "description",
+            StatusBarIcon.Shape.FIXED_SPACE
+        )
+
+        val iconHolder = iconList.getIconHolder("slot", 0)
+        assertThat(iconHolder).isNotNull()
+        assertThat(iconHolder?.icon?.pkg).isEqualTo("some.package")
+        assertThat(iconHolder?.icon?.icon?.resId).isEqualTo(123)
+        assertThat(iconHolder?.icon?.icon?.resPackage).isEqualTo("some.package")
+        assertThat(iconHolder?.icon?.contentDescription).isEqualTo("description")
+        assertThat(iconHolder?.icon?.shape).isEqualTo(StatusBarIcon.Shape.FIXED_SPACE)
+        assertThat(iconHolder?.icon?.preloadedIcon).isEqualTo(drawable)
     }
 
     private fun createExternalIcon(): StatusBarIcon {

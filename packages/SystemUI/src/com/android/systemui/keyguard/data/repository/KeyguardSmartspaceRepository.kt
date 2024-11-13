@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.content.Context
+import android.os.UserHandle
 import android.provider.Settings
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.stateIn
 interface KeyguardSmartspaceRepository {
     val bcSmartspaceVisibility: StateFlow<Int>
     val isWeatherEnabled: StateFlow<Boolean>
+
     fun setBcSmartspaceVisibility(visibility: Int)
 }
 
@@ -55,7 +57,7 @@ constructor(
         secureSettings
             .observerFlow(
                 names = arrayOf(Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED),
-                userId = userTracker.userId,
+                userId = UserHandle.USER_ALL,
             )
             .onStart { emit(Unit) }
             .map { getLockscreenWeatherEnabled() }

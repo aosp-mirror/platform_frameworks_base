@@ -72,6 +72,10 @@ constructor(
                 else QSTileState.ActivationState.INACTIVE
 
             supportedActions =
-                setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                setOf(
+                    QSTileState.UserAction.CLICK,
+                    QSTileState.UserAction.TOGGLE_CLICK,
+                    QSTileState.UserAction.LONG_CLICK
+                )
         }
 }

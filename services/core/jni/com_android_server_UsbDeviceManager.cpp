@@ -15,32 +15,167 @@
  */
 
 #define LOG_TAG "UsbDeviceManagerJNI"
-#include "utils/Log.h"
-
-#include "jni.h"
+#include <android-base/properties.h>
+#include <android-base/unique_fd.h>
+#include <core_jni_helpers.h>
+#include <fcntl.h>
+#include <linux/usb/f_accessory.h>
 #include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <stdio.h>
+#include <sys/epoll.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <thread>
+
+#include "MtpDescriptors.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
-#include "MtpDescriptors.h"
-
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <linux/usb/f_accessory.h>
+#include "jni.h"
+#include "utils/Log.h"
 
 #define DRIVER_NAME "/dev/usb_accessory"
+#define EPOLL_MAX_EVENTS 4
+#define USB_STATE_MAX_LEN 20
 
 namespace android
 {
+
+static JavaVM *gvm = nullptr;
+static jmethodID gUpdateGadgetStateMethod;
 
 static struct parcel_file_descriptor_offsets_t
 {
     jclass mClass;
     jmethodID mConstructor;
 } gParcelFileDescriptorOffsets;
+
+/*
+ * NativeGadgetMonitorThread starts a new thread to monitor udc state by epoll,
+ * convert and update the state to UsbDeviceManager.
+ */
+class NativeGadgetMonitorThread {
+    android::base::unique_fd mMonitorFd;
+    int mPipefd[2];
+    std::thread mThread;
+    jobject mCallbackObj;
+    std::string mGadgetState;
+
+    void handleStateUpdate(const char *state) {
+        JNIEnv *env = AndroidRuntime::getJNIEnv();
+        std::string gadgetState;
+
+        if (!std::strcmp(state, "not attached\n")) {
+            gadgetState = "DISCONNECTED";
+        } else if (!std::strcmp(state, "attached\n") || !std::strcmp(state, "powered\n") ||
+                   !std::strcmp(state, "default\n") || !std::strcmp(state, "addressed\n")) {
+            gadgetState = "CONNECTED";
+        } else if (!std::strcmp(state, "configured\n")) {
+            gadgetState = "CONFIGURED";
+        } else if (!std::strcmp(state, "suspended\n")) {
+            return;
+        } else {
+            ALOGE("Unknown gadget state %s", state);
+            return;
+        }
+
+        if (mGadgetState.compare(gadgetState)) {
+            mGadgetState = gadgetState;
+            jstring obj = env->NewStringUTF(gadgetState.c_str());
+            env->CallVoidMethod(mCallbackObj, gUpdateGadgetStateMethod, obj);
+        }
+    }
+
+    int setupEpoll(android::base::unique_fd &epollFd) {
+        struct epoll_event ev;
+
+        ev.data.fd = mMonitorFd.get();
+        ev.events = EPOLLPRI;
+        if (epoll_ctl(epollFd.get(), EPOLL_CTL_ADD, mMonitorFd.get(), &ev) != 0) {
+            ALOGE("epoll_ctl failed for monitor fd; errno=%d", errno);
+            return errno;
+        }
+
+        ev.data.fd = mPipefd[0];
+        ev.events = EPOLLIN;
+        if (epoll_ctl(epollFd.get(), EPOLL_CTL_ADD, mPipefd[0], &ev) != 0) {
+            ALOGE("epoll_ctl failed for pipe fd; errno=%d", errno);
+            return errno;
+        }
+
+        return 0;
+    }
+
+    void monitorLoop() {
+        android::base::unique_fd epollFd(epoll_create(EPOLL_MAX_EVENTS));
+        if (epollFd.get() == -1) {
+            ALOGE("epoll_create failed; errno=%d", errno);
+            return;
+        }
+        if (setupEpoll(epollFd) != 0) return;
+
+        JNIEnv *env = nullptr;
+        JavaVMAttachArgs aargs = {JNI_VERSION_1_4, "NativeGadgetMonitorThread", nullptr};
+        if (gvm->AttachCurrentThread(&env, &aargs) != JNI_OK || env == nullptr) {
+            ALOGE("Couldn't attach thread");
+            return;
+        }
+
+        struct epoll_event events[EPOLL_MAX_EVENTS];
+        int nevents = 0;
+        while (true) {
+            nevents = epoll_wait(epollFd.get(), events, EPOLL_MAX_EVENTS, -1);
+            if (nevents < 0) {
+                ALOGE("usb epoll_wait failed; errno=%d", errno);
+                continue;
+            }
+            for (int i = 0; i < nevents; ++i) {
+                int fd = events[i].data.fd;
+                if (fd == mPipefd[0]) {
+                    goto exit;
+                } else if (fd == mMonitorFd.get()) {
+                    char state[USB_STATE_MAX_LEN] = {0};
+                    lseek(fd, 0, SEEK_SET);
+                    read(fd, &state, USB_STATE_MAX_LEN);
+                    handleStateUpdate(state);
+                }
+            }
+        }
+
+    exit:
+        auto res = gvm->DetachCurrentThread();
+        ALOGE_IF(res != JNI_OK, "Couldn't detach thread");
+        return;
+    }
+
+    void stop() {
+        if (mThread.joinable()) {
+            int c = 'q';
+            write(mPipefd[1], &c, 1);
+            mThread.join();
+        }
+    }
+
+    DISALLOW_COPY_AND_ASSIGN(NativeGadgetMonitorThread);
+
+public:
+    explicit NativeGadgetMonitorThread(jobject obj, android::base::unique_fd monitorFd)
+          : mMonitorFd(std::move(monitorFd)), mGadgetState("") {
+        mCallbackObj = AndroidRuntime::getJNIEnv()->NewGlobalRef(obj);
+        pipe(mPipefd);
+        mThread = std::thread(&NativeGadgetMonitorThread::monitorLoop, this);
+    }
+
+    ~NativeGadgetMonitorThread() {
+        stop();
+        close(mPipefd[0]);
+        close(mPipefd[1]);
+        AndroidRuntime::getJNIEnv()->DeleteGlobalRef(mCallbackObj);
+    }
+};
+static std::unique_ptr<NativeGadgetMonitorThread> sGadgetMonitorThread;
 
 static void set_accessory_string(JNIEnv *env, int fd, int cmd, jobjectArray strArray, int index)
 {
@@ -135,6 +270,41 @@ static jobject android_server_UsbDeviceManager_openControl(JNIEnv *env, jobject 
     return jifd;
 }
 
+static jboolean android_server_UsbDeviceManager_startGadgetMonitor(JNIEnv *env, jobject thiz,
+                                                                   jstring jUdcName) {
+    std::string filePath;
+    ScopedUtfChars udcName(env, jUdcName);
+
+    filePath = "/sys/class/udc/" + std::string(udcName.c_str()) + "/state";
+    android::base::unique_fd fd(open(filePath.c_str(), O_RDONLY));
+
+    if (fd.get() == -1) {
+        ALOGE("Cannot open %s", filePath.c_str());
+        return JNI_FALSE;
+    }
+
+    ALOGI("Start monitoring %s", filePath.c_str());
+    sGadgetMonitorThread.reset(new NativeGadgetMonitorThread(thiz, std::move(fd)));
+
+    return JNI_TRUE;
+}
+
+static void android_server_UsbDeviceManager_stopGadgetMonitor(JNIEnv *env, jobject /* thiz */) {
+    sGadgetMonitorThread.reset();
+    return;
+}
+
+static jstring android_server_UsbDeviceManager_waitAndGetProperty(JNIEnv *env, jobject thiz,
+                                                                  jstring jPropName) {
+    ScopedUtfChars propName(env, jPropName);
+    std::string propValue;
+
+    while (!android::base::WaitForPropertyCreation(propName.c_str()));
+    propValue = android::base::GetProperty(propName.c_str(), "" /* default */);
+
+    return env->NewStringUTF(propValue.c_str());
+}
+
 static const JNINativeMethod method_table[] = {
         {"nativeGetAccessoryStrings", "()[Ljava/lang/String;",
          (void *)android_server_UsbDeviceManager_getAccessoryStrings},
@@ -143,15 +313,25 @@ static const JNINativeMethod method_table[] = {
         {"nativeIsStartRequested", "()Z", (void *)android_server_UsbDeviceManager_isStartRequested},
         {"nativeOpenControl", "(Ljava/lang/String;)Ljava/io/FileDescriptor;",
          (void *)android_server_UsbDeviceManager_openControl},
+        {"nativeStartGadgetMonitor", "(Ljava/lang/String;)Z",
+         (void *)android_server_UsbDeviceManager_startGadgetMonitor},
+        {"nativeStopGadgetMonitor", "()V",
+         (void *)android_server_UsbDeviceManager_stopGadgetMonitor},
+        {"nativeWaitAndGetProperty", "(Ljava/lang/String;)Ljava/lang/String;",
+         (void *)android_server_UsbDeviceManager_waitAndGetProperty},
 };
 
-int register_android_server_UsbDeviceManager(JNIEnv *env)
-{
+int register_android_server_UsbDeviceManager(JavaVM *vm, JNIEnv *env) {
+    gvm = vm;
+
     jclass clazz = env->FindClass("com/android/server/usb/UsbDeviceManager");
     if (clazz == NULL) {
         ALOGE("Can't find com/android/server/usb/UsbDeviceManager");
         return -1;
     }
+
+    gUpdateGadgetStateMethod =
+            GetMethodIDOrDie(env, clazz, "updateGadgetState", "(Ljava/lang/String;)V");
 
     clazz = env->FindClass("android/os/ParcelFileDescriptor");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.ParcelFileDescriptor");
@@ -163,5 +343,4 @@ int register_android_server_UsbDeviceManager(JNIEnv *env)
     return jniRegisterNativeMethods(env, "com/android/server/usb/UsbDeviceManager",
             method_table, NELEM(method_table));
 }
-
 };

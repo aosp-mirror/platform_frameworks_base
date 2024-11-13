@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.os.Bundle;
 import android.os.IBinder;
 import android.view.RemoteAnimationDefinition;
 import android.window.ITaskFragmentOrganizer;
@@ -24,14 +25,21 @@ import android.window.WindowContainerTransaction;
 
 /** @hide */
 interface ITaskFragmentOrganizerController {
-
     /**
      * Registers a TaskFragmentOrganizer to manage TaskFragments. Registering a system
      * organizer requires MANAGE_ACTIVITY_TASKS permission, and the organizer will have additional
      * system capabilities.
+     *
+     * @param organizer          The TaskFragmentOrganizer to register
+     * @param isSystemOrganizer  If it is a system organizer
+     * @param outSavedState      Returning the saved state (if any) that previously saved. This is
+     *                           useful when retrieve the state from the same TaskFragmentOrganizer
+     *                           that was killed by the system (e.g. to reclaim memory). Note that
+     *                           the save state is dropped and unable to retrieve once the system
+     *                           restarts or the organizer is unregistered.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value=android.Manifest.permission.MANAGE_ACTIVITY_TASKS, conditional=true)")
-    void registerOrganizer(in ITaskFragmentOrganizer organizer, in boolean isSystemOrganizer);
+    void registerOrganizer(in ITaskFragmentOrganizer organizer, in boolean isSystemOrganizer, out Bundle outSavedState);
 
     /**
      * Unregisters a previously registered TaskFragmentOrganizer.
@@ -52,10 +60,10 @@ interface ITaskFragmentOrganizerController {
     void unregisterRemoteAnimations(in ITaskFragmentOrganizer organizer);
 
     /**
-     * Checks if an activity organized by a {@link android.window.TaskFragmentOrganizer} and
-     * only occupies a portion of Task bounds.
+     * Saves the state in the system, where the state can be restored if the process of
+     * the TaskFragmentOrganizer is restarted.
      */
-    boolean isActivityEmbedded(in IBinder activityToken);
+    void setSavedState(in ITaskFragmentOrganizer organizer, in Bundle savedState);
 
     /**
      * Notifies the server that the organizer has finished handling the given transaction. The

@@ -141,31 +141,10 @@ class ZygoteArguments {
     String mAppDataDir;
 
     /**
-     * The APK path of the package to preload, when using --preload-package.
-     */
-    String mPreloadPackage;
-
-    /**
      * A Base64 string representing a serialize ApplicationInfo Parcel,
      when using --preload-app.
      */
     String mPreloadApp;
-
-    /**
-     * The native library path of the package to preload, when using --preload-package.
-     */
-    String mPreloadPackageLibs;
-
-    /**
-     * The filename of the native library to preload, when using --preload-package.
-     */
-    String mPreloadPackageLibFileName;
-
-    /**
-     * The cache key under which to enter the preloaded package into the classloader cache, when
-     * using --preload-package.
-     */
-    String mPreloadPackageCacheKey;
 
     /**
      * Whether this is a request to start preloading the default resources and classes. This
@@ -419,12 +398,6 @@ class ZygoteArguments {
             } else if (arg.equals("--preload-app")) {
                 ++curArg;
                 mPreloadApp = args.nextArg();
-            } else if (arg.equals("--preload-package")) {
-                curArg += 4;
-                mPreloadPackage = args.nextArg();
-                mPreloadPackageLibs = args.nextArg();
-                mPreloadPackageLibFileName = args.nextArg();
-                mPreloadPackageCacheKey = args.nextArg();
             } else if (arg.equals("--preload-default")) {
                 mPreloadDefault = true;
                 expectRuntimeArgs = false;
@@ -503,11 +476,6 @@ class ZygoteArguments {
         } else if (mAbiListQuery || mPidQuery) {
             if (argCount > curArg) {
                 throw new IllegalArgumentException("Unexpected arguments after --query-abi-list.");
-            }
-        } else if (mPreloadPackage != null) {
-            if (argCount > curArg) {
-                throw new IllegalArgumentException(
-                    "Unexpected arguments after --preload-package.");
             }
         } else if (mPreloadApp != null) {
             if (argCount > curArg) {

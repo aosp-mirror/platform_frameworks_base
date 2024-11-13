@@ -16,18 +16,17 @@
 
 package com.android.wm.shell.common.split;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Rect;
 
 import androidx.annotation.Nullable;
@@ -35,6 +34,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.util.ArrayUtils;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.shared.split.SplitScreenConstants;
 
 /** Helper utility class for split screen components to use. */
 public class SplitScreenUtils {
@@ -127,11 +127,5 @@ public class SplitScreenUtils {
         } else {
             return isLandscape;
         }
-    }
-
-    /** Returns the specified background color that matches a RunningTaskInfo. */
-    public static Color getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {
-        final int taskBgColor = taskInfo.taskDescription.getBackgroundColor();
-        return Color.valueOf(taskBgColor == -1 ? Color.WHITE : taskBgColor);
     }
 }

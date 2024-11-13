@@ -37,3 +37,41 @@ android_test {
     static_libs: ["FlickerTestsBase"],
     data: ["trace_config/*"],
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Begin breakdowns for FlickerTestsRotation module
+
+test_module_config {
+    name: "FlickerTestsAppRotation-CatchAll",
+    base: "FlickerTestsRotation",
+    exclude_filters: [
+        "com.android.server.wm.flicker.rotation.ChangeAppRotationTest",
+        "com.android.server.wm.flicker.rotation.OpenShowWhenLockedSeamlessAppRotationTest",
+        "com.android.server.wm.flicker.rotation.SeamlessAppRotationTest",
+    ],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsAppRotation-ChangeAppRotationTest",
+    base: "FlickerTestsRotation",
+    include_filters: ["com.android.server.wm.flicker.rotation.ChangeAppRotationTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsAppRotation-OpenShowWhenLockedSeamlessAppRotationTest",
+    base: "FlickerTestsRotation",
+    include_filters: ["com.android.server.wm.flicker.rotation.OpenShowWhenLockedSeamlessAppRotationTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsAppRotation-SeamlessAppRotationTest",
+    base: "FlickerTestsRotation",
+    include_filters: ["com.android.server.wm.flicker.rotation.SeamlessAppRotationTest"],
+    test_suites: ["device-tests"],
+}
+
+// End breakdowns for FlickerTestsRotation module
+////////////////////////////////////////////////////////////////////////////////

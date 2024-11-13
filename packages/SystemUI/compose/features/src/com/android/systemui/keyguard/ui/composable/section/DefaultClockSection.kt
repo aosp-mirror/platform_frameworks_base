@@ -111,7 +111,7 @@ constructor(
                     1f
                 }
 
-            val dir = if (transition.toScene == splitShadeLargeClockScene) -1f else 1f
+            val dir = if (transition.toContent == splitShadeLargeClockScene) -1f else 1f
             val distance = dir * getClockCenteringDistance()
             val largeClock = checkNotNull(currentClock).largeClock
             largeClock.animations.onPositionUpdated(
@@ -120,7 +120,7 @@ constructor(
             )
         }
 
-        MovableElement(key = largeClockElementKey, modifier = modifier) {
+        Element(key = largeClockElementKey, modifier = modifier) {
             content {
                 AndroidView(
                     factory = { context ->

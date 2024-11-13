@@ -233,36 +233,59 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
     }
 
     public TextAppearanceSpan(Parcel src) {
-        mFamilyName = src.readString();
-        mStyle = src.readInt();
-        mTextSize = src.readInt();
-        if (src.readInt() != 0) {
-            mTextColor = ColorStateList.CREATOR.createFromParcel(src);
-        } else {
-            mTextColor = null;
-        }
-        if (src.readInt() != 0) {
-            mTextColorLink = ColorStateList.CREATOR.createFromParcel(src);
-        } else {
-            mTextColorLink = null;
-        }
-        mTypeface = LeakyTypefaceStorage.readTypefaceFromParcel(src);
+        this(/* familyName= */ src.readString(),
+                /* style= */ src.readInt(),
+                /* textSize= */ src.readInt(),
+                /* textColor= */ (src.readInt() != 0)
+                        ? ColorStateList.CREATOR.createFromParcel(src) : null,
+                /* textColorLink= */ (src.readInt() != 0)
+                        ? ColorStateList.CREATOR.createFromParcel(src) : null,
+                /* typeface= */ LeakyTypefaceStorage.readTypefaceFromParcel(src),
+                /* textFontWeight= */ src.readInt(),
+                /* textLocales= */
+                src.readParcelable(LocaleList.class.getClassLoader(), LocaleList.class),
+                /* shadowRadius= */ src.readFloat(),
+                /* shadowDx= */ src.readFloat(),
+                /* shadowDy= */ src.readFloat(),
+                /* shadowColor= */ src.readInt(),
+                /* hasElegantTextHeight= */ src.readBoolean(),
+                /* elegantTextHeight= */ src.readBoolean(),
+                /* hasLetterSpacing= */ src.readBoolean(),
+                /* letterSpacing= */ src.readFloat(),
+                /* fontFeatureSettings= */ src.readString(),
+                /* fontVariationSettings= */ src.readString());
+    }
 
-        mTextFontWeight = src.readInt();
-        mTextLocales = src.readParcelable(LocaleList.class.getClassLoader(), android.os.LocaleList.class);
+    /** @hide */
+    public TextAppearanceSpan(@Nullable String familyName, int style, int textSize,
+            @Nullable ColorStateList textColor, @Nullable ColorStateList textColorLink,
+            @Nullable Typeface typeface,
+            int textFontWeight, @Nullable LocaleList textLocales, float shadowRadius,
+            float shadowDx, float shadowDy, int shadowColor, boolean hasElegantTextHeight,
+            boolean elegantTextHeight, boolean hasLetterSpacing, float letterSpacing,
+            @Nullable String fontFeatureSettings, @Nullable String fontVariationSettings) {
+        mFamilyName = familyName;
+        mStyle = style;
+        mTextSize = textSize;
+        mTextColor = textColor;
+        mTextColorLink = textColorLink;
+        mTypeface = typeface;
 
-        mShadowRadius = src.readFloat();
-        mShadowDx = src.readFloat();
-        mShadowDy = src.readFloat();
-        mShadowColor = src.readInt();
+        mTextFontWeight = textFontWeight;
+        mTextLocales = textLocales;
 
-        mHasElegantTextHeight = src.readBoolean();
-        mElegantTextHeight = src.readBoolean();
-        mHasLetterSpacing = src.readBoolean();
-        mLetterSpacing = src.readFloat();
+        mShadowRadius = shadowRadius;
+        mShadowDx = shadowDx;
+        mShadowDy = shadowDy;
+        mShadowColor = shadowColor;
 
-        mFontFeatureSettings = src.readString();
-        mFontVariationSettings = src.readString();
+        mHasElegantTextHeight = hasElegantTextHeight;
+        mElegantTextHeight = elegantTextHeight;
+        mHasLetterSpacing = hasLetterSpacing;
+        mLetterSpacing = letterSpacing;
+
+        mFontFeatureSettings = fontFeatureSettings;
+        mFontVariationSettings = fontVariationSettings;
     }
 
     public int getSpanTypeId() {
@@ -563,5 +586,15 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
                 + ", fontFeatureSettings='" + getFontFeatureSettings() + '\''
                 + ", fontVariationSettings='" + getFontVariationSettings() + '\''
                 + '}';
+    }
+
+    /** @hide */
+    public boolean hasElegantTextHeight() {
+        return mHasElegantTextHeight;
+    }
+
+    /** @hide */
+    public boolean hasLetterSpacing() {
+        return mHasLetterSpacing;
     }
 }

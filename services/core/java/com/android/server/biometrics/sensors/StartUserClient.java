@@ -51,7 +51,8 @@ public abstract class StartUserClient<T, U>  extends HalClientMonitor<T> {
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull UserStartedCallback<U> callback) {
         super(context, lazyDaemon, token, null /* listener */, userId, context.getOpPackageName(),
-                0 /* cookie */, sensorId, logger, biometricContext);
+                0 /* cookie */, sensorId, logger, biometricContext,
+                false /* isMandatoryBiometrics */);
         mUserStartedCallback = callback;
     }
 

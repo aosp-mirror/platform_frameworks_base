@@ -128,7 +128,7 @@
         errorLine1="        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());"
         errorLine2="                                                                ~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBar.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java"
             line="807"
             column="65"/>
     </issue>
@@ -1646,7 +1646,7 @@
         errorLine1="        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);"
         errorLine2="                                               ~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonView.java"
             line="177"
             column="48"/>
     </issue>
@@ -2086,7 +2086,7 @@
         errorLine1="            WindowManager wm = getContext().getSystemService(WindowManager.class);"
         errorLine2="                                            ~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="729"
             column="45"/>
     </issue>
@@ -2097,7 +2097,7 @@
         errorLine1="        WindowManager wm = getContext().getSystemService(WindowManager.class);"
         errorLine2="                                        ~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="830"
             column="41"/>
     </issue>
@@ -4049,7 +4049,7 @@
         errorLine1="        pw.println(String.format(&quot;      mCurrentView: id=%s (%dx%d) %s %f&quot;,"
         errorLine2="                   ^">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="1128"
             column="20"/>
     </issue>
@@ -4060,7 +4060,7 @@
         errorLine1="        pw.println(String.format(&quot;      disabled=0x%08x vertical=%s darkIntensity=%.2f&quot;,"
         errorLine2="                   ^">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="1134"
             column="20"/>
     </issue>
@@ -4668,7 +4668,7 @@
         errorLine1="                    500).show();"
         errorLine2="                    ~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBar.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java"
             line="1894"
             column="21"/>
     </issue>
@@ -8386,7 +8386,7 @@
         errorLine1="        mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);"
         errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBar.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java"
             line="1500"
             column="60"/>
     </issue>
@@ -9163,39 +9163,6 @@
         <location
             file="frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java"
             line="1208"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="UnclosedTrace"
-        message="The `beginSection()` call is not always closed with a matching `endSection()` because the code in between may return early"
-        errorLine1="        Trace.beginSection(&quot;KeyguardViewMediator#handleKeyguardDone&quot;);"
-        errorLine2="              ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java"
-            line="2654"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="UnclosedTrace"
-        message="The `beginSection()` call is not always closed with a matching `endSection()` because the code in between may return early"
-        errorLine1="        Trace.beginSection(&quot;KeyguardViewMediator#handleShow&quot;);"
-        errorLine2="              ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java"
-            line="2780"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="UnclosedTrace"
-        message="The `beginSection()` call is not always closed with a matching `endSection()` because the code in between may return early"
-        errorLine1="        Trace.beginSection(&quot;KeyguardViewMediator#handleStartKeyguardExitAnimation&quot;);"
-        errorLine2="              ~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java"
-            line="3011"
             column="15"/>
     </issue>
 
@@ -23055,7 +23022,7 @@
         errorLine1="            mBarTransitions.setBackgroundFrame(new Rect(0, frameHeight - height, w, h));"
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="1001"
             column="48"/>
     </issue>
@@ -25002,7 +24969,7 @@
         errorLine1="        mAudioManager.playSoundEffect(soundConstant, ActivityManager.getCurrentUser());"
         errorLine2="                                                                     ~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonView.java"
             line="373"
             column="70"/>
     </issue>
@@ -25222,7 +25189,7 @@
         errorLine1="        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);"
         errorLine2="                                                                         ~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonDrawable.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonDrawable.java"
             line="329"
             column="74"/>
     </issue>
@@ -25233,7 +25200,7 @@
         errorLine1="        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);"
         errorLine2="                                                                         ~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonDrawable.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonDrawable.java"
             line="357"
             column="74"/>
     </issue>
@@ -25827,7 +25794,7 @@
         errorLine1="        new AsyncTask&lt;Icon, Void, Drawable>() {"
         errorLine2="        ^">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonView.java"
             line="207"
             column="9"/>
     </issue>
@@ -27084,17 +27051,6 @@
             file="frameworks/base/packages/SystemUI/res/layout/magnifier_controllers.xml"
             line="25"
             column="4"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
-        message="This `FrameLayout` layout or its `LinearLayout` parent is unnecessary"
-        errorLine1="    &lt;FrameLayout"
-        errorLine2="     ~~~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/res/layout/media_output_list_item.xml"
-            line="24"
-            column="6"/>
     </issue>
 
     <issue
@@ -29314,7 +29270,7 @@
         errorLine1="    public boolean onTouchEvent(MotionEvent ev) {"
         errorLine2="                   ~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/KeyButtonView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/KeyButtonView.java"
             line="267"
             column="20"/>
     </issue>
@@ -29589,7 +29545,7 @@
         errorLine1="        mView.setOnTouchListener(this::onNavigationTouch);"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBar.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java"
             line="782"
             column="9"/>
     </issue>
@@ -29600,7 +29556,7 @@
         errorLine1="    public boolean onTouchEvent(MotionEvent event) {"
         errorLine2="                   ~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavigationBarView.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBarView.java"
             line="383"
             column="20"/>
     </issue>
@@ -29611,7 +29567,7 @@
         errorLine1="    public boolean onTouchEvent(MotionEvent event) {"
         errorLine2="                   ~~~~~~~~~~~~">
         <location
-            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/buttons/NearestTouchFrame.java"
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/buttons/NearestTouchFrame.java"
             line="207"
             column="20"/>
     </issue>
@@ -30581,17 +30537,6 @@
         <location
             file="frameworks/base/packages/SystemUI/res/layout/media_output_broadcast_area.xml"
             line="130"
-            column="14"/>
-    </issue>
-
-    <issue
-        id="ContentDescription"
-        message="Missing `contentDescription` attribute on image"
-        errorLine1="            &lt;ImageView"
-        errorLine2="             ~~~~~~~~~">
-        <location
-            file="frameworks/base/packages/SystemUI/res/layout/media_output_list_item.xml"
-            line="54"
             column="14"/>
     </issue>
 
@@ -32210,6 +32155,633 @@
             file="frameworks/base/packages/SystemUI/res/layout/people_tile_punctuation_background_large.xml"
             line="81"
             column="6"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="                contentResolver.registerContentObserver("
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/keyguard/ActiveUnlockConfig.kt"
+            line="154"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="            resolver.registerContentObserver(ALWAYS_ON_DISPLAY_CONSTANTS_URI,"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/doze/AlwaysOnDisplayPolicy.java"
+            line="164"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="                resolver.registerContentObserver("
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/util/animation/data/repository/AnimationStatusRepository.kt"
+            line="61"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="                awaitClose { resolver.unregisterContentObserver(observer) }"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/util/animation/data/repository/AnimationStatusRepository.kt"
+            line="67"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="                    mContentResolver.unregisterContentObserver(mSettingObserver);"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/battery/BatteryMeterViewController.java"
+            line="123"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        mContentResolver.unregisterContentObserver(mSettingObserver);"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/battery/BatteryMeterViewController.java"
+            line="180"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContentResolver.registerContentObserver("
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/battery/BatteryMeterViewController.java"
+            line="211"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContentResolver.registerContentObserver("
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/battery/BatteryMeterViewController.java"
+            line="219"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        resolver.registerContentObserver("
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/demomode/DemoModeAvailabilityTracker.kt"
+            line="46"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        resolver.registerContentObserver("
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/demomode/DemoModeAvailabilityTracker.kt"
+            line="48"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        resolver.unregisterContentObserver(allowedObserver)"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/demomode/DemoModeAvailabilityTracker.kt"
+            line="54"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        resolver.unregisterContentObserver(onObserver)"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/demomode/DemoModeAvailabilityTracker.kt"
+            line="55"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="                resolver.registerContentObserver(mQuickPickupGesture, false, this,"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java"
+            line="511"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="                resolver.registerContentObserver(mPickupGesture, false, this, UserHandle.USER_ALL);"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java"
+            line="513"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="                resolver.registerContentObserver(mAlwaysOnEnabled, false, this,"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java"
+            line="514"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContext.getContentResolver().registerContentObserver("
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java"
+            line="2470"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContext.getContentResolver().registerContentObserver("
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java"
+            line="3077"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="            mContext.getContentResolver().unregisterContentObserver(mDeviceProvisionedObserver);"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java"
+            line="3168"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="            mContext.getContentResolver().unregisterContentObserver(mDeviceProvisionedObserver);"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java"
+            line="3957"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="            mContext.getContentResolver().unregisterContentObserver(mTimeFormatChangeObserver);"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardUpdateMonitor.java"
+            line="3961"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        contentResolver.registerContentObserver("
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/lockscreen/LockscreenSmartspaceController.kt"
+            line="486"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        contentResolver.registerContentObserver("
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/lockscreen/LockscreenSmartspaceController.kt"
+            line="492"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        contentResolver.unregisterContentObserver(settingsObserver)"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/lockscreen/LockscreenSmartspaceController.kt"
+            line="543"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        contentResolver.registerContentObserver("
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/smartspace/filters/LockscreenTargetFilter.kt"
+            line="82"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        contentResolver.unregisterContentObserver(settingsObserver)"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/smartspace/filters/LockscreenTargetFilter.kt"
+            line="100"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        mContext.getContentResolver().unregisterContentObserver(mMenuTargetFeaturesContentObserver);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/accessibility/floatingmenu/MenuInfoRepository.java"
+            line="275"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        mContext.getContentResolver().unregisterContentObserver(mMenuSizeContentObserver);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/accessibility/floatingmenu/MenuInfoRepository.java"
+            line="276"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        mContext.getContentResolver().unregisterContentObserver(mMenuFadeOutContentObserver);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/accessibility/floatingmenu/MenuInfoRepository.java"
+            line="277"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContext.getContentResolver().registerContentObserver(Global.getUriFor(Global.MOBILE_DATA),"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/connectivity/MobileSignalController.java"
+            line="200"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContext.getContentResolver().registerContentObserver(Global.getUriFor("
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/connectivity/MobileSignalController.java"
+            line="202"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        mContext.getContentResolver().unregisterContentObserver(mObserver);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/connectivity/MobileSignalController.java"
+            line="212"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        context.contentResolver.registerContentObserver("
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/domain/interactor/NaturalScrollingSettingObserver.kt"
+            line="54"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContentResolver.registerContentObserver("
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavBarHelper.java"
+            line="253"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContentResolver.registerContentObserver("
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavBarHelper.java"
+            line="256"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContentResolver.registerContentObserver("
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavBarHelper.java"
+            line="259"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContentResolver.registerContentObserver("
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavBarHelper.java"
+            line="262"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        mContentResolver.unregisterContentObserver(mAssistContentObserver);"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/NavBarHelper.java"
+            line="295"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContext.getContentResolver().registerContentObserver("
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/NotificationLockscreenUserManagerImpl.java"
+            line="395"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContext.getContentResolver().registerContentObserver("
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/NotificationLockscreenUserManagerImpl.java"
+            line="400"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContentResolver.registerContentObserver("
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/shade/NotificationPanelViewController.java"
+            line="3675"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="            mContentResolver.unregisterContentObserver(mSettingsChangeObserver);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/shade/NotificationPanelViewController.java"
+            line="4705"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        resolver.registerContentObserver(Settings.Global.getUriFor("
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/power/PowerUI.java"
+            line="191"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        resolver.registerContentObserver("
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/power/PowerUI.java"
+            line="205"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        resolver.registerContentObserver("
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/power/PowerUI.java"
+            line="216"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="        mContext.getContentResolver().registerContentObserver("
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/QSFooterView.java"
+            line="178"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        mContext.getContentResolver().unregisterContentObserver(mDeveloperSettingsObserver);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/qs/QSFooterView.java"
+            line="186"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="            mContentResolver.registerContentObserver("
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/accessibility/SecureSettingsContentObserver.java"
+            line="83"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="            mContentResolver.unregisterContentObserver(mContentObserver);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/accessibility/SecureSettingsContentObserver.java"
+            line="100"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="            mContentResolver.registerContentObserver(uri, false, mObserver, mCurrentUser);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/tuner/TunerServiceImpl.java"
+            line="219"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="        mContentResolver.unregisterContentObserver(mObserver);"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/tuner/TunerServiceImpl.java"
+            line="241"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="            mContentResolver.registerContentObserver(uri, false, mObserver, mCurrentUser);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/tuner/TunerServiceImpl.java"
+            line="243"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="            mContext.getContentResolver().registerContentObserver(ZEN_MODE_URI, false, this);"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogControllerImpl.java"
+            line="1235"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="            mContext.getContentResolver().registerContentObserver(ZEN_MODE_CONFIG_URI, false, this);"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogControllerImpl.java"
+            line="1236"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="            mContext.getContentResolver().unregisterContentObserver(this);"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogControllerImpl.java"
+            line="1240"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.unregisterContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.unregisterContentObserver()`"
+        errorLine1="                mResolver.unregisterContentObserver(this);"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/ZenModeControllerImpl.java"
+            line="377"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="            mResolver.registerContentObserver("
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/ZenModeControllerImpl.java"
+            line="379"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="RegisterContentObserverViaContentResolver"
+        message="`ContentResolver.registerContentObserver()` should be replaced with an appropriate interface API call, for eg.`&lt;SettingsProxy>/&lt;UserSettingsProxy>.registerContentObserver()`"
+        errorLine1="            mResolver.registerContentObserver("
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/ZenModeControllerImpl.java"
+            line="381"
+            column="23"/>
     </issue>
 
 </issues>

@@ -42,7 +42,7 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
-                <xs:element type="thermalThrottling" name="thermalThrottling">
+                <xs:element type="thermalThrottling" name="thermalThrottling" minOccurs="0" maxOccurs="1">
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -177,6 +177,19 @@
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element name="supportsVrr" type="xs:boolean" minOccurs="0">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Table that translates doze brightness sensor values to brightness values in
+                the float scale [0, 1]; -1 means the current brightness should be kept.
+                The following formula should be used for conversion between nits and the float
+                scale: float = (nits - minNits) / (maxNits - minNits). minNits and maxNits are
+                defined in screenBrightnessMap. -->
+                <xs:element type="float-array" name="dozeBrightnessSensorValueToBrightness">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- The default screen brightness in the scale [0, 1] to use while the device is
+                dozing. -->
+                <xs:element type="nonNegativeDecimal" name="defaultDozeBrightness">
                     <xs:annotation name="final"/>
                 </xs:element>
             </xs:sequence>
@@ -315,6 +328,42 @@
         <xs:element name="screenBrightnessRampDecrease" type="nonNegativeDecimal">
             <xs:annotation name="final"/>
         </xs:element>
+
+        <!-- The minimum HDR layer % at which hdr boost will be applied with transition point cap.
+             Should be lower or equal to minimumHdrPercentOfScreenForHbm. -->
+        <xs:element name="minimumHdrPercentOfScreenForNbm" type="nonNegativeDecimal"
+            minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- The minimum HDR layer size at which hdr boost will be applied. -->
+        <xs:element name="minimumHdrPercentOfScreenForHbm" type="nonNegativeDecimal"
+            minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- If hdr boost is allowed in low power mode. -->
+        <xs:element name="allowInLowPowerMode" type="xs:boolean" minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- sdrNits, hdrRatio This LUT specifies how to boost HDR brightness at given SDR brightness (nits). -->
+        <!-- sdr brightness to hdr boost ratio map
+           Format: first = sdrNits, second = hdrRatio. E.g. :
+           <sdrHdrRatioMap>
+               <point>
+                   <first>2.0</first>   // sdrNits
+                   <second>4.0</second> // hdrRatio
+               </point>
+               ....
+           </sdrHdrRatioMap>
+        -->
+        <xs:element type="nonNegativeFloatToFloatMap" name="sdrHdrRatioMap" minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+
+
     </xs:complexType>
 
     <!-- Maps to PowerManager.THERMAL_STATUS_* values. -->
@@ -415,7 +464,15 @@
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
-        <xs:element name="pollingWindowMillis" type="xs:nonNegativeInteger">
+        <xs:element name="customAnimationRateSec" type="nonNegativeDecimal" minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="pollingWindowMaxMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="pollingWindowMinMillis" type="xs:nonNegativeInteger">
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
@@ -820,6 +877,12 @@
     <xs:complexType name="integer-array">
         <xs:sequence>
             <xs:element name="item" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="float-array">
+        <xs:sequence>
+            <xs:element name="item" type="nonNegativeDecimal" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 

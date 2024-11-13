@@ -26,4 +26,12 @@
         <option name="package" value="com.android.internal.tests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
     </test>
+
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="pull-pattern-keys" value="perfetto_file_path"/>
+        <option name="directory-keys"
+            value="/data/user/0/com.android.internal.tests/files"/>
+        <option name="collect-on-run-ended-only" value="true"/>
+        <option name="clean-up" value="true"/>
+    </metrics_collector>
 </configuration>

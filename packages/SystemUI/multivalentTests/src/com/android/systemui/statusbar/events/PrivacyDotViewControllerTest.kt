@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.events
 
 import android.graphics.Point
 import android.graphics.Rect
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
 import android.view.DisplayAdjustments
@@ -28,7 +26,6 @@ import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.FakeStatusBarStateController
@@ -297,8 +294,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_PRIVACY_DOT_UNFOLD_WRONG_CORNER_FIX)
-    fun initialize_newViews_fixFlagEnabled_gravityIsUpdated() {
+    fun initialize_newViews_gravityIsUpdated() {
         val newTopLeftView = initDotView()
         val newTopRightView = initDotView()
         val newBottomLeftView = initDotView()
@@ -318,28 +314,6 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
             .isNotEqualTo(UNSPECIFIED_GRAVITY)
     }
 
-    @Test
-    @DisableFlags(Flags.FLAG_PRIVACY_DOT_UNFOLD_WRONG_CORNER_FIX)
-    fun initialize_newViews_fixFlagDisabled_gravityIsNotUpdated() {
-        val newTopLeftView = initDotView()
-        val newTopRightView = initDotView()
-        val newBottomLeftView = initDotView()
-        val newBottomRightView = initDotView()
-        setRotation(ROTATION_LANDSCAPE) // Bottom right used in landscape
-
-        val controller = createAndInitializeController()
-        // Re-init with different views, but same rotation
-        controller.initialize(
-            newTopLeftView,
-            newTopRightView,
-            newBottomLeftView,
-            newBottomRightView
-        )
-
-        assertThat((newBottomRightView.layoutParams as FrameLayout.LayoutParams).gravity)
-            .isEqualTo(UNSPECIFIED_GRAVITY)
-    }
-
     private fun setRotation(rotation: Int) {
         whenever(mockDisplay.rotation).thenReturn(rotation)
     }
@@ -347,7 +321,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
     private fun initDotView(): View {
         val privacyDot = View(context).also { it.id = R.id.privacy_dot }
         return FrameLayout(context).also {
-            it.layoutParams = FrameLayout.LayoutParams(/* width = */ 0, /* height = */ 0)
+            it.layoutParams = FrameLayout.LayoutParams(/* width= */ 0, /* height= */ 0)
             it.addView(privacyDot)
         }
     }

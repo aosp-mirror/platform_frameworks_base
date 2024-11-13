@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.overlayKeys
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.model.Scenes
@@ -46,19 +47,9 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
 
     @Test
-    fun allSceneKeys() {
+    fun allContentKeys() {
         val underTest = kosmos.sceneContainerRepository
-        assertThat(underTest.allSceneKeys())
-            .isEqualTo(
-                listOf(
-                    Scenes.QuickSettings,
-                    Scenes.Shade,
-                    Scenes.Lockscreen,
-                    Scenes.Bouncer,
-                    Scenes.Gone,
-                    Scenes.Communal,
-                )
-            )
+        assertThat(underTest.allContentKeys).isEqualTo(kosmos.sceneKeys + kosmos.overlayKeys)
     }
 
     @Test
@@ -73,6 +64,18 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
             underTest.snapToScene(Scenes.QuickSettings)
             assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
+        }
+
+    // TODO(b/356596436): Add tests for showing, hiding, and replacing overlays after we've defined
+    //  them.
+    @Test
+    fun currentOverlays() =
+        testScope.runTest {
+            val underTest = kosmos.sceneContainerRepository
+            val currentOverlays by collectLastValue(underTest.currentOverlays)
+            assertThat(currentOverlays).isEmpty()
+
+            // TODO(b/356596436): When we have a first overlay, add it here and assert contains.
         }
 
     @Test(expected = IllegalStateException::class)

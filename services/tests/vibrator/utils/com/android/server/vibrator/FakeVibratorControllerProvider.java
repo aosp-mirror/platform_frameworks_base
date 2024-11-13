@@ -17,8 +17,11 @@
 package com.android.server.vibrator;
 
 import android.annotation.Nullable;
+import android.hardware.vibrator.IVibrator;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
@@ -45,6 +48,7 @@ public final class FakeVibratorControllerProvider {
 
     private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();
     private final Map<Long, List<VibrationEffectSegment>> mEffectSegments = new TreeMap<>();
+    private final Map<Long, List<VibrationEffect.VendorEffect>> mVendorEffects = new TreeMap<>();
     private final Map<Long, List<Integer>> mBraking = new HashMap<>();
     private final List<Float> mAmplitudes = new ArrayList<>();
     private final List<Boolean> mExternalControlStates = new ArrayList<>();
@@ -64,14 +68,22 @@ public final class FakeVibratorControllerProvider {
     private int[] mSupportedPrimitives;
     private int mCompositionSizeMax;
     private int mPwleSizeMax;
+    private int mMaxEnvelopeEffectSize;
+    private int mMinEnvelopeEffectControlPointDurationMillis;
+    private int mMaxEnvelopeEffectControlPointDurationMillis;
     private float mMinFrequency = Float.NaN;
     private float mResonantFrequency = Float.NaN;
     private float mFrequencyResolution = Float.NaN;
     private float mQFactor = Float.NaN;
     private float[] mMaxAmplitudes;
+    private long mVendorEffectDuration = EFFECT_DURATION;
 
     void recordEffectSegment(long vibrationId, VibrationEffectSegment segment) {
         mEffectSegments.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(segment);
+    }
+
+    void recordVendorEffect(long vibrationId, VibrationEffect.VendorEffect vendorEffect) {
+        mVendorEffects.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(vendorEffect);
     }
 
     void recordBraking(long vibrationId, int braking) {
@@ -127,6 +139,21 @@ public final class FakeVibratorControllerProvider {
             applyLatency(mOnLatency);
             scheduleListener(EFFECT_DURATION, vibrationId);
             return EFFECT_DURATION;
+        }
+
+        @Override
+        public long performVendorEffect(Parcel vendorData, long strength, float scale,
+                float adaptiveScale, long vibrationId) {
+            if ((mCapabilities & IVibrator.CAP_PERFORM_VENDOR_EFFECTS) == 0) {
+                return 0;
+            }
+            PersistableBundle bundle = PersistableBundle.CREATOR.createFromParcel(vendorData);
+            recordVendorEffect(vibrationId,
+                    new VibrationEffect.VendorEffect(bundle, (int) strength, scale, adaptiveScale));
+            applyLatency(mOnLatency);
+            scheduleListener(mVendorEffectDuration, vibrationId);
+            // HAL has unknown duration for vendor effects.
+            return Long.MAX_VALUE;
         }
 
         @Override
@@ -193,6 +220,11 @@ public final class FakeVibratorControllerProvider {
             infoBuilder.setQFactor(mQFactor);
             infoBuilder.setFrequencyProfile(new VibratorInfo.FrequencyProfile(
                     mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
+            infoBuilder.setMaxEnvelopeEffectSize(mMaxEnvelopeEffectSize);
+            infoBuilder.setMinEnvelopeEffectControlPointDurationMillis(
+                    mMinEnvelopeEffectControlPointDurationMillis);
+            infoBuilder.setMaxEnvelopeEffectControlPointDurationMillis(
+                    mMaxEnvelopeEffectControlPointDurationMillis);
             return mIsInfoLoadSuccessful;
         }
 
@@ -328,6 +360,31 @@ public final class FakeVibratorControllerProvider {
         mMaxAmplitudes = maxAmplitudes;
     }
 
+    /** Set the duration of vendor effects in fake vibrator hardware. */
+    public void setVendorEffectDuration(long durationMs) {
+        mVendorEffectDuration = durationMs;
+    }
+
+    /**
+     * Set the maximum number of envelope effects control points supported in fake vibrator
+     * hardware.
+     */
+    public void setMaxEnvelopeEffectSize(int envelopeEffectControlPointsMax) {
+        mMaxEnvelopeEffectSize = envelopeEffectControlPointsMax;
+    }
+
+    /** Set the envelope effect minimum segment duration in fake vibrator hardware. */
+    public void setMinEnvelopeEffectControlPointDurationMillis(
+            int minEnvelopeEffectControlPointDurationMillis) {
+        mMinEnvelopeEffectControlPointDurationMillis = minEnvelopeEffectControlPointDurationMillis;
+    }
+
+    /** Set the envelope effect maximum segment duration in fake vibrator hardware. */
+    public void setMaxEnvelopeEffectControlPointDurationMillis(
+            int maxEnvelopeEffectControlPointDurationMillis) {
+        mMaxEnvelopeEffectControlPointDurationMillis = maxEnvelopeEffectControlPointDurationMillis;
+    }
+
     /**
      * Return the amplitudes set by this controller, including zeroes for each time the vibrator was
      * turned off.
@@ -366,6 +423,29 @@ public final class FakeVibratorControllerProvider {
         }
         return result;
     }
+
+    /** Return list of {@link VibrationEffect.VendorEffect} played by this controller, in order. */
+    public List<VibrationEffect.VendorEffect> getVendorEffects(long vibrationId) {
+        if (mVendorEffects.containsKey(vibrationId)) {
+            return new ArrayList<>(mVendorEffects.get(vibrationId));
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Returns a list of all vibrations' effect segments, for external-use where vibration IDs
+     * aren't exposed.
+     */
+    public List<VibrationEffect.VendorEffect> getAllVendorEffects() {
+        // Returns segments in order of vibrationId, which increases over time. TreeMap gives order.
+        ArrayList<VibrationEffect.VendorEffect> result = new ArrayList<>();
+        for (List<VibrationEffect.VendorEffect> subList : mVendorEffects.values()) {
+            result.addAll(subList);
+        }
+        return result;
+    }
+
     /** Return list of states set for external control to the fake vibrator hardware. */
     public List<Boolean> getExternalControlStates() {
         return mExternalControlStates;

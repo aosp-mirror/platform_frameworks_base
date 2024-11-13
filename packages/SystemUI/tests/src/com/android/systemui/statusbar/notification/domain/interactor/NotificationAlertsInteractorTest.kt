@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.app.StatusBarManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
@@ -26,8 +27,10 @@ import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class NotificationAlertsInteractorTest : SysuiTestCase() {
 
     @Component(modules = [SysUITestModule::class])

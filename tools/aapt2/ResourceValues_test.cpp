@@ -184,6 +184,35 @@ TEST(ResourcesValuesTest, StringClones) {
   EXPECT_THAT(pool_b.strings()[0]->value, StrEq("hello"));
 }
 
+TEST(ResourcesValuesTest, StringEquals) {
+  android::StringPool pool;
+
+  String str(pool.MakeRef("hello", android::StringPool::Context(test::ParseConfigOrDie("en"))));
+  String str2(pool.MakeRef("hello"));
+  EXPECT_TRUE(str.Equals(&str2));
+  EXPECT_TRUE(str2.Equals(&str));
+
+  String str3(pool.MakeRef("how are you"));
+  EXPECT_FALSE(str.Equals(&str3));
+}
+
+TEST(ResourcesValuesTest, StyledStringEquals) {
+  android::StringPool pool;
+
+  StyledString ss(pool.MakeRef(android::StyleString{"hello", {{"b", 0, 1}, {"u", 2, 4}}}));
+  StyledString ss2(pool.MakeRef(android::StyleString{"hello", {{"b", 0, 1}, {"u", 2, 4}}}));
+  StyledString ss3(pool.MakeRef(android::StyleString{"hi", {{"b", 0, 1}, {"u", 2, 4}}}));
+  StyledString ss4(pool.MakeRef(android::StyleString{"hello", {{"b", 0, 1}}}));
+  StyledString ss5(pool.MakeRef(android::StyleString{"hello", {{"b", 0, 1}, {"u", 3, 4}}}));
+  StyledString ss6(pool.MakeRef(android::StyleString{"hello", {{"b", 0, 1}, {"s", 2, 4}}}));
+  EXPECT_TRUE(ss.Equals(&ss2));
+  EXPECT_TRUE(ss2.Equals(&ss));
+  EXPECT_FALSE(ss.Equals(&ss3));
+  EXPECT_FALSE(ss.Equals(&ss4));
+  EXPECT_FALSE(ss.Equals(&ss5));
+  EXPECT_FALSE(ss.Equals(&ss6));
+}
+
 TEST(ResourceValuesTest, StyleMerges) {
   android::StringPool pool_a;
   android::StringPool pool_b;

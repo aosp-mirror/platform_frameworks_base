@@ -74,6 +74,9 @@ public class BitmapUploadActivity extends AppCompatActivity {
         }
     }
 
+    private ObjectAnimator mColorValueAnimator;
+    private ObjectAnimator mYAnimator;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,16 +84,28 @@ public class BitmapUploadActivity extends AppCompatActivity {
 
         // animate color to force bitmap uploads
         UploadView uploadView = findViewById(R.id.upload_view);
-        ObjectAnimator colorValueAnimator = ObjectAnimator.ofInt(uploadView, "colorValue", 0, 255);
-        colorValueAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        colorValueAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        colorValueAnimator.start();
+        mColorValueAnimator = ObjectAnimator.ofInt(uploadView, "colorValue", 0, 255);
+        mColorValueAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mColorValueAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        mColorValueAnimator.start();
 
         // animate scene root to guarantee there's a minimum amount of GPU rendering work
         View uploadRoot = findViewById(R.id.upload_root);
-        ObjectAnimator yAnimator = ObjectAnimator.ofFloat(uploadRoot, "translationY", 0, 100);
-        yAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        yAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        yAnimator.start();
+        mYAnimator = ObjectAnimator.ofFloat(uploadRoot, "translationY", 0, 100);
+        mYAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mYAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        mYAnimator.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mColorValueAnimator != null) {
+            mColorValueAnimator.cancel();
+        }
+
+        if (mYAnimator != null) {
+            mYAnimator.cancel();
+        }
     }
 }

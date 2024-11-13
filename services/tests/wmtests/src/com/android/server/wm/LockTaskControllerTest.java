@@ -219,7 +219,7 @@ public class LockTaskControllerTest {
         mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
 
         // THEN a pinning request should be shown
-        verify(mStatusBarManagerInternal).showScreenPinningRequest(anyInt());
+        verify(mStatusBarManagerInternal).showScreenPinningRequest(anyInt(), anyInt());
     }
 
     @Test
@@ -769,9 +769,11 @@ public class LockTaskControllerTest {
 
     private Task getTask(Intent intent, int lockTaskAuth) {
         Task tr = mock(Task.class);
+        DisplayContent dc = mock(DisplayContent.class);
         tr.mLockTaskAuth = lockTaskAuth;
         tr.intent = intent;
         tr.mUserId = TEST_USER_ID;
+        tr.mDisplayContent = dc;
         return tr;
     }
 

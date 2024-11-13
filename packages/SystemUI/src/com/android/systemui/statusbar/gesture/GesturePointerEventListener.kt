@@ -103,7 +103,7 @@ constructor(context: Context, gestureDetector: GesturePointerEventDetector) : Co
         mSwipeDistanceThreshold =
             r.getDimensionPixelSize(R.dimen.system_gestures_distance_threshold)
         val display = DisplayManagerGlobal.getInstance().getRealDisplay(mContext.displayId)
-        val displayCutout = display.cutout
+        val displayCutout = display?.cutout
         if (displayCutout != null) {
             // Expand swipe start threshold such that we can catch touches that just start beyond
             // the notch area

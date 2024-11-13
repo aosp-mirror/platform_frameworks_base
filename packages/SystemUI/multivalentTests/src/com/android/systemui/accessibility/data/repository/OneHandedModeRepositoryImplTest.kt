@@ -22,11 +22,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -35,14 +36,14 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
 class OneHandedModeRepositoryImplTest : SysuiTestCase() {
 
     private val testUser1 = UserHandle.of(1)!!
     private val testUser2 = UserHandle.of(2)!!
-    private val testDispatcher = StandardTestDispatcher()
-    private val scope = TestScope(testDispatcher)
-    private val settings: FakeSettings = FakeSettings()
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val scope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
 
     private val underTest: OneHandedModeRepository =
         OneHandedModeRepositoryImpl(

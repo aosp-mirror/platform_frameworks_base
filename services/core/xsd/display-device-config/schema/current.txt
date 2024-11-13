@@ -125,9 +125,11 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getAmbientLightHorizonLong();
     method public final java.math.BigInteger getAmbientLightHorizonShort();
     method public com.android.server.display.config.AutoBrightness getAutoBrightness();
+    method public final java.math.BigDecimal getDefaultDozeBrightness();
     method @Nullable public final com.android.server.display.config.DensityMapping getDensityMapping();
     method @NonNull public final com.android.server.display.config.Thresholds getDisplayBrightnessChangeThresholds();
     method public final com.android.server.display.config.Thresholds getDisplayBrightnessChangeThresholdsIdle();
+    method public final com.android.server.display.config.FloatArray getDozeBrightnessSensorValueToBrightness();
     method public final com.android.server.display.config.EvenDimmerMode getEvenDimmer();
     method @Nullable public final com.android.server.display.config.HdrBrightnessConfig getHdrBrightnessConfig();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
@@ -163,9 +165,11 @@ package com.android.server.display.config {
     method public final void setAmbientLightHorizonLong(java.math.BigInteger);
     method public final void setAmbientLightHorizonShort(java.math.BigInteger);
     method public void setAutoBrightness(com.android.server.display.config.AutoBrightness);
+    method public final void setDefaultDozeBrightness(java.math.BigDecimal);
     method public final void setDensityMapping(@Nullable com.android.server.display.config.DensityMapping);
     method public final void setDisplayBrightnessChangeThresholds(@NonNull com.android.server.display.config.Thresholds);
     method public final void setDisplayBrightnessChangeThresholdsIdle(com.android.server.display.config.Thresholds);
+    method public final void setDozeBrightnessSensorValueToBrightness(com.android.server.display.config.FloatArray);
     method public final void setEvenDimmer(com.android.server.display.config.EvenDimmerMode);
     method public final void setHdrBrightnessConfig(@Nullable com.android.server.display.config.HdrBrightnessConfig);
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
@@ -214,6 +218,11 @@ package com.android.server.display.config {
     method public void setTransitionPoint(java.math.BigDecimal);
   }
 
+  public class FloatArray {
+    ctor public FloatArray();
+    method public java.util.List<java.math.BigDecimal> getItem();
+  }
+
   public class HbmTiming {
     ctor public HbmTiming();
     method @NonNull public final java.math.BigInteger getTimeMaxSecs_all();
@@ -226,16 +235,24 @@ package com.android.server.display.config {
 
   public class HdrBrightnessConfig {
     ctor public HdrBrightnessConfig();
+    method @NonNull public final boolean getAllowInLowPowerMode();
     method public final java.math.BigInteger getBrightnessDecreaseDebounceMillis();
     method public final java.math.BigInteger getBrightnessIncreaseDebounceMillis();
     method @NonNull public final com.android.server.display.config.NonNegativeFloatToFloatMap getBrightnessMap();
+    method @Nullable public final java.math.BigDecimal getMinimumHdrPercentOfScreenForHbm();
+    method @Nullable public final java.math.BigDecimal getMinimumHdrPercentOfScreenForNbm();
     method public final java.math.BigDecimal getScreenBrightnessRampDecrease();
     method public final java.math.BigDecimal getScreenBrightnessRampIncrease();
+    method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getSdrHdrRatioMap();
+    method public final void setAllowInLowPowerMode(@NonNull boolean);
     method public final void setBrightnessDecreaseDebounceMillis(java.math.BigInteger);
     method public final void setBrightnessIncreaseDebounceMillis(java.math.BigInteger);
     method public final void setBrightnessMap(@NonNull com.android.server.display.config.NonNegativeFloatToFloatMap);
+    method public final void setMinimumHdrPercentOfScreenForHbm(@Nullable java.math.BigDecimal);
+    method public final void setMinimumHdrPercentOfScreenForNbm(@Nullable java.math.BigDecimal);
     method public final void setScreenBrightnessRampDecrease(java.math.BigDecimal);
     method public final void setScreenBrightnessRampIncrease(java.math.BigDecimal);
+    method public final void setSdrHdrRatioMap(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);
   }
 
   public class HighBrightnessMode {
@@ -328,10 +345,14 @@ package com.android.server.display.config {
   public class PowerThrottlingConfig {
     ctor public PowerThrottlingConfig();
     method @NonNull public final java.math.BigDecimal getBrightnessLowestCapAllowed();
-    method @NonNull public final java.math.BigInteger getPollingWindowMillis();
+    method @NonNull public final java.math.BigDecimal getCustomAnimationRateSec();
+    method @NonNull public final java.math.BigInteger getPollingWindowMaxMillis();
+    method @NonNull public final java.math.BigInteger getPollingWindowMinMillis();
     method public final java.util.List<com.android.server.display.config.PowerThrottlingMap> getPowerThrottlingMap();
     method public final void setBrightnessLowestCapAllowed(@NonNull java.math.BigDecimal);
-    method public final void setPollingWindowMillis(@NonNull java.math.BigInteger);
+    method public final void setCustomAnimationRateSec(@NonNull java.math.BigDecimal);
+    method public final void setPollingWindowMaxMillis(@NonNull java.math.BigInteger);
+    method public final void setPollingWindowMinMillis(@NonNull java.math.BigInteger);
   }
 
   public class PowerThrottlingMap {

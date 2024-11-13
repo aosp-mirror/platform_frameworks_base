@@ -35,6 +35,7 @@ import android.graphics.drawable.Icon
 import android.util.Log
 import android.util.Size
 import androidx.core.content.res.ResourcesCompat
+import com.android.app.tracing.traceSection
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -162,20 +163,21 @@ constructor(
         @Px maxWidth: Int = DEFAULT_MAX_SAFE_BITMAP_SIZE_PX,
         @Px maxHeight: Int = DEFAULT_MAX_SAFE_BITMAP_SIZE_PX,
         allocator: Int = ImageDecoder.ALLOCATOR_DEFAULT
-    ): Bitmap? {
-        return try {
-            ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
-                configureDecoderForMaximumSize(decoder, info.size, maxWidth, maxHeight)
-                decoder.allocator = allocator
+    ): Bitmap? =
+        traceSection("ImageLoader#loadBitmap") {
+            return try {
+                ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+                    configureDecoderForMaximumSize(decoder, info.size, maxWidth, maxHeight)
+                    decoder.allocator = allocator
+                }
+            } catch (e: IOException) {
+                Log.w(TAG, "Failed to load source $source", e)
+                return null
+            } catch (e: DecodeException) {
+                Log.w(TAG, "Failed to decode source $source", e)
+                return null
             }
-        } catch (e: IOException) {
-            Log.w(TAG, "Failed to load source $source", e)
-            return null
-        } catch (e: DecodeException) {
-            Log.w(TAG, "Failed to decode source $source", e)
-            return null
         }
-    }
 
     /**
      * Loads passed [Source] on a background thread and returns the [Drawable].
@@ -253,28 +255,31 @@ constructor(
         @Px maxWidth: Int = DEFAULT_MAX_SAFE_BITMAP_SIZE_PX,
         @Px maxHeight: Int = DEFAULT_MAX_SAFE_BITMAP_SIZE_PX,
         allocator: Int = ImageDecoder.ALLOCATOR_DEFAULT
-    ): Drawable? {
-        return try {
-            loadDrawableSync(
-                toImageDecoderSource(source, defaultContext),
-                maxWidth,
-                maxHeight,
-                allocator
-            )
-                ?:
-                // If we have a resource, retry fallback using the "normal" Resource loading system.
-                // This will come into effect in cases like trying to load AnimatedVectorDrawable.
-                if (source is Res) {
-                    val context = source.context ?: defaultContext
-                    ResourcesCompat.getDrawable(context.resources, source.resId, context.theme)
-                } else {
-                    null
-                }
-        } catch (e: NotFoundException) {
-            Log.w(TAG, "Couldn't load resource $source", e)
-            null
+    ): Drawable? =
+        traceSection("ImageLoader#loadDrawable") {
+            return try {
+                loadDrawableSync(
+                    toImageDecoderSource(source, defaultContext),
+                    maxWidth,
+                    maxHeight,
+                    allocator
+                )
+                    ?:
+                    // If we have a resource, retry fallback using the "normal" Resource loading
+                    // system.
+                    // This will come into effect in cases like trying to load
+                    // AnimatedVectorDrawable.
+                    if (source is Res) {
+                        val context = source.context ?: defaultContext
+                        ResourcesCompat.getDrawable(context.resources, source.resId, context.theme)
+                    } else {
+                        null
+                    }
+            } catch (e: NotFoundException) {
+                Log.w(TAG, "Couldn't load resource $source", e)
+                null
+            }
         }
-    }
 
     /**
      * Loads passed [ImageDecoder.Source] synchronously and returns the drawable.
@@ -297,20 +302,21 @@ constructor(
         @Px maxWidth: Int = DEFAULT_MAX_SAFE_BITMAP_SIZE_PX,
         @Px maxHeight: Int = DEFAULT_MAX_SAFE_BITMAP_SIZE_PX,
         allocator: Int = ImageDecoder.ALLOCATOR_DEFAULT
-    ): Drawable? {
-        return try {
-            ImageDecoder.decodeDrawable(source) { decoder, info, _ ->
-                configureDecoderForMaximumSize(decoder, info.size, maxWidth, maxHeight)
-                decoder.allocator = allocator
+    ): Drawable? =
+        traceSection("ImageLoader#loadDrawable") {
+            return try {
+                ImageDecoder.decodeDrawable(source) { decoder, info, _ ->
+                    configureDecoderForMaximumSize(decoder, info.size, maxWidth, maxHeight)
+                    decoder.allocator = allocator
+                }
+            } catch (e: IOException) {
+                Log.w(TAG, "Failed to load source $source", e)
+                return null
+            } catch (e: DecodeException) {
+                Log.w(TAG, "Failed to decode source $source", e)
+                return null
             }
-        } catch (e: IOException) {
-            Log.w(TAG, "Failed to load source $source", e)
-            return null
-        } catch (e: DecodeException) {
-            Log.w(TAG, "Failed to decode source $source", e)
-            return null
         }
-    }
 
     /** Loads icon drawable while attempting to size restrict the drawable. */
     @WorkerThread
@@ -320,55 +326,59 @@ constructor(
         @Px maxWidth: Int = DEFAULT_MAX_SAFE_BITMAP_SIZE_PX,
         @Px maxHeight: Int = DEFAULT_MAX_SAFE_BITMAP_SIZE_PX,
         allocator: Int = ImageDecoder.ALLOCATOR_DEFAULT
-    ): Drawable? {
-        return when (icon.type) {
-            Icon.TYPE_URI,
-            Icon.TYPE_URI_ADAPTIVE_BITMAP -> {
-                val source = ImageDecoder.createSource(context.contentResolver, icon.uri)
-                loadDrawableSync(source, maxWidth, maxHeight, allocator)
-            }
-            Icon.TYPE_RESOURCE -> {
-                val resources = resolveResourcesForIcon(context, icon)
-                resources?.let {
+    ): Drawable? =
+        traceSection("ImageLoader#loadDrawable") {
+            return when (icon.type) {
+                Icon.TYPE_URI,
+                Icon.TYPE_URI_ADAPTIVE_BITMAP -> {
+                    val source = ImageDecoder.createSource(context.contentResolver, icon.uri)
+                    loadDrawableSync(source, maxWidth, maxHeight, allocator)
+                }
+                Icon.TYPE_RESOURCE -> {
+                    val resources = resolveResourcesForIcon(context, icon)
+                    resources?.let {
+                        loadDrawableSync(
+                            ImageDecoder.createSource(it, icon.resId),
+                            maxWidth,
+                            maxHeight,
+                            allocator
+                        )
+                    }
+                        // Fallback to non-ImageDecoder load if the attempt failed (e.g. the
+                        // resource
+                        // is a Vector drawable which ImageDecoder doesn't support.)
+                        ?: loadIconDrawable(icon, context)
+                }
+                Icon.TYPE_BITMAP -> {
+                    BitmapDrawable(context.resources, icon.bitmap)
+                }
+                Icon.TYPE_ADAPTIVE_BITMAP -> {
+                    AdaptiveIconDrawable(null, BitmapDrawable(context.resources, icon.bitmap))
+                }
+                Icon.TYPE_DATA -> {
                     loadDrawableSync(
-                        ImageDecoder.createSource(it, icon.resId),
+                        ImageDecoder.createSource(icon.dataBytes, icon.dataOffset, icon.dataLength),
                         maxWidth,
                         maxHeight,
                         allocator
                     )
                 }
-                // Fallback to non-ImageDecoder load if the attempt failed (e.g. the resource
-                // is a Vector drawable which ImageDecoder doesn't support.)
-                ?: loadIconDrawable(icon, context)
+                else -> {
+                    // We don't recognize this icon, just fallback.
+                    loadIconDrawable(icon, context)
+                }
+            }?.let { drawable ->
+                // Icons carry tint which we need to propagate down to a Drawable.
+                tintDrawable(icon, drawable)
+                drawable
             }
-            Icon.TYPE_BITMAP -> {
-                BitmapDrawable(context.resources, icon.bitmap)
-            }
-            Icon.TYPE_ADAPTIVE_BITMAP -> {
-                AdaptiveIconDrawable(null, BitmapDrawable(context.resources, icon.bitmap))
-            }
-            Icon.TYPE_DATA -> {
-                loadDrawableSync(
-                    ImageDecoder.createSource(icon.dataBytes, icon.dataOffset, icon.dataLength),
-                    maxWidth,
-                    maxHeight,
-                    allocator
-                )
-            }
-            else -> {
-                // We don't recognize this icon, just fallback.
-                loadIconDrawable(icon, context)
-            }
-        }?.let { drawable ->
-            // Icons carry tint which we need to propagate down to a Drawable.
-            tintDrawable(icon, drawable)
-            drawable
         }
-    }
 
     @WorkerThread
     fun loadIconDrawable(icon: Icon, context: Context): Drawable? {
-        icon.loadDrawable(context)?.let { return it }
+        icon.loadDrawable(context)?.let {
+            return it
+        }
 
         Log.w(TAG, "Failed to load drawable for $icon")
         return null

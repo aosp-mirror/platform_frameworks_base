@@ -31,6 +31,20 @@ public abstract class SQLiteClosable implements Closeable {
     private int mReferenceCount = 1;
 
     /**
+     * True if the instance should record when it was closed.  Tracking closure can be expensive,
+     * so it is best reserved for subclasses that have long lifetimes.
+     * @hide
+     */
+    protected boolean mTrackClosure = false;
+
+    /**
+     * The caller that finally released this instance.  If this is not null, it is supplied as the
+     * cause to the IllegalStateException that is thrown when the object is reopened.  Subclasses
+     * are responsible for populating this field, if they wish to use it.
+     */
+    private Throwable mClosedBy = null;
+
+    /**
      * Called when the last reference to the object was released by
      * a call to {@link #releaseReference()} or {@link #close()}.
      */
@@ -57,7 +71,7 @@ public abstract class SQLiteClosable implements Closeable {
         synchronized(this) {
             if (mReferenceCount <= 0) {
                 throw new IllegalStateException(
-                        "attempt to re-open an already-closed object: " + this);
+                    "attempt to re-open an already-closed object: " + this, mClosedBy);
             }
             mReferenceCount++;
         }
@@ -108,5 +122,11 @@ public abstract class SQLiteClosable implements Closeable {
      */
     public void close() {
         releaseReference();
+        synchronized (this) {
+            if (mTrackClosure && (mClosedBy == null)) {
+                String name = getClass().getName();
+                mClosedBy = new Exception("closed by " + name + ".close()").fillInStackTrace();
+            }
+        }
     }
 }

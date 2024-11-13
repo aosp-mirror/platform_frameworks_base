@@ -21,17 +21,12 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
-import androidx.constraintlayout.widget.ConstraintSet.END
-import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
-import androidx.constraintlayout.widget.ConstraintSet.START
-import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.compose.animation.scene.transitions
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
@@ -42,10 +37,10 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.ui.binder.DeviceEntryUnlockTrackerViewBinder
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
@@ -69,10 +64,13 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.google.android.msdl.domain.MSDLPlayer
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -103,16 +101,18 @@ constructor(
     private val falsingManager: FalsingManager,
     private val keyguardClockViewModel: KeyguardClockViewModel,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
-    private val lockscreenContentViewModel: LockscreenContentViewModel,
+    private val lockscreenContentViewModelFactory: LockscreenContentViewModel.Factory,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
     private val deviceEntryUnlockTrackerViewBinder: Optional<DeviceEntryUnlockTrackerViewBinder>,
+    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
+    @Main private val mainDispatcher: CoroutineDispatcher,
+    private val msdlPlayer: MSDLPlayer,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
     private var indicationAreaHandle: DisposableHandle? = null
-    private val sceneKey = SceneKey("root-view-scene-key")
 
     var keyguardStatusViewController: KeyguardStatusViewController? = null
         get() {
@@ -121,7 +121,7 @@ constructor(
                     keyguardStatusViewComponentFactory.build(
                         LayoutInflater.from(context).inflate(R.layout.keyguard_status_view, null)
                             as KeyguardStatusView,
-                        context.display
+                        context.display,
                     )
                 val controller = statusViewComponent.keyguardStatusViewController
                 controller.init()
@@ -136,29 +136,12 @@ constructor(
         initializeViews()
 
         if (!SceneContainerFlag.isEnabled) {
-            if (ComposeLockscreen.isEnabled) {
-                val composeView =
-                    createLockscreen(
-                        context = context,
-                        viewModel = lockscreenContentViewModel,
-                        blueprints = lockscreenSceneBlueprintsLazy.get(),
-                    )
-                composeView.id = View.generateViewId()
-                val cs = ConstraintSet()
-                cs.clone(keyguardRootView)
-                cs.connect(composeView.id, START, PARENT_ID, START)
-                cs.connect(composeView.id, END, PARENT_ID, END)
-                cs.connect(composeView.id, TOP, PARENT_ID, TOP)
-                cs.connect(composeView.id, BOTTOM, PARENT_ID, BOTTOM)
-                keyguardRootView.addView(composeView)
-            } else {
-                KeyguardBlueprintViewBinder.bind(
-                    keyguardRootView,
-                    keyguardBlueprintViewModel,
-                    keyguardClockViewModel,
-                    smartspaceViewModel,
-                )
-            }
+            KeyguardBlueprintViewBinder.bind(
+                keyguardRootView,
+                keyguardBlueprintViewModel,
+                keyguardClockViewModel,
+                smartspaceViewModel,
+            )
         }
         if (deviceEntryUnlockTrackerViewBinder.isPresent) {
             deviceEntryUnlockTrackerViewBinder.get().bind(keyguardRootView)
@@ -215,12 +198,15 @@ constructor(
                 vibratorHelper,
                 falsingManager,
                 keyguardViewMediator,
+                statusBarKeyguardViewManager,
+                mainDispatcher,
+                msdlPlayer,
             )
     }
 
     private fun createLockscreen(
         context: Context,
-        viewModel: LockscreenContentViewModel,
+        viewModelFactory: LockscreenContentViewModel.Factory,
         blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
     ): View {
         val sceneBlueprints =
@@ -229,17 +215,15 @@ constructor(
             setContent {
                 // STL is used solely to provide a SceneScope to enable us to invoke SceneScope
                 // composables.
-                SceneTransitionLayout(
-                    currentScene = sceneKey,
-                    onChangeScene = {},
-                    transitions = transitions {},
-                ) {
-                    scene(sceneKey) {
+                val currentScene = remember { SceneKey("root-view-scene-key") }
+                val state = remember { MutableSceneTransitionLayoutState(currentScene) }
+                SceneTransitionLayout(state) {
+                    scene(currentScene) {
                         with(
                             LockscreenContent(
-                                viewModel = viewModel,
+                                viewModelFactory = viewModelFactory,
                                 blueprints = sceneBlueprints,
-                                clockInteractor = clockInteractor
+                                clockInteractor = clockInteractor,
                             )
                         ) {
                             Content(modifier = Modifier.fillMaxSize())

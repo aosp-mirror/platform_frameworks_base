@@ -18,8 +18,9 @@ package com.android.systemui.qs.ui.composable
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ fun BrightnessMirror(
     viewModel: BrightnessMirrorViewModel,
     qsSceneAdapter: QSSceneAdapter,
     modifier: Modifier = Modifier,
+    measureFromContainer: Boolean = false,
 ) {
     val isShowing by viewModel.isShowing.collectAsStateWithLifecycle()
     val mirrorAlpha by
@@ -47,9 +49,22 @@ fun BrightnessMirror(
             label = "alphaAnimationBrightnessMirrorShowing",
         )
     val mirrorOffsetAndSize by viewModel.locationAndSize.collectAsStateWithLifecycle()
-    val offset = IntOffset(0, mirrorOffsetAndSize.yOffset)
+    val yOffset =
+        if (measureFromContainer) {
+            mirrorOffsetAndSize.yOffsetFromContainer
+        } else {
+            mirrorOffsetAndSize.yOffsetFromWindow
+        }
+    val offset = IntOffset(0, yOffset)
 
-    Box(modifier = modifier.fillMaxSize().graphicsLayer { alpha = mirrorAlpha }) {
+    // Use unbounded=true as the full mirror (with paddings and background offset) may be larger
+    // than the space we have (but it will fit, because the brightness slider fits).
+    Box(
+        modifier =
+            modifier.fillMaxHeight().wrapContentWidth(unbounded = true).graphicsLayer {
+                alpha = mirrorAlpha
+            }
+    ) {
         QuickSettingsTheme {
             // The assumption for using this AndroidView is that there will be only one in view at
             // a given time (which is a reasonable assumption). Because `QSSceneAdapter` (actually

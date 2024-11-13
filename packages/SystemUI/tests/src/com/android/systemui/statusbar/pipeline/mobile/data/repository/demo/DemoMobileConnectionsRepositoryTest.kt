@@ -19,12 +19,12 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
 import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.log.table.tableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -33,9 +33,9 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,25 +49,19 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
-    private val dumpManager: DumpManager = mock()
+    private val kosmos = testKosmos()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
     private val fakeNetworkEventFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val fakeWifiEventFlow = MutableStateFlow<FakeWifiEventModel?>(null)
-    private val logFactory =
-        TableLogBufferFactory(
-            dumpManager,
-            FakeSystemClock(),
-            mock(),
-            testDispatcher,
-            testScope.backgroundScope,
-        )
 
     private lateinit var underTest: DemoMobileConnectionsRepository
     private lateinit var mobileDataSource: DemoModeMobileConnectionDataSource
@@ -91,7 +85,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                 wifiDataSource = wifiDataSource,
                 scope = testScope.backgroundScope,
                 context = context,
-                logFactory = logFactory,
+                logFactory = kosmos.tableLogBufferFactory,
             )
 
         underTest.startProcessingCommands()

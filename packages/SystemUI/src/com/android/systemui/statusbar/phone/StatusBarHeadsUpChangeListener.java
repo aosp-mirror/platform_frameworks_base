@@ -19,12 +19,12 @@ package com.android.systemui.statusbar.phone;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -112,7 +112,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
     }
 
     private void setHeadsAnimatingAway(boolean headsUpAnimatingAway) {
-        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+        if (!SceneContainerFlag.isEnabled()) {
             mHeadsUpManager.setHeadsUpAnimatingAway(headsUpAnimatingAway);
         }
     }

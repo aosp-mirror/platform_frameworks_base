@@ -16,10 +16,9 @@
 
 package com.android.systemui.settings.brightness.ui.viewmodel
 
-import android.content.applicationContext
 import android.content.res.mainResources
-import android.view.ContextThemeWrapper
 import android.view.View
+import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -27,12 +26,10 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
-import com.android.systemui.settings.brightness.ui.binder.BrightnessMirrorInflater
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.settings.brightness.ui.viewModel.LocationAndSize
 import com.android.systemui.settings.brightnessSliderControllerFactory
 import com.android.systemui.testKosmos
-import com.android.systemui.util.Assert
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -46,9 +43,6 @@ import org.junit.runner.RunWith
 class BrightnessMirrorViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
-
-    private val themedContext =
-        ContextThemeWrapper(kosmos.applicationContext, R.style.Theme_SystemUI_QuickSettings)
 
     private val underTest =
         with(kosmos) {
@@ -76,7 +70,7 @@ class BrightnessMirrorViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun setLocationInWindow_correctLocationAndSize() =
+    fun locationInWindowAndContainer_correctLocationAndSize() =
         with(kosmos) {
             testScope.runTest {
                 val locationAndSize by collectLastValue(underTest.locationAndSize)
@@ -101,6 +95,7 @@ class BrightnessMirrorViewModelTest : SysuiTestCase() {
                         whenever(measuredHeight).thenReturn(height)
                         whenever(measuredWidth).thenReturn(width)
                     }
+                val yOffsetFromContainer = setContainerViewHierarchy(mockView)
 
                 underTest.setLocationAndSize(mockView)
 
@@ -108,7 +103,8 @@ class BrightnessMirrorViewModelTest : SysuiTestCase() {
                     .isEqualTo(
                         // Adjust for padding around the view
                         LocationAndSize(
-                            yOffset = y - padding,
+                            yOffsetFromWindow = y - padding,
+                            yOffsetFromContainer = yOffsetFromContainer - padding,
                             width = width + 2 * padding,
                             height = height + 2 * padding,
                         )
@@ -116,31 +112,20 @@ class BrightnessMirrorViewModelTest : SysuiTestCase() {
             }
         }
 
-    @Test
-    fun setLocationInWindow_paddingSetToRootView() =
-        with(kosmos) {
-            Assert.setTestThread(Thread.currentThread())
-            val padding =
-                mainResources.getDimensionPixelSize(R.dimen.rounded_slider_background_padding)
+    private fun setContainerViewHierarchy(mockView: View): Int {
+        val rootView = FrameLayout(context)
+        val containerView = FrameLayout(context).apply { id = R.id.quick_settings_container }
+        val otherView = FrameLayout(context)
 
-            val view = mock<View>()
+        rootView.addView(containerView)
+        containerView.addView(otherView)
+        otherView.addView(mockView)
 
-            val (_, sliderController) =
-                BrightnessMirrorInflater.inflate(
-                    themedContext,
-                    brightnessSliderControllerFactory,
-                )
-            underTest.setToggleSlider(sliderController)
+        containerView.setLeftTopRightBottom(1, /* top= */ 1, 1, 1)
+        otherView.setLeftTopRightBottom(0, /* top= */ 2, 0, 0)
+        whenever(mockView.parent).thenReturn(otherView)
+        whenever(mockView.top).thenReturn(3)
 
-            underTest.setLocationAndSize(view)
-
-            with(sliderController.rootView) {
-                assertThat(paddingBottom).isEqualTo(padding)
-                assertThat(paddingTop).isEqualTo(padding)
-                assertThat(paddingLeft).isEqualTo(padding)
-                assertThat(paddingRight).isEqualTo(padding)
-            }
-
-            Assert.setTestThread(null)
-        }
+        return 2 + 3
+    }
 }

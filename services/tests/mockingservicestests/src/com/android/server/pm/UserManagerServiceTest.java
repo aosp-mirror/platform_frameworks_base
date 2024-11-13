@@ -52,6 +52,7 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.multiuser.Flags;
 import android.os.PowerManager;
 import android.os.ServiceSpecificException;
@@ -152,6 +153,7 @@ public final class UserManagerServiceTest {
     private File mTestDir;
 
     private Context mSpiedContext;
+    private Resources mSpyResources;
 
     private @Mock PackageManagerService mMockPms;
     private @Mock UserDataPreparer mMockUserDataPreparer;
@@ -192,6 +194,13 @@ public final class UserManagerServiceTest {
         mockGetLocalService(PackageManagerInternal.class, mPackageManagerInternal);
         doNothing().when(mSpiedContext).sendBroadcastAsUser(any(), any(), any());
         mockIsLowRamDevice(false);
+
+        // Called when getting boot user. config_bootToHeadlessSystemUser is false by default.
+        mSpyResources = spy(mSpiedContext.getResources());
+        when(mSpiedContext.getResources()).thenReturn(mSpyResources);
+        doReturn(false)
+                .when(mSpyResources)
+                .getBoolean(com.android.internal.R.bool.config_bootToHeadlessSystemUser);
 
         // Must construct UserManagerService in the UiThread
         mTestDir = new File(mRealContext.getDataDir(), "umstest");
@@ -847,6 +856,16 @@ public final class UserManagerServiceTest {
         assertThrows(ServiceSpecificException.class,
                 () -> mUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
                         USER_TYPE_PROFILE_PRIVATE, 0, mainUser, null));
+    }
+
+    @Test
+    public void testGetBootUser_enableBootToHeadlessSystemUser() {
+        setSystemUserHeadless(true);
+        doReturn(true)
+                .when(mSpyResources)
+                .getBoolean(com.android.internal.R.bool.config_bootToHeadlessSystemUser);
+
+        assertThat(mUms.getBootUser()).isEqualTo(UserHandle.USER_SYSTEM);
     }
 
     /**

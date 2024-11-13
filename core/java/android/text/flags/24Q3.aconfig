@@ -1,0 +1,54 @@
+package: "com.android.text.flags"
+container: "system"
+
+# This aconfig file contains released flags in 24Q3 those cannot be removed.
+
+flag {
+  name: "use_bounds_for_width"
+  is_exported: true
+  namespace: "text"
+  description: "Feature flag for preventing horizontal clipping."
+  bug: "63938206"
+}
+
+flag {
+  name: "word_style_auto"
+  is_exported: true
+  namespace: "text"
+  description: "A feature flag that implements line break word style auto."
+  bug: "280005585"
+}
+
+flag {
+  name: "letter_spacing_justification"
+  is_exported: true
+  namespace: "text"
+  description: "A feature flag that implement inter character justification."
+  bug: "283193133"
+}
+
+flag {
+  name: "fix_line_height_for_locale"
+  is_exported: true
+  namespace: "text"
+  description: "Feature flag that preserve the line height of the TextView and EditText even if the the locale is different from Latin"
+  bug: "303326708"
+}
+
+flag {
+  name: "new_fonts_fallback_xml"
+  is_exported: true
+  namespace: "text"
+  description: "Feature flag for deprecating fonts.xml. By setting true for this feature flag, the new font configuration XML, /system/etc/font_fallback.xml is used. The new XML has a new syntax and flexibility of variable font declarations, but it is not compatible with the apps that reads fonts.xml. So, fonts.xml is maintained as a subset of the font_fallback.xml"
+  # Make read only, as it could be used before the Settings provider is initialized.
+  is_fixed_read_only: true
+  bug: "281769620"
+}
+
+flag {
+  name: "no_break_no_hyphenation_span"
+  is_exported: true
+  namespace: "text"
+  description: "A feature flag that adding new spans that prevents line breaking and hyphenation."
+  bug: "283193586"
+}

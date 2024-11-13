@@ -33,10 +33,10 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import android.content.Intent;
 import android.platform.test.annotations.RootPermissionTest;
 import android.platform.test.rule.UnlockScreenRule;
-import android.support.test.uiautomator.UiDevice;
 import android.widget.EditText;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.Rule;
 import org.junit.Test;

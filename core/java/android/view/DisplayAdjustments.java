@@ -21,10 +21,12 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.util.Objects;
 
 /** @hide */
+@RavenwoodKeepWholeClass
 public class DisplayAdjustments {
     public static final DisplayAdjustments DEFAULT_DISPLAY_ADJUSTMENTS = new DisplayAdjustments();
 

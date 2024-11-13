@@ -56,9 +56,6 @@ class InputMethodRepositoryTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        whenever(inputMethodManager.getEnabledInputMethodSubtypeList(eq(null), anyBoolean()))
-            .thenReturn(listOf())
-
         underTest =
             InputMethodRepositoryImpl(
                 backgroundDispatcher = kosmos.testDispatcher,
@@ -71,10 +68,16 @@ class InputMethodRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             whenever(inputMethodManager.getEnabledInputMethodListAsUser(eq(USER_HANDLE)))
                 .thenReturn(listOf())
-            whenever(inputMethodManager.getEnabledInputMethodSubtypeList(any(), anyBoolean()))
+            whenever(
+                    inputMethodManager.getEnabledInputMethodSubtypeListAsUser(
+                        any(),
+                        anyBoolean(),
+                        eq(USER_HANDLE)
+                    )
+                )
                 .thenReturn(listOf())
 
-            assertThat(underTest.enabledInputMethods(USER_ID, fetchSubtypes = true).count())
+            assertThat(underTest.enabledInputMethods(USER_HANDLE, fetchSubtypes = true).count())
                 .isEqualTo(0)
         }
 
@@ -83,11 +86,20 @@ class InputMethodRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val subtypeId = 123
             val isAuxiliary = true
+            val selectedImiId = "imiId"
+            val selectedImi = mock<InputMethodInfo>()
+            whenever(selectedImi.id).thenReturn(selectedImiId)
+            whenever(inputMethodManager.getCurrentInputMethodInfoAsUser(eq(USER_HANDLE)))
+                .thenReturn(selectedImi)
             whenever(inputMethodManager.getEnabledInputMethodListAsUser(eq(USER_HANDLE)))
-                .thenReturn(listOf(mock<InputMethodInfo>()))
-            whenever(inputMethodManager.getEnabledInputMethodSubtypeList(any(), anyBoolean()))
-                .thenReturn(listOf())
-            whenever(inputMethodManager.getEnabledInputMethodSubtypeList(eq(null), anyBoolean()))
+                .thenReturn(listOf(selectedImi))
+            whenever(
+                    inputMethodManager.getEnabledInputMethodSubtypeListAsUser(
+                        eq(selectedImiId),
+                        anyBoolean(),
+                        eq(USER_HANDLE)
+                    )
+                )
                 .thenReturn(
                     listOf(
                         InputMethodSubtype.InputMethodSubtypeBuilder()
@@ -97,7 +109,7 @@ class InputMethodRepositoryTest : SysuiTestCase() {
                     )
                 )
 
-            val result = underTest.selectedInputMethodSubtypes()
+            val result = underTest.selectedInputMethodSubtypes(USER_HANDLE)
             assertThat(result).hasSize(1)
             assertThat(result.first().subtypeId).isEqualTo(subtypeId)
             assertThat(result.first().isAuxiliary).isEqualTo(isAuxiliary)
@@ -108,7 +120,7 @@ class InputMethodRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val displayId = 7
 
-            underTest.showInputMethodPicker(displayId, /* showAuxiliarySubtypes = */ true)
+            underTest.showInputMethodPicker(displayId, /* showAuxiliarySubtypes= */ true)
 
             verify(inputMethodManager)
                 .showInputMethodPickerFromSystem(
@@ -118,7 +130,6 @@ class InputMethodRepositoryTest : SysuiTestCase() {
         }
 
     companion object {
-        private const val USER_ID = 100
-        private val USER_HANDLE = UserHandle.of(USER_ID)
+        private val USER_HANDLE = UserHandle.of(100)
     }
 }

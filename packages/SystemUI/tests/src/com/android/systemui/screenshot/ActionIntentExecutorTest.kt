@@ -17,9 +17,9 @@
 package com.android.systemui.screenshot
 
 import android.content.Intent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.os.Process.myUserHandle
 import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -36,7 +36,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ActionIntentExecutorTest : SysuiTestCase() {
 
     private val scheduler = TestCoroutineScheduler()

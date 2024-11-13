@@ -129,6 +129,8 @@ public final class JobServiceContext implements ServiceConnection {
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
     };
+    private static final String TRACE_JOB_FORCE_FINISHED_PREFIX = "forceJobFinished:";
+    private static final String TRACE_JOB_FORCE_FINISHED_DELIMITER = "#";
 
     // States that a job occupies while interacting with the client.
     static final int VERB_BINDING = 0;
@@ -289,6 +291,11 @@ public final class JobServiceContext implements ServiceConnection {
         @Override
         public void jobFinished(int jobId, boolean reschedule) {
             doJobFinished(this, jobId, reschedule);
+        }
+
+        @Override
+        public void forceJobFinished(int jobId) {
+            doForceJobFinished(this, jobId);
         }
 
         @Override
@@ -473,6 +480,14 @@ public final class JobServiceContext implements ServiceConnection {
             mInitialDownloadedBytesFromCalling = TrafficStats.getUidRxBytes(job.getUid());
             mInitialUploadedBytesFromCalling = TrafficStats.getUidTxBytes(job.getUid());
 
+            int procState = mService.getUidProcState(job.getUid());
+            if (Flags.useCorrectProcessStateForLogging()
+                    && procState > ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+                // Try to get the latest proc state from AMS, there might be some delay
+                // for the proc states worse than TRANSIENT_BACKGROUND.
+                procState = mActivityManagerInternal.getUidProcessState(job.getUid());
+            }
+
             FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     job.isProxyJob() ? new int[]{sourceUid, job.getUid()} : new int[]{sourceUid},
                     // Given that the source tag is set by the calling app, it should be connected
@@ -517,7 +532,7 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getEstimatedNetworkDownloadBytes(),
                     job.getEstimatedNetworkUploadBytes(),
                     job.getWorkCount(),
-                    ActivityManager.processStateAmToProto(mService.getUidProcState(job.getUid())),
+                    ActivityManager.processStateAmToProto(procState),
                     job.getNamespaceHash(),
                     /* system_measured_source_download_bytes */ 0,
                     /* system_measured_source_upload_bytes */ 0,
@@ -748,6 +763,35 @@ public final class JobServiceContext implements ServiceConnection {
                         JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
                         "app called jobFinished");
                 doCallbackLocked(reschedule, "app called jobFinished");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * This method just adds traces to evaluate jobs that leak jobparameters at the client.
+     * It does not stop the job.
+     */
+    void doForceJobFinished(JobCallback cb, int jobId) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final JobStatus executing;
+            synchronized (mLock) {
+                // not the current job, presumably it has finished in some way already
+                if (!verifyCallerLocked(cb)) {
+                    return;
+                }
+
+                executing = getRunningJobLocked();
+            }
+            if (executing != null && jobId == executing.getJobId()) {
+                final StringBuilder stateSuffix = new StringBuilder();
+                stateSuffix.append(TRACE_JOB_FORCE_FINISHED_PREFIX);
+                stateSuffix.append(executing.getBatteryName());
+                stateSuffix.append(TRACE_JOB_FORCE_FINISHED_DELIMITER);
+                stateSuffix.append(executing.getJobId());
+                Trace.instant(Trace.TRACE_TAG_POWER, stateSuffix.toString());
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1528,6 +1572,13 @@ public final class JobServiceContext implements ServiceConnection {
         mJobPackageTracker.noteInactive(completedJob,
                 loggingInternalStopReason, loggingDebugReason);
         final int sourceUid = completedJob.getSourceUid();
+        int procState = mService.getUidProcState(completedJob.getUid());
+        if (Flags.useCorrectProcessStateForLogging()
+                && procState > ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+            // Try to get the latest proc state from AMS, there might be some delay
+            // for the proc states worse than TRANSIENT_BACKGROUND.
+            procState = mActivityManagerInternal.getUidProcessState(completedJob.getUid());
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                 completedJob.isProxyJob()
                         ? new int[]{sourceUid, completedJob.getUid()} : new int[]{sourceUid},
@@ -1573,7 +1624,7 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getEstimatedNetworkUploadBytes(),
                 completedJob.getWorkCount(),
                 ActivityManager
-                        .processStateAmToProto(mService.getUidProcState(completedJob.getUid())),
+                        .processStateAmToProto(procState),
                 completedJob.getNamespaceHash(),
                 TrafficStats.getUidRxBytes(completedJob.getSourceUid())
                         - mInitialDownloadedBytesFromSource,

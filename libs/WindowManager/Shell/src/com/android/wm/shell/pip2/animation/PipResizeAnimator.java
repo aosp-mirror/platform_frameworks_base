@@ -47,9 +47,17 @@ public class PipResizeAnimator extends ValueAnimator
     @Nullable
     private Runnable mAnimationEndCallback;
     private RectEvaluator mRectEvaluator;
+
+    // Bounds relative to which scaling/cropping must be done.
     private final Rect mBaseBounds = new Rect();
+
+    // Bounds to animate from.
     private final Rect mStartBounds = new Rect();
+
+    // Target bounds.
     private final Rect mEndBounds = new Rect();
+
+    // Bounds updated by the evaluator as animator is running.
     private final Rect mAnimatedRect = new Rect();
     private final float mDelta;
 
@@ -84,7 +92,6 @@ public class PipResizeAnimator extends ValueAnimator
         addListener(this);
         addUpdateListener(this);
         setEvaluator(mRectEvaluator);
-        // TODO: change this
         setDuration(duration);
     }
 
@@ -127,9 +134,10 @@ public class PipResizeAnimator extends ValueAnimator
             Rect baseBounds, Rect targetBounds, float degrees) {
         Matrix transformTensor = new Matrix();
         final float[] mMatrixTmp = new float[9];
-        final float scale = (float) targetBounds.width() / baseBounds.width();
+        final float scaleX = (float) targetBounds.width() / baseBounds.width();
+        final float scaleY = (float) targetBounds.height() / baseBounds.height();
 
-        transformTensor.setScale(scale, scale);
+        transformTensor.setScale(scaleX, scaleY);
         transformTensor.postTranslate(targetBounds.left, targetBounds.top);
         transformTensor.postRotate(degrees, targetBounds.centerX(), targetBounds.centerY());
 

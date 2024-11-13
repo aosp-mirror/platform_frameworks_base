@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PowerManager;
+import android.os.Process;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +55,8 @@ public class WakeLockLogTest {
 
         when(mPackageManager.getPackagesForUid(101)).thenReturn(new String[]{ "some.package1" });
         when(mPackageManager.getPackagesForUid(102)).thenReturn(new String[]{ "some.package2" });
+        when(mPackageManager.getPackagesForUid(Process.SYSTEM_UID))
+                .thenReturn(new String[]{ "some.package3" });
     }
 
     @Test
@@ -70,14 +73,20 @@ public class WakeLockLogTest {
         log.onWakeLockAcquired("TagFull", 102,
                 PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, -1);
 
+        when(injectorSpy.currentTimeMillis()).thenReturn(1250L);
+        log.onWakeLockAcquired("TagSystem", 1000,
+                PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, -1);
+
         assertEquals("Wake Lock Log\n"
                         + "  01-01 00:00:01.000 - 101 (some.package1) - ACQ TagPartial "
                         + "(partial,on-after-release)\n"
                         + "  01-01 00:00:01.150 - 102 (some.package2) - ACQ TagFull "
                         + "(full,acq-causes-wake)\n"
+                        + "  01-01 00:00:01.250 - 1000 (" + WakeLockLog.SYSTEM_PACKAGE_NAME + ")"
+                        + " - ACQ TagSystem (full,acq-causes-wake)\n"
                         + "  -\n"
-                        + "  Events: 2, Time-Resets: 0\n"
-                        + "  Buffer, Bytes used: 6\n",
+                        + "  Events: 3, Time-Resets: 0\n"
+                        + "  Buffer, Bytes used: 9\n",
                 dumpLog(log, false));
     }
 

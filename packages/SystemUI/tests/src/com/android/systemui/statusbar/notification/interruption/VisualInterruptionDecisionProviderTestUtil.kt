@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
@@ -23,6 +25,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -58,6 +61,9 @@ object VisualInterruptionDecisionProviderTestUtil {
         systemSettings: SystemSettings,
         packageManager: PackageManager,
         bubbles: Optional<Bubbles>,
+        context: Context,
+        notificationManager: NotificationManager,
+        settingsInteractor: NotificationSettingsInteractor
     ): VisualInterruptionDecisionProvider {
         return if (VisualInterruptionRefactor.isEnabled) {
             VisualInterruptionDecisionProviderImpl(
@@ -79,7 +85,10 @@ object VisualInterruptionDecisionProviderTestUtil {
                 avalancheProvider,
                 systemSettings,
                 packageManager,
-                bubbles
+                bubbles,
+                context,
+                notificationManager,
+                settingsInteractor
             )
         } else {
             NotificationInterruptStateProviderWrapper(

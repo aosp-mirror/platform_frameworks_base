@@ -3088,11 +3088,11 @@ public class WebView extends AbsoluteLayout
         }
 
         if (Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager == null) {
+            if (WebViewFactory.isWebViewSupported()) {
+                return WebViewUpdateManager.getInstance().getCurrentWebViewPackage();
+            } else {
                 return null;
             }
-            return manager.getCurrentWebViewPackage();
         } else {
             IWebViewUpdateService service = WebViewFactory.getUpdateService();
             if (service == null) {

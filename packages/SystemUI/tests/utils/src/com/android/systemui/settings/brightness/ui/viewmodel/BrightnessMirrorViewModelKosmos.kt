@@ -18,15 +18,23 @@ package com.android.systemui.settings.brightness.ui.viewmodel
 
 import android.content.res.mainResources
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.settings.brightnessSliderControllerFactory
 
-val Kosmos.brightnessMirrorViewModel by
-    Kosmos.Fixture {
-        BrightnessMirrorViewModel(
-            brightnessMirrorShowingInteractor,
-            mainResources,
-            brightnessSliderControllerFactory,
-        )
+val Kosmos.brightnessMirrorViewModel by Fixture {
+    BrightnessMirrorViewModel(
+        brightnessMirrorShowingInteractor,
+        mainResources,
+        brightnessSliderControllerFactory,
+    )
+}
+
+val Kosmos.brightnessMirrorViewModelFactory by Fixture {
+    object : BrightnessMirrorViewModel.Factory {
+        override fun create(): BrightnessMirrorViewModel {
+            return brightnessMirrorViewModel
+        }
     }
+}

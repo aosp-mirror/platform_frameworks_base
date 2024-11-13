@@ -169,13 +169,13 @@ public interface TelephonyProperties
 
     /**
      * Set to false to disable SMS receiving, default is
-     * the value of config_sms_capable
+     * the value of TelephonyManager.isDeviceSmsCapable
      */
     static final String PROPERTY_SMS_RECEIVE = "telephony.sms.receive";
 
     /**
      * Set to false to disable SMS sending, default is
-     * the value of config_sms_capable
+     * the value of TelephonyManager.isDeviceSmsCapable
      */
     static final String PROPERTY_SMS_SEND = "telephony.sms.send";
 

@@ -454,6 +454,8 @@ public class ZenModeDiff {
      */
     public static class RuleDiff extends BaseDiff {
         public static final String FIELD_ENABLED = "enabled";
+        public static final String FIELD_CONDITION_OVERRIDE = "conditionOverride";
+        @Deprecated
         public static final String FIELD_SNOOZING = "snoozing";
         public static final String FIELD_NAME = "name";
         public static final String FIELD_ZEN_MODE = "zenMode";
@@ -472,6 +474,7 @@ public class ZenModeDiff {
         public static final String FIELD_ICON_RES = "iconResName";
         public static final String FIELD_TRIGGER_DESCRIPTION = "triggerDescription";
         public static final String FIELD_TYPE = "type";
+        public static final String FIELD_LEGACY_SUPPRESSED_EFFECTS = "legacySuppressedEffects";
         // NOTE: new field strings must match the variable names in ZenModeConfig.ZenRule
 
         // Special field to track whether this rule became active or inactive
@@ -492,8 +495,8 @@ public class ZenModeDiff {
 
             // Even if added or removed, there may be a change in whether or not it was active.
             // This only applies to automatic rules.
-            boolean fromActive = from != null ? from.isAutomaticActive() : false;
-            boolean toActive = to != null ? to.isAutomaticActive() : false;
+            boolean fromActive = from != null ? from.isActive() : false;
+            boolean toActive = to != null ? to.isActive() : false;
             if (fromActive != toActive) {
                 mActiveDiff = new FieldDiff<>(fromActive, toActive);
             }
@@ -506,8 +509,15 @@ public class ZenModeDiff {
             if (from.enabled != to.enabled) {
                 addField(FIELD_ENABLED, new FieldDiff<>(from.enabled, to.enabled));
             }
-            if (from.snoozing != to.snoozing) {
-                addField(FIELD_SNOOZING, new FieldDiff<>(from.snoozing, to.snoozing));
+            if (Flags.modesApi() && Flags.modesUi()) {
+                if (from.conditionOverride != to.conditionOverride) {
+                    addField(FIELD_CONDITION_OVERRIDE,
+                            new FieldDiff<>(from.conditionOverride, to.conditionOverride));
+                }
+            } else {
+                if (from.snoozing != to.snoozing) {
+                    addField(FIELD_SNOOZING, new FieldDiff<>(from.snoozing, to.snoozing));
+                }
             }
             if (!Objects.equals(from.name, to.name)) {
                 addField(FIELD_NAME, new FieldDiff<>(from.name, to.name));
@@ -566,6 +576,13 @@ public class ZenModeDiff {
                 }
                 if (!Objects.equals(from.iconResName, to.iconResName)) {
                     addField(FIELD_ICON_RES, new FieldDiff<>(from.iconResName, to.iconResName));
+                }
+                if (android.app.Flags.modesUi()) {
+                    if (from.legacySuppressedEffects != to.legacySuppressedEffects) {
+                        addField(FIELD_LEGACY_SUPPRESSED_EFFECTS,
+                                new FieldDiff<>(from.legacySuppressedEffects,
+                                        to.legacySuppressedEffects));
+                    }
                 }
             }
         }

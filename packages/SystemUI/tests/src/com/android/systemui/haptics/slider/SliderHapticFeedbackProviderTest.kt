@@ -21,7 +21,7 @@ import android.view.VelocityTracker
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.haptics.vibratorHelper
+import com.android.systemui.haptics.fakeVibratorHelper
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.fakeSystemClock
@@ -47,6 +47,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
     private val lowTickDuration = 12 // Mocked duration of a low tick
     private val dragTextureThresholdMillis =
         lowTickDuration * config.numberOfLowTicks + config.deltaMillisForDragInterval
+    private val vibratorHelper = kosmos.fakeVibratorHelper
     private lateinit var sliderHapticFeedbackProvider: SliderHapticFeedbackProvider
 
     @Before
@@ -56,11 +57,11 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
         whenever(velocityTracker.getAxisVelocity(config.velocityAxis))
             .thenReturn(config.maxVelocityToScale)
 
-        kosmos.vibratorHelper.primitiveDurations[VibrationEffect.Composition.PRIMITIVE_LOW_TICK] =
+        vibratorHelper.primitiveDurations[VibrationEffect.Composition.PRIMITIVE_LOW_TICK] =
             lowTickDuration
         sliderHapticFeedbackProvider =
             SliderHapticFeedbackProvider(
-                kosmos.vibratorHelper,
+                vibratorHelper,
                 velocityTracker,
                 config,
                 kosmos.fakeSystemClock,
@@ -136,7 +137,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             sliderHapticFeedbackProvider.onUpperBookend()
             sliderHapticFeedbackProvider.onUpperBookend()
 
-            assertEquals(/* expected=*/ 1, vibratorHelper.timesVibratedWithEffect(vibration))
+            assertEquals(/* expected= */ 1, vibratorHelper.timesVibratedWithEffect(vibration))
         }
 
     @Test
@@ -162,7 +163,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             sliderHapticFeedbackProvider.onProgress(progress)
 
             // THEN the correct composition only plays once
-            assertEquals(/* expected=*/ 1, vibratorHelper.timesVibratedWithEffect(ticks.compose()))
+            assertEquals(/* expected= */ 1, vibratorHelper.timesVibratedWithEffect(ticks.compose()))
         }
 
     @Test

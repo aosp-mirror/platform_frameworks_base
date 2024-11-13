@@ -15,8 +15,8 @@
 package com.android.systemui.shared.animation
 
 import android.graphics.Point
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.Surface.ROTATION_0
 import android.view.Surface.ROTATION_90
@@ -36,7 +36,7 @@ import org.mockito.Mockito.spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
 

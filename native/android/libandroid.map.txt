@@ -273,6 +273,7 @@ LIBANDROID {
     ASurfaceTransaction_fromJava; # introduced=34
     ASurfaceTransaction_reparent; # introduced=29
     ASurfaceTransaction_setBuffer; # introduced=29
+    ASurfaceTransaction_setBufferWithRelease; # introduced=36
     ASurfaceTransaction_setBufferAlpha; # introduced=29
     ASurfaceTransaction_setBufferDataSpace; # introduced=29
     ASurfaceTransaction_setBufferTransparency; # introduced=29
@@ -367,6 +368,7 @@ LIBANDROID_PLATFORM {
     APerformanceHint_sendHint;
     APerformanceHint_getThreadIds;
     APerformanceHint_createSessionInternal;
+    APerformanceHint_setUseFMQForTesting;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;

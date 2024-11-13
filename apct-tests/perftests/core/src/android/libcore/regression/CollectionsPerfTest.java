@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -40,7 +40,7 @@ import java.util.Vector;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CollectionsPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(new Object[][] {{4}, {16}, {64}, {256}, {1024}});
@@ -60,7 +60,7 @@ public class CollectionsPerfTest {
     @Parameters(method = "getData")
     public void timeSort_arrayList(int arrayListLength) throws Exception {
         List<Integer> input = buildList(arrayListLength, ArrayList.class);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Collections.sort(input);
         }
@@ -70,7 +70,7 @@ public class CollectionsPerfTest {
     @Parameters(method = "getData")
     public void timeSortWithComparator_arrayList(int arrayListLength) throws Exception {
         List<Integer> input = buildList(arrayListLength, ArrayList.class);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Collections.sort(input, REVERSE);
         }
@@ -80,7 +80,7 @@ public class CollectionsPerfTest {
     @Parameters(method = "getData")
     public void timeSort_vector(int arrayListLength) throws Exception {
         List<Integer> input = buildList(arrayListLength, Vector.class);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Collections.sort(input);
         }
@@ -90,7 +90,7 @@ public class CollectionsPerfTest {
     @Parameters(method = "getData")
     public void timeSortWithComparator_vector(int arrayListLength) throws Exception {
         List<Integer> input = buildList(arrayListLength, Vector.class);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Collections.sort(input, REVERSE);
         }

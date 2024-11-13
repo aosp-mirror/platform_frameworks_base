@@ -28,13 +28,6 @@ import android.telephony.satellite.stub.SatelliteModemState;
  */
 oneway interface ISatelliteListener {
     /**
-     * Indicates that the satellite provision state has changed.
-     *
-     * @param provisioned True means the service is provisioned and false means it is not.
-     */
-    void onSatelliteProvisionStateChanged(in boolean provisioned);
-
-    /**
      * Indicates that new datagrams have been received on the device.
      *
      * @param datagram New datagram that was received.

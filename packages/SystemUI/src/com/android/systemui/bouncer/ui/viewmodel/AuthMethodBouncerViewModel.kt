@@ -20,14 +20,17 @@ import android.annotation.StringRes
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
-import kotlinx.coroutines.CoroutineScope
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 
 sealed class AuthMethodBouncerViewModel(
-    protected val viewModelScope: CoroutineScope,
     protected val interactor: BouncerInteractor,
 
     /**
@@ -37,7 +40,11 @@ sealed class AuthMethodBouncerViewModel(
      * being able to attempt to unlock the device.
      */
     val isInputEnabled: StateFlow<Boolean>,
-) {
+
+    /** Name to use for performance tracing purposes. */
+    val traceName: String,
+    protected val bouncerHapticPlayer: BouncerHapticPlayer? = null,
+) : ExclusiveActivatable() {
 
     private val _animateFailure = MutableStateFlow(false)
     /**
@@ -56,6 +63,35 @@ sealed class AuthMethodBouncerViewModel(
      * attempts were made, and the second one indicating in how many seconds lockout will expire.
      */
     @get:StringRes abstract val lockoutMessageId: Int
+
+    private val authenticationRequests = Channel<AuthenticationRequest>(Channel.BUFFERED)
+
+    override suspend fun onActivated(): Nothing {
+        authenticationRequests.receiveAsFlow().collectLatest { request ->
+            if (!isInputEnabled.value) {
+                return@collectLatest
+            }
+
+            val authenticationResult =
+                interactor.authenticate(
+                    input = request.input,
+                    tryAutoConfirm = request.useAutoConfirm,
+                )
+
+            if (authenticationResult == AuthenticationResult.SKIPPED && request.useAutoConfirm) {
+                return@collectLatest
+            }
+
+            performAuthenticationHapticFeedback(authenticationResult)
+
+            _animateFailure.value = authenticationResult != AuthenticationResult.SUCCEEDED
+            clearInput()
+            if (authenticationResult == AuthenticationResult.SUCCEEDED) {
+                onSuccessfulAuthentication()
+            }
+        }
+        awaitCancellation()
+    }
 
     /**
      * Notifies that the UI has been hidden from the user (after any transitions have completed).
@@ -83,23 +119,26 @@ sealed class AuthMethodBouncerViewModel(
     /** Returns the input entered so far. */
     protected abstract fun getInput(): List<Any>
 
+    /** Invoked after a successful authentication. */
+    protected open fun onSuccessfulAuthentication() = Unit
+
+    /** Perform authentication result haptics */
+    private fun performAuthenticationHapticFeedback(result: AuthenticationResult) {
+        if (result == AuthenticationResult.SKIPPED) return
+
+        bouncerHapticPlayer?.playAuthenticationFeedback(
+            authenticationSucceeded = result == AuthenticationResult.SUCCEEDED
+        )
+    }
+
     /**
      * Attempts to authenticate the user using the current input value.
      *
      * @see BouncerInteractor.authenticate
      */
-    protected fun tryAuthenticate(
-        input: List<Any> = getInput(),
-        useAutoConfirm: Boolean = false,
-    ) {
-        viewModelScope.launch {
-            val authenticationResult = interactor.authenticate(input, useAutoConfirm)
-            if (authenticationResult == AuthenticationResult.SKIPPED && useAutoConfirm) {
-                return@launch
-            }
-            _animateFailure.value = authenticationResult != AuthenticationResult.SUCCEEDED
-
-            clearInput()
-        }
+    protected fun tryAuthenticate(input: List<Any> = getInput(), useAutoConfirm: Boolean = false) {
+        authenticationRequests.trySend(AuthenticationRequest(input, useAutoConfirm))
     }
+
+    private data class AuthenticationRequest(val input: List<Any>, val useAutoConfirm: Boolean)
 }

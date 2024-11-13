@@ -17,7 +17,11 @@
 package android.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_ACTIVITY;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -34,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplay;
@@ -46,6 +51,8 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualRotaryEncoder;
+import android.hardware.input.VirtualRotaryEncoderConfig;
 import android.hardware.input.VirtualStylus;
 import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
@@ -58,6 +65,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.WindowManager;
 
@@ -126,7 +134,41 @@ public class VirtualDeviceInternal {
                         Binder.restoreCallingIdentity(token);
                     }
                 }
+
+                @Override
+                public void onActivityLaunchBlocked(int displayId, ComponentName componentName,
+                        UserHandle user, IntentSender intentSender) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mActivityListenersLock) {
+                            for (int i = 0; i < mActivityListeners.size(); i++) {
+                                mActivityListeners.valueAt(i)
+                                        .onActivityLaunchBlocked(
+                                                displayId, componentName, user, intentSender);
+                            }
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                }
+
+                @Override
+                public void onSecureWindowShown(int displayId, ComponentName componentName,
+                        UserHandle user) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mActivityListenersLock) {
+                            for (int i = 0; i < mActivityListeners.size(); i++) {
+                                mActivityListeners.valueAt(i)
+                                        .onSecureWindowShown(displayId, componentName, user);
+                            }
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                }
             };
+
     private final IVirtualDeviceSoundEffectListener mSoundEffectListener =
             new IVirtualDeviceSoundEffectListener.Stub() {
                 @Override
@@ -160,6 +202,20 @@ public class VirtualDeviceInternal {
                 params,
                 mActivityListenerBinder,
                 mSoundEffectListener);
+    }
+
+    VirtualDeviceInternal(
+            IVirtualDeviceManager service,
+            Context context,
+            IVirtualDevice virtualDevice) {
+        mService = service;
+        mContext = context.getApplicationContext();
+        mVirtualDevice = virtualDevice;
+        try {
+            mVirtualDevice.setListeners(mActivityListenerBinder, mSoundEffectListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     int getDeviceId() {
@@ -250,6 +306,16 @@ public class VirtualDeviceInternal {
 
     void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
             @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+        switch (policyType) {
+            case POLICY_TYPE_RECENTS:
+            case POLICY_TYPE_CLIPBOARD:
+            case POLICY_TYPE_ACTIVITY:
+            case POLICY_TYPE_BLOCKED_ACTIVITY:
+                break;
+            default:
+                throw new IllegalArgumentException("Device policy " + policyType
+                        + " cannot be changed at runtime. ");
+        }
         try {
             mVirtualDevice.setDevicePolicy(policyType, devicePolicy);
         } catch (RemoteException e) {
@@ -257,17 +323,36 @@ public class VirtualDeviceInternal {
         }
     }
 
-    void addActivityPolicyExemption(@NonNull ComponentName componentName) {
+    void addActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         try {
-            mVirtualDevice.addActivityPolicyExemption(componentName);
+            mVirtualDevice.addActivityPolicyExemption(exemption);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
+    void removeActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         try {
-            mVirtualDevice.removeActivityPolicyExemption(componentName);
+            mVirtualDevice.removeActivityPolicyExemption(exemption);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void setDevicePolicyForDisplay(int displayId,
+            @VirtualDeviceParams.DynamicDisplayPolicyType int policyType,
+            @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+        switch (policyType) {
+            case POLICY_TYPE_RECENTS:
+            case POLICY_TYPE_ACTIVITY:
+                break;
+            default:
+                throw new IllegalArgumentException("Device policy " + policyType
+                        + " cannot be changed for a specific display. ");
+        }
+
+        try {
+            mVirtualDevice.setDevicePolicyForDisplay(displayId, policyType, devicePolicy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -330,6 +415,19 @@ public class VirtualDeviceInternal {
                     "android.hardware.input.VirtualStylus:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualStylus(config, token);
             return new VirtualStylus(config, mVirtualDevice, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    @NonNull
+    VirtualRotaryEncoder createVirtualRotaryEncoder(@NonNull VirtualRotaryEncoderConfig config) {
+        try {
+            final IBinder token = new Binder(
+                    "android.hardware.input.VirtualRotaryEncoder:" + config.getInputDeviceName());
+            mVirtualDevice.createVirtualRotaryEncoder(config, token);
+            return new VirtualRotaryEncoder(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -495,6 +593,19 @@ public class VirtualDeviceInternal {
 
         public void onDisplayEmpty(int displayId) {
             mExecutor.execute(() -> mActivityListener.onDisplayEmpty(displayId));
+        }
+
+        public void onActivityLaunchBlocked(int displayId, ComponentName componentName,
+                UserHandle user, IntentSender intentSender) {
+            mExecutor.execute(() ->
+                    mActivityListener.onActivityLaunchBlocked(
+                            displayId, componentName, user, intentSender));
+        }
+
+        public void onSecureWindowShown(int displayId, ComponentName componentName,
+                UserHandle user) {
+            mExecutor.execute(() ->
+                    mActivityListener.onSecureWindowShown(displayId, componentName, user));
         }
     }
 

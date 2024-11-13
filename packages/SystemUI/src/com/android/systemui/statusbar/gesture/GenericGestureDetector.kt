@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.android.systemui.statusbar.gesture
 
 import android.annotation.CallSuper
@@ -55,18 +54,22 @@ abstract class GenericGestureDetector(
      * The callback receive the last motion event in the gesture.
      */
     fun addOnGestureDetectedCallback(tag: String, callback: (MotionEvent) -> Unit) {
-        val callbacksWasEmpty = callbacks.isEmpty()
-        callbacks[tag] = callback
-        if (callbacksWasEmpty) {
-            startGestureListening()
+        synchronized(callbacks) {
+            val callbacksWasEmpty = callbacks.isEmpty()
+            callbacks[tag] = callback
+            if (callbacksWasEmpty) {
+                startGestureListening()
+            }
         }
     }
 
     /** Removes the callback. */
     fun removeOnGestureDetectedCallback(tag: String) {
-        callbacks.remove(tag)
-        if (callbacks.isEmpty()) {
-            stopGestureListening()
+        synchronized(callbacks) {
+            callbacks.remove(tag)
+            if (callbacks.isEmpty()) {
+                stopGestureListening()
+            }
         }
     }
 
@@ -78,7 +81,8 @@ abstract class GenericGestureDetector(
      * event in the gesture.
      */
     internal fun onGestureDetected(e: MotionEvent) {
-        callbacks.values.forEach { it.invoke(e) }
+        val callbackValues = synchronized(callbacks) { ArrayList(callbacks.values) }
+        callbackValues.forEach { it.invoke(e) }
     }
 
     /** Start listening to touch events. */
@@ -86,13 +90,15 @@ abstract class GenericGestureDetector(
     internal open fun startGestureListening() {
         stopGestureListening()
 
-        inputMonitor = InputMonitorCompat(tag, displayId).also {
-            inputReceiver = it.getInputReceiver(
-                Looper.getMainLooper(),
-                Choreographer.getInstance(),
-                this::onInputEvent
-            )
-        }
+        inputMonitor =
+            InputMonitorCompat(tag, displayId).also {
+                inputReceiver =
+                    it.getInputReceiver(
+                        Looper.getMainLooper(),
+                        Choreographer.getInstance(),
+                        this::onInputEvent,
+                    )
+            }
     }
 
     /** Stop listening to touch events. */

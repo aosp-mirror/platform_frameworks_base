@@ -24,6 +24,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.wm.shell.compatui.impl.CompatUIEventsKt.SIZE_COMPAT_RESTART_BUTTON_APPEARED;
+import static com.android.wm.shell.compatui.impl.CompatUIEventsKt.SIZE_COMPAT_RESTART_BUTTON_CLICKED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
@@ -31,7 +33,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.LocusId;
@@ -45,18 +46,20 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
-import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
+import com.android.wm.shell.compatui.api.CompatUIHandler;
+import com.android.wm.shell.compatui.api.CompatUIInfo;
+import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonAppeared;
+import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonClicked;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -69,14 +72,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * Unified task organizer for all components in the shell.
  * TODO(b/167582004): may consider consolidating this class and TaskOrganizer
  */
-public class ShellTaskOrganizer extends TaskOrganizer implements
-        CompatUIController.CompatUICallback {
+public class ShellTaskOrganizer extends TaskOrganizer {
     private static final String TAG = "ShellTaskOrganizer";
 
     // Intentionally using negative numbers here so the positive numbers can be used
@@ -124,6 +125,15 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
+     * Limited scope callback to notify when a task is removed from the system.  This signal is
+     * not synchronized with anything (or any transition), and should not be used in cases where
+     * that is necessary.
+     */
+    public interface TaskVanishedListener {
+        default void onTaskVanished(RunningTaskInfo taskInfo) {}
+    }
+
+    /**
      * Callbacks for events on a task with a locus id.
      */
     public interface LocusIdListener {
@@ -167,6 +177,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     private final ArraySet<FocusListener> mFocusListeners = new ArraySet<>();
 
+    // Listeners that should be notified when a task is removed
+    private final ArraySet<TaskVanishedListener> mTaskVanishedListeners = new ArraySet<>();
+
     private final Object mLock = new Object();
     private StartingWindowController mStartingWindow;
 
@@ -182,12 +195,11 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
      * In charge of showing compat UI. Can be {@code null} if the device doesn't support size
      * compat or if this isn't the main {@link ShellTaskOrganizer}.
      *
-     * <p>NOTE: only the main {@link ShellTaskOrganizer} should have a {@link CompatUIController},
-     * and register itself as a {@link CompatUIController.CompatUICallback}. Subclasses should be
-     * initialized with a {@code null} {@link CompatUIController}.
+     * <p>NOTE: only the main {@link ShellTaskOrganizer} should have a {@link CompatUIHandler},
+     * Subclasses should be initialized with a {@code null} {@link CompatUIHandler}.
      */
     @Nullable
-    private final CompatUIController mCompatUI;
+    private final CompatUIHandler mCompatUI;
 
     @NonNull
     private final ShellCommandHandler mShellCommandHandler;
@@ -211,7 +223,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     public ShellTaskOrganizer(ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
-            @Nullable CompatUIController compatUI,
+            @Nullable CompatUIHandler compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
@@ -223,7 +235,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     protected ShellTaskOrganizer(ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             ITaskOrganizerController taskOrganizerController,
-            @Nullable CompatUIController compatUI,
+            @Nullable CompatUIHandler compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
@@ -240,7 +252,18 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     private void onInit() {
         mShellCommandHandler.addDumpCallback(this::dump, this);
         if (mCompatUI != null) {
-            mCompatUI.setCompatUICallback(this);
+            mCompatUI.setCallback(compatUIEvent -> {
+                switch(compatUIEvent.getEventId()) {
+                    case SIZE_COMPAT_RESTART_BUTTON_APPEARED:
+                        onSizeCompatRestartButtonAppeared(compatUIEvent.asType());
+                        break;
+                    case SIZE_COMPAT_RESTART_BUTTON_CLICKED:
+                        onSizeCompatRestartButtonClicked(compatUIEvent.asType());
+                        break;
+                    default:
+
+                }
+            });
         }
         registerOrganizer();
     }
@@ -409,7 +432,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
-     * Removes listener.
+     * Removes a locus id listener.
      */
     public void removeLocusIdListener(LocusIdListener listener) {
         synchronized (mLock) {
@@ -430,11 +453,29 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
-     * Removes listener.
+     * Removes a focus listener.
      */
     public void removeFocusListener(FocusListener listener) {
         synchronized (mLock) {
             mFocusListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Adds a listener to be notified when a task vanishes.
+     */
+    public void addTaskVanishedListener(TaskVanishedListener listener) {
+        synchronized (mLock) {
+            mTaskVanishedListeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes a task-vanished listener.
+     */
+    public void removeTaskVanishedListener(TaskVanishedListener listener) {
+        synchronized (mLock) {
+            mTaskVanishedListeners.remove(listener);
         }
     }
 
@@ -517,19 +558,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskAdded(info.getTaskInfo()));
     }
 
-    /**
-     * Take a screenshot of a task.
-     */
-    public void screenshotTask(RunningTaskInfo taskInfo, Rect crop,
-            Consumer<ScreenCapture.ScreenshotHardwareBuffer> consumer) {
-        final TaskAppearedInfo info = mTasks.get(taskInfo.taskId);
-        if (info == null) {
-            return;
-        }
-        ScreenshotUtils.captureLayer(info.getLeash(), crop, consumer);
-    }
-
-
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         synchronized (mLock) {
@@ -556,7 +584,8 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             final boolean windowModeChanged =
                     data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode();
             final boolean visibilityChanged = data.getTaskInfo().isVisible != taskInfo.isVisible;
-            if (windowModeChanged || visibilityChanged) {
+            if (windowModeChanged || (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    && visibilityChanged)) {
                 mRecentTasks.ifPresent(recentTasks ->
                         recentTasks.onTaskRunningInfoChanged(taskInfo));
             }
@@ -614,6 +643,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 t.apply();
                 ProtoLog.v(WM_SHELL_TASK_ORG, "Removing overlay surface");
             }
+            for (TaskVanishedListener l : mTaskVanishedListeners) {
+                l.onTaskVanished(taskInfo);
+            }
 
             if (!ENABLE_SHELL_TRANSITIONS && (appearedInfo.getLeash() != null)) {
                 // Preemptively clean up the leash only if shell transitions are not enabled
@@ -638,12 +670,37 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         return result;
     }
 
+    /** Return list of {@link RunningTaskInfo}s on all the displays. */
+    public ArrayList<RunningTaskInfo> getRunningTasks() {
+        ArrayList<RunningTaskInfo> result = new ArrayList<>();
+        for (int i = 0; i < mTasks.size(); i++) {
+            result.add(mTasks.valueAt(i).getTaskInfo());
+        }
+        return result;
+    }
+
     /** Gets running task by taskId. Returns {@code null} if no such task observed. */
     @Nullable
     public RunningTaskInfo getRunningTaskInfo(int taskId) {
         synchronized (mLock) {
             final TaskAppearedInfo info = mTasks.get(taskId);
             return info != null ? info.getTaskInfo() : null;
+        }
+    }
+
+    /**
+     * Shows/hides the given task surface.  Not for general use as changing the task visibility may
+     * conflict with other Transitions.  This is currently ONLY used to temporarily hide a task
+     * while a drag is in session.
+     */
+    public void setTaskSurfaceVisibility(int taskId, boolean visible) {
+        synchronized (mLock) {
+            final TaskAppearedInfo info = mTasks.get(taskId);
+            if (info != null) {
+                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                t.setVisibility(info.getLeash(), visible);
+                t.apply();
+            }
         }
     }
 
@@ -694,45 +751,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
-    @Override
-    public void onSizeCompatRestartButtonAppeared(int taskId) {
-        final TaskAppearedInfo info;
-        synchronized (mLock) {
-            info = mTasks.get(taskId);
-        }
-        if (info == null) {
-            return;
-        }
-        logSizeCompatRestartButtonEventReported(info,
-                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__APPEARED);
-    }
-
-    @Override
-    public void onSizeCompatRestartButtonClicked(int taskId) {
-        final TaskAppearedInfo info;
-        synchronized (mLock) {
-            info = mTasks.get(taskId);
-        }
-        if (info == null) {
-            return;
-        }
-        logSizeCompatRestartButtonEventReported(info,
-                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__CLICKED);
-        restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
-    }
-
-    @Override
-    public void onCameraControlStateUpdated(int taskId, @CameraCompatControlState int state) {
-        final TaskAppearedInfo info;
-        synchronized (mLock) {
-            info = mTasks.get(taskId);
-        }
-        if (info == null) {
-            return;
-        }
-        updateCameraCompatControlState(info.getTaskInfo().token, state);
-    }
-
     /** Reparents a child window surface to the task surface. */
     public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
             SurfaceControl.Transaction t) {
@@ -748,6 +766,35 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             return;
         }
         taskListener.reparentChildSurfaceToTask(taskId, sc, t);
+    }
+
+    @VisibleForTesting
+    void onSizeCompatRestartButtonAppeared(@NonNull SizeCompatRestartButtonAppeared compatUIEvent) {
+        final int taskId = compatUIEvent.getTaskId();
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info == null) {
+            return;
+        }
+        logSizeCompatRestartButtonEventReported(info,
+                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__APPEARED);
+    }
+
+    @VisibleForTesting
+    void onSizeCompatRestartButtonClicked(@NonNull SizeCompatRestartButtonClicked compatUIEvent) {
+        final int taskId = compatUIEvent.getTaskId();
+        final TaskAppearedInfo info;
+        synchronized (mLock) {
+            info = mTasks.get(taskId);
+        }
+        if (info == null) {
+            return;
+        }
+        logSizeCompatRestartButtonEventReported(info,
+                FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__CLICKED);
+        restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
     }
 
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
@@ -777,10 +824,10 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportCompatUI()
                 || !taskInfo.appCompatTaskInfo.hasCompatUI() || !taskInfo.isVisible) {
-            mCompatUI.onCompatInfoChanged(taskInfo, null /* taskListener */);
+            mCompatUI.onCompatInfoChanged(new CompatUIInfo(taskInfo, null /* taskListener */));
             return;
         }
-        mCompatUI.onCompatInfoChanged(taskInfo, taskListener);
+        mCompatUI.onCompatInfoChanged(new CompatUIInfo(taskInfo, taskListener));
     }
 
     private TaskListener getTaskListener(RunningTaskInfo runningTaskInfo) {

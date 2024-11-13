@@ -17,7 +17,6 @@
 package com.android.systemui.communal.data.model
 
 import android.appwidget.AppWidgetProviderInfo
-import com.android.settingslib.flags.Flags.allowAllWidgetsOnLockscreenByDefault
 
 /**
  * The widget categories to display on communal hub (where categories is a bitfield with values that
@@ -31,9 +30,7 @@ value class CommunalWidgetCategories(val categories: Int = defaultCategories) {
         val defaultCategories: Int
             get() {
                 return AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD or
-                    if (allowAllWidgetsOnLockscreenByDefault())
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
-                    else 0
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
             }
     }
 }

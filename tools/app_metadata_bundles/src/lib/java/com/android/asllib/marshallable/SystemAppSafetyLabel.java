@@ -21,34 +21,43 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 /** Safety Label representation containing zero or more {@link DataCategory} for data shared */
 public class SystemAppSafetyLabel implements AslMarshallable {
 
+    private final String mUrl;
     private final Boolean mDeclaration;
 
-    public SystemAppSafetyLabel(Boolean d) {
+    public SystemAppSafetyLabel(String url, Boolean d) {
         this.mDeclaration = d;
+        this.mUrl = null;
     }
 
     /** Creates an on-device DOM element from the {@link SystemAppSafetyLabel}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element systemAppSafetyLabelEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_SYSTEM_APP_SAFETY_LABEL);
-        systemAppSafetyLabelEle.appendChild(
-                XmlUtils.createOdBooleanEle(doc, XmlUtils.OD_NAME_DECLARATION, mDeclaration));
-        return XmlUtils.listOf(systemAppSafetyLabelEle);
+        if (mUrl != null) {
+            systemAppSafetyLabelEle.appendChild(
+                    XmlUtils.createOdStringEle(doc, XmlUtils.OD_NAME_URL, mUrl));
+        }
+        if (mDeclaration != null) {
+            systemAppSafetyLabelEle.appendChild(
+                    XmlUtils.createOdBooleanEle(doc, XmlUtils.OD_NAME_DECLARATION, mDeclaration));
+        }
+        return systemAppSafetyLabelEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element systemAppSafetyLabelEle =
                 doc.createElement(XmlUtils.HR_TAG_SYSTEM_APP_SAFETY_LABEL);
-        XmlUtils.maybeSetHrBoolAttr(
-                systemAppSafetyLabelEle, XmlUtils.HR_ATTR_DECLARATION, mDeclaration);
-        return XmlUtils.listOf(systemAppSafetyLabelEle);
+        if (mUrl != null) {
+            systemAppSafetyLabelEle.setAttribute(XmlUtils.HR_ATTR_URL, mUrl);
+        }
+        if (mDeclaration != null) {
+            systemAppSafetyLabelEle.setAttribute(
+                    XmlUtils.HR_ATTR_DECLARATION, String.valueOf(mDeclaration));
+        }
+        return systemAppSafetyLabelEle;
     }
 }

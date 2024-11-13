@@ -19,9 +19,11 @@ package com.android.systemui.bouncer.ui.viewmodel
 import android.content.pm.UserInfo
 import android.hardware.biometrics.BiometricFaceConstants
 import android.hardware.fingerprint.FingerprintManager
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -29,14 +31,14 @@ import com.android.systemui.authentication.domain.interactor.authenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
+import com.android.systemui.biometrics.FaceHelpMessageDebouncer
 import com.android.systemui.biometrics.data.repository.FaceSensorInfo
 import com.android.systemui.biometrics.data.repository.fakeFacePropertyRepository
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
-import com.android.systemui.bouncer.shared.flag.fakeComposeBouncerFlags
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
@@ -51,6 +53,7 @@ import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthentication
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -69,21 +72,27 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(Flags.FLAG_COMPOSE_BOUNCER)
 class BouncerMessageViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
     private lateinit var underTest: BouncerMessageViewModel
+    private val ignoreHelpMessageId = 1
 
     @Before
     fun setUp() {
         kosmos.fakeUserRepository.setUserInfos(listOf(PRIMARY_USER))
-        kosmos.fakeComposeBouncerFlags.composeBouncerEnabled = true
+        overrideResource(
+            R.array.config_face_acquire_device_entry_ignorelist,
+            intArrayOf(ignoreHelpMessageId)
+        )
         underTest = kosmos.bouncerMessageViewModel
+        underTest.activateIn(testScope)
         overrideResource(R.string.kg_trust_agent_disabled, "Trust agent is unavailable")
         kosmos.fakeSystemPropertiesHelper.set(
-            DeviceEntryInteractor.SYS_BOOT_REASON_PROP,
+            DeviceUnlockedInteractor.SYS_BOOT_REASON_PROP,
             "not mainline reboot"
         )
     }
@@ -379,7 +388,15 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
             runCurrent()
 
             kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
-                HelpFaceAuthenticationStatus(1, "some helpful message")
+                HelpFaceAuthenticationStatus(0, "some helpful message", 0)
+            )
+            runCurrent()
+            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
+                HelpFaceAuthenticationStatus(
+                    0,
+                    "some helpful message",
+                    FaceHelpMessageDebouncer.DEFAULT_WINDOW_MS
+                )
             )
             runCurrent()
             assertThat(bouncerMessage?.text).isEqualTo("Enter PIN")
@@ -412,6 +429,22 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
             assertThat(bouncerMessage?.text).isEqualTo("Enter PIN")
             assertThat(bouncerMessage?.secondaryText)
                 .isEqualTo("Can’t unlock with face. Too many attempts.")
+        }
+
+    @Test
+    fun startLockdownCountdown_onActivated() =
+        testScope.runTest {
+            val bouncerMessage by collectLastValue(underTest.message)
+            val lockoutSeconds = 200 * 1000 // 200 second lockout
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.reportLockoutStarted(lockoutSeconds)
+            runCurrent()
+
+            assertThat(bouncerMessage?.text).isEqualTo("Try again in 200 seconds.")
+            advanceTimeBy(100.seconds)
+            assertThat(bouncerMessage?.text).isEqualTo("Try again in 100 seconds.")
+            advanceTimeBy(101.seconds)
+            assertThat(bouncerMessage?.text).isEqualTo("Enter PIN")
         }
 
     private fun TestScope.verifyMessagesForAuthFlags(

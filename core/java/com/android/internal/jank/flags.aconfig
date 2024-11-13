@@ -1,0 +1,10 @@
+package: "com.android.internal.jank"
+container: "system"
+
+flag {
+  name: "use_sf_frame_duration"
+  namespace: "window_surfaces"
+  description: "Whether to get the frame duration from SurfaceFlinger, or HWUI"
+  bug: "354763298"
+  is_fixed_read_only: true
+}

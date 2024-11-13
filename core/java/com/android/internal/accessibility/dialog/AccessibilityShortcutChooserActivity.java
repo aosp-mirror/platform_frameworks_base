@@ -18,7 +18,6 @@ package com.android.internal.accessibility.dialog;
 import static com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getInstalledTargets;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
@@ -213,10 +212,7 @@ public class AccessibilityShortcutChooserActivity extends Activity {
         final boolean isEditMenuMode =
                 mTargetAdapter.getShortcutMenuMode() == ShortcutMenuMode.EDIT;
         final int selectDialogTitleId = R.string.accessibility_select_shortcut_menu_title;
-        final int editDialogTitleId =
-                mShortcutType == SOFTWARE
-                        ? R.string.accessibility_edit_shortcut_menu_button_title
-                        : R.string.accessibility_edit_shortcut_menu_volume_title;
+        final int editDialogTitleId = R.string.accessibility_edit_shortcut_menu_volume_title;
 
         mMenuDialog.setTitle(getString(isEditMenuMode ? editDialogTitleId : selectDialogTitleId));
         mMenuDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(

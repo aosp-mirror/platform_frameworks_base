@@ -134,7 +134,7 @@ constructor(
     // TODO(b/243695312): Encapsulate all of the show logic for the bouncer.
     /** Show the bouncer if necessary and set the relevant states. */
     @JvmOverloads
-    fun show(isScrimmed: Boolean) {
+    fun show(isScrimmed: Boolean): Boolean {
         // When the scene container framework is enabled, instead of calling this, call
         // SceneInteractor#changeScene(Scenes.Bouncer, ...).
         SceneContainerFlag.assertInLegacyMode()
@@ -146,44 +146,48 @@ constructor(
                     "primaryBouncerDelegate is set. Let's exit early so we don't " +
                     "set the wrong primaryBouncer state."
             )
-            return
+            return false
         }
 
-        // Reset some states as we show the bouncer.
-        repository.setKeyguardAuthenticatedBiometrics(null)
-        repository.setPrimaryStartingToHide(false)
+        try {
+            Trace.beginSection("KeyguardBouncer#show")
+            // Reset some states as we show the bouncer.
+            repository.setKeyguardAuthenticatedBiometrics(null)
+            repository.setPrimaryStartingToHide(false)
 
-        val resumeBouncer =
-            (isBouncerShowing() || repository.primaryBouncerShowingSoon.value) &&
-                needsFullscreenBouncer()
+            val resumeBouncer =
+                (isBouncerShowing() || repository.primaryBouncerShowingSoon.value) &&
+                    needsFullscreenBouncer()
 
-        Trace.beginSection("KeyguardBouncer#show")
-        repository.setPrimaryScrimmed(isScrimmed)
-        if (isScrimmed) {
-            setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
+            repository.setPrimaryScrimmed(isScrimmed)
+            if (isScrimmed) {
+                setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
+            }
+
+            // In this special case, we want to hide the bouncer and show it again. We want to emit
+            // show(true) again so that we can reinflate the new view.
+            if (resumeBouncer) {
+                repository.setPrimaryShow(false)
+            }
+
+            if (primaryBouncerView.delegate?.showNextSecurityScreenOrFinish() == true) {
+                // Keyguard is done.
+                return false
+            }
+
+            repository.setPrimaryShowingSoon(true)
+            if (usePrimaryBouncerPassiveAuthDelay()) {
+                Log.d(TAG, "delay bouncer, passive auth may succeed")
+                mainHandler.postDelayed(showRunnable, passiveAuthBouncerDelay)
+            } else {
+                DejankUtils.postAfterTraversal(showRunnable)
+            }
+            keyguardStateController.notifyPrimaryBouncerShowing(true)
+            primaryBouncerCallbackInteractor.dispatchStartingToShow()
+            return true
+        } finally {
+            Trace.endSection()
         }
-
-        // In this special case, we want to hide the bouncer and show it again. We want to emit
-        // show(true) again so that we can reinflate the new view.
-        if (resumeBouncer) {
-            repository.setPrimaryShow(false)
-        }
-
-        if (primaryBouncerView.delegate?.showNextSecurityScreenOrFinish() == true) {
-            // Keyguard is done.
-            return
-        }
-
-        repository.setPrimaryShowingSoon(true)
-        if (usePrimaryBouncerPassiveAuthDelay()) {
-            Log.d(TAG, "delay bouncer, passive auth may succeed")
-            mainHandler.postDelayed(showRunnable, passiveAuthBouncerDelay)
-        } else {
-            DejankUtils.postAfterTraversal(showRunnable)
-        }
-        keyguardStateController.notifyPrimaryBouncerShowing(true)
-        primaryBouncerCallbackInteractor.dispatchStartingToShow()
-        Trace.endSection()
     }
 
     /** Sets the correct bouncer states to hide the bouncer. */
@@ -290,7 +294,9 @@ constructor(
 
     /** Tell the bouncer that bouncer is requested when device is already authenticated */
     fun notifyUserRequestedBouncerWhenAlreadyAuthenticated(userId: Int) {
-        applicationScope.launch { repository.setKeyguardAuthenticatedPrimaryAuth(userId) }
+        applicationScope.launch {
+            repository.setUserRequestedBouncerWhenAlreadyAuthenticated(userId)
+        }
     }
 
     /** Tell the bouncer that keyguard is authenticated with biometrics. */

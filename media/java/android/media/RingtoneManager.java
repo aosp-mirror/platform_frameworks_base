@@ -34,6 +34,7 @@ import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.StaleDataException;
+import android.media.audio.Flags;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -809,6 +810,12 @@ public class RingtoneManager {
         // Don't set the stream type
         Ringtone ringtone = getRingtone(context, ringtoneUri, -1 /* streamType */,
                 volumeShaperConfig, false);
+        if (Flags.enableRingtoneHapticsCustomization()
+                && Utils.isRingtoneVibrationSettingsSupported(context)
+                && Utils.hasVibration(ringtoneUri) && hasHapticChannels(ringtoneUri)) {
+            audioAttributes = new AudioAttributes.Builder(
+                    audioAttributes).setHapticChannelsMuted(true).build();
+        }
         if (ringtone != null) {
             ringtone.setAudioAttributesField(audioAttributes);
             if (!ringtone.createLocalMediaPlayer()) {

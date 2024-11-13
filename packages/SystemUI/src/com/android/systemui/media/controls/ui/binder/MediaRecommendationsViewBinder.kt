@@ -16,13 +16,24 @@
 
 package com.android.systemui.media.controls.ui.binder
 
+import android.app.WallpaperColors
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Matrix
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.Icon
+import android.graphics.drawable.LayerDrawable
+import android.os.Trace
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -30,17 +41,29 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.animation.Expandable
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.media.controls.shared.model.NUM_REQUIRED_RECOMMENDATIONS
+import com.android.systemui.media.controls.ui.animation.surfaceFromScheme
+import com.android.systemui.media.controls.ui.animation.textPrimaryFromScheme
+import com.android.systemui.media.controls.ui.animation.textSecondaryFromScheme
 import com.android.systemui.media.controls.ui.controller.MediaViewController
+import com.android.systemui.media.controls.ui.util.MediaArtworkHelper
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.viewmodel.MediaRecViewModel
 import com.android.systemui.media.controls.ui.viewmodel.MediaRecommendationsViewModel
 import com.android.systemui.media.controls.ui.viewmodel.MediaRecsCardViewModel
+import com.android.systemui.monet.ColorScheme
+import com.android.systemui.monet.Style
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.util.animation.TransitionLayout
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+private const val TAG = "MediaRecommendationsViewBinder"
+private const val MEDIA_REC_SCRIM_START_ALPHA = 0.15f
+private const val MEDIA_REC_SCRIM_END_ALPHA = 1.0f
 
 object MediaRecommendationsViewBinder {
 
@@ -50,6 +73,8 @@ object MediaRecommendationsViewBinder {
         viewModel: MediaRecommendationsViewModel,
         mediaViewController: MediaViewController,
         falsingManager: FalsingManager,
+        backgroundDispatcher: CoroutineDispatcher,
+        mainDispatcher: CoroutineDispatcher,
     ) {
         mediaViewController.recsConfigurationChangeListener = this::updateRecommendationsVisibility
         val cardView = viewHolder.recommendations
@@ -59,7 +84,14 @@ object MediaRecommendationsViewBinder {
                     launch {
                         viewModel.mediaRecsCard.collectLatest { viewModel ->
                             viewModel?.let {
-                                bindRecsCard(viewHolder, it, mediaViewController, falsingManager)
+                                bindRecsCard(
+                                    viewHolder,
+                                    it,
+                                    mediaViewController,
+                                    falsingManager,
+                                    backgroundDispatcher,
+                                    mainDispatcher,
+                                )
                             }
                         }
                     }
@@ -68,17 +100,21 @@ object MediaRecommendationsViewBinder {
         }
     }
 
-    fun bindRecsCard(
+    suspend fun bindRecsCard(
         viewHolder: RecommendationViewHolder,
         viewModel: MediaRecsCardViewModel,
-        mediaViewController: MediaViewController,
+        viewController: MediaViewController,
         falsingManager: FalsingManager,
+        backgroundDispatcher: CoroutineDispatcher,
+        mainDispatcher: CoroutineDispatcher,
     ) {
+        // Set up media control location and its listener.
+        viewModel.onLocationChanged(viewController.currentEndLocation)
+        viewController.locationChangeListener = viewModel.onLocationChanged
+
         // Bind main card.
-        viewHolder.cardTitle.setTextColor(viewModel.cardTitleColor)
-        viewHolder.recommendations.backgroundTintList = ColorStateList.valueOf(viewModel.cardColor)
         viewHolder.recommendations.contentDescription =
-            viewModel.contentDescription.invoke(mediaViewController.isGutsVisible)
+            viewModel.contentDescription.invoke(viewController.isGutsVisible)
 
         viewHolder.recommendations.setOnClickListener {
             if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@setOnClickListener
@@ -88,21 +124,30 @@ object MediaRecommendationsViewBinder {
         viewHolder.recommendations.setOnLongClickListener {
             if (falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY))
                 return@setOnLongClickListener true
-            if (!mediaViewController.isGutsVisible) {
-                openGuts(viewHolder, viewModel, mediaViewController)
+            if (!viewController.isGutsVisible) {
+                openGuts(viewHolder, viewModel, viewController)
             } else {
-                closeGuts(viewHolder, viewModel, mediaViewController)
+                closeGuts(viewHolder, viewModel, viewController)
             }
             return@setOnLongClickListener true
         }
 
+        // Bind colors
+        val appIcon = viewModel.mediaRecs.first().appIcon
+        fetchAndUpdateColors(viewHolder, appIcon, backgroundDispatcher, mainDispatcher)
         // Bind all recommendations.
-        bindRecommendationsList(viewHolder, viewModel.mediaRecs, falsingManager)
-        updateRecommendationsVisibility(mediaViewController, viewHolder.recommendations)
+        bindRecommendationsList(
+            viewHolder,
+            viewModel.mediaRecs,
+            falsingManager,
+            backgroundDispatcher,
+            mainDispatcher,
+        )
+        updateRecommendationsVisibility(viewController, viewHolder.recommendations)
 
         // Set visibility of recommendations.
-        val expandedSet: ConstraintSet = mediaViewController.expandedLayout
-        val collapsedSet: ConstraintSet = mediaViewController.collapsedLayout
+        val expandedSet: ConstraintSet = viewController.expandedLayout
+        val collapsedSet: ConstraintSet = viewController.collapsedLayout
         viewHolder.mediaTitles.forEach {
             setVisibleAndAlpha(expandedSet, it.id, viewModel.areTitlesVisible)
             setVisibleAndAlpha(collapsedSet, it.id, viewModel.areTitlesVisible)
@@ -112,15 +157,15 @@ object MediaRecommendationsViewBinder {
             setVisibleAndAlpha(collapsedSet, it.id, viewModel.areSubtitlesVisible)
         }
 
-        bindRecommendationsGuts(viewHolder, viewModel, mediaViewController, falsingManager)
+        bindRecommendationsGuts(viewHolder, viewModel, viewController, falsingManager)
 
-        mediaViewController.refreshState()
+        viewController.refreshState()
     }
 
     private fun bindRecommendationsGuts(
         viewHolder: RecommendationViewHolder,
         viewModel: MediaRecsCardViewModel,
-        mediaViewController: MediaViewController,
+        viewController: MediaViewController,
         falsingManager: FalsingManager,
     ) {
         val gutsViewHolder = viewHolder.gutsViewHolder
@@ -131,14 +176,14 @@ object MediaRecommendationsViewBinder {
         gutsViewHolder.dismiss.isEnabled = true
         gutsViewHolder.dismiss.setOnClickListener {
             if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@setOnClickListener
-            closeGuts(viewHolder, viewModel, mediaViewController)
-            gutsViewModel.onDismissClicked.invoke()
+            closeGuts(viewHolder, viewModel, viewController)
+            gutsViewModel.onDismissClicked()
         }
 
         gutsViewHolder.cancelText.background = gutsViewModel.cancelTextBackground
         gutsViewHolder.cancel.setOnClickListener {
             if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                closeGuts(viewHolder, viewModel, mediaViewController)
+                closeGuts(viewHolder, viewModel, viewController)
             }
         }
 
@@ -149,31 +194,26 @@ object MediaRecommendationsViewBinder {
         }
 
         gutsViewHolder.setDismissible(gutsViewModel.isDismissEnabled)
-        gutsViewHolder.setTextPrimaryColor(gutsViewModel.textPrimaryColor)
-        gutsViewHolder.setAccentPrimaryColor(gutsViewModel.accentPrimaryColor)
-        gutsViewHolder.setSurfaceColor(gutsViewModel.surfaceColor)
     }
 
-    private fun bindRecommendationsList(
+    private suspend fun bindRecommendationsList(
         viewHolder: RecommendationViewHolder,
         mediaRecs: List<MediaRecViewModel>,
-        falsingManager: FalsingManager
+        falsingManager: FalsingManager,
+        backgroundDispatcher: CoroutineDispatcher,
+        mainDispatcher: CoroutineDispatcher,
     ) {
         mediaRecs.forEachIndexed { index, mediaRecViewModel ->
             if (index >= NUM_REQUIRED_RECOMMENDATIONS) return@forEachIndexed
 
             val appIconView = viewHolder.mediaAppIcons[index]
             appIconView.clearColorFilter()
-            if (mediaRecViewModel.appIcon != null) {
-                appIconView.setImageDrawable(mediaRecViewModel.appIcon)
-            } else {
-                appIconView.setImageResource(R.drawable.ic_music_note)
-            }
+            appIconView.setImageDrawable(mediaRecViewModel.appIcon)
 
             val mediaCoverContainer = viewHolder.mediaCoverContainers[index]
             mediaCoverContainer.setOnClickListener {
                 if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return@setOnClickListener
-                mediaRecViewModel.onClicked.invoke(Expandable.fromView(it), index)
+                mediaRecViewModel.onClicked(Expandable.fromView(it), index)
             }
             mediaCoverContainer.setOnLongClickListener {
                 if (falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY))
@@ -183,29 +223,24 @@ object MediaRecommendationsViewBinder {
             }
 
             val mediaCover = viewHolder.mediaCoverItems[index]
-            val width: Int =
-                mediaCover.context.resources.getDimensionPixelSize(R.dimen.qs_media_rec_album_width)
-            val height: Int =
-                mediaCover.context.resources.getDimensionPixelSize(
-                    R.dimen.qs_media_rec_album_height_expanded
-                )
-            val coverMatrix = Matrix(mediaCover.imageMatrix)
-            coverMatrix.postScale(1.25f, 1.25f, 0.5f * width, 0.5f * height)
-            mediaCover.imageMatrix = coverMatrix
-            mediaCover.setImageDrawable(mediaRecViewModel.albumIcon)
+            bindRecommendationArtwork(
+                mediaCover.context,
+                viewHolder,
+                mediaRecViewModel,
+                index,
+                backgroundDispatcher,
+                mainDispatcher,
+            )
             mediaCover.contentDescription = mediaRecViewModel.contentDescription
 
             val title = viewHolder.mediaTitles[index]
             title.text = mediaRecViewModel.title
-            title.setTextColor(ColorStateList.valueOf(mediaRecViewModel.titleColor))
 
             val subtitle = viewHolder.mediaSubtitles[index]
             subtitle.text = mediaRecViewModel.subtitle
-            subtitle.setTextColor(ColorStateList.valueOf(mediaRecViewModel.subtitleColor))
 
             val progressBar = viewHolder.mediaProgressBars[index]
             progressBar.progress = mediaRecViewModel.progress
-            progressBar.progressTintList = ColorStateList.valueOf(mediaRecViewModel.progressColor)
             if (mediaRecViewModel.progress == 0) {
                 progressBar.visibility = View.GONE
             }
@@ -287,11 +322,148 @@ object MediaRecommendationsViewBinder {
                     TypedValue.applyDimension(
                             TypedValue.COMPLEX_UNIT_DIP,
                             displayAvailableDpWidth.toFloat(),
-                            res.displayMetrics
+                            res.displayMetrics,
                         )
                         .toInt()
                 displayAvailableWidth / recCoverWidth
             }
         return min(fittedNum.toDouble(), NUM_REQUIRED_RECOMMENDATIONS.toDouble()).toInt()
     }
+
+    private suspend fun bindRecommendationArtwork(
+        context: Context,
+        viewHolder: RecommendationViewHolder,
+        viewModel: MediaRecViewModel,
+        index: Int,
+        backgroundDispatcher: CoroutineDispatcher,
+        mainDispatcher: CoroutineDispatcher,
+    ) {
+        val traceCookie = viewHolder.hashCode()
+        val traceName = "MediaRecommendationsViewBinder#bindRecommendationArtwork"
+        Trace.beginAsyncSection(traceName, traceCookie)
+
+        // Capture width & height from views in foreground for artwork scaling in background
+        val width = context.resources.getDimensionPixelSize(R.dimen.qs_media_rec_album_width)
+        val height =
+            context.resources.getDimensionPixelSize(R.dimen.qs_media_rec_album_height_expanded)
+
+        withContext(backgroundDispatcher) {
+            val artwork =
+                getRecCoverBackground(
+                    context,
+                    viewModel.albumIcon,
+                    width,
+                    height,
+                    backgroundDispatcher,
+                )
+            withContext(mainDispatcher) {
+                val mediaCover = viewHolder.mediaCoverItems[index]
+                val coverMatrix = Matrix(mediaCover.imageMatrix)
+                coverMatrix.postScale(1.25f, 1.25f, 0.5f * width, 0.5f * height)
+                mediaCover.imageMatrix = coverMatrix
+                mediaCover.setImageDrawable(artwork)
+            }
+        }
+    }
+
+    /** Returns the recommendation album cover of [width]x[height] size. */
+    private suspend fun getRecCoverBackground(
+        context: Context,
+        icon: Icon?,
+        width: Int,
+        height: Int,
+        backgroundDispatcher: CoroutineDispatcher,
+    ): Drawable =
+        withContext(backgroundDispatcher) {
+            return@withContext MediaArtworkHelper.getWallpaperColor(
+                    context,
+                    backgroundDispatcher,
+                    icon,
+                    TAG,
+                )
+                ?.let { wallpaperColors ->
+                    addGradientToRecommendationAlbum(
+                        context,
+                        icon!!,
+                        ColorScheme(wallpaperColors, true, Style.CONTENT),
+                        width,
+                        height,
+                    )
+                } ?: ColorDrawable(Color.TRANSPARENT)
+        }
+
+    private fun addGradientToRecommendationAlbum(
+        context: Context,
+        artworkIcon: Icon,
+        mutableColorScheme: ColorScheme,
+        width: Int,
+        height: Int,
+    ): LayerDrawable {
+        // First try scaling rec card using bitmap drawable.
+        // If returns null, set drawable bounds.
+        val albumArt =
+            getScaledRecommendationCover(context, artworkIcon, width, height)
+                ?: MediaArtworkHelper.getScaledBackground(context, artworkIcon, width, height)
+        val gradient =
+            AppCompatResources.getDrawable(context, R.drawable.qs_media_rec_scrim)?.mutate()
+                as GradientDrawable
+        return MediaArtworkHelper.setUpGradientColorOnDrawable(
+            albumArt,
+            gradient,
+            mutableColorScheme,
+            MEDIA_REC_SCRIM_START_ALPHA,
+            MEDIA_REC_SCRIM_END_ALPHA,
+        )
+    }
+
+    /** Returns a [Drawable] of a given [artworkIcon] scaled to [width]x[height] size, . */
+    private fun getScaledRecommendationCover(
+        context: Context,
+        artworkIcon: Icon,
+        width: Int,
+        height: Int,
+    ): Drawable? {
+        check(width > 0) { "Width must be a positive number but was $width" }
+        check(height > 0) { "Height must be a positive number but was $height" }
+
+        return if (
+            artworkIcon.type == Icon.TYPE_BITMAP || artworkIcon.type == Icon.TYPE_ADAPTIVE_BITMAP
+        ) {
+            artworkIcon.bitmap?.let {
+                val bitmap = Bitmap.createScaledBitmap(it, width, height, false)
+                BitmapDrawable(context.resources, bitmap)
+            }
+        } else {
+            null
+        }
+    }
+
+    private suspend fun fetchAndUpdateColors(
+        viewHolder: RecommendationViewHolder,
+        appIcon: Drawable,
+        backgroundDispatcher: CoroutineDispatcher,
+        mainDispatcher: CoroutineDispatcher,
+    ) =
+        withContext(backgroundDispatcher) {
+            val colorScheme =
+                ColorScheme(WallpaperColors.fromDrawable(appIcon), /* darkTheme= */ true)
+            withContext(mainDispatcher) {
+                val backgroundColor = surfaceFromScheme(colorScheme)
+                val textPrimaryColor = textPrimaryFromScheme(colorScheme)
+                val textSecondaryColor = textSecondaryFromScheme(colorScheme)
+
+                viewHolder.cardTitle.setTextColor(textPrimaryColor)
+                viewHolder.recommendations.setBackgroundTintList(
+                    ColorStateList.valueOf(backgroundColor)
+                )
+
+                viewHolder.mediaTitles.forEach { it.setTextColor(textPrimaryColor) }
+                viewHolder.mediaSubtitles.forEach { it.setTextColor(textSecondaryColor) }
+                viewHolder.mediaProgressBars.forEach {
+                    it.progressTintList = ColorStateList.valueOf(textPrimaryColor)
+                }
+
+                viewHolder.gutsViewHolder.setColors(colorScheme)
+            }
+        }
 }

@@ -19,12 +19,14 @@ package android.webkit;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
 
 /** @hide */
@@ -41,19 +43,29 @@ public final class WebViewUpdateManager {
     /**
      * Get the singleton instance of the manager.
      *
-     * This exists for the benefit of callsites without a {@link Context}; prefer
+     * <p>This exists for the benefit of callsites without a {@link Context}; prefer
      * {@link Context#getSystemService(Class)} otherwise.
+     *
+     * <p>This must only be called on devices with {@link PackageManager#FEATURE_WEBVIEW},
+     * and will WTF or throw {@link UnsupportedOperationException} otherwise.
      */
     @SuppressLint("ManagerLookup") // service opts in to getSystemServiceWithNoContext()
-    public static @Nullable WebViewUpdateManager getInstance() {
-        return (WebViewUpdateManager) SystemServiceRegistry.getSystemServiceWithNoContext(
-                Context.WEBVIEW_UPDATE_SERVICE);
+    @RequiresFeature(PackageManager.FEATURE_WEBVIEW)
+    public static @NonNull WebViewUpdateManager getInstance() {
+        WebViewUpdateManager manager =
+                (WebViewUpdateManager) SystemServiceRegistry.getSystemServiceWithNoContext(
+                        Context.WEBVIEW_UPDATE_SERVICE);
+        if (manager == null) {
+            throw new UnsupportedOperationException("WebView not supported by device");
+        } else {
+            return manager;
+        }
     }
 
     /**
      * Block until system-level WebView preparations are complete.
      *
-     * This also makes the current WebView provider package visible to the caller.
+     * <p>This also makes the current WebView provider package visible to the caller.
      *
      * @return the status of WebView preparation and the current provider package.
      */
@@ -81,7 +93,7 @@ public final class WebViewUpdateManager {
     /**
      * Get the complete list of supported WebView providers for this device.
      *
-     * This includes all configured providers, regardless of whether they are currently available
+     * <p>This includes all configured providers, regardless of whether they are currently available
      * or valid.
      */
     @SuppressLint({"ParcelableList", "ArrayReturn"})
@@ -96,11 +108,15 @@ public final class WebViewUpdateManager {
     /**
      * Get the list of currently-valid WebView providers for this device.
      *
-     * This only includes providers that are currently present on the device and meet the validity
-     * criteria (signature, version, etc), but does not check if the provider is installed and
-     * enabled for all users.
+     * <p>This only includes providers that are currently present on the device and meet the
+     * validity criteria (signature, version, etc), but does not check if the provider is installed
+     * and enabled for all users.
+     *
+     * <p>Note that this will be filtered by the caller's package visibility; callers should
+     * have QUERY_ALL_PACKAGES permission to ensure that the list is complete.
      */
     @SuppressLint({"ParcelableList", "ArrayReturn"})
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public @NonNull WebViewProviderInfo[] getValidWebViewPackages() {
         try {
             return mService.getValidWebViewPackages();
@@ -125,7 +141,7 @@ public final class WebViewUpdateManager {
     /**
      * Ask the system to switch to a specific WebView implementation if possible.
      *
-     * This choice will be stored persistently.
+     * <p>This choice will be stored persistently.
      *
      * @param newProvider the package name to use.
      * @return the package name which is now in use, which may not be the
@@ -155,7 +171,7 @@ public final class WebViewUpdateManager {
     /**
      * Get the WebView provider which will be used if no explicit choice has been made.
      *
-     * The default provider is not guaranteed to be a valid/usable WebView implementation.
+     * <p>The default provider is not guaranteed to be a valid/usable WebView implementation.
      *
      * @return the default WebView provider.
      */

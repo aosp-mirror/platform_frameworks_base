@@ -96,4 +96,8 @@
 
     <!-- True if the device supports system decorations on secondary displays. -->
     <bool name="config_supportsSystemDecorsOnSecondaryDisplays">false</bool>
+
+    <!-- Whether to enable scaling and fading animation to scrollviews while scrolling.
+         P.S this is a change only intended for wear devices. -->
+    <bool name="config_enableViewGroupScalingFading">true</bool>
 </resources>

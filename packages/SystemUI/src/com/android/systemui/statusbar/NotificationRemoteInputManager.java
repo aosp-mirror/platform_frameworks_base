@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry.
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
@@ -399,7 +400,7 @@ public class NotificationRemoteInputManager implements CoreStartable {
     public boolean activateRemoteInput(View view, RemoteInput[] inputs, RemoteInput input,
             PendingIntent pendingIntent, @Nullable EditedSuggestionInfo editedSuggestionInfo) {
         return activateRemoteInput(view, inputs, input, pendingIntent, editedSuggestionInfo,
-                null /* userMessageContent */, null /* authBypassCheck */);
+                    null /* userMessageContent */, null /* authBypassCheck */);
     }
 
     /**
@@ -420,6 +421,12 @@ public class NotificationRemoteInputManager implements CoreStartable {
             PendingIntent pendingIntent, @Nullable EditedSuggestionInfo editedSuggestionInfo,
             @Nullable String userMessageContent,
             @Nullable AuthBypassPredicate authBypassCheck) {
+        if (ExpandHeadsUpOnInlineReply.isEnabled()) {
+            return activateRemoteInputOnExpanded(view, inputs, input, pendingIntent,
+                    editedSuggestionInfo, userMessageContent,
+                    authBypassCheck);
+        }
+
         ViewParent p = view.getParent();
         RemoteInputView riv = null;
         ExpandableNotificationRow row = null;
@@ -466,6 +473,86 @@ public class NotificationRemoteInputManager implements CoreStartable {
                         userMessageContent, authBypassCheck);
             });
             return true;
+        }
+
+        if (!riv.isAttachedToWindow()) {
+            // if we still didn't find a view that is attached, let's abort.
+            return false;
+        }
+
+        riv.getController().setPendingIntent(pendingIntent);
+        riv.getController().setRemoteInput(input);
+        riv.getController().setRemoteInputs(inputs);
+        riv.getController().setEditedSuggestionInfo(editedSuggestionInfo);
+        riv.focusAnimated();
+        if (userMessageContent != null) {
+            riv.setEditTextContent(userMessageContent);
+        }
+        if (deferBouncer) {
+            final ExpandableNotificationRow finalRow = row;
+            riv.getController().setBouncerChecker(() ->
+                    !authBypassCheck.canSendRemoteInputWithoutBouncer()
+                            && showBouncerForRemoteInput(view, pendingIntent, finalRow));
+        }
+
+        return true;
+    }
+
+    /**
+     * Activates a given {@link RemoteInput} on the expanded notification.
+     * If the given notification is not expanded, this method will expand the notification
+     * first and after that activate remote input on the expanded.
+     * @param view The view of the action button or suggestion chip that was tapped.
+     * @param inputs The remote inputs that need to be sent to the app.
+     * @param input The remote input that needs to be activated.
+     * @param pendingIntent The pending intent to be sent to the app.
+     * @param editedSuggestionInfo The smart reply that should be inserted in the remote input, or
+     *         {@code null} if the user is not editing a smart reply.
+     * @param userMessageContent User-entered text with which to initialize the remote input view.
+     * @param authBypassCheck Optional auth bypass check associated with this remote input
+     *         activation. If {@code null}, we never bypass.
+     * @return Whether the {@link RemoteInput} was activated.
+     */
+    public boolean activateRemoteInputOnExpanded(View view, RemoteInput[] inputs, RemoteInput input,
+            PendingIntent pendingIntent, @Nullable EditedSuggestionInfo editedSuggestionInfo,
+            @Nullable String userMessageContent,
+            @Nullable AuthBypassPredicate authBypassCheck) {
+        ViewParent p = view.getParent();
+        RemoteInputView riv = null;
+        ExpandableNotificationRow row = null;
+        while (p != null) {
+            if (p instanceof View) {
+                View pv = (View) p;
+                if (pv.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
+                    row = (ExpandableNotificationRow) pv.getTag(R.id.row_tag_for_content_view);
+                    break;
+                }
+            }
+            p = p.getParent();
+        }
+
+        if (row == null) {
+            return false;
+        }
+
+        final boolean deferBouncer = authBypassCheck != null;
+        if (!deferBouncer && showBouncerForRemoteInput(view, pendingIntent, row)) {
+            return true;
+        }
+
+        if (!row.getPrivateLayout().getExpandedChild().isShown()) {
+            // The expanded layout is selected, but it's not shown yet, let's wait on it to
+            // show before we do the animation.
+            mCallback.onMakeExpandedVisibleForRemoteInput(row, view, deferBouncer, () -> {
+                activateRemoteInputOnExpanded(view, inputs, input, pendingIntent,
+                        editedSuggestionInfo, userMessageContent, authBypassCheck);
+            });
+            return true;
+        }
+
+        riv = findRemoteInputView(row.getPrivateLayout().getExpandedChild());
+        if (riv == null) {
+            return false;
         }
 
         if (!riv.isAttachedToWindow()) {

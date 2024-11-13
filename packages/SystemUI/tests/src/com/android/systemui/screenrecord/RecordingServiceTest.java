@@ -16,8 +16,13 @@
 
 package com.android.systemui.screenrecord;
 
+import static com.android.systemui.screenrecord.RecordingService.GROUP_KEY_ERROR_SAVING;
+import static com.android.systemui.screenrecord.RecordingService.GROUP_KEY_SAVED;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,6 +30,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -35,8 +41,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -60,7 +66,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class RecordingServiceTest extends SysuiTestCase {
 
@@ -72,8 +78,6 @@ public class RecordingServiceTest extends SysuiTestCase {
     private NotificationManager mNotificationManager;
     @Mock
     private ScreenMediaRecorder mScreenMediaRecorder;
-    @Mock
-    private Notification mNotification;
     @Mock
     private Executor mExecutor;
     @Mock
@@ -124,9 +128,6 @@ public class RecordingServiceTest extends SysuiTestCase {
 
         // Mock notifications
         doNothing().when(mRecordingService).createRecordingNotification();
-        doReturn(mNotification).when(mRecordingService).createProcessingNotification();
-        doReturn(mNotification).when(mRecordingService).createSaveNotification(any());
-        doNothing().when(mRecordingService).createErrorNotification();
         doNothing().when(mRecordingService).showErrorToast(anyInt());
         doNothing().when(mRecordingService).stopForeground(anyInt());
 
@@ -227,6 +228,33 @@ public class RecordingServiceTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnSystemRequestedStop_whenRecordingInProgress_showsNotifications() {
+        doReturn(true).when(mController).isRecording();
+
+        mRecordingService.onStopped();
+
+        // Processing notification
+        ArgumentCaptor<Notification> notifCaptor = ArgumentCaptor.forClass(Notification.class);
+        verify(mNotificationManager).notifyAsUser(any(), anyInt(), notifCaptor.capture(), any());
+        assertEquals(GROUP_KEY_SAVED, notifCaptor.getValue().getGroup());
+
+        reset(mNotificationManager);
+        verify(mExecutor).execute(mRunnableCaptor.capture());
+        mRunnableCaptor.getValue().run();
+
+        verify(mNotificationManager, times(2))
+                .notifyAsUser(any(), anyInt(), notifCaptor.capture(), any());
+        // Saved notification
+        Notification saveNotification = notifCaptor.getAllValues().get(0);
+        assertFalse(saveNotification.isGroupSummary());
+        assertEquals(GROUP_KEY_SAVED, saveNotification.getGroup());
+        // Group summary notification
+        Notification groupSummaryNotification = notifCaptor.getAllValues().get(1);
+        assertTrue(groupSummaryNotification.isGroupSummary());
+        assertEquals(GROUP_KEY_SAVED, groupSummaryNotification.getGroup());
+    }
+
+    @Test
     public void testOnSystemRequestedStop_recorderEndThrowsRuntimeException_showsErrorNotification()
             throws IOException {
         doReturn(true).when(mController).isRecording();
@@ -234,7 +262,11 @@ public class RecordingServiceTest extends SysuiTestCase {
 
         mRecordingService.onStopped();
 
-        verify(mRecordingService).createErrorNotification();
+        verify(mRecordingService).createErrorSavingNotification(any());
+        ArgumentCaptor<Notification> notifCaptor = ArgumentCaptor.forClass(Notification.class);
+        verify(mNotificationManager).notifyAsUser(any(), anyInt(), notifCaptor.capture(), any());
+        assertTrue(notifCaptor.getValue().isGroupSummary());
+        assertEquals(GROUP_KEY_ERROR_SAVING, notifCaptor.getValue().getGroup());
     }
 
     @Test

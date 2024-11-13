@@ -49,6 +49,8 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.testing.ViewUtils;
 import android.util.MathUtils;
@@ -65,6 +67,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -75,7 +78,9 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scrim.ScrimView;
+import com.android.systemui.shade.shared.flag.DualShade;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LinearLargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
@@ -309,7 +314,11 @@ public class ScrimControllerTest extends SysuiTestCase {
         mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
         mTestScope.getTestScheduler().runCurrent();
 
-        mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
+        if (SceneContainerFlag.isEnabled()) {
+            mScrimController.transitionTo(ScrimState.KEYGUARD);
+        } else {
+            mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
+        }
         finishAnimationsImmediately();
     }
 
@@ -354,6 +363,47 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
                 mScrimBehind, true
+        ));
+    }
+
+    @Test
+    @EnableSceneContainer
+    @DisableFlags(DualShade.FLAG_NAME)
+    public void transitionToShadeLocked_sceneContainer_dualShadeOff() {
+        mScrimController.transitionTo(SHADE_LOCKED);
+        mScrimController.setQsPosition(1f, 0);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mNotificationsScrim, OPAQUE,
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, OPAQUE
+        ));
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mScrimBehind, true
+        ));
+    }
+
+    @Test
+    @EnableSceneContainer
+    @EnableFlags(DualShade.FLAG_NAME)
+    public void transitionToShadeLocked_sceneContainer_dualShadeOn() {
+        mScrimController.transitionTo(SHADE_LOCKED);
+        mScrimController.setQsPosition(1f, 0);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mNotificationsScrim, TRANSPARENT,
+                mScrimInFront, TRANSPARENT,
+                mScrimBehind, TRANSPARENT
+        ));
+
+        assertScrimTinted(Map.of(
+                mScrimInFront, false,
+                mNotificationsScrim, false,
+                mScrimBehind, false
         ));
     }
 
@@ -994,6 +1044,64 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, OPAQUE,
                 mScrimBehind, OPAQUE));
+    }
+
+    @Test
+    @EnableSceneContainer
+    @DisableFlags(DualShade.FLAG_NAME)
+    public void transitionToUnlocked_sceneContainer_dualShadeOff() {
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT
+        ));
+
+        mScrimController.setRawPanelExpansionFraction(0.5f);
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, SEMI_TRANSPARENT,
+                mScrimBehind, SEMI_TRANSPARENT
+        ));
+
+        mScrimController.setRawPanelExpansionFraction(1f);
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, OPAQUE,
+                mScrimBehind, OPAQUE
+        ));
+    }
+
+    @Test
+    @EnableSceneContainer
+    @EnableFlags(DualShade.FLAG_NAME)
+    public void transitionToUnlocked_sceneContainer_dualShadeOn() {
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT
+        ));
+
+        mScrimController.setRawPanelExpansionFraction(0.5f);
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT
+        ));
+
+        mScrimController.setRawPanelExpansionFraction(1f);
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, TRANSPARENT
+        ));
     }
 
     @Test
@@ -2086,7 +2194,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     private void assertScrimTinted(Map<ScrimView, Boolean> scrimToTint) {
-        scrimToTint.forEach((scrim, hasTint) -> assertScrimTint(scrim, hasTint));
+        scrimToTint.forEach(this::assertScrimTint);
     }
 
     private void assertScrimTint(ScrimView scrim, boolean hasTint) {
@@ -2123,7 +2231,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         if (!scrimToAlpha.containsKey(mNotificationsScrim)) {
             assertScrimAlpha(mNotificationsScrim, TRANSPARENT);
         }
-        scrimToAlpha.forEach((scrimView, alpha) -> assertScrimAlpha(scrimView, alpha));
+        scrimToAlpha.forEach(this::assertScrimAlpha);
 
         // When clipping, QS scrim should not affect combined visibility.
         if (mScrimController.getClipQsScrim() && scrimToAlpha.get(mScrimBehind) == OPAQUE) {

@@ -291,8 +291,9 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     private void updateMediaMetaData(MediaListener callback) {
-        callback.onPrimaryMetadataOrStateChanged(mMediaMetadata,
-                getMediaControllerPlaybackState(mMediaController));
+        int playbackState = getMediaControllerPlaybackState(mMediaController);
+        mHandler.post(
+                () -> callback.onPrimaryMetadataOrStateChanged(mMediaMetadata, playbackState));
     }
 
     public void removeCallback(MediaListener callback) {
@@ -437,9 +438,11 @@ public class NotificationMediaManager implements Dumpable {
 
     private void updateMediaMetaData(List<MediaListener> callbacks) {
         @PlaybackState.State int state = getMediaControllerPlaybackState(mMediaController);
-        for (int i = 0; i < callbacks.size(); i++) {
-            callbacks.get(i).onPrimaryMetadataOrStateChanged(mMediaMetadata, state);
-        }
+        mHandler.post(() -> {
+            for (int i = 0; i < callbacks.size(); i++) {
+                callbacks.get(i).onPrimaryMetadataOrStateChanged(mMediaMetadata, state);
+            }
+        });
     }
 
     @Override

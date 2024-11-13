@@ -20,6 +20,7 @@ import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
@@ -30,6 +31,7 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
@@ -73,6 +75,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
     @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Captor private lateinit var updateCallbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
     private val mainDispatcher = StandardTestDispatcher()
     private val testDispatcher = StandardTestDispatcher()
@@ -100,6 +103,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 systemClock,
                 facePropertyRepository,
                 userTracker,
+                lockPatternUtils,
             )
     }
 
@@ -137,6 +141,27 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             underTest.setBottomAreaAlpha(1.0f)
             assertThat(underTest.bottomAreaAlpha.value).isEqualTo(1f)
+        }
+
+    @Test
+    fun panelAlpha() =
+        testScope.runTest {
+            assertThat(underTest.panelAlpha.value).isEqualTo(1f)
+
+            underTest.setPanelAlpha(0.1f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.1f)
+
+            underTest.setPanelAlpha(0.2f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.2f)
+
+            underTest.setPanelAlpha(0.3f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.3f)
+
+            underTest.setPanelAlpha(0.5f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.5f)
+
+            underTest.setPanelAlpha(1.0f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(1f)
         }
 
     @Test
@@ -264,6 +289,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun dozeAmount() =
         testScope.runTest {
             val values = mutableListOf<Float>()

@@ -79,8 +79,8 @@ import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import androidx.camera.extensions.impl.AutoImageCaptureExtenderImpl;
 import androidx.camera.extensions.impl.AutoPreviewExtenderImpl;
 import androidx.camera.extensions.impl.BeautyImageCaptureExtenderImpl;
@@ -172,7 +172,7 @@ public class CameraExtensionsProxyService extends Service {
             EXTENSIONS_VERSION.startsWith(LATENCY_VERSION_PREFIX) ||
             EXTENSIONS_VERSION.startsWith(EFV_VERSION_PREFIX));
 
-    private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
+    private static HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
     private CameraManager mCameraManager;
 
     private static boolean checkForLatencyAPI() {
@@ -529,167 +529,6 @@ public class CameraExtensionsProxyService extends Service {
      */
     public static Pair<PreviewExtenderImpl, ImageCaptureExtenderImpl> initializeExtension(
             int extensionType) {
-        if (Flags.concertModeApi()) {
-            if (extensionType == CameraExtensionCharacteristics.EXTENSION_EYES_FREE_VIDEOGRAPHY) {
-                // Basic extensions are deprecated starting with extension version 1.5
-                return new Pair<>(new PreviewExtenderImpl() {
-                    @Override
-                    public boolean isExtensionAvailable(String cameraId,
-                            CameraCharacteristics cameraCharacteristics) {
-                        return false;
-                    }
-
-                    @Override
-                    public void init(String cameraId, CameraCharacteristics cameraCharacteristics) {
-
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl getCaptureStage() {
-                        return null;
-                    }
-
-                    @Override
-                    public ProcessorType getProcessorType() {
-                        return null;
-                    }
-
-                    @Override
-                    public ProcessorImpl getProcessor() {
-                        return null;
-                    }
-
-                    @Nullable
-                    @Override
-                    public List<Pair<Integer, Size[]>> getSupportedResolutions() {
-                        return null;
-                    }
-
-                    @Override
-                    public void onInit(String cameraId, CameraCharacteristics cameraCharacteristics,
-                            Context context) { }
-
-                    @Override
-                    public void onDeInit() { }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onPresetSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onEnableSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onDisableSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public int onSessionType() {
-                        return 0;
-                    }
-                }, new ImageCaptureExtenderImpl() {
-                    @Override
-                    public boolean isExtensionAvailable(String cameraId,
-                            CameraCharacteristics cameraCharacteristics) {
-                        return false;
-                    }
-
-                    @Override
-                    public void init(String cameraId,
-                            CameraCharacteristics cameraCharacteristics) { }
-
-                    @Override
-                    public CaptureProcessorImpl getCaptureProcessor() {
-                        return null;
-                    }
-
-                    @Override
-                    public
-                    List<androidx.camera.extensions.impl.CaptureStageImpl> getCaptureStages() {
-                        return null;
-                    }
-
-                    @Override
-                    public int getMaxCaptureStage() {
-                        return 0;
-                    }
-
-                    @Override
-                    public List<Pair<Integer, Size[]>> getSupportedResolutions() {
-                        return null;
-                    }
-
-                    @Override
-                    public List<Pair<Integer, Size[]>> getSupportedPostviewResolutions(
-                            Size captureSize) {
-                        return null;
-                    }
-
-                    @Override
-                    public Range<Long> getEstimatedCaptureLatencyRange(
-                            Size captureOutputSize) {
-                        return null;
-                    }
-
-                    @Override
-                    public List<CaptureRequest.Key> getAvailableCaptureRequestKeys() {
-                        return null;
-                    }
-
-                    @Override
-                    public List<CaptureResult.Key> getAvailableCaptureResultKeys() {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isCaptureProcessProgressAvailable() {
-                        return false;
-                    }
-
-                    @Override
-                    public Pair<Long, Long> getRealtimeCaptureLatency() {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isPostviewAvailable() {
-                        return false;
-                    }
-
-                    @Override
-                    public void onInit(String cameraId,
-                            CameraCharacteristics cameraCharacteristics, Context context) { }
-
-                    @Override
-                    public void onDeInit() { }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onPresetSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onEnableSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onDisableSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public int onSessionType() {
-                        return 0;
-                    }
-                });
-            }
-        }
-
         switch (extensionType) {
             case CameraExtensionCharacteristics.EXTENSION_AUTOMATIC:
                 return new Pair<>(new AutoPreviewExtenderImpl(),
@@ -714,88 +553,6 @@ public class CameraExtensionsProxyService extends Service {
      * @hide
      */
     public static AdvancedExtenderImpl initializeAdvancedExtensionImpl(int extensionType) {
-        if (Flags.concertModeApi()) {
-            if (extensionType == CameraExtensionCharacteristics.EXTENSION_EYES_FREE_VIDEOGRAPHY) {
-                if (EFV_SUPPORTED) {
-                    return new EyesFreeVideographyAdvancedExtenderImpl();
-                } else {
-                    return new AdvancedExtenderImpl() {
-                        @Override
-                        public boolean isExtensionAvailable(String cameraId,
-                                Map<String, CameraCharacteristics> characteristicsMap) {
-                            return false;
-                        }
-
-                        @Override
-                        public void init(String cameraId,
-                                Map<String, CameraCharacteristics> characteristicsMap) {
-
-                        }
-
-                        @Override
-                        public Range<Long> getEstimatedCaptureLatencyRange(String cameraId,
-                                Size captureOutputSize, int imageFormat) {
-                            return null;
-                        }
-
-                        @Override
-                        public Map<Integer, List<Size>> getSupportedPreviewOutputResolutions(
-                                String cameraId) {
-                            return null;
-                        }
-
-                        @Override
-                        public Map<Integer, List<Size>> getSupportedCaptureOutputResolutions(
-                                String cameraId) {
-                            return null;
-                        }
-
-                        @Override
-                        public Map<Integer, List<Size>> getSupportedPostviewResolutions(
-                                Size captureSize) {
-                            return null;
-                        }
-
-                        @Override
-                        public List<Size> getSupportedYuvAnalysisResolutions(String cameraId) {
-                            return null;
-                        }
-
-                        @Override
-                        public SessionProcessorImpl createSessionProcessor() {
-                            return null;
-                        }
-
-                        @Override
-                        public List<CaptureRequest.Key> getAvailableCaptureRequestKeys() {
-                            return null;
-                        }
-
-                        @Override
-                        public List<CaptureResult.Key> getAvailableCaptureResultKeys() {
-                            return null;
-                        }
-
-                        @Override
-                        public boolean isCaptureProcessProgressAvailable() {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean isPostviewAvailable() {
-                            return false;
-                        }
-
-                        @Override
-                        public List<Pair<CameraCharacteristics.Key, Object>>
-                                getAvailableCharacteristicsKeyValues() {
-                            return Collections.emptyList();
-                        }
-                    };
-                }
-            }
-        }
-
         switch (extensionType) {
             case CameraExtensionCharacteristics.EXTENSION_AUTOMATIC:
                 return new AutoAdvancedExtenderImpl();
@@ -821,7 +578,7 @@ public class CameraExtensionsProxyService extends Service {
             mCameraManager = getSystemService(CameraManager.class);
 
             String [] cameraIds = mCameraManager.getCameraIdListNoLazy();
-            if (cameraIds != null) {
+            if (cameraIds != null && mMetadataVendorIdMap.isEmpty()) {
                 for (String cameraId : cameraIds) {
                     CameraCharacteristics chars = mCameraManager.getCameraCharacteristics(cameraId);
                     Object thisClass = CameraCharacteristics.Key.class;
@@ -1280,14 +1037,12 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void onCaptureFailed(int captureSequenceId, int reason) {
-            if (Flags.concertMode()) {
-                if (mCaptureCallback != null) {
-                    try {
-                        mCaptureCallback.onCaptureProcessFailed(captureSequenceId, reason);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to notify capture failure due to remote " +
-                                "exception!");
-                    }
+            if (mCaptureCallback != null) {
+                try {
+                    mCaptureCallback.onCaptureProcessFailed(captureSequenceId, reason);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to notify capture failure due to remote " +
+                            "exception!");
                 }
             }
         }
@@ -1620,7 +1375,7 @@ public class CameraExtensionsProxyService extends Service {
                 }
                 ret.outputConfigs.add(entry);
             }
-            if (Flags.extension10Bit() && EFV_SUPPORTED) {
+            if (EFV_SUPPORTED) {
                 ret.colorSpace = sessionConfig.getColorSpace();
             } else {
                 ret.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
@@ -1643,16 +1398,14 @@ public class CameraExtensionsProxyService extends Service {
             CameraExtensionsProxyService.unregisterDeathRecipient(mToken, this);
             mSessionProcessor.deInitSession();
 
-            if (Flags.surfaceLeakFix()) {
-                if (mOutputImageCaptureSurfaceImpl.mSurface != null) {
-                    mOutputImageCaptureSurfaceImpl.mSurface.release();
-                }
-                if (mOutputPreviewSurfaceImpl.mSurface != null) {
-                    mOutputPreviewSurfaceImpl.mSurface.release();
-                }
-                if (mOutputPostviewSurfaceImpl.mSurface != null) {
-                    mOutputPostviewSurfaceImpl.mSurface.release();
-                }
+            if (mOutputImageCaptureSurfaceImpl.mSurface != null) {
+                mOutputImageCaptureSurfaceImpl.mSurface.release();
+            }
+            if (mOutputPreviewSurfaceImpl.mSurface != null) {
+                mOutputPreviewSurfaceImpl.mSurface.release();
+            }
+            if (mOutputPostviewSurfaceImpl.mSurface != null) {
+                mOutputPostviewSurfaceImpl.mSurface.release();
             }
         }
 
@@ -2596,7 +2349,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private static CameraOutputConfig getCameraOutputConfig(Camera2OutputConfigImpl output) {
         CameraOutputConfig ret = new CameraOutputConfig();
-        if (Flags.extension10Bit() && EFV_SUPPORTED) {
+        if (EFV_SUPPORTED) {
             ret.dynamicRangeProfile = output.getDynamicRangeProfile();
         } else {
             ret.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
@@ -2619,11 +2372,7 @@ public class CameraExtensionsProxyService extends Service {
             ret.size.height = imageReaderOutputConfig.getSize().getHeight();
             ret.imageFormat = imageReaderOutputConfig.getImageFormat();
             ret.capacity = imageReaderOutputConfig.getMaxImages();
-            if (EFV_SUPPORTED) {
-                ret.usage = imageReaderOutputConfig.getUsage();
-            } else {
-                ret.usage = 0;
-            }
+            ret.usage = imageReaderOutputConfig.getUsage();
         } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
             MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
                     (MultiResolutionImageReaderOutputConfigImpl) output;

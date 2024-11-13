@@ -212,35 +212,57 @@
 
     <issue
         id="FlaggedApi"
-        message="Method `PollingFrame()` is a flagged API and should be inside an `if (Flags.nfcReadPollingLoop())` check (or annotate the surrounding method `handleMessage` with `@FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP) to transfer requirement to caller`)"
-        errorLine1="                        pollingFrames.add(new PollingFrame(frame));"
-        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/nfc/java/android/nfc/cardemulation/HostApduService.java"
-            line="335"
-            column="43"/>
-    </issue>
-
-    <issue
-        id="FlaggedApi"
-        message="Method `processPollingFrames()` is a flagged API and should be inside an `if (Flags.nfcReadPollingLoop())` check (or annotate the surrounding method `handleMessage` with `@FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP) to transfer requirement to caller`)"
-        errorLine1="                    processPollingFrames(pollingFrames);"
-        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="frameworks/base/nfc/java/android/nfc/cardemulation/HostApduService.java"
-            line="337"
-            column="21"/>
-    </issue>
-
-    <issue
-        id="FlaggedApi"
         message="Method `NfcOemExtension()` is a flagged API and should be inside an `if (Flags.nfcOemExtension())` check (or annotate the surrounding method `NfcAdapter` with `@FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION) to transfer requirement to caller`)"
         errorLine1="        mNfcOemExtension = new NfcOemExtension(mContext, this);"
         errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
-            line="895"
+            line="909"
             column="28"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Field `FLAG_SET_DEFAULT_TECH` is a flagged API and should be inside an `if (Flags.nfcSetDefaultDiscTech())` check (or annotate the surrounding method `setDiscoveryTechnology` with `@FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH) to transfer requirement to caller`)"
+        errorLine1="                &amp;&amp; ((pollTechnology &amp; FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="1917"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Field `FLAG_SET_DEFAULT_TECH` is a flagged API and should be inside an `if (Flags.nfcSetDefaultDiscTech())` check (or annotate the surrounding method `setDiscoveryTechnology` with `@FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH) to transfer requirement to caller`)"
+        errorLine1="                &amp;&amp; ((pollTechnology &amp; FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH"
+        errorLine2="                                                                ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="1917"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Field `FLAG_SET_DEFAULT_TECH` is a flagged API and should be inside an `if (Flags.nfcSetDefaultDiscTech())` check (or annotate the surrounding method `setDiscoveryTechnology` with `@FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH) to transfer requirement to caller`)"
+        errorLine1="                || (listenTechnology &amp; FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH)) {"
+        errorLine2="                                       ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="1918"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="FlaggedApi"
+        message="Field `FLAG_SET_DEFAULT_TECH` is a flagged API and should be inside an `if (Flags.nfcSetDefaultDiscTech())` check (or annotate the surrounding method `setDiscoveryTechnology` with `@FlaggedApi(Flags.FLAG_NFC_SET_DEFAULT_DISC_TECH) to transfer requirement to caller`)"
+        errorLine1="                || (listenTechnology &amp; FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH)) {"
+        errorLine2="                                                                 ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="1918"
+            column="66"/>
     </issue>
 
     <issue

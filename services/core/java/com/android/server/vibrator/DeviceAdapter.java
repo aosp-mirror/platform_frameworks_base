@@ -21,7 +21,6 @@ import android.os.CombinedVibration;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.VibrationEffectSegment;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
@@ -82,9 +81,8 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
     @NonNull
     @Override
     public VibrationEffect adaptToVibrator(int vibratorId, @NonNull VibrationEffect effect) {
-        if (!(effect instanceof VibrationEffect.Composed)) {
+        if (!(effect instanceof VibrationEffect.Composed composed)) {
             // Segments adapters can only apply to Composed effects.
-            Slog.wtf(TAG, "Error adapting unsupported vibration effect: " + effect);
             return effect;
         }
 
@@ -95,7 +93,6 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
         }
 
         VibratorInfo info = controller.getVibratorInfo();
-        VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
         List<VibrationEffectSegment> newSegments = new ArrayList<>(composed.getSegments());
         int newRepeatIndex = composed.getRepeatIndex();
 

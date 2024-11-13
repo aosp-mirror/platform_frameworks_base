@@ -77,6 +77,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A proxy that processes all {@link IInputMethodManager} calls asynchronously.
@@ -86,8 +87,6 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
     interface Callback extends IInputMethodManagerImpl.Callback {
         @GuardedBy("ImfLock.class")
         ClientState getClientStateLocked(IInputMethodClient client);
-        @GuardedBy("ImfLock.class")
-        boolean isInputShownLocked();
     }
 
     private final Callback mInner;
@@ -177,49 +176,45 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             @MotionEvent.ToolType int lastClickToolType, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
-        offload(
-                () -> {
-                    if (!mInner.showSoftInput(
+            @SoftInputShowHideReason int reason, boolean async) {
+
+        if (async) {
+            offload(() -> mInner.showSoftInput(
+                    client, windowToken, statsToken, flags, lastClickToolType, resultReceiver,
+                    reason, async));
+            return true;
+        } else {
+            final var future = CompletableFuture.supplyAsync(
+                    () -> mInner.showSoftInput(
                             client,
                             windowToken,
                             statsToken,
                             flags,
                             lastClickToolType,
                             resultReceiver,
-                            reason)) {
-                        sendResultReceiverFailure(resultReceiver);
-                    }
-                });
-        return true;
+                            reason,
+                            async),
+                    this::offload);
+            return future.completeOnTimeout(false, 1, TimeUnit.SECONDS).join();
+        }
     }
 
     @Override
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
-        offload(
-                () -> {
-                    if (!mInner.hideSoftInput(
-                            client, windowToken, statsToken, flags, resultReceiver, reason)) {
-                        sendResultReceiverFailure(resultReceiver);
-                    }
-                });
-        return true;
-    }
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason, boolean async) {
 
-    private void sendResultReceiverFailure(@Nullable ResultReceiver resultReceiver) {
-        if (resultReceiver == null) {
-            return;
+        if (async) {
+            offload(() -> mInner.hideSoftInput(
+                    client, windowToken, statsToken, flags, resultReceiver, reason, async));
+            return true;
+        } else {
+            final var future = CompletableFuture.supplyAsync(
+                    () -> mInner.hideSoftInput(
+                            client, windowToken, statsToken, flags, resultReceiver, reason, async),
+                    this::offload);
+            return future.completeOnTimeout(false, 1, TimeUnit.SECONDS).join();
         }
-        final boolean isInputShown;
-        synchronized (ImfLock.class) {
-            isInputShown = mInner.isInputShownLocked();
-        }
-        resultReceiver.send(isInputShown
-                        ? InputMethodManager.RESULT_UNCHANGED_SHOWN
-                        : InputMethodManager.RESULT_UNCHANGED_HIDDEN,
-                null);
     }
 
     @Override
@@ -239,7 +234,8 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
             IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq,
+            boolean useAsyncShowHideMethod) {
         offload(() -> {
             InputBindResult result = mInner.startInputOrWindowGainedFocus(startInputReason, client,
                     windowToken, startInputFlags, softInputMode, windowFlags,
@@ -254,7 +250,7 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
                 synchronized (ImfLock.class) {
                     ClientState cs = imms.getClientStateLocked(client);
                     if (cs != null) {
-                        imms.requestClientSessionLocked(cs);
+                        imms.requestClientSessionLocked(cs, userId);
                         imms.requestClientSessionForAccessibilityLocked(cs);
                     }
                 }
@@ -284,7 +280,9 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
         offload(() -> mInner.showInputMethodPickerFromClient(client, auxiliarySubtypeMode));
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.WRITE_SECURE_SETTINGS})
     @Override
     public void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId) {
         mInner.showInputMethodPickerFromSystem(auxiliarySubtypeMode, displayId);
@@ -294,6 +292,14 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
     @Override
     public boolean isInputMethodPickerShownForTest() {
         return mInner.isInputMethodPickerShownForTest();
+    }
+
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.WRITE_SECURE_SETTINGS})
+    @Override
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        mInner.onImeSwitchButtonClickFromSystem(displayId);
     }
 
     @Override
@@ -324,10 +330,12 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
         mInner.reportPerceptibleAsync(windowToken, perceptible);
     }
 
-    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @IInputMethodManagerImpl.PermissionVerified(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.INTERNAL_SYSTEM_WINDOW})
     @Override
-    public void removeImeSurface() {
-        mInner.removeImeSurface();
+    public void removeImeSurface(int displayId) {
+        mInner.removeImeSurface(displayId);
     }
 
     @Override

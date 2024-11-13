@@ -118,6 +118,13 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         mTaskViewTaskController.startShortcutActivity(shortcut, options, launchBounds);
     }
 
+    /**
+     * Moves the current task in taskview out of the view and back to fullscreen.
+     */
+    public void moveToFullscreen() {
+        mTaskViewTaskController.moveToFullscreen();
+    }
+
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         if (mTaskViewTaskController.isUsingShellTransitions()) {

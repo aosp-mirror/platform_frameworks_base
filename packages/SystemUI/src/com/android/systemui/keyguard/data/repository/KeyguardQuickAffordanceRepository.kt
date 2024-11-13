@@ -22,7 +22,6 @@ import android.content.Intent
 import android.os.UserHandle
 import android.util.LayoutDirection
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -35,6 +34,7 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -61,10 +61,13 @@ constructor(
     private val remoteUserSelectionManager: KeyguardQuickAffordanceRemoteUserSelectionManager,
     private val userTracker: UserTracker,
     legacySettingSyncer: KeyguardQuickAffordanceLegacySettingSyncer,
-    private val configs: Set<@JvmSuppressWildcards KeyguardQuickAffordanceConfig>,
+    configs: Set<@JvmSuppressWildcards KeyguardQuickAffordanceConfig>,
     dumpManager: DumpManager,
     userHandle: UserHandle,
 ) {
+    // Configs for all keyguard quick affordances, mapped by the quick affordance ID as key
+    private val configsByAffordanceId: Map<String, KeyguardQuickAffordanceConfig> =
+        configs.associateBy { it.key }
     private val userId: Flow<Int> =
         ConflatedCallbackFlow.conflatedCallbackFlow {
             val callback =
@@ -126,7 +129,7 @@ constructor(
      */
     fun getCurrentSelections(slotId: String): List<KeyguardQuickAffordanceConfig> {
         val selections = selectionManager.value.getSelections().getOrDefault(slotId, emptyList())
-        return configs.filter { selections.contains(it.key) }
+        return configsByAffordanceId.values.filter { selections.contains(it.key) }
     }
 
     /**
@@ -159,7 +162,7 @@ constructor(
      */
     suspend fun getAffordancePickerRepresentations():
         List<KeyguardQuickAffordancePickerRepresentation> {
-        return configs
+        return configsByAffordanceId.values
             .associateWith { config -> config.getPickerScreenState() }
             .filterNot { (_, pickerState) ->
                 pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
@@ -226,6 +229,11 @@ constructor(
         }
     }
 
+    /** Get the config of a quick affordance. */
+    fun getConfig(quickAffordanceId: String): KeyguardQuickAffordanceConfig? {
+        return configsByAffordanceId[quickAffordanceId]
+    }
+
     private inner class Dumpster : Dumpable {
         override fun dump(pw: PrintWriter, args: Array<out String>) {
             val slotPickerRepresentations = getSlotPickerRepresentations()
@@ -246,7 +254,7 @@ constructor(
                 pw.println("    $slotId$selectionText (capacity = $capacity)")
             }
             pw.println("Available affordances on device:")
-            configs.forEach { config ->
+            configsByAffordanceId.values.forEach { config ->
                 pw.println("    ${config.key} (\"${config.pickerName()}\")")
             }
         }

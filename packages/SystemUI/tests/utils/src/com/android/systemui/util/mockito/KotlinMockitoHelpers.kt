@@ -219,7 +219,7 @@ inline fun <reified T : Any> kotlinArgumentCaptor(): KotlinArgumentCaptor<T> =
  *
  * NOTE: this uses the KotlinArgumentCaptor to avoid the NullPointerException.
  */
-@Deprecated("Replace with mockito-kotlin", level = WARNING)
+// TODO(359670968): rewrite this to use mockito-kotlin
 inline fun <reified T : Any> withArgCaptor(block: KotlinArgumentCaptor<T>.() -> Unit): T =
     kotlinArgumentCaptor<T>().apply { block() }.value
 

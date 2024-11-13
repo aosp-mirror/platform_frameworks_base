@@ -19,7 +19,7 @@ package com.android.systemui.qs.tiles.dialog;
 import android.content.Context;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.notification.ZenModeDialogMetricsLogger;
+import com.android.settingslib.notification.modes.ZenModeDialogMetricsLogger;
 import com.android.systemui.qs.QSDndEvent;
 import com.android.systemui.qs.QSEvents;
 

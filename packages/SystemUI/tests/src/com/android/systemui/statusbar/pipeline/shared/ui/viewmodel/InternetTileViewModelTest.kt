@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_OTHER_DEVICE_CONNECTION
 import com.android.systemui.SysuiTestCase
@@ -25,7 +26,7 @@ import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.WifiIcons
@@ -48,6 +49,7 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkMode
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -55,9 +57,13 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class InternetTileViewModelTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private lateinit var underTest: InternetTileViewModel
     private lateinit var mobileIconsInteractor: MobileIconsInteractor
 
@@ -70,7 +76,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
     private val wifiInteractor =
         WifiInteractorImpl(connectivityRepository, wifiRepository, testScope.backgroundScope)
 
-    private val tableLogBuffer: TableLogBuffer = mock()
+    private val tableLogBuffer = logcatTableLogBuffer(kosmos, "InternetTileViewModelTest")
     private val carrierConfigTracker: CarrierConfigTracker = mock()
 
     private val mobileConnectionsRepository =
@@ -148,8 +154,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.tileModel)
 
             val networkModel =
-                WifiNetworkModel.Active(
-                    networkId = 1,
+                WifiNetworkModel.Active.of(
                     level = 4,
                     ssid = "test ssid",
                 )
@@ -178,8 +183,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.tileModel)
 
             val networkModel =
-                WifiNetworkModel.Active(
-                    networkId = 1,
+                WifiNetworkModel.Active.of(
                     level = 4,
                     ssid = "test ssid",
                     hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.NONE,
@@ -291,7 +295,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.tileModel)
 
-            val networkModel = WifiNetworkModel.Inactive
+            val networkModel = WifiNetworkModel.Inactive()
 
             connectivityRepository.setWifiConnected(validated = false)
             wifiRepository.setIsWifiDefault(true)
@@ -306,7 +310,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.tileModel)
 
-            val networkModel = WifiNetworkModel.Inactive
+            val networkModel = WifiNetworkModel.Inactive()
 
             connectivityRepository.setWifiConnected(validated = false)
             wifiRepository.setIsWifiDefault(true)
@@ -386,8 +390,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
     private fun setWifiNetworkWithHotspot(hotspot: WifiNetworkModel.HotspotDeviceType) {
         val networkModel =
-            WifiNetworkModel.Active(
-                networkId = 1,
+            WifiNetworkModel.Active.of(
                 level = 4,
                 ssid = "test ssid",
                 hotspotDeviceType = hotspot,

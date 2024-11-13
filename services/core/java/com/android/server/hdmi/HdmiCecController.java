@@ -427,7 +427,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     void setHpdSignalType(@Constants.HpdSignalType int signal, int portId) {
         assertRunOnServiceThread();
-        HdmiLogger.debug("setHpdSignalType: portId %b, signal %b", portId, signal);
+        HdmiLogger.debug("setHpdSignalType: portId %d, signal %d", portId, signal);
         mNativeWrapperImpl.nativeSetHpdSignalType(signal, portId);
     }
 
@@ -439,7 +439,7 @@ final class HdmiCecController {
     @Constants.HpdSignalType
     int getHpdSignalType(int portId) {
         assertRunOnServiceThread();
-        HdmiLogger.debug("getHpdSignalType: portId %b ", portId);
+        HdmiLogger.debug("getHpdSignalType: portId %d ", portId);
         return mNativeWrapperImpl.nativeGetHpdSignalType(portId);
     }
 

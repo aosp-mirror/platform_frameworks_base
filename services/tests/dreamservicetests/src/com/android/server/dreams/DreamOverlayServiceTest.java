@@ -18,7 +18,9 @@ package com.android.server.dreams;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,7 +29,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.DreamOverlayService;
+import android.service.dreams.Flags;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
 import android.service.dreams.IDreamOverlayClient;
@@ -35,7 +39,6 @@ import android.service.dreams.IDreamOverlayClientCallback;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -102,6 +105,12 @@ public class DreamOverlayServiceTest {
             mMonitor.onEndDream();
             super.onEndDream();
         }
+
+        @Override
+        public void onWakeUp() {
+            mMonitor.onWakeUp();
+            super.onWakeUp();
+        }
     }
 
     /**
@@ -124,7 +133,6 @@ public class DreamOverlayServiceTest {
      * Verifies that callbacks for subclasses are run on the provided executor.
      */
     @Test
-    @FlakyTest(bugId = 293108088)
     public void testCallbacksRunOnExecutor() throws RemoteException {
         final TestDreamOverlayService.Monitor monitor = Mockito.mock(
                 TestDreamOverlayService.Monitor.class);
@@ -136,7 +144,7 @@ public class DreamOverlayServiceTest {
 
         // Start the dream.
         client.startDream(mLayoutParams, mOverlayCallback,
-                FIRST_DREAM_COMPONENT.flattenToString(), false);
+                FIRST_DREAM_COMPONENT.flattenToString(), false, false);
 
         // The callback should not have run yet.
         verify(monitor, never()).onStartDream();
@@ -149,6 +157,8 @@ public class DreamOverlayServiceTest {
         // Callback is run.
         verify(monitor).onStartDream();
 
+        clearInvocations(mExecutor);
+
         // Verify onWakeUp is run on the executor.
         client.wakeUp();
         verify(monitor, never()).onWakeUp();
@@ -156,6 +166,8 @@ public class DreamOverlayServiceTest {
         verify(mExecutor).execute(mRunnableCaptor.capture());
         mRunnableCaptor.getValue().run();
         verify(monitor).onWakeUp();
+
+        clearInvocations(mExecutor);
 
         // Verify onEndDream is run on the executor.
         client.endDream();
@@ -194,22 +206,24 @@ public class DreamOverlayServiceTest {
         // Start a dream with the first client and ensure the dream is now active from the
         // overlay's perspective.
         firstClient.startDream(mLayoutParams, mOverlayCallback,
-                FIRST_DREAM_COMPONENT.flattenToString(), false);
+                FIRST_DREAM_COMPONENT.flattenToString(), true, false);
 
 
         verify(monitor).onStartDream();
         assertThat(service.getDreamComponent()).isEqualTo(FIRST_DREAM_COMPONENT);
+        assertThat(service.isDreamInPreviewMode()).isTrue();
 
         Mockito.clearInvocations(monitor);
 
         // Start a dream from the second client and verify that the overlay has both cycled to
         // the new dream (ended/started).
         secondClient.startDream(mLayoutParams, mOverlayCallback,
-                SECOND_DREAM_COMPONENT.flattenToString(), false);
+                SECOND_DREAM_COMPONENT.flattenToString(), false, false);
 
         verify(monitor).onEndDream();
         verify(monitor).onStartDream();
         assertThat(service.getDreamComponent()).isEqualTo(SECOND_DREAM_COMPONENT);
+        assertThat(service.isDreamInPreviewMode()).isFalse();
 
         Mockito.clearInvocations(monitor);
 
@@ -219,6 +233,47 @@ public class DreamOverlayServiceTest {
 
         firstClient.wakeUp();
         verify(monitor, never()).onWakeUp();
+    }
+
+    /**
+     * Verifies that only the currently started dream is able to affect the overlay.
+     */
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    public void testRedirectToWakeAcrossClients() throws RemoteException {
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mExecutor).execute(any());
+
+        final TestDreamOverlayService.Monitor monitor = Mockito.mock(
+                TestDreamOverlayService.Monitor.class);
+        final TestDreamOverlayService service = new TestDreamOverlayService(monitor, mExecutor);
+        final IBinder binder = service.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(binder);
+
+        service.redirectWake(true);
+
+        final IDreamOverlayClient client = getClient(overlay);
+
+        // Start the dream.
+        client.startDream(mLayoutParams, mOverlayCallback,
+                FIRST_DREAM_COMPONENT.flattenToString(), false, false);
+        // Make sure redirect state is set on dream.
+        verify(mOverlayCallback).onRedirectWake(eq(true));
+
+        // Make sure new changes are propagated.
+        clearInvocations(mOverlayCallback);
+        service.redirectWake(false);
+        verify(mOverlayCallback).onRedirectWake(eq(false));
+
+
+        // Start another dream, make sure new dream is informed of current state.
+        service.redirectWake(true);
+        clearInvocations(mOverlayCallback);
+        client.startDream(mLayoutParams, mOverlayCallback,
+                FIRST_DREAM_COMPONENT.flattenToString(), false, false);
+        verify(mOverlayCallback).onRedirectWake(eq(true));
     }
 
     private static IDreamOverlayClient getClient(IDreamOverlay overlay) throws RemoteException {

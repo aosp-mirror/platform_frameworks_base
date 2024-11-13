@@ -16,8 +16,11 @@
 
 package android.os.storage;
 
+import android.content.res.ObbInfo;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ProxyFileDescriptorCallback;
+import android.os.ServiceManager;
 import android.system.ErrnoException;
 
 import androidx.test.filters.LargeTest;
@@ -104,7 +107,14 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
     public void testMountBadPackageNameObb() throws Exception {
         final File file = createObbFile(OBB_FILE_3_BAD_PACKAGENAME, R.raw.obb_file3_bad_packagename);
         String filePath = file.getAbsolutePath();
-        mountObb(filePath, OnObbStateChangeListener.ERROR_PERMISSION_DENIED);
+        try {
+            mountObb(filePath, OnObbStateChangeListener.ERROR_PERMISSION_DENIED);
+            fail("mountObb should throw an exception as package name is incorrect");
+        } catch (Exception ex) {
+            assertEquals("Path " + filePath
+                            + " does not contain package name " + mContext.getPackageName(),
+                    ex.getMessage());
+        }
     }
 
     /**
@@ -151,6 +161,48 @@ public class StorageManagerIntegrationTest extends StorageManagerBaseTest {
                 ParcelFileDescriptor.MODE_WRITE_ONLY, callback, null, factory)) {
             assertNotSame(Thread.State.TERMINATED, factory.thread.getState());
             assertNotSame(firstMountId, mSm.getProxyFileDescriptorMountPointId());
+        }
+    }
+
+    @LargeTest
+    public void testObbInfo_withValidObbInfo_success() throws Exception {
+        final File file = createObbFile(OBB_FILE_1, R.raw.obb_file1);
+        String filePath = file.getAbsolutePath();
+        try {
+            mountObb(filePath);
+            unmountObb(filePath, DONT_FORCE);
+        } catch (Exception ex) {
+            fail("No exception expected, got " + ex.getMessage());
+        }
+    }
+
+    @LargeTest
+    public void testObbInfo_withInvalidObbInfo_exception() throws Exception {
+        final File file = createObbFile(OBB_FILE_1, R.raw.obb_file1);
+        String rawPath = file.getAbsolutePath();
+        String canonicalPath = file.getCanonicalPath();
+
+        ObbInfo obbInfo = ObbInfo.CREATOR.createFromParcel(Parcel.obtain());
+        obbInfo.packageName = "com.android.obbcrash";
+        obbInfo.version = 1;
+        obbInfo.filename = canonicalPath;
+
+        try {
+            IStorageManager.Stub.asInterface(ServiceManager.getServiceOrThrow("mount")).mountObb(
+                    rawPath, canonicalPath, new ObbActionListener(), 0, obbInfo);
+            fail("mountObb should throw an exception as package name is incorrect");
+        } catch (SecurityException ex) {
+            assertEquals("Path " + canonicalPath
+                            + " does not contain package name " + mContext.getPackageName(),
+                    ex.getMessage());
+        }
+    }
+
+    private static class ObbActionListener extends IObbActionListener.Stub {
+        @SuppressWarnings("hiding")
+        @Override
+        public void onObbResult(String filename, int nonce, int status) {
+
         }
     }
 

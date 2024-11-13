@@ -122,7 +122,7 @@ final class RadioModule {
         public void onCurrentProgramInfoChanged(ProgramInfo halProgramInfo) {
             fireLater(() -> {
                 RadioManager.ProgramInfo currentProgramInfo =
-                        ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+                        ConversionUtils.tunedProgramInfoFromHalProgramInfo(halProgramInfo);
                 Objects.requireNonNull(currentProgramInfo,
                         "Program info from AIDL HAL is invalid");
                 synchronized (mLock) {
@@ -251,6 +251,7 @@ final class RadioModule {
         return mProperties;
     }
 
+    @Nullable
     TunerSession openSession(android.hardware.radio.ITunerCallback userCb)
             throws RemoteException {
         mLogger.logRadioEvent("Open TunerSession");
@@ -264,7 +265,13 @@ final class RadioModule {
             antennaConnected = mAntennaConnected;
             currentProgramInfo = mCurrentProgramInfo;
             if (isFirstTunerSession) {
-                mService.setTunerCallback(mHalTunerCallback);
+                try {
+                    mService.setTunerCallback(mHalTunerCallback);
+                } catch (RemoteException ex) {
+                    Slogf.wtf(TAG, ex, "Failed to register HAL callback for module %d",
+                            mProperties.getId());
+                    return null;
+                }
             }
         }
         // Propagate state to new client.

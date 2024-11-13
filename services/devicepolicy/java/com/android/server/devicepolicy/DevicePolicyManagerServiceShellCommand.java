@@ -17,6 +17,7 @@ package com.android.server.devicepolicy;
 
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.os.ShellCommand;
 import android.os.SystemClock;
@@ -46,11 +47,13 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     private static final String USER_OPTION = "--user";
     private static final String DO_ONLY_OPTION = "--device-owner-only";
+    private static final String PROVISIONING_CONTEXT_OPTION = "--provisioning-context";
 
     private final DevicePolicyManagerService mService;
     private int mUserId = UserHandle.USER_SYSTEM;
     private ComponentName mComponent;
     private boolean mSetDoOnly;
+    private String mProvisioningContext = null;
 
     DevicePolicyManagerServiceShellCommand(DevicePolicyManagerService service) {
         mService = Objects.requireNonNull(service);
@@ -127,15 +130,28 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         pw.printf("    Lists the device / profile owners per user \n\n");
         pw.printf("  %s\n", CMD_LIST_POLICY_EXEMPT_APPS);
         pw.printf("    Lists the apps that are exempt from policies\n\n");
-        pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
-                CMD_SET_ACTIVE_ADMIN, USER_OPTION);
-        pw.printf("    Sets the given component as active admin for an existing user.\n\n");
-        pw.printf("  %s [ %s <USER_ID> | current *EXPERIMENTAL* ] [ %s ]"
-                + "<COMPONENT>\n", CMD_SET_DEVICE_OWNER, USER_OPTION, DO_ONLY_OPTION);
-        pw.printf("    Sets the given component as active admin, and its package as device owner."
-                + "\n\n");
-        pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
-                CMD_SET_PROFILE_OWNER, USER_OPTION);
+        if (Flags.provisioningContextParameter()) {
+            pw.printf("  %s [ %s <USER_ID> | current ] [ %s <PROVISIONING_CONTEXT>] <COMPONENT>\n",
+                    CMD_SET_ACTIVE_ADMIN, USER_OPTION, PROVISIONING_CONTEXT_OPTION);
+            pw.printf("    Sets the given component as active admin for an existing user.\n\n");
+            pw.printf("  %s [ %s <USER_ID> | current *EXPERIMENTAL* ] [ %s ]"
+                            + " [ %s <PROVISIONING_CONTEXT>] <COMPONENT>\n",
+                    CMD_SET_DEVICE_OWNER, USER_OPTION, DO_ONLY_OPTION, PROVISIONING_CONTEXT_OPTION);
+            pw.printf("    Sets the given component as active admin, and its package as device"
+                    + " owner.\n\n");
+            pw.printf("  %s [ %s <USER_ID> | current ] [ %s <PROVISIONING_CONTEXT>] <COMPONENT>\n",
+                    CMD_SET_PROFILE_OWNER, USER_OPTION, PROVISIONING_CONTEXT_OPTION);
+        } else {
+            pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
+                    CMD_SET_ACTIVE_ADMIN, USER_OPTION);
+            pw.printf("    Sets the given component as active admin for an existing user.\n\n");
+            pw.printf("  %s [ %s <USER_ID> | current *EXPERIMENTAL* ] [ %s ]"
+                    + "<COMPONENT>\n", CMD_SET_DEVICE_OWNER, USER_OPTION, DO_ONLY_OPTION);
+            pw.printf("    Sets the given component as active admin, and its package as device"
+                    + " owner.\n\n");
+            pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
+                    CMD_SET_PROFILE_OWNER, USER_OPTION);
+        }
         pw.printf("    Sets the given component as active admin and profile owner for an existing "
                 + "user.\n\n");
         pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
@@ -243,7 +259,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     private int runSetActiveAdmin(PrintWriter pw) {
         parseArgs();
-        mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
+        mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId, mProvisioningContext);
 
         pw.printf("Success: Active admin set to component %s\n", mComponent.flattenToShortString());
         return 0;
@@ -253,7 +269,12 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         parseArgs();
         boolean isAdminAdded = false;
         try {
-            mService.setActiveAdmin(mComponent, /* refreshing= */ false, mUserId);
+            mService.setActiveAdmin(
+                    mComponent,
+                    /* refreshing= */ false,
+                    mUserId,
+                    mProvisioningContext
+            );
             isAdminAdded = true;
         } catch (IllegalArgumentException e) {
             pw.printf("%s was already an admin for user %d. No need to set it again.\n",
@@ -291,7 +312,7 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     private int runSetProfileOwner(PrintWriter pw) {
         parseArgs();
-        mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
+        mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId, mProvisioningContext);
 
         try {
             if (!mService.setProfileOwner(mComponent, mUserId)) {
@@ -363,6 +384,8 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
                 }
             } else if (DO_ONLY_OPTION.equals(opt)) {
                 mSetDoOnly = true;
+            } else if (PROVISIONING_CONTEXT_OPTION.equals(opt)) {
+                mProvisioningContext = getNextArgRequired();
             } else {
                 throw new IllegalArgumentException("Unknown option: " + opt);
             }

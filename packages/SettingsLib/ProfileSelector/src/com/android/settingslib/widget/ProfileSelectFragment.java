@@ -30,7 +30,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.core.os.BuildCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -226,7 +225,8 @@ public abstract class ProfileSelectFragment extends Fragment {
     // to be here only for this API level - when then private profile was introduced.
     @TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     private boolean shouldShowPrivateProfileIfItsOne(UserHandle userHandle) {
-        if (!BuildCompat.isAtLeastV() || !android.os.Flags.allowPrivateProfile()) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM
+                || !android.os.Flags.allowPrivateProfile()) {
             return false;
         }
         try {

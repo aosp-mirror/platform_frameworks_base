@@ -16,12 +16,17 @@
 
 package com.android.wm.shell.compatui;
 
+import static com.android.window.flags.Flags.FLAG_APP_COMPAT_UI_FRAMEWORK;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.res.Configuration;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -35,6 +40,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -65,6 +71,10 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
     private TaskInfo mTaskInfo;
     private ReachabilityEduWindowManager mWindowManager;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -80,6 +90,7 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testCreateLayout_notEligible_doesNotCreateLayout() {
         assertFalse(mWindowManager.createLayout(/* canShow= */ true));
 
@@ -87,6 +98,7 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testWhenDockedStateHasChanged_needsToBeRecreated() {
         ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
         newTaskInfo.configuration.uiMode =
@@ -97,6 +109,7 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testWhenDarkLightThemeHasChanged_needsToBeRecreated() {
         ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
         mTaskInfo.configuration.uiMode =

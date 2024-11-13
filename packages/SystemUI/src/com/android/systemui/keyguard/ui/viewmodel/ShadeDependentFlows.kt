@@ -34,7 +34,9 @@ constructor(
 ) {
     /** When the last keyguard state transition started, was the shade fully expanded? */
     private val lastStartedTransitionHadShadeFullyExpanded: Flow<Boolean> =
-        transitionInteractor.startedKeyguardState.sample(shadeInteractor.isAnyFullyExpanded)
+        transitionInteractor.startedKeyguardTransitionStep.sample(
+            shadeInteractor.isAnyFullyExpanded
+        )
 
     /**
      * Decide which flow to use depending on the shade expansion state at the start of the last

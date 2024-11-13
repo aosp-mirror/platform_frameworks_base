@@ -1989,10 +1989,8 @@ public class AppStandbyController
                 mAdminProtectedPackages.put(userId, packageNames);
             }
         }
-        if (android.app.admin.flags.Flags.disallowUserControlBgUsageFix()) {
-            if (!Flags.avoidIdleCheck()) {
-                postCheckIdleStates(userId);
-            }
+        if (!Flags.avoidIdleCheck() || mInjector.getBootPhase() >= PHASE_BOOT_COMPLETED) {
+            postCheckIdleStates(userId);
         }
     }
 

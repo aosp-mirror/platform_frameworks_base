@@ -32,6 +32,7 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
+import com.android.server.display.feature.flags.Flags;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.qs.QSTile;
@@ -116,6 +117,10 @@ public class TileQueryHelper {
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
         possibleTiles.remove("cell");
         possibleTiles.remove("wifi");
+        if (Flags.evenDimmer() && mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_evenDimmerEnabled)) {
+            possibleTiles.remove("reduce_brightness");
+        }
 
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.

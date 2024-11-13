@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.drawer;
 
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,7 +26,9 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -36,6 +39,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -101,6 +106,9 @@ public class TileUtils {
 
     /** The key used to get the package name of the icon resource for the preference. */
     static final String EXTRA_PREFERENCE_ICON_PACKAGE = "com.android.settings.icon_package";
+
+    /** The key used for the raw byte data of the icon for the preference. */
+    static final String EXTRA_PREFERENCE_ICON_RAW = "com.android.settings.icon_raw";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
@@ -518,6 +526,24 @@ public class TileUtils {
     }
 
     /**
+     * Retrieves an icon stored in the Bundle as a Parcel with key EXTRA_PREFERENCE_ICON_RAW
+     */
+    @TargetApi(Build.VERSION_CODES.TIRAMISU)
+    @Nullable
+    public static Icon getRawIconFromUri(@NonNull Context context, @Nullable Uri uri,
+            @NonNull Map<String, IContentProvider> providerMap) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return null;
+        }
+        final Bundle bundle = getBundleFromUri(context, uri, providerMap, null /* bundle */);
+        if (bundle == null) {
+            return null;
+        }
+
+        return bundle.getParcelable(EXTRA_PREFERENCE_ICON_RAW, Icon.class);
+    }
+
+    /**
      * Gets text associated with the input key from the content provider.
      *
      * @param context context
@@ -564,8 +590,9 @@ public class TileUtils {
         return getBundleFromUri(context, uri, providerMap, bundle);
     }
 
-    private static Bundle getBundleFromUri(Context context, Uri uri,
-            Map<String, IContentProvider> providerMap, Bundle bundle) {
+    @Nullable
+    private static Bundle getBundleFromUri(@NonNull Context context, @Nullable Uri uri,
+            @NonNull Map<String, IContentProvider> providerMap, @Nullable Bundle bundle) {
         final Pair<String, String> args = getMethodAndKey(uri);
         if (args == null) {
             return null;
@@ -593,8 +620,9 @@ public class TileUtils {
         }
     }
 
-    private static IContentProvider getProviderFromUri(Context context, Uri uri,
-            Map<String, IContentProvider> providerMap) {
+    @Nullable
+    private static IContentProvider getProviderFromUri(@NonNull Context context, @Nullable Uri uri,
+            @NonNull Map<String, IContentProvider> providerMap) {
         if (uri == null) {
             return null;
         }
@@ -609,7 +637,8 @@ public class TileUtils {
     }
 
     /** Returns method and key of the complete uri. */
-    private static Pair<String, String> getMethodAndKey(Uri uri) {
+    @Nullable
+    private static Pair<String, String> getMethodAndKey(@Nullable Uri uri) {
         if (uri == null) {
             return null;
         }

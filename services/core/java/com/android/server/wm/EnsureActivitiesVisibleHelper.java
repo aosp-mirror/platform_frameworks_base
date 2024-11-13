@@ -174,6 +174,9 @@ class EnsureActivitiesVisibleHelper {
             // First: if this is not the current activity being started, make
             // sure it matches the current configuration.
             if (r != mStarting && mNotifyClients) {
+                if (!isTop) {
+                    r.mDisplayContent.applyFixedRotationForNonTopVisibleActivityIfNeeded(r);
+                }
                 r.ensureActivityConfiguration(true /* ignoreVisibility */);
             }
 
@@ -237,7 +240,7 @@ class EnsureActivitiesVisibleHelper {
             }
             r.setVisibility(true);
         }
-        if (r != starting) {
+        if (r != starting && mNotifyClients) {
             mTaskFragment.mTaskSupervisor.startSpecificActivity(r, andResume,
                     true /* checkConfig */);
         }

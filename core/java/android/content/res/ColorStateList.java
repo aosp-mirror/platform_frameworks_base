@@ -26,12 +26,16 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
 import android.util.StateSet;
 import android.util.Xml;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 
 import com.android.internal.R;
 import com.android.internal.graphics.ColorUtils;
@@ -44,7 +48,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -138,6 +144,7 @@ import java.util.Arrays;
  * @attr ref android.R.styleable#ColorStateListItem_color
  * @attr ref android.R.styleable#ColorStateListItem_lStar
  */
+@RavenwoodKeepWholeClass
 public class ColorStateList extends ComplexColor implements Parcelable {
     private static final String TAG = "ColorStateList";
 
@@ -793,4 +800,61 @@ public class ColorStateList extends ComplexColor implements Parcelable {
             return new ColorStateList(stateSpecs, colors);
         }
     };
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream out) {
+        for (int[] states : mStateSpecs) {
+            long specToken = out.start(ColorStateListProto.STATE_SPECS);
+            for (int state : states) {
+                out.write(ColorStateListProto.StateSpec.STATE, state);
+            }
+            out.end(specToken);
+        }
+        for (int color : mColors) {
+            out.write(ColorStateListProto.COLORS, color);
+        }
+    }
+
+    /** @hide */
+    public static ColorStateList createFromProto(ProtoInputStream in)
+            throws Exception {
+        List<int[]> stateSpecs = new ArrayList<>();
+        List<Integer> colors = new ArrayList<>();
+
+
+        while (in.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (in.getFieldNumber()) {
+                case (int) ColorStateListProto.COLORS:
+                    colors.add(in.readInt(ColorStateListProto.COLORS));
+                    break;
+                case (int) ColorStateListProto.STATE_SPECS:
+                    final long stateToken = in.start(ColorStateListProto.STATE_SPECS);
+                    List<Integer> states = new ArrayList<>();
+                    while (in.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                        switch (in.getFieldNumber()) {
+                            case (int) ColorStateListProto.StateSpec.STATE:
+                                states.add(in.readInt(ColorStateListProto.StateSpec.STATE));
+                                break;
+                            default:
+                                Log.w(TAG, "Unhandled field while reading Icon proto!\n"
+                                        + ProtoUtils.currentFieldToString(in));
+                        }
+                    }
+                    int[] statesArray = new int[states.size()];
+                    Arrays.setAll(statesArray, states::get);
+                    stateSpecs.add(statesArray);
+                    in.end(stateToken);
+                    break;
+                default:
+                    Log.w(TAG, "Unhandled field while reading Icon proto!\n"
+                            + ProtoUtils.currentFieldToString(in));
+            }
+        }
+
+        int[][] stateSpecsArray = new int[stateSpecs.size()][];
+        Arrays.setAll(stateSpecsArray, stateSpecs::get);
+        int[] colorsArray = new int[colors.size()];
+        Arrays.setAll(colorsArray, colors::get);
+        return new ColorStateList(stateSpecsArray, colorsArray);
+    }
 }

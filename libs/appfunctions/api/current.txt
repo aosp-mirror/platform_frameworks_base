@@ -1,0 +1,49 @@
+// Signature format: 2.0
+package com.google.android.appfunctions.sidecar {
+
+  public final class AppFunctionManager {
+    ctor public AppFunctionManager(android.content.Context);
+    method public void executeAppFunction(@NonNull com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse>);
+  }
+
+  public abstract class AppFunctionService extends android.app.Service {
+    ctor public AppFunctionService();
+    method @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @MainThread public abstract void onExecuteFunction(@NonNull com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest, @NonNull java.util.function.Consumer<com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse>);
+    field @NonNull public static final String BIND_APP_FUNCTION_SERVICE = "android.permission.BIND_APP_FUNCTION_SERVICE";
+    field @NonNull public static final String SERVICE_INTERFACE = "android.app.appfunctions.AppFunctionService";
+  }
+
+  public final class ExecuteAppFunctionRequest {
+    method @NonNull public android.os.Bundle getExtras();
+    method @NonNull public String getFunctionIdentifier();
+    method @NonNull public android.app.appsearch.GenericDocument getParameters();
+    method @NonNull public String getTargetPackageName();
+  }
+
+  public static final class ExecuteAppFunctionRequest.Builder {
+    ctor public ExecuteAppFunctionRequest.Builder(@NonNull String, @NonNull String);
+    method @NonNull public com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest build();
+    method @NonNull public com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public com.google.android.appfunctions.sidecar.ExecuteAppFunctionRequest.Builder setParameters(@NonNull android.app.appsearch.GenericDocument);
+  }
+
+  public final class ExecuteAppFunctionResponse {
+    method @Nullable public String getErrorMessage();
+    method @NonNull public android.os.Bundle getExtras();
+    method public int getResultCode();
+    method @NonNull public android.app.appsearch.GenericDocument getResultDocument();
+    method public boolean isSuccess();
+    method @NonNull public static com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse newFailure(int, @Nullable String, @Nullable android.os.Bundle);
+    method @NonNull public static com.google.android.appfunctions.sidecar.ExecuteAppFunctionResponse newSuccess(@NonNull android.app.appsearch.GenericDocument, @Nullable android.os.Bundle);
+    field public static final String PROPERTY_RETURN_VALUE = "returnValue";
+    field public static final int RESULT_APP_UNKNOWN_ERROR = 2; // 0x2
+    field public static final int RESULT_DENIED = 1; // 0x1
+    field public static final int RESULT_INTERNAL_ERROR = 3; // 0x3
+    field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
+    field public static final int RESULT_OK = 0; // 0x0
+    field public static final int RESULT_TIMED_OUT = 5; // 0x5
+  }
+
+}
+

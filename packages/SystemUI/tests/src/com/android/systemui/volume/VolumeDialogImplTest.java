@@ -20,9 +20,9 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
-import static com.android.systemui.Flags.FLAG_HAPTIC_VOLUME_SLIDER;
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
+import static com.android.systemui.volume.VolumeDialogControllerImpl.DYNAMIC_STREAM_BROADCAST;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
 import static junit.framework.Assert.assertEquals;
@@ -35,6 +35,7 @@ import static org.junit.Assume.assumeNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -49,7 +50,6 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.SystemClock;
-import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
@@ -69,6 +69,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.settingslib.flags.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
@@ -91,6 +92,8 @@ import com.android.systemui.volume.domain.interactor.VolumePanelNavigationIntera
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
+import com.google.common.collect.ImmutableList;
+
 import dagger.Lazy;
 
 import junit.framework.Assert;
@@ -106,6 +109,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @SmallTest
@@ -156,11 +160,12 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
-        @Override
-        public CsdWarningDialog create(int warningType, Runnable onCleanup) {
-            return mCsdWarningDialog;
-        }
-    };
+                @Override
+                public CsdWarningDialog create(int warningType, Runnable onCleanup,
+                        Optional<ImmutableList<CsdWarningAction>> actionIntents) {
+                    return mCsdWarningDialog;
+                }
+            };
     @Mock
     private VibratorHelper mVibratorHelper;
 
@@ -250,13 +255,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     private State createShellState() {
         State state = new VolumeDialogController.State();
-        for (int i = AudioManager.STREAM_VOICE_CALL; i <= AudioManager.STREAM_ACCESSIBILITY; i++) {
+        for (int stream : STREAMS.keySet()) {
             VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
-            ss.name = STREAMS.get(i);
+            ss.name = STREAMS.get(stream);
             ss.level = 1;
             ss.levelMin = 0;
             ss.levelMax = 25;
-            state.states.append(i, ss);
+            state.states.append(stream, ss);
         }
         return state;
     }
@@ -278,23 +283,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
-    public void addSliderHaptics_withHapticsDisabled_doesNotDeliverOnProgressChangedHaptics() {
-        // GIVEN that the slider haptics flag is disabled and we try to add haptics to volume rows
-        mDialog.addSliderHapticsToRows();
-
-        // WHEN haptics try to be delivered to a volume stream
-        boolean canDeliverHaptics =
-                mDialog.canDeliverProgressHapticsToStream(AudioSystem.STREAM_MUSIC, true, 50);
-
-        // THEN the result is that haptics are not successfully delivered
-        assertFalse(canDeliverHaptics);
-    }
-
-    @Test
-    @EnableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
-    public void addSliderHaptics_withHapticsEnabled_canDeliverOnProgressChangedHaptics() {
-        // GIVEN that the slider haptics flag is enabled and we try to add haptics to volume rows
+    public void addSliderHaptics_canDeliverOnProgressChangedHaptics() {
+        // GIVEN that the slider haptics are added to rows
         mDialog.addSliderHapticsToRows();
 
         // WHEN haptics try to be delivered to a volume stream
@@ -783,8 +773,40 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDialog.show(SHOW_REASON_UNKNOWN);
         mTestableLooper.processAllMessages();
 
-        verify(mVolumeDialogInteractor).onDialogShown();
-        verify(mVolumeDialogInteractor).onDialogDismissed(); // dismiss by timeout
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogShown();
+        verify(mVolumeDialogInteractor, atLeastOnce()).onDialogDismissed(); // dismiss by timeout
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
+    public void testDynamicStreamForBroadcast_createRow() {
+        State state = createShellState();
+        VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
+        ss.dynamic = true;
+        ss.levelMin = 0;
+        ss.levelMax = 255;
+        ss.level = 20;
+        ss.name = -1;
+        ss.remoteLabel = mContext.getString(R.string.audio_sharing_description);
+        state.states.append(DYNAMIC_STREAM_BROADCAST, ss);
+
+        mDialog.onStateChangedH(state);
+        mTestableLooper.processAllMessages();
+
+        ViewGroup volumeDialogRows = mDialog.getDialogView().findViewById(R.id.volume_dialog_rows);
+        assumeNotNull(volumeDialogRows);
+        View broadcastRow = null;
+        final int rowCount = volumeDialogRows.getChildCount();
+        // we don't make assumptions about the position of the dnd row
+        for (int i = 0; i < rowCount; i++) {
+            View volumeRow = volumeDialogRows.getChildAt(i);
+            if (volumeRow.getId() == DYNAMIC_STREAM_BROADCAST) {
+                broadcastRow = volumeRow;
+                break;
+            }
+        }
+        assertNotNull(broadcastRow);
+        assertEquals(broadcastRow.getVisibility(), View.VISIBLE);
     }
 
     /**

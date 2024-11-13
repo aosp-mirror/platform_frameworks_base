@@ -18,38 +18,19 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/entity_header"
-    style="@style/EntityHeader"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:orientation="horizontal">
+    style="@style/SettingsLibEntityHeader">
 
     <LinearLayout
         android:id="@+id/entity_header_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        style="@style/SettingsLibEntityHeaderContent">
 
         <ImageView
             android:id="@+id/entity_header_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="fitCenter"
-            android:antialias="true"/>
+            style="@style/SettingsLibEntityHeaderIcon"/>
 
         <TextView
             android:id="@+id/entity_header_title"
-            style="@style/TextAppearance.EntityHeaderTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="false"
-            android:gravity="center"
-            android:ellipsize="marquee"
-            android:textDirection="locale"
-            android:layout_marginTop="8dp"/>
+            style="@style/SettingsLibEntityHeaderTitle"/>
 
         <TextView
             android:id="@+id/install_type"

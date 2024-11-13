@@ -35,4 +35,23 @@ public interface SatelliteModemStateCallback {
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatelliteModemStateChanged(@SatelliteManager.SatelliteModemState int state);
+
+    /**
+     * Called when the satellite emergency mode has changed.
+     *
+     * @param isEmergency {@code true} enabled for emergency mode, {@code false} otherwise.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    default void onEmergencyModeChanged(boolean isEmergency) {};
+
+    /**
+     * Indicates that the satellite registration failed with following failure code
+     *
+     * @param causeCode the primary failure cause code of the procedure.
+     *                  For LTE (EMM), cause codes are TS 24.301 Sec 9.9.3.9
+     * @hide
+     */
+    default void onRegistrationFailure(int causeCode) {};
 }

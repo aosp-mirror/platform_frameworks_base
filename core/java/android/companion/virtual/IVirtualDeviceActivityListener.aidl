@@ -17,6 +17,8 @@
 package android.companion.virtual;
 
 import android.content.ComponentName;
+import android.content.IntentSender;
+import android.os.UserHandle;
 
 /**
  * Interface to listen for activity changes in a virtual device.
@@ -32,7 +34,7 @@ oneway interface IVirtualDeviceActivityListener {
      * @param topActivity The component name of the top activity.
      * @param userId The user ID associated with the top activity.
      */
-    void onTopActivityChanged(int displayId, in ComponentName topActivity, in int userId);
+    void onTopActivityChanged(int displayId, in ComponentName topActivity, int userId);
 
     /**
      * Called when the display becomes empty (e.g. if the user hits back on the last
@@ -41,4 +43,24 @@ oneway interface IVirtualDeviceActivityListener {
      * @param displayId The display ID that became empty.
      */
     void onDisplayEmpty(int displayId);
+
+    /**
+     * Called when an activity launch was blocked due to a policy violation.
+     *
+     * @param displayId The display ID on which the activity tried to launch.
+     * @param componentName The component name of the blocked activity.
+     * @param user The user associated with the blocked activity.
+     * @param intentSender The original sender of the intent.
+     */
+    void onActivityLaunchBlocked(int displayId, in ComponentName componentName, in UserHandle user,
+            in IntentSender intentSender);
+
+    /**
+     * Called when a secure surface is shown on the device.
+     *
+     * @param displayId The display ID on which the secure surface was shown.
+     * @param componentName The component name of the activity that showed the secure surface.
+     * @param user The user associated with the activity.
+     */
+    void onSecureWindowShown(int displayId, in ComponentName componentName, in UserHandle user);
 }

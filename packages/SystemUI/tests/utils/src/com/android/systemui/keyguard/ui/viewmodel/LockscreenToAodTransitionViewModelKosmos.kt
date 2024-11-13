@@ -22,11 +22,13 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsIntera
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.power.domain.interactor.powerInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.lockscreenToAodTransitionViewModel by Fixture {
+var Kosmos.lockscreenToAodTransitionViewModel by Fixture {
     LockscreenToAodTransitionViewModel(
         deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,
+        powerInteractor = powerInteractor,
         shadeDependentFlows = shadeDependentFlows,
         animationFlow = keyguardTransitionAnimationFlow,
     )

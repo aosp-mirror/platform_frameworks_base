@@ -16,12 +16,12 @@
 
 package com.android.systemui.statusbar.policy
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View.MeasureSpec.UNSPECIFIED
 import android.view.View.MeasureSpec.makeMeasureSpec
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import org.junit.Before
@@ -31,7 +31,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ClockTest : SysuiTestCase() {
     private lateinit var clockView: Clock

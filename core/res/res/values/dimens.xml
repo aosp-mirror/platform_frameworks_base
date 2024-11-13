@@ -355,6 +355,9 @@
     <!-- the padding of the expand icon in the notification header -->
     <dimen name="notification_expand_button_icon_padding">2dp</dimen>
 
+    <!-- the size of the notification close button -->
+    <dimen name="notification_close_button_size">16dp</dimen>
+
     <!-- Vertical margin for the headerless notification content, when content has 1 line -->
     <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
     <dimen name="notification_headerless_margin_oneline">16dp</dimen>
@@ -768,6 +771,7 @@
     <dimen name="tooltip_precise_anchor_threshold">96dp</dimen>
     <!-- Extra tooltip offset used when anchoring to the mouse/touch position -->
     <dimen name="tooltip_precise_anchor_extra_offset">8dp</dimen>
+    <dimen name="tooltip_font_size">14sp</dimen>
 
     <!-- The max amount of scroll ItemTouchHelper will trigger if dragged view is out of
          RecyclerView's bounds.-->
@@ -1061,4 +1065,7 @@
     <!-- The non-linear progress interval when the screen is wider than the
         navigation_edge_action_progress_threshold. -->
     <item name="back_progress_non_linear_factor" format="float" type="dimen">0.2</item>
+
+    <!-- The maximum width for a context menu icon -->
+    <dimen name="list_menu_item_icon_max_width">24dp</dimen>
 </resources>

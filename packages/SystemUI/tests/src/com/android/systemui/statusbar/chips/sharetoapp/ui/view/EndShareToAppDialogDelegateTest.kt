@@ -19,8 +19,10 @@ package com.android.systemui.statusbar.chips.sharetoapp.ui.view
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.applicationContext
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.Kosmos
@@ -59,12 +61,14 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        verify(sysuiDialog).setIcon(R.drawable.ic_screenshot_share)
+        verify(sysuiDialog).setIcon(R.drawable.ic_present_to_all)
     }
 
     @Test
     fun title() {
         createAndSetDelegate(ENTIRE_SCREEN)
+        whenever(kosmos.packageManager.getApplicationInfo(eq(HOST_PACKAGE), any<Int>()))
+            .thenThrow(PackageManager.NameNotFoundException())
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -72,16 +76,61 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
     }
 
     @Test
-    fun message_entireScreen() {
+    fun message_entireScreen_unknownHostPackage() {
         createAndSetDelegate(ENTIRE_SCREEN)
+        whenever(kosmos.packageManager.getApplicationInfo(eq(HOST_PACKAGE), any<Int>()))
+            .thenThrow(PackageManager.NameNotFoundException())
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        verify(sysuiDialog).setMessage(context.getString(R.string.share_to_app_stop_dialog_message))
+        verify(sysuiDialog)
+            .setMessage(context.getString(R.string.share_to_app_stop_dialog_message_entire_screen))
     }
 
     @Test
-    fun message_singleTask() {
+    fun message_entireScreen_hasHostPackage() {
+        createAndSetDelegate(ENTIRE_SCREEN)
+        val hostAppInfo = mock<ApplicationInfo>()
+        whenever(hostAppInfo.loadLabel(kosmos.packageManager)).thenReturn("Host Package")
+        whenever(kosmos.packageManager.getApplicationInfo(eq(HOST_PACKAGE), any<Int>()))
+            .thenReturn(hostAppInfo)
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(
+                    R.string.share_to_app_stop_dialog_message_entire_screen_with_host_app,
+                    "Host Package",
+                )
+            )
+    }
+
+    @Test
+    fun message_singleTask_unknownAppName() {
+        val baseIntent =
+            Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
+        whenever(kosmos.packageManager.getApplicationInfo(eq("fake.task.package"), any<Int>()))
+            .thenThrow(PackageManager.NameNotFoundException())
+
+        createAndSetDelegate(
+            MediaProjectionState.Projecting.SingleTask(
+                HOST_PACKAGE,
+                hostDeviceName = null,
+                createTask(taskId = 1, baseIntent = baseIntent)
+            )
+        )
+
+        underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
+
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(R.string.share_to_app_stop_dialog_message_single_app_generic)
+            )
+    }
+
+    @Test
+    fun message_singleTask_hasAppName() {
         val baseIntent =
             Intent().apply { this.component = ComponentName("fake.task.package", "cls") }
         val appInfo = mock<ApplicationInfo>()
@@ -92,17 +141,20 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
         createAndSetDelegate(
             MediaProjectionState.Projecting.SingleTask(
                 HOST_PACKAGE,
+                hostDeviceName = null,
                 createTask(taskId = 1, baseIntent = baseIntent)
             )
         )
 
         underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
-        // It'd be nice to use R.string.share_to_app_stop_dialog_message_specific_app directly, but
-        // it includes the <b> tags which aren't in the returned string.
-        val result = argumentCaptor<CharSequence>()
-        verify(sysuiDialog).setMessage(result.capture())
-        assertThat(result.firstValue.toString()).isEqualTo("You will stop sharing Fake Package")
+        verify(sysuiDialog)
+            .setMessage(
+                context.getString(
+                    R.string.share_to_app_stop_dialog_message_single_app_specific,
+                    "Fake Package",
+                )
+            )
     }
 
     @Test
@@ -118,6 +170,8 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
     fun positiveButton() =
         kosmos.testScope.runTest {
             createAndSetDelegate(ENTIRE_SCREEN)
+            whenever(kosmos.packageManager.getApplicationInfo(eq(HOST_PACKAGE), any<Int>()))
+                .thenThrow(PackageManager.NameNotFoundException())
 
             underTest.beforeCreate(sysuiDialog, /* savedInstanceState= */ null)
 
@@ -143,8 +197,12 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
         underTest =
             EndShareToAppDialogDelegate(
                 kosmos.endMediaProjectionDialogHelper,
+                kosmos.applicationContext,
                 stopAction = kosmos.mediaProjectionChipInteractor::stopProjecting,
-                ProjectionChipModel.Projecting(ProjectionChipModel.Type.SHARE_TO_APP, state),
+                ProjectionChipModel.Projecting(
+                    ProjectionChipModel.Type.SHARE_TO_APP,
+                    state,
+                ),
             )
     }
 
@@ -152,6 +210,10 @@ class EndShareToAppDialogDelegateTest : SysuiTestCase() {
         private const val HOST_PACKAGE = "fake.host.package"
         private val ENTIRE_SCREEN = MediaProjectionState.Projecting.EntireScreen(HOST_PACKAGE)
         private val SINGLE_TASK =
-            MediaProjectionState.Projecting.SingleTask(HOST_PACKAGE, createTask(taskId = 1))
+            MediaProjectionState.Projecting.SingleTask(
+                HOST_PACKAGE,
+                hostDeviceName = null,
+                createTask(taskId = 1)
+            )
     }
 }

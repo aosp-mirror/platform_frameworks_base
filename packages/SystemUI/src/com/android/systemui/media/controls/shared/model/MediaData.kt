@@ -39,7 +39,7 @@ data class MediaData(
     /** Album artwork. */
     val artwork: Icon? = null,
     /** List of generic action buttons for the media player, based on notification actions */
-    val actions: List<MediaAction> = emptyList(),
+    val actions: List<MediaNotificationAction> = emptyList(),
     /** Same as above, but shown on smaller versions of the player, like in QQS or keyguard. */
     val actionsToShowInCompact: List<Int> = emptyList(),
     /**
@@ -99,6 +99,12 @@ data class MediaData(
 
     /** Track progress (0 - 1) to display for players where [resumption] is true */
     val resumeProgress: Double? = null,
+
+    /** Smartspace Id, used for logging. */
+    var smartspaceId: Int = -1,
+
+    /** If media card was visible to user, used for logging. */
+    var isImpressed: Boolean = false,
 ) {
     companion object {
         /** Media is playing on the local device */
@@ -154,6 +160,14 @@ data class MediaAction(
     // to prevent continuously looping animations from restarting due to the arrival
     // of repeated media notifications that are visually identical.
     val rebindId: Int? = null
+)
+
+/** State of a media action from notification. */
+data class MediaNotificationAction(
+    val isAuthenticationRequired: Boolean,
+    val actionIntent: PendingIntent?,
+    val icon: Drawable?,
+    val contentDescription: CharSequence?
 )
 
 /** State of the media device. */

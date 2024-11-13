@@ -17,11 +17,10 @@
 package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
-import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_BIOMETRIC_PROMPT_TRANSITION;
-import static com.android.systemui.Flags.constraintBp;
+import static com.android.systemui.Flags.enableViewCaptureTracing;
 
 import android.animation.Animator;
 import android.annotation.IntDef;
@@ -30,8 +29,6 @@ import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
@@ -41,17 +38,11 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.UserManager;
 import android.util.Log;
-import android.view.Display;
-import android.view.DisplayInfo;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -60,16 +51,14 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.AccessibilityDelegateCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 import com.android.app.animation.Interpolators;
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
@@ -77,7 +66,6 @@ import com.android.systemui.biometrics.AuthController.ScaleFactorProvider;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
 import com.android.systemui.biometrics.shared.model.BiometricModalities;
 import com.android.systemui.biometrics.shared.model.PromptKind;
-import com.android.systemui.biometrics.ui.BiometricPromptLayout;
 import com.android.systemui.biometrics.ui.CredentialView;
 import com.android.systemui.biometrics.ui.binder.BiometricViewBinder;
 import com.android.systemui.biometrics.ui.binder.BiometricViewSizeBinder;
@@ -89,6 +77,10 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import com.google.android.msdl.domain.MSDLPlayer;
+
+import kotlin.Lazy;
 
 import kotlinx.coroutines.CoroutineScope;
 
@@ -114,7 +106,6 @@ public class AuthContainerView extends LinearLayout
 
     private static final int ANIMATION_DURATION_SHOW_MS = 250;
     private static final int ANIMATION_DURATION_AWAY_MS = 350;
-    private static final int ANIMATE_CREDENTIAL_START_DELAY_MS = 300;
 
     private static final int STATE_UNKNOWN = 0;
     private static final int STATE_ANIMATING_IN = 1;
@@ -139,13 +130,11 @@ public class AuthContainerView extends LinearLayout
 
     private final Config mConfig;
     private final int mEffectiveUserId;
-    private final Handler mHandler;
     private final IBinder mWindowToken = new Binder();
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private final Interpolator mLinearOutSlowIn;
     private final LockPatternUtils mLockPatternUtils;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final AuthDialogPanelInteractionDetector mPanelInteractionDetector;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final CoroutineScope mApplicationCoroutineScope;
 
@@ -162,16 +151,15 @@ public class AuthContainerView extends LinearLayout
     private final AuthPanelController mPanelController;
     private final ViewGroup mLayout;
     private final ImageView mBackgroundView;
-    private final ScrollView mBiometricScrollView;
     private final View mPanelView;
-    private final List<FingerprintSensorPropertiesInternal> mFpProps;
-    private final List<FaceSensorPropertiesInternal> mFaceProps;
     private final float mTranslationY;
     @VisibleForTesting @ContainerState int mContainerState = STATE_UNKNOWN;
     private final Set<Integer> mFailedModalities = new HashSet<Integer>();
     private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     private final @Background DelayableExecutor mBackgroundExecutor;
+
+    private final MSDLPlayer mMSDLPlayer;
 
     // Non-null only if the dialog is in the act of dismissing and has not sent the reason yet.
     @Nullable @AuthDialogCallback.DismissedReason private Integer mPendingCallbackReason;
@@ -232,13 +220,7 @@ public class AuthContainerView extends LinearLayout
         @Override
         public void onUseDeviceCredential() {
             mConfig.mCallback.onDeviceCredentialPressed(getRequestId());
-            if (constraintBp()) {
-                addCredentialView(false /* animatePanel */, true /* animateContents */);
-            } else {
-                mHandler.postDelayed(() -> {
-                    addCredentialView(false /* animatePanel */, true /* animateContents */);
-                }, mConfig.mSkipAnimation ? 0 : ANIMATE_CREDENTIAL_START_DELAY_MS);
-            }
+            addCredentialView(false /* animatePanel */, true /* animateContents */);
 
             // TODO(b/313469218): Remove Config
             mConfig.mPromptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
@@ -306,47 +288,25 @@ public class AuthContainerView extends LinearLayout
             @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
             @Nullable List<FaceSensorPropertiesInternal> faceProps,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
-            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
-            @NonNull UserManager userManager,
-            @NonNull LockPatternUtils lockPatternUtils,
-            @NonNull InteractionJankMonitor jankMonitor,
-            @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractor,
-            @NonNull PromptViewModel promptViewModel,
-            @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
-            @NonNull @Background DelayableExecutor bgExecutor,
-            @NonNull VibratorHelper vibratorHelper) {
-        this(config, applicationCoroutineScope, fpProps, faceProps,
-                wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                jankMonitor, promptSelectorInteractor, promptViewModel,
-                credentialViewModelProvider, new Handler(Looper.getMainLooper()), bgExecutor,
-                vibratorHelper);
-    }
-
-    @VisibleForTesting
-    AuthContainerView(@NonNull Config config,
-            @NonNull CoroutineScope applicationCoroutineScope,
-            @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
-            @Nullable List<FaceSensorPropertiesInternal> faceProps,
-            @NonNull WakefulnessLifecycle wakefulnessLifecycle,
-            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull InteractionJankMonitor jankMonitor,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull PromptViewModel promptViewModel,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
-            @NonNull Handler mainHandler,
             @NonNull @Background DelayableExecutor bgExecutor,
-            @NonNull VibratorHelper vibratorHelper) {
+            @NonNull VibratorHelper vibratorHelper,
+            Lazy<ViewCapture> lazyViewCapture,
+            @NonNull MSDLPlayer msdlPlayer) {
         super(config.mContext);
 
         mConfig = config;
         mLockPatternUtils = lockPatternUtils;
         mEffectiveUserId = userManager.getCredentialOwnerProfile(mConfig.mUserId);
-        mHandler = mainHandler;
-        mWindowManager = mContext.getSystemService(WindowManager.class);
+        WindowManager wm = getContext().getSystemService(WindowManager.class);
+        mWindowManager = new ViewCaptureAwareWindowManager(wm, lazyViewCapture,
+                enableViewCaptureTracing());
         mWakefulnessLifecycle = wakefulnessLifecycle;
-        mPanelInteractionDetector = panelInteractionDetector;
         mApplicationCoroutineScope = applicationCoroutineScope;
 
         mPromptViewModel = promptViewModel;
@@ -354,9 +314,8 @@ public class AuthContainerView extends LinearLayout
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mBiometricCallback = new BiometricCallback();
+        mMSDLPlayer = msdlPlayer;
 
-        mFpProps = fpProps;
-        mFaceProps = faceProps;
         final BiometricModalities biometricModalities = new BiometricModalities(
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
                 Utils.findFirstSensorProperties(faceProps, mConfig.mSensorIds));
@@ -370,7 +329,7 @@ public class AuthContainerView extends LinearLayout
 
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         final PromptKind kind = mPromptViewModel.getPromptKind().getValue();
-        if (constraintBp() && kind.isBiometric()) {
+        if (kind.isBiometric()) {
             if (kind.isTwoPaneLandscapeBiometric()) {
                 mLayout = (ConstraintLayout) layoutInflater.inflate(
                         R.layout.biometric_prompt_two_pane_layout, this, false /* attachToRoot */);
@@ -382,39 +341,16 @@ public class AuthContainerView extends LinearLayout
             mLayout = (FrameLayout) layoutInflater.inflate(
                     R.layout.auth_container_view, this, false /* attachToRoot */);
         }
-        mBiometricScrollView = mLayout.findViewById(R.id.biometric_scrollview);
         addView(mLayout);
         mBackgroundView = mLayout.findViewById(R.id.background);
-        ViewCompat.setAccessibilityDelegate(mBackgroundView, new AccessibilityDelegateCompat() {
-            @Override
-            public void onInitializeAccessibilityNodeInfo(View host,
-                    AccessibilityNodeInfoCompat info) {
-                super.onInitializeAccessibilityNodeInfo(host, info);
-                info.addAction(
-                        new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
-                                AccessibilityNodeInfoCompat.ACTION_CLICK,
-                                mContext.getString(R.string.biometric_dialog_cancel_authentication)
-                        )
-                );
-            }
-        });
 
         mPanelView = mLayout.findViewById(R.id.panel);
-        if (!constraintBp()) {
-            final TypedArray ta = mContext.obtainStyledAttributes(new int[]{
-                    android.R.attr.colorBackgroundFloating});
-            mPanelView.setBackgroundColor(ta.getColor(0, Color.WHITE));
-            ta.recycle();
-        }
         mPanelController = new AuthPanelController(mContext, mPanelView);
         mBackgroundExecutor = bgExecutor;
         mInteractionJankMonitor = jankMonitor;
         mCredentialViewModelProvider = credentialViewModelProvider;
 
-        showPrompt(config, layoutInflater, promptViewModel,
-                Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
-                Utils.findFirstSensorProperties(faceProps, mConfig.mSensorIds),
-                vibratorHelper);
+        showPrompt(promptViewModel, vibratorHelper);
 
         // TODO: De-dupe the logic with AuthCredentialPasswordView
         setOnKeyListener((v, keyCode, event) -> {
@@ -428,59 +364,32 @@ public class AuthContainerView extends LinearLayout
         });
 
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        setFocusableInTouchMode(true);
         requestFocus();
     }
 
-    private void showPrompt(@NonNull Config config, @NonNull LayoutInflater layoutInflater,
-            @NonNull PromptViewModel viewModel,
-            @Nullable FingerprintSensorPropertiesInternal fpProps,
-            @Nullable FaceSensorPropertiesInternal faceProps,
-            @NonNull VibratorHelper vibratorHelper
-    ) {
+    private void showPrompt(@NonNull PromptViewModel viewModel,
+            @NonNull VibratorHelper vibratorHelper) {
         if (mPromptViewModel.getPromptKind().getValue().isBiometric()) {
-            addBiometricView(config, layoutInflater, viewModel, fpProps, faceProps, vibratorHelper);
+            addBiometricView(viewModel, vibratorHelper);
         } else if (mPromptViewModel.getPromptKind().getValue().isCredential()) {
-            if (constraintBp()) {
-                addCredentialView(true, false);
-            }
+            addCredentialView(true, false);
         } else {
             mPromptSelectorInteractorProvider.get().resetPrompt(getRequestId());
         }
     }
 
-    private void addBiometricView(@NonNull Config config, @NonNull LayoutInflater layoutInflater,
-            @NonNull PromptViewModel viewModel,
-            @Nullable FingerprintSensorPropertiesInternal fpProps,
-            @Nullable FaceSensorPropertiesInternal faceProps,
+    private void addBiometricView(@NonNull PromptViewModel viewModel,
             @NonNull VibratorHelper vibratorHelper) {
-
-        if (constraintBp()) {
-            mBiometricView = BiometricViewBinder.bind(mLayout, viewModel, null,
-                    // TODO(b/201510778): This uses the wrong timeout in some cases
-                    getJankListener(mLayout, TRANSIT,
-                            BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
-                    mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
-                    vibratorHelper);
-        } else {
-            final BiometricPromptLayout view = (BiometricPromptLayout) layoutInflater.inflate(
-                    R.layout.biometric_prompt_layout, null, false);
-            mBiometricView = BiometricViewBinder.bind(view, viewModel, mPanelController,
-                    // TODO(b/201510778): This uses the wrong timeout in some cases
-                    getJankListener(view, TRANSIT,
-                            BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
-                    mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
-                    vibratorHelper);
-
-            // TODO(b/251476085): migrate these dependencies
-            if (fpProps != null && fpProps.isAnyUdfpsType()) {
-                view.setUdfpsAdapter(new UdfpsDialogMeasureAdapter(view, fpProps),
-                        config.mScaleProvider);
-            }
-        }
+        mBiometricView = BiometricViewBinder.bind(mLayout, viewModel,
+                // TODO(b/201510778): This uses the wrong timeout in some cases
+                getJankListener(mLayout, TRANSIT,
+                        BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
+                mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
+                vibratorHelper, mMSDLPlayer);
     }
 
-    private void onBackInvoked() {
+    @VisibleForTesting
+    public void onBackInvoked() {
         sendEarlyUserCanceled();
         animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
     }
@@ -540,9 +449,6 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onOrientationChanged() {
-        if (!constraintBp()) {
-            updatePositionByCapability(true /* invalidate */);
-        }
     }
 
     @Override
@@ -554,23 +460,6 @@ public class AuthContainerView extends LinearLayout
         }
 
         mWakefulnessLifecycle.addObserver(this);
-        if (constraintBp()) {
-            // Do nothing on attachment with constraintLayout
-        } else if (mPromptViewModel.getPromptKind().getValue().isBiometric()) {
-            mBiometricScrollView.addView(mBiometricView.asView());
-        } else if (mPromptViewModel.getPromptKind().getValue().isCredential()) {
-            addCredentialView(true /* animatePanel */, false /* animateContents */);
-        } else {
-            throw new IllegalStateException("Unknown configuration: "
-                    + mConfig.mPromptInfo.getAuthenticators());
-        }
-
-        if (!constraintBp()) {
-            mPanelInteractionDetector.enable(
-                    () -> animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED));
-            updatePositionByCapability(false /* invalidate */);
-        }
-
         if (mConfig.mSkipIntro) {
             mContainerState = STATE_SHOWING;
         } else {
@@ -634,120 +523,8 @@ public class AuthContainerView extends LinearLayout
         };
     }
 
-    private void updatePositionByCapability(boolean forceInvalidate) {
-        final FingerprintSensorPropertiesInternal fpProp = Utils.findFirstSensorProperties(
-                mFpProps, mConfig.mSensorIds);
-        final FaceSensorPropertiesInternal faceProp = Utils.findFirstSensorProperties(
-                mFaceProps, mConfig.mSensorIds);
-        if (fpProp != null && fpProp.isAnyUdfpsType()) {
-            maybeUpdatePositionForUdfps(forceInvalidate /* invalidate */);
-        }
-        if (faceProp != null && mBiometricView != null && mBiometricView.isFaceOnly()) {
-            alwaysUpdatePositionAtScreenBottom(forceInvalidate /* invalidate */);
-        }
-        if (fpProp != null && fpProp.sensorType == TYPE_POWER_BUTTON) {
-            alwaysUpdatePositionAtScreenBottom(forceInvalidate /* invalidate */);
-        }
-    }
-
-    private static boolean shouldUpdatePositionForUdfps(@NonNull View view) {
-        if (view instanceof BiometricPromptLayout) {
-            // this will force the prompt to align itself on the edge of the screen
-            // instead of centering (temporary workaround to prevent small implicit view
-            // from breaking due to the way gravity / margins are set in the legacy
-            // AuthPanelController
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean maybeUpdatePositionForUdfps(boolean invalidate) {
-        final Display display = getDisplay();
-        if (display == null) {
-            return false;
-        }
-
-        final DisplayInfo cachedDisplayInfo = new DisplayInfo();
-        display.getDisplayInfo(cachedDisplayInfo);
-        if (mBiometricView == null || !shouldUpdatePositionForUdfps(mBiometricView.asView())) {
-            return false;
-        }
-
-        final int displayRotation = cachedDisplayInfo.rotation;
-        switch (displayRotation) {
-            case Surface.ROTATION_0:
-                mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
-                setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-                break;
-
-            case Surface.ROTATION_90:
-                mPanelController.setPosition(AuthPanelController.POSITION_RIGHT);
-                setScrollViewGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
-                break;
-
-            case Surface.ROTATION_270:
-                mPanelController.setPosition(AuthPanelController.POSITION_LEFT);
-                setScrollViewGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-                break;
-
-            case Surface.ROTATION_180:
-            default:
-                Log.e(TAG, "Unsupported display rotation: " + displayRotation);
-                mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
-                setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-                break;
-        }
-
-        if (invalidate) {
-            mPanelView.invalidateOutline();
-        }
-
-        return true;
-    }
-
-    private boolean alwaysUpdatePositionAtScreenBottom(boolean invalidate) {
-        final Display display = getDisplay();
-        if (display == null) {
-            return false;
-        }
-        if (mBiometricView == null || !shouldUpdatePositionForUdfps(mBiometricView.asView())) {
-            return false;
-        }
-
-        final int displayRotation = display.getRotation();
-        switch (displayRotation) {
-            case Surface.ROTATION_0:
-            case Surface.ROTATION_90:
-            case Surface.ROTATION_270:
-            case Surface.ROTATION_180:
-                mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
-                setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-                break;
-            default:
-                Log.e(TAG, "Unsupported display rotation: " + displayRotation);
-                mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
-                setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-                break;
-        }
-
-        if (invalidate) {
-            mPanelView.invalidateOutline();
-        }
-
-        return true;
-    }
-
-    private void setScrollViewGravity(int gravity) {
-        final FrameLayout.LayoutParams params =
-                (FrameLayout.LayoutParams) mBiometricScrollView.getLayoutParams();
-        params.gravity = gravity;
-        mBiometricScrollView.setLayoutParams(params);
-    }
-
     @Override
     public void onDetachedFromWindow() {
-        mPanelInteractionDetector.disable();
         OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
         if (dispatcher != null) {
             findOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mBackCallback);
@@ -850,6 +627,11 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
+    public String getClassNameIfItIsConfirmDeviceCredentialActivity() {
+        return  mConfig.mPromptInfo.getClassNameIfItIsConfirmDeviceCredentialActivity();
+    }
+
+    @Override
     public long getRequestId() {
         return mConfig.mRequestId;
     }
@@ -894,7 +676,7 @@ public class AuthContainerView extends LinearLayout
 
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
-            if (Flags.customBiometricPrompt() && constraintBp()) {
+            if (Flags.customBiometricPrompt()) {
                 // TODO(b/288175645): resetPrompt calls should be lifecycle aware
                 mPromptSelectorInteractorProvider.get().resetPrompt(getRequestId());
             }

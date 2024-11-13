@@ -68,7 +68,6 @@ import static com.android.server.wm.AppTransition.isNormalTransit;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldAttachNavBarToApp;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldStartNonAppWindowAnimationsForKeyguardExit;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WallpaperAnimationAdapter.shouldStartWallpaperAnimation;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -92,7 +91,7 @@ import android.view.WindowManager.TransitionType;
 import android.window.ITaskFragmentOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -174,41 +173,6 @@ public class AppTransitionController {
                 || !transitionGoodToGoForTaskFragments()) {
             return;
         }
-        final boolean isRecentsInOpening = mDisplayContent.mOpeningApps.stream().anyMatch(
-                ConfigurationContainer::isActivityTypeRecents);
-        // In order to avoid visual clutter caused by a conflict between app transition
-        // animation and recents animation, app transition is delayed until recents finishes.
-        // One exceptional case. When 3P launcher is used and a user taps a task screenshot in
-        // task switcher (isRecentsInOpening=true), app transition must start even though
-        // recents is running. Otherwise app transition is blocked until timeout (b/232984498).
-        // When 1P launcher is used, this animation is controlled by the launcher outside of
-        // the app transition, so delaying app transition doesn't cause visible delay. After
-        // recents finishes, app transition is handled just to commit visibility on apps.
-        if (!isRecentsInOpening) {
-            final ArraySet<WindowContainer> participants = new ArraySet<>();
-            participants.addAll(mDisplayContent.mOpeningApps);
-            participants.addAll(mDisplayContent.mChangingContainers);
-            boolean deferForRecents = false;
-            for (int i = 0; i < participants.size(); i++) {
-                WindowContainer wc = participants.valueAt(i);
-                final ActivityRecord activity = getAppFromContainer(wc);
-                if (activity == null) {
-                    continue;
-                }
-                // Don't defer recents animation if one of activity isn't running for it, that one
-                // might be started from quickstep.
-                if (!activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
-                    deferForRecents = false;
-                    break;
-                }
-                deferForRecents = true;
-            }
-            if (deferForRecents) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "Delaying app transition for recents animation to finish");
-                return;
-            }
-        }
 
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
 
@@ -251,7 +215,7 @@ public class AppTransitionController {
 
         ArraySet<ActivityRecord> tmpOpenApps = mDisplayContent.mOpeningApps;
         ArraySet<ActivityRecord> tmpCloseApps = mDisplayContent.mClosingApps;
-        if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringTransition()) {
+        if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringFinishTransition()) {
             tmpOpenApps = new ArraySet<>(mDisplayContent.mOpeningApps);
             tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
             if (mDisplayContent.mAtmService.mBackNavigationController
@@ -1093,12 +1057,8 @@ public class AppTransitionController {
     private void applyAnimations(ArraySet<ActivityRecord> openingApps,
             ArraySet<ActivityRecord> closingApps, @TransitionOldType int transit,
             LayoutParams animLp, boolean voiceInteraction) {
-        final RecentsAnimationController rac = mService.getRecentsAnimationController();
         if (transit == WindowManager.TRANSIT_OLD_UNSET
                 || (openingApps.isEmpty() && closingApps.isEmpty())) {
-            if (rac != null) {
-                rac.sendTasksAppeared();
-            }
             return;
         }
 
@@ -1136,9 +1096,6 @@ public class AppTransitionController {
                 voiceInteraction);
         applyAnimations(closingWcs, closingApps, transit, false /* visible */, animLp,
                 voiceInteraction);
-        if (rac != null) {
-            rac.sendTasksAppeared();
-        }
 
         for (int i = 0; i < openingApps.size(); ++i) {
             openingApps.valueAtUnchecked(i).mOverrideTaskTransition = false;

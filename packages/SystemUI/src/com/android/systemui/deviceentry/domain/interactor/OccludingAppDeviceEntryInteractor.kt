@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.Intent
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.model.BiometricMessage
@@ -33,6 +34,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.combine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -64,10 +66,18 @@ constructor(
     activityStarter: ActivityStarter,
     powerInteractor: PowerInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    communalSceneInteractor: CommunalSceneInteractor,
 ) {
     private val keyguardOccludedByApp: Flow<Boolean> =
         if (KeyguardWmStateRefactor.isEnabled) {
-            keyguardTransitionInteractor.currentKeyguardState.map { it == KeyguardState.OCCLUDED }
+            combine(
+                    keyguardTransitionInteractor.currentKeyguardState,
+                    communalSceneInteractor.isIdleOnCommunal,
+                    ::Pair,
+                )
+                .map { (currentState, isIdleOnCommunal) ->
+                    currentState == KeyguardState.OCCLUDED && !isIdleOnCommunal
+                }
         } else {
             combine(
                     keyguardInteractor.isKeyguardOccluded,
@@ -75,12 +85,20 @@ constructor(
                     primaryBouncerInteractor.isShowing,
                     alternateBouncerInteractor.isVisible,
                     keyguardInteractor.isDozing,
-                ) { occluded, showing, primaryBouncerShowing, alternateBouncerVisible, dozing ->
+                    communalSceneInteractor.isIdleOnCommunal,
+                ) {
+                    occluded,
+                    showing,
+                    primaryBouncerShowing,
+                    alternateBouncerVisible,
+                    dozing,
+                    isIdleOnCommunal ->
                     occluded &&
                         showing &&
                         !primaryBouncerShowing &&
                         !alternateBouncerVisible &&
-                        !dozing
+                        !dozing &&
+                        !isIdleOnCommunal
                 }
                 .distinctUntilChanged()
         }
@@ -109,7 +127,7 @@ constructor(
             // On fingerprint success when the screen is on and not dreaming, go to the home screen
             fingerprintUnlockSuccessEvents
                 .sample(
-                    combine(powerInteractor.isInteractive, keyguardInteractor.isDreaming, ::Pair),
+                    combine(powerInteractor.isInteractive, keyguardInteractor.isDreaming, ::Pair)
                 )
                 .collect { (interactive, dreaming) ->
                     if (interactive && !dreaming) {
@@ -137,7 +155,7 @@ constructor(
                         }
                     },
                     /* cancel= */ null,
-                    /* afterKeyguardGone */ false
+                    /* afterKeyguardGone */ false,
                 )
             }
         }

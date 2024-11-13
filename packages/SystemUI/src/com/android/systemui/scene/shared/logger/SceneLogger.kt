@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene.shared.logger
 
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
@@ -42,7 +44,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logSceneChangeRequested(
+    fun logSceneChanged(
         from: SceneKey,
         to: SceneKey,
         reason: String,
@@ -59,7 +61,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             },
             messagePrinter = {
                 buildString {
-                    append("Scene change requested: $str1 → $str2")
+                    append("Scene changed: $str1 → $str2")
                     if (isInstant) {
                         append(" (instant)")
                     }
@@ -69,18 +71,55 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logSceneChangeCommitted(
-        from: SceneKey,
-        to: SceneKey,
+    fun logSceneTransition(transitionState: ObservableTransitionState) {
+        when (transitionState) {
+            is ObservableTransitionState.Transition -> {
+                logBuffer.log(
+                    tag = TAG,
+                    level = LogLevel.INFO,
+                    messageInitializer = {
+                        str1 = transitionState.fromContent.toString()
+                        str2 = transitionState.toContent.toString()
+                    },
+                    messagePrinter = { "Scene transition started: $str1 → $str2" },
+                )
+            }
+            is ObservableTransitionState.Idle -> {
+                logBuffer.log(
+                    tag = TAG,
+                    level = LogLevel.INFO,
+                    messageInitializer = { str1 = transitionState.currentScene.toString() },
+                    messagePrinter = { "Scene transition idle on: $str1" },
+                )
+            }
+        }
+    }
+
+    fun logOverlayChangeRequested(
+        from: OverlayKey? = null,
+        to: OverlayKey? = null,
+        reason: String,
     ) {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,
             messageInitializer = {
-                str1 = from.toString()
-                str2 = to.toString()
+                str1 = from?.toString()
+                str2 = to?.toString()
+                str3 = reason
             },
-            messagePrinter = { "Scene change committed: $str1 → $str2" },
+            messagePrinter = {
+                buildString {
+                    append("Overlay change requested: ")
+                    if (str1 != null) {
+                        append(str1)
+                        append(if (str2 == null) " (hidden)" else " → $str2")
+                    } else {
+                        append("$str2 (shown)")
+                    }
+                    append(", reason: $str3")
+                }
+            },
         )
     }
 
@@ -105,7 +144,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logRemoteUserInteractionStarted(
+    fun logRemoteUserInputStarted(
         reason: String,
     ) {
         logBuffer.log(
@@ -116,7 +155,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logUserInteractionFinished() {
+    fun logUserInputFinished() {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,

@@ -33,3 +33,34 @@ android_test {
     static_libs: ["FlickerTestsBase"],
     data: ["trace_config/*"],
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Begin breakdowns for FlickerTestsAppClose module
+
+test_module_config {
+    name: "FlickerTestsAppClose-CatchAll",
+    base: "FlickerTestsAppClose",
+    exclude_filters: [
+        "com.android.server.wm.flicker.close.CloseAppBackButtonTest",
+        "com.android.server.wm.flicker.close.CloseAppHomeButtonTest",
+        "com.android.server.wm.flicker.close.",
+    ],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsAppClose-CloseAppBackButtonTest",
+    base: "FlickerTestsAppClose",
+    include_filters: ["com.android.server.wm.flicker.close.CloseAppBackButtonTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsAppClose-CloseAppHomeButtonTest",
+    base: "FlickerTestsAppClose",
+    include_filters: ["com.android.server.wm.flicker.close.CloseAppHomeButtonTest"],
+    test_suites: ["device-tests"],
+}
+
+// End breakdowns for FlickerTestsAppClose module
+////////////////////////////////////////////////////////////////////////////////

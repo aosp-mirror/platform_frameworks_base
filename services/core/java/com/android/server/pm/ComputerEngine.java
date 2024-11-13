@@ -3065,10 +3065,9 @@ public class ComputerEngine implements Computer {
             case DumpState.DUMP_PREFERRED_XML:
             {
                 pw.flush();
-                FileOutputStream fout = new FileOutputStream(fd);
-                BufferedOutputStream str = new BufferedOutputStream(fout);
                 TypedXmlSerializer serializer = Xml.newFastSerializer();
-                try {
+                try (BufferedOutputStream str =
+                             new BufferedOutputStream(new FileOutputStream(fd))) {
                     serializer.setOutput(str, StandardCharsets.UTF_8.name());
                     serializer.startDocument(null, true);
                     serializer.setFeature(

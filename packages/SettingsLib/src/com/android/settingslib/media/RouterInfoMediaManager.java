@@ -29,6 +29,7 @@ import android.media.session.MediaController;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -41,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -65,7 +65,9 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
                 refreshDevices();
             };
 
-    private final AtomicReference<MediaRouter2.ScanToken> mScanToken = new AtomicReference<>();
+    @GuardedBy("this")
+    @Nullable
+    private MediaRouter2.ScanToken mScanToken;
 
     // TODO (b/321969740): Plumb target UserHandle between UMO and RouterInfoMediaManager.
     /* package */ RouterInfoMediaManager(
@@ -101,8 +103,13 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     @Override
     protected void startScanOnRouter() {
         if (Flags.enableScreenOffScanning()) {
-            MediaRouter2.ScanRequest request = new MediaRouter2.ScanRequest.Builder().build();
-            mScanToken.compareAndSet(null, mRouter.requestScan(request));
+            synchronized (this) {
+                if (mScanToken == null) {
+                    MediaRouter2.ScanRequest request =
+                            new MediaRouter2.ScanRequest.Builder().build();
+                    mScanToken = mRouter.requestScan(request);
+                }
+            }
         } else {
             mRouter.startScan();
         }
@@ -120,9 +127,11 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     @Override
     protected void stopScanOnRouter() {
         if (Flags.enableScreenOffScanning()) {
-            MediaRouter2.ScanToken token = mScanToken.getAndSet(null);
-            if (token != null) {
-                mRouter.cancelScanRequest(token);
+            synchronized (this) {
+                if (mScanToken != null) {
+                    mRouter.cancelScanRequest(mScanToken);
+                    mScanToken = null;
+                }
             }
         } else {
             mRouter.stopScan();

@@ -23,12 +23,14 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
+import android.hardware.biometrics.fingerprint.virtualhal.IVirtualHal;
 import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -162,6 +164,43 @@ public class FingerprintSensorConfigurations implements Parcelable {
         dest.writeMap(mSensorPropsMap);
     }
 
+
+    /**
+     * Remap fqName of VHAL because the `virtual` instance is registered
+     * with IVirtulalHal now (IFingerprint previously)
+     * @param fqName fqName to be translated
+     * @return real fqName
+     */
+    public static String remapFqName(String fqName) {
+        if (!fqName.contains(IFingerprint.DESCRIPTOR + "/virtual")) {
+            return fqName;  //no remap needed for real hardware HAL
+        } else {
+            //new Vhal instance name
+            return fqName.replace("IFingerprint", "virtualhal.IVirtualHal");
+        }
+    }
+
+    /**
+     * @param fqName aidl interface instance name
+     * @return aidl interface
+     */
+    public static IFingerprint getIFingerprint(String fqName) {
+        if (fqName.contains("virtual")) {
+            String fqNameMapped = remapFqName(fqName);
+            Slog.i(TAG, "getIFingerprint fqName is mapped: " + fqName + "->" + fqNameMapped);
+            try {
+                IVirtualHal vhal = IVirtualHal.Stub.asInterface(
+                        Binder.allowBlocking(ServiceManager.waitForService(fqNameMapped)));
+                return vhal.getFingerprintHal();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in vhal.getFingerprintHal() call" + fqNameMapped);
+            }
+        }
+
+        return IFingerprint.Stub.asInterface(
+                Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
+    }
+
     /**
      * Returns fingerprint sensor props for the HAL {@param instance}.
      */
@@ -176,8 +215,7 @@ public class FingerprintSensorConfigurations implements Parcelable {
 
         try {
             final String fqName = IFingerprint.DESCRIPTOR + "/" + instance;
-            final IFingerprint fp = IFingerprint.Stub.asInterface(Binder.allowBlocking(
-                    ServiceManager.waitForDeclaredService(fqName)));
+            final IFingerprint fp = getIFingerprint(fqName);
             if (fp != null) {
                 props = fp.getSensorProps();
             } else {

@@ -296,6 +296,15 @@ public class BiometricLogger {
         mSink.reportUnknownTemplateEnrolledFramework(mStatsModality);
     }
 
+    /** Report unknown enrollment in framework settings */
+    public void logFingerprintsLoe() {
+        if (shouldSkipLogging()) {
+            return;
+        }
+
+        mSink.reportFingerprintsLoe(mStatsModality);
+    }
+
     /**
      * Get a callback to start/stop ALS capture when the client runs. Do not create
      * multiple callbacks since there is at most one light sensor (they will all share

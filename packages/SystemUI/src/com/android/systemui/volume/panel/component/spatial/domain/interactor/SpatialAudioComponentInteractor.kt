@@ -63,13 +63,7 @@ constructor(
     private val changes = MutableSharedFlow<Unit>()
     private val currentAudioDeviceAttributes: StateFlow<AudioDeviceAttributes?> =
         audioOutputInteractor.currentAudioDevice
-            .map { audioDevice ->
-                if (audioDevice is AudioOutputDevice.Unknown) {
-                    builtinSpeaker
-                } else {
-                    audioDevice.getAudioDeviceAttributes()
-                }
-            }
+            .map { audioDevice -> audioDevice.getAudioDeviceAttributes() }
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), builtinSpeaker)
 
     /**
@@ -185,7 +179,10 @@ constructor(
                         .firstOrNull { spatializerInteractor.isSpatialAudioAvailable(it) }
                 }
             }
-            else -> null
+            is AudioOutputDevice.Wired -> null
+            is AudioOutputDevice.Remote -> null
+            is AudioOutputDevice.Unknown -> builtinSpeaker
+            is AudioOutputDevice.Unavailable -> builtinSpeaker
         }
     }
 

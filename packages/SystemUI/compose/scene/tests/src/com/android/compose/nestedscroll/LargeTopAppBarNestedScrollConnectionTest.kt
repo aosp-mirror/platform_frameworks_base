@@ -117,7 +117,7 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
             scrollConnection.onPostScroll(
                 consumed = Offset.Zero,
                 available = Offset(x = 0f, y = -1f),
-                source = scrollSource
+                source = scrollSource,
             )
 
         // It should ignore all onPostScroll events
@@ -147,7 +147,7 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
             scrollConnection.onPostScroll(
                 consumed = Offset.Zero,
                 available = Offset(x = 0f, y = 1f),
-                source = scrollSource
+                source = scrollSource,
             )
 
         // It can increase by 1 the height
@@ -162,13 +162,13 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset(x = 0f, y = 0.5f),
-            source = scrollSource
+            source = scrollSource,
         )
 
         val offsetConsumed =
             scrollConnection.onPreScroll(
                 available = Offset(x = 0f, y = 0.5f),
-                source = scrollSource
+                source = scrollSource,
             )
         assertThat(offsetConsumed).isEqualTo(Offset(0f, 0.5f))
 
@@ -185,7 +185,7 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
             scrollConnection.onPostScroll(
                 consumed = Offset.Zero,
                 available = Offset(x = 0f, y = 1f),
-                source = scrollSource
+                source = scrollSource,
             )
 
         // It should not change the height (already at max)

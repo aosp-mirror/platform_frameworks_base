@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 import android.os.Handler;
 import android.os.test.TestLooper;
 
+import com.android.server.vibrator.VibrationSession.Status;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -113,7 +115,6 @@ public class VibratorFrameworkStatsLoggerTest {
     }
 
     private static VibrationStats.StatsInfo newEmptyStatsInfo() {
-        return new VibrationStats.StatsInfo(
-                0, 0, 0, Vibration.Status.FINISHED, new VibrationStats(), 0L);
+        return new VibrationStats.StatsInfo(0, 0, 0, Status.FINISHED, new VibrationStats(), 0L);
     }
 }

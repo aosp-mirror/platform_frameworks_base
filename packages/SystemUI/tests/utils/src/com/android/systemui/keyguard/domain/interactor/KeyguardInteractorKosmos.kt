@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
-import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
@@ -31,7 +30,6 @@ val Kosmos.keyguardInteractor: KeyguardInteractor by
     Kosmos.Fixture {
         KeyguardInteractor(
             repository = keyguardRepository,
-            commandQueue = fakeCommandQueue,
             powerInteractor = powerInteractor,
             bouncerRepository = keyguardBouncerRepository,
             configurationInteractor = configurationInteractor,
@@ -40,6 +38,7 @@ val Kosmos.keyguardInteractor: KeyguardInteractor by
             sceneInteractorProvider = { sceneInteractor },
             fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
             fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
+            fromOccludedTransitionInteractor = { fromOccludedTransitionInteractor },
             sharedNotificationContainerInteractor = { sharedNotificationContainerInteractor },
             applicationScope = testScope.backgroundScope,
         )

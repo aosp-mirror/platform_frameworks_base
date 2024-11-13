@@ -359,7 +359,8 @@ public class FingerprintAuthenticationClient
                 mCallback.onClientFinished(this, false /* success */);
             }
         } else {
-            Slog.e(TAG, "cancellation signal was null");
+            Slog.e(TAG, "Cancellation signal was null");
+            mCallback.onClientFinished(this, false /* success */);
         }
     }
 

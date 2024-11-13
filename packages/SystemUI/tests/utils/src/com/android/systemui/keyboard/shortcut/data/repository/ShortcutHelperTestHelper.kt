@@ -18,18 +18,59 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
 import android.content.Intent
+import android.hardware.input.FakeInputManager
+import android.view.KeyboardShortcutGroup
+import android.view.WindowManager
+import android.view.WindowManager.KeyboardShortcutsReceiver
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
 
 class ShortcutHelperTestHelper(
-    repo: ShortcutHelperRepository,
+    repo: ShortcutHelperStateRepository,
     private val context: Context,
     private val fakeBroadcastDispatcher: FakeBroadcastDispatcher,
     private val fakeCommandQueue: FakeCommandQueue,
+    private val fakeInputManager: FakeInputManager,
+    windowManager: WindowManager
 ) {
 
+    companion object {
+        const val DEFAULT_DEVICE_ID = 123
+    }
+
+    private var imeShortcuts: List<KeyboardShortcutGroup> = emptyList()
+    private var currentAppsShortcuts: List<KeyboardShortcutGroup> = emptyList()
+
     init {
+        whenever(windowManager.requestImeKeyboardShortcuts(any(), any())).thenAnswer {
+            val keyboardShortcutReceiver = it.getArgument<KeyboardShortcutsReceiver>(0)
+            keyboardShortcutReceiver.onKeyboardShortcutsReceived(imeShortcuts)
+            return@thenAnswer Unit
+        }
+        whenever(windowManager.requestAppKeyboardShortcuts(any(), any())).thenAnswer {
+            val keyboardShortcutReceiver = it.getArgument<KeyboardShortcutsReceiver>(0)
+            keyboardShortcutReceiver.onKeyboardShortcutsReceived(currentAppsShortcuts)
+            return@thenAnswer Unit
+        }
         repo.start()
+    }
+
+    /**
+     * Use this method to set what ime shortcuts should be returned from windowManager in tests. By
+     * default windowManager.requestImeKeyboardShortcuts will return emptyList. See init block.
+     */
+    fun setImeShortcuts(imeShortcuts: List<KeyboardShortcutGroup>) {
+        this.imeShortcuts = imeShortcuts
+    }
+
+    /**
+     * Use this method to set what current app shortcuts should be returned from windowManager in
+     * tests. By default [WindowManager.requestAppKeyboardShortcuts] will return emptyList.
+     */
+    fun setCurrentAppsShortcuts(currentAppShortcuts: List<KeyboardShortcutGroup>) {
+        this.currentAppsShortcuts = currentAppShortcuts
     }
 
     fun hideThroughCloseSystemDialogs() {
@@ -54,6 +95,7 @@ class ShortcutHelperTestHelper(
     }
 
     fun toggle(deviceId: Int) {
+        fakeInputManager.addPhysicalKeyboardIfNotPresent(deviceId)
         fakeCommandQueue.doForEachCallback { it.toggleKeyboardShortcutsMenu(deviceId) }
     }
 

@@ -189,7 +189,7 @@ public class FingerprintCallback {
             mEnrollmentCallback.onAcquired(acquireInfo == FINGERPRINT_ACQUIRED_GOOD);
         }
         final String msg = getAcquiredString(context, acquireInfo, vendorCode);
-        if (msg == null) {
+        if (msg == null || msg.isEmpty()) {
             return;
         }
         // emulate HAL 2.1 behavior and send real acquiredInfo

@@ -16,10 +16,12 @@
 
 package com.android.systemui.mediaprojection.data.repository
 
+import android.hardware.display.displayManager
 import android.os.Handler
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.mediaprojection.taskswitcher.activityTaskManagerTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
 
@@ -30,10 +32,12 @@ val Kosmos.realMediaProjectionRepository by
     Kosmos.Fixture {
         MediaProjectionManagerRepository(
             mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
+            displayManager = displayManager,
             handler = Handler.getMain(),
             applicationScope = applicationCoroutineScope,
             tasksRepository = activityTaskManagerTasksRepository,
             backgroundDispatcher = testDispatcher,
             mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
+            logger = logcatLogBuffer("TestMediaProjection"),
         )
     }

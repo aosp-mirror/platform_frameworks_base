@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.security.attestationverification.AttestationVerificationManager.PARAM_CHALLENGE
+import android.security.attestationverification.AttestationVerificationManager.PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS
 import android.security.attestationverification.AttestationVerificationManager.PARAM_PUBLIC_KEY
 import android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE
 import android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS
@@ -156,6 +157,41 @@ class AttestationVerificationPeerDeviceVerifierTest {
 
         val result = verifier.verifyAttestation(
             TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
+        assertThat(result).isEqualTo(RESULT_FAILURE)
+    }
+
+    @Test
+    fun verifyAttestation_returnsSuccessPatchDataWithinMaxPatchDiff() {
+        val verifier = AttestationVerificationPeerDeviceVerifier(
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2023, 3, 1),
+            LocalDate.of(2023, 2, 1)
+        )
+        val challengeRequirements = Bundle()
+        challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
+        challengeRequirements.putInt(PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS, 24)
+
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
+        assertThat(result).isEqualTo(RESULT_SUCCESS)
+    }
+
+    @Test
+    fun verifyAttestation_returnsFailurePatchDataNotWithinMaxPatchDiff() {
+        val verifier = AttestationVerificationPeerDeviceVerifier(
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2024, 10, 1),
+            LocalDate.of(2024, 9, 1)
+        )
+        val challengeRequirements = Bundle()
+        challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
+        challengeRequirements.putInt(PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS, 24)
+
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            // The patch date of this file is early 2022
             TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
         )
         assertThat(result).isEqualTo(RESULT_FAILURE)

@@ -77,6 +77,7 @@ import android.view.InputChannel;
 import android.view.SurfaceControl;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -132,13 +133,13 @@ public class SystemServicesTestRule implements TestRule {
     private final ArrayList<DeviceConfig.OnPropertiesChangedListener> mDeviceConfigListeners =
             new ArrayList<>();
 
+    private AppCompatConfiguration mAppCompat;
     private Description mDescription;
     private Context mContext;
     private StaticMockitoSession mMockitoSession;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
     private InputManagerService mImService;
-    private InputChannel mInputChannel;
     private Runnable mOnBeforeServicesCreated;
     /**
      * Spied {@link SurfaceControl.Transaction} class than can be used to verify calls.
@@ -202,7 +203,8 @@ public class SystemServicesTestRule implements TestRule {
                 .mockStatic(DisplayControl.class, mockStubOnly)
                 .mockStatic(LockGuard.class, mockStubOnly)
                 .mockStatic(Watchdog.class, mockStubOnly)
-                .spyStatic(DesktopModeLaunchParamsModifier.class)
+                .spyStatic(DesktopModeHelper.class)
+                .spyStatic(DesktopModeBoundsCalculator.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
@@ -324,12 +326,15 @@ public class SystemServicesTestRule implements TestRule {
 
         // InputManagerService
         mImService = mock(InputManagerService.class);
-        // InputChannel cannot be mocked because it may pass to InputEventReceiver.
-        final InputChannel[] inputChannels = InputChannel.openInputChannelPair(TAG);
-        inputChannels[0].dispose();
-        mInputChannel = inputChannels[1];
-        doReturn(mInputChannel).when(mImService).monitorInput(anyString(), anyInt());
-        doReturn(mInputChannel).when(mImService).createInputChannel(anyString());
+        // InputChannel cannot be mocked because it may be passed to InputEventReceiver.
+        Answer<InputChannel> newInputChannel = invocation -> {
+            String name = invocation.getArgument(0);
+            final InputChannel[] channels = InputChannel.openInputChannelPair(name);
+            channels[0].dispose();
+            return channels[1];
+        };
+        when(mImService.monitorInput(anyString(), anyInt())).thenAnswer(newInputChannel);
+        when(mImService.createInputChannel(anyString())).thenAnswer(newInputChannel);
 
         // StatusBarManagerInternal
         final StatusBarManagerInternal sbmi = mock(StatusBarManagerInternal.class);
@@ -375,6 +380,11 @@ public class SystemServicesTestRule implements TestRule {
                 mock(ActivityManagerService.class, withSettings().stubOnly());
         mAtmService = new TestActivityTaskManagerService(mContext, amService);
         LocalServices.addService(ActivityTaskManagerInternal.class, mAtmService.getAtmInternal());
+
+        // AppCompatConfiguration
+        mAppCompat = new AppCompatConfiguration(
+                ActivityThread.currentActivityThread().getSystemUiContext());
+
         // Create a fake WindowProcessController for the system process.
         final WindowProcessController wpc =
                 addProcess("android", "system", 1485 /* pid */, 1000 /* uid */);
@@ -390,7 +400,7 @@ public class SystemServicesTestRule implements TestRule {
         mWmService = WindowManagerService.main(
                 mContext, mImService, false, wmPolicy, mAtmService,
                 testDisplayWindowSettingsProvider, StubTransaction::new,
-                (unused) -> new MockSurfaceControlBuilder());
+                MockSurfaceControlBuilder::new, mAppCompat);
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
         // Invoked during {@link ActivityStack} creation.
@@ -442,15 +452,7 @@ public class SystemServicesTestRule implements TestRule {
                 dc.getDisplayPolicy().release();
                 // Unregister SensorEventListener (foldable device may register for hinge angle).
                 dc.getDisplayRotation().onDisplayRemoved();
-                if (dc.mDisplayRotationCompatPolicy != null) {
-                    dc.mDisplayRotationCompatPolicy.dispose();
-                }
-                if (dc.mCameraCompatFreeformPolicy != null) {
-                    dc.mCameraCompatFreeformPolicy.dispose();
-                }
-                if (dc.mCameraStateMonitor != null) {
-                    dc.mCameraStateMonitor.dispose();
-                }
+                dc.mAppCompatCameraPolicy.dispose();
             }
         }
 
@@ -470,9 +472,6 @@ public class SystemServicesTestRule implements TestRule {
         SurfaceAnimationThread.dispose();
         AnimationThread.dispose();
         UiThread.dispose();
-        if (mInputChannel != null) {
-            mInputChannel.dispose();
-        }
 
         tearDownLocalServices();
         // Reset priority booster because animation thread has been changed.
@@ -560,6 +559,9 @@ public class SystemServicesTestRule implements TestRule {
         // This is a different handler object than the wm.mAnimationHandler above.
         waitHandlerIdle(AnimationThread.getHandler());
         waitHandlerIdle(SurfaceAnimationThread.getHandler());
+        // Some binder calls are posted to BackgroundThread.getHandler(), we should wait for them
+        // to finish to run next test.
+        waitHandlerIdle(BackgroundThread.getHandler());
     }
 
     static void waitHandlerIdle(Handler handler) {
@@ -575,7 +577,7 @@ public class SystemServicesTestRule implements TestRule {
         // This makes sure all previous messages in the handler are fully processed vs. just popping
         // them from the message queue.
         final AtomicBoolean currentMessagesProcessed = new AtomicBoolean(false);
-        wm.mAnimator.getChoreographer().postFrameCallback(time -> {
+        wm.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             synchronized (currentMessagesProcessed) {
                 currentMessagesProcessed.set(true);
                 currentMessagesProcessed.notifyAll();

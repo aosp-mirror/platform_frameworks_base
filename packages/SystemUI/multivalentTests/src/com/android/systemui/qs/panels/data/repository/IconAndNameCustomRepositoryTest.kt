@@ -19,7 +19,6 @@ package com.android.systemui.qs.panels.data.repository
 import android.content.ComponentName
 import android.content.packageManager
 import android.content.pm.PackageManager
-import android.content.pm.ServiceInfo
 import android.content.pm.UserInfo
 import android.graphics.drawable.TestStubDrawable
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -35,6 +34,7 @@ import com.android.systemui.qs.pipeline.data.repository.FakeInstalledTilesCompon
 import com.android.systemui.qs.pipeline.data.repository.fakeInstalledTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.installedTilesRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
@@ -100,6 +100,7 @@ class IconAndNameCustomRepositoryTest : SysuiTestCase() {
                         Icon.Loaded(drawable1, ContentDescription.Loaded(tileService1)),
                         Text.Loaded(tileService1),
                         Text.Loaded(appName1),
+                        TileCategory.PROVIDED_BY_APP,
                     )
                 val expectedData2 =
                     EditTileData(
@@ -107,6 +108,7 @@ class IconAndNameCustomRepositoryTest : SysuiTestCase() {
                         Icon.Loaded(drawable2, ContentDescription.Loaded(tileService2)),
                         Text.Loaded(tileService2),
                         Text.Loaded(appName2),
+                        TileCategory.PROVIDED_BY_APP,
                     )
 
                 assertThat(editTileDataList).containsExactly(expectedData1, expectedData2)
@@ -144,6 +146,7 @@ class IconAndNameCustomRepositoryTest : SysuiTestCase() {
                         Icon.Loaded(drawable1, ContentDescription.Loaded(tileService1)),
                         Text.Loaded(tileService1),
                         Text.Loaded(appName1),
+                        TileCategory.PROVIDED_BY_APP,
                     )
 
                 val editTileDataList = underTest.getCustomTileData()

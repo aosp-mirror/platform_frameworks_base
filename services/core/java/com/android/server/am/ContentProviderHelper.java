@@ -538,6 +538,8 @@ public class ContentProviderHelper {
                             if (!pr.hasProvider(cpi.name)) {
                                 checkTime(startTime, "getContentProviderImpl: scheduling install");
                                 pr.installProvider(cpi.name, cpr);
+                                mService.mOomAdjuster.unfreezeTemporarily(proc,
+                                        CachedAppOptimizer.UNFREEZE_REASON_GET_PROVIDER);
                                 try {
                                     thread.scheduleInstallProvider(cpi);
                                 } catch (RemoteException e) {
@@ -552,13 +554,11 @@ public class ContentProviderHelper {
                                     callingProcessState, proc.mState.getCurProcState(),
                                     false, 0L);
                         } else {
-                            final boolean stopped =
-                                    (cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+                            final boolean stopped = cpr.appInfo.isStopped();
                             final int packageState = stopped
                                     ? PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
                                     : PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
-                            final boolean firstLaunch = !mService.wasPackageEverLaunched(
-                                    cpi.packageName, userId);
+                            final boolean firstLaunch = cpr.appInfo.isNotLaunched();
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = mService.startProcessLocked(
                                     cpi.processName, cpr.appInfo, false, 0,
@@ -674,7 +674,9 @@ public class ContentProviderHelper {
                     if (conn != null) {
                         conn.waiting = true;
                     }
-                    cpr.wait(wait);
+                    if (wait > 0) {
+                        cpr.wait(wait);
+                    }
                     if (cpr.provider == null) {
                         timedOut = true;
                         break;
@@ -1802,10 +1804,12 @@ public class ContentProviderHelper {
                         ActivityManagerService.WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG, cpr);
             }
             final int userId = UserHandle.getUserId(cpr.uid);
+            boolean removed = false;
             // Don't remove from provider map if it doesn't match
             // could be a new content provider is starting
             if (mProviderMap.getProviderByClass(cpr.name, userId) == cpr) {
                 mProviderMap.removeProviderByClass(cpr.name, userId);
+                removed = true;
             }
             String[] names = cpr.info.authority.split(";");
             for (int j = 0; j < names.length; j++) {
@@ -1813,7 +1817,11 @@ public class ContentProviderHelper {
                 // could be a new content provider is starting
                 if (mProviderMap.getProviderByName(names[j], userId) == cpr) {
                     mProviderMap.removeProviderByName(names[j], userId);
+                    removed = true;
                 }
+            }
+            if (removed && cpr.proc != null) {
+                cpr.proc.mProviders.removeProvider(cpr.info.name);
             }
         }
 

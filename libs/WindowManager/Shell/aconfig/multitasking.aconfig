@@ -25,11 +25,10 @@ flag {
 }
 
 flag {
-    name: "enable_pip2_implementation"
+    name: "enable_pip2"
     namespace: "multitasking"
     description: "Enables the new implementation of PiP (PiP2)"
-    bug: "290220798"
-    is_fixed_read_only: true
+    bug: "311462191"
 }
 
 flag {
@@ -113,11 +112,42 @@ flag {
 }
 
 flag {
-    name: "animate_bubble_size_change"
+    name: "enable_taskbar_on_phones"
     namespace: "multitasking"
-    description: "Turns on the animation for bubble bar icons size change"
-    bug: "335575529"
+    description: "Enables taskbar on phones"
+    bug: "348007377"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "enable_bubble_bar_in_persistent_task_bar"
+    namespace: "multitasking"
+    description: "Enable bubble bar to be shown in the persistent task bar"
+    bug: "346391377"
+}
+
+flag {
+    name: "bubble_view_info_executors"
+    namespace: "multitasking"
+    description: "Use executors to inflate bubble views"
+    bug: "353894869"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+   name: "enable_bubble_to_fullscreen"
+   namespace: "multitasking"
+   description: "Enable an option to move bubbles to fullscreen"
+   bug: "363326492"
+}
+
+flag {
+    name: "enable_flexible_split"
+    namespace: "multitasking"
+    description: "Enables flexibile split feature for split screen"
+    bug: "349828130"
 }

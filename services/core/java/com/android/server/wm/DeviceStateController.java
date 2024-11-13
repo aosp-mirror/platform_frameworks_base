@@ -16,9 +16,19 @@
 
 package com.android.server.wm;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.feature.flags.FeatureFlags;
+import android.hardware.devicestate.feature.flags.FeatureFlagsImpl;
 import android.util.ArrayMap;
 import android.util.Pair;
 
@@ -28,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -43,16 +54,16 @@ final class DeviceStateController {
     @NonNull
     private final WindowManagerGlobalLock mWmLock;
     @NonNull
-    private final int[] mOpenDeviceStates;
+    private final List<Integer> mOpenDeviceStates;
     @NonNull
-    private final int[] mHalfFoldedDeviceStates;
+    private final List<Integer> mHalfFoldedDeviceStates;
     @NonNull
-    private final int[] mFoldedDeviceStates;
+    private final List<Integer> mFoldedDeviceStates;
     @NonNull
-    private final int[] mRearDisplayDeviceStates;
-    private final int mConcurrentDisplayDeviceState;
+    private final List<Integer> mRearDisplayDeviceStates;
+    private final List<Integer> mConcurrentDisplayDeviceStates;
     @NonNull
-    private final int[] mReverseRotationAroundZAxisStates;
+    private final List<Integer> mReverseRotationAroundZAxisStates;
     @GuardedBy("mWmLock")
     @NonNull
     @VisibleForTesting
@@ -76,18 +87,55 @@ final class DeviceStateController {
     DeviceStateController(@NonNull Context context, @NonNull WindowManagerGlobalLock wmLock) {
         mWmLock = wmLock;
 
-        mOpenDeviceStates = context.getResources()
-                .getIntArray(R.array.config_openDeviceStates);
-        mHalfFoldedDeviceStates = context.getResources()
-                .getIntArray(R.array.config_halfFoldedDeviceStates);
-        mFoldedDeviceStates = context.getResources()
-                .getIntArray(R.array.config_foldedDeviceStates);
-        mRearDisplayDeviceStates = context.getResources()
-                .getIntArray(R.array.config_rearDisplayDeviceStates);
-        mConcurrentDisplayDeviceState = context.getResources()
-                .getInteger(R.integer.config_deviceStateConcurrentRearDisplay);
-        mReverseRotationAroundZAxisStates = context.getResources()
-                .getIntArray(R.array.config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis);
+        final FeatureFlags deviceStateManagerFlags = new FeatureFlagsImpl();
+        if (deviceStateManagerFlags.deviceStatePropertyMigration()) {
+            mOpenDeviceStates = new ArrayList<>();
+            mHalfFoldedDeviceStates = new ArrayList<>();
+            mFoldedDeviceStates = new ArrayList<>();
+            mRearDisplayDeviceStates = new ArrayList<>();
+            mConcurrentDisplayDeviceStates = new ArrayList<>();
+
+            final DeviceStateManager deviceStateManager =
+                    context.getSystemService(DeviceStateManager.class);
+            final List<android.hardware.devicestate.DeviceState> deviceStates =
+                    deviceStateManager.getSupportedDeviceStates();
+
+            for (int i = 0; i < deviceStates.size(); i++) {
+                final android.hardware.devicestate.DeviceState state = deviceStates.get(i);
+                if (state.hasProperty(
+                        PROPERTY_FEATURE_REAR_DISPLAY)) {
+                    mRearDisplayDeviceStates.add(state.getIdentifier());
+                } else if (state.hasProperty(
+                        PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT)) {
+                    mConcurrentDisplayDeviceStates.add(state.getIdentifier());
+                } else if (state.hasProperty(
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)) {
+                    mFoldedDeviceStates.add(state.getIdentifier());
+                } else if (state.hasProperty(
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY)) {
+                    if (state.hasProperty(
+                            PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN)) {
+                        mHalfFoldedDeviceStates.add(state.getIdentifier());
+                    } else {
+                        mOpenDeviceStates.add(state.getIdentifier());
+                    }
+                }
+            }
+        } else {
+            mOpenDeviceStates = copyIntArrayToList(context.getResources()
+                    .getIntArray(R.array.config_openDeviceStates));
+            mHalfFoldedDeviceStates = copyIntArrayToList(context.getResources()
+                    .getIntArray(R.array.config_halfFoldedDeviceStates));
+            mFoldedDeviceStates = copyIntArrayToList(context.getResources()
+                    .getIntArray(R.array.config_foldedDeviceStates));
+            mRearDisplayDeviceStates = copyIntArrayToList(context.getResources()
+                    .getIntArray(R.array.config_rearDisplayDeviceStates));
+            mConcurrentDisplayDeviceStates = new ArrayList<>(List.of(context.getResources()
+                    .getInteger(R.integer.config_deviceStateConcurrentRearDisplay)));
+        }
+
+        mReverseRotationAroundZAxisStates = copyIntArrayToList(context.getResources().getIntArray(
+                R.array.config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis));
         mMatchBuiltInDisplayOrientationToDefaultDisplay = context.getResources()
                 .getBoolean(R.bool
                         .config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay);
@@ -145,7 +193,6 @@ final class DeviceStateController {
      */
     public void onDeviceStateReceivedByDisplayManager(int state) {
         mCurrentState = state;
-
         final DeviceState deviceState;
         if (ArrayUtils.contains(mHalfFoldedDeviceStates, state)) {
             deviceState = DeviceState.HALF_FOLDED;
@@ -155,9 +202,10 @@ final class DeviceStateController {
             deviceState = DeviceState.REAR;
         } else if (ArrayUtils.contains(mOpenDeviceStates, state)) {
             deviceState = DeviceState.OPEN;
-        } else if (state == mConcurrentDisplayDeviceState) {
+        } else if (ArrayUtils.contains(mConcurrentDisplayDeviceStates, state)) {
             deviceState = DeviceState.CONCURRENT;
         } else {
+
             deviceState = DeviceState.UNKNOWN;
         }
 
@@ -189,5 +237,17 @@ final class DeviceStateController {
             });
         }
         return entries;
+    }
+
+    @NonNull
+    private List<Integer> copyIntArrayToList(@Nullable int[] values) {
+        if (values == null) {
+            return Collections.emptyList();
+        }
+        final List<Integer> valueList = new ArrayList<>();
+        for (int i = 0; i < values.length; i++) {
+            valueList.add(values[i]);
+        }
+        return valueList;
     }
 }

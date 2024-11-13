@@ -404,6 +404,17 @@ public class RuntimeInit {
     }
 
     public static void redirectLogStreams$ravenwood() {
+        if (sOut$ravenwood != null && sErr$ravenwood != null) {
+            return; // Already initialized.
+        }
+
+        // Make sure the Log class is loaded and the JNI methods are hooked up,
+        // before redirecting System.out/err.
+        // Otherwise, because ClassLoadHook tries to write to System.out, this would cause
+        // a circular initialization problem and would cause a UnsatisfiedLinkError
+        // on the JNI methods.
+        Log.isLoggable("X", Log.VERBOSE);
+
         if (sOut$ravenwood == null) {
             sOut$ravenwood = System.out;
             System.setOut(new AndroidPrintStream(Log.INFO, "System.out"));

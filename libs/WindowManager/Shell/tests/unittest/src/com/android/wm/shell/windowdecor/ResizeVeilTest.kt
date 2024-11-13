@@ -97,7 +97,7 @@ class ResizeVeilTest : ShellTestCase() {
             .thenReturn(spyResizeVeilSurfaceBuilder)
         doReturn(mockResizeVeilSurface).whenever(spyResizeVeilSurfaceBuilder).build()
         whenever(mockSurfaceControlBuilderFactory
-            .create(eq("Resize veil background of Task=" + taskInfo.taskId), any()))
+            .create(eq("Resize veil background of Task=" + taskInfo.taskId)))
             .thenReturn(spyBackgroundSurfaceBuilder)
         doReturn(mockBackgroundSurface).whenever(spyBackgroundSurfaceBuilder).build()
         whenever(mockSurfaceControlBuilderFactory

@@ -21,4 +21,8 @@ import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineVi
 data class NotificationContentModel(
     val headsUpStatusBarModel: HeadsUpStatusBarModel,
     val singleLineViewModel: SingleLineViewModel? = null,
+    val publicSingleLineViewModel: SingleLineViewModel? = null,
+    val richOngoingContentModel: RichOngoingContentModel? = null,
 )
+
+sealed interface RichOngoingContentModel

@@ -75,4 +75,13 @@ public interface SatelliteTransmissionUpdateCallback {
     void onReceiveDatagramStateChanged(
             @SatelliteManager.SatelliteDatagramTransferState int state, int receivePendingCount,
             @SatelliteManager.SatelliteResult int errorCode);
+
+    /**
+     * Called when framework receives a request to send a datagram.
+     *
+     * @param datagramType The type of the requested datagram.
+     *
+     * @hide
+     */
+    default void onSendDatagramRequested(@SatelliteManager.DatagramType int datagramType) {}
 }

@@ -405,6 +405,11 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
                 return;
             }
             break;
+        case SP_FOREGROUND_WINDOW:
+            if (!CgroupGetAttributePath("HighCapacityWICPUs", &filename)) {
+                return;
+            }
+            break;
         case SP_TOP_APP:
             if (!CgroupGetAttributePath("MaxCapacityCPUs", &filename)) {
                 return;
@@ -657,9 +662,8 @@ static int pid_compare(const void* v1, const void* v2)
 
 static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
-    std::array<std::string_view, 2> memFreeTags = {
-        ::android::meminfo::SysMemInfo::kMemFree,
-        ::android::meminfo::SysMemInfo::kMemCached,
+    std::array<std::string_view, 1> memFreeTags = {
+            ::android::meminfo::SysMemInfo::kMemAvailable,
     };
     std::vector<uint64_t> mem(memFreeTags.size());
     ::android::meminfo::SysMemInfo smi;

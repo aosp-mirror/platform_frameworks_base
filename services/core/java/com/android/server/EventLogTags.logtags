@@ -63,7 +63,7 @@ option java_package com.android.server
 # NotificationManagerService.java
 # ---------------------------
 # when a NotificationManager.notify is called. status: 0=post, 1=update, 2=ignored
-2750 notification_enqueue (uid|1|5),(pid|1|5),(pkg|3),(id|1|5),(tag|3),(userid|1|5),(notification|3),(status|1)
+2750 notification_enqueue (uid|1|5),(pid|1|5),(pkg|3),(id|1|5),(tag|3),(userid|1|5),(notification|3),(status|1),(app_provided|1)
 # when someone tries to cancel a notification, the notification manager sometimes
 # calls this with flags too
 2751 notification_cancel (uid|1|5),(pid|1|5),(pkg|3),(id|1|5),(tag|3),(userid|1|5),(required_flags|1),(forbidden_flags|1),(reason|1|5),(listener|3)
@@ -94,6 +94,8 @@ option java_package com.android.server
 275534 notification_unautogrouped (key|3)
 # when a notification is adjusted via assistant
 27535 notification_adjusted (key|3),(adjustment_type|3),(new_value|3)
+# when a notification cancellation is prevented by the system
+27536 notification_cancel_prevented (key|3)
 
 # ---------------------------
 # Watchdog.java

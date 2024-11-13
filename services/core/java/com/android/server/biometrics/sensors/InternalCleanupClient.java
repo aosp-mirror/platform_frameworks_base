@@ -25,6 +25,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 
@@ -62,7 +63,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     }
 
     private final ArrayList<UserTemplate> mUnknownHALTemplates = new ArrayList<>();
-    private final BiometricUtils<S> mBiometricUtils;
+    protected final BiometricUtils<S> mBiometricUtils;
     private final Map<Integer, Long> mAuthenticatorIds;
     private final boolean mHasEnrollmentsBeforeStarting;
     private BaseClientMonitor mCurrentTask;
@@ -105,6 +106,11 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
                     startCleanupUnknownHalTemplates();
                 }
             }
+
+            if (mBiometricUtils.hasValidBiometricUserState(getContext(), getTargetUserId())
+                    && Flags.notifyFingerprintsLoe()) {
+                handleInvalidBiometricState();
+            }
         }
     };
 
@@ -137,7 +143,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             @NonNull BiometricUtils<S> utils,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* ClientMonitorCallbackConverter */,
-                userId, owner, 0 /* cookie */, sensorId, logger, biometricContext);
+                userId, owner, 0 /* cookie */, sensorId, logger, biometricContext,
+                false /* isMandatoryBiometrics */);
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
         mHasEnrollmentsBeforeStarting = !utils.getBiometricsForUser(context, userId).isEmpty();
@@ -154,6 +161,11 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
                 getLogger(), getBiometricContext(), mAuthenticatorIds);
 
         getLogger().logUnknownEnrollmentInHal();
+
+        if (mBiometricUtils.hasValidBiometricUserState(getContext(), getTargetUserId())
+                && Flags.notifyFingerprintsLoe()) {
+            getLogger().logFingerprintsLoe();
+        }
 
         mCurrentTask.start(mRemoveCallback);
     }
@@ -248,4 +260,8 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     public ArrayList<UserTemplate> getUnknownHALTemplates() {
         return mUnknownHALTemplates;
     }
+
+    protected void handleInvalidBiometricState() {}
+
+    protected abstract int getModality();
 }

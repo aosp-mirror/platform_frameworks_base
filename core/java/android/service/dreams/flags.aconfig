@@ -47,3 +47,23 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "start_and_stop_dozing_in_background"
+    namespace: "systemui"
+    description: "Move the start-dozing and stop-dozing operation to the background"
+    bug: "330287187"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "publish_preview_state_to_overlay"
+    namespace: "systemui"
+    description: "send preview information from dream to overlay"
+    bug: "333734282"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

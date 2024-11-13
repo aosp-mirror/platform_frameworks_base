@@ -47,6 +47,8 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
     private final SparseArray<PerDisplay> mInsetsPerDisplay = new SparseArray<>();
     private final SparseArray<CopyOnWriteArrayList<OnInsetsChangedListener>> mListeners =
             new SparseArray<>();
+    private final CopyOnWriteArrayList<OnInsetsChangedListener> mGlobalListeners =
+            new CopyOnWriteArrayList<>();
 
     public DisplayInsetsController(IWindowManager wmService,
             ShellInit shellInit,
@@ -81,6 +83,16 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
     }
 
     /**
+     * Adds a callback to listen for insets changes for any display. Note that the
+     * listener will not be updated with the existing state of the insets on any display.
+     */
+    public void addGlobalInsetsChangedListener(OnInsetsChangedListener listener) {
+        if (!mGlobalListeners.contains(listener)) {
+            mGlobalListeners.add(listener);
+        }
+    }
+
+    /**
      * Removes a callback listening for insets changes from a particular display.
      */
     public void removeInsetsChangedListener(int displayId, OnInsetsChangedListener listener) {
@@ -89,6 +101,13 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             return;
         }
         listeners.remove(listener);
+    }
+
+    /**
+     * Removes a callback listening for insets changes from any display.
+     */
+    public void removeGlobalInsetsChangedListener(OnInsetsChangedListener listener) {
+        mGlobalListeners.remove(listener);
     }
 
     @Override
@@ -138,12 +157,17 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
 
         private void insetsChanged(InsetsState insetsState) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
-            if (listeners == null) {
+            if (listeners == null && mGlobalListeners.isEmpty()) {
                 return;
             }
             mDisplayController.updateDisplayInsets(mDisplayId, insetsState);
-            for (OnInsetsChangedListener listener : listeners) {
-                listener.insetsChanged(insetsState);
+            for (OnInsetsChangedListener listener : mGlobalListeners) {
+                listener.insetsChanged(mDisplayId, insetsState);
+            }
+            if (listeners != null) {
+                for (OnInsetsChangedListener listener : listeners) {
+                    listener.insetsChanged(mDisplayId, insetsState);
+                }
             }
         }
 
@@ -283,6 +307,13 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          * Called when the window insets configuration has changed.
          */
         default void insetsChanged(InsetsState insetsState) {}
+
+        /**
+         * Called when the window insets configuration has changed for the given display.
+         */
+        default void insetsChanged(int displayId, InsetsState insetsState) {
+            insetsChanged(insetsState);
+        }
 
         /**
          * Called when this window retrieved control over a specified set of insets sources.

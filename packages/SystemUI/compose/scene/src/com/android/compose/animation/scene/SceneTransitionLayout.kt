@@ -28,10 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
@@ -47,8 +49,7 @@ import androidx.compose.ui.unit.IntSize
  *   if any.
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
- * @param scenes the configuration of the different scenes of this layout.
- * @see updateSceneTransitionLayoutState
+ * @param builder the configuration of the different scenes and overlays of this layout.
  */
 @Composable
 fun SceneTransitionLayout(
@@ -57,7 +58,7 @@ fun SceneTransitionLayout(
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0.05f,
-    scenes: SceneTransitionLayoutScope.() -> Unit,
+    builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
     SceneTransitionLayoutForTesting(
         state,
@@ -66,57 +67,7 @@ fun SceneTransitionLayout(
         swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
-        scenes,
-    )
-}
-
-/**
- * [SceneTransitionLayout] is a container that automatically animates its content whenever
- * [currentScene] changes, using the transitions defined in [transitions].
- *
- * Note: You should use [androidx.compose.animation.AnimatedContent] instead of
- * [SceneTransitionLayout] if it fits your need. Use [SceneTransitionLayout] over AnimatedContent if
- * you need support for swipe gestures, shared elements or transitions defined declaratively outside
- * UI code.
- *
- * @param currentScene the current scene
- * @param onChangeScene a mutator that should set [currentScene] to the given scene when called.
- *   This is called when the user commits a transition to a new scene because of a [UserAction], for
- *   instance by triggering back navigation or by swiping to a new scene.
- * @param transitions the definition of the transitions used to animate a change of scene.
- * @param swipeSourceDetector the source detector used to detect which source a swipe is started
- *   from, if any.
- * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
- *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
- * @param scenes the configuration of the different scenes of this layout.
- */
-@Composable
-fun SceneTransitionLayout(
-    currentScene: SceneKey,
-    onChangeScene: (SceneKey) -> Unit,
-    transitions: SceneTransitions,
-    modifier: Modifier = Modifier,
-    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
-    swipeDetector: SwipeDetector = DefaultSwipeDetector,
-    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
-    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
-    scenes: SceneTransitionLayoutScope.() -> Unit,
-) {
-    val state =
-        updateSceneTransitionLayoutState(
-            currentScene,
-            onChangeScene,
-            transitions,
-            enableInterruptions = enableInterruptions,
-        )
-
-    SceneTransitionLayout(
-        state,
-        modifier,
-        swipeSourceDetector,
-        swipeDetector,
-        transitionInterceptionThreshold,
-        scenes,
+        builder,
     )
 }
 
@@ -133,7 +84,37 @@ interface SceneTransitionLayoutScope {
     fun scene(
         key: SceneKey,
         userActions: Map<UserAction, UserActionResult> = emptyMap(),
-        content: @Composable SceneScope.() -> Unit,
+        content: @Composable ContentScope.() -> Unit,
+    )
+
+    /**
+     * Add an overlay to this layout, identified by [key].
+     *
+     * Overlays are displayed above scenes and can be toggled using
+     * [MutableSceneTransitionLayoutState.showOverlay] and
+     * [MutableSceneTransitionLayoutState.hideOverlay].
+     *
+     * Overlays will have a maximum size that is the size of the layout without overlays, i.e. an
+     * overlay can be fillMaxSize() to match the layout size but it won't make the layout bigger.
+     *
+     * By default overlays are centered in their layout but they can be aligned differently using
+     * [alignment].
+     *
+     * If [isModal] is true (the default), then a protective layer will be added behind the overlay
+     * to prevent swipes from reaching other scenes or overlays behind this one. Clicking this
+     * protective layer will close the overlay.
+     *
+     * Important: overlays must be defined after all scenes. Overlay order along the z-axis follows
+     * call order. Calling overlay(A) followed by overlay(B) will mean that overlay B renders
+     * after/above overlay A.
+     */
+    fun overlay(
+        key: OverlayKey,
+        userActions: Map<UserAction, UserActionResult> =
+            mapOf(Back to UserActionResult.HideOverlay(key)),
+        alignment: Alignment = Alignment.Center,
+        isModal: Boolean = true,
+        content: @Composable ContentScope.() -> Unit,
     )
 }
 
@@ -166,25 +147,25 @@ interface ElementStateScope {
 
 @Stable
 @ElementDsl
-interface BaseSceneScope : ElementStateScope {
-    /** The key of this scene. */
-    val sceneKey: SceneKey
+interface BaseContentScope : ElementStateScope {
+    /** The key of this content. */
+    val contentKey: ContentKey
 
-    /** The state of the [SceneTransitionLayout] in which this scene is contained. */
+    /** The state of the [SceneTransitionLayout] in which this content is contained. */
     val layoutState: SceneTransitionLayoutState
 
     /**
      * Tag an element identified by [key].
      *
      * Tagging an element will allow you to reference that element when defining transitions, so
-     * that the element can be transformed and animated when the scene transitions in or out.
+     * that the element can be transformed and animated when the content transitions in or out.
      *
-     * Additionally, this [key] will be used to detect elements that are shared between scenes to
+     * Additionally, this [key] will be used to detect elements that are shared between contents to
      * automatically interpolate their size and offset. If you need to animate shared element values
-     * (i.e. values associated to this element that change depending on which scene it is composed
+     * (i.e. values associated to this element that change depending on which content it is composed
      * in), use [Element] instead.
      *
-     * Note that shared elements tagged using this function will be duplicated in each scene they
+     * Note that shared elements tagged using this function will be duplicated in each content they
      * are part of, so any **internal** state (e.g. state created using `remember {
      * mutableStateOf(...) }`) will be lost. If you need to preserve internal state, you should use
      * [MovableElement] instead.
@@ -198,7 +179,7 @@ interface BaseSceneScope : ElementStateScope {
      * Create an element identified by [key].
      *
      * Similar to [element], this creates an element that will be automatically shared when present
-     * in multiple scenes and that can be transformed during transitions, the same way that
+     * in multiple contents and that can be transformed during transitions, the same way that
      * [element] does.
      *
      * The only difference with [element] is that the provided [ElementScope] allows you to
@@ -225,7 +206,7 @@ interface BaseSceneScope : ElementStateScope {
      * Create a *movable* element identified by [key].
      *
      * Similar to [Element], this creates an element that will be automatically shared when present
-     * in multiple scenes and that can be transformed during transitions, and you can also use the
+     * in multiple contents and that can be transformed during transitions, and you can also use the
      * provided [ElementScope] to [animate element values][ElementScope.animateElementValueAsState].
      *
      * The important difference with [element] and [Element] is that this element
@@ -238,7 +219,7 @@ interface BaseSceneScope : ElementStateScope {
      */
     @Composable
     fun MovableElement(
-        key: ElementKey,
+        key: MovableElementKey,
         modifier: Modifier,
 
         // TODO(b/317026105): As discussed in http://shortn/_gJVdltF8Si, remove the @Composable
@@ -255,8 +236,8 @@ interface BaseSceneScope : ElementStateScope {
      * @param rightBehavior when we should perform the overscroll animation at the right.
      */
     fun Modifier.horizontalNestedScrollToScene(
-        leftBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
-        rightBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        leftBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
+        rightBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
         isExternalOverscrollGesture: () -> Boolean = { false },
     ): Modifier
 
@@ -268,8 +249,8 @@ interface BaseSceneScope : ElementStateScope {
      * @param bottomBehavior when we should perform the overscroll animation at the bottom.
      */
     fun Modifier.verticalNestedScrollToScene(
-        topBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
-        bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        topBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
+        bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
         isExternalOverscrollGesture: () -> Boolean = { false },
     ): Modifier
 
@@ -280,24 +261,26 @@ interface BaseSceneScope : ElementStateScope {
     fun Modifier.noResizeDuringTransitions(): Modifier
 }
 
+typealias SceneScope = ContentScope
+
 @Stable
 @ElementDsl
-interface SceneScope : BaseSceneScope {
+interface ContentScope : BaseContentScope {
     /**
-     * Animate some value at the scene level.
+     * Animate some value at the content level.
      *
-     * @param value the value of this shared value in the current scene.
+     * @param value the value of this shared value in the current content.
      * @param key the key of this shared value.
      * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
      *   between, for instance because the transition is animated using a bouncy spring.
-     * @see animateSceneIntAsState
-     * @see animateSceneFloatAsState
-     * @see animateSceneDpAsState
-     * @see animateSceneColorAsState
+     * @see animateContentIntAsState
+     * @see animateContentFloatAsState
+     * @see animateContentDpAsState
+     * @see animateContentColorAsState
      */
     @Composable
-    fun <T> animateSceneValueAsState(
+    fun <T> animateContentValueAsState(
         value: T,
         key: ValueKey,
         type: SharedValueType<T, *>,
@@ -307,7 +290,7 @@ interface SceneScope : BaseSceneScope {
 
 /**
  * The type of a shared value animated using [ElementScope.animateElementValueAsState] or
- * [SceneScope.animateSceneValueAsState].
+ * [ContentScope.animateContentValueAsState].
  */
 @Stable
 interface SharedValueType<T, Delta> {
@@ -339,7 +322,7 @@ interface ElementScope<ContentScope> {
     /**
      * Animate some value associated to this element.
      *
-     * @param value the value of this shared value in the current scene.
+     * @param value the value of this shared value in the current content.
      * @param key the key of this shared value.
      * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
@@ -369,8 +352,9 @@ interface ElementScope<ContentScope> {
  * The exact same scope as [androidx.compose.foundation.layout.BoxScope].
  *
  * We can't reuse BoxScope directly because of the @LayoutScopeMarker annotation on it, which would
- * prevent us from calling Modifier.element() and other methods of [SceneScope] inside any Box {} in
- * the [content][ElementScope.content] of a [SceneScope.Element] or a [SceneScope.MovableElement].
+ * prevent us from calling Modifier.element() and other methods of [ContentScope] inside any Box {}
+ * in the [content][ElementScope.content] of a [ContentScope.Element] or a
+ * [ContentScope.MovableElement].
  */
 @Stable
 @ElementDsl
@@ -383,46 +367,87 @@ interface ElementBoxScope {
 }
 
 /** The scope for "normal" (not movable) elements. */
-@Stable @ElementDsl interface ElementContentScope : SceneScope, ElementBoxScope
+@Stable @ElementDsl interface ElementContentScope : ContentScope, ElementBoxScope
 
 /**
  * The scope for the content of movable elements.
  *
- * Note that it extends [BaseSceneScope] and not [SceneScope] because movable elements should not
- * call [SceneScope.animateSceneValueAsState], given that their content is not composed in all
- * scenes.
+ * Note that it extends [BaseContentScope] and not [ContentScope] because movable elements should
+ * not call [ContentScope.animateContentValueAsState], given that their content is not composed in
+ * all scenes.
  */
-@Stable @ElementDsl interface MovableElementContentScope : BaseSceneScope, ElementBoxScope
+@Stable @ElementDsl interface MovableElementContentScope : BaseContentScope, ElementBoxScope
 
 /** An action performed by the user. */
-sealed interface UserAction {
+sealed class UserAction {
     infix fun to(scene: SceneKey): Pair<UserAction, UserActionResult> {
         return this to UserActionResult(toScene = scene)
     }
+
+    infix fun to(overlay: OverlayKey): Pair<UserAction, UserActionResult> {
+        return this to UserActionResult(toOverlay = overlay)
+    }
+
+    /** Resolve this into a [Resolved] user action given [layoutDirection]. */
+    internal abstract fun resolve(layoutDirection: LayoutDirection): Resolved
+
+    /** A resolved [UserAction] that does not depend on the layout direction. */
+    internal sealed class Resolved
 }
 
 /** The user navigated back, either using a gesture or by triggering a KEYCODE_BACK event. */
-data object Back : UserAction
+data object Back : UserAction() {
+    override fun resolve(layoutDirection: LayoutDirection): Resolved = Resolved
+
+    internal object Resolved : UserAction.Resolved()
+}
 
 /** The user swiped on the container. */
 data class Swipe(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
     val fromSource: SwipeSource? = null,
-) : UserAction {
+) : UserAction() {
     companion object {
         val Left = Swipe(SwipeDirection.Left)
         val Up = Swipe(SwipeDirection.Up)
         val Right = Swipe(SwipeDirection.Right)
         val Down = Swipe(SwipeDirection.Down)
+        val Start = Swipe(SwipeDirection.Start)
+        val End = Swipe(SwipeDirection.End)
     }
+
+    override fun resolve(layoutDirection: LayoutDirection): UserAction.Resolved {
+        return Resolved(
+            direction = direction.resolve(layoutDirection),
+            pointerCount = pointerCount,
+            fromSource = fromSource?.resolve(layoutDirection),
+        )
+    }
+
+    /** A resolved [Swipe] that does not depend on the layout direction. */
+    internal data class Resolved(
+        val direction: SwipeDirection.Resolved,
+        val pointerCount: Int,
+        val fromSource: SwipeSource.Resolved?,
+    ) : UserAction.Resolved()
 }
 
-enum class SwipeDirection(val orientation: Orientation) {
-    Up(Orientation.Vertical),
-    Down(Orientation.Vertical),
-    Left(Orientation.Horizontal),
-    Right(Orientation.Horizontal),
+enum class SwipeDirection(internal val resolve: (LayoutDirection) -> Resolved) {
+    Up(resolve = { Resolved.Up }),
+    Down(resolve = { Resolved.Down }),
+    Left(resolve = { Resolved.Left }),
+    Right(resolve = { Resolved.Right }),
+    Start(resolve = { if (it == LayoutDirection.Ltr) Resolved.Left else Resolved.Right }),
+    End(resolve = { if (it == LayoutDirection.Ltr) Resolved.Right else Resolved.Left });
+
+    /** A resolved [SwipeDirection] that does not depend on the layout direction. */
+    internal enum class Resolved(val orientation: Orientation) {
+        Up(Orientation.Vertical),
+        Down(Orientation.Vertical),
+        Left(Orientation.Horizontal),
+        Right(Orientation.Horizontal),
+    }
 }
 
 /**
@@ -437,6 +462,16 @@ interface SwipeSource {
     override fun equals(other: Any?): Boolean
 
     override fun hashCode(): Int
+
+    /** Resolve this into a [Resolved] swipe source given [layoutDirection]. */
+    fun resolve(layoutDirection: LayoutDirection): Resolved
+
+    /** A resolved [SwipeSource] that does not depend on the layout direction. */
+    interface Resolved {
+        override fun equals(other: Any?): Boolean
+
+        override fun hashCode(): Int
+    }
 }
 
 interface SwipeSourceDetector {
@@ -449,19 +484,101 @@ interface SwipeSourceDetector {
         position: IntOffset,
         density: Density,
         orientation: Orientation,
-    ): SwipeSource?
+    ): SwipeSource.Resolved?
 }
 
 /** The result of performing a [UserAction]. */
-data class UserActionResult(
-    /** The scene we should be transitioning to during the [UserAction]. */
-    val toScene: SceneKey,
-
+sealed class UserActionResult(
     /** The key of the transition that should be used. */
-    val transitionKey: TransitionKey? = null,
-)
+    open val transitionKey: TransitionKey? = null,
 
-interface UserActionDistance {
+    /**
+     * If `true`, the swipe will be committed and we will settle to [toScene] if only if the user
+     * swiped at least the swipe distance, i.e. the transition progress was already equal to or
+     * bigger than 100% when the user released their finger. `
+     */
+    open val requiresFullDistanceSwipe: Boolean,
+) {
+    internal abstract fun toContent(currentScene: SceneKey): ContentKey
+
+    data class ChangeScene
+    internal constructor(
+        /** The scene we should be transitioning to during the [UserAction]. */
+        val toScene: SceneKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = toScene
+    }
+
+    /** A [UserActionResult] that shows [overlay]. */
+    data class ShowOverlay(
+        val overlay: OverlayKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = overlay
+    }
+
+    /** A [UserActionResult] that hides [overlay]. */
+    data class HideOverlay(
+        val overlay: OverlayKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = currentScene
+    }
+
+    /**
+     * A [UserActionResult] that replaces the current overlay by [overlay].
+     *
+     * Note: This result can only be used for user actions of overlays and an exception will be
+     * thrown if it is used for a scene.
+     */
+    data class ReplaceByOverlay(
+        val overlay: OverlayKey,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = overlay
+    }
+
+    companion object {
+        /** A [UserActionResult] that changes the current scene to [toScene]. */
+        operator fun invoke(
+            /** The scene we should be transitioning to during the [UserAction]. */
+            toScene: SceneKey,
+
+            /** The key of the transition that should be used. */
+            transitionKey: TransitionKey? = null,
+
+            /**
+             * If `true`, the swipe will be committed if only if the user swiped at least the swipe
+             * distance, i.e. the transition progress was already equal to or bigger than 100% when
+             * the user released their finger.
+             */
+            requiresFullDistanceSwipe: Boolean = false,
+        ): UserActionResult = ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe)
+
+        /** A [UserActionResult] that shows [toOverlay]. */
+        operator fun invoke(
+            /** The overlay we should be transitioning to during the [UserAction]. */
+            toOverlay: OverlayKey,
+
+            /** The key of the transition that should be used. */
+            transitionKey: TransitionKey? = null,
+
+            /**
+             * If `true`, the swipe will be committed if only if the user swiped at least the swipe
+             * distance, i.e. the transition progress was already equal to or bigger than 100% when
+             * the user released their finger.
+             */
+            requiresFullDistanceSwipe: Boolean = false,
+        ): UserActionResult = ShowOverlay(toOverlay, transitionKey, requiresFullDistanceSwipe)
+    }
+}
+
+fun interface UserActionDistance {
     /**
      * Return the **absolute** distance of the user action given the size of the scene we are
      * animating from and the [orientation].
@@ -473,7 +590,7 @@ interface UserActionDistance {
      */
     fun UserActionDistanceScope.absoluteDistance(
         fromSceneSize: IntSize,
-        orientation: Orientation
+        orientation: Orientation,
     ): Float
 }
 
@@ -501,25 +618,27 @@ internal fun SceneTransitionLayoutForTesting(
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
-    scenes: SceneTransitionLayoutScope.() -> Unit,
+    builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
-    val coroutineScope = rememberCoroutineScope()
+    val layoutDirection = LocalLayoutDirection.current
+    val animationScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
-                state = state as BaseSceneTransitionLayoutState,
+                state = state as MutableSceneTransitionLayoutStateImpl,
                 density = density,
+                layoutDirection = layoutDirection,
                 swipeSourceDetector = swipeSourceDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
-                builder = scenes,
-                coroutineScope = coroutineScope,
+                builder = builder,
+                animationScope = animationScope,
             )
             .also { onLayoutImpl?.invoke(it) }
     }
 
     // TODO(b/317014852): Move this into the SideEffect {} again once STLImpl.scenes is not a
     // SnapshotStateMap anymore.
-    layoutImpl.updateScenes(scenes)
+    layoutImpl.updateContents(builder, layoutDirection)
 
     SideEffect {
         if (state != layoutImpl.state) {
@@ -530,6 +649,7 @@ internal fun SceneTransitionLayoutForTesting(
         }
 
         layoutImpl.density = density
+        layoutImpl.layoutDirection = layoutDirection
         layoutImpl.swipeSourceDetector = swipeSourceDetector
         layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
     }

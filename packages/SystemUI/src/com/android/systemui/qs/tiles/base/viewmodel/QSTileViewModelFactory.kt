@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.base.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
@@ -61,6 +62,7 @@ sealed interface QSTileViewModelFactory<T> {
         private val qsTileConfigProvider: QSTileConfigProvider,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
+        @UiBackground private val uiBackgroundDispatcher: CoroutineDispatcher,
         private val customTileComponentBuilder: CustomTileComponent.Builder,
     ) : QSTileViewModelFactory<CustomTileDataModel> {
 
@@ -86,6 +88,7 @@ sealed interface QSTileViewModelFactory<T> {
                 qsTileLogger,
                 systemClock,
                 backgroundDispatcher,
+                uiBackgroundDispatcher,
                 component.coroutineScope(),
             )
         }
@@ -106,6 +109,7 @@ sealed interface QSTileViewModelFactory<T> {
         private val qsTileConfigProvider: QSTileConfigProvider,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
+        @UiBackground private val uiBackgroundDispatcher: CoroutineDispatcher,
         private val coroutineScopeFactory: QSTileCoroutineScopeFactory,
     ) : QSTileViewModelFactory<T> {
 
@@ -136,6 +140,7 @@ sealed interface QSTileViewModelFactory<T> {
                 qsTileLogger,
                 systemClock,
                 backgroundDispatcher,
+                uiBackgroundDispatcher,
                 coroutineScopeFactory.create(),
             )
     }

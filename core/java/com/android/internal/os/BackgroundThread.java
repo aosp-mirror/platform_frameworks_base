@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.annotation.NonNull;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
@@ -53,6 +54,7 @@ public final class BackgroundThread extends HandlerThread {
         }
     }
 
+    @NonNull
     public static BackgroundThread get() {
         synchronized (BackgroundThread.class) {
             ensureThreadLocked();
@@ -60,6 +62,7 @@ public final class BackgroundThread extends HandlerThread {
         }
     }
 
+    @NonNull
     public static Handler getHandler() {
         synchronized (BackgroundThread.class) {
             ensureThreadLocked();
@@ -67,6 +70,7 @@ public final class BackgroundThread extends HandlerThread {
         }
     }
 
+    @NonNull
     public static Executor getExecutor() {
         synchronized (BackgroundThread.class) {
             ensureThreadLocked();

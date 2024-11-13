@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.GuestResetOrExitSessionReceiver
@@ -39,7 +40,6 @@ import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.never
@@ -47,7 +47,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class GuestUserInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var manager: UserManager

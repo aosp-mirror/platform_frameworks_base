@@ -32,7 +32,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.logging.testing.UiEventLoggerFake
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.Flags
 import com.android.wm.shell.R
@@ -53,6 +53,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -101,6 +102,7 @@ class BubbleStackViewTest {
                 BubbleLogger(UiEventLoggerFake()),
                 positioner,
                 BubbleEducationController(context),
+                shellExecutor,
                 shellExecutor
             )
         bubbleStackViewManager = FakeBubbleStackViewManager()
@@ -363,6 +365,7 @@ class BubbleStackViewTest {
                 /* taskId= */ 0,
                 "locus",
                 /* isDismissable= */ true,
+                directExecutor(),
                 directExecutor()
             ) {}
         inflateBubble(bubble)
@@ -372,7 +375,8 @@ class BubbleStackViewTest {
     private fun createAndInflateBubble(): Bubble {
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
         val icon = Icon.createWithResource(context.resources, R.drawable.bubble_ic_overflow_button)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), icon, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), icon, directExecutor(), directExecutor())
         inflateBubble(bubble)
         return bubble
     }
@@ -458,5 +462,7 @@ class BubbleStackViewTest {
         override fun isShowingAsBubbleBar(): Boolean = false
 
         override fun hideCurrentInputMethod() {}
+
+        override fun updateBubbleBarLocation(location: BubbleBarLocation) {}
     }
 }

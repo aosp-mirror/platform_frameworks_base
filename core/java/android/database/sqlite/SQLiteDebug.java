@@ -66,7 +66,6 @@ public final class SQLiteDebug {
         public static final boolean DEBUG_SQL_TIME =
                 Log.isLoggable("SQLiteTime", Log.VERBOSE);
 
-
         /**
          * True to enable database performance testing instrumentation.
          */
@@ -83,6 +82,15 @@ public final class SQLiteDebug {
          */
         public static final boolean DEBUG_LOG_DETAILED = Build.IS_DEBUGGABLE
                 && SystemProperties.getBoolean("db.log.detailed", false);
+
+        /**
+         * Whether to accept double-quoted strings in SQL statements.  Double-quoted strings are a
+         * syntax error but are accepted by sqlite in compatibility mode (the default).  If the
+         * property is set to true, double-quoted strings will be treated by sqlite as a syntax
+         * error.
+         */
+        public static final boolean NO_DOUBLE_QUOTED_STRS =
+                SystemProperties.getBoolean("debug.sqlite.no_double_quoted_strs", false);
     }
 
     private SQLiteDebug() {

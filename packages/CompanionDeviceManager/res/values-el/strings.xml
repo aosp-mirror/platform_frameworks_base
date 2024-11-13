@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"ρολόι"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Επιλέξτε μια συσκευή για διαχείριση μέσω της εφαρμογής &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Επιλέξτε ένα προφίλ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> για ρύθμιση"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"Αυτή η εφαρμογή θα μπορεί να συγχρονίζει πληροφορίες, όπως το όνομα ενός ατόμου που σας καλεί, και να αποκτά πρόσβαση σε αυτές τις άδειες στη συσκευή <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="summary_watch" msgid="8134580124808507407">"Αυτή η εφαρμογή θα μπορεί να συγχρονίζει πληροφορίες, όπως το όνομα ενός ατόμου που σας καλεί, και να αποκτά πρόσβαση σε αυτές τις άδειες στη συσκευή <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Να επιτρέπεται στην εφαρμογή &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; να διαχειρίζεται τη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ;"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"συσκευή"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"Αυτή η εφαρμογή θα μπορεί να έχει πρόσβαση σε αυτές τις άδειες στη συσκευή <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"Να επιτρέπεται στο &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; η πρόσβαση σε αυτές τις πληροφορίες από το τηλέφωνό σας."</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Να επιτρέπεται στην εφαρμογή &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; η μετάδοση σε ροή των εφαρμογών του τηλεφώνου σας;"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"Το %1$s θα έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στο τηλέφωνο, συμπεριλαμβανομένων ήχων, φωτογραφιών, κωδικών πρόσβασης και μηνυμάτων.&lt;br/&gt;&lt;br/&gt;Το %1$s θα μπορεί να μεταδώσει εφαρμογές σε ροή μέχρι να καταργήσετε την πρόσβαση σε αυτή την άδεια."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Υπηρεσίες πολλών συσκευών"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά εκ μέρους της συσκευής σας <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> άδεια για ροή εφαρμογών μεταξύ των συσκευών σας"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά άδεια εκ μέρους της συσκευής <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> για προβολή και μετάδοση εφαρμογών σε ροή μεταξύ των συσκευών σας"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"Αυτή η εφαρμογή θα μπορεί να έχει πρόσβαση σε αυτές τις άδειες στη συσκευή <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"Να επιτρέπεται στην εφαρμογή &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; να κάνει ροή των εφαρμογών της συσκευής <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> στη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;;"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"Η εφαρμογή <xliff:g id="APP_NAME_0">%1$s</xliff:g> θα έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στη συσκευή <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>, συμπεριλαμβανομένων ήχων, φωτογραφιών, κωδικών πρόσβασης και μηνυμάτων.&lt;br/&gt;&lt;br/&gt;Η εφαρμογή <xliff:g id="APP_NAME_1">%1$s</xliff:g> θα μπορεί να κάνει ροή εφαρμογών στη συσκευή <xliff:g id="DEVICE_NAME">%3$s</xliff:g>, μέχρι να καταργήσετε την πρόσβαση σε αυτή την άδεια."</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά άδεια εκ μέρους της συσκευής <xliff:g id="DEVICE_NAME">%2$s</xliff:g> για προβολή και ροή εφαρμογών μεταξύ των συσκευών σας"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Επιτρέψτε στην εφαρμογή &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; να έχει πρόσβαση σε αυτές τις πληροφορίες από το τηλέφωνό σας"</string>
+    <string name="title_computer" msgid="4782923323932440751">"Να επιτρέπεται στην εφαρμογή &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; η πρόσβαση σε αυτές τις πληροφορίες από τη συσκευή σας <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>."</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Υπηρεσίες Google Play"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά εκ μέρους της συσκευής σας <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> άδεια για πρόσβαση στις φωτογραφίες, τα αρχεία μέσων και τις ειδοποιήσεις του τηλεφώνου σας"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Να επιτρέπεται στη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; να εκτελεί αυτή την ενέργεια;"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Να επιτρέπεται στη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; η μετάδοση σε ροή των εφαρμογών και των λειτουργιών συστήματος του τηλεφώνου σας;"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"Το %1$s θα έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στο τηλέφωνο, συμπεριλαμβανομένων ήχων, φωτογραφιών, στοιχείων πληρωμής, κωδικών πρόσβασης και μηνυμάτων.&lt;br/&gt;&lt;br/&gt;Το %1$s θα μπορεί να μεταδώσει εφαρμογές και λειτουργίες συστήματος σε ροή μέχρι να καταργήσετε την πρόσβαση σε αυτή την άδεια."</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά άδεια εκ μέρους της συσκευής σας <xliff:g id="DEVICE_NAME">%2$s</xliff:g> για ροή εφαρμογών και άλλων λειτουργιών του συστήματος σε συσκευές σε κοντινή απόσταση"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά άδεια εκ μέρους της συσκευής σας <xliff:g id="DEVICE_NAME">%2$s</xliff:g>, για πρόσβαση στις φωτογραφίες, τα αρχεία μέσων και τις ειδοποιήσεις της συσκευής <xliff:g id="DEVICE_TYPE">%3$s</xliff:g>"</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"Να επιτρέπεται στη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; να κάνει ροή των εφαρμογών και των λειτουργιών συστήματος της συσκευής <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> στη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt;;"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"Η εφαρμογή <xliff:g id="APP_NAME_0">%1$s</xliff:g> θα έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στη συσκευή <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>, συμπεριλαμβανομένων ήχων, φωτογραφιών, στοιχείων πληρωμής, κωδικών πρόσβασης και μηνυμάτων.&lt;br/&gt;&lt;br/&gt;Η εφαρμογή <xliff:g id="APP_NAME_1">%1$s</xliff:g> θα μπορεί να κάνει ροή εφαρμογών και λειτουργιών συστήματος στη συσκευή <xliff:g id="DEVICE_NAME">%3$s</xliff:g>, μέχρι να καταργήσετε την πρόσβαση σε αυτή την άδεια."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> ζητά άδεια εκ μέρους της συσκευής σας <xliff:g id="DEVICE_NAME">%2$s</xliff:g> για ροή εφαρμογών και άλλων λειτουργιών συστήματος μεταξύ των συσκευών σας"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"συσκευή"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Αυτή η εφαρμογή θα μπορεί να συγχρονίζει πληροφορίες μεταξύ του τηλεφώνου και της επιλεγμένης συσκευής σας, όπως το όνομα ενός ατόμου που σας καλεί."</string>
     <string name="consent_yes" msgid="8344487259618762872">"Να επιτρέπεται"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Αλλαγή εξόδου μέσων"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Φωτογραφίες και μέσα"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Ειδοποιήσεις"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"Εφαρμογές"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Ροή"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"Πραγματοποίηση και διαχείριση τηλεφωνικών κλήσεων"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"Ανάγνωση και εγγραφή αρχείου καταγραφής τηλεφωνικών κλήσεων"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"Αποστολή και προβολή μηνυμάτων SMS"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Εύρεση, σύνδεση και προσδιορισμός της σχετικής τοποθεσίας συσκευών σε κοντινή απόσταση"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Ανάγνωση όλων των ειδοποιήσεων, συμπεριλαμβανομένων πληροφοριών όπως επαφές, μηνύματα και φωτογραφίες"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• Ανάγνωση όλων των ειδοποιήσεων, συμπεριλαμβανομένων πληροφοριών όπως επαφές, μηνύματα και φωτογραφίες&lt;br/&gt;• Αποστολή ειδοποιήσεων&lt;br/&gt;&lt;br/&gt;Μπορείτε να διαχειριστείτε τη δυνατότητα της εφαρμογής να διαβάζει και να στέλνει ειδοποιήσεις οποιαδήποτε στιγμή στις Ρυθμίσεις &gt; Ειδοποιήσεις."</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Μεταδώστε σε ροή τις εφαρμογές του τηλεφώνου σας"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Ροή εφαρμογών και άλλων λειτουργιών του συστήματος από το τηλέφωνό σας"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Αποκτήστε πρόσβαση σε μια λίστα διαθέσιμων συσκευών και ελέγξτε ποιες κάνουν ροή ή μετάδοση ήχου ή βίντεο από άλλες εφαρμογές"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"τηλέφωνο"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"τηλεόραση"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"συσκευή"</string>
 </resources>

@@ -267,7 +267,7 @@ public abstract class CompoundButton extends Button implements Checkable {
          * @param buttonView The compound button view whose state has changed.
          * @param isChecked  The new checked state of buttonView.
          */
-        void onCheckedChanged(CompoundButton buttonView, boolean isChecked);
+        void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked);
     }
 
     /**

@@ -16,12 +16,18 @@
 
 package android.content;
 
+import static android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM;
+
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +37,10 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
+
+import com.android.window.flags.Flags;
+
+import java.util.concurrent.Executor;
 
 /**
  * A description of an Intent and target action to perform with it.
@@ -60,6 +70,11 @@ import android.util.AndroidException;
  * {@link android.app.PendingIntent#getIntentSender() PendingIntent.getIntentSender()}.
  */
 public class IntentSender implements Parcelable {
+    /** If enabled consider the deprecated @hide method as removed. */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VANILLA_ICE_CREAM)
+    private static final long REMOVE_HIDDEN_SEND_INTENT_METHOD = 356174596;
+
     private static final Bundle SEND_INTENT_DEFAULT_OPTIONS =
             ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT).toBundle();
@@ -114,15 +129,15 @@ public class IntentSender implements Parcelable {
             implements Runnable {
         private final IntentSender mIntentSender;
         private final OnFinished mWho;
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private Intent mIntent;
         private int mResultCode;
         private String mResultData;
         private Bundle mResultExtras;
-        FinishedDispatcher(IntentSender pi, OnFinished who, Handler handler) {
+        FinishedDispatcher(IntentSender pi, OnFinished who, Executor executor) {
             mIntentSender = pi;
             mWho = who;
-            mHandler = handler;
+            mExecutor = executor;
         }
         public void performReceive(Intent intent, int resultCode, String data,
                 Bundle extras, boolean serialized, boolean sticky, int sendingUser) {
@@ -130,10 +145,10 @@ public class IntentSender implements Parcelable {
             mResultCode = resultCode;
             mResultData = data;
             mResultExtras = extras;
-            if (mHandler == null) {
+            if (mExecutor == null) {
                 run();
             } else {
-                mHandler.post(this);
+                mExecutor.execute(this);
             }
         }
         public void run() {
@@ -147,16 +162,16 @@ public class IntentSender implements Parcelable {
      * caller to specify information about the Intent to use and be notified
      * when the send has completed.
      *
-     * @param context The Context of the caller.  This may be null if
-     * <var>intent</var> is also null.
+     * @param context The Context of the caller.  This may be {@code null} if
+     * <var>intent</var> is also {@code null}.
      * @param code Result code to supply back to the IntentSender's target.
      * @param intent Additional Intent data.  See {@link Intent#fillIn
      * Intent.fillIn()} for information on how this is applied to the
-     * original Intent.  Use null to not modify the original Intent.
+     * original Intent.  Use {@code null} to not modify the original Intent.
      * @param onFinished The object to call back on when the send has
-     * completed, or null for no callback.
+     * completed, or {@code null} for no callback.
      * @param handler Handler identifying the thread on which the callback
-     * should happen.  If null, the callback will happen from the thread
+     * should happen.  If {@code null}, the callback will happen from the thread
      * pool of the process.
      *
      *
@@ -165,8 +180,8 @@ public class IntentSender implements Parcelable {
      */
     public void sendIntent(Context context, int code, Intent intent,
             OnFinished onFinished, Handler handler) throws SendIntentException {
-        sendIntent(context, code, intent, onFinished, handler, null,
-                SEND_INTENT_DEFAULT_OPTIONS);
+        sendIntent(context, code, intent, null, SEND_INTENT_DEFAULT_OPTIONS,
+                handler == null ? null : handler::post, onFinished);
     }
 
     /**
@@ -174,22 +189,22 @@ public class IntentSender implements Parcelable {
      * caller to specify information about the Intent to use and be notified
      * when the send has completed.
      *
-     * @param context The Context of the caller.  This may be null if
-     * <var>intent</var> is also null.
+     * @param context The Context of the caller.  This may be {@code null} if
+     * <var>intent</var> is also {@code null}.
      * @param code Result code to supply back to the IntentSender's target.
      * @param intent Additional Intent data.  See {@link Intent#fillIn
      * Intent.fillIn()} for information on how this is applied to the
-     * original Intent.  Use null to not modify the original Intent.
+     * original Intent.  Use {@code null} to not modify the original Intent.
      * @param onFinished The object to call back on when the send has
-     * completed, or null for no callback.
+     * completed, or {@code null} for no callback.
      * @param handler Handler identifying the thread on which the callback
-     * should happen.  If null, the callback will happen from the thread
+     * should happen.  If {@code null}, the callback will happen from the thread
      * pool of the process.
      * @param requiredPermission Name of permission that a recipient of the PendingIntent
      * is required to hold.  This is only valid for broadcast intents, and
      * corresponds to the permission argument in
      * {@link Context#sendBroadcast(Intent, String) Context.sendOrderedBroadcast(Intent, String)}.
-     * If null, no permission is required.
+     * If {@code null}, no permission is required.
      *
      *
      * @throws SendIntentException Throws CanceledIntentException if the IntentSender
@@ -198,8 +213,8 @@ public class IntentSender implements Parcelable {
     public void sendIntent(Context context, int code, Intent intent,
             OnFinished onFinished, Handler handler, String requiredPermission)
             throws SendIntentException {
-        sendIntent(context, code, intent, onFinished, handler, requiredPermission,
-                SEND_INTENT_DEFAULT_OPTIONS);
+        sendIntent(context, code, intent, requiredPermission, SEND_INTENT_DEFAULT_OPTIONS,
+                handler == null ? null : handler::post, onFinished);
     }
 
     /**
@@ -207,32 +222,70 @@ public class IntentSender implements Parcelable {
      * caller to specify information about the Intent to use and be notified
      * when the send has completed.
      *
-     * @param context The Context of the caller.  This may be null if
-     * <var>intent</var> is also null.
+     * @param context The Context of the caller.  This may be {@code null} if
+     * <var>intent</var> is also {@code null}.
      * @param code Result code to supply back to the IntentSender's target.
      * @param intent Additional Intent data.  See {@link Intent#fillIn
      * Intent.fillIn()} for information on how this is applied to the
-     * original Intent.  Use null to not modify the original Intent.
+     * original Intent.  Use {@code null} to not modify the original Intent.
      * @param onFinished The object to call back on when the send has
-     * completed, or null for no callback.
+     * completed, or {@code null} for no callback.
      * @param handler Handler identifying the thread on which the callback
-     * should happen.  If null, the callback will happen from the thread
+     * should happen.  If {@code null}, the callback will happen from the thread
+     * pool of the process.
+     * @param options Additional options the caller would like to provide to modify the sending
+     * behavior.  Typically built from using {@link ActivityOptions} to apply to an activity start.
+     *
+     * @throws SendIntentException Throws CanceledIntentException if the IntentSender
+     * is no longer allowing more intents to be sent through it.
+     *
+     * @deprecated use {@link #sendIntent(Context, int, Intent, String, Bundle, Executor,
+     *         OnFinished)}
+     *
+     * @hide
+     */
+    @Deprecated public void sendIntent(Context context, int code, Intent intent,
+            OnFinished onFinished, Handler handler, String requiredPermission,
+            @Nullable Bundle options)
+            throws SendIntentException {
+        if (CompatChanges.isChangeEnabled(REMOVE_HIDDEN_SEND_INTENT_METHOD)) {
+            throw new NoSuchMethodError("This overload of sendIntent was removed.");
+        }
+        sendIntent(context, code, intent, requiredPermission, options,
+                handler == null ? null : handler::post, onFinished);
+    }
+
+    /**
+     * Perform the operation associated with this IntentSender, allowing the
+     * caller to specify information about the Intent to use and be notified
+     * when the send has completed.
+     *
+     * @param context The Context of the caller.  This may be {@code null} if
+     * <var>intent</var> is also {@code null}.
+     * @param code Result code to supply back to the IntentSender's target.
+     * @param intent Additional Intent data.  See {@link Intent#fillIn
+     * Intent.fillIn()} for information on how this is applied to the
+     * original Intent.  Use {@code null} to not modify the original Intent.
+     * @param onFinished The object to call back on when the send has
+     * completed, or {@code null} for no callback.
+     * @param executor Executor identifying the thread on which the callback
+     * should happen.  If {@code null}, the callback will happen from the thread
      * pool of the process.
      * @param requiredPermission Name of permission that a recipient of the PendingIntent
      * is required to hold.  This is only valid for broadcast intents, and
      * corresponds to the permission argument in
      * {@link Context#sendBroadcast(Intent, String) Context.sendOrderedBroadcast(Intent, String)}.
-     * If null, no permission is required.
+     * If {@code null}, no permission is required.
      * @param options Additional options the caller would like to provide to modify the sending
-     * behavior.  May be built from an {@link ActivityOptions} to apply to an activity start.
+     * behavior.  Typically built from using {@link ActivityOptions} to apply to an activity start.
      *
      * @throws SendIntentException Throws CanceledIntentException if the IntentSender
      * is no longer allowing more intents to be sent through it.
-     * @hide
      */
-    public void sendIntent(Context context, int code, Intent intent,
-            OnFinished onFinished, Handler handler, String requiredPermission,
-            @Nullable Bundle options)
+    @FlaggedApi(Flags.FLAG_BAL_SEND_INTENT_WITH_OPTIONS)
+    public void sendIntent(@Nullable Context context, int code, @Nullable Intent intent,
+            @Nullable String requiredPermission, @Nullable Bundle options,
+            @Nullable Executor executor, @Nullable OnFinished onFinished)
             throws SendIntentException {
         try {
             String resolvedType = intent != null ?
@@ -243,7 +296,7 @@ public class IntentSender implements Parcelable {
             int res = ActivityManager.getService().sendIntentSender(app, mTarget, mWhitelistToken,
                     code, intent, resolvedType,
                     onFinished != null
-                            ? new FinishedDispatcher(this, onFinished, handler)
+                            ? new FinishedDispatcher(this, onFinished, executor)
                             : null,
                     requiredPermission, options);
             if (res < 0) {
@@ -268,7 +321,7 @@ public class IntentSender implements Parcelable {
      * sending the Intent.  The returned string is supplied by the system, so
      * that an application can not spoof its package.
      *
-     * @return The package name of the PendingIntent, or null if there is
+     * @return The package name of the PendingIntent, or {@code null} if there is
      * none associated with it.
      */
     public String getCreatorPackage() {
@@ -296,7 +349,7 @@ public class IntentSender implements Parcelable {
      * {@link android.os.Process#myUserHandle() Process.myUserHandle()} for
      * more explanation of user handles.
      *
-     * @return The user handle of the PendingIntent, or null if there is
+     * @return The user handle of the PendingIntent,  {@code null} if there is
      * none associated with it.
      */
     public UserHandle getCreatorUserHandle() {
@@ -355,11 +408,11 @@ public class IntentSender implements Parcelable {
     };
 
     /**
-     * Convenience function for writing either a IntentSender or null pointer to
+     * Convenience function for writing either a IntentSender or {@code null} pointer to
      * a Parcel.  You must use this with {@link #readIntentSenderOrNullFromParcel}
      * for later reading it.
      *
-     * @param sender The IntentSender to write, or null.
+     * @param sender The IntentSender to write, or {@code null}.
      * @param out Where to write the IntentSender.
      */
     public static void writeIntentSenderOrNullToParcel(IntentSender sender,
@@ -369,13 +422,13 @@ public class IntentSender implements Parcelable {
     }
 
     /**
-     * Convenience function for reading either a Messenger or null pointer from
+     * Convenience function for reading either a Messenger or {@code null} pointer from
      * a Parcel.  You must have previously written the Messenger with
      * {@link #writeIntentSenderOrNullToParcel}.
      *
      * @param in The Parcel containing the written Messenger.
      *
-     * @return Returns the Messenger read from the Parcel, or null if null had
+     * @return Returns the Messenger read from the Parcel, or @code null} if @code null} had
      * been written.
      */
     public static IntentSender readIntentSenderOrNullFromParcel(Parcel in) {

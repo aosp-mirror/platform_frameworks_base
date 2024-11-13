@@ -86,10 +86,11 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @VisibleForTesting
     PlatformCompat(Context context, CompatConfig compatConfig,
-            AndroidBuildClassifier buildClassifier) {
+            AndroidBuildClassifier buildClassifier,
+            ChangeReporter changeReporter) {
         super(PermissionEnforcer.fromContext(context));
         mContext = context;
-        mChangeReporter = new ChangeReporter(ChangeReporter.SOURCE_SYSTEM_SERVER);
+        mChangeReporter = changeReporter;
         mCompatConfig = compatConfig;
         mBuildClassifier = buildClassifier;
 
@@ -100,8 +101,11 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @EnforcePermission(LOG_COMPAT_CHANGE)
     public void reportChange(long changeId, ApplicationInfo appInfo) {
         super.reportChange_enforcePermission();
-
-        reportChangeInternal(changeId, appInfo.uid, ChangeReporter.STATE_LOGGED);
+        reportChangeInternal(
+                changeId,
+                appInfo.uid,
+                appInfo.isSystemApp(),
+                ChangeReporter.STATE_LOGGED);
     }
 
     @Override
@@ -112,7 +116,11 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
         ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
         if (appInfo != null) {
-            reportChangeInternal(changeId, appInfo.uid, ChangeReporter.STATE_LOGGED);
+            reportChangeInternal(
+                    changeId,
+                    appInfo.uid,
+                    appInfo.isSystemApp(),
+                    ChangeReporter.STATE_LOGGED);
         }
     }
 
@@ -121,7 +129,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     public void reportChangeByUid(long changeId, int uid) {
         super.reportChangeByUid_enforcePermission();
 
-        reportChangeInternal(changeId, uid, ChangeReporter.STATE_LOGGED);
+        reportChangeInternal(changeId, uid, false, ChangeReporter.STATE_LOGGED);
     }
 
     /**
@@ -132,8 +140,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
      * @param uid             of the user
      * @param state           of the change - enabled/disabled/logged
      */
-    private void reportChangeInternal(long changeId, int uid, int state) {
-        mChangeReporter.reportChange(uid, changeId, state, true);
+    private void reportChangeInternal(long changeId, int uid, boolean isKnownSystemApp, int state) {
+        mChangeReporter.reportChange(uid, changeId, state, isKnownSystemApp, true);
     }
 
     @Override
@@ -194,7 +202,11 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         if (appInfo != null) {
             boolean isTargetingLatestSdk =
                     mCompatConfig.isChangeTargetingLatestSdk(c, appInfo.targetSdkVersion);
-            mChangeReporter.reportChange(appInfo.uid, changeId, state, isTargetingLatestSdk);
+            mChangeReporter.reportChange(appInfo.uid,
+                    changeId,
+                    state,
+                    appInfo.isSystemApp(),
+                    isTargetingLatestSdk);
         }
         return enabled;
     }

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -31,11 +32,10 @@ import androidx.annotation.StringRes;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.settingslib.utils.BuildCompatUtils;
+import com.android.settingslib.widget.preference.actionbuttons.R;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.settingslib.widget.preference.actionbuttons.R;
 
 /**
  * This preference provides a four buttons layout with Settings style.
@@ -56,7 +56,7 @@ import com.android.settingslib.widget.preference.actionbuttons.R;
 public class ActionButtonsPreference extends Preference {
 
     private static final String TAG = "ActionButtonPreference";
-    private static final boolean mIsAtLeastS = BuildCompatUtils.isAtLeastS();
+    private static final boolean mIsAtLeastS = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
     private static final int SINGLE_BUTTON_STYLE = 1;
     private static final int TWO_BUTTONS_STYLE = 2;
     private static final int THREE_BUTTONS_STYLE = 3;

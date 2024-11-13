@@ -42,6 +42,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -59,37 +61,46 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
-import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
+import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
+import com.android.systemui.notifications.ui.composable.NotificationStackCutoffGuideline
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQS
-import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneContentViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsUserActionsViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.Shade
@@ -102,43 +113,48 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlin.math.roundToInt
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class QuickSettingsScene
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
-    private val viewModel: QuickSettingsSceneViewModel,
-    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
+    private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
+    private val actionsViewModelFactory: QuickSettingsUserActionsViewModel.Factory,
+    private val contentViewModelFactory: QuickSettingsSceneContentViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
     private val mediaCarouselController: MediaCarouselController,
     @Named(MediaModule.QS_PANEL) private val mediaHost: MediaHost,
-) : ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.QuickSettings
 
-    override val destinationScenes =
-        viewModel.destinationScenes.stateIn(
-            scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = emptyMap(),
-        )
+    private val actionsViewModel: QuickSettingsUserActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
+
+    override suspend fun onActivated(): Nothing {
+        actionsViewModel.activate()
+    }
 
     @Composable
-    override fun SceneScope.Content(
-        modifier: Modifier,
-    ) {
+    override fun SceneScope.Content(modifier: Modifier) {
         QuickSettingsScene(
             notificationStackScrollView = notificationStackScrollView.get(),
-            viewModel = viewModel,
-            notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
+            viewModelFactory = contentViewModelFactory,
+            notificationsPlaceholderViewModel =
+                rememberViewModel("QuickSettingsScene-notifPlaceholderViewModel") {
+                    notificationsPlaceholderViewModelFactory.create()
+                },
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -153,7 +169,7 @@ constructor(
 @Composable
 private fun SceneScope.QuickSettingsScene(
     notificationStackScrollView: NotificationScrollView,
-    viewModel: QuickSettingsSceneViewModel,
+    viewModelFactory: QuickSettingsSceneContentViewModel.Factory,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
@@ -165,20 +181,34 @@ private fun SceneScope.QuickSettingsScene(
 ) {
     val cutoutLocation = LocalDisplayCutout.current.location
 
-    val brightnessMirrorShowing by
-        viewModel.brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
+    val viewModel = rememberViewModel("QuickSettingsScene-viewModel") { viewModelFactory.create() }
+    val brightnessMirrorViewModel =
+        rememberViewModel("QuickSettingsScene-brightnessMirrorViewModel") {
+            viewModel.brightnessMirrorViewModelFactory.create()
+        }
+    val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(
             targetValue = if (brightnessMirrorShowing) 0f else 1f,
             label = "alphaAnimationBrightnessMirrorContentHiding",
         )
 
-    viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
-    DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
+    notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(contentAlpha)
+    DisposableEffect(Unit) {
+        onDispose { notificationsPlaceholderViewModel.setAlphaForBrightnessMirror(1f) }
+    }
+
+    val shadeHorizontalPadding =
+        dimensionResource(id = R.dimen.notification_panel_margin_horizontal)
 
     BrightnessMirror(
-        viewModel = viewModel.brightnessMirrorViewModel,
-        qsSceneAdapter = viewModel.qsSceneAdapter
+        viewModel = brightnessMirrorViewModel,
+        qsSceneAdapter = viewModel.qsSceneAdapter,
+        modifier =
+            Modifier.thenIf(cutoutLocation != CutoutLocation.CENTER) {
+                    Modifier.displayCutoutPadding()
+                }
+                .padding(horizontal = shadeHorizontalPadding),
     )
 
     val shouldPunchHoleBehindScrim =
@@ -197,25 +227,18 @@ private fun SceneScope.QuickSettingsScene(
                     // scene (and not the one under it) during a scene transition.
                     Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
                 }
-                .thenIf(cutoutLocation != CutoutLocation.CENTER) {
-                    Modifier.displayCutoutPadding()
-                },
+                .thenIf(cutoutLocation != CutoutLocation.CENTER) { Modifier.displayCutoutPadding() }
     ) {
+        val density = LocalDensity.current
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsStateWithLifecycle()
         val isCustomizerShowing by
             viewModel.qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
         val customizingAnimationDuration by
             viewModel.qsSceneAdapter.customizerAnimationDuration.collectAsStateWithLifecycle()
-        val screenHeight = LocalRawScreenHeight.current
+        val screenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
 
-        BackHandler(
-            enabled = isCustomizing,
-        ) {
-            viewModel.qsSceneAdapter.requestCloseCustomizer()
-        }
+        BackHandler(enabled = isCustomizing) { viewModel.qsSceneAdapter.requestCloseCustomizer() }
 
-        val collapsedHeaderHeight =
-            with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
         val lifecycleOwner = LocalLifecycleOwner.current
         val footerActionsViewModel =
             remember(lifecycleOwner, viewModel) {
@@ -231,7 +254,7 @@ private fun SceneScope.QuickSettingsScene(
         val isScrollable =
             when (val state = layoutState.transitionState) {
                 is TransitionState.Idle -> true
-                is TransitionState.Transition -> state.fromScene == Scenes.QuickSettings
+                is TransitionState.Transition -> state.fromContent == Scenes.QuickSettings
             }
 
         LaunchedEffect(isCustomizing, scrollState) {
@@ -244,18 +267,17 @@ private fun SceneScope.QuickSettingsScene(
 
         val navBarBottomHeight =
             WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        val density = LocalDensity.current
         val bottomPadding by
             animateDpAsState(
                 targetValue = if (isCustomizing) 0.dp else navBarBottomHeight,
                 animationSpec = tween(customizingAnimationDuration),
-                label = "animateQSSceneBottomPaddingAsState"
+                label = "animateQSSceneBottomPaddingAsState",
             )
         val topPadding by
             animateDpAsState(
                 targetValue = if (isCustomizing) ShadeHeader.Dimensions.CollapsedHeight else 0.dp,
                 animationSpec = tween(customizingAnimationDuration),
-                label = "animateQSSceneTopPaddingAsState"
+                label = "animateQSSceneTopPaddingAsState",
             )
 
         LaunchedEffect(navBarBottomHeight, density) {
@@ -286,19 +308,15 @@ private fun SceneScope.QuickSettingsScene(
                 Modifier.fillMaxSize()
                     .padding(
                         top = topPadding.coerceAtLeast(0.dp),
-                        bottom = bottomPadding.coerceAtLeast(0.dp)
-                    )
+                        bottom = bottomPadding.coerceAtLeast(0.dp),
+                    ),
         ) {
             Box(modifier = Modifier.fillMaxSize().weight(1f)) {
                 val shadeHeaderAndQuickSettingsModifier =
                     if (isCustomizerShowing) {
                         Modifier.fillMaxHeight().align(Alignment.TopCenter)
                     } else {
-                        Modifier.verticalNestedScrollToScene()
-                            .verticalScroll(
-                                scrollState,
-                                enabled = isScrollable,
-                            )
+                        Modifier.verticalScroll(scrollState, enabled = isScrollable)
                             .clipScrollableContainer(Orientation.Horizontal)
                             .fillMaxWidth()
                             .wrapContentHeight(unbounded = true)
@@ -307,7 +325,7 @@ private fun SceneScope.QuickSettingsScene(
 
                 Column(
                     modifier =
-                        shadeHeaderAndQuickSettingsModifier.sysuiResTag("expanded_qs_scroll_view"),
+                        shadeHeaderAndQuickSettingsModifier.sysuiResTag("expanded_qs_scroll_view")
                 ) {
                     when (LocalWindowSizeClass.current.widthSizeClass) {
                         WindowWidthSizeClass.Compact ->
@@ -319,7 +337,7 @@ private fun SceneScope.QuickSettingsScene(
                                         expandFrom = Alignment.Top,
                                     ) +
                                         slideInVertically(
-                                            animationSpec = tween(customizingAnimationDuration),
+                                            animationSpec = tween(customizingAnimationDuration)
                                         ) +
                                         fadeIn(tween(customizingAnimationDuration)),
                                 exit =
@@ -328,12 +346,12 @@ private fun SceneScope.QuickSettingsScene(
                                         shrinkTowards = Alignment.Top,
                                     ) +
                                         slideOutVertically(
-                                            animationSpec = tween(customizingAnimationDuration),
+                                            animationSpec = tween(customizingAnimationDuration)
                                         ) +
                                         fadeOut(tween(customizingAnimationDuration)),
                             ) {
                                 ExpandedShadeHeader(
-                                    viewModel = viewModel.shadeHeaderViewModel,
+                                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                                     createTintedIconManager = createTintedIconManager,
                                     createBatteryMeterViewController =
                                         createBatteryMeterViewController,
@@ -343,7 +361,7 @@ private fun SceneScope.QuickSettingsScene(
                             }
                         else ->
                             CollapsedShadeHeader(
-                                viewModel = viewModel.shadeHeaderViewModel,
+                                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                                 createTintedIconManager = createTintedIconManager,
                                 createBatteryMeterViewController = createBatteryMeterViewController,
                                 statusBarIconController = statusBarIconController,
@@ -356,7 +374,7 @@ private fun SceneScope.QuickSettingsScene(
                             viewModel.qsSceneAdapter,
                             { viewModel.qsSceneAdapter.qsHeight },
                             isSplitShade = false,
-                            modifier = Modifier.layoutId(QSMediaMeasurePolicy.LayoutId.QS)
+                            modifier = Modifier.layoutId(QSMediaMeasurePolicy.LayoutId.QS),
                         )
 
                         MediaCarousel(
@@ -374,13 +392,12 @@ private fun SceneScope.QuickSettingsScene(
                             { mediaOffset.roundToPx() },
                         )
                     }
-                    if (mediaInRow) {
-                        Layout(
-                            content = content,
-                            measurePolicy = landscapeQsMediaMeasurePolicy,
-                        )
-                    } else {
-                        content()
+                    Column(modifier = Modifier.padding(horizontal = shadeHorizontalPadding)) {
+                        if (mediaInRow) {
+                            Layout(content = content, measurePolicy = landscapeQsMediaMeasurePolicy)
+                        } else {
+                            content()
+                        }
                     }
                 }
             }
@@ -391,14 +408,45 @@ private fun SceneScope.QuickSettingsScene(
                 customizingAnimationDuration = customizingAnimationDuration,
                 lifecycleOwner = lifecycleOwner,
                 modifier =
-                    Modifier.align(Alignment.CenterHorizontally).sysuiResTag("qs_footer_actions"),
+                    Modifier.align(Alignment.CenterHorizontally)
+                        .sysuiResTag("qs_footer_actions")
+                        .padding(horizontal = shadeHorizontalPadding),
             )
         }
         HeadsUpNotificationSpace(
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
-            modifier = Modifier.align(Alignment.BottomCenter),
-            isPeekFromBottom = true,
+            useHunBounds = { shouldUseQuickSettingsHunBounds(layoutState.transitionState) },
+            modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(horizontal = shadeHorizontalPadding),
+        )
+        NotificationScrollingStack(
+            shadeSession = shadeSession,
+            stackScrollView = notificationStackScrollView,
+            viewModel = notificationsPlaceholderViewModel,
+            maxScrimTop = { screenHeight },
+            shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+            shouldIncludeHeadsUpSpace = false,
+            shadeMode = ShadeMode.Single,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .offset { IntOffset(x = 0, y = screenHeight.roundToInt()) }
+                    .padding(horizontal = shadeHorizontalPadding),
+        )
+        NotificationStackCutoffGuideline(
+            stackScrollView = notificationStackScrollView,
+            viewModel = notificationsPlaceholderViewModel,
+            modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .offset { IntOffset(x = 0, y = screenHeight.roundToInt()) }
+                    .padding(horizontal = shadeHorizontalPadding),
         )
     }
+}
+
+private fun shouldUseQuickSettingsHunBounds(state: TransitionState): Boolean {
+    return state is TransitionState.Idle && state.currentScene == Scenes.QuickSettings
 }

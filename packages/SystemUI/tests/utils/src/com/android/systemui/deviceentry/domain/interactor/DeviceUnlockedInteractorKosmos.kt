@@ -18,6 +18,9 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
+import com.android.systemui.flags.fakeSystemPropertiesHelper
+import com.android.systemui.flags.systemPropertiesHelper
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.trustInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -33,5 +36,8 @@ val Kosmos.deviceUnlockedInteractor by Fixture {
         faceAuthInteractor = deviceEntryFaceAuthInteractor,
         fingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
         powerInteractor = powerInteractor,
+        biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
+        systemPropertiesHelper = fakeSystemPropertiesHelper,
+        keyguardTransitionInteractor = keyguardTransitionInteractor,
     )
 }

@@ -25,6 +25,7 @@ import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Repository used for tracking the state of notification remote input (e.g. when the user presses
@@ -33,14 +34,21 @@ import kotlinx.coroutines.flow.Flow
 interface RemoteInputRepository {
     /** Whether remote input is currently active for any notification. */
     val isRemoteInputActive: Flow<Boolean>
+
+    /**
+     * The bottom bound of the currently focused remote input notification row, or null if there
+     * isn't one.
+     */
+    val remoteInputRowBottomBound: Flow<Float?>
+
+    fun setRemoteInputRowBottomBound(bottom: Float?)
 }
 
 @SysUISingleton
 class RemoteInputRepositoryImpl
 @Inject
-constructor(
-    private val notificationRemoteInputManager: NotificationRemoteInputManager,
-) : RemoteInputRepository {
+constructor(private val notificationRemoteInputManager: NotificationRemoteInputManager) :
+    RemoteInputRepository {
     override val isRemoteInputActive: Flow<Boolean> = conflatedCallbackFlow {
         trySend(false) // initial value is false
         val callback =
@@ -51,6 +59,12 @@ constructor(
             }
         notificationRemoteInputManager.addControllerCallback(callback)
         awaitClose { notificationRemoteInputManager.removeControllerCallback(callback) }
+    }
+
+    override val remoteInputRowBottomBound = MutableStateFlow<Float?>(null)
+
+    override fun setRemoteInputRowBottomBound(bottom: Float?) {
+        remoteInputRowBottomBound.value = bottom
     }
 }
 

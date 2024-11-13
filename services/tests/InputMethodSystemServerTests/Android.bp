@@ -84,7 +84,6 @@ android_ravenwood_test {
     ],
     srcs: [
         "src/com/android/server/inputmethod/**/ClientControllerTest.java",
-        "src/com/android/server/inputmethod/**/UserDataRepositoryTest.java",
     ],
     auto_gen_config: true,
 }

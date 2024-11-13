@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,8 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ReferencePerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private Object mObject;
 
@@ -43,7 +42,7 @@ public class ReferencePerfTest {
     @Test
     public void timeAlloc() {
         ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new PhantomReference(mObject, queue);
         }
@@ -53,7 +52,7 @@ public class ReferencePerfTest {
     @Test
     public void timeAllocAndEnqueue() {
         ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             (new PhantomReference<Object>(mObject, queue)).enqueue();
         }
@@ -63,7 +62,7 @@ public class ReferencePerfTest {
     @Test
     public void timeAllocEnqueueAndPoll() {
         ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             (new PhantomReference<Object>(mObject, queue)).enqueue();
             queue.poll();
@@ -74,7 +73,7 @@ public class ReferencePerfTest {
     @Test
     public void timeAllocEnqueueAndRemove() {
         ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             (new PhantomReference<Object>(mObject, queue)).enqueue();
             try {
@@ -103,7 +102,7 @@ public class ReferencePerfTest {
         // Allocate a bunch of finalizable objects.
         int n = 0;
         AtomicInteger count = new AtomicInteger(0);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             n++;
             new FinalizableObject(count);

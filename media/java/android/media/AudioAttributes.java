@@ -578,6 +578,8 @@ public final class AudioAttributes implements Parcelable {
     });
 
     private AudioAttributes() {
+        mBundle = null;
+        mFormattedTags = "";
     }
 
     /**

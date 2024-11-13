@@ -41,7 +41,8 @@ import java.io.PrintWriter;
  * Class used to prevent the screen brightness dipping below a certain value, based on current
  * lux conditions and user preferred minimum.
  */
-public class BrightnessLowLuxModifier extends BrightnessModifier {
+public class BrightnessLowLuxModifier extends BrightnessModifier implements
+        BrightnessClamperController.UserSwitchListener {
 
     // To enable these logs, run:
     // 'adb shell setprop persist.log.tag.BrightnessLowLuxModifier DEBUG && adb reboot'
@@ -81,10 +82,9 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
      */
     @VisibleForTesting
     public void recalculateLowerBound() {
-        int userId = UserHandle.USER_CURRENT;
         float settingNitsLowerBound = Settings.Secure.getFloatForUser(
                 mContentResolver, Settings.Secure.EVEN_DIMMER_MIN_NITS,
-                /* def= */ MIN_NITS_DEFAULT, userId);
+                /* def= */ MIN_NITS_DEFAULT, UserHandle.USER_CURRENT);
 
         boolean isActive = isSettingEnabled()
                 && mAmbientLux != BrightnessMappingStrategy.INVALID_LUX;
@@ -190,6 +190,11 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
     }
 
     @Override
+    public void onSwitchUser() {
+        recalculateLowerBound();
+    }
+
+    @Override
     public void dump(PrintWriter pw) {
         pw.println("BrightnessLowLuxModifier:");
         pw.println("  mIsActive=" + mIsActive);
@@ -221,10 +226,10 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
             super(handler);
             mContentResolver.registerContentObserver(
                     Settings.Secure.getUriFor(Settings.Secure.EVEN_DIMMER_MIN_NITS),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
             mContentResolver.registerContentObserver(
                     Settings.Secure.getUriFor(Settings.Secure.EVEN_DIMMER_ACTIVATED),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override

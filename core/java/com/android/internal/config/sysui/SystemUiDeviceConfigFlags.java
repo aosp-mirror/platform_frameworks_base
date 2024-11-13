@@ -573,6 +573,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String GENERATED_PREVIEW_API_MAX_CALLS_PER_INTERVAL =
             "generated_preview_api_max_calls_per_interval";
 
+    /*
+     * (int) The max number of providers for which to keep generated previews.
+     */
+    public static final String GENERATED_PREVIEW_API_MAX_PROVIDERS =
+            "generated_preview_api_max_providers";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

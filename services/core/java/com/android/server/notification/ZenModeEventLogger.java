@@ -34,7 +34,7 @@ import android.os.Process;
 import android.service.notification.DNDPolicyProto;
 import android.service.notification.ZenAdapters;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
+import android.service.notification.ZenModeConfig.ConfigOrigin;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenPolicy;
@@ -106,14 +106,14 @@ class ZenModeEventLogger {
     /**
      * Potentially log a zen mode change if the provided config and policy changes warrant it.
      *
-     * @param prevInfo    ZenModeInfo (zen mode setting, config, policy) prior to this change
-     * @param newInfo     ZenModeInfo after this change takes effect
-     * @param callingUid  the calling UID associated with the change; may be used to attribute the
-     *                    change to a particular package or determine if this is a user action
-     * @param origin      The origin of the Zen change.
+     * @param prevInfo   ZenModeInfo (zen mode setting, config, policy) prior to this change
+     * @param newInfo    ZenModeInfo after this change takes effect
+     * @param callingUid the calling UID associated with the change; may be used to attribute the
+     *                   change to a particular package or determine if this is a user action
+     * @param origin     The origin of the Zen change.
      */
     public final void maybeLogZenChange(ZenModeInfo prevInfo, ZenModeInfo newInfo, int callingUid,
-            @ConfigChangeOrigin int origin) {
+            @ConfigOrigin int origin) {
         mChangeState.init(prevInfo, newInfo, callingUid, origin);
         if (mChangeState.shouldLogChanges()) {
             maybeReassignCallingUid();
@@ -127,6 +127,9 @@ class ZenModeEventLogger {
     /**
      * Reassign callingUid in mChangeState if we have more specific information that warrants it
      * (for instance, if the change is automatic and due to an automatic rule change).
+     *
+     * <p>When Flags.modesUi() is enabled, we reassign the calling UID to the package UID in all
+     * changes whose source is not system or system UI, as long as there is only one rule changed.
      */
     private void maybeReassignCallingUid() {
         int userId = Process.INVALID_UID;
@@ -145,12 +148,23 @@ class ZenModeEventLogger {
             userId = mChangeState.mNewConfig.user;  // mNewConfig must not be null if enabler exists
         }
 
-        // The conditions where we should consider reassigning UID for an automatic rule change:
+        // The conditions where we should consider reassigning UID for an automatic rule change
+        // (pre-modes_ui):
         //   - we've determined it's not a user action
         //   - our current best guess is that the calling uid is system/sysui
+        // When Flags.modesUi() is true, we get the package UID for the changed rule, as long as:
+        //   - the change does not originate from the system based on change origin
+        //   - there is only one rule changed
         if (mChangeState.getChangedRuleType() == RULE_TYPE_AUTOMATIC) {
-            if (mChangeState.getIsUserAction() || !mChangeState.isFromSystemOrSystemUi()) {
-                return;
+            if (Flags.modesUi()) {
+                // ignore anything whose origin is system
+                if (mChangeState.isFromSystemOrSystemUi()) {
+                    return;
+                }
+            } else {
+                if (mChangeState.getIsUserAction() || !mChangeState.isFromSystemOrSystemUi()) {
+                    return;
+                }
             }
 
             // Only try to get the package UID if there's exactly one changed automatic rule. If
@@ -202,7 +216,8 @@ class ZenModeEventLogger {
                 /* int32 package_uid = 7 */ mChangeState.getPackageUid(),
                 /* DNDPolicyProto current_policy = 8 */ mChangeState.getDNDPolicyProto(),
                 /* bool are_channels_bypassing = 9 */ mChangeState.getAreChannelsBypassing(),
-                /* ActiveRuleType active_rule_types = 10 */ mChangeState.getActiveRuleTypes());
+                /* ActiveRuleType active_rule_types = 10 */ mChangeState.getActiveRuleTypes(),
+                /* ChangeOrigin change_origin = 11 */ mChangeState.getChangeOrigin());
     }
 
     /**
@@ -235,10 +250,11 @@ class ZenModeEventLogger {
         ZenModeConfig mPrevConfig, mNewConfig;
         NotificationManager.Policy mPrevPolicy, mNewPolicy;
         int mCallingUid = Process.INVALID_UID;
-        @ConfigChangeOrigin int mOrigin = ZenModeConfig.UPDATE_ORIGIN_UNKNOWN;
+        @ConfigOrigin
+        int mOrigin = ZenModeConfig.ORIGIN_UNKNOWN;
 
         private void init(ZenModeInfo prevInfo, ZenModeInfo newInfo, int callingUid,
-                @ConfigChangeOrigin int origin) {
+                @ConfigOrigin int origin) {
             // previous & new may be the same -- that would indicate that zen mode hasn't changed.
             mPrevZenMode = prevInfo.mZenMode;
             mNewZenMode = newInfo.mZenMode;
@@ -388,7 +404,8 @@ class ZenModeEventLogger {
          * rules available.
          */
         @SuppressLint("WrongConstant")  // special case for log-only type on manual rule
-        @NonNull List<ZenRule> activeRulesList(ZenModeConfig config) {
+        @NonNull
+        List<ZenRule> activeRulesList(ZenModeConfig config) {
             ArrayList<ZenRule> rules = new ArrayList<>();
             if (config == null) {
                 return rules;
@@ -402,7 +419,7 @@ class ZenModeEventLogger {
 
             if (config.automaticRules != null) {
                 for (ZenModeConfig.ZenRule rule : config.automaticRules.values()) {
-                    if (rule != null && rule.isAutomaticActive()) {
+                    if (rule != null && rule.isActive()) {
                         rules.add(rule);
                     }
                 }
@@ -467,7 +484,8 @@ class ZenModeEventLogger {
          */
         boolean getIsUserAction() {
             if (Flags.modesApi()) {
-                return mOrigin == ZenModeConfig.UPDATE_ORIGIN_USER;
+                return mOrigin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
+                        || mOrigin == ZenModeConfig.ORIGIN_USER_IN_APP;
             }
 
             // Approach for pre-MODES_API:
@@ -532,10 +550,10 @@ class ZenModeEventLogger {
         }
 
         boolean isFromSystemOrSystemUi() {
-            return mOrigin == ZenModeConfig.UPDATE_ORIGIN_INIT
-                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_INIT_USER
-                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
-                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_RESTORE_BACKUP;
+            return mOrigin == ZenModeConfig.ORIGIN_INIT
+                    || mOrigin == ZenModeConfig.ORIGIN_INIT_USER
+                    || mOrigin == ZenModeConfig.ORIGIN_SYSTEM
+                    || mOrigin == ZenModeConfig.ORIGIN_RESTORE_BACKUP;
         }
 
         /**
@@ -545,6 +563,17 @@ class ZenModeEventLogger {
          */
         int getPackageUid() {
             return mCallingUid;
+        }
+
+        /**
+         * Get the config change origin associated with this change, which is stored in mOrigin.
+         * Only useable if modes_ui is true.
+         */
+        int getChangeOrigin() {
+            if (Flags.modesUi()) {
+                return mOrigin;
+            }
+            return 0;
         }
 
         /**

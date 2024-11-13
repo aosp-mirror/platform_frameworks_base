@@ -16,19 +16,26 @@
 
 package com.android.server.location.contexthub;
 
+import android.chre.flags.Flags;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubTransactionCallback;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -47,34 +54,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 /* package */ class ContextHubTransactionManager {
     private static final String TAG = "ContextHubTransactionManager";
 
-    /*
-     * Maximum number of transaction requests that can be pending at a time
-     */
+    public static final Duration RELIABLE_MESSAGE_TIMEOUT = Duration.ofSeconds(1);
+
+    public static final Duration RELIABLE_MESSAGE_DUPLICATE_DETECTION_TIMEOUT =
+            RELIABLE_MESSAGE_TIMEOUT.multipliedBy(3);
+
     private static final int MAX_PENDING_REQUESTS = 10000;
 
-    /*
-     * The proxy to talk to the Context Hub
-     */
+    private static final int RELIABLE_MESSAGE_MAX_NUM_RETRY = 3;
+
+    private static final Duration RELIABLE_MESSAGE_RETRY_WAIT_TIME = Duration.ofMillis(250);
+
+    private static final Duration RELIABLE_MESSAGE_MIN_WAIT_TIME = Duration.ofNanos(1000);
+
     private final IContextHubWrapper mContextHubProxy;
 
-    /*
-     * The manager for all clients for the service.
-     */
     private final ContextHubClientManager mClientManager;
 
-    /*
-     * The nanoapp state manager for the service
-     */
     private final NanoAppStateManager mNanoAppStateManager;
 
-    /*
-     * A queue containing the current transactions
-     */
     private final ArrayDeque<ContextHubServiceTransaction> mTransactionQueue = new ArrayDeque<>();
 
-    /*
-     * The next available transaction ID
-     */
+    private final Map<Integer, ContextHubServiceTransaction> mReliableMessageTransactionMap =
+            new HashMap<>();
+
+    /** A set of host endpoint IDs that have an active pending transaction. */
+    private final Set<Short> mReliableMessageHostEndpointIdActiveSet = new HashSet<>();
+
     private final AtomicInteger mNextAvailableId = new AtomicInteger();
 
     /**
@@ -86,10 +92,12 @@ import java.util.concurrent.atomic.AtomicInteger;
             new AtomicInteger(new Random().nextInt(Integer.MAX_VALUE / 2));
 
     /*
-     * An executor and the future object for scheduling timeout timers
+     * An executor and the future object for scheduling timeout timers and
+     * for scheduling the processing of reliable message transactions.
      */
-    private final ScheduledThreadPoolExecutor mTimeoutExecutor = new ScheduledThreadPoolExecutor(1);
+    private final ScheduledThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(1);
     private ScheduledFuture<?> mTimeoutFuture = null;
+    private ScheduledFuture<?> mReliableMessageTransactionFuture = null;
 
     /*
      * The list of previous transaction records.
@@ -333,7 +341,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             IContextHubTransactionCallback transactionCallback, String packageName) {
         return new ContextHubServiceTransaction(mNextAvailableId.getAndIncrement(),
                 ContextHubTransaction.TYPE_RELIABLE_MESSAGE, packageName,
-                mNextAvailableMessageSequenceNumber.getAndIncrement()) {
+                mNextAvailableMessageSequenceNumber.getAndIncrement(), hostEndpointId) {
             @Override
             /* package */ int onTransact() {
                 try {
@@ -416,16 +424,23 @@ import java.util.concurrent.atomic.AtomicInteger;
             return;
         }
 
-        if (mTransactionQueue.size() == MAX_PENDING_REQUESTS) {
+        if (mTransactionQueue.size() >= MAX_PENDING_REQUESTS
+                || mReliableMessageTransactionMap.size() >= MAX_PENDING_REQUESTS) {
             throw new IllegalStateException("Transaction queue is full (capacity = "
                     + MAX_PENDING_REQUESTS + ")");
         }
 
-        mTransactionQueue.add(transaction);
         mTransactionRecordDeque.add(new TransactionRecord(transaction.toString()));
-
-        if (mTransactionQueue.size() == 1) {
-            startNextTransaction();
+        if (Flags.reliableMessageRetrySupportService()
+                && transaction.getTransactionType()
+                        == ContextHubTransaction.TYPE_RELIABLE_MESSAGE) {
+            mReliableMessageTransactionMap.put(transaction.getMessageSequenceNumber(), transaction);
+            mExecutor.execute(() -> processMessageTransactions());
+        } else {
+            mTransactionQueue.add(transaction);
+            if (mTransactionQueue.size() == 1) {
+                startNextTransaction();
+            }
         }
     }
 
@@ -455,26 +470,42 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     /* package */
     synchronized void onMessageDeliveryResponse(int messageSequenceNumber, boolean success) {
-        ContextHubServiceTransaction transaction = mTransactionQueue.peek();
+        if (!Flags.reliableMessageRetrySupportService()) {
+            ContextHubServiceTransaction transaction = mTransactionQueue.peek();
+            if (transaction == null) {
+                Log.w(TAG, "Received unexpected transaction response (no transaction pending)");
+                return;
+            }
+
+            int transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
+            if (transaction.getTransactionType() != ContextHubTransaction.TYPE_RELIABLE_MESSAGE
+                    || transactionMessageSequenceNumber != messageSequenceNumber) {
+                Log.w(TAG, "Received unexpected message transaction response (expected message "
+                        + "sequence number = "
+                        + transaction.getMessageSequenceNumber()
+                        + ", received messageSequenceNumber = " + messageSequenceNumber + ")");
+                return;
+            }
+
+            transaction.onTransactionComplete(success ? ContextHubTransaction.RESULT_SUCCESS :
+                            ContextHubTransaction.RESULT_FAILED_AT_HUB);
+            removeTransactionAndStartNext();
+            return;
+        }
+
+        ContextHubServiceTransaction transaction =
+                mReliableMessageTransactionMap.get(messageSequenceNumber);
         if (transaction == null) {
-            Log.w(TAG, "Received unexpected transaction response (no transaction pending)");
+            Log.w(TAG, "Could not find reliable message transaction with "
+                    + "message sequence number = "
+                    + messageSequenceNumber);
             return;
         }
 
-        Integer transactionMessageSequenceNumber = transaction.getMessageSequenceNumber();
-        if (transaction.getTransactionType() != ContextHubTransaction.TYPE_RELIABLE_MESSAGE
-                || transactionMessageSequenceNumber == null
-                || transactionMessageSequenceNumber != messageSequenceNumber) {
-            Log.w(TAG, "Received unexpected message transaction response (expected message "
-                    + "sequence number = "
-                    + transaction.getMessageSequenceNumber()
-                    + ", received messageSequenceNumber = " + messageSequenceNumber + ")");
-            return;
-        }
-
-        transaction.onTransactionComplete(success ? ContextHubTransaction.RESULT_SUCCESS :
-                        ContextHubTransaction.RESULT_FAILED_AT_HUB);
-        removeTransactionAndStartNext();
+        completeMessageTransaction(transaction,
+                success ? ContextHubTransaction.RESULT_SUCCESS
+                        : ContextHubTransaction.RESULT_FAILED_AT_HUB);
+        mExecutor.execute(() -> processMessageTransactions());
     }
 
     /**
@@ -503,6 +534,15 @@ import java.util.concurrent.atomic.AtomicInteger;
      */
     /* package */
     synchronized void onHubReset() {
+        if (Flags.reliableMessageRetrySupportService()) {
+            Iterator<Map.Entry<Integer, ContextHubServiceTransaction>> iter =
+                    mReliableMessageTransactionMap.entrySet().iterator();
+            while (iter.hasNext()) {
+                completeMessageTransaction(iter.next().getValue(),
+                        ContextHubTransaction.RESULT_FAILED_AT_HUB, iter);
+            }
+        }
+
         ContextHubServiceTransaction transaction = mTransactionQueue.peek();
         if (transaction == null) {
             return;
@@ -566,7 +606,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
                 long timeoutMs = transaction.getTimeout(TimeUnit.MILLISECONDS);
                 try {
-                    mTimeoutFuture = mTimeoutExecutor.schedule(
+                    mTimeoutFuture = mExecutor.schedule(
                             onTimeoutFunc, timeoutMs, TimeUnit.MILLISECONDS);
                 } catch (Exception e) {
                     Log.e(TAG, "Error when schedule a timer", e);
@@ -577,6 +617,147 @@ import java.util.concurrent.atomic.AtomicInteger;
                 mTransactionQueue.remove();
             }
         }
+    }
+
+    /**
+     * Processes message transactions, starting and completing them as needed.
+     * <p>
+     * This function is called when adding a message transaction or when a timer
+     * expires for an existing message transaction's retry or timeout. The
+     * internal processing loop will iterate at most twice as if one iteration
+     * completes a transaction, the next iteration can only start new transactions.
+     * If the first iteration does not complete any transaction, the loop will
+     * only iterate once.
+     * <p>
+     */
+    private synchronized void processMessageTransactions() {
+        if (!Flags.reliableMessageRetrySupportService()) {
+            return;
+        }
+
+        if (mReliableMessageTransactionFuture != null) {
+            mReliableMessageTransactionFuture.cancel(/* mayInterruptIfRunning= */ false);
+            mReliableMessageTransactionFuture = null;
+        }
+
+        long now = SystemClock.elapsedRealtimeNanos();
+        long nextExecutionTime = Long.MAX_VALUE;
+        boolean continueProcessing;
+        do {
+            continueProcessing = false;
+            Iterator<Map.Entry<Integer, ContextHubServiceTransaction>> iter =
+                    mReliableMessageTransactionMap.entrySet().iterator();
+            while (iter.hasNext()) {
+                ContextHubServiceTransaction transaction = iter.next().getValue();
+                short hostEndpointId = transaction.getHostEndpointId();
+                int numCompletedStartCalls = transaction.getNumCompletedStartCalls();
+                if (numCompletedStartCalls == 0
+                        && mReliableMessageHostEndpointIdActiveSet.contains(hostEndpointId)) {
+                    continue;
+                }
+
+                long nextRetryTime = transaction.getNextRetryTime();
+                long timeoutTime = transaction.getTimeoutTime();
+                boolean transactionTimedOut = timeoutTime <= now;
+                boolean transactionHitMaxRetries = nextRetryTime <= now
+                        && numCompletedStartCalls > RELIABLE_MESSAGE_MAX_NUM_RETRY;
+                if (transactionTimedOut || transactionHitMaxRetries) {
+                    completeMessageTransaction(transaction,
+                            ContextHubTransaction.RESULT_FAILED_TIMEOUT, iter);
+                    continueProcessing = true;
+                } else {
+                    if (nextRetryTime <= now || numCompletedStartCalls <= 0) {
+                        startMessageTransaction(transaction, now);
+                    }
+
+                    nextExecutionTime = Math.min(nextExecutionTime,
+                            transaction.getNextRetryTime());
+                    nextExecutionTime = Math.min(nextExecutionTime,
+                            transaction.getTimeoutTime());
+                }
+            }
+        } while (continueProcessing);
+
+        if (nextExecutionTime < Long.MAX_VALUE) {
+            mReliableMessageTransactionFuture = mExecutor.schedule(
+                    () -> processMessageTransactions(),
+                    Math.max(nextExecutionTime - SystemClock.elapsedRealtimeNanos(),
+                            RELIABLE_MESSAGE_MIN_WAIT_TIME.toNanos()),
+                    TimeUnit.NANOSECONDS);
+        }
+    }
+
+    /**
+     * Completes a message transaction and removes it from the reliable message map.
+     *
+     * @param transaction The transaction to complete.
+     * @param result The result code.
+     */
+    private void completeMessageTransaction(ContextHubServiceTransaction transaction,
+            @ContextHubTransaction.Result int result) {
+        completeMessageTransaction(transaction, result, /* iter= */ null);
+    }
+
+    /**
+     * Completes a message transaction and removes it from the reliable message map using iter.
+     *
+     * @param transaction The transaction to complete.
+     * @param result The result code.
+     * @param iter The iterator for the reliable message map - used to remove the message directly.
+     */
+    private void completeMessageTransaction(ContextHubServiceTransaction transaction,
+            @ContextHubTransaction.Result int result,
+            Iterator<Map.Entry<Integer, ContextHubServiceTransaction>> iter) {
+        transaction.onTransactionComplete(result);
+
+        if (iter == null) {
+            mReliableMessageTransactionMap.remove(transaction.getMessageSequenceNumber());
+        } else {
+            iter.remove();
+        }
+        mReliableMessageHostEndpointIdActiveSet.remove(transaction.getHostEndpointId());
+
+    Log.d(
+        TAG,
+        "Successfully completed reliable message transaction with "
+            + "message sequence number = "
+            + transaction.getMessageSequenceNumber()
+            + " and result = "
+            + result);
+    }
+
+    /**
+     * Starts a message transaction.
+     *
+     * @param transaction The transaction to start.
+     * @param now The now time.
+     */
+    private void startMessageTransaction(ContextHubServiceTransaction transaction, long now) {
+        int numCompletedStartCalls = transaction.getNumCompletedStartCalls();
+        @ContextHubTransaction.Result int result = transaction.onTransact();
+        if (result == ContextHubTransaction.RESULT_SUCCESS) {
+      Log.d(
+          TAG,
+          "Successfully "
+              + (numCompletedStartCalls == 0 ? "started" : "retried")
+              + " reliable message transaction with message sequence number = "
+              + transaction.getMessageSequenceNumber());
+        } else {
+      Log.w(
+          TAG,
+          "Could not start reliable message transaction with "
+              + "message sequence number = "
+              + transaction.getMessageSequenceNumber()
+              + ", result = "
+              + result);
+        }
+
+        transaction.setNextRetryTime(now + RELIABLE_MESSAGE_RETRY_WAIT_TIME.toNanos());
+        if (transaction.getTimeoutTime() == Long.MAX_VALUE) { // first time starting transaction
+            transaction.setTimeoutTime(now + RELIABLE_MESSAGE_TIMEOUT.toNanos());
+        }
+        transaction.setNumCompletedStartCalls(numCompletedStartCalls + 1);
+        mReliableMessageHostEndpointIdActiveSet.add(transaction.getHostEndpointId());
     }
 
     private int toStatsTransactionResult(@ContextHubTransaction.Result int result) {
@@ -605,19 +786,34 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(100);
-        ContextHubServiceTransaction[] arr;
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
         synchronized (this) {
-            arr = mTransactionQueue.toArray(new ContextHubServiceTransaction[0]);
-        }
-        for (int i = 0; i < arr.length; i++) {
-            sb.append(i + ": " + arr[i] + "\n");
-        }
+            for (ContextHubServiceTransaction transaction: mTransactionQueue) {
+                sb.append(i);
+                sb.append(": ");
+                sb.append(transaction.toString());
+                sb.append("\n");
+                ++i;
+            }
 
-        sb.append("Transaction History:\n");
-        Iterator<TransactionRecord> iterator = mTransactionRecordDeque.descendingIterator();
-        while (iterator.hasNext()) {
-            sb.append(iterator.next() + "\n");
+            if (Flags.reliableMessageRetrySupportService()) {
+                for (ContextHubServiceTransaction transaction:
+                        mReliableMessageTransactionMap.values()) {
+                    sb.append(i);
+                    sb.append(": ");
+                    sb.append(transaction.toString());
+                    sb.append("\n");
+                    ++i;
+                }
+            }
+
+            sb.append("Transaction History:\n");
+            Iterator<TransactionRecord> iterator = mTransactionRecordDeque.descendingIterator();
+            while (iterator.hasNext()) {
+                sb.append(iterator.next());
+                sb.append("\n");
+            }
         }
         return sb.toString();
     }

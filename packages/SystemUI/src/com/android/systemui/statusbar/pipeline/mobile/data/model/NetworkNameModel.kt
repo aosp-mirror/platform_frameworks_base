@@ -21,6 +21,8 @@ import android.telephony.TelephonyManager.EXTRA_DATA_SPN
 import android.telephony.TelephonyManager.EXTRA_PLMN
 import android.telephony.TelephonyManager.EXTRA_SHOW_PLMN
 import android.telephony.TelephonyManager.EXTRA_SHOW_SPN
+import android.telephony.TelephonyManager.EXTRA_SPN
+import com.android.systemui.Flags.statusBarSwitchToSpnFromDataSpn
 import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
 
@@ -96,15 +98,26 @@ sealed interface NetworkNameModel : Diffable<NetworkNameModel> {
 
 fun Intent.toNetworkNameModel(separator: String): NetworkNameModel? {
     val showSpn = getBooleanExtra(EXTRA_SHOW_SPN, false)
-    val spn = getStringExtra(EXTRA_DATA_SPN)
+    val spn =
+        if (statusBarSwitchToSpnFromDataSpn()) {
+            // Context: b/358669494. Use DATA_SPN if it exists, since that allows carriers to
+            // customize the display name. Otherwise, fall back to the SPN
+            val dataSpn = getStringExtra(EXTRA_DATA_SPN)
+            if (dataSpn.isNullOrEmpty()) {
+                getStringExtra(EXTRA_SPN)
+            } else {
+                dataSpn
+            }
+        } else {
+            getStringExtra(EXTRA_DATA_SPN)
+        }
+
     val showPlmn = getBooleanExtra(EXTRA_SHOW_PLMN, false)
     val plmn = getStringExtra(EXTRA_PLMN)
 
     val str = StringBuilder()
-    val strData = StringBuilder()
     if (showPlmn && plmn != null) {
         str.append(plmn)
-        strData.append(plmn)
     }
     if (showSpn && spn != null) {
         if (str.isNotEmpty()) {

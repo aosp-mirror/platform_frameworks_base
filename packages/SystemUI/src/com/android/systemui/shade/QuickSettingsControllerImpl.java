@@ -19,7 +19,6 @@ package com.android.systemui.shade;
 
 import static android.view.WindowInsets.Type.ime;
 
-import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
 import static com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE;
@@ -75,6 +74,7 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.screenrecord.RecordingController;
@@ -109,6 +109,8 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import dalvik.annotation.optimization.NeverCompile;
 
 import dagger.Lazy;
+
+import kotlin.Unit;
 
 import java.io.PrintWriter;
 
@@ -442,10 +444,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mUseLargeScreenShadeHeader =
                 LargeScreenUtils.shouldUseLargeScreenShadeHeader(mPanelView.getResources());
         mLargeScreenShadeHeaderHeight =
-                centralizedStatusBarHeightFix()
-                        ? mLargeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
-                        : mResources.getDimensionPixelSize(
-                                R.dimen.large_screen_shade_header_height);
+                mLargeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight();
         int topMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
         mShadeHeaderController.setLargeScreenActive(mUseLargeScreenShadeHeader);
@@ -465,6 +464,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mJavaAdapter.alwaysCollectFlow(
                 mCommunalTransitionViewModelLazy.get().isUmoOnCommunal(),
                 this::setShouldUpdateSquishinessOnMedia);
+        mJavaAdapter.alwaysCollectFlow(
+                mShadeInteractor.isAnyExpanded(),
+                this::onAnyExpandedChanged);
     }
 
     private void initNotificationStackScrollLayoutController() {
@@ -484,6 +486,10 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         }
     }
 
+    private void onAnyExpandedChanged(boolean isAnyExpanded) {
+        mQsFrame.setVisibility(isAnyExpanded ? View.VISIBLE : View.INVISIBLE);
+    }
+
     private void onNotificationScrolled(int newScrollPosition) {
         updateExpansionEnabledAmbient();
     }
@@ -494,7 +500,15 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     }
 
     int getHeaderHeight() {
-        return isQsFragmentCreated() ? mQs.getHeader().getHeight() : 0;
+        if (isQsFragmentCreated()) {
+            if (QSComposeFragment.isEnabled()) {
+                return mQs.getHeaderHeight();
+            } else {
+                return mQs.getHeader().getHeight();
+            }
+        } else {
+            return 0;
+        }
     }
 
     private boolean isRemoteInputActiveWithKeyboardUp() {
@@ -664,14 +678,26 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 && mKeyguardBypassController.getBypassEnabled()) || mSplitShadeEnabled) {
             return false;
         }
-        View header = keyguardShowing || mQs == null ? mKeyguardStatusBar : mQs.getHeader();
+        int headerTop, headerBottom;
+        if (keyguardShowing || mQs == null) {
+            headerTop = mKeyguardStatusBar.getTop();
+            headerBottom = mKeyguardStatusBar.getBottom();
+        } else {
+            if (QSComposeFragment.isEnabled()) {
+                headerTop = mQs.getHeaderTop();
+                headerBottom = mQs.getHeaderBottom();
+            } else {
+                headerTop = mQs.getHeader().getTop();
+                headerBottom = mQs.getHeader().getBottom();
+            }
+        }
         int frameTop = keyguardShowing
                 || mQs == null ? 0 : mQsFrame.getTop();
         mInterceptRegion.set(
                 /* left= */ (int) mQsFrame.getX(),
-                /* top= */ header.getTop() + frameTop,
+                /* top= */ headerTop + frameTop,
                 /* right= */ (int) mQsFrame.getX() + mQsFrame.getWidth(),
-                /* bottom= */ header.getBottom() + frameTop);
+                /* bottom= */ headerBottom + frameTop);
         // Also allow QS to intercept if the touch is near the notch.
         mStatusBarTouchableRegionManager.updateRegionForNotch(mInterceptRegion);
         final boolean onHeader = mInterceptRegion.contains((int) x, (int) y);
@@ -718,9 +744,18 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         if (mCollapsedOnDown || mBarState == KEYGUARD || getExpanded()) {
             return false;
         }
-        View header = mQs == null ? mKeyguardStatusBar : mQs.getHeader();
+        int headerBottom;
+        if (mQs == null) {
+            headerBottom = mKeyguardStatusBar.getBottom();
+        } else {
+            if (QSComposeFragment.isEnabled()) {
+                headerBottom = mQs.getHeaderBottom();
+            } else {
+                headerBottom = mQs.getHeader().getBottom();
+            }
+        }
         return downX >= mQsFrame.getX() && downX <= mQsFrame.getX() + mQsFrame.getWidth()
-                && downY <= header.getBottom();
+                && downY <= headerBottom;
     }
 
     /** Closes the Qs customizer. */
@@ -789,6 +824,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
     /** update Qs height state */
     void setExpansionHeight(float height) {
+        if (mExpansionHeight == height) {
+            return;
+        }
         int maxHeight = getMaxExpansionHeight();
         height = Math.min(Math.max(
                 height, getMinExpansionHeight()), maxHeight);
@@ -975,7 +1013,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
         if (height == 0 && !mKeyguardStateController.canDismissLockScreen()) {
-            mDeviceEntryFaceAuthInteractor.onQsExpansionStared();
+            mDeviceEntryFaceAuthInteractor.onShadeExpansionStarted();
         }
     }
 
@@ -1033,13 +1071,17 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
         setClippingBounds();
 
-        if (mSplitShadeEnabled) {
-            // In split shade we want to pretend that QS are always collapsed so their behaviour and
-            // interactions don't influence notifications as they do in portrait. But we want to set
-            // 0 explicitly in case we're rotating from non-split shade with QS expansion of 1.
-            mNotificationStackScrollLayoutController.setQsExpansionFraction(0);
-        } else {
-            mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
+        if (!SceneContainerFlag.isEnabled()) {
+            if (mSplitShadeEnabled) {
+                // In split shade we want to pretend that QS are always collapsed so their
+                // behaviour and interactions don't influence notifications as they do in portrait.
+                // But we want to set 0 explicitly in case we're rotating from non-split shade with
+                // QS expansion of 1.
+                mNotificationStackScrollLayoutController.setQsExpansionFraction(0);
+            } else {
+                mNotificationStackScrollLayoutController.setQsExpansionFraction(
+                        qsExpansionFraction);
+            }
         }
 
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
@@ -1265,20 +1307,20 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             mTranslationForFullShadeTransition = qsTranslation;
             updateQsFrameTranslation();
             float currentTranslation = mQsFrame.getTranslationY();
-            int clipTop = mEnableClipping
-                    ? (int) (top - currentTranslation - mQsFrame.getTop()) : 0;
-            int clipBottom = mEnableClipping
-                    ? (int) (bottom - currentTranslation - mQsFrame.getTop()) : 0;
+            int clipTop = (int) (top - currentTranslation - mQsFrame.getTop());
+            int clipBottom = (int) (bottom - currentTranslation - mQsFrame.getTop());
             mVisible = qsVisible;
             mQs.setQsVisible(qsVisible);
-            mQs.setFancyClipping(
-                    mDisplayLeftInset,
-                    clipTop,
-                    mDisplayRightInset,
-                    clipBottom,
-                    radius,
-                    qsVisible && !mSplitShadeEnabled,
-                    mIsFullWidth);
+            if (mEnableClipping) {
+                mQs.setFancyClipping(
+                        mDisplayLeftInset,
+                        clipTop,
+                        mDisplayRightInset,
+                        clipBottom,
+                        radius,
+                        qsVisible && !mSplitShadeEnabled,
+                        mIsFullWidth);
+            }
 
         }
 
@@ -2189,14 +2231,27 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                         }
                     });
             mQs.setCollapsedMediaVisibilityChangedListener((visible) -> {
-                if (mQs.getHeader().isShown()) {
+                if (mQs.isHeaderShown()) {
                     setAnimateNextNotificationBounds(
                             StackStateAnimator.ANIMATION_DURATION_STANDARD, 0);
                     mNotificationStackScrollLayoutController.animateNextTopPaddingChange();
                 }
             });
             mLockscreenShadeTransitionController.setQS(mQs);
-            mNotificationStackScrollLayoutController.setQsHeader((ViewGroup) mQs.getHeader());
+            if (QSComposeFragment.isEnabled()) {
+                QSHeaderBoundsProvider provider = new QSHeaderBoundsProvider(
+                        mQs::getHeaderLeft,
+                        mQs::getHeaderHeight,
+                        rect -> {
+                            mQs.getHeaderBoundsOnScreen(rect);
+                            return Unit.INSTANCE;
+                        }
+                );
+
+                mNotificationStackScrollLayoutController.setQsHeaderBoundsProvider(provider);
+            } else {
+                mNotificationStackScrollLayoutController.setQsHeader((ViewGroup) mQs.getHeader());
+            }
             mQs.setScrollListener(mQsScrollListener);
             updateExpansion();
         }
@@ -2208,6 +2263,12 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             // non-fragment and fragment code. Once we are using a fragment for the notification
             // panel, mQs will not need to be null cause it will be tied to the same lifecycle.
             if (fragment == mQs) {
+                // Clear it to remove bindings to mQs from the provider.
+                if (QSComposeFragment.isEnabled()) {
+                    mNotificationStackScrollLayoutController.setQsHeaderBoundsProvider(null);
+                } else {
+                    mNotificationStackScrollLayoutController.setQsHeader(null);
+                }
                 mQs = null;
             }
         }

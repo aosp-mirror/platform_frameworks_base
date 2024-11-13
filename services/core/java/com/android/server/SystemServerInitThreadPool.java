@@ -197,8 +197,8 @@ public final class SystemServerInitThreadPool implements Dumpable {
                 /* processCpuTracker= */null, /* lastPids= */null,
                 CompletableFuture.completedFuture(Watchdog.getInterestingNativePids()),
                 /* logExceptionCreatingFile= */null, /* subject= */null,
-                /* criticalEventSection= */null, Runnable::run,
-                /* latencyTracker= */null);
+                /* criticalEventSection= */null, /* extraHeaders= */ null,
+                Runnable::run, /* latencyTracker= */null);
     }
 
     @Override

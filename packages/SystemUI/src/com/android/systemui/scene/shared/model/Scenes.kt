@@ -43,20 +43,6 @@ object Scenes {
     @JvmField val Lockscreen = SceneKey("lockscreen")
 
     /**
-     * The notifications shade scene primarily shows a scrollable list of notifications as an
-     * overlay UI.
-     *
-     * It's used only in the dual shade configuration, where there are two separate shades: one for
-     * notifications (this scene) and another for [QuickSettingsShade].
-     *
-     * It's not used in the single/accordion configuration (swipe down once to reveal the shade,
-     * swipe down again the to expand quick settings) or in the "split" shade configuration (on
-     * large screens or unfolded foldables, where notifications and quick settings are shown
-     * side-by-side in their own columns).
-     */
-    @JvmField val NotificationsShade = SceneKey("notifications_shade")
-
-    /**
      * The quick settings scene shows the quick setting tiles.
      *
      * This scene is used for single/accordion configuration (swipe down once to reveal the shade,
@@ -67,23 +53,10 @@ object Scenes {
      * scene is used.
      *
      * For the dual shade configuration, where there are two separate shades: one for notifications
-     * and one for quick settings, [NotificationsShade] and [QuickSettingsShade] scenes are used
-     * respectively.
+     * and one for quick settings, the overlays `NotificationsShade` and `QuickSettingsShade` are
+     * used respectively.
      */
     @JvmField val QuickSettings = SceneKey("quick_settings")
-
-    /**
-     * The quick settings shade scene shows the quick setting tiles as an overlay UI.
-     *
-     * It's used only in the dual shade configuration, where there are two separate shades: one for
-     * quick settings (this scene) and another for [NotificationsShade].
-     *
-     * It's not used in the single/accordion configuration (swipe down once to reveal the shade,
-     * swipe down again the to expand quick settings) or in the "split" shade configuration (on
-     * large screens or unfolded foldables, where notifications and quick settings are shown
-     * side-by-side in their own columns).
-     */
-    @JvmField val QuickSettingsShade = SceneKey("quick_settings_shade")
 
     /**
      * The shade is the scene that shows a scrollable list of notifications and the minimized
@@ -93,7 +66,8 @@ object Scenes {
      * swipe down again the to expand quick settings) and for the "split" shade configuration (on
      * large screens or unfolded foldables, where notifications and quick settings are shown
      * side-by-side in their own columns). For the dual shade configuration, where there are two
-     * separate shades: one for notifications and one for quick settings, other scenes are used.
+     * separate shades: one for notifications and one for quick settings, the overlays
+     * `NotificationsShade` and `QuickSettingsShade` are used respectively.
      */
     @JvmField val Shade = SceneKey("shade")
 }
@@ -110,16 +84,4 @@ object SceneFamilies {
      * depending on whether the device is unlocked and has been entered.
      */
     @JvmField val Home = SceneKey(debugName = "scene_family_home")
-
-    /**
-     * The scene that contains the full, interactive notification shade. The specific scene it
-     * resolves to can depend on dual / split / single shade settings.
-     */
-    @JvmField val NotifShade = SceneKey(debugName = "scene_family_notif_shade")
-
-    /**
-     * The scene that contains the full QuickSettings (not to be confused with Quick-QuickSettings).
-     * The specific scene it resolves to can depend on dual / split / single shade settings.
-     */
-    @JvmField val QuickSettings = SceneKey(debugName = "scene_family_quick_settings")
 }

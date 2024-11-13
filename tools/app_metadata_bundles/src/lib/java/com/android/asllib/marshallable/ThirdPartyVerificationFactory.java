@@ -22,16 +22,11 @@ import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 public class ThirdPartyVerificationFactory
         implements AslMarshallableFactory<ThirdPartyVerification> {
 
     /** Creates a {@link ThirdPartyVerification} from the human-readable DOM element. */
-    @Override
-    public ThirdPartyVerification createFromHrElements(List<Element> elements)
-            throws MalformedXmlException {
-        Element ele = XmlUtils.getSingleElement(elements);
+    public ThirdPartyVerification createFromHrElement(Element ele) throws MalformedXmlException {
         if (ele == null) {
             AslgenUtil.logI("No ThirdPartyVerification found in hr format.");
             return null;
@@ -42,10 +37,7 @@ public class ThirdPartyVerificationFactory
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    @Override
-    public ThirdPartyVerification createFromOdElements(List<Element> elements)
-            throws MalformedXmlException {
-        Element ele = XmlUtils.getSingleElement(elements);
+    public ThirdPartyVerification createFromOdElement(Element ele) throws MalformedXmlException {
         if (ele == null) {
             AslgenUtil.logI("No ThirdPartyVerification found in od format.");
             return null;

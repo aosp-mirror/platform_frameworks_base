@@ -25,6 +25,9 @@
 #include <input/Input.h>
 #include <log/log.h>
 
+#define INDENT "  "
+#define INDENT2 "    "
+
 namespace {
 // Time to spend fading out the pointer completely.
 const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms
@@ -61,25 +64,6 @@ MouseCursorController::~MouseCursorController() {
     mLocked.pointerSprite.clear();
 }
 
-std::optional<FloatRect> MouseCursorController::getBounds() const {
-    std::scoped_lock lock(mLock);
-
-    return getBoundsLocked();
-}
-
-std::optional<FloatRect> MouseCursorController::getBoundsLocked() const REQUIRES(mLock) {
-    if (!mLocked.viewport.isValid()) {
-        return {};
-    }
-
-    return FloatRect{
-            static_cast<float>(mLocked.viewport.logicalLeft),
-            static_cast<float>(mLocked.viewport.logicalTop),
-            static_cast<float>(mLocked.viewport.logicalRight - 1),
-            static_cast<float>(mLocked.viewport.logicalBottom - 1),
-    };
-}
-
 void MouseCursorController::move(float deltaX, float deltaY) {
 #if DEBUG_MOUSE_CURSOR_UPDATES
     ALOGD("Move pointer by deltaX=%0.3f, deltaY=%0.3f", deltaX, deltaY);
@@ -102,11 +86,20 @@ void MouseCursorController::setPosition(float x, float y) {
 }
 
 void MouseCursorController::setPositionLocked(float x, float y) REQUIRES(mLock) {
-    const auto bounds = getBoundsLocked();
-    if (!bounds) return;
+    const auto& v = mLocked.viewport;
+    if (!v.isValid()) return;
 
-    mLocked.pointerX = std::max(bounds->left, std::min(bounds->right, x));
-    mLocked.pointerY = std::max(bounds->top, std::min(bounds->bottom, y));
+    // The valid bounds for a mouse cursor. Since the right and bottom edges are considered outside
+    // the display, clip the bounds by one pixel instead of letting the cursor get arbitrarily
+    // close to the outside edge.
+    const FloatRect bounds{
+            static_cast<float>(mLocked.viewport.logicalLeft),
+            static_cast<float>(mLocked.viewport.logicalTop),
+            static_cast<float>(mLocked.viewport.logicalRight - 1),
+            static_cast<float>(mLocked.viewport.logicalBottom - 1),
+    };
+    mLocked.pointerX = std::max(bounds.left, std::min(bounds.right, x));
+    mLocked.pointerY = std::max(bounds.top, std::min(bounds.bottom, y));
 
     updatePointerLocked();
 }
@@ -213,9 +206,11 @@ void MouseCursorController::setDisplayViewport(const DisplayViewport& viewport,
     // Reset cursor position to center if size or display changed.
     if (oldViewport.displayId != viewport.displayId || oldDisplayWidth != newDisplayWidth ||
         oldDisplayHeight != newDisplayHeight) {
-        if (const auto bounds = getBoundsLocked(); bounds) {
-            mLocked.pointerX = (bounds->left + bounds->right) * 0.5f;
-            mLocked.pointerY = (bounds->top + bounds->bottom) * 0.5f;
+        if (viewport.isValid()) {
+            // Use integer coordinates as the starting point for the cursor location.
+            // We usually expect display sizes to be even numbers, so the flooring is precautionary.
+            mLocked.pointerX = std::floor((viewport.logicalLeft + viewport.logicalRight) / 2);
+            mLocked.pointerY = std::floor((viewport.logicalTop + viewport.logicalBottom) / 2);
             // Reload icon resources for density may be changed.
             loadResourcesLocked(getAdditionalMouseResources);
         } else {
@@ -447,6 +442,24 @@ void MouseCursorController::getAdditionalMouseResources() {
 bool MouseCursorController::resourcesLoaded() {
     std::scoped_lock lock(mLock);
     return mLocked.resourcesLoaded;
+}
+
+std::string MouseCursorController::dump() const {
+    std::string dump = INDENT "MouseCursorController:\n";
+    std::scoped_lock lock(mLock);
+    dump += StringPrintf(INDENT2 "viewport: %s\n", mLocked.viewport.toString().c_str());
+    dump += StringPrintf(INDENT2 "stylusHoverMode: %s\n",
+                         mLocked.stylusHoverMode ? "true" : "false");
+    dump += StringPrintf(INDENT2 "pointerFadeDirection: %d\n", mLocked.pointerFadeDirection);
+    dump += StringPrintf(INDENT2 "updatePointerIcon: %s\n",
+                         mLocked.updatePointerIcon ? "true" : "false");
+    dump += StringPrintf(INDENT2 "resourcesLoaded: %s\n",
+                         mLocked.resourcesLoaded ? "true" : "false");
+    dump += StringPrintf(INDENT2 "requestedPointerType: %d\n", mLocked.requestedPointerType);
+    dump += StringPrintf(INDENT2 "resolvedPointerType: %d\n", mLocked.resolvedPointerType);
+    dump += StringPrintf(INDENT2 "skipScreenshot: %s\n", mLocked.skipScreenshot ? "true" : "false");
+    dump += StringPrintf(INDENT2 "animating: %s\n", mLocked.animating ? "true" : "false");
+    return dump;
 }
 
 bool MouseCursorController::doAnimations(nsecs_t timestamp) {

@@ -23,7 +23,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
-import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -37,14 +36,14 @@ constructor(
 
     private val transitionAnimation =
         animationFlow
-            .setup(duration = TO_GLANCEABLE_HUB_DURATION, edge = Edge.create(GONE, Scenes.Communal))
+            .setup(duration = TO_GLANCEABLE_HUB_DURATION, edge = Edge.INVALID)
             .setupWithoutSceneContainer(edge = Edge.create(GONE, GLANCEABLE_HUB))
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = 167.milliseconds,
             onStep = { it },
-            onCancel = { 0f },
+            onCancel = { 1f },
             onFinish = { 1f },
         )
 }

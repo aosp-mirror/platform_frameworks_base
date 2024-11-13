@@ -117,8 +117,8 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Display;
@@ -369,8 +369,10 @@ public class DisplayContentTests extends WindowTestsBase {
                 "startingWin");
         startingWin.setHasSurface(true);
         assertTrue(startingWin.canBeImeTarget());
+        final WindowContainer imeSurfaceParentWindow = mock(WindowContainer.class);
         final SurfaceControl imeSurfaceParent = mock(SurfaceControl.class);
-        doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
+        doReturn(imeSurfaceParent).when(imeSurfaceParentWindow).getSurfaceControl();
+        doReturn(imeSurfaceParentWindow).when(mDisplayContent).computeImeParent();
         spyOn(imeContainer);
 
         mDisplayContent.setImeInputTarget(startingWin);
@@ -406,8 +408,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 "startingWin");
         startingWin.setHasSurface(true);
         assertTrue(startingWin.canBeImeTarget());
+        final WindowContainer imeSurfaceParentWindow = mock(WindowContainer.class);
         final SurfaceControl imeSurfaceParent = mock(SurfaceControl.class);
-        doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
+        doReturn(imeSurfaceParent).when(imeSurfaceParentWindow).getSurfaceControl();
+        doReturn(imeSurfaceParentWindow).when(mDisplayContent).computeImeParent();
+
 
         // Main precondition for this test: organize the ImeContainer.
         final IDisplayAreaOrganizer mockImeOrganizer = mock(IDisplayAreaOrganizer.class);
@@ -639,10 +644,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 ws.matchesDisplayAreaBounds());
 
         assertTrue("IME shouldn't be attached to app",
-                dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
-                        .mActivityRecord.getSurfaceControl());
+                dc.computeImeParent().getSurfaceControl() != dc.getImeTarget(
+                        IME_TARGET_LAYERING).getWindow().mActivityRecord.getSurfaceControl());
         assertEquals("IME should be attached to display",
-                dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+                dc.getImeContainer().getParent().getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     private WindowState[] createNotDrawnWindowsOn(DisplayContent displayContent, int... types) {
@@ -1144,6 +1150,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testOrientationBehind() {
+        assertNull(mDisplayContent.getLastOrientationSource());
         final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setScreenOrientation(getRotatedOrientation(mDisplayContent)).build();
         prev.setVisibleRequested(false);
@@ -1190,8 +1197,9 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setImeLayeringTarget(createWindow(null, TYPE_BASE_APPLICATION, "app"));
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
-                        .mActivityRecord.getSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeTarget(
+                        IME_TARGET_LAYERING).getWindow().mActivityRecord.getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1201,7 +1209,8 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getImeTarget(IME_TARGET_LAYERING).getWindow().setWindowingMode(
                 WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -1212,7 +1221,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(mAppWindow);
         // The surface parent of IME should be the display instead of app window.
         assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
-                mDisplayContent.computeImeParent());
+                mDisplayContent.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1220,7 +1229,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setImeLayeringTarget(createWindow(null, TYPE_STATUS_BAR, "statusBar"));
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -1231,7 +1241,8 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(mDisplayContent).shouldImeAttachedToApp();
         mDisplayContent.setImeLayeringTarget(app1);
         mDisplayContent.setImeInputTarget(app1);
-        assertEquals(app1.mActivityRecord.getSurfaceControl(), mDisplayContent.computeImeParent());
+        assertEquals(app1.mActivityRecord.getSurfaceControl(),
+                mDisplayContent.computeImeParent().getSurfaceControl());
         mDisplayContent.setImeLayeringTarget(app2);
         // Expect null means no change IME parent when the IME layering target not yet
         // request IME to be the input target.
@@ -1249,7 +1260,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         assertFalse(mDisplayContent.shouldImeAttachedToApp());
         assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
-                mDisplayContent.computeImeParent());
+                mDisplayContent.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1274,7 +1285,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc.getImeTarget(IME_TARGET_LAYERING), dc.getImeInputTarget());
 
         // The ImeParent should be the display.
-        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1732,25 +1744,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
 
-    @SetupWindows(addWindows = W_ACTIVITY)
-    @Test
-    public void testRotateSeamlesslyWithFixedRotation() {
-        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
-        final ActivityRecord app = mAppWindow.mActivityRecord;
-        mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
-        mAppWindow.mAttrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
-
-        // Use seamless rotation if the top app is rotated.
-        assertTrue(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
-                ROTATION_90 /* newRotation */, false /* forceUpdate */));
-
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(app);
-
-        // Use normal rotation because animating recents is an intermediate state.
-        assertFalse(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
-                ROTATION_90 /* newRotation */, false /* forceUpdate */));
-    }
-
     @Test
     public void testFixedRotationWithPip() {
         final DisplayContent displayContent = mDefaultDisplay;
@@ -1828,47 +1821,44 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
 
+    @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
     @Test
-    public void testRecentsNotRotatingWithFixedRotation() {
-        unblockDisplayRotation(mDisplayContent);
-        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
-        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
-        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
+    public void testRespectNonTopVisibleFixedOrientation() {
+        spyOn(mWm.mAppCompatConfiguration);
+        doReturn(false).when(mWm.mAppCompatConfiguration).isTranslucentLetterboxingEnabled();
+        makeDisplayPortrait(mDisplayContent);
+        final ActivityRecord nonTopVisible = new ActivityBuilder(mAtm)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setCreateTask(true).build();
+        final ActivityRecord translucentTop = new ActivityBuilder(mAtm)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .setTask(nonTopVisible.getTask()).setVisible(false)
+                .setActivityTheme(android.R.style.Theme_Translucent).build();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+        mDisplayContent.requestTransitionAndLegacyPrepare(WindowManager.TRANSIT_OPEN, 0);
+        translucentTop.setVisibility(true);
+        mDisplayContent.updateOrientation();
+        assertEquals("Non-top visible activity must be portrait",
+                Configuration.ORIENTATION_PORTRAIT, nonTopVisible.getConfiguration().orientation);
+        assertEquals("Top translucent activity must be landscape",
+                Configuration.ORIENTATION_LANDSCAPE, translucentTop.getConfiguration().orientation);
 
-        final ActivityRecord activity = createActivityRecord(mDisplayContent);
-        final ActivityRecord recentsActivity = createActivityRecord(mDisplayContent);
-        recentsActivity.setRequestedOrientation(SCREEN_ORIENTATION_NOSENSOR);
-        doReturn(mock(RecentsAnimationController.class)).when(mWm).getRecentsAnimationController();
+        player.start();
+        player.finish();
+        assertEquals("Display must be landscape after the transition is finished",
+                Configuration.ORIENTATION_LANDSCAPE,
+                mDisplayContent.getConfiguration().orientation);
+        assertEquals("Non-top visible activity must still be portrait",
+                Configuration.ORIENTATION_PORTRAIT,
+                nonTopVisible.getConfiguration().orientation);
 
-        // Do not rotate if the recents animation is animating on top.
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
-        assertFalse(displayRotation.updateRotationUnchecked(false));
-
-        // Rotation can be updated if the recents animation is finished.
-        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation();
-        assertTrue(displayRotation.updateRotationUnchecked(false));
-
-        // Rotation can be updated if the policy is not ok to animate (e.g. going to sleep).
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
-        ((TestWindowManagerPolicy) mWm.mPolicy).mOkToAnimate = false;
-        assertTrue(displayRotation.updateRotationUnchecked(false));
-
-        // Rotation can be updated if the recents animation is animating but it is not on top, e.g.
-        // switching activities in different orientations by quickstep gesture.
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        mDisplayContent.setFixedRotationLaunchingAppUnchecked(activity);
-        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
-        assertTrue(displayRotation.updateRotationUnchecked(false));
-
-        // The recents activity should not apply fixed rotation if the top activity is not opaque.
-        mDisplayContent.mFocusedApp = activity;
-        doReturn(false).when(mDisplayContent.mFocusedApp).occludesParent();
-        doReturn(ROTATION_90).when(mDisplayContent).rotationForActivityInDifferentOrientation(
-                eq(recentsActivity));
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        assertFalse(recentsActivity.hasFixedRotationTransform());
+        translucentTop.finishIfPossible("test", false /* oomAdj */);
+        mDisplayContent.updateOrientation();
+        player.start();
+        player.finish();
+        assertEquals("Display must be portrait after closing the translucent activity",
+                Configuration.ORIENTATION_PORTRAIT,
+                mDisplayContent.getConfiguration().orientation);
     }
 
     @Test
@@ -2564,7 +2554,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // test misc display overrides
         assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
-                mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
+                mWm.mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
     }
 
@@ -2607,7 +2597,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // test misc display overrides
         assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
-                mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
+                mWm.mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
     }
 
@@ -2616,6 +2606,7 @@ public class DisplayContentTests extends WindowTestsBase {
      * display.
      */
     @Test
+    @SuppressWarnings("GuardedBy")
     public void testNotResumeHomeRootTaskOnRemovingDisplay() {
         // Create a display which supports system decoration and allows reparenting root tasks to
         // another display when the display is removed.
@@ -2638,7 +2629,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // The removed display should have no focused root task and its home root task should never
         // resume.
         assertNull(display.getFocusedRootTask());
-        verify(homeRootTask, never()).resumeTopActivityUncheckedLocked(any(), any());
+        verify(homeRootTask, never()).resumeTopActivityUncheckedLocked(
+                any(), any(), anyBoolean());
     }
 
     /**
@@ -2754,15 +2746,17 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState imeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
-        spyOn(imeAppTarget);
-        doReturn(true).when(imeAppTarget).isRequestedVisible(ime());
+        imeAppTarget.setRequestedVisibleTypes(ime());
         assertEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
 
         // Verify imeMenuDialog doesn't be focused window if the next IME target is closing.
         final WindowState nextImeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "nextImeAppTarget");
         makeWindowVisibleAndDrawn(nextImeAppTarget);
-        nextImeAppTarget.mActivityRecord.commitVisibility(false, false);
+        // Even if the app still requests IME, the ime dialog should not gain focus if the target
+        // app is invisible.
+        nextImeAppTarget.setRequestedVisibleTypes(ime());
+        nextImeAppTarget.mActivityRecord.setVisibility(false);
         mDisplayContent.setImeLayeringTarget(nextImeAppTarget);
         assertNotEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
     }
@@ -2830,25 +2824,25 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void cameraCompatFreeformFlagEnabled_cameraCompatFreeformPolicyNotNull() {
         doReturn(true).when(() ->
-                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+                DesktopModeHelper.canEnterDesktopMode(any()));
 
-        assertNotNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertTrue(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
     @Test
     public void cameraCompatFreeformFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
         doReturn(true).when(() ->
-                DesktopModeLaunchParamsModifier.canEnterDesktopMode(any()));
+                DesktopModeHelper.canEnterDesktopMode(any()));
 
-        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
-        assertNull(createNewDisplay().mCameraCompatFreeformPolicy);
+        assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     private void removeRootTaskTests(Runnable runnable) {

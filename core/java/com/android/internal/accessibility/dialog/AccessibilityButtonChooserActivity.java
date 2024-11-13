@@ -29,8 +29,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.TextUtils;
-import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -45,6 +43,8 @@ import java.util.List;
  * Activity used to display and persist a service or feature target for the Accessibility button.
  */
 public class AccessibilityButtonChooserActivity extends Activity {
+    public static final String EXTRA_TYPE_TO_CHOOSE = "TYPE";
+
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
 
     @Override
@@ -68,24 +68,22 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 NAV_BAR_MODE_GESTURAL == getResources().getInteger(
                         com.android.internal.R.integer.config_navBarInteractionMode);
 
+        final int targetType = android.provider.Flags.a11yStandaloneGestureEnabled()
+                ? getIntent().getIntExtra(EXTRA_TYPE_TO_CHOOSE, SOFTWARE) : SOFTWARE;
+
         if (isGestureNavigateEnabled) {
             final TextView promptPrologue = findViewById(R.id.accessibility_button_prompt_prologue);
             promptPrologue.setText(isTouchExploreOn
                     ? R.string.accessibility_gesture_3finger_prompt_text
                     : R.string.accessibility_gesture_prompt_text);
-        }
 
-        if (TextUtils.isEmpty(component)) {
             final TextView prompt = findViewById(R.id.accessibility_button_prompt);
-            if (isGestureNavigateEnabled) {
-                prompt.setText(isTouchExploreOn
-                        ? R.string.accessibility_gesture_3finger_instructional_text
-                        : R.string.accessibility_gesture_instructional_text);
-            }
-            prompt.setVisibility(View.VISIBLE);
+            prompt.setText(isTouchExploreOn
+                    ? R.string.accessibility_gesture_3finger_instructional_text
+                    : R.string.accessibility_gesture_instructional_text);
         }
 
-        mTargets.addAll(getTargets(this, SOFTWARE));
+        mTargets.addAll(getTargets(this, targetType));
 
         final GridView gridview = findViewById(R.id.accessibility_button_chooser_grid);
         gridview.setAdapter(new ButtonTargetAdapter(mTargets));

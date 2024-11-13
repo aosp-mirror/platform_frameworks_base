@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -138,53 +137,5 @@ public class WatchdogRollbackLoggerTest {
         assertThat(logPackage).isNull();
         verify(mMockPm, times(1)).getPackageInfo(
                 sTestPackageV1.getPackageName(), PACKAGE_INFO_FLAGS);
-    }
-
-    /**
-     * Ensures that we make the correct Package Manager calls in the case that the failing packages
-     * are correctly configured with parent packages.
-     */
-    @Test
-    public void testApexdLoggingCallsWithParents() throws Exception {
-        for (String failingPackage: sFailingPackages) {
-            PackageInfo packageInfo = new PackageInfo();
-            ApplicationInfo applicationInfo = new ApplicationInfo();
-            Bundle bundle = new Bundle();
-            bundle.putString(LOGGING_PARENT_KEY, getParent(failingPackage));
-            applicationInfo.metaData = bundle;
-            packageInfo.applicationInfo = applicationInfo;
-            when(mMockPm.getPackageInfo(same(failingPackage), anyInt())).thenReturn(packageInfo);
-        }
-
-        when(mMockPm.getPackageInfo(anyString(), eq(0))).thenReturn(mPackageInfo);
-        WatchdogRollbackLogger.logApexdRevert(mMockContext, sFailingPackages, "test_process");
-        for (String failingPackage: sFailingPackages) {
-            verify(mMockPm, times(1)).getPackageInfo(failingPackage, PACKAGE_INFO_FLAGS);
-            verify(mMockPm, times(1)).getPackageInfo(getParent(failingPackage), 0);
-        }
-    }
-
-    /**
-     * Ensures that we don't make any calls to parent packages in the case that packages are not
-     * correctly configured with parent packages.
-     */
-    @Test
-    public void testApexdLoggingCallsWithNoParents() throws Exception {
-        for (String failingPackage: sFailingPackages) {
-            PackageInfo packageInfo = new PackageInfo();
-            packageInfo.applicationInfo = new ApplicationInfo();
-            when(mMockPm.getPackageInfo(same(failingPackage), anyInt())).thenReturn(packageInfo);
-        }
-        when(mMockPm.getPackageInfo(anyString(), eq(0))).thenReturn(mPackageInfo);
-
-        WatchdogRollbackLogger.logApexdRevert(mMockContext, sFailingPackages, "test_process");
-        verify(mMockPm, times(sFailingPackages.size())).getPackageInfo(anyString(), anyInt());
-        for (String failingPackage: sFailingPackages) {
-            verify(mMockPm, times(1)).getPackageInfo(failingPackage, PACKAGE_INFO_FLAGS);
-        }
-    }
-
-    private String getParent(String packageName) {
-        return packageName + "-parent";
     }
 }

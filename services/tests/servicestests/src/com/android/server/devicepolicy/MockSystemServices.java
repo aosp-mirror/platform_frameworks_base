@@ -142,6 +142,7 @@ public class MockSystemServices {
     public final DevicePolicyManager devicePolicyManager;
     public final LocationManager locationManager;
     public final RoleManager roleManager;
+    public final RoleManagerForMock roleManagerForMock;
     public final SubscriptionManager subscriptionManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -200,6 +201,7 @@ public class MockSystemServices {
         devicePolicyManager = mock(DevicePolicyManager.class);
         locationManager = mock(LocationManager.class);
         roleManager = realContext.getSystemService(RoleManager.class);
+        roleManagerForMock = mock(RoleManagerForMock.class);
         subscriptionManager = mock(SubscriptionManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
@@ -492,6 +494,12 @@ public class MockSystemServices {
     public static class UserManagerForMock {
         public boolean isHeadlessSystemUserMode() {
             return false;
+        }
+    }
+
+    public static class RoleManagerForMock {
+        public List<String> getRoleHoldersAsUser(String role, UserHandle userHandle) {
+            return new ArrayList<>();
         }
     }
 

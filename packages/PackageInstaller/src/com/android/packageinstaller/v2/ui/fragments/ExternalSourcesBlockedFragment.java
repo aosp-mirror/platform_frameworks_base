@@ -63,7 +63,7 @@ public class ExternalSourcesBlockedFragment extends DialogFragment {
             .setMessage(R.string.untrusted_external_source_warning)
             .setPositiveButton(R.string.external_sources_settings,
                 (dialog, which) -> mInstallActionListener.sendUnknownAppsIntent(
-                    mDialogData.getDialogMessage()))
+                    mDialogData.getSourceApp()))
             .setNegativeButton(R.string.cancel,
                 (dialog, which) -> mInstallActionListener.onNegativeResponse(
                     mDialogData.getStageCode()))

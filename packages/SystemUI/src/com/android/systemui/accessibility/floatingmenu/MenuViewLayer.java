@@ -77,11 +77,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.Flags;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissViewUtils;
-import com.android.wm.shell.common.bubbles.DismissView;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.shared.bubbles.DismissView;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -142,6 +143,8 @@ class MenuViewLayer extends FrameLayout implements
     private boolean mIsNotificationShown;
     private Optional<MenuEduTooltipView> mEduTooltipView = Optional.empty();
     private BroadcastReceiver mNotificationActionReceiver;
+    private NavigationModeController mNavigationModeController;
+    private NavigationModeController.ModeChangedListener mNavigationModeChangedListender;
 
     @IntDef({
             LayerIndex.MENU_VIEW,
@@ -205,8 +208,9 @@ class MenuViewLayer extends FrameLayout implements
                         return;
                     }
 
-                    setAccessibilityServiceState(getContext(), serviceComponentName, /* enabled= */
-                            false);
+                    setAccessibilityServiceState(
+                            getContext(), serviceComponentName, /* enabled= */ false,
+                            mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
                 });
             }
 
@@ -219,7 +223,8 @@ class MenuViewLayer extends FrameLayout implements
             MenuViewModel menuViewModel,
             MenuViewAppearance menuViewAppearance, MenuView menuView,
             IAccessibilityFloatingMenu floatingMenu,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            NavigationModeController navigationModeController) {
         super(context);
 
         // Simplifies the translation positioning and animations
@@ -252,6 +257,8 @@ class MenuViewLayer extends FrameLayout implements
         mNotificationFactory = new MenuNotificationFactory(context);
         mNotificationManager = context.getSystemService(NotificationManager.class);
         mStatusBarManager = context.getSystemService(StatusBarManager.class);
+        mNavigationModeController = navigationModeController;
+        mNavigationModeChangedListender = (mode -> mMenuView.onPositionChanged());
 
         if (Flags.floatingMenuDragToEdit()) {
             mDragToInteractAnimationController = new DragToInteractAnimationController(
@@ -334,6 +341,7 @@ class MenuViewLayer extends FrameLayout implements
         mDragToInteractView.updateResources();
         mDismissView.updateResources();
         mDragToInteractAnimationController.updateResources();
+        mMenuAnimationController.skipAnimations();
     }
 
     @Override
@@ -379,6 +387,7 @@ class MenuViewLayer extends FrameLayout implements
                 mMigrationTooltipObserver);
         mMessageView.setUndoListener(view -> undo());
         getContext().registerComponentCallbacks(this);
+        mNavigationModeController.addListener(mNavigationModeChangedListender);
     }
 
     @Override
@@ -394,6 +403,7 @@ class MenuViewLayer extends FrameLayout implements
                 mMigrationTooltipObserver);
         mHandler.removeCallbacksAndMessages(/* token= */ null);
         getContext().unregisterComponentCallbacks(this);
+        mNavigationModeController.removeListener(mNavigationModeChangedListender);
     }
 
     @Override
@@ -467,6 +477,7 @@ class MenuViewLayer extends FrameLayout implements
 
     private void onSpringAnimationsEndAction() {
         if (mShouldShowDockTooltip) {
+            mEduTooltipView.ifPresent(this::removeTooltip);
             mEduTooltipView = Optional.of(new MenuEduTooltipView(mContext, mMenuViewAppearance));
             mEduTooltipView.ifPresent(view -> addTooltipView(view,
                     getContext().getText(R.string.accessibility_floating_button_docking_tooltip),
@@ -512,7 +523,7 @@ class MenuViewLayer extends FrameLayout implements
         List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
                 PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY));
         if (!activities.isEmpty()) {
-            mContext.startActivity(intent);
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
             mStatusBarManager.collapsePanels();
         }
     }

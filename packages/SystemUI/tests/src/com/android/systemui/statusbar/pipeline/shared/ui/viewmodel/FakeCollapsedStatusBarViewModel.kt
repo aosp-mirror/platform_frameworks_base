@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.view.View
+import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,12 +30,36 @@ class FakeCollapsedStatusBarViewModel : CollapsedStatusBarViewModel {
 
     override val transitionFromLockscreenToDreamStartedEvent = MutableSharedFlow<Unit>()
 
-    override val ongoingActivityChip: MutableStateFlow<OngoingActivityChipModel> =
-        MutableStateFlow(OngoingActivityChipModel.Hidden)
+    override val primaryOngoingActivityChip: MutableStateFlow<OngoingActivityChipModel> =
+        MutableStateFlow(OngoingActivityChipModel.Hidden())
+
+    override val ongoingActivityChips = MutableStateFlow(MultipleOngoingActivityChipsModel())
+
+    override val isHomeStatusBarAllowedByScene = MutableStateFlow(false)
+
+    override val isClockVisible =
+        MutableStateFlow(
+            CollapsedStatusBarViewModel.VisibilityModel(
+                visibility = View.GONE,
+                shouldAnimateChange = false,
+            )
+        )
+
+    override val isNotificationIconContainerVisible =
+        MutableStateFlow(
+            CollapsedStatusBarViewModel.VisibilityModel(
+                visibility = View.GONE,
+                shouldAnimateChange = false,
+            )
+        )
+
+    override val isSystemInfoVisible =
+        MutableStateFlow(
+            CollapsedStatusBarViewModel.VisibilityModel(
+                visibility = View.GONE,
+                shouldAnimateChange = false,
+            )
+        )
 
     override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> = areNotificationLightsOut
-
-    fun setNotificationLightsOut(lightsOut: Boolean) {
-        areNotificationLightsOut.value = lightsOut
-    }
 }

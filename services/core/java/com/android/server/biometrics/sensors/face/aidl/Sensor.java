@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+import static android.hardware.face.FaceSensorConfigurations.remapFqName;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -158,7 +159,7 @@ public class Sensor {
                                         Slog.e(TAG, "Face sensor hardware unavailable.");
                                         mCurrentSession = null;
                                     }
-                                });
+                                }, getFaceUtilsInstance());
 
                         return Sensor.this.getStartUserClient(resultController, sensorId,
                                 newUserId, provider);
@@ -280,8 +281,7 @@ public class Sensor {
             final long userToken = proto.start(SensorStateProto.USER_STATES);
             proto.write(UserStateProto.USER_ID, userId);
             proto.write(UserStateProto.NUM_ENROLLED,
-                    FaceUtils.getInstance(mSensorProperties.sensorId)
-                            .getBiometricsForUser(mContext, userId).size());
+                    getFaceUtilsInstance().getBiometricsForUser(mContext, userId).size());
             proto.end(userToken);
         }
 
@@ -338,7 +338,8 @@ public class Sensor {
         if (mTestHalEnabled) {
             return true;
         }
-        return ServiceManager.checkService(IFace.DESCRIPTOR + "/" + halInstanceName) != null;
+        return ServiceManager.checkService(
+                remapFqName(IFace.DESCRIPTOR + "/" + halInstanceName)) != null;
     }
 
     /**
@@ -357,5 +358,9 @@ public class Sensor {
     public void setLazySession(
             Supplier<AidlSession> lazySession) {
         mLazySession = lazySession;
+    }
+
+    public FaceUtils getFaceUtilsInstance() {
+        return FaceUtils.getInstance(mSensorProperties.sensorId);
     }
 }

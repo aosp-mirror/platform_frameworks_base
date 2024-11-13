@@ -1,0 +1,10 @@
+package: "com.android.server.updates"
+container: "system"
+
+flag {
+    name: "certificate_transparency_installer"
+    is_exported: true
+    namespace: "network_security"
+    description: "Enable certificate transparency installer for log list data"
+    bug: "319829948"
+}

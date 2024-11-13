@@ -16,7 +16,9 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
@@ -89,8 +91,13 @@ final class SystemAudioAutoInitiationAction extends HdmiCecFeatureAction {
 
         // If System Audio Control feature is enabled, turn on system audio mode when new AVR is
         // detected. Otherwise, turn off system audio mode.
+        // If AVR reports SAM on and it is in standby, the action SystemAudioActionFromTv
+        // triggers a <SAM Request> that will wake-up the AVR.
         boolean targetSystemAudioMode = tv().isSystemAudioControlFeatureEnabled();
-        if (currentSystemAudioMode != targetSystemAudioMode) {
+        if (currentSystemAudioMode != targetSystemAudioMode
+                || (currentSystemAudioMode && tv().getAvrDeviceInfo() != null
+                && tv().getAvrDeviceInfo().getDevicePowerStatus()
+                == HdmiControlManager.POWER_STATUS_STANDBY)) {
             // Start System Audio Control feature actions only if necessary.
             addAndStartAction(
                     new SystemAudioActionFromTv(tv(), mAvrAddress, targetSystemAudioMode, null));

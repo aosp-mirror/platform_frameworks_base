@@ -18,7 +18,7 @@ package com.android.internal.widget.remotecompose.core.operations.utilities.easi
 /**
  * Provides and interface to create easing functions
  */
-public class GeneralEasing extends  Easing{
+public class GeneralEasing extends Easing{
     float[] mEasingData = new float[0];
     Easing mEasingCurve = new CubicEasing(CUBIC_STANDARD);
 

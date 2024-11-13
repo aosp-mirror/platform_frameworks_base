@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.SharedPreferencesExt.observe
@@ -40,6 +41,7 @@ class QSPreferencesRepository
 constructor(
     private val userFileManager: UserFileManager,
     private val userRepository: UserRepository,
+    private val defaultLargeTilesRepository: DefaultLargeTilesRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
     /** Whether to show the labels on icon tiles for the current user. */
@@ -51,10 +53,34 @@ constructor(
             }
             .flowOn(backgroundDispatcher)
 
+    /** Set of [TileSpec] to display as large tiles for the current user. */
+    val largeTilesSpecs: Flow<Set<TileSpec>> =
+        userRepository.selectedUserInfo
+            .flatMapLatest { userInfo ->
+                val prefs = getSharedPrefs(userInfo.id)
+                prefs.observe().emitOnStart().map {
+                    prefs
+                        .getStringSet(
+                            LARGE_TILES_SPECS_KEY,
+                            defaultLargeTilesRepository.defaultLargeTiles.map { it.spec }.toSet()
+                        )
+                        ?.map { TileSpec.create(it) }
+                        ?.toSet() ?: defaultLargeTilesRepository.defaultLargeTiles
+                }
+            }
+            .flowOn(backgroundDispatcher)
+
     /** Sets for the current user whether to show the labels on icon tiles. */
     fun setShowLabels(showLabels: Boolean) {
         with(getSharedPrefs(userRepository.getSelectedUserInfo().id)) {
             edit().putBoolean(ICON_LABELS_KEY, showLabels).apply()
+        }
+    }
+
+    /** Sets for the current user the set of [TileSpec] to display as large tiles. */
+    fun setLargeTilesSpecs(specs: Set<TileSpec>) {
+        with(getSharedPrefs(userRepository.getSelectedUserInfo().id)) {
+            edit().putStringSet(LARGE_TILES_SPECS_KEY, specs.map { it.spec }.toSet()).apply()
         }
     }
 
@@ -68,6 +94,7 @@ constructor(
 
     companion object {
         private const val ICON_LABELS_KEY = "show_icon_labels"
+        private const val LARGE_TILES_SPECS_KEY = "large_tiles_specs"
         const val FILE_NAME = "quick_settings_prefs"
     }
 }

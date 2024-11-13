@@ -39,7 +39,7 @@ import android.view.WindowManager.LayoutParams.WindowType;
 import android.window.WindowContext;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.util.Objects;
 
@@ -330,8 +330,8 @@ class WindowContextListenerController {
             mLastReportedConfig.setTo(config);
             mLastReportedDisplay = displayId;
 
-            mWpc.scheduleClientTransactionItem(WindowContextInfoChangeItem.obtain(
-                    mClientToken, config, displayId));
+            mWpc.scheduleClientTransactionItem(
+                    new WindowContextInfoChangeItem(mClientToken, config, displayId));
             mHasPendingConfiguration = false;
         }
 
@@ -356,7 +356,7 @@ class WindowContextListenerController {
                 }
             }
             mDeathRecipient.unlinkToDeath();
-            mWpc.scheduleClientTransactionItem(WindowContextWindowRemovalItem.obtain(mClientToken));
+            mWpc.scheduleClientTransactionItem(new WindowContextWindowRemovalItem(mClientToken));
             unregister();
         }
 

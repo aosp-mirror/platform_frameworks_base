@@ -69,6 +69,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
             Flags::enableModeLimitForExternalDisplay);
 
+    private final FlagState mDisplayTopology = new FlagState(
+            Flags.FLAG_DISPLAY_TOPOLOGY,
+            Flags::displayTopology);
+
     private final FlagState mConnectedDisplayErrorHandlingFlagState = new FlagState(
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_ERROR_HANDLING,
             Flags::enableConnectedDisplayErrorHandling);
@@ -154,6 +158,10 @@ public class DisplayManagerFlags {
             Flags::useFusionProxSensor
     );
 
+    private final FlagState mDozeBrightnessFloat = new FlagState(
+            Flags.FLAG_DOZE_BRIGHTNESS_FLOAT,
+            Flags::dozeBrightnessFloat);
+
     private final FlagState mOffloadControlsDozeAutoBrightness = new FlagState(
             Flags.FLAG_OFFLOAD_CONTROLS_DOZE_AUTO_BRIGHTNESS,
             Flags::offloadControlsDozeAutoBrightness
@@ -177,6 +185,28 @@ public class DisplayManagerFlags {
     private final FlagState mOffloadDozeOverrideHoldsWakelock = new FlagState(
             Flags.FLAG_OFFLOAD_DOZE_OVERRIDE_HOLDS_WAKELOCK,
             Flags::offloadDozeOverrideHoldsWakelock
+    );
+
+    private final FlagState mOffloadSessionCancelBlockScreenOn = new FlagState(
+            Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON,
+            Flags::offloadSessionCancelBlockScreenOn);
+
+    private final FlagState mNewHdrBrightnessModifier = new FlagState(
+            Flags.FLAG_NEW_HDR_BRIGHTNESS_MODIFIER,
+            Flags::newHdrBrightnessModifier);
+
+    private final FlagState mIdleScreenConfigInSubscribingLightSensor = new FlagState(
+            Flags.FLAG_IDLE_SCREEN_CONFIG_IN_SUBSCRIBING_LIGHT_SENSOR,
+            Flags::idleScreenConfigInSubscribingLightSensor);
+
+    private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
+            Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
+            Flags::normalBrightnessForDozeParameter
+    );
+
+    private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
+            Flags.FLAG_ENABLE_BATTERY_STATS_FOR_ALL_DISPLAYS,
+            Flags::enableBatteryStatsForAllDisplays
     );
 
     /**
@@ -238,6 +268,10 @@ public class DisplayManagerFlags {
      */
     public boolean isExternalDisplayLimitModeEnabled() {
         return mExternalDisplayLimitModeState.isEnabled();
+    }
+
+    public boolean isDisplayTopologyEnabled() {
+        return mDisplayTopology.isEnabled();
     }
 
     /**
@@ -337,6 +371,10 @@ public class DisplayManagerFlags {
         return mUseFusionProxSensor.getName();
     }
 
+    public boolean isDozeBrightnessFloatEnabled() {
+        return mDozeBrightnessFloat.isEnabled();
+    }
+
     /**
      * @return Whether DisplayOffload should control auto-brightness in doze
      */
@@ -352,6 +390,10 @@ public class DisplayManagerFlags {
         return mOffloadDozeOverrideHoldsWakelock.isEnabled();
     }
 
+    public boolean isOffloadSessionCancelBlockScreenOnEnabled() {
+        return mOffloadSessionCancelBlockScreenOn.isEnabled();
+    }
+
     /**
      * @return Whether to ignore preferredRefreshRate app request conversion to display mode or not
      */
@@ -364,11 +406,42 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return Whether to use new HDR brightness modifier or not
+     */
+    public boolean useNewHdrBrightnessModifier() {
+        return mNewHdrBrightnessModifier.isEnabled();
+    }
+
+    /**
+     * @return Whether the useDozeBrightness parameter should be used
+     */
+    public boolean isNormalBrightnessForDozeParameterEnabled() {
+        return mNormalBrightnessForDozeParameter.isEnabled();
+    }
+
+     /**
+      * @return {@code true} if idle timer refresh rate config is accounted for while subscribing to
+      * the light sensor
+      */
+    public boolean isIdleScreenConfigInSubscribingLightSensorEnabled() {
+        return mIdleScreenConfigInSubscribingLightSensor.isEnabled();
+    }
+
+    /**
+      * @return {@code true} if battery stats is enabled for all displays, not just the primary
+      * display.
+      */
+    public boolean isBatteryStatsEnabledForAllDisplays() {
+        return mEnableBatteryStatsForAllDisplays.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
     public void dump(PrintWriter pw) {
         pw.println("DisplayManagerFlags:");
+        pw.println("--------------------");
         pw.println(" " + mAdaptiveToneImprovements1);
         pw.println(" " + mAdaptiveToneImprovements2);
         pw.println(" " + mBackUpSmoothDisplayAndForcePeakRefreshRateFlagState);
@@ -376,6 +449,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mConnectedDisplayManagementFlagState);
         pw.println(" " + mDisplayOffloadFlagState);
         pw.println(" " + mExternalDisplayLimitModeState);
+        pw.println(" " + mDisplayTopology);
         pw.println(" " + mHdrClamperFlagState);
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
@@ -394,11 +468,17 @@ public class DisplayManagerFlags {
         pw.println(" " + mRefactorDisplayPowerController);
         pw.println(" " + mResolutionBackupRestore);
         pw.println(" " + mUseFusionProxSensor);
+        pw.println(" " + mDozeBrightnessFloat);
         pw.println(" " + mOffloadControlsDozeAutoBrightness);
         pw.println(" " + mPeakRefreshRatePhysicalLimit);
         pw.println(" " + mIgnoreAppPreferredRefreshRate);
         pw.println(" " + mSynthetic60hzModes);
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
+        pw.println(" " + mOffloadSessionCancelBlockScreenOn);
+        pw.println(" " + mNewHdrBrightnessModifier);
+        pw.println(" " + mNormalBrightnessForDozeParameter);
+        pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
+        pw.println(" " + mEnableBatteryStatsForAllDisplays);
     }
 
     private static class FlagState {

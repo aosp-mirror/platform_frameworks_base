@@ -385,7 +385,7 @@ public class AccountManager {
     /**
      * @hide
      */
-    public static final int CACHE_USER_DATA_SIZE = 4;
+    public static final int CACHE_USER_DATA_SIZE = 32;
 
     private static final class AccountKeyData {
         final public Account account;

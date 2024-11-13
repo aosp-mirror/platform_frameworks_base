@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Trace;
 import android.view.ContextThemeWrapper;
@@ -30,6 +31,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.brightness.MirrorController;
 import com.android.systemui.util.LifecycleFragment;
@@ -103,10 +105,56 @@ public class QSFragmentLegacy extends LifecycleFragment implements QS {
 
     @Override
     public View getHeader() {
+        QSComposeFragment.assertInLegacyMode();
         if (mQsImpl != null) {
             return mQsImpl.getHeader();
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public int getHeaderTop() {
+        if (mQsImpl != null) {
+            return mQsImpl.getHeaderTop();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public int getHeaderBottom() {
+        if (mQsImpl != null) {
+            return mQsImpl.getHeaderBottom();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public int getHeaderLeft() {
+        if (mQsImpl != null) {
+            return mQsImpl.getHeaderLeft();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public void getHeaderBoundsOnScreen(Rect outBounds) {
+        if (mQsImpl != null) {
+            mQsImpl.getHeaderBoundsOnScreen(outBounds);
+        } else {
+            outBounds.setEmpty();
+        }
+    }
+
+    @Override
+    public boolean isHeaderShown() {
+        if (mQsImpl != null) {
+            return mQsImpl.isHeaderShown();
+        } else {
+            return false;
         }
     }
 

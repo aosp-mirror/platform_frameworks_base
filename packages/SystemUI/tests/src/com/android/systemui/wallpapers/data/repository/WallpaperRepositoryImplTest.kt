@@ -20,6 +20,7 @@ import android.app.WallpaperInfo
 import android.app.WallpaperManager
 import android.content.Intent
 import android.content.pm.UserInfo
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -37,9 +38,11 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class WallpaperRepositoryImplTest : SysuiTestCase() {
 
     private val testDispatcher = StandardTestDispatcher()

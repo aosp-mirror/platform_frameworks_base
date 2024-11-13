@@ -18,26 +18,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <FrameLayout
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical">
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight=".8">
+        android:layout_marginEnd="6dip"
+        android:layout_marginTop="6dip"
+        android:layout_marginBottom="6dip"
+        android:layout_weight="1">
         <include
             android:id="@+id/language_picker_item"
             layout="@layout/language_picker_item" />
-    </FrameLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight=".2"
+        android:layout_height="match_parent"
         android:gravity="center"
         android:minHeight="?android:attr/listPreferredItemHeight">
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginHorizontal="16dp"
             android:src="@drawable/ic_check_24dp"
             app:tint="?attr/colorAccentPrimaryVariant"
             android:contentDescription="@*android:string/checked"/>

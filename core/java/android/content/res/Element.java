@@ -19,6 +19,7 @@ package android.content.res;
 import static android.os.SystemProperties.PROP_VALUE_MAX;
 
 import android.annotation.NonNull;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.Pools.SimplePool;
 import android.util.Slog;
 
@@ -33,6 +34,7 @@ import java.util.Set;
  *
  * {@hide}
  */
+@RavenwoodKeepWholeClass
 public class Element {
     private static final int DEFAULT_MAX_STRING_ATTR_LENGTH = 32_768;
     private static final int MAX_POOL_SIZE = 128;

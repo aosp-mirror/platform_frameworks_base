@@ -16,6 +16,7 @@
 
 package com.android.systemui.process;
 
+import android.app.ActivityManager;
 import android.os.Process;
 import android.os.UserHandle;
 
@@ -34,6 +35,13 @@ public class ProcessWrapper {
      */
     public boolean isSystemUser() {
         return myUserHandle().isSystem();
+    }
+
+    /**
+     * Returns {@code true} if the foreground user is running the current process.
+     */
+    public boolean isForegroundUser() {
+        return ActivityManager.getCurrentUser() == myUserHandle().getIdentifier();
     }
 
     /**

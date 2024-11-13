@@ -18,11 +18,10 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -77,7 +76,6 @@ public class MonotonicClockTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "b/321832617")
     public void corruptedFile() throws IOException {
         // Create an invalid binary XML file to cause IOException: "Unexpected magic number"
         try (FileWriter w = new FileWriter(mFile)) {

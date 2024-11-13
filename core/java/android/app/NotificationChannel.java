@@ -55,7 +55,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -70,6 +72,40 @@ public final class NotificationChannel implements Parcelable {
      * earlier without a notification channel specified are posted to this channel.
      */
     public static final String DEFAULT_CHANNEL_ID = "miscellaneous";
+
+    /**
+     * A reserved id for a system channel reserved for promotional notifications.
+     *  @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String PROMOTIONS_ID = "android.app.promotions";
+    /**
+     * A reserved id for a system channel reserved for non-conversation social media notifications.
+     *  @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String SOCIAL_MEDIA_ID = "android.app.social";
+    /**
+     * A reserved id for a system channel reserved for news notifications.
+     *  @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String NEWS_ID = "android.app.news";
+    /**
+     * A reserved id for a system channel reserved for content recommendation notifications.
+     *  @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String RECS_ID = "android.app.recs";
+
+    /** @hide */
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final ArrayList<String> SYSTEM_RESERVED_IDS = new ArrayList<>(
+            List.of(NEWS_ID, SOCIAL_MEDIA_ID, PROMOTIONS_ID, RECS_ID));
 
     /**
      * The formatter used by the system to create an id for notification
@@ -139,7 +175,11 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
-    public static final int MAX_VIBRATION_LENGTH = 1000;
+    public static final int MAX_VIBRATION_LENGTH = 500;
+    /**
+     * @hide
+     */
+    public static final int MAX_SERIALIZED_VIBRATION_LENGTH = 32_768;
 
     private static final String TAG_CHANNEL = "channel";
     private static final String ATT_NAME = "name";
@@ -339,6 +379,9 @@ public final class NotificationChannel implements Parcelable {
         if (Flags.notificationChannelVibrationEffectApi()) {
             mVibrationEffect =
                     in.readInt() != 0 ? VibrationEffect.CREATOR.createFromParcel(in) : null;
+            if (Flags.notifChannelCropVibrationEffects() && mVibrationEffect != null) {
+                mVibrationEffect = getTrimmedVibrationEffect(mVibrationEffect);
+            }
         }
         mUserLockedFields = in.readInt();
         mUserVisibleTaskShown = in.readByte() != 0;
@@ -553,6 +596,23 @@ public final class NotificationChannel implements Parcelable {
         return input;
     }
 
+    // Returns trimmed vibration effect or null if not trimmable.
+    private VibrationEffect getTrimmedVibrationEffect(VibrationEffect effect) {
+        if (effect == null) {
+            return null;
+        }
+        // trim if possible; check serialized length; reject if it is still too long
+        VibrationEffect result = effect;
+        VibrationEffect trimmed = effect.cropToLengthOrNull(MAX_VIBRATION_LENGTH);
+        if (trimmed != null) {
+            result = trimmed;
+        }
+        if (vibrationToString(result).length() > MAX_SERIALIZED_VIBRATION_LENGTH) {
+            return null;
+        }
+        return result;
+    }
+
     /**
      * @hide
      */
@@ -656,6 +716,11 @@ public final class NotificationChannel implements Parcelable {
     public void setVibrationPattern(long[] vibrationPattern) {
         this.mVibrationEnabled = vibrationPattern != null && vibrationPattern.length > 0;
         this.mVibrationPattern = vibrationPattern;
+        if (Flags.notifChannelCropVibrationEffects()) {
+            if (vibrationPattern != null && vibrationPattern.length > MAX_VIBRATION_LENGTH) {
+                this.mVibrationPattern = Arrays.copyOf(vibrationPattern, MAX_VIBRATION_LENGTH);
+            }
+        }
         if (Flags.notificationChannelVibrationEffectApi()) {
             try {
                 this.mVibrationEffect =
@@ -702,9 +767,29 @@ public final class NotificationChannel implements Parcelable {
     public void setVibrationEffect(@Nullable VibrationEffect effect) {
         this.mVibrationEnabled = effect != null;
         this.mVibrationEffect = effect;
-        this.mVibrationPattern =
-                effect == null
-                ? null : effect.computeCreateWaveformOffOnTimingsOrNull();
+        if (Flags.notifChannelCropVibrationEffects() && effect != null) {
+            long[] pattern = effect.computeCreateWaveformOffOnTimingsOrNull();
+            if (pattern != null) {
+                // If this effect has an equivalent pattern, AND the pattern needs to be truncated
+                // due to being too long, we delegate to setVibrationPattern to re-generate the
+                // effect as well. Otherwise, we use the effect (already set above) and converted
+                // pattern directly.
+                if (pattern.length > MAX_VIBRATION_LENGTH) {
+                    setVibrationPattern(pattern);
+                } else {
+                    this.mVibrationPattern = pattern;
+                }
+            } else {
+                // If not convertible to a pattern directly, try trimming the vibration effect if
+                // possible and storing that version instead.
+                this.mVibrationEffect = getTrimmedVibrationEffect(mVibrationEffect);
+                this.mVibrationPattern = null;
+            }
+        } else {
+            this.mVibrationPattern =
+                    mVibrationEffect == null
+                            ? null : mVibrationEffect.computeCreateWaveformOffOnTimingsOrNull();
+        }
     }
 
     /**
@@ -724,9 +809,14 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets whether or not notifications posted to this channel can interrupt the user in
-     * {@link android.app.NotificationManager.Policy#INTERRUPTION_FILTER_PRIORITY} mode.
+     * {@link android.app.NotificationManager#INTERRUPTION_FILTER_PRIORITY} mode.
      *
-     * Only modifiable by the system and notification ranker.
+     * <p>Apps with Do Not Disturb policy access (see
+     * {@link NotificationManager#isNotificationPolicyAccessGranted()}) can set up their own
+     * channels this way, but only if the channel hasn't been updated by the user since its
+     * creation.
+     *
+     * <p>Otherwise, this value is only modifiable by the system and the notification ranker.
      */
     public void setBypassDnd(boolean bypassDnd) {
         this.mBypassDnd = bypassDnd;
@@ -1138,7 +1228,9 @@ public final class NotificationChannel implements Parcelable {
             if (vibrationEffect != null) {
                 // Restore the effect only if it is not null. This allows to avoid undoing a
                 // `setVibrationPattern` call above, if that was done with a non-null pattern
-                // (e.g. back up from a version that did not support `setVibrationEffect`).
+                // (e.g. back up from a version that did not support `setVibrationEffect`), or
+                // when notif_channel_crop_vibration_effects is true, if there is an equivalent
+                // vibration pattern available.
                 setVibrationEffect(vibrationEffect);
             }
         }
@@ -1331,7 +1423,11 @@ public final class NotificationChannel implements Parcelable {
             out.attribute(null, ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         }
         if (getVibrationEffect() != null) {
-            out.attribute(null, ATT_VIBRATION_EFFECT, vibrationToString(getVibrationEffect()));
+            if (!Flags.notifChannelCropVibrationEffects() || getVibrationPattern() == null) {
+                // When notif_channel_crop_vibration_effects is on, only serialize the vibration
+                // effect if we do not already have an equivalent vibration pattern.
+                out.attribute(null, ATT_VIBRATION_EFFECT, vibrationToString(getVibrationEffect()));
+            }
         }
         if (getUserLockedFields() != 0) {
             out.attributeInt(null, ATT_USER_LOCKED, getUserLockedFields());

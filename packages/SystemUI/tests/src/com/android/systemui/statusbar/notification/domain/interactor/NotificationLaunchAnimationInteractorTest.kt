@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -23,8 +24,10 @@ import com.android.systemui.statusbar.notification.data.repository.NotificationL
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class NotificationLaunchAnimationInteractorTest : SysuiTestCase() {
     private val repository = NotificationLaunchAnimationRepository()
     private val underTest = NotificationLaunchAnimationInteractor(repository)

@@ -39,7 +39,7 @@ class FakeUserRepository @Inject constructor() : UserRepository {
         // User id to represent a non system (human) user id. We presume this is the main user.
         const val MAIN_USER_ID = 10
 
-        private const val DEFAULT_SELECTED_USER = 0
+        const val DEFAULT_SELECTED_USER = 0
         private val DEFAULT_SELECTED_USER_INFO =
             UserInfo(
                 /* id= */ DEFAULT_SELECTED_USER,

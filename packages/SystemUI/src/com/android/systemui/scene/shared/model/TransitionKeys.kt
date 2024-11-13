@@ -27,9 +27,6 @@ object TransitionKeys {
     /** Reference to the gone/lockscreen to shade transition with split shade enabled. */
     val ToSplitShade = TransitionKey("GoneToSplitShade")
 
-    /** Reference to a scene transition that can collapse the shade scene instantly. */
-    val CollapseShadeInstantly = TransitionKey("CollapseShadeInstantly")
-
     /**
      * Reference to a scene transition that can collapse the shade scene slightly faster than a
      * normal collapse would.

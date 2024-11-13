@@ -20,10 +20,14 @@ import android.app.backup.BackupManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
+import android.os.UserManager
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalWidgetDao
+import com.android.systemui.communal.data.db.CommunalWidgetItem
+import com.android.systemui.communal.data.db.DefaultWidgetPopulation
+import com.android.systemui.communal.data.db.DefaultWidgetPopulation.SkipReason.RESTORED_FROM_BACKUP
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.proto.toCommunalHubState
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
@@ -53,12 +57,17 @@ interface CommunalWidgetRepository {
     /** A flow of information about active communal widgets stored in database. */
     val communalWidgets: Flow<List<CommunalWidgetContentModel>>
 
-    /** Add a widget at the specified position in the app widget service and the database. */
+    /**
+     * Add a widget in the app widget service and the database.
+     *
+     * @param rank The rank of the widget determines its position in the grid. 0 is first place, 1
+     *   is second, etc. If rank is not specified, widget is added at the end.
+     */
     fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        priority: Int,
-        configurator: WidgetConfigurator? = null
+        rank: Int?,
+        configurator: WidgetConfigurator? = null,
     ) {}
 
     /**
@@ -71,9 +80,9 @@ interface CommunalWidgetRepository {
     /**
      * Update the order of widgets in the database.
      *
-     * @param widgetIdToPriorityMap mapping of the widget ids to the priority of the widget.
+     * @param widgetIdToRankMap mapping of the widget ids to the rank of the widget.
      */
-    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {}
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {}
 
     /**
      * Restores the database by reading a state file from disk and updating the widget ids according
@@ -98,6 +107,8 @@ constructor(
     private val backupManager: BackupManager,
     private val backupUtils: CommunalBackupUtils,
     packageChangeRepository: PackageChangeRepository,
+    private val userManager: UserManager,
+    private val defaultWidgetPopulation: DefaultWidgetPopulation,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
@@ -115,7 +126,7 @@ constructor(
                 CommunalWidgetEntry(
                     appWidgetId = widget.widgetId,
                     componentName = widget.componentName,
-                    priority = rank.rank,
+                    rank = rank.rank,
                     providerInfo = providers[widget.widgetId]
                 )
             }
@@ -145,8 +156,8 @@ constructor(
     override fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        priority: Int,
-        configurator: WidgetConfigurator?
+        rank: Int?,
+        configurator: WidgetConfigurator?,
     ) {
         bgScope.launch {
             val id = communalWidgetHost.allocateIdAndBindWidget(provider, user)
@@ -184,13 +195,14 @@ constructor(
                 communalWidgetDao.addWidget(
                     widgetId = id,
                     provider = provider,
-                    priority = priority,
+                    rank = rank,
+                    userSerialNumber = userManager.getUserSerialNumber(user.identifier),
                 )
                 backupManager.dataChanged()
             } else {
                 appWidgetHost.deleteAppWidgetId(id)
             }
-            logger.i("Added widget ${provider.flattenToString()} at position $priority.")
+            logger.i("Added widget ${provider.flattenToString()} at position $rank.")
         }
     }
 
@@ -204,11 +216,11 @@ constructor(
         }
     }
 
-    override fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {
+    override fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {
         bgScope.launch {
-            communalWidgetDao.updateWidgetOrder(widgetIdToPriorityMap)
+            communalWidgetDao.updateWidgetOrder(widgetIdToRankMap)
             logger.i({ "Updated the order of widget list with ids: $str1." }) {
-                str1 = widgetIdToPriorityMap.toString()
+                str1 = widgetIdToRankMap.toString()
             }
             backupManager.dataChanged()
         }
@@ -228,8 +240,37 @@ constructor(
                 return@launch
             }
 
+            // Abort restoring widgets if this code is somehow run on a device that does not have
+            // a main user, e.g. auto.
+            val mainUser = userManager.mainUser
+            if (mainUser == null) {
+                logger.w("Skipped restoring widgets because device does not have a main user")
+                return@launch
+            }
+
             val widgetsWithHost = appWidgetHost.appWidgetIds.toList()
             val widgetsToRemove = widgetsWithHost.toMutableList()
+
+            val oldUserSerialNumbers = state.widgets.map { it.userSerialNumber }.distinct()
+            val usersMap =
+                oldUserSerialNumbers.associateWith { oldUserSerialNumber ->
+                    if (oldUserSerialNumber == CommunalWidgetItem.USER_SERIAL_NUMBER_UNDEFINED) {
+                        // If user serial number from the backup is undefined, the widget was added
+                        // to the hub before user serial numbers are stored in the database. In this
+                        // case, we restore the widget with the main user.
+                        mainUser
+                    } else {
+                        // If the user serial number is defined, look up whether the user is
+                        // restored. This API returns a user handle matching its backed up user
+                        // serial number, if the user is restored. Otherwise, null is returned.
+                        backupManager.getUserForAncestralSerialNumber(oldUserSerialNumber.toLong())
+                            ?: null
+                    }
+                }
+            logger.d({ "Restored users map: $str1" }) { str1 = usersMap.toString() }
+
+            // A set to hold all widgets that belong to non-main users
+            val secondaryUserWidgets = mutableSetOf<CommunalHubState.CommunalWidgetItem>()
 
             // Produce a new state to be restored, skipping invalid widgets
             val newWidgets =
@@ -249,19 +290,66 @@ constructor(
                         return@mapNotNull null
                     }
 
+                    // Skip if user / profile is not registered
+                    val newUser = usersMap[restoredWidget.userSerialNumber]
+                    if (newUser == null) {
+                        logger.d({
+                            "Skipped restoring widget $int1 because its user $int2 is not " +
+                                "registered"
+                        }) {
+                            int1 = restoredWidget.widgetId
+                            int2 = restoredWidget.userSerialNumber
+                        }
+                        return@mapNotNull null
+                    }
+
+                    // Place secondary user widgets in a bucket to be manually bound later because
+                    // of a platform bug (b/349852237) that backs up work profile widgets as
+                    // personal.
+                    if (newUser.identifier != mainUser.identifier) {
+                        logger.d({
+                            "Skipped restoring widget $int1 for now because its new user $int2 " +
+                                "is secondary. This widget will be bound later."
+                        }) {
+                            int1 = restoredWidget.widgetId
+                            int2 = newUser.identifier
+                        }
+                        secondaryUserWidgets.add(restoredWidget)
+                        return@mapNotNull null
+                    }
+
                     widgetsToRemove.remove(newWidgetId)
 
                     CommunalHubState.CommunalWidgetItem().apply {
                         widgetId = newWidgetId
                         componentName = restoredWidget.componentName
                         rank = restoredWidget.rank
+                        userSerialNumber = userManager.getUserSerialNumber(newUser.identifier)
                     }
                 }
             val newState = CommunalHubState().apply { widgets = newWidgets.toTypedArray() }
 
+            // Skip default widgets population
+            defaultWidgetPopulation.skipDefaultWidgetsPopulation(RESTORED_FROM_BACKUP)
+
             // Restore database
-            logger.i("Restoring communal database $newState")
+            logger.i("Restoring communal database:\n$newState")
             communalWidgetDao.restoreCommunalHubState(newState)
+
+            // Manually bind each secondary user widget due to platform bug b/349852237
+            secondaryUserWidgets.forEach { widget ->
+                val newUser = usersMap[widget.userSerialNumber]!!
+                logger.i({ "Binding secondary user ($int1) widget $int2: $str1" }) {
+                    int1 = newUser.identifier
+                    int2 = widget.widgetId
+                    str1 = widget.componentName
+                }
+                addWidget(
+                    provider = ComponentName.unflattenFromString(widget.componentName)!!,
+                    user = newUser,
+                    rank = widget.rank,
+                )
+            }
 
             // Delete restored state file from disk
             backupUtils.clear()
@@ -294,7 +382,7 @@ constructor(
         return CommunalWidgetContentModel.Available(
             appWidgetId = entry.appWidgetId,
             providerInfo = entry.providerInfo!!,
-            priority = entry.priority,
+            rank = entry.rank,
         )
     }
 
@@ -311,20 +399,17 @@ constructor(
             return CommunalWidgetContentModel.Available(
                 appWidgetId = entry.appWidgetId,
                 providerInfo = entry.providerInfo!!,
-                priority = entry.priority,
+                rank = entry.rank,
             )
         }
 
-        val session =
-            installSessions.firstOrNull {
-                it.packageName ==
-                    ComponentName.unflattenFromString(entry.componentName)?.packageName
-            }
-        return if (session != null) {
+        val componentName = ComponentName.unflattenFromString(entry.componentName)
+        val session = installSessions.firstOrNull { it.packageName == componentName?.packageName }
+        return if (componentName != null && session != null) {
             CommunalWidgetContentModel.Pending(
                 appWidgetId = entry.appWidgetId,
-                priority = entry.priority,
-                packageName = session.packageName,
+                rank = entry.rank,
+                componentName = componentName,
                 icon = session.icon,
                 user = session.user,
             )
@@ -336,7 +421,7 @@ constructor(
     private data class CommunalWidgetEntry(
         val appWidgetId: Int,
         val componentName: String,
-        val priority: Int,
+        val rank: Int,
         var providerInfo: AppWidgetProviderInfo? = null,
     )
 }

@@ -518,6 +518,7 @@ final class LogicalDisplay {
                     deviceInfo.supportedColorModes,
                     deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
+            mBaseDisplayInfo.isForceSdr = deviceInfo.isForceSdr;
             mBaseDisplayInfo.userDisabledHdrTypes = mUserDisabledHdrTypes;
             mBaseDisplayInfo.minimalPostProcessingSupported =
                     deviceInfo.allmSupported || deviceInfo.gameContentTypeSupported;
@@ -899,6 +900,29 @@ final class LogicalDisplay {
     }
 
     /**
+     * Checks whether display is of the type where HDR settings are relevant, and then sets
+     * whether Force SDR conversion mode is active.  isForceSdr is checked by the Display when
+     * returning HDR capabilities.
+     *
+     * @param isForceSdr Whether Force SDR conversion mode is active
+     * @return Whether Display Manager should call handleLogicalDisplayChangedLocked()
+     */
+    public boolean setIsForceSdr(boolean isForceSdr) {
+        int displayType = getDisplayInfoLocked().type;
+        boolean isTargetDisplayType = displayType == Display.TYPE_INTERNAL
+                || displayType == Display.TYPE_EXTERNAL
+                || displayType == Display.TYPE_OVERLAY;
+
+        boolean handleLogicalDisplayChangedLocked = false;
+        if (isTargetDisplayType && mBaseDisplayInfo.isForceSdr != isForceSdr) {
+            mBaseDisplayInfo.isForceSdr = isForceSdr;
+            mInfo.set(null);
+            handleLogicalDisplayChangedLocked = true;
+        }
+        return handleLogicalDisplayChangedLocked;
+    }
+
+    /**
      * Swap the underlying {@link DisplayDevice} with the specified LogicalDisplay.
      *
      * @param targetDisplay The display with which to swap display-devices.
@@ -1040,6 +1064,9 @@ final class LogicalDisplay {
 
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
+        pw.println("mPrimaryDisplayDevice=" + (mPrimaryDisplayDevice != null
+                ? mPrimaryDisplayDevice.getNameLocked() + "(" + mPrimaryDisplayDevice.getUniqueId()
+                        + ")" : "null"));
         pw.println("mIsEnabled=" + mIsEnabled);
         pw.println("mIsInTransition=" + mIsInTransition);
         pw.println("mLayerStack=" + mLayerStack);
@@ -1049,8 +1076,6 @@ final class LogicalDisplay {
         pw.println("mRequestedColorMode=" + mRequestedColorMode);
         pw.println("mDisplayOffset=(" + mDisplayOffsetX + ", " + mDisplayOffsetY + ")");
         pw.println("mDisplayScalingDisabled=" + mDisplayScalingDisabled);
-        pw.println("mPrimaryDisplayDevice=" + (mPrimaryDisplayDevice != null ?
-                mPrimaryDisplayDevice.getNameLocked() : "null"));
         pw.println("mBaseDisplayInfo=" + mBaseDisplayInfo);
         pw.println("mOverrideDisplayInfo=" + mOverrideDisplayInfo);
         pw.println("mRequestedMinimalPostProcessing=" + mRequestedMinimalPostProcessing);

@@ -22,11 +22,11 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.RectF
 import android.hardware.graphics.common.DisplayDecorationSupport
-import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.DisplayCutout
 import android.view.DisplayInfo
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.util.mockito.eq
@@ -39,7 +39,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ScreenDecorHwcLayerTest : SysuiTestCase() {
 

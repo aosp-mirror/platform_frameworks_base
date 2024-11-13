@@ -18,29 +18,51 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeBroadcastMetadata;
+import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothStatusCodes;
 import android.content.Context;
+import android.os.Looper;
 import android.os.Parcel;
+import android.platform.test.flag.junit.SetFlagsRule;
+
+import com.android.settingslib.flags.Flags;
+import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowBluetoothAdapter.class})
 public class CsipDeviceManagerTest {
     private final static String DEVICE_NAME_1 = "TestName_1";
     private final static String DEVICE_NAME_2 = "TestName_2";
@@ -56,6 +78,9 @@ public class CsipDeviceManagerTest {
             createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
     private final BluetoothClass DEVICE_CLASS_2 =
             createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
@@ -75,7 +100,12 @@ public class CsipDeviceManagerTest {
     private A2dpProfile mA2dpProfile;
     @Mock
     private LeAudioProfile mLeAudioProfile;
+    @Mock
+    private LocalBluetoothLeBroadcast mBroadcast;
+    @Mock
+    private LocalBluetoothLeBroadcastAssistant mAssistant;
 
+    private ShadowBluetoothAdapter mShadowBluetoothAdapter;
     private CachedBluetoothDevice mCachedDevice1;
     private CachedBluetoothDevice mCachedDevice2;
     private CachedBluetoothDevice mCachedDevice3;
@@ -99,6 +129,12 @@ public class CsipDeviceManagerTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = RuntimeEnvironment.application;
+        mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        mShadowBluetoothAdapter.setEnabled(true);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
         when(mDevice1.getAddress()).thenReturn(DEVICE_ADDRESS_1);
         when(mDevice2.getAddress()).thenReturn(DEVICE_ADDRESS_2);
         when(mDevice3.getAddress()).thenReturn(DEVICE_ADDRESS_3);
@@ -122,6 +158,8 @@ public class CsipDeviceManagerTest {
         when(mLocalProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
         when(mLocalProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
         when(mLocalProfileManager.getHeadsetProfile()).thenReturn(mHfpProfile);
+        when(mLocalProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(mAssistant);
+        when(mLocalProfileManager.getLeAudioBroadcastProfile()).thenReturn(mBroadcast);
 
         when(mLeAudioProfile.getConnectedGroupLeadDevice(anyInt())).thenReturn(null);
         mCachedDeviceManager = new CachedBluetoothDeviceManager(mContext, mLocalBluetoothManager);
@@ -145,18 +183,18 @@ public class CsipDeviceManagerTest {
         profiles.add(mHfpProfile);
         profiles.add(mA2dpProfile);
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice1.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice1.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice1.isConnected()).thenReturn(true);
 
         profiles.clear();
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice2.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice2.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice2.isConnected()).thenReturn(true);
 
         profiles.clear();
         profiles.add(mHfpProfile);
         profiles.add(mA2dpProfile);
-        when(mCachedDevice3.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice3.getUiAccessibleProfiles()).thenReturn(profiles);
         when(mCachedDevice3.isConnected()).thenReturn(true);
     }
 
@@ -253,7 +291,7 @@ public class CsipDeviceManagerTest {
         when(mDevice2.isConnected()).thenReturn(false);
         List<LocalBluetoothProfile> profiles = new ArrayList<LocalBluetoothProfile>();
         profiles.add(mLeAudioProfile);
-        when(mCachedDevice1.getConnectableProfiles()).thenReturn(profiles);
+        when(mCachedDevice1.getUiAccessibleProfiles()).thenReturn(profiles);
         CachedBluetoothDevice expectedDevice = mCachedDevice1;
 
         assertThat(
@@ -305,6 +343,7 @@ public class CsipDeviceManagerTest {
         mCachedDevices.add(preferredDevice);
         mCachedDevices.add(mCachedDevice2);
         mCachedDevices.add(mCachedDevice3);
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
 
         assertThat(mCsipDeviceManager.addMemberDevicesIntoMainDevice(GROUP1, preferredDevice))
                 .isTrue();
@@ -312,6 +351,36 @@ public class CsipDeviceManagerTest {
         assertThat(mCachedDevices.contains(mCachedDevice2)).isFalse();
         assertThat(mCachedDevices.contains(mCachedDevice3)).isTrue();
         assertThat(preferredDevice.getMemberDevice()).contains(mCachedDevice2);
+        verify(mAssistant, never()).addSource(any(BluetoothDevice.class),
+                any(BluetoothLeBroadcastMetadata.class), anyBoolean());
+    }
+
+    @Test
+    public void addMemberDevicesIntoMainDevice_preferredDeviceIsMainAndTwoMain_syncSource() {
+        // Condition: The preferredDevice is main and there is another main device in top list
+        // Expected Result: return true and there is the preferredDevice in top list
+        CachedBluetoothDevice preferredDevice = mCachedDevice1;
+        mCachedDevice1.getMemberDevice().clear();
+        mCachedDevices.clear();
+        mCachedDevices.add(preferredDevice);
+        mCachedDevices.add(mCachedDevice2);
+        mCachedDevices.add(mCachedDevice3);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        when(mBroadcast.isEnabled(null)).thenReturn(true);
+        BluetoothLeBroadcastMetadata metadata = Mockito.mock(BluetoothLeBroadcastMetadata.class);
+        when(mBroadcast.getLatestBluetoothLeBroadcastMetadata()).thenReturn(metadata);
+        BluetoothLeBroadcastReceiveState state = Mockito.mock(
+                BluetoothLeBroadcastReceiveState.class);
+        when(state.getBisSyncState()).thenReturn(ImmutableList.of(1L));
+        when(mAssistant.getAllSources(mDevice2)).thenReturn(ImmutableList.of(state));
+
+        assertThat(mCsipDeviceManager.addMemberDevicesIntoMainDevice(GROUP1, preferredDevice))
+                .isTrue();
+        assertThat(mCachedDevices.contains(preferredDevice)).isTrue();
+        assertThat(mCachedDevices.contains(mCachedDevice2)).isFalse();
+        assertThat(mCachedDevices.contains(mCachedDevice3)).isTrue();
+        assertThat(preferredDevice.getMemberDevice()).contains(mCachedDevice2);
+        verify(mAssistant).addSource(mDevice1, metadata, /* isGroupOp= */ false);
     }
 
     @Test
@@ -339,6 +408,8 @@ public class CsipDeviceManagerTest {
         CachedBluetoothDevice preferredDevice = mCachedDevice2;
         BluetoothDevice expectedMainBluetoothDevice = preferredDevice.getDevice();
         mCachedDevice3.setGroupId(GROUP1);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        when(mBroadcast.isEnabled(null)).thenReturn(false);
 
         assertThat(mCsipDeviceManager.addMemberDevicesIntoMainDevice(GROUP1, preferredDevice))
                 .isTrue();
@@ -349,7 +420,69 @@ public class CsipDeviceManagerTest {
         assertThat(mCachedDevices.contains(mCachedDevice3)).isFalse();
         assertThat(mCachedDevice1.getMemberDevice()).contains(mCachedDevice2);
         assertThat(mCachedDevice1.getMemberDevice()).contains(mCachedDevice3);
+        assertThat(mCachedDevice1.getDevice()).isEqualTo(expectedMainBluetoothDevice);
+        verify(mAssistant, never()).addSource(any(BluetoothDevice.class),
+                any(BluetoothLeBroadcastMetadata.class), anyBoolean());
+    }
+
+    @Test
+    public void addMemberDevicesIntoMainDevice_preferredDeviceIsMemberAndTwoMain_syncSource() {
+        // Condition: The preferredDevice is member and there are two main device in top list
+        // Expected Result: return true and there is the preferredDevice in top list
+        CachedBluetoothDevice preferredDevice = mCachedDevice2;
+        BluetoothDevice expectedMainBluetoothDevice = preferredDevice.getDevice();
+        mCachedDevice3.setGroupId(GROUP1);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        when(mBroadcast.isEnabled(null)).thenReturn(true);
+        BluetoothLeBroadcastMetadata metadata = Mockito.mock(BluetoothLeBroadcastMetadata.class);
+        when(mBroadcast.getLatestBluetoothLeBroadcastMetadata()).thenReturn(metadata);
+        BluetoothLeBroadcastReceiveState state = Mockito.mock(
+                BluetoothLeBroadcastReceiveState.class);
+        when(state.getBisSyncState()).thenReturn(ImmutableList.of(1L));
+        when(mAssistant.getAllSources(mDevice1)).thenReturn(ImmutableList.of(state));
+
+        assertThat(mCsipDeviceManager.addMemberDevicesIntoMainDevice(GROUP1, preferredDevice))
+                .isTrue();
+        shadowOf(Looper.getMainLooper()).idle();
+        // expected main is mCachedDevice1 which is the main of preferredDevice, since system
+        // switch the relationship between preferredDevice and the main of preferredDevice
+        assertThat(mCachedDevices.contains(mCachedDevice1)).isTrue();
+        assertThat(mCachedDevices.contains(mCachedDevice2)).isFalse();
+        assertThat(mCachedDevices.contains(mCachedDevice3)).isFalse();
+        assertThat(mCachedDevice1.getMemberDevice()).contains(mCachedDevice2);
         assertThat(mCachedDevice1.getMemberDevice()).contains(mCachedDevice3);
         assertThat(mCachedDevice1.getDevice()).isEqualTo(expectedMainBluetoothDevice);
+        verify(mAssistant).addSource(mDevice2, metadata, /* isGroupOp= */ false);
+        verify(mAssistant).addSource(mDevice3, metadata, /* isGroupOp= */ false);
+    }
+
+    @Test
+    public void onProfileConnectionStateChangedIfProcessed_addMemberDevice_refreshUI() {
+        mCachedDevice3.setGroupId(GROUP1);
+
+        mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice3,
+                BluetoothProfile.STATE_CONNECTED);
+
+        verify(mCachedDevice1).refresh();
+    }
+
+    @Test
+    public void onProfileConnectionStateChangedIfProcessed_switchMainDevice_refreshUI() {
+        when(mDevice3.isConnected()).thenReturn(true);
+        when(mDevice2.isConnected()).thenReturn(false);
+        when(mDevice1.isConnected()).thenReturn(false);
+        mCachedDevice3.setGroupId(GROUP1);
+        mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice3,
+                BluetoothProfile.STATE_CONNECTED);
+
+        when(mDevice3.isConnected()).thenReturn(false);
+        mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice3,
+                BluetoothProfile.STATE_DISCONNECTED);
+        when(mDevice1.isConnected()).thenReturn(true);
+        mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(mCachedDevice1,
+                BluetoothProfile.STATE_CONNECTED);
+
+        verify(mCachedDevice3).switchMemberDeviceContent(mCachedDevice1);
+        verify(mCachedDevice3, atLeastOnce()).refresh();
     }
 }

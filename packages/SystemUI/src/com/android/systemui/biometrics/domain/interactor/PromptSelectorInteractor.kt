@@ -74,7 +74,7 @@ interface PromptSelectorInteractor {
     val isConfirmationRequired: Flow<Boolean>
 
     /** Fingerprint sensor type */
-    val sensorType: Flow<FingerprintSensorType>
+    val fingerprintSensorType: Flow<FingerprintSensorType>
 
     /** Switch to the credential view. */
     fun onSwitchToCredential()
@@ -154,7 +154,8 @@ constructor(
             }
         }
 
-    override val sensorType: Flow<FingerprintSensorType> = fingerprintPropertyRepository.sensorType
+    override val fingerprintSensorType: Flow<FingerprintSensorType> =
+        fingerprintPropertyRepository.sensorType
 
     override fun onSwitchToCredential() {
         val modalities: BiometricModalities =
@@ -187,7 +188,6 @@ constructor(
         val hasCredentialViewShown = promptKind.value.isCredential()
         val showBpForCredential =
             Flags.customBiometricPrompt() &&
-                com.android.systemui.Flags.constraintBp() &&
                 !Utils.isBiometricAllowed(promptInfo) &&
                 isDeviceCredentialAllowed(promptInfo) &&
                 promptInfo.contentView != null &&

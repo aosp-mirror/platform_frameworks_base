@@ -22,8 +22,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
@@ -73,11 +71,6 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
     private val demoModelFlow = MutableStateFlow<FakeWifiEventModel?>(null)
 
     private val mainExecutor = FakeExecutor(FakeSystemClock())
-    private val featureFlags =
-        FakeFeatureFlagsClassic().also {
-            it.set(Flags.INSTANT_TETHER, true)
-            it.set(Flags.WIFI_SECONDARY_NETWORKS, true)
-        }
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -93,7 +86,6 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
 
         realImpl =
             WifiRepositoryImpl(
-                featureFlags,
                 testScope.backgroundScope,
                 mainExecutor,
                 testDispatcher,

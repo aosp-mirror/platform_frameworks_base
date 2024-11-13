@@ -110,28 +110,26 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
     DrawTextFunctor f(layout, this, paint, x, y, layout.getAdvance());
     MinikinUtils::forFontRun(layout, &paint, f);
 
-    if (text_feature::fix_double_underline()) {
-        Paint copied(paint);
-        PaintFilter* filter = getPaintFilter();
-        if (filter != nullptr) {
-            filter->filterFullPaint(&copied);
+    Paint copied(paint);
+    PaintFilter* filter = getPaintFilter();
+    if (filter != nullptr) {
+        filter->filterFullPaint(&copied);
+    }
+    const bool isUnderline = copied.isUnderline();
+    const bool isStrikeThru = copied.isStrikeThru();
+    if (isUnderline || isStrikeThru) {
+        const SkScalar left = x;
+        const SkScalar right = x + layout.getAdvance();
+        if (isUnderline) {
+            const SkScalar top = y + f.getUnderlinePosition();
+            drawStroke(left, right, top, f.getUnderlineThickness(), copied, this);
         }
-        const bool isUnderline = copied.isUnderline();
-        const bool isStrikeThru = copied.isStrikeThru();
-        if (isUnderline || isStrikeThru) {
-            const SkScalar left = x;
-            const SkScalar right = x + layout.getAdvance();
-            if (isUnderline) {
-                const SkScalar top = y + f.getUnderlinePosition();
-                drawStroke(left, right, top, f.getUnderlineThickness(), copied, this);
-            }
-            if (isStrikeThru) {
-                float textSize = paint.getSkFont().getSize();
-                const float position = textSize * Paint::kStdStrikeThru_Top;
-                const SkScalar thickness = textSize * Paint::kStdStrikeThru_Thickness;
-                const SkScalar top = y + position;
-                drawStroke(left, right, top, thickness, copied, this);
-            }
+        if (isStrikeThru) {
+            float textSize = paint.getSkFont().getSize();
+            const float position = textSize * Paint::kStdStrikeThru_Top;
+            const SkScalar thickness = textSize * Paint::kStdStrikeThru_Thickness;
+            const SkScalar top = y + position;
+            drawStroke(left, right, top, thickness, copied, this);
         }
     }
 }

@@ -26,6 +26,7 @@ import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
+import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -51,6 +52,7 @@ constructor(
     private val context: Context,
     private val audioVolumeInteractor: AudioVolumeInteractor,
     private val uiEventLogger: UiEventLogger,
+    private val volumePanelLogger: VolumePanelLogger,
 ) : SliderViewModel {
 
     private val volumeChanges = MutableStateFlow<Int?>(null)
@@ -64,7 +66,6 @@ constructor(
         mapOf(
             AudioStream(AudioManager.STREAM_MUSIC) to R.drawable.ic_music_note,
             AudioStream(AudioManager.STREAM_VOICE_CALL) to R.drawable.ic_call,
-            AudioStream(AudioManager.STREAM_BLUETOOTH_SCO) to R.drawable.ic_call,
             AudioStream(AudioManager.STREAM_RING) to R.drawable.ic_ring_volume,
             AudioStream(AudioManager.STREAM_NOTIFICATION) to R.drawable.ic_volume_ringer,
             AudioStream(AudioManager.STREAM_ALARM) to R.drawable.ic_volume_alarm,
@@ -73,7 +74,6 @@ constructor(
         mapOf(
             AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_music,
             AudioStream(AudioManager.STREAM_VOICE_CALL) to R.string.stream_voice_call,
-            AudioStream(AudioManager.STREAM_BLUETOOTH_SCO) to R.string.stream_voice_call,
             AudioStream(AudioManager.STREAM_RING) to R.string.stream_ring,
             AudioStream(AudioManager.STREAM_NOTIFICATION) to R.string.stream_notification,
             AudioStream(AudioManager.STREAM_ALARM) to R.string.stream_alarm,
@@ -89,8 +89,6 @@ constructor(
                 VolumePanelUiEvent.VOLUME_PANEL_MUSIC_SLIDER_TOUCHED,
             AudioStream(AudioManager.STREAM_VOICE_CALL) to
                 VolumePanelUiEvent.VOLUME_PANEL_VOICE_CALL_SLIDER_TOUCHED,
-            AudioStream(AudioManager.STREAM_BLUETOOTH_SCO) to
-                VolumePanelUiEvent.VOLUME_PANEL_VOICE_CALL_SLIDER_TOUCHED,
             AudioStream(AudioManager.STREAM_RING) to
                 VolumePanelUiEvent.VOLUME_PANEL_RING_SLIDER_TOUCHED,
             AudioStream(AudioManager.STREAM_NOTIFICATION) to
@@ -105,6 +103,7 @@ constructor(
                 audioVolumeInteractor.canChangeVolume(audioStream),
                 audioVolumeInteractor.ringerMode,
             ) { model, isEnabled, ringerMode ->
+                volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
                 model.toState(isEnabled, ringerMode)
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
@@ -112,7 +111,10 @@ constructor(
     init {
         volumeChanges
             .filterNotNull()
-            .onEach { audioVolumeInteractor.setVolume(audioStream, it) }
+            .onEach {
+                volumePanelLogger.onSetVolumeRequested(audioStream, it)
+                audioVolumeInteractor.setVolume(audioStream, it)
+            }
             .launchIn(coroutineScope)
     }
 

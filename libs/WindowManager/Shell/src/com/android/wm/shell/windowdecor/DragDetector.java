@@ -19,9 +19,14 @@ package com.android.wm.shell.windowdecor;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_HOVER_ENTER;
+import static android.view.MotionEvent.ACTION_HOVER_EXIT;
+import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_MOVE;
+import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 
+import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
@@ -43,13 +48,19 @@ class DragDetector {
     private final PointF mInputDownPoint = new PointF();
     private int mTouchSlop;
     private boolean mIsDragEvent;
-    private int mDragPointerId;
+    private int mDragPointerId = -1;
+    private final long mHoldToDragMinDurationMs;
+    private boolean mDidStrayBeforeFullHold;
+    private boolean mDidHoldForMinDuration;
 
     private boolean mResultOfDownAction;
 
-    DragDetector(MotionEventHandler eventHandler) {
+    DragDetector(@NonNull MotionEventHandler eventHandler, long holdToDragMinDurationMs,
+            int touchSlop) {
         resetState();
         mEventHandler = eventHandler;
+        mHoldToDragMinDurationMs = holdToDragMinDurationMs;
+        mTouchSlop = touchSlop;
     }
 
     /**
@@ -67,7 +78,7 @@ class DragDetector {
      *
      * @return the result returned by {@link #mEventHandler}, or the result when
      * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
-    */
+     */
     boolean onMotionEvent(View v, MotionEvent ev) {
         final boolean isTouchScreen =
                 (ev.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
@@ -86,33 +97,84 @@ class DragDetector {
                 return mResultOfDownAction;
             }
             case ACTION_MOVE: {
-                if (ev.findPointerIndex(mDragPointerId) == -1) {
-                    mDragPointerId = ev.getPointerId(0);
+                if (mDragPointerId == -1) {
+                    // The primary pointer was lifted, ignore the rest of the gesture.
+                    return mResultOfDownAction;
                 }
                 final int dragPointerIndex = ev.findPointerIndex(mDragPointerId);
+                if (dragPointerIndex == -1) {
+                    throw new IllegalStateException("Failed to find primary pointer!");
+                }
                 if (!mIsDragEvent) {
                     float dx = ev.getRawX(dragPointerIndex) - mInputDownPoint.x;
                     float dy = ev.getRawY(dragPointerIndex) - mInputDownPoint.y;
+                    final float dt = ev.getEventTime() - ev.getDownTime();
+                    final boolean pastTouchSlop = Math.hypot(dx, dy) > mTouchSlop;
+                    final boolean withinHoldRegion = !pastTouchSlop;
+
+                    if (mHoldToDragMinDurationMs <= 0) {
+                        mDidHoldForMinDuration = true;
+                    } else {
+                        if (!withinHoldRegion && dt < mHoldToDragMinDurationMs) {
+                            // Mark as having strayed so that in case the (x,y) ends up in the
+                            // original position we know it's not actually valid.
+                            mDidStrayBeforeFullHold = true;
+                        }
+                        if (!mDidStrayBeforeFullHold && dt >= mHoldToDragMinDurationMs) {
+                            mDidHoldForMinDuration = true;
+                        }
+                    }
+
                     // Touches generate noisy moves, so only once the move is past the touch
                     // slop threshold should it be considered a drag.
-                    mIsDragEvent = Math.hypot(dx, dy) > mTouchSlop;
+                    mIsDragEvent = mDidHoldForMinDuration && pastTouchSlop;
                 }
                 // The event handler should only be notified about 'move' events if a drag has been
                 // detected.
-                if (mIsDragEvent) {
-                    return mEventHandler.handleMotionEvent(v, ev);
-                } else {
+                if (!mIsDragEvent) {
                     return mResultOfDownAction;
                 }
+                return mEventHandler.handleMotionEvent(v,
+                        getSinglePointerEvent(ev, mDragPointerId));
+            }
+            case ACTION_HOVER_ENTER:
+            case ACTION_HOVER_MOVE:
+            case ACTION_HOVER_EXIT: {
+                return mEventHandler.handleMotionEvent(v,
+                        getSinglePointerEvent(ev, mDragPointerId));
+            }
+            case ACTION_POINTER_UP: {
+                if (mDragPointerId == -1) {
+                    // The primary pointer was lifted, ignore the rest of the gesture.
+                    return mResultOfDownAction;
+                }
+                if (mDragPointerId != ev.getPointerId(ev.getActionIndex())) {
+                    // Ignore a secondary pointer being lifted.
+                    return mResultOfDownAction;
+                }
+                // The primary pointer is being lifted.
+                final int dragPointerId = mDragPointerId;
+                mDragPointerId = -1;
+                return mEventHandler.handleMotionEvent(v, getSinglePointerEvent(ev, dragPointerId));
             }
             case ACTION_UP:
             case ACTION_CANCEL: {
+                final int dragPointerId = mDragPointerId;
                 resetState();
-                return mEventHandler.handleMotionEvent(v, ev);
+                if (dragPointerId == -1) {
+                    // The primary pointer was lifted, ignore the rest of the gesture.
+                    return mResultOfDownAction;
+                }
+                return mEventHandler.handleMotionEvent(v, getSinglePointerEvent(ev, dragPointerId));
             }
             default:
-                return mEventHandler.handleMotionEvent(v, ev);
+                // Ignore other events.
+                return mResultOfDownAction;
         }
+    }
+
+    private static MotionEvent getSinglePointerEvent(MotionEvent ev, int pointerId) {
+        return ev.getPointerCount() > 1 ? ev.split(1 << pointerId) : ev;
     }
 
     void setTouchSlop(int touchSlop) {
@@ -124,6 +186,8 @@ class DragDetector {
         mInputDownPoint.set(0, 0);
         mDragPointerId = -1;
         mResultOfDownAction = false;
+        mDidStrayBeforeFullHold = false;
+        mDidHoldForMinDuration = false;
     }
 
     interface MotionEventHandler {

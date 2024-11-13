@@ -55,6 +55,9 @@ fun SceneStack.asIterable(): Iterable<SceneKey> = Iterable {
     }
 }
 
+/** Does this stack contain the given [sceneKey]? O(N) */
+fun SceneStack.contains(sceneKey: SceneKey): Boolean = asIterable().any { it == sceneKey }
+
 /**
  * Returns a new [SceneStack] containing the given [scenes], ordered such that the first argument is
  * the head returned from [peek], then the second, and so forth.

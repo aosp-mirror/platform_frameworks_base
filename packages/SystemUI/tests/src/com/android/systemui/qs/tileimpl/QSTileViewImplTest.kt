@@ -25,6 +25,7 @@ import android.text.TextUtils
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -381,6 +382,47 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testNonSwitchA11yClass_longClickActionHasCorrectLabel() {
+        val state =
+            QSTile.State().apply {
+                expandedAccessibilityClassName = Button::class.java.name
+                handlesLongClick = true
+            }
+        tileView.changeState(state)
+        val info = AccessibilityNodeInfo(tileView)
+        tileView.onInitializeAccessibilityNodeInfo(info)
+
+        assertThat(
+                info.actionList
+                    .find {
+                        it.id == AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id
+                    }
+                    ?.label
+            )
+            .isEqualTo(context.getString(R.string.accessibility_long_click_tile))
+    }
+
+    @Test
+    fun testNonSwitchA11yClass_disabledByPolicy_noLongClickAction() {
+        val state =
+            QSTile.State().apply {
+                expandedAccessibilityClassName = Button::class.java.name
+                handlesLongClick = true
+                disabledByPolicy = true
+            }
+        tileView.changeState(state)
+        val info = AccessibilityNodeInfo(tileView)
+        tileView.onInitializeAccessibilityNodeInfo(info)
+
+        assertThat(
+                info.actionList.find {
+                    it.id == AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id
+                }
+            )
+            .isNull()
+    }
+
+    @Test
     fun onStateChange_longPressEffectActive_withInvalidDuration_doesNotInitializeEffect() {
         val state = QSTile.State() // A state that handles longPress
 
@@ -471,7 +513,7 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun onPrepareForLaunch_paddingForLaunchAnimationIsConfigured() {
+    fun getPaddingForLaunchAnimation_onLongClickedState_paddingForLaunchAnimationIsConfigured() {
         val startingWidth = 100
         val startingHeight = 50
         val deltaWidth = (QSTileViewImpl.LONG_PRESS_EFFECT_WIDTH_SCALE - 1f) * startingWidth
@@ -480,8 +522,8 @@ class QSTileViewImplTest : SysuiTestCase() {
         // GIVEN that long-press effect properties are initialized
         tileView.initializeLongPressProperties(startingHeight, startingWidth)
 
-        // WHEN the tile is preparing for the launch animation
-        tileView.prepareForLaunch()
+        // WHEN the long-press effect has ended in the long-click state
+        kosmos.qsLongPressEffect.setState(QSLongPressEffect.State.LONG_CLICKED)
 
         // THE animation padding corresponds to the tile's growth due to the effect
         val padding = tileView.getPaddingForLaunchAnimation()
@@ -494,6 +536,22 @@ class QSTileViewImplTest : SysuiTestCase() {
                     deltaHeight.toInt() / 2,
                 )
             )
+    }
+
+    @Test
+    fun getPaddingForLaunchAnimation_notInLongClickState_paddingForLaunchAnimationIsEmpty() {
+        val startingWidth = 100
+        val startingHeight = 50
+
+        // GIVEN that long-press effect properties are initialized
+        tileView.initializeLongPressProperties(startingHeight, startingWidth)
+
+        // WHEN the long-press effect has ended in the click state
+        kosmos.qsLongPressEffect.setState(QSLongPressEffect.State.CLICKED)
+
+        // THE animation padding is empty
+        val padding = tileView.getPaddingForLaunchAnimation()
+        assertThat(padding.isEmpty).isTrue()
     }
 
     @Test

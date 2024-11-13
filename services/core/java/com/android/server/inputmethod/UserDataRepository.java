@@ -16,90 +16,58 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.pm.UserInfo;
-import android.os.Handler;
-import android.util.SparseArray;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.server.pm.UserManagerInternal;
 
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
 final class UserDataRepository {
 
-    @GuardedBy("ImfLock.class")
-    private final SparseArray<UserData> mUserData = new SparseArray<>();
+    private final Object mMutationLock = new Object();
 
+    @NonNull
+    private volatile ImmutableSparseArray<UserData> mUserData = ImmutableSparseArray.empty();
+
+    @NonNull
     private final IntFunction<InputMethodBindingController> mBindingControllerFactory;
+    @NonNull
+    private final IntFunction<ImeVisibilityStateComputer> mVisibilityStateComputerFactory;
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     @NonNull
     UserData getOrCreate(@UserIdInt int userId) {
-        UserData userData = mUserData.get(userId);
-        if (userData == null) {
-            userData = new UserData(userId, mBindingControllerFactory.apply(userId));
-            mUserData.put(userId, userData);
+        // Do optimistic read first for optimization.
+        final var userData = mUserData.get(userId);
+        if (userData != null) {
+            return userData;
         }
-        return userData;
+        // Note that the below line can be called concurrently. Here we assume that
+        // instantiating UserData for the same user multiple times would have no side effect.
+        final var newUserData = new UserData(userId, mBindingControllerFactory.apply(userId),
+                mVisibilityStateComputerFactory.apply(userId));
+        synchronized (mMutationLock) {
+            mUserData = mUserData.cloneWithPutOrSelf(userId, newUserData);
+            return newUserData;
+        }
     }
 
-    @GuardedBy("ImfLock.class")
+    @AnyThread
     void forAllUserData(Consumer<UserData> consumer) {
-        for (int i = 0; i < mUserData.size(); i++) {
-            consumer.accept(mUserData.valueAt(i));
-        }
+        mUserData.forEach(consumer);
     }
 
-    UserDataRepository(@NonNull Handler handler, @NonNull UserManagerInternal userManagerInternal,
-            @NonNull IntFunction<InputMethodBindingController> bindingControllerFactory) {
+    UserDataRepository(@NonNull IntFunction<InputMethodBindingController> bindingControllerFactory,
+            @NonNull IntFunction<ImeVisibilityStateComputer> visibilityStateComputerFactory) {
         mBindingControllerFactory = bindingControllerFactory;
-        userManagerInternal.addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserRemoved(UserInfo user) {
-                        final int userId = user.id;
-                        handler.post(() -> {
-                            synchronized (ImfLock.class) {
-                                mUserData.remove(userId);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onUserCreated(UserInfo user, Object unusedToken) {
-                        final int userId = user.id;
-                        handler.post(() -> {
-                            synchronized (ImfLock.class) {
-                                getOrCreate(userId);
-                            }
-                        });
-                    }
-                });
+        mVisibilityStateComputerFactory = visibilityStateComputerFactory;
     }
 
-    /** Placeholder for all IMMS user specific fields */
-    static final class UserData {
-        @UserIdInt
-        final int mUserId;
-
-        @NonNull
-        final InputMethodBindingController mBindingController;
-
-        /**
-         * Intended to be instantiated only from this file.
-         */
-        private UserData(@UserIdInt int userId,
-                @NonNull InputMethodBindingController bindingController) {
-            mUserId = userId;
-            mBindingController = bindingController;
-        }
-
-        @Override
-        public String toString() {
-            return "UserData{" + "mUserId=" + mUserId + '}';
+    @AnyThread
+    void remove(@UserIdInt int userId) {
+        synchronized (mMutationLock) {
+            mUserData = mUserData.cloneWithRemoveOrSelf(userId);
         }
     }
 }

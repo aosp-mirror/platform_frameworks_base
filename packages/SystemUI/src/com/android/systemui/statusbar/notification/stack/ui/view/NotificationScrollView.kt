@@ -50,19 +50,33 @@ interface NotificationScrollView {
     /** set the y position in px of the top of the stack in this view's coordinates */
     fun setStackTop(stackTop: Float)
 
-    /** set the y position in px of the bottom of the stack in this view's coordinates */
-    fun setStackBottom(stackBottom: Float)
+    /**
+     * set the bottom-most acceptable y-position of the bottom of the notification stack/ shelf /
+     * footer.
+     */
+    fun setStackCutoff(stackBottom: Float)
 
     /** set the y position in px of the top of the HUN in this view's coordinates */
     fun setHeadsUpTop(headsUpTop: Float)
+
+    /** set the bottom-most y position in px, where we can draw HUNs in this view's coordinates */
+    fun setHeadsUpBottom(headsUpBottom: Float)
 
     /** set whether the view has been scrolled all the way to the top */
     fun setScrolledToTop(scrolledToTop: Boolean)
 
     /** Set a consumer for synthetic scroll events */
     fun setSyntheticScrollConsumer(consumer: Consumer<Float>?)
+
     /** Set a consumer for current gesture overscroll events */
     fun setCurrentGestureOverscrollConsumer(consumer: Consumer<Boolean>?)
+
+    /** Set a consumer for current gesture in guts events */
+    fun setCurrentGestureInGutsConsumer(consumer: Consumer<Boolean>?)
+
+    /** Set a consumer for current remote input notification row bottom bound events */
+    fun setRemoteInputRowBottomBoundConsumer(consumer: Consumer<Float?>?)
+
     /** Set a consumer for heads up height changed events */
     fun setHeadsUpHeightConsumer(consumer: Consumer<Float>?)
 
@@ -72,8 +86,23 @@ interface NotificationScrollView {
     /** sets the current expand fraction */
     fun setExpandFraction(expandFraction: Float)
 
+    /** sets the current QS expand fraction */
+    fun setQsExpandFraction(expandFraction: Float)
+
     /** Sets whether the view is displayed in doze mode. */
     fun setDozing(dozing: Boolean)
+
+    /** Sets whether the view is displayed in pulsing mode. */
+    fun setPulsing(pulsing: Boolean, animated: Boolean)
+
+    /** Gets the inset for HUNs when they are not visible */
+    fun getHeadsUpInset(): Int
+
+    /**
+     * Signals that any open Notification guts should be closed, as scene container is handling
+     * touch events.
+     */
+    fun closeGutsOnSceneTouch()
 
     /** Adds a listener to be notified, when the stack height might have changed. */
     fun addStackHeightChangedListener(runnable: Runnable)

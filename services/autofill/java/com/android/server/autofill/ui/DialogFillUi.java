@@ -85,7 +85,7 @@ final class DialogFillUi {
         void onDatasetPicked(@NonNull Dataset dataset);
         void onDismissed();
         void onCanceled();
-        void onShown();
+        void onShown(int datasetsShown);
         void startIntentSender(IntentSender intentSender);
     }
 
@@ -95,6 +95,7 @@ final class DialogFillUi {
     private final ComponentName mComponentName;
     private final int mThemeId;
     private final @NonNull Context mContext;
+    private final @NonNull Context mUserContext;
     private final @NonNull UiCallback mCallback;
     private final @NonNull ListView mListView;
     private final @Nullable ItemsAdapter mAdapter;
@@ -104,6 +105,8 @@ final class DialogFillUi {
     private @Nullable AnnounceFilterResult mAnnounceFilterResult;
     private boolean mDestroyed;
 
+    // System has all permissions, see b/228957088
+    @SuppressWarnings("AndroidFrameworkRequiresPermission")
     DialogFillUi(@NonNull Context context, @NonNull FillResponse response,
             @NonNull AutofillId focusedViewId, @Nullable String filterText,
             @Nullable Drawable serviceIcon, @Nullable String servicePackageName,
@@ -117,6 +120,7 @@ final class DialogFillUi {
         mComponentName = componentName;
 
         mContext = new ContextThemeWrapper(context, mThemeId);
+        mUserContext = Helper.getUserContext(mContext);
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         final View decor = inflater.inflate(R.layout.autofill_fill_dialog, null);
 
@@ -151,7 +155,8 @@ final class DialogFillUi {
         mDialog.setContentView(decor);
         setDialogParamsAsBottomSheet();
         mDialog.setOnCancelListener((d) -> mCallback.onCanceled());
-        mDialog.setOnShowListener((d) -> mCallback.onShown());
+        int datasetsShown = (mAdapter != null) ? mAdapter.getCount() : 0;
+        mDialog.setOnShowListener((d) -> mCallback.onShown(datasetsShown));
         show();
     }
 
@@ -224,7 +229,7 @@ final class DialogFillUi {
         };
 
         final View content = presentation.applyWithTheme(
-                mContext, (ViewGroup) decor, interceptionHandler, mThemeId);
+                mUserContext, (ViewGroup) decor, interceptionHandler, mThemeId);
         container.addView(content);
         container.setVisibility(View.VISIBLE);
     }
@@ -263,7 +268,7 @@ final class DialogFillUi {
             return true;
         };
         final View content = presentation.applyWithTheme(
-                mContext, (ViewGroup) decor, interceptionHandler, mThemeId);
+                mUserContext, (ViewGroup) decor, interceptionHandler, mThemeId);
         container.addView(content);
         container.setVisibility(View.VISIBLE);
         container.setFocusable(true);
@@ -305,7 +310,7 @@ final class DialogFillUi {
                 try {
                     if (sVerbose) Slog.v(TAG, "setting remote view for " + focusedViewId);
                     view = presentation.applyWithTheme(
-                            mContext, null, interceptionHandler, mThemeId);
+                            mUserContext, null, interceptionHandler, mThemeId);
                 } catch (RuntimeException e) {
                     Slog.e(TAG, "Error inflating remote views", e);
                     continue;

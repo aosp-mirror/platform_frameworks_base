@@ -16,23 +16,32 @@
 
 package com.android.server.wm;
 
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_180;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
-import android.app.CameraCompatTaskInfo;
+import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.view.DisplayInfo;
+import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.window.flags.Flags;
 
 /**
@@ -56,6 +65,14 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
 
     private boolean mIsCameraCompatTreatmentPending = false;
 
+    @Nullable
+    private Task mCameraTask;
+
+    /**
+     * Value toggled on {@link #start()} to {@code true} and on {@link #dispose()} to {@code false}.
+     */
+    private boolean mIsRunning;
+
     CameraCompatFreeformPolicy(@NonNull DisplayContent displayContent,
             @NonNull CameraStateMonitor cameraStateMonitor,
             @NonNull ActivityRefresher activityRefresher) {
@@ -67,12 +84,19 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     void start() {
         mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher.addEvaluator(this);
+        mIsRunning = true;
     }
 
     /** Releases camera callback listener. */
     void dispose() {
         mCameraStateMonitor.removeCameraStateListener(this);
         mActivityRefresher.removeEvaluator(this);
+        mIsRunning = false;
+    }
+
+    @VisibleForTesting
+    boolean isRunning() {
+        return mIsRunning;
     }
 
     // Refreshing only when configuration changes after rotation or camera split screen aspect ratio
@@ -105,38 +129,43 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     @Override
-    public boolean onCameraOpened(@NonNull ActivityRecord cameraActivity,
+    public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
             @NonNull String cameraId) {
         if (!isTreatmentEnabledForActivity(cameraActivity)) {
-            return false;
+            return;
         }
-        final int existingCameraCompatMode =
-                cameraActivity.mLetterboxUiController.getFreeformCameraCompatMode();
+        final int existingCameraCompatMode = cameraActivity.mAppCompatController
+                .getAppCompatCameraOverrides()
+                        .getFreeformCameraCompatMode();
         final int newCameraCompatMode = getCameraCompatMode(cameraActivity);
         if (newCameraCompatMode != existingCameraCompatMode) {
             mIsCameraCompatTreatmentPending = true;
-            cameraActivity.mLetterboxUiController.setFreeformCameraCompatMode(newCameraCompatMode);
+            mCameraTask = cameraActivity.getTask();
+            cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
+                    .setFreeformCameraCompatMode(newCameraCompatMode);
             forceUpdateActivityAndTask(cameraActivity);
-            return true;
         } else {
             mIsCameraCompatTreatmentPending = false;
         }
-        return false;
     }
 
     @Override
-    public boolean onCameraClosed(@NonNull ActivityRecord cameraActivity,
-            @NonNull String cameraId) {
-        if (isActivityForCameraIdRefreshing(cameraId)) {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_STATES,
-                    "Display id=%d is notified that Camera %s is closed but activity is"
-                            + " still refreshing. Rescheduling an update.",
-                    mDisplayContent.mDisplayId, cameraId);
-            return false;
+    public boolean onCameraClosed(@NonNull String cameraId) {
+        // Top activity in the same task as the camera activity, or `null` if the task is
+        // closed.
+        final ActivityRecord topActivity = mCameraTask != null
+                ? mCameraTask.getTopActivity(/* isFinishing */ false, /* includeOverlays */ false)
+                : null;
+        if (topActivity != null) {
+            if (isActivityForCameraIdRefreshing(topActivity, cameraId)) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_STATES,
+                        "Display id=%d is notified that Camera %s is closed but activity is"
+                                + " still refreshing. Rescheduling an update.",
+                        mDisplayContent.mDisplayId, cameraId);
+                return false;
+            }
         }
-        cameraActivity.mLetterboxUiController.setFreeformCameraCompatMode(
-                CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE);
-        forceUpdateActivityAndTask(cameraActivity);
+        mCameraTask = null;
         mIsCameraCompatTreatmentPending = false;
         return true;
     }
@@ -151,11 +180,35 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     private static int getCameraCompatMode(@NonNull ActivityRecord topActivity) {
-        return switch (topActivity.getRequestedConfigurationOrientation()) {
-            case ORIENTATION_PORTRAIT -> CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT;
-            case ORIENTATION_LANDSCAPE -> CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE;
-            default -> CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
-        };
+        final int appOrientation = topActivity.getRequestedConfigurationOrientation();
+        // It is very important to check the original (actual) display rotation, and not the
+        // sandboxed rotation that camera compat treatment sets.
+        final DisplayInfo displayInfo = topActivity.mWmService.mDisplayManagerInternal
+                .getDisplayInfo(topActivity.getDisplayId());
+        // This treatment targets only devices with portrait natural orientation, which most tablets
+        // have.
+        // TODO(b/365725400): handle landscape natural orientation.
+        if (displayInfo.getNaturalHeight() > displayInfo.getNaturalWidth()) {
+            if (appOrientation == ORIENTATION_PORTRAIT) {
+                if (isDisplayRotationPortrait(displayInfo.rotation)) {
+                    return CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT;
+                } else {
+                    return CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
+                }
+            } else if (appOrientation == ORIENTATION_LANDSCAPE) {
+                if (isDisplayRotationPortrait(displayInfo.rotation)) {
+                    return CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT;
+                } else {
+                    return CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE;
+                }
+            }
+        }
+
+        return CAMERA_COMPAT_FREEFORM_NONE;
+    }
+
+    private static boolean isDisplayRotationPortrait(@Surface.Rotation int displayRotation) {
+        return displayRotation == ROTATION_0 || displayRotation == ROTATION_180;
     }
 
     /**
@@ -184,13 +237,12 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
                 && !activity.isEmbedded();
     }
 
-    private boolean isActivityForCameraIdRefreshing(@NonNull String cameraId) {
-        final ActivityRecord topActivity = mDisplayContent.topRunningActivity(
-                /* considerKeyguardState= */ true);
-        if (topActivity == null || !isTreatmentEnabledForActivity(topActivity)
+    private boolean isActivityForCameraIdRefreshing(@NonNull ActivityRecord topActivity,
+            @NonNull String cameraId) {
+        if (!isTreatmentEnabledForActivity(topActivity)
                 || mCameraStateMonitor.isCameraWithIdRunningForActivity(topActivity, cameraId)) {
             return false;
         }
-        return topActivity.mLetterboxUiController.isRefreshRequested();
+        return topActivity.mAppCompatController.getAppCompatCameraOverrides().isRefreshRequested();
     }
 }

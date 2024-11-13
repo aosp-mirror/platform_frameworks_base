@@ -50,7 +50,7 @@ class AppRequestObserverTest {
     }
 
     @Test
-    fun `test app request votes`(@TestParameter testCase: AppRequestTestCase) {
+    fun testAppRequestVotes(@TestParameter testCase: AppRequestTestCase) {
         whenever(mockFlags.ignoreAppPreferredRefreshRateRequest())
                 .thenReturn(testCase.ignoreRefreshRateRequest)
         val displayModeDirector = DisplayModeDirector(

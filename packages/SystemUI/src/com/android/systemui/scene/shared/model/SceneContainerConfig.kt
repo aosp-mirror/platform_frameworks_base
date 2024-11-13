@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 
 /** Models the configuration of the scene container. */
@@ -36,6 +37,13 @@ data class SceneContainerConfig(
      * before taking any application state in to account.
      */
     val initialSceneKey: SceneKey,
+
+    /**
+     * The keys to all overlays in the container, sorted by z-order such that the last one renders
+     * on top of all previous ones. Overlay keys within the same container must not repeat but it's
+     * okay to have the same overlay keys in different containers.
+     */
+    val overlayKeys: List<OverlayKey> = emptyList(),
 
     /**
      * Navigation distance of each scene.

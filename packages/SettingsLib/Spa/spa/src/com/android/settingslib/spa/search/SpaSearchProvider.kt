@@ -32,8 +32,6 @@ import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.util.SESSION_SEARCH
 import com.android.settingslib.spa.framework.util.createIntent
-import com.android.settingslib.spa.slice.fromEntry
-
 
 private const val TAG = "SpaSearchProvider"
 
@@ -217,11 +215,6 @@ class SpaSearchProvider : ContentProvider() {
                 .add(ColumnEnum.INTENT_TARGET_CLASS.id, spaEnvironment.browseActivityClass?.name)
                 .add(ColumnEnum.INTENT_EXTRAS.id, marshall(intent.extras))
         }
-        if (entry.hasSliceSupport)
-            row.add(
-                ColumnEnum.SLICE_URI.id, Uri.Builder()
-                    .fromEntry(entry, spaEnvironment.sliceProviderAuthorities)
-            )
     }
 
     private fun fetchStatusData(entry: SettingsEntry, cursor: MatrixCursor) {
@@ -252,11 +245,6 @@ class SpaSearchProvider : ContentProvider() {
                 .add(ColumnEnum.INTENT_TARGET_CLASS.id, spaEnvironment.browseActivityClass?.name)
                 .add(ColumnEnum.INTENT_EXTRAS.id, marshall(intent.extras))
         }
-        if (entry.hasSliceSupport)
-            row.add(
-                ColumnEnum.SLICE_URI.id, Uri.Builder()
-                    .fromEntry(entry, spaEnvironment.sliceProviderAuthorities)
-            )
         // Fetch status data. We can add runtime arguments later if necessary
         val statusData = entry.getStatusData() ?: return
         row.add(ColumnEnum.ENTRY_DISABLED.id, statusData.isDisabled)

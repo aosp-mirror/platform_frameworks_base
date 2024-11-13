@@ -43,25 +43,34 @@ import java.util.Map;
 /**
  * Manages the retrieval of certain types of {@link MediaProjection} tokens.
  *
- * <p><ol>An example flow of starting a media projection will be:
- *     <li>Declare a foreground service with the type {@code mediaProjection} in
- *     the {@code AndroidManifest.xml}.
- *     </li>
- *     <li>Create an intent by calling {@link MediaProjectionManager#createScreenCaptureIntent()}
- *         and pass this intent to {@link Activity#startActivityForResult(Intent, int)}.
- *     </li>
- *     <li>On getting {@link Activity#onActivityResult(int, int, Intent)},
- *         start the foreground service with the type
- *         {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION}.
- *     </li>
- *     <li>Retrieve the media projection token by calling
- *         {@link MediaProjectionManager#getMediaProjection(int, Intent)} with the result code and
- *         intent from the {@link Activity#onActivityResult(int, int, Intent)} above.
- *     </li>
- *     <li>Start the screen capture session for media projection by calling
- *         {@link MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
- *         android.hardware.display.VirtualDisplay.Callback, Handler)}.
- *     </li>
+ * <p>
+ *
+ * <ol>
+ *   An example flow of starting a media projection will be:
+ *   <li>Declare a foreground service with the type {@code mediaProjection} in the {@code
+ *       AndroidManifest.xml}.
+ *   <li>Create an intent by calling {@link MediaProjectionManager#createScreenCaptureIntent()} and
+ *       pass this intent to {@link Activity#startActivityForResult(Intent, int)}.
+ *   <li>On getting {@link Activity#onActivityResult(int, int, Intent)}, start the foreground
+ *       service with the type {@link
+ *       android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION}.
+ *   <li>Retrieve the media projection token by calling {@link
+ *       MediaProjectionManager#getMediaProjection(int, Intent)} with the result code and intent
+ *       from the {@link Activity#onActivityResult(int, int, Intent)} above.
+ *   <li>Register a {@link MediaProjection.Callback} by calling {@link
+ *       MediaProjection#registerCallback(MediaProjection.Callback, Handler)}. This is required to
+ *       receive notifications about when the {@link MediaProjection} or captured content changes
+ *       state. When receiving an `onStop()` callback the {@link MediaProjection} session has been
+ *       finished and the client must clean up any resources it is holding, e.g. the {@link
+ *       VirtualDisplay} and {@link Surface}. The MediaProjection may further no longer create any
+ *       new {@link VirtualDisplay}s via {@link MediaProjection#createVirtualDisplay(String, int,
+ *       int, int, int, Surface, VirtualDisplay.Callback, Handler)}. Note that the `onStop()`
+ *       callback can be a result of the system stopping MediaProjection due to various reasons.
+ *       This includes the user stopping the MediaProjection via UI affordances in system-level UI,
+ *       the screen being locked, or another {@link MediaProjection} session starting.
+ *   <li>Start the screen capture session for media projection by calling {@link
+ *       MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
+ *       android.hardware.display.VirtualDisplay.Callback, Handler)}.
  * </ol>
  */
 @SystemService(Context.MEDIA_PROJECTION_SERVICE)
@@ -257,6 +266,7 @@ public final class MediaProjectionManager {
      * @see <a href="/guide/topics/large-screens/media-projection">
      * Media projection developer guide</a>
      */
+    @Nullable
     public MediaProjection getMediaProjection(int resultCode, @NonNull Intent resultData) {
         if (resultCode != Activity.RESULT_OK || resultData == null) {
             return null;

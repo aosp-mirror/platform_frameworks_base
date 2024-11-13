@@ -22,8 +22,8 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Data label representation with data shared and data collected maps containing zero or more {@link
@@ -56,20 +56,18 @@ public class DataLabels implements AslMarshallable {
     }
 
     /** Gets the on-device DOM element for the {@link DataLabels}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element dataLabelsEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_DATA_LABELS);
 
         maybeAppendDataUsages(doc, dataLabelsEle, mDataCollected, XmlUtils.OD_NAME_DATA_COLLECTED);
         maybeAppendDataUsages(doc, dataLabelsEle, mDataShared, XmlUtils.OD_NAME_DATA_SHARED);
 
-        return XmlUtils.listOf(dataLabelsEle);
+        return dataLabelsEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element dataLabelsEle = doc.createElement(XmlUtils.HR_TAG_DATA_LABELS);
         maybeAppendHrDataUsages(
                 doc, dataLabelsEle, mDataCollected, XmlUtils.HR_TAG_DATA_COLLECTED, false);
@@ -77,7 +75,7 @@ public class DataLabels implements AslMarshallable {
                 doc, dataLabelsEle, mDataCollected, XmlUtils.HR_TAG_DATA_COLLECTED_EPHEMERAL, true);
         maybeAppendHrDataUsages(
                 doc, dataLabelsEle, mDataShared, XmlUtils.HR_TAG_DATA_SHARED, false);
-        return XmlUtils.listOf(dataLabelsEle);
+        return dataLabelsEle;
     }
 
     private void maybeAppendDataUsages(
@@ -95,7 +93,7 @@ public class DataLabels implements AslMarshallable {
             DataCategory dataCategory = dataCategoriesMap.get(dataCategoryName);
             for (String dataTypeName : dataCategory.getDataTypes().keySet()) {
                 DataType dataType = dataCategory.getDataTypes().get(dataTypeName);
-                XmlUtils.appendChildren(dataCategoryEle, dataType.toOdDomElements(doc));
+                dataCategoryEle.appendChild(dataType.toOdDomElement(doc));
             }
             dataUsageEle.appendChild(dataCategoryEle);
         }
@@ -138,7 +136,7 @@ public class DataLabels implements AslMarshallable {
                                 "|",
                                 dataType.getPurposes().stream()
                                         .map(DataType.Purpose::toString)
-                                        .toList()));
+                                        .collect(Collectors.toList())));
                 dataLabelsEle.appendChild(hrDataTypeEle);
             }
         }

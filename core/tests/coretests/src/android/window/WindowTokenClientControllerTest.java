@@ -39,9 +39,11 @@ import android.view.IWindowManager;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Tests for {@link WindowTokenClientController}.
@@ -52,6 +54,9 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @Presubmit
 public class WindowTokenClientControllerTest {
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
 
     @Mock
     private IWindowManager mWindowManagerService;
@@ -67,7 +72,6 @@ public class WindowTokenClientControllerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mController = spy(WindowTokenClientController.createInstanceForTesting());
         doReturn(mWindowManagerService).when(mController).getWindowManagerService();
         mWindowContextInfo = new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY);

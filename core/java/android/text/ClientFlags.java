@@ -16,56 +16,14 @@
 
 package android.text;
 
-import com.android.text.flags.Flags;
-
 /**
  * An aconfig feature flags that can be accessible from application process without
  * ContentProvider IPCs.
  *
  * When you add new flags, you have to add flag string to {@link TextFlags#TEXT_ACONFIGS_FLAGS}.
  *
+ * TODO(nona): Remove this class.
  * @hide
  */
 public class ClientFlags {
-    /**
-     * @see Flags#noBreakNoHyphenationSpan()
-     */
-    public static boolean noBreakNoHyphenationSpan() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN);
-    }
-
-    /**
-     * @see Flags#phraseStrictFallback()
-     */
-    public static boolean phraseStrictFallback() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_PHRASE_STRICT_FALLBACK);
-    }
-
-    /**
-     * @see Flags#useBoundsForWidth()
-     */
-    public static boolean useBoundsForWidth() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_USE_BOUNDS_FOR_WIDTH);
-    }
-
-    /**
-     * @see Flags#fixLineHeightForLocale()
-     */
-    public static boolean fixLineHeightForLocale() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE);
-    }
-
-    /**
-     * @see Flags#icuBidiMigration()
-     */
-    public static boolean icuBidiMigration() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_ICU_BIDI_MIGRATION);
-    }
-
-    /**
-     * @see Flags#fixMisalignedContextMenu()
-     */
-    public static boolean fixMisalignedContextMenu() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_MISALIGNED_CONTEXT_MENU);
-    }
 }

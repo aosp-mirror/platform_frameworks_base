@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,6 +85,28 @@ public class DreamServiceTest {
             throws PackageManager.NameNotFoundException {
         final String testDreamClassName =
                 "com.android.server.dreams.TestDreamServiceWithInvalidSettings";
+        final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
+
+        assertThat(metadata.settingsActivity).isNull();
+        assertThat(metadata.dreamCategory).isEqualTo(DreamService.DREAM_CATEGORY_DEFAULT);
+    }
+
+    @Test
+    public void testMetadataParsing_nonexistentSettingsActivity()
+            throws PackageManager.NameNotFoundException {
+        final String testDreamClassName =
+                "com.android.server.dreams.TestDreamServiceWithNonexistentSettings";
+        final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
+
+        assertThat(metadata.settingsActivity).isNull();
+        assertThat(metadata.dreamCategory).isEqualTo(DreamService.DREAM_CATEGORY_DEFAULT);
+    }
+
+    @Test
+    public void testMetadataParsing_noPackage_nonexistentSettingsActivity()
+            throws PackageManager.NameNotFoundException {
+        final String testDreamClassName =
+                "com.android.server.dreams.TestDreamServiceNoPackageNonexistentSettings";
         final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
 
         assertThat(metadata.settingsActivity).isNull();
@@ -192,5 +215,40 @@ public class DreamServiceTest {
 
         // Ensure service does not crash from only receiving up event.
         environment.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SPACE));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_HANDLES_BEING_OBSCURED)
+    public void testComeToFront() throws Exception {
+        TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .setDreamOverlayPresent(true)
+                .build();
+        environment.advance(TestDreamEnvironment.DREAM_STATE_STARTED);
+
+        // Call comeToFront through binder.
+        environment.resetClientInvocations();
+        environment.comeToFront();
+        mTestableLooper.processAllMessages();
+
+        // Overlay client receives call.
+        verify(environment.getDreamOverlayClient()).comeToFront();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_HANDLES_BEING_OBSCURED)
+    public void testComeToFront_noOverlay() throws Exception {
+        // Dream environment with no overlay present
+        TestDreamEnvironment environment = new TestDreamEnvironment.Builder(mTestableLooper)
+                .setDreamOverlayPresent(false)
+                .build();
+        environment.advance(TestDreamEnvironment.DREAM_STATE_STARTED);
+
+        // Call comeToFront through binder.
+        environment.resetClientInvocations();
+        environment.comeToFront();
+        mTestableLooper.processAllMessages();
+
+        // Overlay client receives call.
+        verify(environment.getDreamOverlayClient(), never()).comeToFront();
     }
 }

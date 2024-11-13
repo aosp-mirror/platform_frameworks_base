@@ -31,12 +31,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -62,7 +64,7 @@ public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
     public void setUp() {
         when(mUserTracker.getUserId()).thenReturn(MY_USER_ID);
         mAccessibilityButtonTargetsObserver = new AccessibilityButtonTargetsObserver(mContext,
-                mUserTracker);
+                mUserTracker, Mockito.mock(SecureSettings.class));
     }
 
     @Test

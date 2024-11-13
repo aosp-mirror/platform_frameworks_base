@@ -16,11 +16,12 @@
 package com.android.systemui.statusbar.core
 
 import android.app.Fragment
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.fragments.FragmentHostManager
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
+import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewUpdatedListener
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
-import com.android.systemui.statusbar.phone.PhoneStatusBarView
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
@@ -33,31 +34,60 @@ import javax.inject.Provider
  * Responsible for creating the status bar window and initializing the root components of that
  * window (see [CollapsedStatusBarFragment])
  */
-@SysUISingleton
-class StatusBarInitializer @Inject constructor(
-    private val windowController: StatusBarWindowController,
-    private val collapsedStatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
-    private val creationListeners: Set<@JvmSuppressWildcards OnStatusBarViewInitializedListener>,
-) {
+interface StatusBarInitializer {
 
-    var statusBarViewUpdatedListener: OnStatusBarViewUpdatedListener? = null
+    var statusBarViewUpdatedListener: OnStatusBarViewUpdatedListener?
 
     /**
      * Creates the status bar window and root views, and initializes the component.
      *
      * TODO(b/277764509): Initialize the status bar via [CoreStartable#start].
      */
-    fun initializeStatusBar() {
-        windowController.fragmentHostManager.addTagListener(
+    fun initializeStatusBar()
+
+    interface OnStatusBarViewInitializedListener {
+
+        /**
+         * The status bar view has been initialized.
+         *
+         * @param component Dagger component that is created when the status bar view is created.
+         *   Can be used to retrieve dependencies from that scope, including the status bar root
+         *   view.
+         */
+        fun onStatusBarViewInitialized(component: StatusBarFragmentComponent)
+    }
+
+    interface OnStatusBarViewUpdatedListener {
+        fun onStatusBarViewUpdated(
+            statusBarViewController: PhoneStatusBarViewController,
+            statusBarTransitions: PhoneStatusBarTransitions,
+        )
+    }
+}
+
+@SysUISingleton
+class StatusBarInitializerImpl
+@Inject
+constructor(
+    private val windowController: StatusBarWindowController,
+    private val collapsedStatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
+    private val creationListeners: Set<@JvmSuppressWildcards OnStatusBarViewInitializedListener>,
+) : StatusBarInitializer {
+
+    override var statusBarViewUpdatedListener: OnStatusBarViewUpdatedListener? = null
+
+    override fun initializeStatusBar() {
+        windowController.fragmentHostManager
+            .addTagListener(
                 CollapsedStatusBarFragment.TAG,
                 object : FragmentHostManager.FragmentListener {
                     override fun onFragmentViewCreated(tag: String, fragment: Fragment) {
-                        val statusBarFragmentComponent = (fragment as CollapsedStatusBarFragment)
-                                .statusBarFragmentComponent ?: throw IllegalStateException()
+                        val statusBarFragmentComponent =
+                            (fragment as CollapsedStatusBarFragment).statusBarFragmentComponent
+                                ?: throw IllegalStateException()
                         statusBarViewUpdatedListener?.onStatusBarViewUpdated(
-                            statusBarFragmentComponent.phoneStatusBarView,
                             statusBarFragmentComponent.phoneStatusBarViewController,
-                            statusBarFragmentComponent.phoneStatusBarTransitions
+                            statusBarFragmentComponent.phoneStatusBarTransitions,
                         )
                         creationListeners.forEach { listener ->
                             listener.onStatusBarViewInitialized(statusBarFragmentComponent)
@@ -67,33 +97,15 @@ class StatusBarInitializer @Inject constructor(
                     override fun onFragmentViewDestroyed(tag: String?, fragment: Fragment?) {
                         // nop
                     }
-                }
-        ).fragmentManager
-                .beginTransaction()
-                .replace(
-                    R.id.status_bar_container,
-                    collapsedStatusBarFragmentProvider.get(),
-                    CollapsedStatusBarFragment.TAG
-                )
-                .commit()
-    }
-
-    interface OnStatusBarViewInitializedListener {
-
-        /**
-         * The status bar view has been initialized.
-         *
-         * @param component Dagger component that is created when the status bar view is created.
-         * Can be used to retrieve dependencies from that scope, including the status bar root view.
-         */
-        fun onStatusBarViewInitialized(component: StatusBarFragmentComponent)
-    }
-
-    interface OnStatusBarViewUpdatedListener {
-        fun onStatusBarViewUpdated(
-            statusBarView: PhoneStatusBarView,
-            statusBarViewController: PhoneStatusBarViewController,
-            statusBarTransitions: PhoneStatusBarTransitions
-        )
+                },
+            )
+            .fragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.status_bar_container,
+                collapsedStatusBarFragmentProvider.get(),
+                CollapsedStatusBarFragment.TAG,
+            )
+            .commit()
     }
 }

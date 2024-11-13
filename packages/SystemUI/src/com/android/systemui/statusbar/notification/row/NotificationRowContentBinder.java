@@ -89,6 +89,7 @@ public interface NotificationRowContentBinder {
                     FLAG_CONTENT_VIEW_SINGLE_LINE,
                     FLAG_GROUP_SUMMARY_HEADER,
                     FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
+                    FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE,
                     FLAG_CONTENT_VIEW_ALL})
     @interface InflationFlag {}
     /**
@@ -105,7 +106,7 @@ public interface NotificationRowContentBinder {
      */
     int FLAG_CONTENT_VIEW_HEADS_UP = 1 << 2;
     /**
-     * The public view.  This is a version of the contracted view that hides sensitive
+     * The public view. This is a version of the contracted view that hides sensitive
      * information and is used on the lock screen if we determine that the notification's
      * content should be hidden.
      */
@@ -126,7 +127,14 @@ public interface NotificationRowContentBinder {
      */
     int FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER = 1 << 6;
 
-    int FLAG_CONTENT_VIEW_ALL = (1 << 7) - 1;
+    /**
+     * The public single line view. This is a version of the contracted view that hides sensitive
+     * information and is used on the lock screen if we determine that the notification's
+     * content should be hidden, and the notification is shown as a child in a group.
+     */
+    int FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE = 1 << 7;
+
+    int FLAG_CONTENT_VIEW_ALL = (1 << 8) - 1;
 
     /**
      * Parameters for content view binding

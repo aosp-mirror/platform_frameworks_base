@@ -22,6 +22,9 @@
         <item name="android:textColorPrimary">@color/settingslib_materialColorOnSurface</item>
         <item name="android:textColorSecondary">@color/settingslib_text_color_secondary</item>
         <item name="android:textColorTertiary">@color/settingslib_materialColorOutline</item>
+        <!-- Set up edge-to-edge configuration for top app bar -->
+        <item name="android:clipToPadding">false</item>
+        <item name="android:clipChildren">false</item>
     </style>
 
     <style name="Theme.SettingsBase" parent="Theme.SettingsBase_v35" />

@@ -237,6 +237,13 @@
     <integer name="config_emergency_call_wait_for_connection_timeout_millis">20000</integer>
     <java-symbol type="integer" name="config_emergency_call_wait_for_connection_timeout_millis" />
 
+    <!-- The time duration in millis after which Telephony will stop waiting for the OFF state
+         from cellular modem, consider the request to power off cellular modem as failed, and thus
+         treat the cellular modem state as ON.
+     -->
+    <integer name="config_satellite_wait_for_cellular_modem_off_timeout_millis">120000</integer>
+    <java-symbol type="integer" name="config_satellite_wait_for_cellular_modem_off_timeout_millis" />
+
     <!-- Indicates the data limit in bytes that can be used for bootstrap sim until factory reset.
          -1 means unlimited. -->
     <integer name="config_esim_bootstrap_data_limit_bytes">-1</integer>
@@ -274,6 +281,16 @@
          handed over for emergency messaging via satellite. -->
     <string name="config_satellite_emergency_handover_intent_action" translatable="false"></string>
     <java-symbol type="string" name="config_satellite_emergency_handover_intent_action" />
+
+    <!-- The action of the intent that hidden menu sends to the app to launch demo mode for sos
+     emergency messaging via satellite. -->
+    <string name="config_satellite_demo_mode_sos_intent_action" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_demo_mode_sos_intent_action" />
+
+    <!-- The action of the intent that hidden menu sends to the app to launch esp loopback test mode
+     for sos emergency messaging via satellite. -->
+    <string name="config_satellite_test_with_esp_replies_intent_action" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_test_with_esp_replies_intent_action" />
 
     <!-- Whether outgoing satellite datagrams should be sent to modem in demo mode. When satellite
          is enabled for demo mode, if this config is enabled, outgoing datagrams will be sent to
@@ -393,12 +410,6 @@
     <bool name="config_wait_for_device_alignment_in_demo_datagram">false</bool>
     <java-symbol type="bool" name="config_wait_for_device_alignment_in_demo_datagram" />
 
-    <!-- Boolean indicating whether to enable MMS to be attempted on IWLAN if possible, even if
-     existing cellular networks already supports IWLAN.
-     -->
-    <bool name="force_iwlan_mms_feature_enabled">false</bool>
-    <java-symbol type="bool" name="force_iwlan_mms_feature_enabled" />
-
     <!-- The time duration in millis after which Telephony will abort the last message datagram
      sending requests. Telephony starts a timer when receiving a last message datagram sending
      request in either OFF, IDLE, or NOT_CONNECTED state. In NOT_CONNECTED, the duration of the
@@ -429,5 +440,24 @@
      -->
     <bool name="config_dropboxmanager_persistent_logging_enabled">false</bool>
     <java-symbol type="bool" name="config_dropboxmanager_persistent_logging_enabled" />
+
+    <!-- Telephony satellite gateway class name for handling carrier roaming to satellite is using ESOS messaging. -->
+    <string name="config_satellite_carrier_roaming_esos_provisioned_class" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_carrier_roaming_esos_provisioned_class" />
+
+    <!-- The time duration in minutes to wait before retry validating a possible change
+         in satellite allowed region. The default value is 10 minutes. -->
+    <integer name="config_satellite_delay_minutes_before_retry_validating_possible_change_in_allowed_region">10</integer>
+    <java-symbol type="integer" name="config_satellite_delay_minutes_before_retry_validating_possible_change_in_allowed_region" />
+
+    <!-- The maximum retry count to validate a possible change in satellite allowed region.
+         The default value is 3 minutes. -->
+    <integer name="config_satellite_max_retry_count_for_validating_possible_change_in_allowed_region">3</integer>
+    <java-symbol type="integer" name="config_satellite_max_retry_count_for_validating_possible_change_in_allowed_region" />
+
+    <!-- The time duration in minutes for location query throttle interval.
+         The default value is 10 minutes. -->
+    <integer name="config_satellite_location_query_throttle_interval_minutes">10</integer>
+    <java-symbol type="integer" name="config_satellite_location_query_throttle_interval_minutes" />
 
 </resources>

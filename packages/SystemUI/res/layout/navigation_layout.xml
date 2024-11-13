@@ -27,7 +27,7 @@
     android:clipToPadding="false"
     android:id="@+id/horizontal">
 
-    <com.android.systemui.navigationbar.buttons.NearestTouchFrame
+    <com.android.systemui.navigationbar.views.buttons.NearestTouchFrame
         android:id="@+id/nav_buttons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -53,6 +53,6 @@
             android:clipToPadding="false"
             android:clipChildren="false" />
 
-    </com.android.systemui.navigationbar.buttons.NearestTouchFrame>
+    </com.android.systemui.navigationbar.views.buttons.NearestTouchFrame>
 
 </FrameLayout>

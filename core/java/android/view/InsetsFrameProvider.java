@@ -162,6 +162,12 @@ public class InsetsFrameProvider implements Parcelable {
         return mSource;
     }
 
+    /** Set the flags of this provider. */
+    public InsetsFrameProvider setFlags(@Flags int flags) {
+        mFlags = flags;
+        return this;
+    }
+
     public InsetsFrameProvider setFlags(@Flags int flags, @Flags int mask) {
         mFlags = (mFlags & ~mask) | (flags & mask);
         return this;

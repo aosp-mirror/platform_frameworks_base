@@ -26,8 +26,7 @@ import java.io.IOException;
  * Serialized representation of a generic vibration.
  *
  * <p>This can be used to represent a {@link android.os.CombinedVibration} or a
- * {@link android.os.VibrationEffect}. Instances can be created from vibration objects via
- * {@link XmlSerializer}, or from XML content via {@link XmlParser}.
+ * {@link android.os.VibrationEffect}.
  *
  * <p>The separation of serialization and writing procedures enables configurable rules to define
  * which vibrations can be successfully serialized before any data is written to the output stream.

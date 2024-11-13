@@ -2158,8 +2158,12 @@ public class SyncManager {
             }
             if (mBound) {
                 mBound = false;
-                mLogger.log("unbindService for ", this);
-                mContext.unbindService(this);
+                try {
+                    mLogger.log("unbindService for ", this);
+                    mContext.unbindService(this);
+                } catch (NoSuchElementException e) {
+                    Slog.wtf(TAG, "Failed to unlink active sync adapter on close()", e);
+                }
                 try {
                     mBatteryStats.noteSyncFinish(mEventName, mSyncAdapterUid);
                 } catch (RemoteException e) {

@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WallpaperManager.COMMAND_DISPLAY_SWITCH;
 import static android.app.WallpaperManager.COMMAND_FREEZE;
 import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -57,10 +56,9 @@ import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -119,11 +117,6 @@ class WallpaperController {
 
     private boolean mShouldOffsetWallpaperCenter;
 
-    /**
-     * Whether the wallpaper has been notified about a physical display switch event is started.
-     */
-    private volatile boolean mIsWallpaperNotifiedOnDisplaySwitch;
-
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         final boolean useShellTransition = w.mTransitionController.isShellTransitionsEnabled();
         if (!useShellTransition) {
@@ -179,8 +172,8 @@ class WallpaperController {
                 && animatingContainer.getAnimation() != null
                 && animatingContainer.getAnimation().getShowWallpaper();
         final boolean hasWallpaper = w.hasWallpaper() || animationWallpaper;
-        if (isRecentsTransitionTarget(w) || isBackNavigationTarget(w)) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
+        if (isBackNavigationTarget(w)) {
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Found back animation wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             return true;
         } else if (hasWallpaper
@@ -205,15 +198,6 @@ class WallpaperController {
         }
         return false;
     };
-
-    private boolean isRecentsTransitionTarget(WindowState w) {
-        if (w.mTransitionController.isShellTransitionsEnabled()) {
-            return false;
-        }
-        // The window is either the recents activity or is in the task animating by the recents.
-        final RecentsAnimationController controller = mService.getRecentsAnimationController();
-        return controller != null && controller.isWallpaperVisible(w);
-    }
 
     private boolean isBackNavigationTarget(WindowState w) {
         // The window is in animating by back navigation and set to show wallpaper.
@@ -335,13 +319,13 @@ class WallpaperController {
         }
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
-            token.setVisibility(false);
             if (token.isVisible()) {
                 ProtoLog.d(WM_DEBUG_WALLPAPER,
                         "Hiding wallpaper %s from %s target=%s prev=%s callers=%s",
                         token, winGoingAway, mWallpaperTarget, mPrevWallpaperTarget,
                         Debug.getCallers(5));
             }
+            token.setVisibility(false);
         }
     }
 
@@ -765,7 +749,7 @@ class WallpaperController {
 
     void collectTopWallpapers(Transition transition) {
         if (mFindResults.hasTopShowWhenLockedWallpaper()) {
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper.mToken);
             } else {
                 transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
@@ -773,7 +757,7 @@ class WallpaperController {
 
         }
         if (mFindResults.hasTopHideWhenLockedWallpaper()) {
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper.mToken);
             } else {
                 transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
@@ -935,12 +919,6 @@ class WallpaperController {
                 Slog.v(TAG, "*** WALLPAPER DRAW TIMEOUT");
             }
 
-            // If there was a pending recents animation, start the animation anyways (it's better
-            // to not see the wallpaper than for the animation to not start)
-            if (mService.getRecentsAnimationController() != null) {
-                mService.getRecentsAnimationController().startAnimation();
-            }
-
             // If there was a pending back navigation animation that would show wallpaper, start
             // the animation due to it was skipped in previous surface placement.
             mService.mAtmService.mBackNavigationController.startAnimation();
@@ -1070,13 +1048,17 @@ class WallpaperController {
 
     /**
      * Mirrors the visible wallpaper if it's available.
+     * <p>
+     * We mirror at the WallpaperWindowToken level because scale and translation is applied at
+     * the WindowState level and mirroring the WindowState's SurfaceControl will remove any local
+     * scale and translation.
      *
      * @return A SurfaceControl for the parent of the mirrored wallpaper.
      */
     SurfaceControl mirrorWallpaperSurface() {
         final WindowState wallpaperWindowState = getTopVisibleWallpaper();
         return wallpaperWindowState != null
-                ? SurfaceControl.mirrorSurface(wallpaperWindowState.getSurfaceControl())
+                ? SurfaceControl.mirrorSurface(wallpaperWindowState.mToken.getSurfaceControl())
                 : null;
     }
 
@@ -1091,52 +1073,6 @@ class WallpaperController {
             }
         }
         return null;
-    }
-
-    /**
-     * Notifies the wallpaper that the display turns off when switching physical device. If the
-     * wallpaper is currently visible, its client visibility will be preserved until the display is
-     * confirmed to be off or on.
-     */
-    void onDisplaySwitchStarted() {
-        mIsWallpaperNotifiedOnDisplaySwitch = notifyDisplaySwitch(true /* start */);
-    }
-
-    /**
-     * Called when the screen has finished turning on or the device goes to sleep. This is no-op if
-     * the operation is not part of a display switch.
-     */
-    void onDisplaySwitchFinished() {
-        // The method can be called outside WM lock (turned on), so only acquire lock if needed.
-        // This is to optimize the common cases that regular devices don't have display switch.
-        if (mIsWallpaperNotifiedOnDisplaySwitch) {
-            synchronized (mService.mGlobalLock) {
-                mIsWallpaperNotifiedOnDisplaySwitch = false;
-                notifyDisplaySwitch(false /* start */);
-            }
-        }
-    }
-
-    private boolean notifyDisplaySwitch(boolean start) {
-        boolean notified = false;
-        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            for (int i = token.getChildCount() - 1; i >= 0; i--) {
-                final WindowState w = token.getChildAt(i);
-                if (start && !w.mWinAnimator.getShown()) {
-                    continue;
-                }
-                try {
-                    w.mClient.dispatchWallpaperCommand(COMMAND_DISPLAY_SWITCH, 0 /* x */, 0 /* y */,
-                            start ? 1 : 0 /* use z as start or finish */,
-                            null /* bundle */, false /* sync */);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to dispatch COMMAND_DISPLAY_SWITCH " + e);
-                }
-                notified = true;
-            }
-        }
-        return notified;
     }
 
     /**

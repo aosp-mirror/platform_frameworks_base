@@ -17,14 +17,20 @@
 package com.android.systemui.communal.dagger
 
 import android.content.Context
+import android.content.res.Resources
+import com.android.systemui.CoreStartable
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalDatabaseModule
 import com.android.systemui.communal.data.repository.CommunalMediaRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalPrefsRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryModule
+import com.android.systemui.communal.data.repository.CommunalSmartspaceRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
+import com.android.systemui.communal.domain.interactor.CommunalSceneTransitionInteractor
+import com.android.systemui.communal.shared.log.CommunalMetricsLogger
+import com.android.systemui.communal.shared.log.CommunalStatsLogProxyImpl
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.communal.util.CommunalColorsImpl
@@ -33,12 +39,17 @@ import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarterImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSource
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
+import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
 
 @Module(
@@ -52,6 +63,8 @@ import kotlinx.coroutines.CoroutineScope
             CommunalWidgetModule::class,
             CommunalPrefsRepositoryModule::class,
             CommunalSettingsRepositoryModule::class,
+            CommunalSmartspaceRepositoryModule::class,
+            CommunalStartableModule::class,
         ]
 )
 interface CommunalModule {
@@ -66,7 +79,22 @@ interface CommunalModule {
 
     @Binds fun bindCommunalColors(impl: CommunalColorsImpl): CommunalColors
 
+    @Binds
+    fun bindCommunalStatsLogProxy(
+        impl: CommunalStatsLogProxyImpl
+    ): CommunalMetricsLogger.StatsLogProxy
+
+    @Binds
+    @IntoMap
+    @ClassKey(CommunalSceneTransitionInteractor::class)
+    abstract fun bindCommunalSceneTransitionInteractor(
+        impl: CommunalSceneTransitionInteractor
+    ): CoreStartable
+
     companion object {
+        const val LOGGABLE_PREFIXES = "loggable_prefixes"
+        const val LAUNCHER_PACKAGE = "launcher_package"
+
         @Provides
         @Communal
         @SysUISingleton
@@ -92,6 +120,22 @@ interface CommunalModule {
             @Application context: Context,
         ): CommunalBackupUtils {
             return CommunalBackupUtils(context)
+        }
+
+        /** The prefixes of widgets packages names that are considered loggable. */
+        @Provides
+        @Named(LOGGABLE_PREFIXES)
+        fun provideLoggablePrefixes(@Application context: Context): List<String> {
+            return context.resources
+                .getStringArray(com.android.internal.R.array.config_loggable_dream_prefixes)
+                .toList()
+        }
+
+        /** The package name of the launcher */
+        @Provides
+        @Named(LAUNCHER_PACKAGE)
+        fun provideLauncherPackage(@Main resources: Resources): String {
+            return resources.getString(R.string.launcher_overlayable_package)
         }
     }
 }

@@ -25,6 +25,7 @@ import android.service.voice.VisualQueryAttentionResult;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.app.IVisualQueryRecognitionStatusListener;
@@ -195,12 +196,13 @@ public class AssistManager {
             SecureSettings secureSettings,
             SelectedUserInteractor selectedUserInteractor,
             ActivityManager activityManager,
-            AssistInteractor interactor) {
+            AssistInteractor interactor,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
         mAssistUtils = assistUtils;
-        mAssistDisclosure = new AssistDisclosure(context, uiHandler);
+        mAssistDisclosure = new AssistDisclosure(context, uiHandler, viewCaptureAwareWindowManager);
         mOverviewProxyService = overviewProxyService;
         mPhoneStateMonitor = phoneStateMonitor;
         mAssistLogger = assistLogger;
@@ -515,7 +517,7 @@ public class AssistManager {
     }
 
     @Nullable
-    private ComponentName getAssistInfo() {
+    public ComponentName getAssistInfo() {
         return getAssistInfoForUser(mSelectedUserInteractor.getSelectedUserId());
     }
 

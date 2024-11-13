@@ -17,11 +17,9 @@
 package android.text
 
 import android.graphics.Paint
-import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -40,7 +38,6 @@ class TextLineLetterSpacingTest {
     @JvmField
     val mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
-    @RequiresFlagsEnabled(FLAG_LETTER_SPACING_JUSTIFICATION)
     @Test
     fun calculateRunFlagTest() {
         // Only one Bidi run
@@ -84,7 +81,6 @@ class TextLineLetterSpacingTest {
                 .isEqualTo(LEFT_EDGE)
     }
 
-    @RequiresFlagsEnabled(FLAG_LETTER_SPACING_JUSTIFICATION)
     @Test
     fun resolveRunFlagForSubSequenceTest() {
         val runStart = 5

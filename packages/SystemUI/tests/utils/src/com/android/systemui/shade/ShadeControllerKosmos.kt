@@ -71,6 +71,7 @@ val Kosmos.shadeControllerImpl by
             deviceProvisionedController,
             mock<NotificationShadeWindowController>(),
             0,
+            { mock<NotificationShadeWindowViewController>() },
             { mock<NotificationPanelViewController>() },
             { mock<AssistManager>() },
             { mock<NotificationGutsManager>() },

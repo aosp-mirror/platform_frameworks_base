@@ -27,7 +27,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import com.android.internal.R.color.system_neutral1_900
 import com.android.wm.shell.R
-import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.shared.animation.Interpolators
 
 /**
  * User education view to highlight the manage button that allows a user to configure the settings

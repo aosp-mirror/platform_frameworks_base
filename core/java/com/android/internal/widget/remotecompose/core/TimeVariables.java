@@ -16,6 +16,9 @@
 package com.android.internal.widget.remotecompose.core;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 /**
  * This generates the standard system variables for time.
@@ -23,6 +26,7 @@ import java.time.LocalDateTime;
 public class TimeVariables {
     /**
      * This class populates all time variables in the system
+     *
      * @param context
      */
     public void updateTime(RemoteContext context) {
@@ -33,19 +37,29 @@ public class TimeVariables {
         // hours run from Midnight=0 quantized to Hours 0-23
         // CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600
         // CONTINUOUS_SEC is accurate to milliseconds due to float precession
-        int month = dateTime.getDayOfMonth();
+        // ID_OFFSET_TO_UTC is the offset from UTC in sec (typically / 3600f)
+        int month = dateTime.getMonth().getValue();
         int hour = dateTime.getHour();
         int minute = dateTime.getMinute();
         int seconds = dateTime.getSecond();
         int currentMinute = hour * 60 + minute;
         int currentSeconds = minute * 60 + seconds;
         float sec = currentSeconds + dateTime.getNano() * 1E-9f;
+        int day_week = dateTime.getDayOfWeek().getValue();
 
+
+        ZoneId zone = ZoneId.systemDefault();
+        OffsetDateTime offsetDateTime = dateTime.atZone(zone).toOffsetDateTime();
+        ZoneOffset offset = offsetDateTime.getOffset();
+
+        context.loadFloat(RemoteContext.ID_OFFSET_TO_UTC, offset.getTotalSeconds());
         context.loadFloat(RemoteContext.ID_CONTINUOUS_SEC, sec);
         context.loadFloat(RemoteContext.ID_TIME_IN_SEC, currentSeconds);
         context.loadFloat(RemoteContext.ID_TIME_IN_MIN, currentMinute);
         context.loadFloat(RemoteContext.ID_TIME_IN_HR, hour);
         context.loadFloat(RemoteContext.ID_CALENDAR_MONTH, month);
+        context.loadFloat(RemoteContext.ID_DAY_OF_MONTH, month);
+        context.loadFloat(RemoteContext.ID_WEEK_DAY, day_week);
 
     }
 }

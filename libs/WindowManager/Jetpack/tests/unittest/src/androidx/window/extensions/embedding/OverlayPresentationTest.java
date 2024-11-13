@@ -30,6 +30,13 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSpli
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPlaceholderRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTfContainer;
+import static androidx.window.extensions.embedding.SplitController.KEY_OVERLAY_ASSOCIATE_WITH_LAUNCHING_ACTIVITY;
+import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_BOTTOM;
+import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_LEFT;
+import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_RIGHT;
+import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_TOP;
+import static androidx.window.extensions.embedding.SplitPresenter.getOverlayPosition;
+import static androidx.window.extensions.embedding.SplitPresenter.positionToString;
 import static androidx.window.extensions.embedding.SplitPresenter.sanitizeBounds;
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
@@ -73,7 +80,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
@@ -81,11 +87,15 @@ import androidx.window.extensions.layout.WindowLayoutInfo;
 
 import com.android.window.flags.Flags;
 
+import com.google.testing.junit.testparameterinjector.TestParameter;
+import com.google.testing.junit.testparameterinjector.TestParameterInjector;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -103,7 +113,7 @@ import java.util.List;
 @SuppressWarnings("GuardedBy")
 @Presubmit
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(TestParameterInjector.class)
 public class OverlayPresentationTest {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -259,7 +269,7 @@ public class OverlayPresentationTest {
     }
 
     @Test
-    public void testCreateOrUpdateOverlay_visibleOverlaySameTagInTask_dismissOverlay() {
+    public void testCreateOrUpdateOverlay_topOverlayInTask_dismissOverlay() {
         createExistingOverlayContainers();
 
         final TaskFragmentContainer overlayContainer =
@@ -284,26 +294,6 @@ public class OverlayPresentationTest {
                 + "task")
                 .that(mSplitController.getAllNonFinishingOverlayContainers())
                 .containsExactly(mOverlayContainer2, overlayContainer);
-    }
-
-    @Test
-    public void testCreateOrUpdateOverlay_sameTagTaskAndActivity_updateOverlay() {
-        createExistingOverlayContainers();
-
-        final Rect bounds = new Rect(0, 0, 100, 100);
-        mSplitController.setActivityStackAttributesCalculator(params ->
-                new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
-        final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                mOverlayContainer1.getOverlayTag());
-
-        assertWithMessage("overlayContainer1 must be updated since the new overlay container"
-                + " is launched with the same tag and task")
-                .that(mSplitController.getAllNonFinishingOverlayContainers())
-                .containsExactly(mOverlayContainer1, mOverlayContainer2);
-
-        assertThat(overlayContainer).isEqualTo(mOverlayContainer1);
-        verify(mSplitPresenter).resizeTaskFragment(eq(mTransaction),
-                eq(mOverlayContainer1.getTaskFragmentToken()), eq(bounds));
     }
 
     @Test
@@ -354,6 +344,43 @@ public class OverlayPresentationTest {
     }
 
     @Test
+    public void testCreateOrUpdateAlwaysOnTopOverlay_dismissMultipleOverlaysInTask() {
+        createExistingOverlayContainers();
+        // Create another overlay in task.
+        final TaskFragmentContainer overlayContainer3 =
+                createTestOverlayContainer(TASK_ID, "test3");
+        assertThat(mSplitController.getAllNonFinishingOverlayContainers())
+                .containsExactly(mOverlayContainer1, mOverlayContainer2, overlayContainer3);
+
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateAlwaysOnTopOverlay("test4");
+
+        assertWithMessage("overlayContainer1 and overlayContainer3 must be dismissed")
+                .that(mSplitController.getAllNonFinishingOverlayContainers())
+                .containsExactly(mOverlayContainer2, overlayContainer);
+    }
+
+    @Test
+    public void testCreateOrUpdateAlwaysOnTopOverlay_updateOverlay() {
+        createExistingOverlayContainers();
+        // Create another overlay in task.
+        final TaskFragmentContainer alwaysOnTopOverlay = createTestOverlayContainer(TASK_ID,
+                "test3", true /* isVisible */, false /* associateLaunchingActivity */);
+        final ActivityStackAttributes attrs = new ActivityStackAttributes.Builder()
+                .setRelativeBounds(new Rect(0, 0, 100, 100)).build();
+        mSplitController.setActivityStackAttributesCalculator(params -> attrs);
+
+        Mockito.clearInvocations(mSplitPresenter);
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateAlwaysOnTopOverlay(alwaysOnTopOverlay.getOverlayTag());
+
+        assertWithMessage("overlayContainer1 and overlayContainer3 must be dismissed")
+                .that(mSplitController.getAllNonFinishingOverlayContainers())
+                .containsExactly(mOverlayContainer2, alwaysOnTopOverlay);
+        assertThat(overlayContainer).isEqualTo(alwaysOnTopOverlay);
+    }
+
+    @Test
     public void testCreateOrUpdateOverlay_launchFromSplit_returnNull() {
         final Activity primaryActivity = createMockActivity();
         final Activity secondaryActivity = createMockActivity();
@@ -373,13 +400,13 @@ public class OverlayPresentationTest {
     }
 
     private void createExistingOverlayContainers() {
-        createExistingOverlayContainers(true /* visible */);
+        createExistingOverlayContainers(true /* isOnTop */);
     }
 
-    private void createExistingOverlayContainers(boolean visible) {
-        mOverlayContainer1 = createTestOverlayContainer(TASK_ID, "test1", visible,
+    private void createExistingOverlayContainers(boolean isOnTop) {
+        mOverlayContainer1 = createTestOverlayContainer(TASK_ID, "test1", isOnTop,
                 true /* associatedLaunchingActivity */, mActivity);
-        mOverlayContainer2 = createTestOverlayContainer(TASK_ID + 1, "test2", visible);
+        mOverlayContainer2 = createTestOverlayContainer(TASK_ID + 1, "test2", isOnTop);
         List<TaskFragmentContainer> overlayContainers = mSplitController
                 .getAllNonFinishingOverlayContainers();
         assertThat(overlayContainers).containsExactly(mOverlayContainer1, mOverlayContainer2);
@@ -522,7 +549,7 @@ public class OverlayPresentationTest {
         assertThat(taskContainer.getTaskFragmentContainers()).containsExactly(overlayContainer);
 
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(Configuration.EMPTY,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */));
 
         mSplitController.updateOverlayContainer(mTransaction, overlayContainer);
@@ -591,7 +618,8 @@ public class OverlayPresentationTest {
         final TaskContainer.TaskProperties taskProperties = taskContainer.getTaskProperties();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(
                 new Configuration(taskProperties.getConfiguration()), taskProperties.getDisplayId(),
-                true /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
+                TASK_ID, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */);
         parentInfo.getConfiguration().windowConfiguration.getBounds().offset(10, 10);
 
         mSplitController.onTaskFragmentParentInfoChanged(mTransaction, TASK_ID, parentInfo);
@@ -615,7 +643,8 @@ public class OverlayPresentationTest {
         final TaskContainer.TaskProperties taskProperties = taskContainer.getTaskProperties();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(
                 new Configuration(taskProperties.getConfiguration()), taskProperties.getDisplayId(),
-                true /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
+                TASK_ID, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */);
 
         mSplitController.onTaskFragmentParentInfoChanged(mTransaction, TASK_ID, parentInfo);
 
@@ -666,8 +695,8 @@ public class OverlayPresentationTest {
                 attributes.getRelativeBounds());
         verify(mSplitPresenter).updateTaskFragmentWindowingModeIfRegistered(mTransaction, container,
                 WINDOWING_MODE_MULTI_WINDOW);
-        verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
-                TaskFragmentAnimationParams.DEFAULT);
+        verify(mSplitPresenter).updateAnimationParams(eq(mTransaction), eq(token),
+                any(TaskFragmentAnimationParams.class));
         verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, true);
         verify(mSplitPresenter, never()).setTaskFragmentPinned(any(),
                 any(TaskFragmentContainer.class), anyBoolean());
@@ -691,8 +720,8 @@ public class OverlayPresentationTest {
                 attributes.getRelativeBounds());
         verify(mSplitPresenter).updateTaskFragmentWindowingModeIfRegistered(mTransaction,
                 container, WINDOWING_MODE_MULTI_WINDOW);
-        verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
-                TaskFragmentAnimationParams.DEFAULT);
+        verify(mSplitPresenter).updateAnimationParams(eq(mTransaction), eq(token),
+                any(TaskFragmentAnimationParams.class));
         verify(mSplitPresenter, never()).setTaskFragmentIsolatedNavigation(any(),
                 any(TaskFragmentContainer.class), anyBoolean());
         verify(mSplitPresenter).setTaskFragmentPinned(mTransaction, container, true);
@@ -847,8 +876,6 @@ public class OverlayPresentationTest {
 
     @Test
     public void testOnActivityReparentedToTask_overlayRestoration() {
-        mSetFlagRule.enableFlags(Flags.FLAG_FIX_PIP_RESTORE_TO_OVERLAY);
-
         // Prepares and mock the data necessary for the test.
         final IBinder activityToken = mActivity.getActivityToken();
         final Intent intent = new Intent();
@@ -868,6 +895,72 @@ public class OverlayPresentationTest {
                 fillTaskActivityToken, lastOverlayToken);
         verify(mTransaction).reparentActivityToTaskFragment(
                 eq(overlayContainer.getTaskFragmentToken()), eq(activityToken));
+    }
+
+    @Test
+    public void testGetOverlayPosition(@TestParameter OverlayPositionTestParams params) {
+        final Rect taskBounds = new Rect(TASK_BOUNDS);
+        final Rect overlayBounds = params.toOverlayBounds();
+        final int overlayPosition = getOverlayPosition(overlayBounds, taskBounds);
+
+        assertWithMessage("The overlay position must be "
+                + positionToString(params.mPosition) + ", but is "
+                + positionToString(overlayPosition)
+                + ", parent bounds=" + taskBounds + ", overlay bounds=" + overlayBounds)
+                .that(overlayPosition).isEqualTo(params.mPosition);
+    }
+
+    private enum OverlayPositionTestParams {
+        LEFT_OVERLAY(CONTAINER_POSITION_LEFT, false /* shouldBeShrunk */),
+        LEFT_SHRUNK_OVERLAY(CONTAINER_POSITION_LEFT, true  /* shouldBeShrunk */),
+        TOP_OVERLAY(CONTAINER_POSITION_TOP, false /* shouldBeShrunk */),
+        TOP_SHRUNK_OVERLAY(CONTAINER_POSITION_TOP, true  /* shouldBeShrunk */),
+        RIGHT_OVERLAY(CONTAINER_POSITION_RIGHT, false /* shouldBeShrunk */),
+        RIGHT_SHRUNK_OVERLAY(CONTAINER_POSITION_RIGHT, true /* shouldBeShrunk */),
+        BOTTOM_OVERLAY(CONTAINER_POSITION_BOTTOM, false /* shouldBeShrunk */),
+        BOTTOM_SHRUNK_OVERLAY(CONTAINER_POSITION_BOTTOM, true /* shouldBeShrunk */);
+
+        @SplitPresenter.ContainerPosition
+        private final int mPosition;
+
+        private final boolean mShouldBeShrunk;
+
+        OverlayPositionTestParams(
+                @SplitPresenter.ContainerPosition int position, boolean shouldBeShrunk) {
+            mPosition = position;
+            mShouldBeShrunk = shouldBeShrunk;
+        }
+
+        @NonNull
+        private Rect toOverlayBounds() {
+            Rect r = new Rect(TASK_BOUNDS);
+            final int offset = mShouldBeShrunk ? 20 : 0;
+            switch (mPosition) {
+                case CONTAINER_POSITION_LEFT:
+                    r.top += offset;
+                    r.right /= 2;
+                    r.bottom -= offset;
+                    break;
+                case CONTAINER_POSITION_TOP:
+                    r.left += offset;
+                    r.right -= offset;
+                    r.bottom /= 2;
+                    break;
+                case CONTAINER_POSITION_RIGHT:
+                    r.left = r.right / 2;
+                    r.top += offset;
+                    r.bottom -= offset;
+                    break;
+                case CONTAINER_POSITION_BOTTOM:
+                    r.left += offset;
+                    r.right -= offset;
+                    r.top = r.bottom / 2;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid position: " + mPosition);
+            }
+            return r;
+        }
     }
 
     /**
@@ -892,6 +985,16 @@ public class OverlayPresentationTest {
                 launchOptions, mIntent, activity);
     }
 
+    @Nullable
+    private TaskFragmentContainer createOrUpdateAlwaysOnTopOverlay(
+            @NonNull String tag) {
+        final Bundle launchOptions = new Bundle();
+        launchOptions.putBoolean(KEY_OVERLAY_ASSOCIATE_WITH_LAUNCHING_ACTIVITY, false);
+        launchOptions.putString(KEY_OVERLAY_TAG, tag);
+        return mSplitController.createOrUpdateOverlayTaskFragmentIfNeeded(mTransaction,
+                launchOptions, mIntent, createMockActivity());
+    }
+
     /** Creates a mock TaskFragment that has been registered and appeared in the organizer. */
     @NonNull
     private TaskFragmentContainer createMockTaskFragmentContainer(@NonNull Activity activity) {
@@ -901,10 +1004,10 @@ public class OverlayPresentationTest {
     /** Creates a mock TaskFragment that has been registered and appeared in the organizer. */
     @NonNull
     private TaskFragmentContainer createMockTaskFragmentContainer(
-            @NonNull Activity activity, boolean isVisible) {
+            @NonNull Activity activity, boolean isOnTop) {
         final TaskFragmentContainer container = createTfContainer(mSplitController,
                 activity.getTaskId(), activity);
-        setupTaskFragmentInfo(container, activity, isVisible);
+        setupTaskFragmentInfo(container, activity, isOnTop);
         return container;
     }
 
@@ -916,8 +1019,8 @@ public class OverlayPresentationTest {
 
     @NonNull
     private TaskFragmentContainer createTestOverlayContainer(int taskId, @NonNull String tag,
-            boolean isVisible) {
-        return createTestOverlayContainer(taskId, tag, isVisible,
+            boolean isOnTop) {
+        return createTestOverlayContainer(taskId, tag, isOnTop,
                 true /* associateLaunchingActivity */);
     }
 
@@ -928,11 +1031,9 @@ public class OverlayPresentationTest {
                 null /* launchingActivity */);
     }
 
-    // TODO(b/243518738): add more test coverage on overlay container without activity association
-    //  once we have use cases.
     @NonNull
     private TaskFragmentContainer createTestOverlayContainer(int taskId, @NonNull String tag,
-            boolean isVisible, boolean associateLaunchingActivity,
+            boolean isOnTop, boolean associateLaunchingActivity,
             @Nullable Activity launchingActivity) {
         final Activity activity = launchingActivity != null
                 ? launchingActivity : createMockActivity();
@@ -943,14 +1044,15 @@ public class OverlayPresentationTest {
                         .setLaunchOptions(Bundle.EMPTY)
                         .setAssociatedActivity(associateLaunchingActivity ? activity : null)
                         .build();
-        setupTaskFragmentInfo(overlayContainer, createMockActivity(), isVisible);
+        setupTaskFragmentInfo(overlayContainer, createMockActivity(), isOnTop);
         return overlayContainer;
     }
 
     private void setupTaskFragmentInfo(@NonNull TaskFragmentContainer container,
                                        @NonNull Activity activity,
-                                       boolean isVisible) {
-        final TaskFragmentInfo info = createMockTaskFragmentInfo(container, activity, isVisible);
+                                       boolean isOnTop) {
+        final TaskFragmentInfo info = createMockTaskFragmentInfo(container, activity, isOnTop,
+                isOnTop);
         container.setInfo(mTransaction, info);
         mSplitPresenter.mFragmentInfos.put(container.getTaskFragmentToken(), info);
     }

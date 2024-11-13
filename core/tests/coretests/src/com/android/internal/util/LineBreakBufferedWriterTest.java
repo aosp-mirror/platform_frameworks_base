@@ -18,7 +18,7 @@ package com.android.internal.util;
 
 import static org.junit.Assert.assertEquals;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -341,7 +341,8 @@ public class WindowMagnificationGestureHandlerTest {
                     twoFingerTap();
                     twoFingerTap();
                     // Wait for two-finger tap gesture completed.
-                    SystemClock.sleep(ViewConfiguration.getDoubleTapMinTime() + 500);
+                    SystemClock.sleep(MagnificationGestureMatcher
+                            .getMagnificationMultiTapTimeout(mContext) + 100);
                     InstrumentationRegistry.getInstrumentation().waitForIdleSync();
                 }
                 break;
@@ -403,7 +404,8 @@ public class WindowMagnificationGestureHandlerTest {
                 twoFingerTap();
                 twoFingerTap();
                 // Wait for two-finger tap gesture completed.
-                SystemClock.sleep(ViewConfiguration.getDoubleTapMinTime() + 500);
+                SystemClock.sleep(MagnificationGestureMatcher
+                        .getMagnificationMultiTapTimeout(mContext) + 100);
                 InstrumentationRegistry.getInstrumentation().waitForIdleSync();
             }
             break;

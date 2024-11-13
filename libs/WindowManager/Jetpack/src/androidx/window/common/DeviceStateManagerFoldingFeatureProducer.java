@@ -18,8 +18,8 @@ package androidx.window.common;
 
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
-import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
-import static androidx.window.common.CommonFoldingFeature.parseListFromString;
+import static androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
+import static androidx.window.common.layout.CommonFoldingFeature.parseListFromString;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -31,8 +31,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
-import androidx.window.util.AcceptOnceConsumer;
-import androidx.window.util.BaseDataProducer;
+import androidx.window.common.layout.CommonFoldingFeature;
+import androidx.window.common.layout.DisplayFoldFeatureCommon;
 
 import com.android.internal.R;
 
@@ -44,7 +44,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * An implementation of {@link androidx.window.util.BaseDataProducer} that returns
+ * An implementation of {@link BaseDataProducer} that returns
  * the device's posture by mapping the state returned from {@link DeviceStateManager} to
  * values provided in the resources' config at {@link R.array#config_device_state_postures}.
  */
@@ -203,6 +203,23 @@ public final class DeviceStateManagerFoldingFeatureProducer
 
 
     /**
+     * Returns the list of supported {@link DisplayFoldFeatureCommon} calculated from the
+     * {@link DeviceStateManagerFoldingFeatureProducer}.
+     */
+    @NonNull
+    public List<DisplayFoldFeatureCommon> getDisplayFeatures() {
+        final List<DisplayFoldFeatureCommon> foldFeatures = new ArrayList<>();
+        final List<CommonFoldingFeature> folds = getFoldsWithUnknownState();
+
+        final boolean isHalfOpenedSupported = isHalfOpenedSupported();
+        for (CommonFoldingFeature fold : folds) {
+            foldFeatures.add(DisplayFoldFeatureCommon.create(fold, isHalfOpenedSupported));
+        }
+        return foldFeatures;
+    }
+
+
+    /**
      * Returns {@code true} if the device supports half-opened mode, {@code false} otherwise.
      */
     public boolean isHalfOpenedSupported() {
@@ -214,7 +231,7 @@ public final class DeviceStateManagerFoldingFeatureProducer
      * @param storeFeaturesConsumer a consumer to collect the data when it is first available.
      */
     @Override
-    public void getData(Consumer<List<CommonFoldingFeature>> storeFeaturesConsumer) {
+    public void getData(@NonNull Consumer<List<CommonFoldingFeature>> storeFeaturesConsumer) {
         mRawFoldSupplier.getData((String displayFeaturesString) -> {
             if (TextUtils.isEmpty(displayFeaturesString)) {
                 storeFeaturesConsumer.accept(new ArrayList<>());

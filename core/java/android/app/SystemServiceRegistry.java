@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.adservices.AdServicesFrameworkInitializer;
@@ -28,6 +30,9 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextManager;
+import android.app.appfunctions.AppFunctionManager;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
+import android.app.appfunctions.IAppFunctionManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
@@ -44,6 +49,8 @@ import android.app.sdksandbox.SdkSandboxManagerFrameworkInitializer;
 import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
 import android.app.smartspace.SmartspaceManager;
+import android.app.supervision.ISupervisionManager;
+import android.app.supervision.SupervisionManager;
 import android.app.time.TimeManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timedetector.TimeDetectorImpl;
@@ -95,6 +102,7 @@ import android.debug.IAdbManager;
 import android.devicelock.DeviceLockFrameworkInitializer;
 import android.graphics.fonts.FontManager;
 import android.hardware.ConsumerIrManager;
+import android.hardware.ISensorPrivacyManager;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
@@ -444,6 +452,11 @@ public final class SystemServiceRegistry {
             public VpnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getService(Context.VPN_MANAGEMENT_SERVICE);
                 IVpnManager service = IVpnManager.Stub.asInterface(b);
+                if (service == null
+                        && ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                        && android.server.Flags.allowRemovingVpnService()) {
+                    return null;
+                }
                 return new VpnManager(ctx, service);
             }});
 
@@ -540,6 +553,11 @@ public final class SystemServiceRegistry {
             @Override
             public TextServicesManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
+                 if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                        && ServiceManager.getService(Context.TEXT_SERVICES_MANAGER_SERVICE) == null
+                        && android.server.Flags.removeTextService()) {
+                    return null;
+                }
                 return TextServicesManager.createInstance(ctx);
             }});
 
@@ -655,8 +673,12 @@ public final class SystemServiceRegistry {
         registerService(Context.SENSOR_PRIVACY_SERVICE, SensorPrivacyManager.class,
                 new CachedServiceFetcher<SensorPrivacyManager>() {
                     @Override
-                    public SensorPrivacyManager createService(ContextImpl ctx) {
-                        return SensorPrivacyManager.getInstance(ctx);
+                    public SensorPrivacyManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.SENSOR_PRIVACY_SERVICE);
+                        return SensorPrivacyManager.getInstance(
+                                ctx, ISensorPrivacyManager.Stub.asInterface(b));
                     }});
 
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,
@@ -879,6 +901,23 @@ public final class SystemServiceRegistry {
                 }
                 return new CompanionDeviceManager(service, ctx.getOuterContext());
             }});
+
+        if (enableAppFunctionManager()) {
+            registerService(Context.APP_FUNCTION_SERVICE, AppFunctionManager.class,
+                    new CachedServiceFetcher<>() {
+                        @Override
+                        public AppFunctionManager createService(ContextImpl ctx)
+                                throws ServiceNotFoundException {
+                            if (!AppFunctionManagerConfiguration.isSupported(ctx)) {
+                                return null;
+                            }
+                            IAppFunctionManager service;
+                            service = IAppFunctionManager.Stub.asInterface(
+                                    ServiceManager.getServiceOrThrow(Context.APP_FUNCTION_SERVICE));
+                            return new AppFunctionManager(service, ctx.getOuterContext());
+                        }
+                    });
+        }
 
         registerService(Context.VIRTUAL_DEVICE_SERVICE, VirtualDeviceManager.class,
                 new CachedServiceFetcher<VirtualDeviceManager>() {
@@ -1588,11 +1627,20 @@ public final class SystemServiceRegistry {
                     @Override
                     public WearableSensingManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                        IBinder iBinder = ServiceManager.getService(
                                 Context.WEARABLE_SENSING_SERVICE);
-                        IWearableSensingManager manager =
-                                IWearableSensingManager.Stub.asInterface(iBinder);
-                        return new WearableSensingManager(ctx.getOuterContext(), manager);
+                        if (iBinder != null) {
+                            IWearableSensingManager manager =
+                                    IWearableSensingManager.Stub.asInterface(iBinder);
+                            return new WearableSensingManager(ctx.getOuterContext(), manager);
+                        }
+                        // Wear intentionally removes the service, so do not throw a
+                        // ServiceNotFoundException when the service is not absent.
+                        if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                                && android.server.Flags.removeWearableSensingServiceFromWear()) {
+                            return null;
+                        }
+                        throw new ServiceNotFoundException(Context.WEARABLE_SENSING_SERVICE);
                     }});
 
         registerService(Context.ON_DEVICE_INTELLIGENCE_SERVICE, OnDeviceIntelligenceManager.class,
@@ -1650,6 +1698,21 @@ public final class SystemServiceRegistry {
                         return new E2eeContactKeysManager(ctx);
                     }});
 
+        registerService(Context.SUPERVISION_SERVICE, SupervisionManager.class,
+                new CachedServiceFetcher<>() {
+                    @Override
+                    public SupervisionManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.app.supervision.flags.Flags.supervisionApi()) {
+                            throw new ServiceNotFoundException(
+                                    "SupervisionManager is not supported");
+                        }
+                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                                Context.SUPERVISION_SERVICE);
+                        ISupervisionManager service = ISupervisionManager.Stub.asInterface(iBinder);
+                        return new SupervisionManager(ctx, service);
+                    }
+                });
         // DO NOT do a flag check like this unless the flag is read-only.
         // (because this code is executed during preload in zygote.)
         // If the flag is mutable, the check should be inside CachedServiceFetcher.
@@ -1790,6 +1853,12 @@ public final class SystemServiceRegistry {
                     break;
                 case Context.APPWIDGET_SERVICE:
                     if (!hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_APP_WIDGETS)) {
+                        return null;
+                    }
+                    break;
+                case Context.TEXT_SERVICES_MANAGER_SERVICE:
+                    if (android.server.Flags.removeTextService()
+                            && hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_WATCH)) {
                         return null;
                     }
                     break;

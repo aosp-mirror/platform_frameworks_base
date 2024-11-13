@@ -38,14 +38,13 @@ oneway interface IBackAnimationRunner {
     /**
      * Called when the system is ready for the handler to start animating all the visible tasks.
      * @param apps The list of departing (type=MODE_CLOSING) and entering (type=MODE_OPENING)
-                   windows to animate,
-     * @param wallpapers The list of wallpapers to animate.
-     * @param nonApps The list of non-app windows such as Bubbles to animate.
+     *             windows to animate,
+     * @param prepareOpenTransition If non-null, the animation should start after receive open
+     *             transition
      * @param finishedCallback The callback to invoke when the animation is finished.
      */
     void onAnimationStart(
             in RemoteAnimationTarget[] apps,
-            in RemoteAnimationTarget[] wallpapers,
-            in RemoteAnimationTarget[] nonApps,
+            in IBinder prepareOpenTransition,
             in IBackAnimationFinishedCallback finishedCallback) = 2;
 }

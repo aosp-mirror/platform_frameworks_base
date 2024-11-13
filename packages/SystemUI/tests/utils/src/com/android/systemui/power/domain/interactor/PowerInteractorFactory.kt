@@ -42,6 +42,7 @@ object PowerInteractorFactory {
                     falsingCollector,
                     screenOffAnimationController,
                     statusBarStateController,
+                    mock(),
                 )
         )
     }

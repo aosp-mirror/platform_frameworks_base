@@ -269,7 +269,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ShellCallback callback, ResultReceiver result) {
-        new GameManagerShellCommand().exec(this, in, out, err, args, callback, result);
+        new GameManagerShellCommand(mPackageManager).exec(this, in, out, err, args, callback,
+                result);
     }
 
     @Override
@@ -2306,7 +2307,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return;
             }
 
-            final int userId = mContext.getUserId();
+            final int userId = ActivityManager.getCurrentUser();
             final boolean isNotGame = Arrays.stream(packages).noneMatch(
                     p -> isPackageGame(p, userId));
             synchronized (mUidObserverLock) {

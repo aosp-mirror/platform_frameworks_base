@@ -23,7 +23,6 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.IAuditLogEventsCallback;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
-import android.app.admin.flags.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -183,28 +182,6 @@ class SecurityLogMonitor implements Runnable {
      */
     @GuardedBy("mLock")
     private final ArrayDeque<SecurityEvent> mAuditLogEventBuffer = new ArrayDeque<>();
-
-    /**
-     * Start security logging.
-     *
-     * @param enabledUser which user logging is enabled on, or USER_ALL to enable logging for all
-     *     users on the device.
-     */
-    void start(int enabledUser) {
-        Slog.i(TAG, "Starting security logging for user " + enabledUser);
-        mEnabledUser = enabledUser;
-        mLock.lock();
-        try {
-            if (mMonitorThread == null) {
-                resetLegacyBufferLocked();
-                startMonitorThreadLocked();
-            } else {
-                Slog.i(TAG, "Security log monitor thread is already running");
-            }
-        } finally {
-            mLock.unlock();
-        }
-    }
 
     void stop() {
         Slog.i(TAG, "Stopping security logging.");
@@ -467,11 +444,11 @@ class SecurityLogMonitor implements Runnable {
             assignLogId(event);
         }
 
-        if (!Flags.securityLogV2Enabled() || mLegacyLogEnabled) {
+        if (mLegacyLogEnabled) {
             addToLegacyBufferLocked(dedupedLogs);
         }
 
-        if (Flags.securityLogV2Enabled() && mAuditLogEnabled) {
+        if (mAuditLogEnabled) {
             addAuditLogEventsLocked(dedupedLogs);
         }
     }
@@ -548,7 +525,7 @@ class SecurityLogMonitor implements Runnable {
                 saveLastEvents(newLogs);
                 newLogs.clear();
 
-                if (!Flags.securityLogV2Enabled() || mLegacyLogEnabled) {
+                if (mLegacyLogEnabled) {
                     notifyDeviceOwnerOrProfileOwnerIfNeeded(force);
                 }
             } catch (IOException e) {
@@ -663,7 +640,7 @@ class SecurityLogMonitor implements Runnable {
             }
         }
         if (DEBUG) {
-            Slogf.d(TAG, "Adding audit %d events to % already present in the buffer",
+            Slogf.d(TAG, "Adding audit %d events to %d already present in the buffer",
                     events.size(), mAuditLogEventBuffer.size());
         }
         mAuditLogEventBuffer.addAll(events);

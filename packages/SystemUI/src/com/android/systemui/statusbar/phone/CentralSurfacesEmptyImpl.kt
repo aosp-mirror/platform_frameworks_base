@@ -20,7 +20,7 @@ import android.view.MotionEvent
 import androidx.lifecycle.LifecycleRegistry
 import com.android.keyguard.AuthKeyguardMessageArea
 import com.android.systemui.animation.ActivityTransitionAnimator
-import com.android.systemui.navigationbar.NavigationBarView
+import com.android.systemui.navigationbar.views.NavigationBarView
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.qs.QSPanelController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -34,72 +34,127 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  */
 abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override val lifecycle = LifecycleRegistry(this)
+
     override fun updateIsKeyguard() = false
+
     override fun updateIsKeyguard(forceStateChange: Boolean) = false
+
     override fun getKeyguardMessageArea(): AuthKeyguardMessageArea? = null
+
     override fun isLaunchingActivityOverLockscreen() = false
+
     override fun isDismissingShadeForActivityLaunch() = false
+
     override fun onKeyguardViewManagerStatesUpdated() {}
+
     override fun getCommandQueuePanelsEnabled() = false
+
     override fun showWirelessChargingAnimation(batteryLevel: Int) {}
+
     override fun checkBarModes() {}
+
     override fun updateBubblesVisibility() {}
+
     override fun setInteracting(barWindow: Int, interacting: Boolean) {}
+
     override fun getDisplayWidth() = 0f
+
     override fun getDisplayHeight() = 0f
+
     override fun showKeyguard() {}
+
     override fun hideKeyguard() = false
+
     override fun showKeyguardImpl() {}
+
     override fun fadeKeyguardAfterLaunchTransition(
         beforeFading: Runnable?,
         endRunnable: Runnable?,
         cancelRunnable: Runnable?,
     ) {}
+
     override fun startLaunchTransitionTimeout() {}
+
     override fun hideKeyguardImpl(forceStateChange: Boolean) = false
+
     override fun keyguardGoingAway() {}
+
     override fun setKeyguardFadingAway(startTime: Long, delay: Long, fadeoutDuration: Long) {}
+
     override fun finishKeyguardFadingAway() {}
+
     override fun userActivity() {}
+
     override fun endAffordanceLaunch() {}
+
     override fun shouldKeyguardHideImmediately() = false
+
     override fun showBouncerWithDimissAndCancelIfKeyguard(
         performAction: OnDismissAction?,
         cancelAction: Runnable?,
     ) {}
+
     override fun getNavigationBarView(): NavigationBarView? = null
+
     override fun setBouncerShowing(bouncerShowing: Boolean) {}
+
     override fun isScreenFullyOff() = false
-    override fun isCameraAllowedByAdmin() = false
+
     override fun isGoingToSleep() = false
+
     override fun notifyBiometricAuthModeChanged() {}
+
     override fun setTransitionToFullShadeProgress(transitionToFullShadeProgress: Float) {}
+
     override fun setPrimaryBouncerHiddenFraction(expansion: Float) {}
+
     override fun updateScrimController() {}
+
     override fun shouldIgnoreTouch() = false
+
     override fun isDeviceInteractive() = false
+
     override fun handleExternalShadeWindowTouch(event: MotionEvent?) {}
+
     override fun handleCommunalHubTouch(event: MotionEvent?) {}
+
     override fun awakenDreams() {}
+
     override fun isBouncerShowing() = false
+
     override fun isBouncerShowingScrimmed() = false
+
     override fun updateNotificationPanelTouchState() {}
+
     override fun getRotation() = 0
+
     override fun setBarStateForTest(state: Int) {}
+
     override fun acquireGestureWakeLock(time: Long) {}
+
     override fun resendMessage(msg: Int) {}
+
     override fun resendMessage(msg: Any?) {}
+
     override fun setLastCameraLaunchSource(source: Int) {}
+
     override fun setLaunchCameraOnFinishedGoingToSleep(launch: Boolean) {}
+
     override fun setLaunchCameraOnFinishedWaking(launch: Boolean) {}
+
     override fun setLaunchEmergencyActionOnFinishedGoingToSleep(launch: Boolean) {}
+
     override fun setLaunchEmergencyActionOnFinishedWaking(launch: Boolean) {}
+
     override fun getQSPanelController(): QSPanelController? = null
+
     override fun getDisplayDensity() = 0f
+
     override fun setIsLaunchingActivityOverLockscreen(
         isLaunchingActivityOverLockscreen: Boolean,
         dismissShade: Boolean,
     ) {}
+
     override fun getAnimatorControllerFromNotification(
         associatedView: ExpandableNotificationRow?,
     ): ActivityTransitionAnimator.Controller? = null

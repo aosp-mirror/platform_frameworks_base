@@ -61,4 +61,28 @@
     <style name="IsFrameRatePowerSavingsBalancedEnabled">
         <item name="android:windowIsFrameRatePowerSavingsBalanced">true</item>
     </style>
+    <style name="customFont">
+        <item name="android:fontFamily">@font/samplefont</item>
+    </style>
+    <style name="customFontWithStyle">
+        <item name="android:fontFamily">@font/samplefont</item>
+        <item name="android:textStyle">bold|italic</item>
+    </style>
+    <style name="textAppearanceWithAllAttributes">
+        <item name="android:fontFamily">@font/samplefont</item>
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:textSize">160dp</item>
+        <item name="android:textColor">#FF00FF</item>
+        <item name="android:textColorLink">#00FFFF</item>
+        <item name="android:textLocale">ja-JP,zh-CN</item>
+        <item name="android:shadowColor">#00FFFF</item>
+        <item name="android:shadowDx">1.0</item>
+        <item name="android:shadowDy">2.0</item>
+        <item name="android:shadowRadius">3.0</item>
+        <item name="android:elegantTextHeight">true</item>
+        <item name="android:letterSpacing">1.0</item>
+        <item name="android:fontFeatureSettings">\"smcp\"</item>
+        <item name="android:fontVariationSettings">\'wdth\' 150</item>
+    </style>
+
 </resources>

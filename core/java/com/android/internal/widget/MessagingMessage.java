@@ -105,7 +105,10 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
     }
 
     default void removeMessage(ArrayList<MessagingLinearLayout.MessagingChild> toRecycle) {
-        getGroup().removeMessage(this, toRecycle);
+        final MessagingGroup group = getGroup();
+        if (group != null) {
+            group.removeMessage(this, toRecycle);
+        }
     }
 
     default void setMessagingGroup(MessagingGroup group) {
@@ -132,7 +135,12 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
     @Override
     default void hideAnimated() {
         setIsHidingAnimated(true);
-        getGroup().performRemoveAnimation(getView(), () -> setIsHidingAnimated(false));
+        final MessagingGroup group = getGroup();
+        if (group != null) {
+            group.performRemoveAnimation(getView(), () -> setIsHidingAnimated(false));
+        } else {
+            setIsHidingAnimated(false);
+        }
     }
 
     default boolean hasOverlappingRendering() {

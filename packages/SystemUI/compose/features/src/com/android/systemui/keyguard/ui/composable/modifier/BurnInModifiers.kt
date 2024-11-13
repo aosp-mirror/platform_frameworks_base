@@ -42,8 +42,9 @@ fun Modifier.burnInAware(
     isClock: Boolean = false,
 ): Modifier {
     val translationYState = remember { mutableStateOf(0F) }
-    val copiedParams = params.copy(translationY = { translationYState.value })
-    val burnIn = viewModel.movement(copiedParams)
+    viewModel.updateBurnInParams(params.copy(translationY = { translationYState.value }))
+
+    val burnIn = viewModel.movement
     val translationX by
         burnIn.map { it.translationX.toFloat() }.collectAsStateWithLifecycle(initialValue = 0f)
     val translationY by
@@ -51,12 +52,7 @@ fun Modifier.burnInAware(
     translationYState.value = translationY
     val scaleViewModel by
         burnIn
-            .map {
-                BurnInScaleViewModel(
-                    scale = it.scale,
-                    scaleClockOnly = it.scaleClockOnly,
-                )
-            }
+            .map { BurnInScaleViewModel(scale = it.scale, scaleClockOnly = it.scaleClockOnly) }
             .collectAsStateWithLifecycle(initialValue = BurnInScaleViewModel())
 
     return this.graphicsLayer {
@@ -72,8 +68,6 @@ fun Modifier.burnInAware(
 
 /** Reports the "top" coordinate of the modified composable to the given [consumer]. */
 @Composable
-fun Modifier.onTopPlacementChanged(
-    consumer: (Float) -> Unit,
-): Modifier {
+fun Modifier.onTopPlacementChanged(consumer: (Float) -> Unit): Modifier {
     return onPlaced { coordinates -> consumer(coordinates.boundsInWindow().top) }
 }

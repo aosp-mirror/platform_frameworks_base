@@ -18,7 +18,6 @@ package com.android.systemui.screenshot
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -45,7 +44,6 @@ import com.android.systemui.res.R
 import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
 import com.android.systemui.screenshot.LogConfig.DEBUG_INPUT
 import com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW
-import com.android.systemui.screenshot.ScreenshotController.SavedImageData
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
 import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.ui.ScreenshotAnimationController
@@ -69,14 +67,24 @@ constructor(
     shelfViewBinder: ScreenshotShelfViewBinder,
     private val thumbnailObserver: ThumbnailObserver,
     @Assisted private val context: Context,
-    @Assisted private val displayId: Int
-) : ScreenshotViewProxy {
-    override val view: ScreenshotShelfView =
+    @Assisted private val displayId: Int,
+) {
+
+    interface ScreenshotViewCallback {
+        fun onUserInteraction()
+
+        fun onDismiss()
+
+        /** DOWN motion event was observed outside of the touchable areas of this view. */
+        fun onTouchOutside()
+    }
+
+    val view: ScreenshotShelfView =
         LayoutInflater.from(context).inflate(R.layout.screenshot_shelf, null) as ScreenshotShelfView
-    override val screenshotPreview: View
-    override var packageName: String = ""
-    override var callbacks: ScreenshotView.ScreenshotViewCallback? = null
-    override var screenshot: ScreenshotData? = null
+    val screenshotPreview: View
+    var packageName: String = ""
+    var callbacks: ScreenshotViewCallback? = null
+    var screenshot: ScreenshotData? = null
         set(value) {
             value?.let {
                 viewModel.setScreenshotBitmap(it.bitmap)
@@ -92,10 +100,11 @@ constructor(
             field = value
         }
 
-    override val isAttachedToWindow
+    val isAttachedToWindow
         get() = view.isAttachedToWindow
-    override var isDismissing = false
-    override var isPendingSharedTransition = false
+
+    var isDismissing = false
+    var isPendingSharedTransition = false
 
     private val animationController = ScreenshotAnimationController(view, viewModel)
     private var inputMonitor: InputMonitorCompat? = null
@@ -108,7 +117,7 @@ constructor(
             animationController,
             LayoutInflater.from(context),
             onDismissalRequested = { event, velocity -> requestDismissal(event, velocity) },
-            onUserInteraction = { callbacks?.onUserInteraction() }
+            onUserInteraction = { callbacks?.onUserInteraction() },
         )
         view.updateInsets(windowManager.currentWindowMetrics.windowInsets)
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
@@ -121,7 +130,7 @@ constructor(
         screenshotPreview = view.screenshotPreview
         thumbnailObserver.setViews(
             view.blurredScreenshotPreview,
-            view.requireViewById(R.id.screenshot_preview_border)
+            view.requireViewById(R.id.screenshot_preview_border),
         )
         view.addOnAttachStateChangeListener(
             object : View.OnAttachStateChangeListener {
@@ -136,17 +145,17 @@ constructor(
         )
     }
 
-    override fun reset() {
+    fun reset() {
         animationController.cancel()
         isPendingSharedTransition = false
         viewModel.reset()
     }
-    override fun updateInsets(insets: WindowInsets) {
+
+    fun updateInsets(insets: WindowInsets) {
         view.updateInsets(insets)
     }
-    override fun updateOrientation(insets: WindowInsets) {}
 
-    override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
+    fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
         val entrance =
             animationController.getEntranceAnimation(screenRect, showFlash) {
                 viewModel.setAnimationState(AnimationState.ENTRANCE_REVEAL)
@@ -164,11 +173,7 @@ constructor(
         return entrance
     }
 
-    override fun addQuickShareChip(quickShareAction: Notification.Action) {}
-
-    override fun setChipIntents(imageData: SavedImageData) {}
-
-    override fun requestDismissal(event: ScreenshotEvent?) {
+    fun requestDismissal(event: ScreenshotEvent?) {
         requestDismissal(event, null)
     }
 
@@ -187,6 +192,7 @@ constructor(
                 override fun onAnimationStart(animator: Animator) {
                     isDismissing = true
                 }
+
                 override fun onAnimationEnd(animator: Animator) {
                     isDismissing = false
                     callbacks?.onDismiss()
@@ -196,13 +202,8 @@ constructor(
         animator.start()
     }
 
-    override fun showScrollChip(packageName: String, onClick: Runnable) {}
-
-    override fun hideScrollChip() {}
-
-    override fun prepareScrollingTransition(
+    fun prepareScrollingTransition(
         response: ScrollCaptureResponse,
-        screenBitmap: Bitmap, // unused
         newScreenshot: Bitmap,
         screenshotTakenInPortrait: Boolean,
         onTransitionPrepared: Runnable,
@@ -222,13 +223,13 @@ constructor(
                 0,
                 0,
                 context.resources.displayMetrics.widthPixels,
-                context.resources.displayMetrics.heightPixels
+                context.resources.displayMetrics.heightPixels,
             )
         )
         return r
     }
 
-    override fun startLongScreenshotTransition(
+    fun startLongScreenshotTransition(
         transitionDestination: Rect,
         onTransitionEnd: Runnable,
         longScreenshot: ScrollCaptureController.LongScreenshot,
@@ -237,33 +238,33 @@ constructor(
             animationController.runLongScreenshotTransition(
                 transitionDestination,
                 longScreenshot,
-                onTransitionEnd
+                onTransitionEnd,
             )
         transitionAnimation.doOnEnd { callbacks?.onDismiss() }
         transitionAnimation.start()
     }
 
-    override fun restoreNonScrollingUi() {
+    fun restoreNonScrollingUi() {
         viewModel.setScrollableRect(null)
         viewModel.setScrollingScrimBitmap(null)
         animationController.restoreUI()
         callbacks?.onUserInteraction() // reset the timeout
     }
 
-    override fun stopInputListening() {
+    fun stopInputListening() {
         inputMonitor?.dispose()
         inputMonitor = null
         inputEventReceiver?.dispose()
         inputEventReceiver = null
     }
 
-    override fun requestFocus() {
+    fun requestFocus() {
         view.requestFocus()
     }
 
-    override fun announceForAccessibility(string: String) = view.announceForAccessibility(string)
+    fun announceForAccessibility(string: String) = view.announceForAccessibility(string)
 
-    override fun prepareEntranceAnimation(runnable: Runnable) {
+    fun prepareEntranceAnimation(runnable: Runnable) {
         view.viewTreeObserver.addOnPreDrawListener(
             object : ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
@@ -276,7 +277,7 @@ constructor(
         )
     }
 
-    override fun fadeForSharedTransition() {
+    fun fadeForSharedTransition() {
         animationController.fadeForSharedTransition()
     }
 
@@ -293,7 +294,7 @@ constructor(
                         .findOnBackInvokedDispatcher()
                         ?.registerOnBackInvokedCallback(
                             OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                            onBackInvokedCallback
+                            onBackInvokedCallback,
                         )
                 }
 
@@ -349,7 +350,7 @@ constructor(
     }
 
     @AssistedFactory
-    interface Factory : ScreenshotViewProxy.Factory {
-        override fun getProxy(context: Context, displayId: Int): ScreenshotShelfViewProxy
+    interface Factory {
+        fun getProxy(context: Context, displayId: Int): ScreenshotShelfViewProxy
     }
 }

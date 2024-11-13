@@ -22,14 +22,10 @@ import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 public class DeveloperInfoFactory implements AslMarshallableFactory<DeveloperInfo> {
-
     /** Creates a {@link DeveloperInfo} from the human-readable DOM element. */
-    @Override
-    public DeveloperInfo createFromHrElements(List<Element> elements) throws MalformedXmlException {
-        Element developerInfoEle = XmlUtils.getSingleElement(elements);
+    public DeveloperInfo createFromHrElement(Element developerInfoEle)
+            throws MalformedXmlException {
         if (developerInfoEle == null) {
             AslgenUtil.logI("No DeveloperInfo found in hr format.");
             return null;
@@ -47,7 +43,6 @@ public class DeveloperInfoFactory implements AslMarshallableFactory<DeveloperInf
         String appDeveloperRegistryId =
                 XmlUtils.getStringAttr(
                         developerInfoEle, XmlUtils.HR_ATTR_APP_DEVELOPER_REGISTRY_ID, false);
-
         return new DeveloperInfo(
                 name,
                 email,
@@ -59,9 +54,8 @@ public class DeveloperInfoFactory implements AslMarshallableFactory<DeveloperInf
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    @Override
-    public DeveloperInfo createFromOdElements(List<Element> elements) throws MalformedXmlException {
-        Element developerInfoEle = XmlUtils.getSingleElement(elements);
+    public DeveloperInfo createFromOdElement(Element developerInfoEle)
+            throws MalformedXmlException {
         if (developerInfoEle == null) {
             AslgenUtil.logI("No DeveloperInfo found in od format.");
             return null;
@@ -83,7 +77,6 @@ public class DeveloperInfoFactory implements AslMarshallableFactory<DeveloperInf
         String appDeveloperRegistryId =
                 XmlUtils.getOdStringEle(
                         developerInfoEle, XmlUtils.OD_NAME_APP_DEVELOPER_REGISTRY_ID, false);
-
         return new DeveloperInfo(
                 name,
                 email,

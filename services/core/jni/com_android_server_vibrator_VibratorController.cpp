@@ -16,24 +16,26 @@
 
 #define LOG_TAG "VibratorController"
 
+#include <aidl/android/hardware/vibrator/IVibrator.h>
+#include <android/binder_parcel.h>
+#include <android/binder_parcel_jni.h>
 #include <android/hardware/vibrator/1.3/IVibrator.h>
-#include <android/hardware/vibrator/IVibrator.h>
-
+#include <android/persistable_bundle_aidl.h>
 #include <nativehelper/JNIHelp.h>
+#include <utils/Log.h>
+#include <utils/misc.h>
+#include <vibratorservice/VibratorHalController.h>
+
 #include "android_runtime/AndroidRuntime.h"
+#include "com_android_server_vibrator_VibratorManagerService.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
 
-#include <utils/Log.h>
-#include <utils/misc.h>
-
-#include <vibratorservice/VibratorHalController.h>
-
-#include "com_android_server_vibrator_VibratorManagerService.h"
-
 namespace V1_0 = android::hardware::vibrator::V1_0;
 namespace V1_3 = android::hardware::vibrator::V1_3;
-namespace aidl = android::hardware::vibrator;
+namespace Aidl = aidl::android::hardware::vibrator;
+
+using aidl::android::os::PersistableBundle;
 
 namespace android {
 
@@ -52,6 +54,9 @@ static struct {
     jmethodID setCompositionSizeMax;
     jmethodID setQFactor;
     jmethodID setFrequencyProfile;
+    jmethodID setMaxEnvelopeEffectSize;
+    jmethodID setMinEnvelopeEffectControlPointDurationMillis;
+    jmethodID setMaxEnvelopeEffectControlPointDurationMillis;
 } sVibratorInfoBuilderClassInfo;
 static struct {
     jfieldID id;
@@ -67,29 +72,29 @@ static struct {
 } sRampClassInfo;
 
 static_assert(static_cast<uint8_t>(V1_0::EffectStrength::LIGHT) ==
-              static_cast<uint8_t>(aidl::EffectStrength::LIGHT));
+              static_cast<uint8_t>(Aidl::EffectStrength::LIGHT));
 static_assert(static_cast<uint8_t>(V1_0::EffectStrength::MEDIUM) ==
-              static_cast<uint8_t>(aidl::EffectStrength::MEDIUM));
+              static_cast<uint8_t>(Aidl::EffectStrength::MEDIUM));
 static_assert(static_cast<uint8_t>(V1_0::EffectStrength::STRONG) ==
-              static_cast<uint8_t>(aidl::EffectStrength::STRONG));
+              static_cast<uint8_t>(Aidl::EffectStrength::STRONG));
 
 static_assert(static_cast<uint8_t>(V1_3::Effect::CLICK) ==
-              static_cast<uint8_t>(aidl::Effect::CLICK));
+              static_cast<uint8_t>(Aidl::Effect::CLICK));
 static_assert(static_cast<uint8_t>(V1_3::Effect::DOUBLE_CLICK) ==
-              static_cast<uint8_t>(aidl::Effect::DOUBLE_CLICK));
-static_assert(static_cast<uint8_t>(V1_3::Effect::TICK) == static_cast<uint8_t>(aidl::Effect::TICK));
-static_assert(static_cast<uint8_t>(V1_3::Effect::THUD) == static_cast<uint8_t>(aidl::Effect::THUD));
-static_assert(static_cast<uint8_t>(V1_3::Effect::POP) == static_cast<uint8_t>(aidl::Effect::POP));
+              static_cast<uint8_t>(Aidl::Effect::DOUBLE_CLICK));
+static_assert(static_cast<uint8_t>(V1_3::Effect::TICK) == static_cast<uint8_t>(Aidl::Effect::TICK));
+static_assert(static_cast<uint8_t>(V1_3::Effect::THUD) == static_cast<uint8_t>(Aidl::Effect::THUD));
+static_assert(static_cast<uint8_t>(V1_3::Effect::POP) == static_cast<uint8_t>(Aidl::Effect::POP));
 static_assert(static_cast<uint8_t>(V1_3::Effect::HEAVY_CLICK) ==
-              static_cast<uint8_t>(aidl::Effect::HEAVY_CLICK));
+              static_cast<uint8_t>(Aidl::Effect::HEAVY_CLICK));
 static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_1) ==
-              static_cast<uint8_t>(aidl::Effect::RINGTONE_1));
+              static_cast<uint8_t>(Aidl::Effect::RINGTONE_1));
 static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_2) ==
-              static_cast<uint8_t>(aidl::Effect::RINGTONE_2));
+              static_cast<uint8_t>(Aidl::Effect::RINGTONE_2));
 static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_15) ==
-              static_cast<uint8_t>(aidl::Effect::RINGTONE_15));
+              static_cast<uint8_t>(Aidl::Effect::RINGTONE_15));
 static_assert(static_cast<uint8_t>(V1_3::Effect::TEXTURE_TICK) ==
-              static_cast<uint8_t>(aidl::Effect::TEXTURE_TICK));
+              static_cast<uint8_t>(Aidl::Effect::TEXTURE_TICK));
 
 static std::shared_ptr<vibrator::HalController> findVibrator(int32_t vibratorId) {
     vibrator::ManagerHalController* manager =
@@ -98,7 +103,7 @@ static std::shared_ptr<vibrator::HalController> findVibrator(int32_t vibratorId)
         return nullptr;
     }
     auto result = manager->getVibrator(vibratorId);
-    return result.isOk() ? std::move(result.value()) : nullptr;
+    return result.isOk() ? result.value() : nullptr;
 }
 
 class VibratorControllerWrapper {
@@ -155,15 +160,15 @@ private:
     std::atomic<int64_t> mCallbackId;
 };
 
-static aidl::BrakingPwle brakingPwle(aidl::Braking braking, int32_t duration) {
-    aidl::BrakingPwle pwle;
+static Aidl::BrakingPwle brakingPwle(Aidl::Braking braking, int32_t duration) {
+    Aidl::BrakingPwle pwle;
     pwle.braking = braking;
     pwle.duration = duration;
     return pwle;
 }
 
-static aidl::ActivePwle activePwleFromJavaPrimitive(JNIEnv* env, jobject ramp) {
-    aidl::ActivePwle pwle;
+static Aidl::ActivePwle activePwleFromJavaPrimitive(JNIEnv* env, jobject ramp) {
+    Aidl::ActivePwle pwle;
     pwle.startAmplitude =
             static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.startAmplitude));
     pwle.endAmplitude = static_cast<float>(env->GetFloatField(ramp, sRampClassInfo.endAmplitude));
@@ -175,23 +180,48 @@ static aidl::ActivePwle activePwleFromJavaPrimitive(JNIEnv* env, jobject ramp) {
 }
 
 /* Return true if braking is not NONE and the active PWLE starts and ends with zero amplitude. */
-static bool shouldBeReplacedWithBraking(aidl::ActivePwle activePwle, aidl::Braking braking) {
-    return (braking != aidl::Braking::NONE) && (activePwle.startAmplitude == 0) &&
+static bool shouldBeReplacedWithBraking(Aidl::ActivePwle activePwle, Aidl::Braking braking) {
+    return (braking != Aidl::Braking::NONE) && (activePwle.startAmplitude == 0) &&
             (activePwle.endAmplitude == 0);
 }
 
 /* Return true if braking is not NONE and the active PWLE only ends with zero amplitude. */
-static bool shouldAddLastBraking(aidl::ActivePwle lastActivePwle, aidl::Braking braking) {
-    return (braking != aidl::Braking::NONE) && (lastActivePwle.startAmplitude > 0) &&
+static bool shouldAddLastBraking(Aidl::ActivePwle lastActivePwle, Aidl::Braking braking) {
+    return (braking != Aidl::Braking::NONE) && (lastActivePwle.startAmplitude > 0) &&
             (lastActivePwle.endAmplitude == 0);
 }
 
-static aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primitive) {
-    aidl::CompositeEffect effect;
-    effect.primitive = static_cast<aidl::CompositePrimitive>(
+static Aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primitive) {
+    Aidl::CompositeEffect effect;
+    effect.primitive = static_cast<Aidl::CompositePrimitive>(
             env->GetIntField(primitive, sPrimitiveClassInfo.id));
     effect.scale = static_cast<float>(env->GetFloatField(primitive, sPrimitiveClassInfo.scale));
     effect.delayMs = static_cast<int32_t>(env->GetIntField(primitive, sPrimitiveClassInfo.delay));
+    return effect;
+}
+
+static Aidl::VendorEffect vendorEffectFromJavaParcel(JNIEnv* env, jobject vendorData,
+                                                     jlong strength, jfloat scale,
+                                                     jfloat adaptiveScale) {
+    PersistableBundle bundle;
+    if (AParcel* parcel = AParcel_fromJavaParcel(env, vendorData); parcel != nullptr) {
+        if (binder_status_t status = bundle.readFromParcel(parcel); status == STATUS_OK) {
+            AParcel_delete(parcel);
+        } else {
+            jniThrowExceptionFmt(env, "android/os/BadParcelableException",
+                                 "Failed to readFromParcel, status %d (%s)", status,
+                                 strerror(-status));
+        }
+    } else {
+        jniThrowExceptionFmt(env, "android/os/BadParcelableException",
+                             "Failed to AParcel_fromJavaParcel, for nullptr");
+    }
+
+    Aidl::VendorEffect effect;
+    effect.vendorData = bundle;
+    effect.strength = static_cast<Aidl::EffectStrength>(strength);
+    effect.scale = static_cast<float>(scale);
+    effect.vendorScale = static_cast<float>(adaptiveScale);
     return effect;
 }
 
@@ -282,14 +312,32 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong ptr, j
         ALOGE("vibratorPerformEffect failed because native wrapper was not initialized");
         return -1;
     }
-    aidl::Effect effectType = static_cast<aidl::Effect>(effect);
-    aidl::EffectStrength effectStrength = static_cast<aidl::EffectStrength>(strength);
+    Aidl::Effect effectType = static_cast<Aidl::Effect>(effect);
+    Aidl::EffectStrength effectStrength = static_cast<Aidl::EffectStrength>(strength);
     auto callback = wrapper->createCallback(vibrationId);
     auto performEffectFn = [effectType, effectStrength, &callback](vibrator::HalWrapper* hal) {
         return hal->performEffect(effectType, effectStrength, callback);
     };
     auto result = wrapper->halCall<std::chrono::milliseconds>(performEffectFn, "performEffect");
     return result.isOk() ? result.value().count() : (result.isUnsupported() ? 0 : -1);
+}
+
+static jlong vibratorPerformVendorEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                         jobject vendorData, jlong strength, jfloat scale,
+                                         jfloat adaptiveScale, jlong vibrationId) {
+    VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
+    if (wrapper == nullptr) {
+        ALOGE("vibratorPerformVendorEffect failed because native wrapper was not initialized");
+        return -1;
+    }
+    Aidl::VendorEffect effect =
+            vendorEffectFromJavaParcel(env, vendorData, strength, scale, adaptiveScale);
+    auto callback = wrapper->createCallback(vibrationId);
+    auto performVendorEffectFn = [&effect, &callback](vibrator::HalWrapper* hal) {
+        return hal->performVendorEffect(effect, callback);
+    };
+    auto result = wrapper->halCall<void>(performVendorEffectFn, "performVendorEffect");
+    return result.isOk() ? std::numeric_limits<int64_t>::max() : (result.isUnsupported() ? 0 : -1);
 }
 
 static jlong vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
@@ -300,7 +348,7 @@ static jlong vibratorPerformComposedEffect(JNIEnv* env, jclass /* clazz */, jlon
         return -1;
     }
     size_t size = env->GetArrayLength(composition);
-    std::vector<aidl::CompositeEffect> effects;
+    std::vector<Aidl::CompositeEffect> effects;
     for (size_t i = 0; i < size; i++) {
         jobject element = env->GetObjectArrayElement(composition, i);
         effects.push_back(effectFromJavaPrimitive(env, element));
@@ -321,13 +369,13 @@ static jlong vibratorPerformPwleEffect(JNIEnv* env, jclass /* clazz */, jlong pt
         ALOGE("vibratorPerformPwleEffect failed because native wrapper was not initialized");
         return -1;
     }
-    aidl::Braking braking = static_cast<aidl::Braking>(brakingId);
+    Aidl::Braking braking = static_cast<Aidl::Braking>(brakingId);
     size_t size = env->GetArrayLength(waveform);
-    std::vector<aidl::PrimitivePwle> primitives;
+    std::vector<Aidl::PrimitivePwle> primitives;
     std::chrono::milliseconds totalDuration(0);
     for (size_t i = 0; i < size; i++) {
         jobject element = env->GetObjectArrayElement(waveform, i);
-        aidl::ActivePwle activePwle = activePwleFromJavaPrimitive(env, element);
+        Aidl::ActivePwle activePwle = activePwleFromJavaPrimitive(env, element);
         if ((i > 0) && shouldBeReplacedWithBraking(activePwle, braking)) {
             primitives.push_back(brakingPwle(braking, activePwle.duration));
         } else {
@@ -356,8 +404,8 @@ static void vibratorAlwaysOnEnable(JNIEnv* env, jclass /* clazz */, jlong ptr, j
         return;
     }
     auto alwaysOnEnableFn = [id, effect, strength](vibrator::HalWrapper* hal) {
-        return hal->alwaysOnEnable(static_cast<int32_t>(id), static_cast<aidl::Effect>(effect),
-                                   static_cast<aidl::EffectStrength>(strength));
+        return hal->alwaysOnEnable(static_cast<int32_t>(id), static_cast<Aidl::Effect>(effect),
+                                   static_cast<Aidl::EffectStrength>(strength));
     };
     wrapper->halCall<void>(alwaysOnEnableFn, "alwaysOnEnable");
 }
@@ -389,7 +437,7 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
                               static_cast<jlong>(info.capabilities.value()));
     }
     if (info.supportedEffects.isOk()) {
-        std::vector<aidl::Effect> effects = info.supportedEffects.value();
+        std::vector<Aidl::Effect> effects = info.supportedEffects.value();
         jintArray supportedEffects = env->NewIntArray(effects.size());
         env->SetIntArrayRegion(supportedEffects, 0, effects.size(),
                                reinterpret_cast<jint*>(effects.data()));
@@ -397,7 +445,7 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
                               sVibratorInfoBuilderClassInfo.setSupportedEffects, supportedEffects);
     }
     if (info.supportedBraking.isOk()) {
-        std::vector<aidl::Braking> braking = info.supportedBraking.value();
+        std::vector<Aidl::Braking> braking = info.supportedBraking.value();
         jintArray supportedBraking = env->NewIntArray(braking.size());
         env->SetIntArrayRegion(supportedBraking, 0, braking.size(),
                                reinterpret_cast<jint*>(braking.data()));
@@ -439,6 +487,25 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
         env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setQFactor,
                               static_cast<jfloat>(info.qFactor.value()));
     }
+    if (info.maxEnvelopeEffectSize.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo.setMaxEnvelopeEffectSize,
+                              static_cast<jint>(info.maxEnvelopeEffectSize.value()));
+    }
+    if (info.minEnvelopeEffectControlPointDuration.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo
+                                      .setMinEnvelopeEffectControlPointDurationMillis,
+                              static_cast<jint>(
+                                      info.minEnvelopeEffectControlPointDuration.value().count()));
+    }
+    if (info.maxEnvelopeEffectControlPointDuration.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo
+                                      .setMaxEnvelopeEffectControlPointDurationMillis,
+                              static_cast<jint>(
+                                      info.maxEnvelopeEffectControlPointDuration.value().count()));
+    }
 
     jfloat minFrequency = static_cast<jfloat>(info.minFrequency.valueOr(NAN));
     jfloat resonantFrequency = static_cast<jfloat>(info.resonantFrequency.valueOr(NAN));
@@ -469,6 +536,7 @@ static const JNINativeMethod method_table[] = {
         {"off", "(J)V", (void*)vibratorOff},
         {"setAmplitude", "(JF)V", (void*)vibratorSetAmplitude},
         {"performEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
+        {"performVendorEffect", "(JLandroid/os/Parcel;JFFJ)J", (void*)vibratorPerformVendorEffect},
         {"performComposedEffect", "(J[Landroid/os/vibrator/PrimitiveSegment;J)J",
          (void*)vibratorPerformComposedEffect},
         {"performPwleEffect", "(J[Landroid/os/vibrator/RampSegment;IJ)J",
@@ -534,6 +602,17 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
             GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyProfile",
                              "(Landroid/os/VibratorInfo$FrequencyProfile;)"
                              "Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setMaxEnvelopeEffectSize =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setMaxEnvelopeEffectSize",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setMinEnvelopeEffectControlPointDurationMillis =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass,
+                             "setMinEnvelopeEffectControlPointDurationMillis",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setMaxEnvelopeEffectControlPointDurationMillis =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass,
+                             "setMaxEnvelopeEffectControlPointDurationMillis",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
 
     return jniRegisterNativeMethods(env,
                                     "com/android/server/vibrator/VibratorController$NativeWrapper",

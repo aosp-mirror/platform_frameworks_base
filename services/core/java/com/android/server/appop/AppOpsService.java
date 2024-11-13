@@ -33,7 +33,6 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
-import static android.app.AppOpsManager.OP_BLUETOOTH_CONNECT;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_CAMERA_SANDBOXED;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
@@ -424,7 +423,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     /** Hands the definition of foreground and uid states */
     @GuardedBy("this")
-    public AppOpsUidStateTracker getUidStateTracker() {
+    private AppOpsUidStateTracker getUidStateTracker() {
         if (mUidStateTracker == null) {
             mUidStateTracker = new AppOpsUidStateTrackerImpl(
                     LocalServices.getService(ActivityManagerInternal.class),
@@ -620,7 +619,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             this.op = op;
             this.uid = uid;
             this.uidState = uidState;
-            this.packageName = packageName;
+            this.packageName = packageName.intern();
             // We keep an invariant that the persistent device will always have an entry in
             // mDeviceAttributedOps.
             mDeviceAttributedOps.put(PERSISTENT_DEVICE_ID_DEFAULT,
@@ -1035,7 +1034,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (action == null) {
                 return;
             }
-            String pkgName = intent.getData().getEncodedSchemeSpecificPart();
+            String pkgName = intent.getData().getEncodedSchemeSpecificPart().intern();
             int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
 
             if (action.equals(ACTION_PACKAGE_ADDED)
@@ -1239,7 +1238,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Ops ops = uidState.pkgOps.get(packageName);
         if (ops == null) {
             ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+            uidState.pkgOps.put(packageName.intern(), ops);
         }
 
         SparseIntArray packageModes =
@@ -1416,6 +1415,22 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     public void uidRemoved(int uid) {
+        if (Flags.dontRemoveExistingUidStates()) {
+            // b/358365471 If apps sharing UID are installed on multiple users and only one of
+            // them is installed for a single user while keeping the others we observe this
+            // subroutine get invoked incorrectly since the UID still exists.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                String uidName = getPackageManagerInternal().getNameForUid(uid);
+                if (uidName != null) {
+                    Slog.e(TAG, "Tried to remove existing UID. uid: " + uid + " name: " + uidName);
+                    return;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         synchronized (this) {
             if (mUidStates.indexOfKey(uid) >= 0) {
                 mUidStates.get(uid).clear();
@@ -2883,21 +2898,28 @@ public class AppOpsService extends IAppOpsService.Stub {
                         uidState.uid, getPersistentId(virtualDeviceId), code);
 
                 if (rawUidMode != AppOpsManager.opToDefaultMode(code)) {
-                    return raw ? rawUidMode : uidState.evalMode(code, rawUidMode);
+                    return raw ? rawUidMode :
+                        evaluateForegroundMode(/* uid= */ uid, /* op= */ code,
+                        /* rawUidMode= */ rawUidMode);
                 }
             }
 
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ false);
             if (op == null) {
-                return AppOpsManager.opToDefaultMode(code);
+                return evaluateForegroundMode(
+                        /* uid= */ uid,
+                        /* op= */ code,
+                        /* rawUidMode= */ AppOpsManager.opToDefaultMode(code));
             }
-            return raw
-                    ? mAppOpsCheckingService.getPackageMode(
-                            op.packageName, op.op, UserHandle.getUserId(op.uid))
-                    : op.uidState.evalMode(
-                            op.op,
-                            mAppOpsCheckingService.getPackageMode(
-                                    op.packageName, op.op, UserHandle.getUserId(op.uid)));
+            var packageMode = mAppOpsCheckingService.getPackageMode(
+                    op.packageName,
+                    op.op,
+                    UserHandle.getUserId(op.uid));
+            return raw ? packageMode :
+                    evaluateForegroundMode(
+                        /* uid= */ uid,
+                        /* op= */op.op,
+                        /* rawUidMode= */ packageMode);
         }
     }
 
@@ -3102,11 +3124,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     packageName);
         }
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
-            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-            if (code == OP_BLUETOOTH_CONNECT) {
-                Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as incoming "
-                        + "package: " + packageName + " and uid: " + uid + " is invalid");
-            }
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -3136,13 +3153,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         } catch (SecurityException e) {
             logVerifyAndGetBypassFailure(uid, e, "noteOperation");
-            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-            if (code == OP_BLUETOOTH_CONNECT) {
-                Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                        + " verifyAndGetBypass returned a SecurityException for package: "
-                        + packageName + " and uid: " + uid + " and attributionTag: "
-                        + attributionTag, e);
-            }
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -3160,17 +3170,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (DEBUG) Slog.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName + "flags: " +
                         AppOpsManager.flagsToString(flags));
-                // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                if (code == OP_BLUETOOTH_CONNECT) {
-                    Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                            + " #getOpsLocked returned null for"
-                            + " uid: " + uid
-                            + " packageName: " + packageName
-                            + " attributionTag: " + attributionTag
-                            + " pvr.isAttributionTagValid: " + pvr.isAttributionTagValid
-                            + " pvr.bypass: " + pvr.bypass);
-                    Slog.e(TAG, "mUidStates.get(" + uid + "): " + mUidStates.get(uid));
-                }
                 return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                         packageName);
             }
@@ -3215,11 +3214,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag,
                             virtualDeviceId, flags, uidMode);
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (code == OP_BLUETOOTH_CONNECT && uidMode == MODE_ERRORED) {
-                        Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                                + " uid mode is MODE_ERRORED");
-                    }
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
             } else {
@@ -3239,11 +3233,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag,
                             virtualDeviceId, flags, mode);
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (code == OP_BLUETOOTH_CONNECT && mode == MODE_ERRORED) {
-                        Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                                + " package mode is MODE_ERRORED");
-                    }
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
             }
@@ -4760,7 +4749,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return null;
             }
             ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+            uidState.pkgOps.put(packageName.intern(), ops);
         }
 
         if (edit) {
@@ -5087,7 +5076,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Ops ops = uidState.pkgOps.get(pkgName);
         if (ops == null) {
             ops = new Ops(pkgName, uidState);
-            uidState.pkgOps.put(pkgName, ops);
+            uidState.pkgOps.put(pkgName.intern(), ops);
         }
         ops.put(op.op, op);
     }
@@ -7012,6 +7001,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         throw new IllegalStateException(
                 "Requested persistentId for invalid virtualDeviceId: " + virtualDeviceId);
+    }
+
+    @GuardedBy("this")
+    private int evaluateForegroundMode(int uid, int op, int rawUidMode) {
+        return getUidStateTracker().evalMode(uid, op, rawUidMode);
     }
 
     private final class ClientUserRestrictionState implements DeathRecipient {

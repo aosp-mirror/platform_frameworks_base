@@ -695,6 +695,29 @@ public class PaintBundle {
     }
 
     /**
+     * Set the color based the R,G,B,A values
+     * @param r red (0 to 255)
+     * @param g green (0 to 255)
+     * @param b blue (0 to 255)
+     * @param a alpha (0 to 255)
+     */
+    public void setColor(int r, int g, int b, int a) {
+        int color = (a << 24) | (r << 16) | (g << 8) | b;
+        setColor(color);
+    }
+
+    /**
+     * Set the color based the R,G,B,A values
+     * @param r red (0.0 to 1.0)
+     * @param g green (0.0 to 1.0)
+     * @param b blue (0.0 to 1.0)
+     * @param a alpha (0.0 to 1.0)
+     */
+    public void setColor(float r, float g, float b, float a) {
+        setColor((int) r * 255, (int) g * 255, (int) b * 255, (int) a * 255);
+    }
+
+    /**
      * Set the Color based on ID
      * @param color
      */

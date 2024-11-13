@@ -35,14 +35,13 @@ import org.junit.runners.Suite;
     AslgenTests.class,
     AndroidSafetyLabelTest.class,
     AppInfoTest.class,
-    // DataCategoryTest.class,
     DataLabelsTest.class,
     DataTypeEqualityTest.class,
-    DeveloperInfoTest.class,
     SafetyLabelsTest.class,
-    SecurityLabelsTest.class,
     SystemAppSafetyLabelTest.class,
-    ThirdPartyVerificationTest.class,
-    TransparencyInfoTest.class
+    TransparencyInfoTest.class,
+    DeveloperInfoTest.class,
+    SecurityLabelsTest.class,
+    ThirdPartyVerificationTest.class
 })
 public class AllTests {}

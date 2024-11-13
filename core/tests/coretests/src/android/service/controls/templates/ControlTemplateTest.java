@@ -25,8 +25,8 @@ import android.annotation.DrawableRes;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 

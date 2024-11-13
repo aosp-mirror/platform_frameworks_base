@@ -79,6 +79,7 @@ import android.view.WindowManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
 import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
@@ -95,6 +96,10 @@ import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
+
+import com.google.android.msdl.domain.MSDLPlayer;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -148,8 +153,6 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
-    private AuthDialogPanelInteractionDetector mPanelInteractionDetector;
-    @Mock
     private UserManager mUserManager;
     @Mock
     private LockPatternUtils mLockPatternUtils;
@@ -167,6 +170,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private PromptViewModel mPromptViewModel;
     @Mock
     private UdfpsUtils mUdfpsUtils;
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
 
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mFpAuthenticatorsRegisteredCaptor;
@@ -182,6 +187,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private VibratorHelper mVibratorHelper;
+    @Mock
+    private MSDLPlayer mMSDLPlayer;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -1059,11 +1066,11 @@ public class AuthControllerTest extends SysuiTestCase {
             super(context, null /* applicationCoroutineScope */,
                     mExecution, mCommandQueue, mActivityTaskManager, mWindowManager,
                     mFingerprintManager, mFaceManager, () -> mUdfpsController, mDisplayManager,
-                    mWakefulnessLifecycle, mPanelInteractionDetector, mUserManager,
-                    mLockPatternUtils, () -> mUdfpsLogger, () -> mLogContextInteractor,
-                    () -> mPromptSelectionInteractor, () -> mCredentialViewModel,
-                    () -> mPromptViewModel, mInteractionJankMonitor,
-                    mHandler, mBackgroundExecutor, mUdfpsUtils, mVibratorHelper);
+                    mWakefulnessLifecycle, mUserManager, mLockPatternUtils, () -> mUdfpsLogger,
+                    () -> mLogContextInteractor, () -> mPromptSelectionInteractor,
+                    () -> mCredentialViewModel, () -> mPromptViewModel, mInteractionJankMonitor,
+                    mHandler, mBackgroundExecutor, mUdfpsUtils, mVibratorHelper,
+                    mLazyViewCapture, mMSDLPlayer);
         }
 
         @Override
@@ -1071,7 +1078,6 @@ public class AuthControllerTest extends SysuiTestCase {
                 boolean requireConfirmation, int userId, int[] sensorIds,
                 String opPackageName, boolean skipIntro, long operationId, long requestId,
                 WakefulnessLifecycle wakefulnessLifecycle,
-                AuthDialogPanelInteractionDetector panelInteractionDetector,
                 UserManager userManager,
                 LockPatternUtils lockPatternUtils, PromptViewModel viewModel) {
 

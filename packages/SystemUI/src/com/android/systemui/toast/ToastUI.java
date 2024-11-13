@@ -117,7 +117,14 @@ public class ToastUI implements
             int displayId) {
         Runnable showToastRunnable = () -> {
             UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
-            Context context = mContext.createContextAsUser(userHandle, 0);
+            Context context;
+            try {
+                context = mContext.createContextAsUser(userHandle, 0);
+            } catch (IllegalStateException e) {
+                // b/366533044 : Own package not found for systemui
+                Log.e(TAG, "Cannot create toast because cannot create context", e);
+                return;
+            }
 
             DisplayManager mDisplayManager = mContext.getSystemService(DisplayManager.class);
             Display display = mDisplayManager.getDisplay(displayId);
@@ -128,7 +135,7 @@ public class ToastUI implements
                 return;
             }
             Context displayContext = context.createDisplayContext(display);
-            mToast = mToastFactory.createToast(mContext /* sysuiContext */, text, packageName,
+            mToast = mToastFactory.createToast(displayContext /* sysuiContext */, text, packageName,
                     userHandle.getIdentifier(), mOrientation);
 
             if (mToast.getInAnimation() != null) {

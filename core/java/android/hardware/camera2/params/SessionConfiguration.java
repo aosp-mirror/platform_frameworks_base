@@ -17,8 +17,6 @@
 
 package android.hardware.camera2.params;
 
-import static com.android.internal.util.Preconditions.*;
-
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -32,8 +30,6 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraDevice.CameraDeviceSetup;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.params.InputConfiguration;
-import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.media.ImageReader;
 import android.os.Parcel;
@@ -46,6 +42,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -95,8 +92,8 @@ public final class SessionConfiguration implements Parcelable {
     public @interface SessionMode {};
 
     // Camera capture session related parameters.
-    private List<OutputConfiguration> mOutputConfigurations;
-    private CameraCaptureSession.StateCallback mStateCallback;
+    private final @NonNull List<OutputConfiguration> mOutputConfigurations;
+    private CameraCaptureSession.StateCallback mStateCallback = null;
     private int mSessionType;
     private Executor mExecutor = null;
     private InputConfiguration mInputConfig = null;
@@ -168,12 +165,10 @@ public final class SessionConfiguration implements Parcelable {
         source.readTypedList(outConfigs, OutputConfiguration.CREATOR);
         // Ignore the values for hasSessionParameters and settings because we cannot reconstruct
         // the CaptureRequest object.
-        if (Flags.featureCombinationQuery()) {
-            boolean hasSessionParameters = source.readBoolean();
-            if (hasSessionParameters) {
-                CameraMetadataNative settings = new CameraMetadataNative();
-                settings.readFromParcel(source);
-            }
+        boolean hasSessionParameters = source.readBoolean();
+        if (hasSessionParameters) {
+            CameraMetadataNative settings = new CameraMetadataNative();
+            settings.readFromParcel(source);
         }
 
         if ((inputWidth > 0) && (inputHeight > 0) && (inputFormat != -1)) {
@@ -215,14 +210,12 @@ public final class SessionConfiguration implements Parcelable {
             dest.writeBoolean(/*isMultiResolution*/ false);
         }
         dest.writeTypedList(mOutputConfigurations);
-        if (Flags.featureCombinationQuery()) {
-            if (mSessionParameters != null) {
-                dest.writeBoolean(/*hasSessionParameters*/true);
-                CameraMetadataNative metadata = mSessionParameters.getNativeCopy();
-                metadata.writeToParcel(dest, /*flags*/0);
-            } else {
-                dest.writeBoolean(/*hasSessionParameters*/false);
-            }
+        if (mSessionParameters != null) {
+            dest.writeBoolean(/*hasSessionParameters*/true);
+            CameraMetadataNative metadata = mSessionParameters.getNativeCopy();
+            metadata.writeToParcel(dest, /*flags*/0);
+        } else {
+            dest.writeBoolean(/*hasSessionParameters*/false);
         }
     }
 
@@ -268,7 +261,8 @@ public final class SessionConfiguration implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return HashCodeHelpers.hashCode(mOutputConfigurations.hashCode(), mInputConfig.hashCode(),
+        return HashCodeHelpers.hashCode(mOutputConfigurations.hashCode(),
+                Objects.hashCode(mInputConfig),
                 mSessionType);
     }
 

@@ -134,6 +134,18 @@ public class UserWakeupStoreTest {
     }
 
     @Test
+    public void testOnUserStarting_userIsRemovedFromTheStore() {
+        mUserWakeupStore.addUserWakeup(USER_ID_1, TEST_TIMESTAMP - 19_000);
+        mUserWakeupStore.addUserWakeup(USER_ID_2, TEST_TIMESTAMP - 7_000);
+        mUserWakeupStore.addUserWakeup(USER_ID_3, TEST_TIMESTAMP - 13_000);
+        assertEquals(3, mUserWakeupStore.getUserIdsToWakeup(TEST_TIMESTAMP).length);
+        mUserWakeupStore.onUserStarting(USER_ID_3);
+        // getWakeupTimeForUser returns negative wakeup time if there is no entry for user.
+        assertEquals(-1, mUserWakeupStore.getWakeupTimeForUser(USER_ID_3));
+        assertEquals(2, mUserWakeupStore.getUserIdsToWakeup(TEST_TIMESTAMP).length);
+    }
+
+    @Test
     public void testGetNextUserWakeup() {
         mUserWakeupStore.addUserWakeup(USER_ID_1, TEST_TIMESTAMP - 19_000);
         mUserWakeupStore.addUserWakeup(USER_ID_2, TEST_TIMESTAMP - 3_000);

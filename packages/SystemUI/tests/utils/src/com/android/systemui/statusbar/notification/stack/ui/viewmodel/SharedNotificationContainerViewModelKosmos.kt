@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -24,6 +25,7 @@ import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodToOccludedTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.dozingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dozingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dozingToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dreamingToLockscreenTransitionViewModel
@@ -65,6 +67,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         aodToGoneTransitionViewModel = aodToGoneTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         aodToOccludedTransitionViewModel = aodToOccludedTransitionViewModel,
+        dozingToGlanceableHubTransitionViewModel = dozingToGlanceableHubTransitionViewModel,
         dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
         dozingToOccludedTransitionViewModel = dozingToOccludedTransitionViewModel,
         dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
@@ -86,6 +89,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         primaryBouncerToLockscreenTransitionViewModel =
             primaryBouncerToLockscreenTransitionViewModel,
         aodBurnInViewModel = aodBurnInViewModel,
+        communalSceneInteractor = communalSceneInteractor,
         unfoldTransitionInteractor = unfoldTransitionInteractor,
     )
 }

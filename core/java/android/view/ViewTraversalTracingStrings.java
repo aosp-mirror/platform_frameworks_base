@@ -58,6 +58,6 @@ class ViewTraversalTracingStrings {
         out.append(" ");
         out.append(className);
         v.appendId(out);
-        return out.substring(0, Math.min(out.length() - 1, Trace.MAX_SECTION_NAME_LEN - 1));
+        return out.substring(0, Math.min(out.length(), Trace.MAX_SECTION_NAME_LEN));
     }
 }

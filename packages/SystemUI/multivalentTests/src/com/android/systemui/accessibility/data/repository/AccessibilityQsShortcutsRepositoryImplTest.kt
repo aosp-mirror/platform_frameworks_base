@@ -22,10 +22,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -37,15 +38,16 @@ import org.mockito.junit.MockitoRule
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
 class AccessibilityQsShortcutsRepositoryImplTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val secureSettings = kosmos.fakeSettings
+
     @Rule @JvmField val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     // mocks
     @Mock private lateinit var a11yManager: AccessibilityManager
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
-    private val secureSettings = FakeSettings()
 
     private val userA11yQsShortcutsRepositoryFactory =
         object : UserA11yQsShortcutsRepository.Factory {

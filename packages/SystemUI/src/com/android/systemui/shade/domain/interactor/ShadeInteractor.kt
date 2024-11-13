@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import androidx.annotation.FloatRange
 import com.android.systemui.shade.shared.model.ShadeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -51,8 +52,38 @@ interface ShadeInteractor : BaseShadeInteractor {
     /** Are touches allowed on the notification panel? */
     val isShadeTouchable: Flow<Boolean>
 
-    /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
+    /** Whether the shade can be expanded from QQS to QS. */
     val isExpandToQsEnabled: Flow<Boolean>
+
+    /**
+     * The version of the shade layout to use.
+     *
+     * Note: Most likely, you want to read [isShadeLayoutWide] instead of this.
+     */
+    val shadeMode: StateFlow<ShadeMode>
+
+    /**
+     * Whether the shade layout should be wide (true) or narrow (false).
+     *
+     * In a wide layout, notifications and quick settings each take up only half the screen width
+     * (whether they are shown at the same time or not). In a narrow layout, they can each be as
+     * wide as the entire screen.
+     */
+    val isShadeLayoutWide: StateFlow<Boolean>
+
+    /**
+     * The fraction between [0..1] (i.e., percentage) of screen width to consider the threshold
+     * between "top-left" and "top-right" for the purposes of dual-shade invocation.
+     *
+     * When the dual-shade is not wide, this always returns 0.5 (the top edge is evenly split). On
+     * wide layouts however, a larger fraction is returned because only the area of the system
+     * status icons is considered top-right.
+     *
+     * Note that this fraction only determines the split between the absolute left and right
+     * directions. In RTL layouts, the "top-start" edge will resolve to "top-right", and "top-end"
+     * will resolve to "top-left".
+     */
+    @FloatRange(from = 0.0, to = 1.0) fun getTopEdgeSplitFraction(): Float
 }
 
 /** ShadeInteractor methods with implementations that differ between non-empty impls. */
@@ -110,13 +141,23 @@ interface BaseShadeInteractor {
      */
     val isUserInteractingWithQs: Flow<Boolean>
 
-    val shadeMode: StateFlow<ShadeMode>
+    /**
+     * Triggers the expansion (opening) of the notification shade. If the notification shade is
+     * already open, this has no effect.
+     */
+    fun expandNotificationShade(loggingReason: String)
+
+    /**
+     * Triggers the expansion (opening) of the quick settings shade. If the quick settings shade is
+     * already open, this has no effect.
+     */
+    fun expandQuickSettingsShade(loggingReason: String)
 }
 
 fun createAnyExpansionFlow(
     scope: CoroutineScope,
     shadeExpansion: Flow<Float>,
-    qsExpansion: Flow<Float>
+    qsExpansion: Flow<Float>,
 ): StateFlow<Float> {
     return combine(shadeExpansion, qsExpansion) { shadeExp, qsExp -> maxOf(shadeExp, qsExp) }
         .stateIn(scope, SharingStarted.Eagerly, 0f)

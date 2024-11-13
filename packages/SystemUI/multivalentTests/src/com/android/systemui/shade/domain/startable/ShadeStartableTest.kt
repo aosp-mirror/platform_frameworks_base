@@ -27,6 +27,7 @@ import com.android.systemui.authentication.data.repository.fakeAuthenticationRep
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.display.data.repository.displayStateRepository
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
@@ -41,6 +42,8 @@ import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
+import com.android.systemui.statusbar.phone.scrimController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -54,6 +57,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.verify
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
@@ -165,6 +169,18 @@ class ShadeStartableTest(flags: FlagsParameterization) : SysuiTestCase() {
             changeScene(Scenes.Shade, transitionState) { progress ->
                 assertThat(latestChangeEvent?.fraction).isEqualTo(progress)
             }
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun hydrateFullWidth() =
+        testScope.runTest {
+            underTest.start()
+
+            kosmos.displayStateRepository.setIsLargeScreen(true)
+            runCurrent()
+            verify(kosmos.notificationStackScrollLayoutController).setIsFullWidth(false)
+            assertThat(kosmos.scrimController.clipQsScrim).isFalse()
         }
 
     private fun TestScope.changeScene(

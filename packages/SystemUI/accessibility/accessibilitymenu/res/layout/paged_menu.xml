@@ -1,27 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/row_width"
     android:layout_height="match_parent"
-    android:id="@+id/coordinatorLayout"
-    android:background="@drawable/view_background"
-    >
-  <LinearLayout
-      android:layout_width="@dimen/row_width"
-      android:layout_height="wrap_content"
-      android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/view_background">
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/table_margin_top"
-        android:paddingBottom="@dimen/a11ymenu_layout_margin"
-        android:paddingLeft="@dimen/a11ymenu_layout_margin"
-        android:paddingRight="@dimen/a11ymenu_layout_margin"
-        android:layout_gravity="center"
-        android:gravity="center"
-        />
+  <androidx.viewpager2.widget.ViewPager2
+      android:id="@+id/view_pager"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:paddingTop="@dimen/table_margin_top"
+      android:paddingBottom="@dimen/a11ymenu_layout_margin"
+      android:gravity="center"
+      />
 
-    <include layout="@layout/footerlayout_switch_page"/>
-  </LinearLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+  <include layout="@layout/footerlayout_switch_page"/>
+</LinearLayout>

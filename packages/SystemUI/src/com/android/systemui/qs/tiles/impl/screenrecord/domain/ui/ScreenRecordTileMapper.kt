@@ -61,7 +61,7 @@ constructor(
                             contentDescription = null
                         )
                     icon = { loadedIcon }
-                    val countDown = Math.floorDiv(data.millisUntilStarted + 500, 1000)
+                    val countDown = data.countdownSeconds
                     sideViewIcon = QSTileState.SideViewIcon.None
                     secondaryLabel = String.format("%d...", countDown)
                 }

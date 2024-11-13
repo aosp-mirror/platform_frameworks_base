@@ -19,6 +19,7 @@ import com.android.internal.widget.remotecompose.core.operations.FloatExpression
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 
 /**
  * Specify an abstract context used to playback RemoteCompose documents
@@ -35,10 +36,25 @@ public abstract class RemoteContext {
     ContextMode mMode = ContextMode.UNSET;
 
     boolean mDebug = false;
+
     private int mTheme = Theme.UNSPECIFIED;
 
     public float mWidth = 0f;
     public float mHeight = 0f;
+    private float mAnimationTime;
+
+    private boolean mAnimate = true;
+
+    public Component lastComponent;
+    public long currentTime = 0L;
+
+    public boolean isAnimationEnabled() {
+        return mAnimate;
+    }
+
+    public void setAnimationEnabled(boolean value) {
+        mAnimate = value;
+    }
 
     /**
      * Load a path under an id.
@@ -65,12 +81,29 @@ public abstract class RemoteContext {
     public abstract void loadColor(int id, int color);
 
     /**
+     * Set the animation time allowing the creator to control animation rates
+     * @param time
+     */
+    public void setAnimationTime(float time) {
+        mAnimationTime = time;
+    }
+
+    /**
      * gets the time animation clock as float in seconds
      * @return a monotonic time in seconds (arbitrary zero point)
      */
     public float getAnimationTime() {
-        return (System.nanoTime() - mStart) * 1E-9f;
+        mAnimationTime = (System.nanoTime() - mStart) * 1E-9f; // Eliminate
+        return mAnimationTime;
     }
+
+    /**
+     * Set the value of a named Color.
+     * This overrides the color in the document
+     * @param colorName
+     * @param color
+     */
+    public abstract void setNamedColorOverride(String colorName, int color);
 
 
     /**
@@ -205,6 +238,13 @@ public abstract class RemoteContext {
     public abstract void loadFloat(int id, float value);
 
     /**
+     * Load a float
+     * @param id
+     * @param value
+     */
+    public abstract void loadInteger(int id, int value);
+
+    /**
      * Load an animated float associated with an id
      * Todo: Remove?
      * @param id
@@ -225,6 +265,13 @@ public abstract class RemoteContext {
      * @return
      */
     public abstract float getFloat(int id);
+
+    /**
+     * Get a float given an id
+     * @param id
+     * @return
+     */
+    public abstract int getInteger(int id);
 
     /**
      * Get the color given and ID
@@ -262,19 +309,50 @@ public abstract class RemoteContext {
     public static final int ID_COMPONENT_WIDTH = 7;
     public static final int ID_COMPONENT_HEIGHT = 8;
     public static final int ID_CALENDAR_MONTH = 9;
+    public static final int ID_OFFSET_TO_UTC = 10;
+    public static final int ID_WEEK_DAY = 11;
+    public static final int ID_DAY_OF_MONTH = 12;
 
+    /**
+     * CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600
+     */
     public static final float FLOAT_CONTINUOUS_SEC = Utils.asNan(ID_CONTINUOUS_SEC);
+    /**
+     * seconds run from Midnight=0 quantized to seconds hour 0..3599
+     */
     public static final float FLOAT_TIME_IN_SEC = Utils.asNan(ID_TIME_IN_SEC);
+    /**
+     * minutes run from Midnight=0 quantized to minutes 0..1439
+     */
     public static final float FLOAT_TIME_IN_MIN = Utils.asNan(ID_TIME_IN_MIN);
+    /**
+     * hours run from Midnight=0 quantized to Hours 0-23
+     */
     public static final float FLOAT_TIME_IN_HR = Utils.asNan(ID_TIME_IN_HR);
+    /**
+     * Moth of Year quantized to MONTHS 1-12. 1 = January
+     */
     public static final float FLOAT_CALENDAR_MONTH = Utils.asNan(ID_CALENDAR_MONTH);
+    /**
+     * DAY OF THE WEEK 1-7. 1 = Monday
+     */
+    public static final float FLOAT_WEEK_DAY = Utils.asNan(ID_WEEK_DAY);
+    /**
+     * DAY OF THE MONTH 1-31
+     */
+    public static final float FLOAT_DAY_OF_MONTH = Utils.asNan(ID_DAY_OF_MONTH);
+
     public static final float FLOAT_WINDOW_WIDTH = Utils.asNan(ID_WINDOW_WIDTH);
     public static final float FLOAT_WINDOW_HEIGHT = Utils.asNan(ID_WINDOW_HEIGHT);
     public static final float FLOAT_COMPONENT_WIDTH = Utils.asNan(ID_COMPONENT_WIDTH);
     public static final float FLOAT_COMPONENT_HEIGHT = Utils.asNan(ID_COMPONENT_HEIGHT);
+    // ID_OFFSET_TO_UTC is the offset from UTC in sec (typically / 3600f)
+    public static final float FLOAT_OFFSET_TO_UTC = Utils.asNan(ID_OFFSET_TO_UTC);
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
+
     public abstract void addClickArea(
             int id,
             int contentDescription,

@@ -564,8 +564,7 @@ public final class PowerManager {
             BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM,
             BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM,
             BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT,
-            BRIGHTNESS_CONSTRAINT_TYPE_DIM,
-            BRIGHTNESS_CONSTRAINT_TYPE_DOZE
+            BRIGHTNESS_CONSTRAINT_TYPE_DIM
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BrightnessConstraint{}
@@ -592,12 +591,6 @@ public final class PowerManager {
      * @hide
      */
     public static final int BRIGHTNESS_CONSTRAINT_TYPE_DIM = 3;
-
-    /**
-     * Brightness constraint type: minimum allowed value.
-     * @hide
-     */
-    public static final int BRIGHTNESS_CONSTRAINT_TYPE_DOZE = 4;
 
     /**
      * @hide
@@ -1151,9 +1144,10 @@ public final class PowerManager {
     }
 
     private static final String CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY =
-            "cache_key.is_power_save_mode";
+            PropertyInvalidatedCache.createSystemCacheKey("is_power_save_mode");
 
-    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY = "cache_key.is_interactive";
+    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY =
+            PropertyInvalidatedCache.createSystemCacheKey("is_interactive");
 
     private static final int MAX_CACHE_ENTRIES = 1;
 

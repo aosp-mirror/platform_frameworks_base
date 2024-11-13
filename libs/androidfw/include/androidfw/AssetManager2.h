@@ -32,6 +32,7 @@
 #include "androidfw/AssetManager.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
+#include "ftl/small_vector.h"
 
 namespace android {
 
@@ -159,9 +160,10 @@ class AssetManager2 {
 
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
-  void SetConfigurations(std::vector<ResTable_config> configurations, bool force_refresh = false);
+  void SetConfigurations(std::span<const ResTable_config> configurations,
+                         bool force_refresh = false);
 
-  inline const std::vector<ResTable_config>& GetConfigurations() const {
+  std::span<const ResTable_config> GetConfigurations() const {
     return configurations_;
   }
 
@@ -280,9 +282,9 @@ class AssetManager2 {
 
    private:
     SelectedValue(uint8_t value_type, Res_value::data_type value_data, ApkAssetsCookie cookie,
-                  uint32_t type_flags, uint32_t resid, const ResTable_config& config) :
+                  uint32_t type_flags, uint32_t resid, ResTable_config config) :
                   cookie(cookie), data(value_data), type(value_type), flags(type_flags),
-                  resid(resid), config(config) {};
+                  resid(resid), config(std::move(config)) {}
   };
 
   // Retrieves the best matching resource value with ID `resid`.
@@ -470,13 +472,13 @@ class AssetManager2 {
 
   // An array mapping package ID to index into package_groups. This keeps the lookup fast
   // without taking too much memory.
-  std::array<uint8_t, std::numeric_limits<uint8_t>::max() + 1> package_ids_;
+  std::array<uint8_t, std::numeric_limits<uint8_t>::max() + 1> package_ids_ = {};
 
-  uint32_t default_locale_;
+  uint32_t default_locale_ = 0;
 
   // The current configurations set for this AssetManager. When this changes, cached resources
   // may need to be purged.
-  std::vector<ResTable_config> configurations_;
+  ftl::SmallVector<ResTable_config, 1> configurations_;
 
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.

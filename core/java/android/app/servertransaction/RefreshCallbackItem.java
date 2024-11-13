@@ -29,8 +29,8 @@ import android.os.Parcel;
 
 /**
  * Callback that allows to {@link TransactionExecutor#cycleToPath} to {@link ON_PAUSE} or
- * {@link ON_STOP} in {@link TransactionExecutor#executeCallbacks} for activity "refresh" flow
- * that goes through "paused -> resumed" or "stopped -> resumed" cycle.
+ * {@link ON_STOP} in {@link TransactionExecutor#executeTransactionItems} for activity "refresh"
+ * flow that goes through "paused -> resumed" or "stopped -> resumed" cycle.
  *
  * <p>This is used in combination with {@link com.android.server.wm.DisplayRotationCompatPolicy}
  * for camera compatibility treatment that handles orientation mismatch between camera buffers and
@@ -44,7 +44,20 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
     // Whether refresh should happen using the "stopped -> resumed" cycle or
     // "paused -> resumed" cycle.
     @LifecycleState
-    private int mPostExecutionState;
+    private final int mPostExecutionState;
+
+    /**
+     * Creates a new RefreshCallbackItem.
+     *
+     * @param activityToken      the target client activity.
+     * @param postExecutionState indicating whether refresh should happen using the
+     *                           "stopped -> "resumed" cycle or "paused -> resumed" cycle.
+     */
+    public RefreshCallbackItem(
+            @NonNull IBinder activityToken, @LifecycleState int postExecutionState) {
+        super(activityToken);
+        mPostExecutionState = postExecutionState;
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client,
@@ -67,45 +80,19 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
         return false;
     }
 
-    // ObjectPoolItem implementation
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        ObjectPool.recycle(this);
-    }
-
-    /**
-    * Obtain an instance initialized with provided params.
-    * @param postExecutionState indicating whether refresh should happen using the
-    *        "stopped -> resumed" cycle or "paused -> resumed" cycle.
-    */
-    @NonNull
-    public static RefreshCallbackItem obtain(@NonNull IBinder activityToken,
-            @LifecycleState int postExecutionState) {
-        if (postExecutionState != ON_STOP && postExecutionState != ON_PAUSE) {
-            throw new IllegalArgumentException(
-                    "Only ON_STOP or ON_PAUSE are allowed as a post execution state for "
-                            + "RefreshCallbackItem but got " + postExecutionState);
-        }
-        RefreshCallbackItem instance =
-                ObjectPool.obtain(RefreshCallbackItem.class);
-        if (instance == null) {
-            instance = new RefreshCallbackItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mPostExecutionState = postExecutionState;
-        return instance;
-    }
-
-    private RefreshCallbackItem() {}
-
     // Parcelable implementation
 
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(mPostExecutionState);
+    }
+
+    /** Reads from Parcel. */
+    private RefreshCallbackItem(@NonNull Parcel in) {
+        super(in);
+        mPostExecutionState = in.readInt();
     }
 
     @Override
@@ -132,11 +119,6 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
     public String toString() {
         return "RefreshCallbackItem{" + super.toString()
                 + ",mPostExecutionState=" + mPostExecutionState + "}";
-    }
-
-    private RefreshCallbackItem(@NonNull Parcel in) {
-        super(in);
-        mPostExecutionState = in.readInt();
     }
 
     public static final @NonNull Creator<RefreshCallbackItem> CREATOR = new Creator<>() {

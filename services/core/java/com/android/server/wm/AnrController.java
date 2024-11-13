@@ -345,7 +345,7 @@ class AnrController {
                     null /* processCpuTracker */, null /* lastPids */,
                     CompletableFuture.completedFuture(nativePids),
                     null /* logExceptionCreatingFile */, "Pre-dump", criticalEvents,
-                    Runnable::run, null/* AnrLatencyTracker */);
+                    null /* extraHeaders */, Runnable::run, null/* AnrLatencyTracker */);
             if (tracesFile != null) {
                 tracesFile.renameTo(
                         new File(tracesFile.getParent(), tracesFile.getName() + "_pre"));

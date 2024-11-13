@@ -36,6 +36,7 @@ import com.android.internal.widget.LockPatternView.Cell;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
@@ -73,6 +74,10 @@ public class KeyguardPatternViewController
         public void onEmergencyButtonClickedWhenInCall() {
             getKeyguardSecurityCallback().reset();
         }
+    };
+
+    private final LockPatternView.ExternalHapticsPlayer mExternalHapticsPlayer = () -> {
+        mBouncerHapticPlayer.playPatternDotFeedback(mView);
     };
 
     /**
@@ -166,6 +171,9 @@ public class KeyguardPatternViewController
                 boolean isValidPattern) {
             boolean dismissKeyguard = mSelectedUserInteractor.getSelectedUserId() == userId;
             if (matched) {
+                mBouncerHapticPlayer.playAuthenticationFeedback(
+                        /* authenticationSucceeded= */true
+                );
                 getKeyguardSecurityCallback().reportUnlockAttempt(userId, true, 0);
                 if (dismissKeyguard) {
                     mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
@@ -173,6 +181,9 @@ public class KeyguardPatternViewController
                     getKeyguardSecurityCallback().dismiss(true, userId, SecurityMode.Pattern);
                 }
             } else {
+                mBouncerHapticPlayer.playAuthenticationFeedback(
+                        /* authenticationSucceeded= */false
+                );
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
                 if (isValidPattern) {
                     getKeyguardSecurityCallback().reportUnlockAttempt(userId, false, timeoutMs);
@@ -200,9 +211,11 @@ public class KeyguardPatternViewController
             EmergencyButtonController emergencyButtonController,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             DevicePostureController postureController, FeatureFlags featureFlags,
-            SelectedUserInteractor selectedUserInteractor) {
+            SelectedUserInteractor selectedUserInteractor, BouncerHapticPlayer bouncerHapticPlayer
+    ) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                messageAreaControllerFactory, featureFlags, selectedUserInteractor);
+                messageAreaControllerFactory, featureFlags, selectedUserInteractor,
+                bouncerHapticPlayer);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
@@ -249,6 +262,7 @@ public class KeyguardPatternViewController
         if (deadline != 0) {
             handleAttemptLockout(deadline);
         }
+        mLockPatternView.setExternalHapticsPlayer(mExternalHapticsPlayer);
     }
 
     @Override
@@ -262,6 +276,7 @@ public class KeyguardPatternViewController
             cancelBtn.setOnClickListener(null);
         }
         mPostureController.removeCallback(mPostureCallback);
+        mLockPatternView.setExternalHapticsPlayer(null);
     }
 
     @Override

@@ -93,7 +93,7 @@ object KeyguardBlueprintViewBinder {
                                         blueprint.applyConstraints(this)
                                     }
 
-                                logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
+                                logAlphaVisibilityScaleOfAppliedConstraintSet(cs, clockViewModel)
                                 cs.applyTo(constraintLayout)
                             }
                         }
@@ -115,7 +115,7 @@ object KeyguardBlueprintViewBinder {
                                     clone(constraintLayout)
                                     blueprint.applyConstraints(this)
                                 }
-                            logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
+                            logAlphaVisibilityScaleOfAppliedConstraintSet(cs, clockViewModel)
                             cs.applyTo(constraintLayout)
                         }
                     }
@@ -124,7 +124,7 @@ object KeyguardBlueprintViewBinder {
         }
     }
 
-    private fun logAlphaVisibilityOfAppliedConstraintSet(
+    private fun logAlphaVisibilityScaleOfAppliedConstraintSet(
         cs: ConstraintSet,
         viewModel: KeyguardClockViewModel
     ) {
@@ -136,12 +136,15 @@ object KeyguardBlueprintViewBinder {
         Log.i(
             TAG,
             "applyCsToSmallClock: vis=${cs.getVisibility(smallClockViewId)} " +
-                "alpha=${cs.getConstraint(smallClockViewId).propertySet.alpha}"
+                "alpha=${cs.getConstraint(smallClockViewId).propertySet.alpha} " +
+                "scale=${cs.getConstraint(smallClockViewId).transform.scaleX} "
         )
         Log.i(
             TAG,
             "applyCsToLargeClock: vis=${cs.getVisibility(largeClockViewId)} " +
-                "alpha=${cs.getConstraint(largeClockViewId).propertySet.alpha}"
+                "alpha=${cs.getConstraint(largeClockViewId).propertySet.alpha} " +
+                "scale=${cs.getConstraint(largeClockViewId).transform.scaleX} " +
+                "pivotX=${cs.getConstraint(largeClockViewId).transform.transformPivotX} "
         )
         Log.i(
             TAG,

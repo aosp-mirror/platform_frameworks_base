@@ -18,6 +18,7 @@ package android.service.dreams.utils;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -32,22 +33,22 @@ public class DreamAccessibility {
     private final Context mContext;
     private final View mView;
     private final View.AccessibilityDelegate mAccessibilityDelegate;
+    private final Runnable mDismissCallback;
 
-    public DreamAccessibility(@NonNull Context context, @NonNull View view) {
+    public DreamAccessibility(@NonNull Context context, @NonNull View view,
+            @NonNull Runnable dismissCallback) {
         mContext = context;
         mView = view;
         mAccessibilityDelegate = createNewAccessibilityDelegate(mContext);
+        mDismissCallback = dismissCallback;
     }
 
     /**
-     * @param interactive
-     * Removes and add accessibility configuration depending if the dream is interactive or not
+     *  Adds default accessibility configuration if none exist on the dream
      */
-    public void updateAccessibilityConfiguration(Boolean interactive) {
-        if (!interactive) {
+    public void updateAccessibilityConfiguration() {
+        if (mView.getAccessibilityDelegate() == null) {
             addAccessibilityConfiguration();
-        } else {
-            removeCustomAccessibilityAction();
         }
     }
 
@@ -58,30 +59,27 @@ public class DreamAccessibility {
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
     }
 
-    /**
-     * Removes Configured the accessibility actions for the given root view.
-     */
-    private void removeCustomAccessibilityAction() {
-        if (mView.getAccessibilityDelegate() == mAccessibilityDelegate) {
-            mView.setAccessibilityDelegate(null);
-        }
-    }
-
     private View.AccessibilityDelegate createNewAccessibilityDelegate(Context context) {
         return new View.AccessibilityDelegate() {
             @Override
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
-                for (AccessibilityNodeInfo.AccessibilityAction action : info.getActionList()) {
-                    if (action.getId() == AccessibilityNodeInfo.ACTION_CLICK) {
-                        info.removeAction(action);
-                        break;
-                    }
-                }
                 info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
-                        AccessibilityNodeInfo.ACTION_CLICK,
+                        AccessibilityNodeInfo.ACTION_DISMISS,
                         context.getResources().getString(R.string.dream_accessibility_action_click)
                 ));
+            }
+
+            @Override
+            public boolean performAccessibilityAction(View host, int action, Bundle args) {
+                switch(action){
+                    case AccessibilityNodeInfo.ACTION_DISMISS:
+                        if (mDismissCallback != null) {
+                            mDismissCallback.run();
+                        }
+                        break;
+                }
+                return true;
             }
         };
     }

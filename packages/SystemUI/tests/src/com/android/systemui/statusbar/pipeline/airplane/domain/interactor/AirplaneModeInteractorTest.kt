@@ -19,13 +19,11 @@ package com.android.systemui.statusbar.pipeline.airplane.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -39,9 +37,9 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class AirplaneModeInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
-    private val mobileConnectionsRepository =
-        FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), mock<TableLogBuffer> {})
+    private val mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
     private val airplaneModeRepository = FakeAirplaneModeRepository()
     private val connectivityRepository = FakeConnectivityRepository()
 

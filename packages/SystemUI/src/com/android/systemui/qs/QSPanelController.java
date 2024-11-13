@@ -284,8 +284,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         return mView.isExpanded();
     }
 
-    void setPageMargin(int pageMargin) {
-        mView.setPageMargin(pageMargin);
+    void setPageMargin(int pageMarginStart, int pageMarginEnd) {
+        mView.setPageMargin(pageMarginStart, pageMarginEnd);
     }
 
     /**

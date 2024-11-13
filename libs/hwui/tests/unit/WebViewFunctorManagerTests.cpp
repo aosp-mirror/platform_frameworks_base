@@ -40,7 +40,7 @@ TEST(WebViewFunctor, createDestroyGLES) {
     TestUtils::runOnRenderThreadUnmanaged([](renderthread::RenderThread&) {
         // Empty, don't care
     });
-    auto& counts = TestUtils::countsForFunctor(functor);
+    auto counts = TestUtils::copyCountsForFunctor(functor);
     // We never initialized, so contextDestroyed == 0
     EXPECT_EQ(0, counts.contextDestroyed);
     EXPECT_EQ(1, counts.destroyed);
@@ -59,7 +59,7 @@ TEST(WebViewFunctor, createSyncHandleGLES) {
     TestUtils::runOnRenderThreadUnmanaged([](renderthread::RenderThread&) {
         // fence
     });
-    auto& counts = TestUtils::countsForFunctor(functor);
+    auto counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(0, counts.sync);
     EXPECT_EQ(0, counts.contextDestroyed);
     EXPECT_EQ(0, counts.destroyed);
@@ -69,6 +69,7 @@ TEST(WebViewFunctor, createSyncHandleGLES) {
         handle->sync(syncData);
     });
 
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(1, counts.sync);
 
     TestUtils::runOnRenderThreadUnmanaged([&](auto&) {
@@ -76,6 +77,7 @@ TEST(WebViewFunctor, createSyncHandleGLES) {
         handle->sync(syncData);
     });
 
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(2, counts.sync);
 
     handle.clear();
@@ -84,6 +86,7 @@ TEST(WebViewFunctor, createSyncHandleGLES) {
         // fence
     });
 
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(2, counts.sync);
     EXPECT_EQ(0, counts.contextDestroyed);
     EXPECT_EQ(1, counts.destroyed);
@@ -98,7 +101,6 @@ TEST(WebViewFunctor, createSyncDrawGLES) {
     auto handle = WebViewFunctorManager::instance().handleFor(functor);
     ASSERT_TRUE(handle);
     WebViewFunctor_release(functor);
-    auto& counts = TestUtils::countsForFunctor(functor);
     for (int i = 0; i < 5; i++) {
         TestUtils::runOnRenderThreadUnmanaged([&](auto&) {
             WebViewSyncData syncData;
@@ -112,6 +114,7 @@ TEST(WebViewFunctor, createSyncDrawGLES) {
     TestUtils::runOnRenderThreadUnmanaged([](renderthread::RenderThread&) {
         // fence
     });
+    auto counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(5, counts.sync);
     EXPECT_EQ(10, counts.glesDraw);
     EXPECT_EQ(1, counts.contextDestroyed);
@@ -127,13 +130,13 @@ TEST(WebViewFunctor, contextDestroyedGLES) {
     auto handle = WebViewFunctorManager::instance().handleFor(functor);
     ASSERT_TRUE(handle);
     WebViewFunctor_release(functor);
-    auto& counts = TestUtils::countsForFunctor(functor);
     TestUtils::runOnRenderThreadUnmanaged([&](auto&) {
         WebViewSyncData syncData;
         handle->sync(syncData);
         DrawGlInfo drawInfo;
         handle->drawGl(drawInfo);
     });
+    auto counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(1, counts.sync);
     EXPECT_EQ(1, counts.glesDraw);
     EXPECT_EQ(0, counts.contextDestroyed);
@@ -141,6 +144,7 @@ TEST(WebViewFunctor, contextDestroyedGLES) {
     TestUtils::runOnRenderThreadUnmanaged([](auto& rt) {
         rt.destroyRenderingContext();
     });
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(1, counts.sync);
     EXPECT_EQ(1, counts.glesDraw);
     EXPECT_EQ(1, counts.contextDestroyed);
@@ -151,6 +155,7 @@ TEST(WebViewFunctor, contextDestroyedGLES) {
         DrawGlInfo drawInfo;
         handle->drawGl(drawInfo);
     });
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(2, counts.sync);
     EXPECT_EQ(2, counts.glesDraw);
     EXPECT_EQ(1, counts.contextDestroyed);
@@ -159,6 +164,7 @@ TEST(WebViewFunctor, contextDestroyedGLES) {
     TestUtils::runOnRenderThreadUnmanaged([](renderthread::RenderThread&) {
         // fence
     });
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(2, counts.sync);
     EXPECT_EQ(2, counts.glesDraw);
     EXPECT_EQ(2, counts.contextDestroyed);

@@ -16,10 +16,13 @@
 
 package com.android.server.autofill;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+
 import static com.android.server.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.assist.AssistStructure;
@@ -29,14 +32,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.metrics.LogMaker;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.autofill.Dataset;
+import android.service.autofill.FillResponse;
 import android.service.autofill.InternalSanitizer;
 import android.service.autofill.SaveInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -55,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
 public final class Helper {
 
     private static final String TAG = "AutofillHelper";
@@ -67,7 +72,7 @@ public final class Helper {
      * {@code cmd autofill set log_level debug} or through
      * {@link android.provider.Settings.Global#AUTOFILL_LOGGING_LEVEL}.
      */
-    public static boolean sDebug = false;
+    public static boolean sDebug = true;
 
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
@@ -99,6 +104,26 @@ public final class Helper {
         });
 
         return permissionsOk.get();
+    }
+
+    /**
+     * Creates the context as the foreground user
+     *
+     * <p>Returns the current context as the current foreground user
+     */
+    @RequiresPermission(INTERACT_ACROSS_USERS)
+    public static Context getUserContext(Context context) {
+        int userId = ActivityManager.getCurrentUser();
+        Context c = context.createContextAsUser(UserHandle.of(userId), /* flags= */ 0);
+        if (sDebug) {
+            Slog.d(
+                    TAG,
+                    "Current User: "
+                            + userId
+                            + ", context created as: "
+                            + c.getContentResolver().getUserId());
+        }
+        return c;
     }
 
     /**
@@ -373,5 +398,51 @@ public final class Helper {
 
     private interface ViewNodeFilter {
         boolean matches(ViewNode node);
+    }
+
+    public static class SaveInfoStats {
+        public int saveInfoCount;
+        public int saveDataTypeCount;
+
+        public SaveInfoStats(int saveInfoCount, int saveDataTypeCount) {
+            this.saveInfoCount = saveInfoCount;
+            this.saveDataTypeCount = saveDataTypeCount;
+        }
+    }
+
+    /**
+     * Get statistic information of save info given a sparse array of fill responses.
+     *
+     * Specifically the statistic includes
+     *   1. how many save info the current session has.
+     *   2. How many distinct save data types current session has.
+     *
+     * @return SaveInfoStats returns the above two number in a SaveInfoStats object
+     */
+    public static SaveInfoStats getSaveInfoStatsFromFillResponses(
+            SparseArray<FillResponse> fillResponses) {
+        if (fillResponses == null) {
+            if (sVerbose) {
+                Slog.v(TAG, "getSaveInfoStatsFromFillResponses(): fillResponse sparse array is "
+                        + "null");
+            }
+            return new SaveInfoStats(-1, -1);
+        }
+        int numSaveInfos = 0;
+        int numSaveDataTypes = 0;
+        ArraySet<Integer> saveDataTypeSeen = new ArraySet<>();
+        final int numResponses = fillResponses.size();
+        for (int responseNum = 0; responseNum < numResponses; responseNum++) {
+            final FillResponse response = fillResponses.valueAt(responseNum);
+            if (response != null && response.getSaveInfo() != null) {
+                numSaveInfos += 1;
+                int saveDataType = response.getSaveInfo().getType();
+                if (!saveDataTypeSeen.contains(saveDataType)) {
+                    saveDataTypeSeen.add(saveDataType);
+                    numSaveDataTypes += 1;
+                }
+            }
+        }
+        return new SaveInfoStats(numSaveInfos, numSaveDataTypes);
     }
 }

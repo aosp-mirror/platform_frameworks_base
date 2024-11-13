@@ -1,0 +1,12 @@
+[
+    {
+        "name": "monospace",
+        "fonts": [
+            {
+                "file": "DroidSansMono.ttf",
+                "weight": "400",
+                "style": "normal"
+            }
+        ]
+    }
+]

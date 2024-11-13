@@ -2,14 +2,6 @@ package: "com.android.window.flags"
 container: "system"
 
 flag {
-    name: "enable_scaled_resizing"
-    namespace: "lse_desktop_experience"
-    description: "Enable the resizing of un-resizable apps through scaling their bounds up/down"
-    bug: "320350734"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "enable_desktop_windowing_mode"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing"
@@ -31,6 +23,20 @@ flag {
 }
 
 flag {
+    name: "enable_windowing_scaled_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Enables the resizing of non-resizable apps through scaling their bounds up/down"
+    bug: "319844447"
+}
+
+flag {
+    name: "disable_non_resizable_app_snap_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Stops non-resizable app desktop windows from being snap resized"
+    bug: "325240072"
+}
+
+flag {
     name: "enable_desktop_windowing_task_limit"
     namespace: "lse_desktop_experience"
     description: "Enables a limit on the number of Tasks shown in Desktop Mode"
@@ -40,8 +46,8 @@ flag {
 flag {
     name: "enable_windowing_edge_drag_resize"
     namespace: "lse_desktop_experience"
-    description: "Enables edge drag resizing for all input sources"
-    bug: "323383067"
+    description: "Enables edge drag resizing for stylus input (cursor is enabled by default)"
+    bug: "337782092"
 }
 
 flag {
@@ -80,10 +86,13 @@ flag {
 }
 
 flag {
-    name: "enable_additional_windows_above_status_bar"
+    name: "enable_handle_input_fix"
     namespace: "lse_desktop_experience"
-    description: "Allows for additional windows tied to WindowDecoration to be layered between status bar and notification shade."
+    description: "Enables using AdditionalSystemViewContainer to resolve handle input issues."
     bug: "316186265"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -98,6 +107,30 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Makes the App Header style adapt to the system's and app's light/dark theme"
     bug: "328668781"
+}
+
+flag {
+    name: "enable_cascading_windows"
+    namespace: "lse_desktop_experience"
+    description: "Whether to apply cascading effect for placing multiple windows when first launched"
+    bug: "325240051"
+}
+
+flag {
+    name: "enable_tile_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Enables drawing a divider bar upon tiling tasks left and right in desktop mode for simultaneous resizing"
+    bug: "351769839"
+}
+
+flag {
+    name: "respect_orientation_change_for_unresizeable"
+    namespace: "lse_desktop_experience"
+    description: "Whether to resize task to respect requested orientation change of unresizeable activity"
+    bug: "353338503"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -119,4 +152,150 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Whether to enable min/max window size constraints when resizing a window in desktop windowing mode"
     bug: "327589741"
+}
+
+flag {
+    name: "enable_resizing_metrics"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable log collection for task resizing in desktop windowing mode"
+    bug: "341319100"
+}
+
+flag {
+    name: "enable_caption_compat_inset_force_consumption"
+    namespace: "lse_desktop_experience"
+    description: "Enables force-consumption of caption bar insets for immersive apps in freeform"
+    bug: "316231589"
+}
+
+flag {
+    name: "enable_caption_compat_inset_force_consumption_always"
+    namespace: "lse_desktop_experience"
+    description: "Enables force-consumption of caption bar insets for all apps in freeform"
+    bug: "352563889"
+}
+
+flag {
+    name: "show_desktop_windowing_dev_option"
+    namespace: "lse_desktop_experience"
+    description: "Whether to show developer option for enabling desktop windowing mode"
+    bug: "348193756"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable the app-to-web feature and show the open in browser button in the header menu"
+    bug: "349695493"
+}
+
+flag {
+    name: "enable_windowing_transition_handlers_observers"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable desktop windowing transition handler and observer instead of task listeners."
+    bug: "332682201"
+}
+
+flag {
+    name: "enable_caption_compat_inset_conversion"
+    namespace: "lse_desktop_experience"
+    description: "Enables compatibility mitigation for apps that don't support caption insets well"
+    bug: "316231589"
+}
+
+flag {
+    name: "enable_desktop_windowing_multi_instance_features"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable multi-instance support in desktop windowing."
+    bug: "336289597"
+}
+
+flag {
+    name: "enable_desktop_windowing_back_navigation"
+    namespace: "lse_desktop_experience"
+    description: "Whether to enable back navigation treatment in desktop windowing."
+    bug: "350421096"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_handle_education"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing app handle education"
+    bug: "348208342"
+}
+
+flag {
+    name: "enable_desktop_windowing_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing transition & motion polish changes"
+    bug: "356570693"
+}
+
+flag {
+    name: "enable_desktop_windowing_exit_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables exit desktop windowing transition & motion polish changes"
+    bug: "353650462"
+}
+
+flag {
+    name: "enable_compat_ui_visibility_status"
+    namespace: "lse_desktop_experience"
+    description: "Enables the tracking of the status for compat ui elements."
+    bug: "350953004"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web_education"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing app-to-web education"
+    bug: "348205896"
+}
+
+flag {
+    name: "enable_minimize_button"
+    namespace: "lse_desktop_experience"
+    description: "Adds a minimize button the the caption bar"
+    bug: "356843241"
+}
+
+flag {
+    name: "enable_hold_to_drag_app_handle"
+    namespace: "lse_desktop_experience"
+    description: "Requires hold-to-drag the App Handle when using touchscreen input"
+    bug: "356409496"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "skip_compat_ui_education_in_desktop_mode"
+    namespace: "lse_desktop_experience"
+    description: "Ignore Compat UI educations when in Desktop Mode."
+    bug: "357062954"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_desktop_windowing_persistence"
+    namespace: "lse_desktop_experience"
+    description: "Persists the desktop windowing session across reboots."
+    bug: "350456942"
+}
+
+flag {
+    name: "enable_display_focus_in_shell_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Creates a shell transition when display focus switches."
+    bug: "356109871"
+}
+
+flag {
+    name: "enter_desktop_by_default_on_freeform_displays"
+    namespace: "lse_desktop_experience"
+    description: "Allow entering desktop mode by default on freeform displays"
+    bug: "361419732"
 }

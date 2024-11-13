@@ -24,8 +24,8 @@ import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAV
 
 import android.view.ViewConfiguration;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

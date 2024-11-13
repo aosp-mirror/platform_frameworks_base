@@ -927,6 +927,29 @@ public class AudioPolicy {
     }
 
     /**
+     * @hide
+     * Causes the given audio focus owner to lose audio focus with
+     * {@link android.media.AudioManager#AUDIOFOCUS_LOSS}, and be removed from the focus stack.
+     * Unlike {@link #sendFocusLoss(AudioFocusInfo)}, the method causes the focus stack
+     * to be reevaluated as the discarded focus owner may have been at the top of stack,
+     * and now the new owner needs to be notified of the gain.
+     * @param focusLoser identifies the focus owner to discard from the focus stack
+     * @throws IllegalStateException if used on an unregistered policy, or a registered policy
+     * with no {@link AudioPolicyFocusListener} set
+     * @see #getFocusStack()
+     * @see #sendFocusLoss(AudioFocusInfo)
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void sendFocusLossAndUpdate(@NonNull AudioFocusInfo focusLoser)
+            throws IllegalStateException {
+        try {
+            getService().sendFocusLossAndUpdate(Objects.requireNonNull(focusLoser), cb());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Send AUDIOFOCUS_LOSS to a specific stack entry, causing it to be notified of the focus
      * loss, and for it to exit the focus stack (its focus listener will not be invoked after that).
      * This operation is only valid for a registered policy (with

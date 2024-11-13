@@ -19,15 +19,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.core.content.ContextCompat;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
@@ -172,12 +174,17 @@ class BubbleBarMenuViewController {
     private ArrayList<BubbleBarMenuView.MenuAction> createMenuActions(Bubble bubble) {
         ArrayList<BubbleBarMenuView.MenuAction> menuActions = new ArrayList<>();
         Resources resources = mContext.getResources();
-
+        int tintColor;
+        try (TypedArray ta = mContext.obtainStyledAttributes(new int[]{
+                com.android.internal.R.attr.materialColorOnSurface})) {
+            tintColor = ta.getColor(0, Color.TRANSPARENT);
+        }
         if (bubble.isConversation()) {
             // Don't bubble conversation action
             menuActions.add(new BubbleBarMenuView.MenuAction(
                     Icon.createWithResource(mContext, R.drawable.bubble_ic_stop_bubble),
                     resources.getString(R.string.bubbles_dont_bubble_conversation),
+                    tintColor,
                     view -> {
                         hideMenu(true /* animated */);
                         if (mListener != null) {
@@ -204,7 +211,7 @@ class BubbleBarMenuViewController {
         menuActions.add(new BubbleBarMenuView.MenuAction(
                 Icon.createWithResource(resources, R.drawable.ic_remove_no_shadow),
                 resources.getString(R.string.bubble_dismiss_text),
-                ContextCompat.getColor(mContext, R.color.bubble_bar_expanded_view_menu_close),
+                tintColor,
                 view -> {
                     hideMenu(true /* animated */);
                     if (mListener != null) {
@@ -212,6 +219,21 @@ class BubbleBarMenuViewController {
                     }
                 }
         ));
+
+        if (Flags.enableBubbleAnything() || Flags.enableBubbleToFullscreen()) {
+            menuActions.add(new BubbleBarMenuView.MenuAction(
+                    Icon.createWithResource(resources,
+                            R.drawable.desktop_mode_ic_handle_menu_fullscreen),
+                    resources.getString(R.string.bubble_fullscreen_text),
+                    tintColor,
+                    view -> {
+                        hideMenu(true /* animated */);
+                        if (mListener != null) {
+                            mListener.onMoveToFullscreen(bubble);
+                        }
+                    }
+            ));
+        }
 
         return menuActions;
     }
@@ -243,5 +265,10 @@ class BubbleBarMenuViewController {
          * Dismiss bubble and remove it from the bubble stack
          */
         void onDismissBubble(Bubble bubble);
+
+        /**
+         * Move the bubble to fullscreen.
+         */
+        void onMoveToFullscreen(Bubble bubble);
     }
 }

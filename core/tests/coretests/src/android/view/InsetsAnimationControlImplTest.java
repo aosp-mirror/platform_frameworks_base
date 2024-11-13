@@ -38,11 +38,11 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
-import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +78,6 @@ public class InsetsAnimationControlImplTest {
     private SurfaceControl mNavLeash;
     private InsetsState mInsetsState;
 
-    @Mock Transaction mMockTransaction;
     @Mock InsetsController mMockController;
     @Mock WindowInsetsAnimationControlListener mMockListener;
 
@@ -97,16 +96,14 @@ public class InsetsAnimationControlImplTest {
         mInsetsState.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(400, 0, 500, 500));
         InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ID_STATUS_BAR,
-                WindowInsets.Type.statusBars(), mInsetsState,
-                () -> mMockTransaction, mMockController);
+                WindowInsets.Type.statusBars(), mInsetsState, mMockController);
         topConsumer.setControl(
                 new InsetsSourceControl(ID_STATUS_BAR, WindowInsets.Type.statusBars(),
                         mStatusLeash, true, new Point(0, 0), Insets.of(0, 100, 0, 0)),
                 new int[1], new int[1]);
 
         InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ID_NAVIGATION_BAR,
-                WindowInsets.Type.navigationBars(), mInsetsState,
-                () -> mMockTransaction, mMockController);
+                WindowInsets.Type.navigationBars(), mInsetsState, mMockController);
         navConsumer.setControl(
                 new InsetsSourceControl(ID_NAVIGATION_BAR, WindowInsets.Type.navigationBars(),
                         mNavLeash, true, new Point(400, 0), Insets.of(0, 0, 100, 0)),
@@ -117,9 +114,20 @@ public class InsetsAnimationControlImplTest {
         SparseArray<InsetsSourceControl> controls = new SparseArray<>();
         controls.put(ID_STATUS_BAR, topConsumer.getControl());
         controls.put(ID_NAVIGATION_BAR, navConsumer.getControl());
+        InsetsAnimationSpec spec = new InsetsAnimationSpec() {
+            @Override
+            public long getDurationMs(boolean hasZeroInsetsIme) {
+                return 10;
+            }
+            @Override
+            public Interpolator getInsetsInterpolator(boolean hasZeroInsetsIme) {
+                return new LinearInterpolator();
+            }
+        };
+
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
-                mMockController, 10 /* durationMs */, new LinearInterpolator(),
+                mMockController, mMockController, spec /* insetsAnimationSpecCreator */,
                 0 /* animationType */, 0 /* layoutInsetsDuringAnimation */, null /* translator */,
                 null /* statsToken */);
         mController.setReadyDispatched(true);

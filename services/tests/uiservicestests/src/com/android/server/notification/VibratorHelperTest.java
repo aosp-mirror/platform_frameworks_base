@@ -22,8 +22,12 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.when;
 
+import android.media.Utils;
+import android.net.Uri;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
+import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,6 +39,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -86,7 +94,40 @@ public class VibratorHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void createVibrationEffectFromSoundUri_nullInput() {
+        assertNull(mVibratorHelper.createVibrationEffectFromSoundUri(null));
+    }
+
+    @Test
+    public void createVibrationEffectFromSoundUri_emptyUri() {
+        assertNull(mVibratorHelper.createVibrationEffectFromSoundUri(Uri.EMPTY));
+    }
+
+    @Test
+    public void createVibrationEffectFromSoundUri_opaqueUri() {
+        Uri uri = Uri.parse("a:b#c");
+        assertNull(mVibratorHelper.createVibrationEffectFromSoundUri(uri));
+    }
+
+    @Test
+    public void createVibrationEffectFromSoundUri_uriWithoutRequiredQueryParameter() {
+        Uri uri = Settings.System.DEFAULT_NOTIFICATION_URI;
+        assertNull(mVibratorHelper.createVibrationEffectFromSoundUri(uri));
+    }
+
+    @Test
+    public void createVibrationEffectFromSoundUri_uriWithVibrationUri() throws IOException {
+        // prepare the uri with vibration
+        when(mVibrator.getInfo()).thenReturn(VibratorInfo.EMPTY_VIBRATOR_INFO);
+        Uri validUri = getVibrationUriAppended(Settings.System.DEFAULT_NOTIFICATION_URI);
+
+        assertSingleVibration(mVibratorHelper.createVibrationEffectFromSoundUri(validUri));
+    }
+
+    @Test
     public void createVibration_insistent_createsRepeatingVibration() {
+        when(mVibrator.getInfo()).thenReturn(VibratorInfo.EMPTY_VIBRATOR_INFO);
+
         when(mVibrator.hasFrequencyControl()).thenReturn(false);
         assertRepeatingVibration(mVibratorHelper.createDefaultVibration(/* insistent= */ true));
         assertRepeatingVibration(mVibratorHelper.createFallbackVibration(/* insistent= */ true));
@@ -98,6 +139,8 @@ public class VibratorHelperTest extends UiServiceTestCase {
 
     @Test
     public void createVibration_nonInsistent_createsSingleShotVibration() {
+        when(mVibrator.getInfo()).thenReturn(VibratorInfo.EMPTY_VIBRATOR_INFO);
+
         when(mVibrator.hasFrequencyControl()).thenReturn(false);
         assertSingleVibration(mVibratorHelper.createDefaultVibration(/* insistent= */ false));
         assertSingleVibration(mVibratorHelper.createFallbackVibration(/* insistent= */ false));
@@ -119,5 +162,27 @@ public class VibratorHelperTest extends UiServiceTestCase {
         assertTrue("Unknown vibration effect " + effect,
                 effect instanceof VibrationEffect.Composed);
         return ((VibrationEffect.Composed) effect).getRepeatIndex();
+    }
+
+    private static Uri getVibrationUriAppended(Uri baseUri) throws IOException {
+        File tempVibrationFile = File.createTempFile("test_vibration_file", ".xml");
+        FileWriter writer = new FileWriter(tempVibrationFile);
+        writer.write("<vibration-effect>\n"
+                + "    <waveform-effect>\n"
+                + "        <!-- PRIMING -->\n"
+                + "        <waveform-entry durationMs=\"0\" amplitude=\"0\"/>\n"
+                + "        <waveform-entry durationMs=\"12\" amplitude=\"255\"/>\n"
+                + "        <waveform-entry durationMs=\"250\" amplitude=\"0\"/>\n"
+                + "        <waveform-entry durationMs=\"12\" amplitude=\"255\"/>\n"
+                + "        <waveform-entry durationMs=\"500\" amplitude=\"0\"/>\n"
+                + "    </waveform-effect>\n"
+                + "</vibration-effect>"); // Your test XML content
+        writer.close();
+
+        Uri.Builder builder = baseUri.buildUpon();
+        builder.appendQueryParameter(
+                Utils.VIBRATION_URI_PARAM,
+                tempVibrationFile.toURI().toString());
+        return builder.build();
     }
 }

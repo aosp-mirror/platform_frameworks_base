@@ -171,6 +171,17 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                             addAndStartAction(
                                     new HotplugDetectionAction(HdmiCecLocalDevicePlayback.this));
                         }
+
+                        if (mService.isHdmiControlEnhancedBehaviorFlagEnabled()) {
+                            List<PowerStatusMonitorActionFromPlayback>
+                                    powerStatusMonitorActionsFromPlayback =
+                                    getActions(PowerStatusMonitorActionFromPlayback.class);
+                            if (powerStatusMonitorActionsFromPlayback.isEmpty()) {
+                                addAndStartAction(
+                                        new PowerStatusMonitorActionFromPlayback(
+                                                HdmiCecLocalDevicePlayback.this));
+                            }
+                        }
                     }
                 });
         addAndStartAction(action);
@@ -686,6 +697,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         removeAction(DeviceDiscoveryAction.class);
         removeAction(HotplugDetectionAction.class);
         removeAction(NewDeviceAction.class);
+        removeAction(PowerStatusMonitorActionFromPlayback.class);
         super.disableDevice(initiatedByCec, callback);
         clearDeviceInfoList();
         checkIfPendingActionsCleared();

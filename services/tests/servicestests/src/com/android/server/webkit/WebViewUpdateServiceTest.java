@@ -104,10 +104,10 @@ public class WebViewUpdateServiceTest {
         mTestSystemImpl = Mockito.spy(testing);
         if (updateServiceV2()) {
             mWebViewUpdateServiceImpl =
-                    new WebViewUpdateServiceImpl2(null /*Context*/, mTestSystemImpl);
+                    new WebViewUpdateServiceImpl2(mTestSystemImpl);
         } else {
             mWebViewUpdateServiceImpl =
-                    new WebViewUpdateServiceImpl(null /*Context*/, mTestSystemImpl);
+                    new WebViewUpdateServiceImpl(mTestSystemImpl);
         }
     }
 
@@ -140,7 +140,7 @@ public class WebViewUpdateServiceTest {
             WebViewProviderInfo[] webviewPackages, int numRelros, String userSetting) {
         setupWithPackagesAndRelroCount(webviewPackages, numRelros);
         if (userSetting != null) {
-            mTestSystemImpl.updateUserSetting(null, userSetting);
+            mTestSystemImpl.updateUserSetting(userSetting);
         }
         // Add (enabled and valid) package infos for each provider
         setEnabledAndValidPackageInfos(webviewPackages);
@@ -313,7 +313,7 @@ public class WebViewUpdateServiceTest {
         };
         setupWithPackagesNonDebuggable(packages);
         // Start with the setting pointing to the invalid package
-        mTestSystemImpl.updateUserSetting(null, invalidPackage);
+        mTestSystemImpl.updateUserSetting(invalidPackage);
         mTestSystemImpl.setPackageInfo(createPackageInfo(invalidPackage, true /* enabled */,
                     true /* valid */, true /* installed */, new Signature[]{invalidPackageSignature}
                     , 0 /* updateTime */));
@@ -481,7 +481,7 @@ public class WebViewUpdateServiceTest {
             new WebViewProviderInfo(secondPackage, "", true, false, null)};
         setupWithPackages(packages);
         // Start with the setting pointing to the second package
-        mTestSystemImpl.updateUserSetting(null, secondPackage);
+        mTestSystemImpl.updateUserSetting(secondPackage);
         // Have all packages be enabled, so that we can change provider however we want to
         setEnabledAndValidPackageInfos(packages);
 
@@ -572,7 +572,7 @@ public class WebViewUpdateServiceTest {
         // Check that the boot time logic re-enables the fallback package.
         runWebViewBootPreparationOnMainSync();
         Mockito.verify(mTestSystemImpl).enablePackageForAllUsers(
-                Matchers.anyObject(), Mockito.eq(testPackage), Mockito.eq(true));
+                Mockito.eq(testPackage), Mockito.eq(true));
 
         // Fake the message about the enabling having changed the package state,
         // and check we now use that package.
@@ -657,7 +657,7 @@ public class WebViewUpdateServiceTest {
                     null)};
         setupWithPackages(packages);
         // Start with the setting pointing to the secondary package
-        mTestSystemImpl.updateUserSetting(null, secondaryPackage);
+        mTestSystemImpl.updateUserSetting(secondaryPackage);
         int secondaryUserId = 10;
         int userIdToChangePackageFor = multiUser ? secondaryUserId : TestSystemImpl.PRIMARY_USER_ID;
         if (multiUser) {
@@ -710,7 +710,7 @@ public class WebViewUpdateServiceTest {
                     null)};
         setupWithPackages(packages);
         // Start with the setting pointing to the secondary package
-        mTestSystemImpl.updateUserSetting(null, secondaryPackage);
+        mTestSystemImpl.updateUserSetting(secondaryPackage);
         setEnabledAndValidPackageInfosForUser(TestSystemImpl.PRIMARY_USER_ID, packages);
         int newUser = 100;
         mTestSystemImpl.addUser(newUser);
@@ -832,14 +832,13 @@ public class WebViewUpdateServiceTest {
                         true /* installed */));
 
         // Set user-chosen package
-        mTestSystemImpl.updateUserSetting(null, chosenPackage);
+        mTestSystemImpl.updateUserSetting(chosenPackage);
 
         runWebViewBootPreparationOnMainSync();
 
         // Verify that we switch the setting to point to the current package
-        Mockito.verify(mTestSystemImpl).updateUserSetting(
-                Mockito.anyObject(), Mockito.eq(nonChosenPackage));
-        assertEquals(nonChosenPackage, mTestSystemImpl.getUserChosenWebViewProvider(null));
+        Mockito.verify(mTestSystemImpl).updateUserSetting(Mockito.eq(nonChosenPackage));
+        assertEquals(nonChosenPackage, mTestSystemImpl.getUserChosenWebViewProvider());
 
         checkPreparationPhasesForPackage(nonChosenPackage, 1);
     }
@@ -976,7 +975,7 @@ public class WebViewUpdateServiceTest {
         setEnabledAndValidPackageInfos(packages);
 
         // Start with the setting pointing to the third package
-        mTestSystemImpl.updateUserSetting(null, thirdPackage);
+        mTestSystemImpl.updateUserSetting(thirdPackage);
 
         runWebViewBootPreparationOnMainSync();
         checkPreparationPhasesForPackage(thirdPackage, 1);
@@ -1167,7 +1166,7 @@ public class WebViewUpdateServiceTest {
 
         setupWithPackages(webviewPackages);
         // Start with the setting pointing to the uninstalled package
-        mTestSystemImpl.updateUserSetting(null, uninstalledPackage);
+        mTestSystemImpl.updateUserSetting(uninstalledPackage);
         int secondaryUserId = 5;
         if (multiUser) {
             mTestSystemImpl.addUser(secondaryUserId);
@@ -1220,7 +1219,7 @@ public class WebViewUpdateServiceTest {
 
         setupWithPackages(webviewPackages);
         // Start with the setting pointing to the uninstalled package
-        mTestSystemImpl.updateUserSetting(null, uninstalledPackage);
+        mTestSystemImpl.updateUserSetting(uninstalledPackage);
         int secondaryUserId = 412;
         mTestSystemImpl.addUser(secondaryUserId);
 
@@ -1277,7 +1276,7 @@ public class WebViewUpdateServiceTest {
 
         setupWithPackages(webviewPackages);
         // Start with the setting pointing to the uninstalled package
-        mTestSystemImpl.updateUserSetting(null, uninstalledPackage);
+        mTestSystemImpl.updateUserSetting(uninstalledPackage);
         int secondaryUserId = 4;
         mTestSystemImpl.addUser(secondaryUserId);
 
@@ -1290,7 +1289,7 @@ public class WebViewUpdateServiceTest {
                 0 /* updateTime */, (testHidden ? true : false) /* hidden */));
 
         // Start with the setting pointing to the uninstalled package
-        mTestSystemImpl.updateUserSetting(null, uninstalledPackage);
+        mTestSystemImpl.updateUserSetting(uninstalledPackage);
 
         runWebViewBootPreparationOnMainSync();
 
@@ -1458,7 +1457,7 @@ public class WebViewUpdateServiceTest {
         runWebViewBootPreparationOnMainSync();
         checkPreparationPhasesForPackage(primaryPackage, 1 /* first preparation phase */);
 
-        mTestSystemImpl.setMultiProcessSetting(null /* context */, settingValue);
+        mTestSystemImpl.setMultiProcessSetting(settingValue);
 
         assertEquals(expectEnabled, mWebViewUpdateServiceImpl.isMultiProcessEnabled());
     }
@@ -1492,7 +1491,7 @@ public class WebViewUpdateServiceTest {
                 };
         setupWithPackages(packages);
         // Start with the setting pointing to the invalid package
-        mTestSystemImpl.updateUserSetting(null, oldSdkPackage.packageName);
+        mTestSystemImpl.updateUserSetting(oldSdkPackage.packageName);
 
         mTestSystemImpl.setPackageInfo(newSdkPackage);
         mTestSystemImpl.setPackageInfo(currentSdkPackage);
@@ -1545,8 +1544,7 @@ public class WebViewUpdateServiceTest {
         // Check that the boot time logic re-enables the default package.
         runWebViewBootPreparationOnMainSync();
         Mockito.verify(mTestSystemImpl)
-                .enablePackageForAllUsers(
-                        Matchers.anyObject(), Mockito.eq(testPackage), Mockito.eq(true));
+                .enablePackageForAllUsers(Mockito.eq(testPackage), Mockito.eq(true));
     }
 
     @Test
@@ -1570,8 +1568,7 @@ public class WebViewUpdateServiceTest {
         // Check that the boot time logic tries to install the default package.
         runWebViewBootPreparationOnMainSync();
         Mockito.verify(mTestSystemImpl)
-                .installExistingPackageForAllUsers(
-                        Matchers.anyObject(), Mockito.eq(testPackage));
+                .installExistingPackageForAllUsers(Mockito.eq(testPackage));
     }
 
     @Test
@@ -1598,8 +1595,7 @@ public class WebViewUpdateServiceTest {
 
         // Check that we try to re-install the default package.
         Mockito.verify(mTestSystemImpl)
-                .installExistingPackageForAllUsers(
-                        Matchers.anyObject(), Mockito.eq(testPackage));
+                .installExistingPackageForAllUsers(Mockito.eq(testPackage));
     }
 
     /**
@@ -1632,8 +1628,7 @@ public class WebViewUpdateServiceTest {
 
         // Check that we try to re-install the default package for all users.
         Mockito.verify(mTestSystemImpl)
-                .installExistingPackageForAllUsers(
-                        Matchers.anyObject(), Mockito.eq(testPackage));
+                .installExistingPackageForAllUsers(Mockito.eq(testPackage));
     }
 
     private void testDefaultPackageChosen(PackageInfo packageInfo) {

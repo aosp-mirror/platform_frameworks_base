@@ -49,6 +49,7 @@ constructor(
                         Intent(Settings.ACTION_ONE_HANDED_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

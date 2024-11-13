@@ -16,17 +16,23 @@
 
 package com.android.systemui.communal.domain.interactor
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.data.repository.communalSceneRepository
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor.OnSceneAboutToChangeListener
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.initialSceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,10 +42,29 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class CommunalSceneInteractorTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class CommunalSceneInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -47,27 +72,62 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
     private val repository = kosmos.communalSceneRepository
     private val underTest by lazy { kosmos.communalSceneInteractor }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun changeScene() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
 
-            underTest.changeScene(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal, "test")
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun changeScene_callsSceneStateProcessor() =
+        testScope.runTest {
+            val callback: OnSceneAboutToChangeListener = mock()
+            underTest.registerSceneStateProcessor(callback)
+
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+            verify(callback, never()).onSceneAboutToChange(any(), anyOrNull())
+
+            underTest.changeScene(CommunalScenes.Communal, "test")
+            assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
+            verify(callback).onSceneAboutToChange(CommunalScenes.Communal, null)
+        }
+
+    @DisableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun changeScene_doesNotCallSceneStateProcessorForDuplicateState() =
+        testScope.runTest {
+            val callback: OnSceneAboutToChangeListener = mock()
+            underTest.registerSceneStateProcessor(callback)
+
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+
+            underTest.changeScene(CommunalScenes.Blank, "test")
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+
+            verify(callback, never()).onSceneAboutToChange(any(), anyOrNull())
+        }
+
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun snapToScene() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
 
-            underTest.snapToScene(CommunalScenes.Communal)
+            underTest.snapToScene(CommunalScenes.Communal, "test")
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun snapToSceneWithDelay() =
         testScope.runTest {
@@ -75,6 +135,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
             underTest.snapToScene(
                 CommunalScenes.Communal,
+                "test",
                 ActivityTransitionAnimator.TIMINGS.totalDuration
             )
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
@@ -82,27 +143,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
         }
 
-    @Test
-    fun snapToSceneForActivity() =
-        testScope.runTest {
-            val currentScene by collectLastValue(underTest.currentScene)
-            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
-
-            underTest.snapToSceneForActivityStart(CommunalScenes.Communal)
-            assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
-        }
-
-    @Test
-    fun snapToSceneForActivity_willNotChangeScene_forEditModeActivity() =
-        testScope.runTest {
-            val currentScene by collectLastValue(underTest.currentScene)
-            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
-
-            underTest.setEditModeState(EditModeState.STARTING)
-            underTest.snapToSceneForActivityStart(CommunalScenes.Communal)
-            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
-        }
-
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun transitionProgress_fullProgress() =
         testScope.runTest {
@@ -121,6 +162,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
                 .isEqualTo(CommunalTransitionProgressModel.Idle(CommunalScenes.Communal))
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun transitionProgress_transitioningAwayFromTrackedScene() =
         testScope.runTest {
@@ -161,6 +203,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
                 .isEqualTo(CommunalTransitionProgressModel.Idle(CommunalScenes.Communal))
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun transitionProgress_transitioningToTrackedScene() =
         testScope.runTest {
@@ -198,6 +241,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
                 .isEqualTo(CommunalTransitionProgressModel.Idle(CommunalScenes.Communal))
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun isIdleOnCommunal() =
         testScope.runTest {
@@ -225,6 +269,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
             assertThat(isIdleOnCommunal).isEqualTo(false)
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun isCommunalVisible() =
         testScope.runTest {
@@ -263,5 +308,207 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
                     isUserInputOngoing = flowOf(false),
                 )
             assertThat(isCommunalVisible).isEqualTo(true)
+        }
+
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun changeScene_legacyCommunalScene_mapToStfScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+
+            // Verify that the current scene is the initial scene
+            assertThat(currentScene).isEqualTo(kosmos.initialSceneKey)
+
+            // Change to legacy communal scene
+            underTest.changeScene(CommunalScenes.Communal, loggingReason = "test")
+
+            // Verify that scene changed to communal scene in STF
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+
+            // Now change to legacy blank scene
+            underTest.changeScene(CommunalScenes.Blank, loggingReason = "test")
+
+            // Verify that scene changed to lock screen scene in STF
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun changeScene_stfScenes() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+
+            // Verify that the current scene is the initial scene
+            assertThat(currentScene).isEqualTo(kosmos.initialSceneKey)
+
+            // Change to communal scene
+            underTest.changeScene(Scenes.Communal, loggingReason = "test")
+
+            // Verify changed to communal scene
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+
+            // Now change to lockscreen scene
+            underTest.changeScene(Scenes.Lockscreen, loggingReason = "test")
+
+            // Verify changed to lockscreen scene
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun snapToScene_legacyCommunalScene_mapToStfScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+
+            // Verify that the current scene is the initial scene
+            assertThat(currentScene).isEqualTo(kosmos.initialSceneKey)
+
+            // Snap to legacy communal scene
+            underTest.snapToScene(CommunalScenes.Communal, loggingReason = "test")
+
+            // Verify that scene changed to communal scene in STF
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+
+            // Now snap to legacy blank scene
+            underTest.snapToScene(CommunalScenes.Blank, loggingReason = "test")
+
+            // Verify that scene changed to lock screen scene in STF
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun snapToScene_stfScenes() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+
+            // Verify that the current scene is the initial scene
+            assertThat(currentScene).isEqualTo(kosmos.initialSceneKey)
+
+            // Snap to communal scene
+            underTest.snapToScene(Scenes.Communal, loggingReason = "test")
+
+            // Verify changed to communal scene
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+
+            // Now snap to lockscreen scene
+            underTest.snapToScene(Scenes.Lockscreen, loggingReason = "test")
+
+            // Verify changed to lockscreen scene
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+        }
+
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun isIdleOnCommunal_sceneContainerEnabled() =
+        testScope.runTest {
+            val transitionState: MutableStateFlow<ObservableTransitionState> =
+                MutableStateFlow(ObservableTransitionState.Idle(Scenes.Lockscreen))
+            underTest.setTransitionState(transitionState)
+
+            // isIdleOnCommunal is initially false
+            val isIdleOnCommunal by collectLastValue(underTest.isIdleOnCommunal)
+            assertThat(isIdleOnCommunal).isEqualTo(false)
+
+            // Start transition to communal.
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Communal,
+                    currentScene = flowOf(Scenes.Lockscreen),
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(isIdleOnCommunal).isEqualTo(false)
+
+            // Finish transition to communal
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Communal)
+            assertThat(isIdleOnCommunal).isEqualTo(true)
+
+            // Start transition away from communal
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Communal,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Communal),
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(isIdleOnCommunal).isEqualTo(false)
+
+            // Finish transition to lock screen
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
+            assertThat(isIdleOnCommunal).isEqualTo(false)
+        }
+
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun isCommunalVisible_sceneContainerEnabled() =
+        testScope.runTest {
+            val transitionState: MutableStateFlow<ObservableTransitionState> =
+                MutableStateFlow(ObservableTransitionState.Idle(Scenes.Lockscreen))
+            underTest.setTransitionState(transitionState)
+
+            // isCommunalVisible is initially false
+            val isCommunalVisible by collectLastValue(underTest.isCommunalVisible)
+            assertThat(isCommunalVisible).isEqualTo(false)
+
+            // Start transition to communal.
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Communal,
+                    currentScene = flowOf(Scenes.Lockscreen),
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(isCommunalVisible).isEqualTo(true)
+
+            // Half-way transition to communal.
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Communal,
+                    currentScene = flowOf(Scenes.Lockscreen),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(isCommunalVisible).isEqualTo(true)
+
+            // Finish transition to communal
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Communal)
+            assertThat(isCommunalVisible).isEqualTo(true)
+
+            // Start transition away from communal
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Communal,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Communal),
+                    progress = flowOf(0.1f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(isCommunalVisible).isEqualTo(true)
+
+            // Half-way transition away from communal
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = Scenes.Communal,
+                    toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Communal),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            assertThat(isCommunalVisible).isEqualTo(true)
+
+            // Finish transition to lock screen
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
+            assertThat(isCommunalVisible).isEqualTo(false)
         }
 }

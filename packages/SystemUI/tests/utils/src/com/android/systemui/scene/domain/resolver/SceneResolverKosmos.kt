@@ -20,40 +20,20 @@ package com.android.systemui.scene.domain.resolver
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.shade.domain.interactor.shadeInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.sceneFamilyResolvers: Map<SceneKey, SceneResolver>
-    get() =
-        mapOf(
-            SceneFamilies.Home to homeSceneFamilyResolver,
-            SceneFamilies.NotifShade to notifShadeSceneFamilyResolver,
-            SceneFamilies.QuickSettings to quickSettingsSceneFamilyResolver,
-        )
+    get() = mapOf(SceneFamilies.Home to homeSceneFamilyResolver)
 
 val Kosmos.homeSceneFamilyResolver by
     Kosmos.Fixture {
         HomeSceneFamilyResolver(
             applicationScope = applicationCoroutineScope,
             deviceEntryInteractor = deviceEntryInteractor,
-        )
-    }
-
-val Kosmos.notifShadeSceneFamilyResolver by
-    Kosmos.Fixture {
-        NotifShadeSceneFamilyResolver(
-            applicationScope = applicationCoroutineScope,
-            shadeInteractor = shadeInteractor,
-        )
-    }
-
-val Kosmos.quickSettingsSceneFamilyResolver by
-    Kosmos.Fixture {
-        QuickSettingsSceneFamilyResolver(
-            applicationScope = applicationCoroutineScope,
-            shadeInteractor = shadeInteractor,
+            keyguardEnabledInteractor = keyguardEnabledInteractor,
         )
     }

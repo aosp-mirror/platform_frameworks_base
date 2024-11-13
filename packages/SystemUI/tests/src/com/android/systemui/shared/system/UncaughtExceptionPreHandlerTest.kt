@@ -1,5 +1,6 @@
 package com.android.systemui.shared.system
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -8,6 +9,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.only
@@ -16,6 +18,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class UncaughtExceptionPreHandlerTest : SysuiTestCase() {
     private lateinit var preHandlerManager: UncaughtExceptionPreHandlerManager
 

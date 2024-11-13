@@ -28,8 +28,8 @@ import android.os.Parcel;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.CollectionUtils;
 
@@ -46,7 +46,7 @@ public class AccessibilityNodeInfoTest {
     // The number of fields tested in the corresponding CTS AccessibilityNodeInfoTest:
     // See fullyPopulateAccessibilityNodeInfo, assertEqualsAccessibilityNodeInfo,
     // and assertAccessibilityNodeInfoCleared in that class.
-    private static final int NUM_MARSHALLED_PROPERTIES = 43;
+    private static final int NUM_MARSHALLED_PROPERTIES = 44;
 
     /**
      * The number of properties that are purposely not marshalled

@@ -37,4 +37,3 @@ public interface Operation {
      */
     String deepToString(String indent);
 }
-

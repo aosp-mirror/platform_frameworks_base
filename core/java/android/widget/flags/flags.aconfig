@@ -1,0 +1,11 @@
+package: "android.widget.flags"
+container: "system"
+flag {
+  name: "enable_fading_view_group"
+  namespace: "system_performance"
+  description: "FRP screen during OOBE must have fading and scaling animation in Wear Watches"
+  bug: "348515581"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

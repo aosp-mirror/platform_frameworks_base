@@ -19,16 +19,21 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
-import static com.android.wm.shell.util.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
+import static com.android.wm.shell.shared.split.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -39,6 +44,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -47,8 +53,6 @@ import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
-import android.view.IRecentsAnimationController;
-import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
@@ -63,7 +67,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -79,10 +84,15 @@ import java.util.function.Consumer;
  * Handles the Recents (overview) animation. Only one of these can run at a time. A recents
  * transition must be created via {@link #startRecentsTransition}. Anything else will be ignored.
  */
-public class RecentsTransitionHandler implements Transitions.TransitionHandler {
+public class RecentsTransitionHandler implements Transitions.TransitionHandler,
+        Transitions.TransitionObserver {
     private static final String TAG = "RecentsTransitionHandler";
 
+    // A placeholder for a synthetic transition that isn't backed by a true system transition
+    public static final IBinder SYNTHETIC_TRANSITION = new Binder();
+
     private final Transitions mTransitions;
+    private final ShellTaskOrganizer mShellTaskOrganizer;
     private final ShellExecutor mExecutor;
     @Nullable
     private final RecentTasksController mRecentTasksController;
@@ -99,19 +109,26 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     private final HomeTransitionObserver mHomeTransitionObserver;
     private @Nullable Color mBackgroundColor;
 
-    public RecentsTransitionHandler(ShellInit shellInit, Transitions transitions,
+    public RecentsTransitionHandler(
+            @NonNull ShellInit shellInit,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            @NonNull Transitions transitions,
             @Nullable RecentTasksController recentTasksController,
-            HomeTransitionObserver homeTransitionObserver) {
+            @NonNull HomeTransitionObserver homeTransitionObserver) {
+        mShellTaskOrganizer = shellTaskOrganizer;
         mTransitions = transitions;
         mExecutor = transitions.getMainExecutor();
         mRecentTasksController = recentTasksController;
         mHomeTransitionObserver = homeTransitionObserver;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) return;
         if (recentTasksController == null) return;
-        shellInit.addInitCallback(() -> {
-            recentTasksController.setTransitionHandler(this);
-            transitions.addHandler(this);
-        }, this);
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        mRecentTasksController.setTransitionHandler(this);
+        mTransitions.addHandler(this);
+        mTransitions.registerObserver(this);
     }
 
     /** Register a mixer handler. {@see RecentsMixedHandler}*/
@@ -138,17 +155,59 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         mBackgroundColor = color;
     }
 
+    /**
+     * Starts a new real/synthetic recents transition.
+     */
     @VisibleForTesting
     public IBinder startRecentsTransition(PendingIntent intent, Intent fillIn, Bundle options,
             IApplicationThread appThread, IRecentsAnimationRunner listener) {
+        // only care about latest one.
+        mAnimApp = appThread;
+
+        // TODO(b/366021931): Formalize this later
+        final boolean isSyntheticRequest = options.containsKey("is_synthetic_recents_transition");
+        if (isSyntheticRequest) {
+            return startSyntheticRecentsTransition(listener);
+        } else {
+            return startRealRecentsTransition(intent, fillIn, options, listener);
+        }
+    }
+
+    /**
+     * Starts a synthetic recents transition that is not backed by a real WM transition.
+     */
+    private IBinder startSyntheticRecentsTransition(@NonNull IRecentsAnimationRunner listener) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                "RecentsTransitionHandler.startRecentsTransition(synthetic)");
+        final RecentsController lastController = getLastController();
+        if (lastController != null) {
+            lastController.cancel(lastController.isSyntheticTransition()
+                    ? "existing_running_synthetic_transition"
+                    : "existing_running_transition");
+            return null;
+        }
+
+        // Create a new synthetic transition and start it immediately
+        final RecentsController controller = new RecentsController(listener);
+        controller.startSyntheticTransition();
+        mControllers.add(controller);
+        return SYNTHETIC_TRANSITION;
+    }
+
+    /**
+     * Starts a real WM-backed recents transition.
+     */
+    private IBinder startRealRecentsTransition(PendingIntent intent, Intent fillIn, Bundle options,
+            IRecentsAnimationRunner listener) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                 "RecentsTransitionHandler.startRecentsTransition");
 
-        // only care about latest one.
-        mAnimApp = appThread;
-        WindowContainerTransaction wct = new WindowContainerTransaction();
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.sendPendingIntent(intent, fillIn, options);
-        final RecentsController controller = new RecentsController(listener);
+
+        // Find the mixed handler which should handle this request (if we are in a state where a
+        // mixed handler is needed).  This is slightly convoluted because starting the transition
+        // requires the handler, but the mixed handler also needs a reference to the transition.
         RecentsMixedHandler mixer = null;
         Consumer<IBinder> setTransitionForMixer = null;
         for (int i = 0; i < mMixers.size(); ++i) {
@@ -160,12 +219,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
         final IBinder transition = mTransitions.startTransition(TRANSIT_TO_FRONT, wct,
                 mixer == null ? this : mixer);
-        for (int i = 0; i < mStateListeners.size(); i++) {
-            mStateListeners.get(i).onTransitionStarted(transition);
-        }
         if (mixer != null) {
             setTransitionForMixer.accept(transition);
         }
+
+        final RecentsController controller = new RecentsController(listener);
         if (transition != null) {
             controller.setTransition(transition);
             mControllers.add(controller);
@@ -187,11 +245,28 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         return null;
     }
 
-    private int findController(IBinder transition) {
+    /**
+     * Returns if there is currently a pending or active recents transition.
+     */
+    @Nullable
+    private RecentsController getLastController() {
+        return !mControllers.isEmpty() ? mControllers.getLast() : null;
+    }
+
+    /**
+     * Finds an existing controller for the provided {@param transition}, or {@code null} if none
+     * exists.
+     */
+    @Nullable
+    @VisibleForTesting
+    RecentsController findController(@NonNull IBinder transition) {
         for (int i = mControllers.size() - 1; i >= 0; --i) {
-            if (mControllers.get(i).mTransition == transition) return i;
+            final RecentsController controller = mControllers.get(i);
+            if (controller.mTransition == transition) {
+                return controller;
+            }
         }
-        return -1;
+        return null;
     }
 
     @Override
@@ -199,13 +274,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             SurfaceControl.Transaction startTransaction,
             SurfaceControl.Transaction finishTransaction,
             Transitions.TransitionFinishCallback finishCallback) {
-        final int controllerIdx = findController(transition);
-        if (controllerIdx < 0) {
+        final RecentsController controller = findController(transition);
+        if (controller == null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "RecentsTransitionHandler.startAnimation: no controller found");
             return false;
         }
-        final RecentsController controller = mControllers.get(controllerIdx);
         final IApplicationThread animApp = mAnimApp;
         mAnimApp = null;
         if (!controller.start(info, startTransaction, finishTransaction, finishCallback)) {
@@ -221,13 +295,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
     public void mergeAnimation(IBinder transition, TransitionInfo info,
             SurfaceControl.Transaction t, IBinder mergeTarget,
             Transitions.TransitionFinishCallback finishCallback) {
-        final int targetIdx = findController(mergeTarget);
-        if (targetIdx < 0) {
+        final RecentsController controller = findController(mergeTarget);
+        if (controller == null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "RecentsTransitionHandler.mergeAnimation: no controller found");
             return;
         }
-        final RecentsController controller = mControllers.get(targetIdx);
         controller.merge(info, t, finishCallback);
     }
 
@@ -244,8 +317,21 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
     }
 
+    @Override
+    public void onTransitionReady(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction) {
+        RecentsController controller = findController(SYNTHETIC_TRANSITION);
+        if (controller != null) {
+            // Cancel the existing synthetic transition if there is one
+            controller.cancel("incoming_transition");
+        }
+    }
+
     /** There is only one of these and it gets reset on finish. */
-    private class RecentsController extends IRecentsAnimationController.Stub {
+    @VisibleForTesting
+    class RecentsController extends IRecentsAnimationController.Stub {
+
         private final int mInstanceId;
 
         private IRecentsAnimationRunner mListener;
@@ -307,7 +393,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mDeathHandler = () -> {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.DeathRecipient: binder died", mInstanceId);
-                finish(mWillFinishToHome, false /* leaveHint */, null /* finishCb */);
+                finishInner(mWillFinishToHome, false /* leaveHint */, null /* finishCb */,
+                        "deathRecipient");
             };
             try {
                 mListener.asBinder().linkToDeath(mDeathHandler, 0 /* flags */);
@@ -317,6 +404,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             }
         }
 
+        /**
+         * Sets the started transition for this instance of the recents transition.
+         */
         void setTransition(IBinder transition) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "[%d] RecentsController.setTransition: id=%s", mInstanceId, transition);
@@ -330,6 +420,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
 
         void cancel(boolean toHome, boolean withScreenshots, String reason) {
+            if (cancelSyntheticTransition(reason)) {
+                return;
+            }
+
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "[%d] RecentsController.cancel: toHome=%b reason=%s",
                     mInstanceId, toHome, reason);
@@ -341,7 +435,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
             if (mFinishCB != null) {
-                finishInner(toHome, false /* userLeave */, null /* finishCb */);
+                finishInner(toHome, false /* userLeave */, null /* finishCb */, "cancel");
             } else {
                 cleanUp();
             }
@@ -434,6 +528,91 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             for (int i = 0; i < mStateListeners.size(); i++) {
                 mStateListeners.get(i).onAnimationStateChanged(false);
             }
+        }
+
+        /**
+         * Starts a new transition that is not backed by a system transition.
+         */
+        void startSyntheticTransition() {
+            mTransition = SYNTHETIC_TRANSITION;
+
+            // TODO(b/366021931): Update mechanism for pulling the home task, for now add home as
+            //                    both opening and closing since there's some pre-existing
+            //                    dependencies on having a closing task
+            final ActivityManager.RunningTaskInfo homeTask =
+                    mShellTaskOrganizer.getRunningTasks(DEFAULT_DISPLAY).stream()
+                            .filter(task -> task.getActivityType() == ACTIVITY_TYPE_HOME)
+                            .findFirst()
+                            .get();
+            final RemoteAnimationTarget openingTarget = TransitionUtil.newSyntheticTarget(
+                    homeTask, mShellTaskOrganizer.getHomeTaskOverlayContainer(), TRANSIT_OPEN,
+                    0, true /* isTranslucent */);
+            final RemoteAnimationTarget closingTarget = TransitionUtil.newSyntheticTarget(
+                    homeTask, mShellTaskOrganizer.getHomeTaskOverlayContainer(), TRANSIT_CLOSE,
+                    0, true /* isTranslucent */);
+            final ArrayList<RemoteAnimationTarget> apps = new ArrayList<>();
+            apps.add(openingTarget);
+            apps.add(closingTarget);
+            try {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.start: calling onAnimationStart with %d apps",
+                        mInstanceId, apps.size());
+                mListener.onAnimationStart(this,
+                        apps.toArray(new RemoteAnimationTarget[apps.size()]),
+                        new RemoteAnimationTarget[0],
+                        new Rect(0, 0, 0, 0), new Rect(), new Bundle());
+                for (int i = 0; i < mStateListeners.size(); i++) {
+                    mStateListeners.get(i).onAnimationStateChanged(true);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error starting recents animation", e);
+                cancel("startSynthetricTransition() failed");
+            }
+        }
+
+        /**
+         * Returns whether this transition is backed by a real system transition or not.
+         */
+        boolean isSyntheticTransition() {
+            return mTransition == SYNTHETIC_TRANSITION;
+        }
+
+        /**
+         * Called when a synthetic transition is canceled.
+         */
+        boolean cancelSyntheticTransition(String reason) {
+            if (!isSyntheticTransition()) {
+                return false;
+            }
+
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                    "[%d] RecentsController.cancelSyntheticTransition reason=%s",
+                    mInstanceId, reason);
+            try {
+                // TODO(b/366021931): Notify the correct tasks once we build actual targets, and
+                //                    clean up leashes accordingly
+                mListener.onAnimationCanceled(new int[0], new TaskSnapshot[0]);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error canceling previous recents animation", e);
+            }
+            cleanUp();
+            return true;
+        }
+
+        /**
+         * Called when a synthetic transition is finished.
+         * @return
+         */
+        boolean finishSyntheticTransition() {
+            if (!isSyntheticTransition()) {
+                return false;
+            }
+
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                    "[%d] RecentsController.finishSyntheticTransition", mInstanceId);
+            // TODO(b/366021931): Clean up leashes accordingly
+            cleanUp();
+            return true;
         }
 
         boolean start(TransitionInfo info, SurfaceControl.Transaction t,
@@ -662,7 +841,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                             // Set the callback once again so we can finish correctly.
                             mFinishCB = finishCB;
                             finishInner(true /* toHome */, false /* userLeave */,
-                                    null /* finishCb */);
+                                    null /* finishCb */, "takeOverAnimation");
                         }, updatedStates);
             });
         }
@@ -775,6 +954,20 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     // Don't consider order-only & non-leaf changes as changing apps.
                     if (!TransitionUtil.isOrderOnly(change) && isLeafTask) {
                         hasChangingApp = true;
+                        // Check if the changing app is moving to top and fullscreen. This handles
+                        // the case where we moved from desktop to recents and launching a desktop
+                        // task in fullscreen.
+                        if ((change.getFlags() & FLAG_MOVED_TO_TOP) != 0
+                                && taskInfo != null
+                                && taskInfo.getWindowingMode()
+                                == WINDOWING_MODE_FULLSCREEN) {
+                            if (openingTasks == null) {
+                                openingTasks = new ArrayList<>();
+                                openingTaskIsLeafs = new IntArray();
+                            }
+                            openingTasks.add(change);
+                            openingTaskIsLeafs.add(1);
+                        }
                     } else if (isLeafTask && taskInfo.topActivityType == ACTIVITY_TYPE_HOME
                             && !isRecentsTask ) {
                         // Unless it is a 3p launcher. This means that the 3p launcher was already
@@ -796,7 +989,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 sendCancelWithSnapshots();
                 mExecutor.executeDelayed(
                         () -> finishInner(true /* toHome */, false /* userLeaveHint */,
-                                null /* finishCb */), 0);
+                                null /* finishCb */, "merge"), 0);
                 return;
             }
             if (recentsOpening != null) {
@@ -991,7 +1184,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     return;
                 }
                 final int displayId = mInfo.getRootCount() > 0 ? mInfo.getRoot(0).getDisplayId()
-                        : Display.DEFAULT_DISPLAY;
+                        : DEFAULT_DISPLAY;
                 // transient launches don't receive focus automatically. Since we are taking over
                 // the gesture now, take focus explicitly.
                 // This also moves recents back to top if the user gestured before a switch
@@ -1005,10 +1198,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     Slog.e(TAG, "Failed to set focused task", e);
                 }
             });
-        }
-
-        @Override
-        public void setAnimationTargetsBehindSystemBars(boolean behindSystemBars) {
         }
 
         @Override
@@ -1028,11 +1217,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         @Override
         @SuppressLint("NewApi")
         public void finish(boolean toHome, boolean sendUserLeaveHint, IResultReceiver finishCb) {
-            mExecutor.execute(() -> finishInner(toHome, sendUserLeaveHint, finishCb));
+            mExecutor.execute(() -> finishInner(toHome, sendUserLeaveHint, finishCb,
+                    "requested"));
         }
 
         private void finishInner(boolean toHome, boolean sendUserLeaveHint,
-                IResultReceiver runnerFinishCb) {
+                IResultReceiver runnerFinishCb, String reason) {
+            if (finishSyntheticTransition()) {
+                return;
+            }
+
             if (mFinishCB == null) {
                 Slog.e(TAG, "Duplicate call to finish");
                 return;
@@ -1238,26 +1432,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         }
 
         @Override
-        public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
-        }
-
-        @Override
-        public void cleanupScreenshot() {
-        }
-
-        @Override
         public void setWillFinishToHome(boolean willFinishToHome) {
             mExecutor.execute(() -> {
                 mWillFinishToHome = willFinishToHome;
             });
-        }
-
-        /**
-         * @see IRecentsAnimationController#removeTask
-         */
-        @Override
-        public boolean removeTask(int taskId) {
-            return false;
         }
 
         /**
@@ -1275,13 +1453,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     Slog.e(TAG, "Failed to detach the navigation bar from app", e);
                 }
             });
-        }
-
-        /**
-         * @see IRecentsAnimationController#animateNavigationBarToApp(long)
-         */
-        @Override
-        public void animateNavigationBarToApp(long duration) {
         }
     };
 

@@ -19,6 +19,7 @@ package com.android.server.companion.virtual;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Process;
 import android.util.SparseArray;
 
 import java.io.PrintWriter;
@@ -35,6 +36,8 @@ final class VirtualDeviceLog {
             "MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     private static final int MAX_ENTRIES = 16;
 
+    private static final String VIRTUAL_DEVICE_OWNER_SYSTEM = "system";
+
     private final Context mContext;
     private final ArrayDeque<LogEntry> mLogEntries = new ArrayDeque<>();
 
@@ -45,9 +48,6 @@ final class VirtualDeviceLog {
     void logCreated(int deviceId, int ownerUid) {
         final long token = Binder.clearCallingIdentity();
         try {
-            if (!Flags.dumpHistory()) {
-                return;
-            }
             addEntry(new LogEntry(TYPE_CREATED, deviceId, System.currentTimeMillis(), ownerUid));
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -57,9 +57,6 @@ final class VirtualDeviceLog {
     void logClosed(int deviceId, int ownerUid) {
         final long token = Binder.clearCallingIdentity();
         try {
-            if (!Flags.dumpHistory()) {
-                return;
-            }
             addEntry(new LogEntry(TYPE_CLOSED, deviceId, System.currentTimeMillis(), ownerUid));
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -76,9 +73,6 @@ final class VirtualDeviceLog {
     void dump(PrintWriter pw) {
         final long token = Binder.clearCallingIdentity();
         try {
-            if (!Flags.dumpHistory()) {
-                return;
-            }
             pw.println("VirtualDevice Log:");
             UidToPackageNameCache packageNameCache = new UidToPackageNameCache(
                     mContext.getPackageManager());
@@ -132,6 +126,8 @@ final class VirtualDeviceLog {
             String[] packages;
             if (mUidToPackagesCache.contains(ownerUid)) {
                 return mUidToPackagesCache.get(ownerUid);
+            } else if (ownerUid == Process.SYSTEM_UID) {
+                return VIRTUAL_DEVICE_OWNER_SYSTEM;
             } else {
                 packages = mPackageManager.getPackagesForUid(ownerUid);
                 String packageName = "";

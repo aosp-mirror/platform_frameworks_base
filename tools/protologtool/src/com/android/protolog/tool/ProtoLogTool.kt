@@ -17,7 +17,6 @@
 package com.android.protolog.tool
 
 import com.android.internal.protolog.common.LogLevel
-import com.android.internal.protolog.common.ProtoLog
 import com.android.internal.protolog.common.ProtoLogToolInjected
 import com.android.protolog.tool.CommandOptions.Companion.USAGE
 import com.github.javaparser.ParseProblemException
@@ -62,6 +61,8 @@ import kotlin.system.exitProcess
 object ProtoLogTool {
     const val PROTOLOG_IMPL_SRC_PATH =
         "frameworks/base/core/java/com/android/internal/protolog/ProtoLogImpl.java"
+
+    private const val PROTOLOG_CLASS_NAME = "ProtoLog"; // ProtoLog::class.java.simpleName
 
     data class LogCall(
         val messageString: String,
@@ -126,7 +127,7 @@ object ProtoLogTool {
                     val text = injector.readText(file)
                     val outSrc = try {
                         val code = tryParse(text, path)
-                        if (containsProtoLogText(text, ProtoLog::class.java.simpleName)) {
+                        if (containsProtoLogText(text, PROTOLOG_CLASS_NAME)) {
                             transformer.processClass(text, path, packagePath(file, code), code)
                         } else {
                             text
@@ -461,10 +462,10 @@ object ProtoLogTool {
             val command = CommandOptions(args)
             invoke(command)
         } catch (ex: InvalidCommandException) {
-            println("\n${ex.message}\n")
+            println("InvalidCommandException: \n${ex.message}\n")
             showHelpAndExit()
         } catch (ex: CodeProcessingException) {
-            println("\n${ex.message}\n")
+            println("CodeProcessingException: \n${ex.message}\n")
             exitProcess(1)
         }
     }

@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"hodinky"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Vyberte zariadenie, ktoré bude spravovať aplikácia &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Vyberte profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, ktorý nastavíte"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"Táto aplikácia bude môcť synchronizovať informácie, napríklad meno volajúceho, a získavať prístup k týmto povoleniam v zariadení <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="summary_watch" msgid="8134580124808507407">"Táto aplikácia bude môcť synchronizovať informácie, napríklad meno volajúceho, a získavať prístup k týmto povoleniam v zariadení <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Chcete povoliť aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; spravovať zariadenie &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"zariadenie"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"Táto aplikácia bude mať prístup k týmto povoleniam v zariadení <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"Povoľte aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; prístup k týmto informáciám z vášho telefónu"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Chcete povoliť zariadeniu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; streamovať aplikácie telefónu?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s bude mať prístup k všetkému, čo v telefóne zobrazíte alebo prehrajete, vrátane zvuku, fotiek, hesiel a správ.&lt;br/&gt;&lt;br/&gt;%1$s bude môcť streamovať aplikácie, kým toto povolenie neodstránite."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Služby pre viacero zariadení"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje pre zariadenie <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> povolenie streamovať aplikácie medzi vašimi zariadeniami."</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje v mene zariadenia <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> povolenie zobrazovať a streamovať aplikácie medzi zariadeniami"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"Táto aplikácia bude mať prístup k týmto povoleniam v zariadení <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"Chcete povoliť aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; streamovať aplikácie zo zariadenia <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> do zariadenia &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"Aplikácia <xliff:g id="APP_NAME_0">%1$s</xliff:g> bude mať prístup k všetkému, čo sa zobrazuje alebo prehráva v zariadení <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> vrátane zvuku, fotiek, hesiel a správ.&lt;br/&gt;&lt;br/&gt;Aplikácia <xliff:g id="APP_NAME_1">%1$s</xliff:g> bude môcť streamovať aplikácie do zariadenia <xliff:g id="DEVICE_NAME">%3$s</xliff:g>, kým prístup k tomuto povoleniu neodstránite."</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje pre zariadenie <xliff:g id="DEVICE_NAME">%2$s</xliff:g> povolenie zobrazovať a streamovať aplikácie medzi zariadeniami"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Povoľte aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; prístup k týmto informáciám z vášho telefónu"</string>
+    <string name="title_computer" msgid="4782923323932440751">"Povoľte aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; prístup k týmto informáciám zo zariadenia <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Služby Google Play"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje pre zariadenie <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> povolenie na prístup k fotkám, médiám a upozorneniam vášho telefónu"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Chcete povoliť zariadeniu &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; vykonať túto akciu?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Chcete povoliť zariadeniu &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; streamovať aplikácie a systémové funkcie telefónu?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s bude mať prístup k všetkému, čo v telefóne zobrazíte alebo prehrajete, vrátane zvuku, fotiek, platobných údajov, hesiel a správ.&lt;br/&gt;&lt;br/&gt;%1$s bude môcť streamovať aplikácie a systémové funkcie, kým toto povolenie neodstránite."</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje pre zariadenie <xliff:g id="DEVICE_NAME">%2$s</xliff:g> povolenie streamovať aplikácie a ďalšie systémové funkcie do zariadení v okolí"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje pre zariadenie <xliff:g id="DEVICE_NAME">%2$s</xliff:g> povolenie na prístup k fotkám, médiám a upozorneniam zariadenia <xliff:g id="DEVICE_TYPE">%3$s</xliff:g>"</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"Chcete povoliť zariadeniu &lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; streamovať aplikácie a funkcie systému zo zariadenia <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> do zariadenia &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"Aplikácia <xliff:g id="APP_NAME_0">%1$s</xliff:g> bude mať prístup k všetkému, čo sa zobrazuje alebo prehráva v zariadení <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> vrátane zvuku, fotiek, platobných údajov, hesiel a správ.&lt;br/&gt;&lt;br/&gt;Aplikácia <xliff:g id="APP_NAME_1">%1$s</xliff:g> bude môcť streamovať aplikácie a funkcie systému do zariadenia <xliff:g id="DEVICE_NAME">%3$s</xliff:g>, kým prístup k tomuto povoleniu neodstránite."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje pre zariadenie <xliff:g id="DEVICE_NAME">%2$s</xliff:g> povolenie streamovať aplikácie a ďalšie funkcie systému medzi zariadeniami"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"zariadenie"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Táto aplikácia bude môcť synchronizovať informácie, napríklad meno volajúceho, medzi telefónom a vybraným zariadením"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Povoliť"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Zmena výstupu médií"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotky a médiá"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Upozornenia"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"Aplikácie"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"Volanie a správa telefonických hovorov"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"Čítanie a zapisovanie do zoznamu telefonických hovorov"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"Posielanie a zobrazovanie správ SMS"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Vyhľadajte zariadenia v okolí, pripojte sa k nim a určite ich relatívnu polohu"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Čítajte všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• Čítajte všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky&lt;br/&gt;• Odosielajte upozornenia&lt;br/&gt;&lt;br/&gt;Schopnosť tejto aplikácie čítať a odosielať upozornenia môžete kedykoľvek spravovať v sekcii Nastavenia &gt; Upozornenia."</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streamovať aplikácie telefónu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Streaming aplikácii a ďalších systémových funkcií zo zariadenia"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Získajte prístup k dostupným zariadeniam a ovládajte, ktoré bude streamovať alebo prenášať zvuk či video z iných aplikácií"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefón"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"televízor"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"zariadenie"</string>
 </resources>

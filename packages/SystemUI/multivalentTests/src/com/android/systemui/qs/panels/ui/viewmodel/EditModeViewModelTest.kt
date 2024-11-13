@@ -26,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.ui.compose.toAnnotatedString
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
@@ -42,6 +43,7 @@ import com.android.systemui.qs.pipeline.data.repository.fakeMinimumTilesReposito
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.qsTileFactory
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tiles.impl.alarm.qsAlarmTileConfig
 import com.android.systemui.qs.tiles.impl.battery.qsBatterySaverTileConfig
 import com.android.systemui.qs.tiles.impl.flashlight.qsFlashlightTileConfig
@@ -54,8 +56,10 @@ import com.android.systemui.qs.tiles.viewmodel.qSTileConfigProvider
 import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -103,9 +107,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             appName2,
         )
 
-    private val underTest: EditModeViewModel by lazy {
-        kosmos.editModeViewModel
-    }
+    private val underTest: EditModeViewModel by lazy { kosmos.editModeViewModel }
 
     @Before
     fun setUp() {
@@ -190,7 +192,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                     .forEach {
                         val data = getEditTileData(it.tileSpec)
 
-                        assertThat(it.label).isEqualTo(data.label)
+                        assertThat(it.label).isEqualTo(data.label.toAnnotatedString(context))
                         assertThat(it.icon).isEqualTo(data.icon)
                         assertThat(it.appName).isNull()
                     }
@@ -224,15 +226,19 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
                 // service1
                 val model1 = tiles!!.first { it.tileSpec == TileSpec.create(component1) }
-                assertThat(model1.label).isEqualTo(Text.Loaded(tileService1))
-                assertThat(model1.appName).isEqualTo(Text.Loaded(appName1))
+                assertThat(model1.label)
+                    .isEqualTo(Text.Loaded(tileService1).toAnnotatedString(context))
+                assertThat(model1.appName)
+                    .isEqualTo(Text.Loaded(appName1).toAnnotatedString(context))
                 assertThat(model1.icon)
                     .isEqualTo(Icon.Loaded(drawable1, ContentDescription.Loaded(tileService1)))
 
                 // service2
                 val model2 = tiles!!.first { it.tileSpec == TileSpec.create(component2) }
-                assertThat(model2.label).isEqualTo(Text.Loaded(tileService2))
-                assertThat(model2.appName).isEqualTo(Text.Loaded(appName2))
+                assertThat(model2.label)
+                    .isEqualTo(Text.Loaded(tileService2).toAnnotatedString(context))
+                assertThat(model2.appName)
+                    .isEqualTo(Text.Loaded(appName2).toAnnotatedString(context))
                 assertThat(model2.icon)
                     .isEqualTo(Icon.Loaded(drawable2, ContentDescription.Loaded(tileService2)))
             }
@@ -461,31 +467,87 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
-    fun tileNotAvailable_notShowing() = with(kosmos) {
-        testScope.runTest {
-            val unavailableTile = "work"
-            qsTileFactory = FakeQSFactory { spec ->
-                FakeQSTile(userTracker.userId, spec != unavailableTile)
-            }
-            tileAvailabilityInteractorsMap = mapOf(
-                    unavailableTile to FakeTileAvailabilityInteractor(
-                            emptyMap<Int, Flow<Boolean>>().withDefault { flowOf(false) }
+    fun tileNotAvailable_notShowing() =
+        with(kosmos) {
+            testScope.runTest {
+                val unavailableTile = "work"
+                qsTileFactory = FakeQSFactory { spec ->
+                    FakeQSTile(userTracker.userId, spec != unavailableTile)
+                }
+                tileAvailabilityInteractorsMap =
+                    mapOf(
+                        unavailableTile to
+                            FakeTileAvailabilityInteractor(
+                                emptyMap<Int, Flow<Boolean>>().withDefault { flowOf(false) }
+                            )
                     )
-            )
-            val tiles by collectLastValue(underTest.tiles)
-            val currentTiles =
+                val tiles by collectLastValue(underTest.tiles)
+                val currentTiles =
                     mutableListOf(
-                            TileSpec.create("flashlight"),
-                            TileSpec.create("airplane"),
-                            TileSpec.create("alarm"),
+                        TileSpec.create("flashlight"),
+                        TileSpec.create("airplane"),
+                        TileSpec.create("alarm"),
                     )
-            currentTilesInteractor.setTiles(currentTiles)
+                currentTilesInteractor.setTiles(currentTiles)
 
-            underTest.startEditing()
+                underTest.startEditing()
 
-            assertThat(tiles!!.none { it.tileSpec == TileSpec.create(unavailableTile) }).isTrue()
+                assertThat(tiles!!.none { it.tileSpec == TileSpec.create(unavailableTile) })
+                    .isTrue()
+            }
         }
-    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun currentTiles_moveTileDown() =
+        with(kosmos) {
+            testScope.runTest {
+                val tiles by collectLastValue(underTest.tiles)
+                val currentTiles =
+                    mutableListOf(
+                        TileSpec.create("flashlight"),
+                        TileSpec.create("airplane"),
+                        TileSpec.create("internet"),
+                        TileSpec.create("alarm"),
+                    )
+                currentTilesInteractor.setTiles(currentTiles)
+                underTest.startEditing()
+                runCurrent()
+
+                // Move flashlight tile to index 3
+                underTest.addTile(TileSpec.create("flashlight"), 3)
+
+                assertThat(tiles!!.filter { it.isCurrent }.map { it.tileSpec.spec })
+                    .containsExactly("airplane", "internet", "alarm", "flashlight")
+                    .inOrder()
+            }
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun currentTiles_moveTileUp() =
+        with(kosmos) {
+            testScope.runTest {
+                val tiles by collectLastValue(underTest.tiles)
+                val currentTiles =
+                    mutableListOf(
+                        TileSpec.create("flashlight"),
+                        TileSpec.create("airplane"),
+                        TileSpec.create("internet"),
+                        TileSpec.create("alarm"),
+                    )
+                currentTilesInteractor.setTiles(currentTiles)
+                underTest.startEditing()
+                runCurrent()
+
+                // Move alarm tile to index 0
+                underTest.addTile(TileSpec.create("alarm"), 0)
+
+                assertThat(tiles!!.filter { it.isCurrent }.map { it.tileSpec.spec })
+                    .containsExactly("alarm", "flashlight", "airplane", "internet")
+                    .inOrder()
+            }
+        }
 
     companion object {
         private val drawable1 = TestStubDrawable("drawable1")
@@ -503,7 +565,8 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 tileSpec = this,
                 icon = Icon.Resource(R.drawable.star_on, ContentDescription.Loaded(spec)),
                 label = Text.Loaded(spec),
-                appName = null
+                appName = null,
+                category = TileCategory.UNKNOWN,
             )
         }
 
@@ -514,6 +577,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                     Icon.Resource(uiConfig.iconRes, ContentDescription.Resource(uiConfig.labelRes)),
                 label = Text.Resource(uiConfig.labelRes),
                 appName = null,
+                category = category,
             )
         }
 

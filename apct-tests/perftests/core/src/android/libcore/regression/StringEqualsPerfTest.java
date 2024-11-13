@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class StringEqualsPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private final String mLong1 =
             "Ahead-of-time compilation is possible as the compiler may just convert an instruction"
@@ -226,7 +226,7 @@ public class StringEqualsPerfTest {
     // Benchmark cases of String.equals(null)
     @Test
     public void timeEqualsNull() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mMediumStrings.length; i++) {
                 mMediumStrings[i][0].equals(null);
@@ -237,7 +237,7 @@ public class StringEqualsPerfTest {
     // Benchmark cases with very short (<5 character) Strings
     @Test
     public void timeEqualsShort() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mShortStrings.length; i++) {
                 mShortStrings[i][0].equals(mShortStrings[i][1]);
@@ -248,7 +248,7 @@ public class StringEqualsPerfTest {
     // Benchmark cases with medium length (10-15 character) Strings
     @Test
     public void timeEqualsMedium() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mMediumStrings.length; i++) {
                 mMediumStrings[i][0].equals(mMediumStrings[i][1]);
@@ -259,7 +259,7 @@ public class StringEqualsPerfTest {
     // Benchmark cases with long (>100 character) Strings
     @Test
     public void timeEqualsLong() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mLongStrings.length; i++) {
                 mLongStrings[i][0].equals(mLongStrings[i][1]);
@@ -270,7 +270,7 @@ public class StringEqualsPerfTest {
     // Benchmark cases with very long (>1000 character) Strings
     @Test
     public void timeEqualsVeryLong() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mVeryLongStrings.length; i++) {
                 mVeryLongStrings[i][0].equals(mVeryLongStrings[i][1]);
@@ -281,7 +281,7 @@ public class StringEqualsPerfTest {
     // Benchmark cases with non-word aligned Strings
     @Test
     public void timeEqualsNonWordAligned() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mNonalignedStrings.length; i++) {
                 mNonalignedStrings[i][0].equals(mNonalignedStrings[i][1]);
@@ -292,7 +292,7 @@ public class StringEqualsPerfTest {
     // Benchmark cases with slight differences in the endings
     @Test
     public void timeEqualsEnd() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mEndStrings.length; i++) {
                 mEndStrings[i][0].equals(mEndStrings[i][1]);
@@ -303,7 +303,7 @@ public class StringEqualsPerfTest {
     // Benchmark cases of comparing a string to a non-string object
     @Test
     public void timeEqualsNonString() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < mMediumStrings.length; i++) {
                 mMediumStrings[i][0].equals(mObjects[i]);

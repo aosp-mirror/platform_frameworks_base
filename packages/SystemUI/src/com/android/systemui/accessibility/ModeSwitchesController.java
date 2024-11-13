@@ -25,6 +25,7 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.view.Display;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 
@@ -47,8 +48,10 @@ public class ModeSwitchesController implements ClickListener {
     private ClickListener mClickListenerDelegate;
 
     @Inject
-    public ModeSwitchesController(Context context, DisplayManager displayManager) {
-        mSwitchSupplier = new SwitchSupplier(context, displayManager, this::onClick);
+    public ModeSwitchesController(Context context, DisplayManager displayManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
+        mSwitchSupplier = new SwitchSupplier(context, displayManager, this::onClick,
+                viewCaptureAwareWindowManager);
     }
 
     @VisibleForTesting
@@ -115,6 +118,7 @@ public class ModeSwitchesController implements ClickListener {
 
         private final Context mContext;
         private final ClickListener mClickListener;
+        private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
         /**
          * Supplies the switch for the given display.
@@ -124,17 +128,20 @@ public class ModeSwitchesController implements ClickListener {
          * @param clickListener The callback that will run when the switch is clicked
          */
         SwitchSupplier(Context context, DisplayManager displayManager,
-                ClickListener clickListener) {
+                ClickListener clickListener,
+                ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
             super(displayManager);
             mContext = context;
             mClickListener = clickListener;
+            mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         }
 
         @Override
         protected MagnificationModeSwitch createInstance(Display display) {
             final Context uiContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
-            return new MagnificationModeSwitch(uiContext, mClickListener);
+            return new MagnificationModeSwitch(uiContext, mClickListener,
+                    mViewCaptureAwareWindowManager);
         }
     }
 }

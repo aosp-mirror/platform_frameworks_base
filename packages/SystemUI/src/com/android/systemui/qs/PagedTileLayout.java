@@ -14,7 +14,10 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
@@ -103,8 +106,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
     private int mLastMaxHeight = -1;
 
-    @Override
-    public void setPageMargin(int marginPixels) {
+    public void setPageMargin(int marginPixelsStart, int marginPixelsEnd) {
         // Using page margins creates some rounding issues that interfere with the correct position
         // in the onPageChangedListener and therefore present bad positions to the PageIndicator.
         // Instead, we use negative margins in the container and positive padding in the pages,
@@ -113,14 +115,19 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         // QSContainerImpl resources are set onAttachedView, so this view will always have the right
         // values when attached.
         MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
-        lp.setMarginStart(-marginPixels);
-        lp.setMarginEnd(-marginPixels);
+        lp.setMarginStart(-marginPixelsStart);
+        lp.setMarginEnd(-marginPixelsEnd);
         setLayoutParams(lp);
 
         int nPages = mPages.size();
         for (int i = 0; i < nPages; i++) {
             View v = mPages.get(i);
-            v.setPadding(marginPixels, v.getPaddingTop(), marginPixels, v.getPaddingBottom());
+            v.setPadding(
+                    marginPixelsStart,
+                    v.getPaddingTop(),
+                    marginPixelsEnd,
+                    v.getPaddingBottom()
+            );
         }
     }
 
@@ -184,6 +191,34 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             setAdapter(mAdapter);
             setCurrentItem(page, false);
         }
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0
+                && event.getAction() == MotionEvent.ACTION_SCROLL) {
+            // Handle mouse (or ext. device) by swiping the page depending on the scroll
+            final float vscroll;
+            final float hscroll;
+            if ((event.getMetaState() & KeyEvent.META_SHIFT_ON) != 0) {
+                vscroll = 0;
+                hscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+            } else {
+                vscroll = -event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                hscroll = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
+            }
+            if (hscroll != 0 || vscroll != 0) {
+                boolean isForwardScroll =
+                        isLayoutRtl() ? (hscroll < 0 || vscroll < 0) : (hscroll > 0 || vscroll > 0);
+                int swipeDirection = isForwardScroll ? RIGHT : LEFT;
+                if (mScroller.isFinished()) {
+                    scrollByX(getDeltaXForPageScrolling(swipeDirection),
+                            SINGLE_PAGE_SCROLL_DURATION_MILLIS);
+                }
+                return true;
+            }
+        }
+        return super.onGenericMotionEvent(event);
     }
 
     @Override

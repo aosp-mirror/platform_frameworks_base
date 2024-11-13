@@ -189,10 +189,8 @@ public final class Person implements Parcelable {
      */
     public void visitUris(@NonNull Consumer<Uri> visitor) {
         visitor.accept(getIconUri());
-        if (Flags.visitPersonUri()) {
-            if (mUri != null && !mUri.isEmpty()) {
-                visitor.accept(Uri.parse(mUri));
-            }
+        if (mUri != null && !mUri.isEmpty()) {
+            visitor.accept(Uri.parse(mUri));
         }
     }
 

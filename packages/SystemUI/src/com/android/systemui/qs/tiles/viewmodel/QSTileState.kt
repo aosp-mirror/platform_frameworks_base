@@ -54,18 +54,21 @@ data class QSTileState(
             resources: Resources,
             theme: Theme,
             config: QSTileUIConfig,
-            build: Builder.() -> Unit
+            builder: Builder.() -> Unit
         ): QSTileState {
             val iconDrawable = resources.getDrawable(config.iconRes, theme)
             return build(
                 { Icon.Loaded(iconDrawable, null) },
                 resources.getString(config.labelRes),
-                build,
+                builder,
             )
         }
 
-        fun build(icon: () -> Icon?, label: CharSequence, build: Builder.() -> Unit): QSTileState =
-            Builder(icon, label).apply(build).build()
+        fun build(
+            icon: () -> Icon?,
+            label: CharSequence,
+            builder: Builder.() -> Unit
+        ): QSTileState = Builder(icon, label).apply { builder() }.build()
     }
 
     enum class ActivationState(val legacyState: Int) {
@@ -102,12 +105,15 @@ data class QSTileState(
 
     enum class UserAction {
         CLICK,
+        TOGGLE_CLICK,
         LONG_CLICK,
     }
 
     sealed interface SideViewIcon {
         data class Custom(val icon: Icon) : SideViewIcon
+
         data object Chevron : SideViewIcon
+
         data object None : SideViewIcon
     }
 

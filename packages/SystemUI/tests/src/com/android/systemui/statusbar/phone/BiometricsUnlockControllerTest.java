@@ -495,18 +495,18 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void biometricUnlockStateResetOnTransitionFromGone() {
-        mBiometricUnlockController.consumeTransitionStepOnStartedKeyguardState(
+    public void biometricUnlockStateResetOnStartedTransition() {
+        mBiometricUnlockController.consumeFromGoneTransitions(
                 new TransitionStep(
-                        KeyguardState.AOD,
                         KeyguardState.GONE,
+                        KeyguardState.AOD,
                         .1f /* value */,
-                        TransitionState.STARTED
+                        TransitionState.RUNNING
                 )
         );
         verify(mBiometricUnlockInteractor, never()).setBiometricUnlockState(anyInt(), any());
 
-        mBiometricUnlockController.consumeTransitionStepOnStartedKeyguardState(
+        mBiometricUnlockController.consumeFromGoneTransitions(
                 new TransitionStep(
                         KeyguardState.GONE,
                         KeyguardState.AOD,

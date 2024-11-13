@@ -17,16 +17,23 @@
 package com.android.server.notification;
 
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
+import static android.app.NotificationChannel.NEWS_ID;
 import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
+import static android.app.NotificationChannel.PROMOTIONS_ID;
+import static android.app.NotificationChannel.RECS_ID;
+import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
+import static android.app.NotificationChannel.SYSTEM_RESERVED_IDS;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.service.notification.Flags.notificationClassification;
+
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
@@ -34,6 +41,7 @@ import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_P
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -155,6 +163,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_SENT_VALID_MESSAGE = "sent_valid_msg";
     private static final String ATT_USER_DEMOTED_INVALID_MSG_APP = "user_demote_msg_app";
     private static final String ATT_SENT_VALID_BUBBLE = "sent_valid_bubble";
+    private static final String ATT_PROMOTE_NOTIFS = "promote";
 
     private static final String ATT_CREATION_TIME = "creation_time";
 
@@ -344,6 +353,10 @@ public class PreferencesHelper implements RankingConfig {
             r.userDemotedMsgApp = parser.getAttributeBoolean(
                     null, ATT_USER_DEMOTED_INVALID_MSG_APP, false);
             r.hasSentValidBubble = parser.getAttributeBoolean(null, ATT_SENT_VALID_BUBBLE, false);
+            if (android.app.Flags.uiRichOngoing()) {
+                r.canHavePromotedNotifs =
+                        parser.getAttributeBoolean(null, ATT_PROMOTE_NOTIFS, false);
+            }
 
             final int innerDepth = parser.getDepth();
             int type;
@@ -434,6 +447,12 @@ public class PreferencesHelper implements RankingConfig {
                 channel.setImportanceLockedByCriticalDeviceFunction(
                         r.defaultAppLockedImportance || r.fixedImportance);
 
+                if (notificationClassification()) {
+                    if (SYSTEM_RESERVED_IDS.contains(id) && channel.isDeleted() ) {
+                        channel.setDeleted(false);
+                    }
+                }
+
                 if (isShortcutOk(channel) && isDeletionOk(channel)) {
                     r.channels.put(id, channel);
                 }
@@ -516,6 +535,10 @@ public class PreferencesHelper implements RankingConfig {
                 createDefaultChannelIfNeededLocked(r);
             } catch (PackageManager.NameNotFoundException e) {
                 Slog.e(TAG, "createDefaultChannelIfNeededLocked - Exception: " + e);
+            }
+
+            if (notificationClassification()) {
+                addReservedChannelsLocked(r);
             }
 
             if (r.uid == UNKNOWN_UID) {
@@ -607,6 +630,40 @@ public class PreferencesHelper implements RankingConfig {
         return true;
     }
 
+    private void addReservedChannelsLocked(PackagePreferences p) {
+        if (!p.channels.containsKey(NotificationChannel.PROMOTIONS_ID)) {
+            NotificationChannel channel = new NotificationChannel(
+                    NotificationChannel.PROMOTIONS_ID,
+                    mContext.getString(R.string.promotional_notification_channel_label),
+                    IMPORTANCE_LOW);
+            p.channels.put(channel.getId(), channel);
+        }
+
+        if (!p.channels.containsKey(NotificationChannel.RECS_ID)) {
+            NotificationChannel channel = new NotificationChannel(
+                    NotificationChannel.RECS_ID,
+                    mContext.getString(R.string.recs_notification_channel_label),
+                    IMPORTANCE_LOW);
+            p.channels.put(channel.getId(), channel);
+        }
+
+        if (!p.channels.containsKey(NotificationChannel.NEWS_ID)) {
+            NotificationChannel channel = new NotificationChannel(
+                    NotificationChannel.NEWS_ID,
+                    mContext.getString(R.string.news_notification_channel_label),
+                    IMPORTANCE_LOW);
+            p.channels.put(channel.getId(), channel);
+        }
+
+        if (!p.channels.containsKey(NotificationChannel.SOCIAL_MEDIA_ID)) {
+            NotificationChannel channel = new NotificationChannel(
+                    NotificationChannel.SOCIAL_MEDIA_ID,
+                    mContext.getString(R.string.social_notification_channel_label),
+                    IMPORTANCE_LOW);
+            p.channels.put(channel.getId(), channel);
+        }
+    }
+
     public void writeXml(TypedXmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, TAG_RANKING);
         out.attributeInt(null, ATT_VERSION, XML_VERSION);
@@ -688,6 +745,11 @@ public class PreferencesHelper implements RankingConfig {
         out.attributeBoolean(null, ATT_USER_DEMOTED_INVALID_MSG_APP,
                 r.userDemotedMsgApp);
         out.attributeBoolean(null, ATT_SENT_VALID_BUBBLE, r.hasSentValidBubble);
+        if (android.app.Flags.uiRichOngoing()) {
+            if (r.canHavePromotedNotifs) {
+                out.attributeBoolean(null, ATT_PROMOTE_NOTIFS, r.canHavePromotedNotifs);
+            }
+        }
 
         if (Flags.persistIncompleteRestoreData() && r.uid == UNKNOWN_UID) {
             out.attributeLong(null, ATT_CREATION_TIME, r.creationTime);
@@ -786,6 +848,28 @@ public class PreferencesHelper implements RankingConfig {
         if (changed) {
             updateConfig();
         }
+    }
+
+    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    public boolean canBePromoted(String packageName, int uid) {
+        synchronized (mLock) {
+            return getOrCreatePackagePreferencesLocked(packageName, uid).canHavePromotedNotifs;
+        }
+    }
+
+    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    public boolean setCanBePromoted(String packageName, int uid, boolean promote) {
+        boolean changed = false;
+        synchronized (mLock) {
+            PackagePreferences pkgPrefs = getOrCreatePackagePreferencesLocked(packageName, uid);
+            if (pkgPrefs.canHavePromotedNotifs != promote) {
+                pkgPrefs.canHavePromotedNotifs = promote;
+                changed = true;
+            }
+        }
+        // no need to send a ranking update because we need to update the flag value on all pending
+        // and posted notifs and NMS will take care of that
+        return changed;
     }
 
     public boolean isInInvalidMsgState(String packageName, int uid) {
@@ -978,6 +1062,11 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channel.getId())) {
                 throw new IllegalArgumentException("Reserved id");
+            }
+            // Only the user can update bundle channel settings
+            if (notificationClassification() && !fromSystemOrSystemUi
+                    && SYSTEM_RESERVED_IDS.contains(channel.getId())) {
+                return false;
             }
             NotificationChannel existing = r.channels.get(channel.getId());
             if (existing != null && fromTargetApp) {
@@ -1543,7 +1632,11 @@ public class PreferencesHelper implements RankingConfig {
                 boolean includeChannel = (includeDeleted || !nc.isDeleted())
                         && (activeChannelFilter == null
                                 || (includeBlocked && nc.getImportance() == IMPORTANCE_NONE)
-                                || activeChannelFilter.contains(nc.getId()));
+                                || activeChannelFilter.contains(nc.getId()))
+                        && !PROMOTIONS_ID.equals(nc.getId())
+                        && !NEWS_ID.equals(nc.getId())
+                        && !SOCIAL_MEDIA_ID.equals(nc.getId())
+                        && !RECS_ID.equals(nc.getId());
                 if (includeChannel) {
                     if (nc.getGroup() != null) {
                         if (r.groups.get(nc.getGroup()) != null) {
@@ -1804,7 +1897,7 @@ public class PreferencesHelper implements RankingConfig {
     public boolean onlyHasDefaultChannel(String pkg, int uid) {
         synchronized (mLock) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
-            if (r.channels.size() == 1
+            if (r.channels.size() == (notificationClassification() ? 5 : 1)
                     && r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
                 return true;
             }
@@ -1930,8 +2023,8 @@ public class PreferencesHelper implements RankingConfig {
                         (areChannelsBypassingDnd
                                 ? NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND : 0),
                         policy.priorityConversationSenders),
-                fromSystemOrSystemUi ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
-                        : ZenModeConfig.UPDATE_ORIGIN_APP,
+                fromSystemOrSystemUi ? ZenModeConfig.ORIGIN_SYSTEM
+                        : ZenModeConfig.ORIGIN_APP,
                 callingUid);
     }
 
@@ -2119,6 +2212,10 @@ public class PreferencesHelper implements RankingConfig {
                 if (r.fixedImportance != DEFAULT_APP_LOCKED_IMPORTANCE) {
                     pw.print(" fixedImportance=");
                     pw.print(r.fixedImportance);
+                }
+                if (android.app.Flags.uiRichOngoing() && r.canHavePromotedNotifs) {
+                    pw.print(" promoted=");
+                    pw.print(r.canHavePromotedNotifs);
                 }
                 pw.println();
                 for (NotificationChannel channel : r.channels.values()) {
@@ -2617,6 +2714,7 @@ public class PreferencesHelper implements RankingConfig {
                                 context.getResources().getString(
                                         R.string.default_notification_channel_label));
                     }
+                    // TODO (b/346396459): Localize all reserved channels
                 }
             }
         }
@@ -2966,6 +3064,9 @@ public class PreferencesHelper implements RankingConfig {
 
         boolean migrateToPm = false;
         long creationTime;
+
+        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+        boolean canHavePromotedNotifs = false;
 
         @UserIdInt int userId;
 

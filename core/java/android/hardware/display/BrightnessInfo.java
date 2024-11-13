@@ -60,7 +60,8 @@ public final class BrightnessInfo implements Parcelable {
     @IntDef(prefix = {"BRIGHTNESS_MAX_REASON_"}, value = {
             BRIGHTNESS_MAX_REASON_NONE,
             BRIGHTNESS_MAX_REASON_THERMAL,
-            BRIGHTNESS_MAX_REASON_POWER_IC
+            BRIGHTNESS_MAX_REASON_POWER_IC,
+            BRIGHTNESS_MAX_REASON_WEAR_BEDTIME_MODE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BrightnessMaxReason {}
@@ -157,6 +158,8 @@ public final class BrightnessInfo implements Parcelable {
                 return "thermal";
             case BRIGHTNESS_MAX_REASON_POWER_IC:
                 return "power IC";
+            case BRIGHTNESS_MAX_REASON_WEAR_BEDTIME_MODE:
+                return "wear bedtime";
         }
         return "invalid";
     }

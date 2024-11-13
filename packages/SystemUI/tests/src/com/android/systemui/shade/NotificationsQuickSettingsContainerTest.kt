@@ -16,11 +16,11 @@
 
 package com.android.systemui.shade
 
-import android.testing.AndroidTestingRunner
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.QSFragmentLegacy
@@ -34,7 +34,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationsQuickSettingsContainerTest : SysuiTestCase() {
 
     @Mock private lateinit var qsFrame: View

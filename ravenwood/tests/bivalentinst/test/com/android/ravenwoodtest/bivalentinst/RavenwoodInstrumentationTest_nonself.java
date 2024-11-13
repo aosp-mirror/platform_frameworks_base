@@ -19,7 +19,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Instrumentation;
 import android.content.Context;
-import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodConfig;
 import android.platform.test.ravenwood.RavenwoodConfig.Config;
 
@@ -34,7 +33,6 @@ import org.junit.runner.RunWith;
  * Tests for the case where the instrumentation target is _not_ the test APK itself.
  */
 @RunWith(AndroidJUnit4.class)
-@DisabledOnRavenwood(reason="AOSP is missing resources support")
 public class RavenwoodInstrumentationTest_nonself {
     private static final String TARGET_PACKAGE_NAME =
             "com.android.ravenwood.bivalentinst_target_app";

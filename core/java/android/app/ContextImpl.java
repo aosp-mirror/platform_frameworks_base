@@ -1160,7 +1160,7 @@ class ContextImpl extends Context {
         }
         mMainThread.getInstrumentation().execStartActivity(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intent, -1, options);
+                (Activity) null, intent, -1, applyLaunchDisplayIfNeeded(options));
     }
 
     /** @hide */
@@ -1170,8 +1170,8 @@ class ContextImpl extends Context {
             ActivityTaskManager.getService().startActivityAsUser(
                     mMainThread.getApplicationThread(), getOpPackageName(), getAttributionTag(),
                     intent, intent.resolveTypeIfNeeded(getContentResolver()),
-                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options,
-                    user.getIdentifier());
+                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
+                    applyLaunchDisplayIfNeeded(options), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1194,7 +1194,8 @@ class ContextImpl extends Context {
         }
         return mMainThread.getInstrumentation().execStartActivitiesAsUser(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intents, options, userHandle.getIdentifier());
+                (Activity) null, intents, applyLaunchDisplayIfNeeded(options),
+                userHandle.getIdentifier());
     }
 
     @Override
@@ -1208,7 +1209,26 @@ class ContextImpl extends Context {
         }
         mMainThread.getInstrumentation().execStartActivities(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intents, options);
+                (Activity) null, intents, applyLaunchDisplayIfNeeded(options));
+    }
+
+    private Bundle applyLaunchDisplayIfNeeded(@Nullable Bundle options) {
+        if (!isAssociatedWithDisplay()) {
+            // return if this Context has no associated display.
+            return options;
+        }
+
+        final ActivityOptions activityOptions;
+        if (options != null) {
+            activityOptions = ActivityOptions.fromBundle(options);
+            if (ActivityOptions.hasLaunchTargetContainer(activityOptions)) {
+                // return if the options already has launching target.
+                return options;
+            }
+        } else {
+            activityOptions = ActivityOptions.makeBasic();
+        }
+        return activityOptions.setLaunchDisplayId(getAssociatedDisplayId()).toBundle();
     }
 
     @Override
@@ -1901,10 +1921,19 @@ class ContextImpl extends Context {
             }
         }
         try {
-            final Intent intent = ActivityManager.getService().registerReceiverWithFeature(
-                    mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
-                    AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission, userId,
-                    flags);
+            final Intent intent;
+            if (receiver == null && BroadcastStickyCache.useCache(filter)) {
+                intent = BroadcastStickyCache.getIntentUnchecked(filter);
+            } else {
+                intent = ActivityManager.getService().registerReceiverWithFeature(
+                        mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
+                        AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission,
+                        userId,
+                        flags);
+                if (receiver == null) {
+                    BroadcastStickyCache.add(filter, intent);
+                }
+            }
             if (intent != null) {
                 intent.setExtrasClassLoader(getClassLoader());
                 // TODO: determine at registration time if caller is
@@ -2326,19 +2355,26 @@ class ContextImpl extends Context {
                 && PermissionManager.DEVICE_AWARE_PERMISSIONS.contains(permission)) {
             VirtualDeviceManager virtualDeviceManager =
                     getSystemService(VirtualDeviceManager.class);
-            VirtualDevice virtualDevice = virtualDeviceManager.getVirtualDevice(deviceId);
-            if (virtualDevice != null) {
-                if ((Objects.equals(permission, Manifest.permission.RECORD_AUDIO)
-                                && !virtualDevice.hasCustomAudioInputSupport())
-                        || (Objects.equals(permission, Manifest.permission.CAMERA)
-                                && !virtualDevice.hasCustomCameraSupport())) {
-                    deviceId = Context.DEVICE_ID_DEFAULT;
-                }
-            } else {
+            if (virtualDeviceManager == null) {
                 Slog.e(
                         TAG,
-                        "virtualDevice is not found when device id is not default. deviceId = "
+                        "VDM is not enabled when device id is not default. deviceId = "
                                 + deviceId);
+            } else {
+                VirtualDevice virtualDevice = virtualDeviceManager.getVirtualDevice(deviceId);
+                if (virtualDevice != null) {
+                    if ((Objects.equals(permission, Manifest.permission.RECORD_AUDIO)
+                                    && !virtualDevice.hasCustomAudioInputSupport())
+                            || (Objects.equals(permission, Manifest.permission.CAMERA)
+                                    && !virtualDevice.hasCustomCameraSupport())) {
+                        deviceId = Context.DEVICE_ID_DEFAULT;
+                    }
+                } else {
+                    Slog.e(
+                            TAG,
+                            "virtualDevice is not found when device id is not default. deviceId = "
+                                    + deviceId);
+                }
             }
         }
 
@@ -3192,6 +3228,11 @@ class ContextImpl extends Context {
     public void updateDeviceId(int updatedDeviceId) {
         if (updatedDeviceId != Context.DEVICE_ID_DEFAULT) {
             VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
+            if (vdm == null) {
+                throw new IllegalArgumentException(
+                        "VDM is not enabled when updating to non-default device id: "
+                                + updatedDeviceId);
+            }
             if (!vdm.isValidVirtualDeviceId(updatedDeviceId)) {
                 throw new IllegalArgumentException(
                         "Not a valid ID of the default device or any virtual device: "

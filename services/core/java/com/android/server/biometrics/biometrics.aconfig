@@ -14,3 +14,23 @@ flag {
   description: "This flag controls whether virtual HAL is used for testing instead of TestHal "
   bug: "294254230"
 }
+
+flag {
+  name: "notify_fingerprints_loe"
+  namespace: "biometrics_framework"
+  description: "This flag controls whether a notification should be sent to notify user when loss of enrollment happens"
+  bug: "351036558"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "set_ignore_speed_up"
+  namespace: "biometrics_framework"
+  description: "This flag controls whether setIgnoreDisplayTouches is called directly on session from FingerprintProvider"
+  bug: "359289274"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}

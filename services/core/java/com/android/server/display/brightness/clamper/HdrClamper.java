@@ -133,7 +133,7 @@ public class HdrClamper {
             // new token not null and hdr min % of the screen is set, subscribe.
             // e.g. for virtual display, HBM data will be missing and HdrListener
             // should not be registered
-            if (displayToken != null && mHdrListener.mHdrMinPixels >= 0) {
+            if (displayToken != null && mHdrListener.mHdrMinPixels >= 0 && hasBrightnessLimits())  {
                 mHdrListener.register(displayToken);
                 mRegisteredDisplayToken = displayToken;
             }
@@ -179,6 +179,10 @@ public class HdrClamper {
         pw.println("  mAutoBrightnessEnabled=" + mAutoBrightnessEnabled);
     }
 
+    private boolean hasBrightnessLimits() {
+        return mHdrBrightnessData != null && !mHdrBrightnessData.maxBrightnessLimits.isEmpty();
+    }
+
     private void reset() {
         if (mMaxBrightness == PowerManager.BRIGHTNESS_MAX
                 && mDesiredMaxBrightness == PowerManager.BRIGHTNESS_MAX && mTransitionRate == -1f
@@ -214,11 +218,11 @@ public class HdrClamper {
             mDesiredMaxBrightness = expectedMaxBrightness;
             long debounceTime;
             if (mDesiredMaxBrightness > mMaxBrightness) {
-                debounceTime = mHdrBrightnessData.mBrightnessIncreaseDebounceMillis;
-                mDesiredTransitionRate = mHdrBrightnessData.mScreenBrightnessRampIncrease;
+                debounceTime = mHdrBrightnessData.brightnessIncreaseDebounceMillis;
+                mDesiredTransitionRate = mHdrBrightnessData.screenBrightnessRampIncrease;
             } else {
-                debounceTime = mHdrBrightnessData.mBrightnessDecreaseDebounceMillis;
-                mDesiredTransitionRate = mHdrBrightnessData.mScreenBrightnessRampDecrease;
+                debounceTime = mHdrBrightnessData.brightnessDecreaseDebounceMillis;
+                mDesiredTransitionRate = mHdrBrightnessData.screenBrightnessRampDecrease;
             }
 
             mHandler.removeCallbacks(mDebouncer);
@@ -232,7 +236,7 @@ public class HdrClamper {
         float foundAmbientBoundary = Float.MAX_VALUE;
         float foundMaxBrightness = PowerManager.BRIGHTNESS_MAX;
         for (Map.Entry<Float, Float> brightnessPoint :
-                data.mMaxBrightnessLimits.entrySet()) {
+                data.maxBrightnessLimits.entrySet()) {
             float ambientBoundary = brightnessPoint.getKey();
             // find ambient lux upper boundary closest to current ambient lux
             if (ambientBoundary > ambientLux && ambientBoundary < foundAmbientBoundary) {

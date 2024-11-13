@@ -45,7 +45,7 @@ class CombinedVoteTest {
     }
 
     @Test
-    fun `delegates update to children`() {
+    fun delegatesUpdateToChildren() {
         val summary = createVotesSummary()
 
         combinedVote.updateSummary(summary)

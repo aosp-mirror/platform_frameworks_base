@@ -16,12 +16,13 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.app.tracing.FlowTracing.traceAsCounter
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +47,10 @@ constructor(
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) : BaseShadeInteractor {
+    init {
+        SceneContainerFlag.assertInLegacyMode()
+    }
+
     /**
      * The amount [0-1] that the shade has been opened. Uses stateIn to avoid redundant calculations
      * in downstream flows.
@@ -56,7 +61,7 @@ constructor(
                 keyguardRepository.statusBarState,
                 repository.legacyShadeExpansion,
                 repository.qsExpansion,
-                sharedNotificationContainerInteractor.isSplitShadeEnabled
+                sharedNotificationContainerInteractor.isSplitShadeEnabled,
             ) {
                 lockscreenShadeExpansion,
                 statusBarState,
@@ -75,6 +80,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .traceAsCounter("panel_expansion") { (it * 100f).toInt() }
             .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     override val qsExpansion: StateFlow<Float> = repository.qsExpansion
@@ -91,13 +97,13 @@ constructor(
         repository.legacyExpandedOrAwaitingInputTransfer.stateIn(
             scope,
             SharingStarted.Eagerly,
-            false
+            false,
         )
 
     override val isUserInteractingWithShade: Flow<Boolean> =
         combine(
             userInteractingFlow(repository.legacyShadeTracking, repository.legacyShadeExpansion),
-            repository.legacyLockscreenShadeTracking
+            repository.legacyLockscreenShadeTracking,
         ) { legacyShadeTracking, legacyLockscreenShadeTracking ->
             legacyShadeTracking || legacyLockscreenShadeTracking
         }
@@ -105,7 +111,17 @@ constructor(
     override val isUserInteractingWithQs: Flow<Boolean> =
         userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
 
-    override val shadeMode: StateFlow<ShadeMode> = repository.shadeMode
+    override fun expandNotificationShade(loggingReason: String) {
+        throw UnsupportedOperationException(
+            "expandNotificationShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun expandQuickSettingsShade(loggingReason: String) {
+        throw UnsupportedOperationException(
+            "expandQuickSettingsShade() is not supported in legacy shade"
+        )
+    }
 
     /**
      * Return a flow for whether a user is interacting with an expandable shade component using
@@ -114,7 +130,7 @@ constructor(
      */
     private fun userInteractingFlow(
         tracking: Flow<Boolean>,
-        expansion: StateFlow<Float>
+        expansion: StateFlow<Float>,
     ): Flow<Boolean> {
         return flow {
             // initial value is false

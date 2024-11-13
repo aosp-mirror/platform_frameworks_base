@@ -21,8 +21,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
 import com.android.systemui.testKosmos
@@ -66,11 +66,11 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val stackRounding by collectLastValue(underTest.shadeScrimRounding)
 
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
+            kosmos.shadeRepository.setShadeLayoutWide(false)
             assertThat(stackRounding)
                 .isEqualTo(ShadeScrimRounding(isTopRounded = true, isBottomRounded = false))
 
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            kosmos.shadeRepository.setShadeLayoutWide(true)
             assertThat(stackRounding)
                 .isEqualTo(ShadeScrimRounding(isTopRounded = true, isBottomRounded = true))
         }
@@ -84,5 +84,49 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
                     bottom = 99f,
                 )
             )
+        }
+
+    @Test
+    fun shouldCloseGuts_userInputOngoing_currentGestureInGuts() =
+        testScope.runTest {
+            val shouldCloseGuts by collectLastValue(underTest.shouldCloseGuts)
+
+            kosmos.sceneInteractor.onSceneContainerUserInputStarted()
+            underTest.setCurrentGestureInGuts(true)
+
+            assertThat(shouldCloseGuts).isFalse()
+        }
+
+    @Test
+    fun shouldCloseGuts_userInputOngoing_currentGestureNotInGuts() =
+        testScope.runTest {
+            val shouldCloseGuts by collectLastValue(underTest.shouldCloseGuts)
+
+            kosmos.sceneInteractor.onSceneContainerUserInputStarted()
+            underTest.setCurrentGestureInGuts(false)
+
+            assertThat(shouldCloseGuts).isTrue()
+        }
+
+    @Test
+    fun shouldCloseGuts_userInputNotOngoing_currentGestureInGuts() =
+        testScope.runTest {
+            val shouldCloseGuts by collectLastValue(underTest.shouldCloseGuts)
+
+            kosmos.sceneInteractor.onUserInputFinished()
+            underTest.setCurrentGestureInGuts(true)
+
+            assertThat(shouldCloseGuts).isFalse()
+        }
+
+    @Test
+    fun shouldCloseGuts_userInputNotOngoing_currentGestureNotInGuts() =
+        testScope.runTest {
+            val shouldCloseGuts by collectLastValue(underTest.shouldCloseGuts)
+
+            kosmos.sceneInteractor.onUserInputFinished()
+            underTest.setCurrentGestureInGuts(false)
+
+            assertThat(shouldCloseGuts).isFalse()
         }
 }

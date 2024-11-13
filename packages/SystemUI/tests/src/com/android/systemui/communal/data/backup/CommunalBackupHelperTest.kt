@@ -120,11 +120,26 @@ class CommunalBackupHelperTest : SysuiTestCase() {
 
     private fun setUpDatabase(): List<FakeWidgetMetadata> {
         return listOf(
-                FakeWidgetMetadata(11, "com.android.fakePackage1/fakeWidget1", 3),
-                FakeWidgetMetadata(12, "com.android.fakePackage2/fakeWidget2", 2),
-                FakeWidgetMetadata(13, "com.android.fakePackage3/fakeWidget3", 1),
+                FakeWidgetMetadata(
+                    widgetId = 11,
+                    componentName = "com.android.fakePackage1/fakeWidget1",
+                    rank = 0,
+                    userSerialNumber = 0,
+                ),
+                FakeWidgetMetadata(
+                    widgetId = 12,
+                    componentName = "com.android.fakePackage2/fakeWidget2",
+                    rank = 1,
+                    userSerialNumber = 0,
+                ),
+                FakeWidgetMetadata(
+                    widgetId = 13,
+                    componentName = "com.android.fakePackage3/fakeWidget3",
+                    rank = 2,
+                    userSerialNumber = 10,
+                ),
             )
-            .onEach { dao.addWidget(it.widgetId, it.componentName, it.rank) }
+            .onEach { dao.addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber) }
     }
 
     private fun getBackupDataInputStream(): BackupDataInputStream {

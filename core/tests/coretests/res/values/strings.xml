@@ -161,4 +161,7 @@
 
     <!-- Html description of the accessibility shortcut [CHAR LIMIT=NONE] -->
     <string name="accessibility_shortcut_html_description">Accessibility shortcut html description</string>
+
+    <!-- Attribution tag label [CHAR LIMIT=NONE] -->
+    <string name="testAttributionLabel">An attribution</string>
 </resources>

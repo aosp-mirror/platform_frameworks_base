@@ -30,6 +30,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -63,6 +64,12 @@ public class TaskInfo {
      * The identifier for this task.
      */
     public int taskId;
+
+    /**
+     * The current effective uid of the identity of this task.
+     * @hide
+     */
+    public int effectiveUid;
 
     /**
      * Whether or not this task has any running activities.
@@ -297,6 +304,31 @@ public class TaskInfo {
     public boolean isTopActivityTransparent;
 
     /**
+     * Whether the top activity has specified style floating.
+     * @hide
+     */
+    public boolean isTopActivityStyleFloating;
+
+    /**
+     * The last non-fullscreen bounds the task was launched in or resized to.
+     * @hide
+     */
+    public Rect lastNonFullscreenBounds;
+
+    /**
+     * The URI of the intent that generated the top-most activity opened using a URL.
+     * @hide
+     */
+    @Nullable
+    public Uri capturedLink;
+
+    /**
+     * The time of the last launch of the activity opened using the {@link #capturedLink}.
+     * @hide
+     */
+    public long capturedLinkTimestamp;
+
+    /**
      * Encapsulate specific App Compat information.
      * @hide
      */
@@ -429,6 +461,10 @@ public class TaskInfo {
                 && parentTaskId == that.parentTaskId
                 && Objects.equals(topActivity, that.topActivity)
                 && isTopActivityTransparent == that.isTopActivityTransparent
+                && isTopActivityStyleFloating == that.isTopActivityStyleFloating
+                && lastNonFullscreenBounds == this.lastNonFullscreenBounds
+                && Objects.equals(capturedLink, that.capturedLink)
+                && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
     }
 
@@ -461,6 +497,7 @@ public class TaskInfo {
     void readFromParcel(Parcel source) {
         userId = source.readInt();
         taskId = source.readInt();
+        effectiveUid = source.readInt();
         displayId = source.readInt();
         isRunning = source.readBoolean();
         baseIntent = source.readTypedObject(Intent.CREATOR);
@@ -498,6 +535,10 @@ public class TaskInfo {
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
         isTopActivityTransparent = source.readBoolean();
+        isTopActivityStyleFloating = source.readBoolean();
+        lastNonFullscreenBounds = source.readTypedObject(Rect.CREATOR);
+        capturedLink = source.readTypedObject(Uri.CREATOR);
+        capturedLinkTimestamp = source.readLong();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
     }
 
@@ -507,6 +548,7 @@ public class TaskInfo {
     void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(userId);
         dest.writeInt(taskId);
+        dest.writeInt(effectiveUid);
         dest.writeInt(displayId);
         dest.writeBoolean(isRunning);
         dest.writeTypedObject(baseIntent, 0);
@@ -545,12 +587,17 @@ public class TaskInfo {
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
         dest.writeBoolean(isTopActivityTransparent);
+        dest.writeBoolean(isTopActivityStyleFloating);
+        dest.writeTypedObject(lastNonFullscreenBounds, flags);
+        dest.writeTypedObject(capturedLink, flags);
+        dest.writeLong(capturedLinkTimestamp);
         dest.writeTypedObject(appCompatTaskInfo, flags);
     }
 
     @Override
     public String toString() {
         return "TaskInfo{userId=" + userId + " taskId=" + taskId
+                + " effectiveUid=" + effectiveUid
                 + " displayId=" + displayId
                 + " isRunning=" + isRunning
                 + " baseIntent=" + baseIntent + " baseActivity=" + baseActivity
@@ -582,6 +629,10 @@ public class TaskInfo {
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " isTopActivityTransparent=" + isTopActivityTransparent
+                + " isTopActivityStyleFloating=" + isTopActivityStyleFloating
+                + " lastNonFullscreenBounds=" + lastNonFullscreenBounds
+                + " capturedLink=" + capturedLink
+                + " capturedLinkTimestamp=" + capturedLinkTimestamp
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + "}";
     }

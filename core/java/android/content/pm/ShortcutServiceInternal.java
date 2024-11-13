@@ -91,6 +91,9 @@ public abstract class ShortcutServiceInternal {
     public abstract void addShortcutChangeCallback(
             @NonNull LauncherApps.ShortcutChangeCallback callback);
 
+    public abstract void removeShortcutChangeCallback(
+            @NonNull LauncherApps.ShortcutChangeCallback callback);
+
     public abstract int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);
 

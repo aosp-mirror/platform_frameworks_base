@@ -100,7 +100,7 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
 
     @Override
     public boolean removeNotification(@NonNull String key, boolean releaseImmediately,
-            boolean animate) {
+            boolean animate, @NonNull String reason) {
         throw new UnsupportedOperationException();
     }
 

@@ -20,7 +20,6 @@ import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_AC
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
-import static android.service.chooser.Flags.FLAG_ENABLE_SHARESHEET_METADATA_EXTRA;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -87,6 +86,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.XmlUtils;
+import com.android.modules.expresslog.Counter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -3768,7 +3768,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>The Intent will have the following extra value:</p>
      * <ul>
      *   <li><em>{@link android.content.Intent#EXTRA_PHONE_NUMBER}</em> -
-     *       the phone number originally intended to be dialed.</li>
+     *       the phone number dialed.</li>
      * </ul>
      * <p class="note">Starting in Android 15, this broadcast is no longer sent as an ordered
      * broadcast.  The <code>resultData</code> no longer has any effect and will not determine the
@@ -3800,6 +3800,14 @@ public class Intent implements Parcelable, Cloneable {
      * <p>You must hold the
      * {@link android.Manifest.permission#PROCESS_OUTGOING_CALLS}
      * permission to receive this Intent.</p>
+     *
+     * <p class="note">Starting in {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, this broadcast is
+     * no longer sent as an ordered broadcast, and does not allow activity launches.  This means
+     * that receivers may no longer change the phone number for the outgoing call, or cancel the
+     * outgoing call.  This functionality is only possible using the
+     * {@link android.telecom.CallRedirectionService} API.  Although background receivers are
+     * woken up to handle this intent, no guarantee is made as to the timeliness of the broadcast.
+     * </p>
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -5278,12 +5286,28 @@ public class Intent implements Parcelable, Cloneable {
      * through {@link #getData()}. User interaction is required to return the edited screenshot to
      * the calling activity.
      *
+     * <p>The response {@link Intent} may include additional data to "backlink" directly back to the
+     * application for which the screenshot was captured. If present, the application "backlink" can
+     * be retrieved via {@link #getClipData()}. The data is present only if the user accepted to
+     * include the link information with the screenshot. The data can contain one of the following:
+     * <ul>
+     *     <li>A deeplinking {@link Uri} or an {@link Intent} if the captured app integrates with
+     *         {@link android.app.assist.AssistContent}.</li>
+     *     <li>Otherwise, a main launcher intent that launches the screenshotted application to
+     *         its home screen.</li>
+     * </ul>
+     * The "backlink" to the screenshotted application will be set within {@link ClipData}, either
+     * as a {@link Uri} or an {@link Intent} if present.
+     *
      * <p>This intent action requires the permission
      * {@link android.Manifest.permission#LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE}.
      *
      * <p>Callers should query
      * {@link StatusBarManager#canLaunchCaptureContentActivityForNote(Activity)} before showing a UI
      * element that allows users to trigger this flow.
+     *
+     * <p>Callers should query for {@link #EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE} in the
+     * response {@link Intent} to check if the request was a success.
      */
     @RequiresPermission(Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -6068,7 +6092,6 @@ public class Intent implements Parcelable, Cloneable {
      * @see #CHOOSER_CONTENT_TYPE_ALBUM
      * @see #createChooser(Intent, CharSequence)
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_ALBUM_TEXT)
     public static final String EXTRA_CHOOSER_CONTENT_TYPE_HINT =
             "android.intent.extra.CHOOSER_CONTENT_TYPE_HINT";
 
@@ -6085,7 +6108,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #EXTRA_CHOOSER_CONTENT_TYPE_HINT
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_ALBUM_TEXT)
     public static final int CHOOSER_CONTENT_TYPE_ALBUM = 1;
 
     /**
@@ -6254,7 +6276,6 @@ public class Intent implements Parcelable, Cloneable {
      * <p>e.g. When sharing a photo, metadata could inform the user that location data is included
      * in the photo they are sharing.</p>
      */
-    @FlaggedApi(FLAG_ENABLE_SHARESHEET_METADATA_EXTRA)
     public static final String EXTRA_METADATA_TEXT = "android.intent.extra.METADATA_TEXT";
 
     /**
@@ -7473,7 +7494,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This flag is only used for split-screen multi-window mode. The new activity will be displayed
-     * adjacent to the one launching it. This can only be used in conjunction with
+     * adjacent to the one launching it if possible. This can only be used in conjunction with
      * {@link #FLAG_ACTIVITY_NEW_TASK}. Also, setting {@link #FLAG_ACTIVITY_MULTIPLE_TASK} is
      * required if you want a new instance of an existing activity to be created.
      */
@@ -12785,6 +12806,8 @@ public class Intent implements Parcelable, Cloneable {
                             new ClipData.Item(text, htmlText, null, stream));
                     setClipData(clipData);
                     if (stream != null) {
+                        logCounterIfFlagsMissing(FLAG_GRANT_READ_URI_PERMISSION,
+                                "intents.value_explicit_uri_grant_for_send_action");
                         addFlags(FLAG_GRANT_READ_URI_PERMISSION);
                     }
                     return true;
@@ -12826,6 +12849,8 @@ public class Intent implements Parcelable, Cloneable {
 
                     setClipData(clipData);
                     if (streams != null) {
+                        logCounterIfFlagsMissing(FLAG_GRANT_READ_URI_PERMISSION,
+                                "intents.value_explicit_uri_grant_for_send_multiple_action");
                         addFlags(FLAG_GRANT_READ_URI_PERMISSION);
                     }
                     return true;
@@ -12845,12 +12870,22 @@ public class Intent implements Parcelable, Cloneable {
                 putExtra(MediaStore.EXTRA_OUTPUT, output);
 
                 setClipData(ClipData.newRawUri("", output));
+
+                logCounterIfFlagsMissing(
+                        FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_READ_URI_PERMISSION,
+                        "intents.value_explicit_uri_grant_for_image_capture_action");
                 addFlags(FLAG_GRANT_WRITE_URI_PERMISSION|FLAG_GRANT_READ_URI_PERMISSION);
                 return true;
             }
         }
 
         return false;
+    }
+
+    private void logCounterIfFlagsMissing(int requiredFlags, String metricId) {
+        if ((getFlags() & requiredFlags) != requiredFlags) {
+            Counter.logIncrement(metricId);
+        }
     }
 
     @android.ravenwood.annotation.RavenwoodThrow

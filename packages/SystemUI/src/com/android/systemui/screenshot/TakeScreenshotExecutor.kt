@@ -74,7 +74,7 @@ interface ScreenshotHandler {
 class TakeScreenshotExecutorImpl
 @Inject
 constructor(
-    private val screenshotControllerFactory: ScreenshotController.Factory,
+    private val interactiveScreenshotHandlerFactory: InteractiveScreenshotHandler.Factory,
     displayRepository: DisplayRepository,
     @Application private val mainScope: CoroutineScope,
     private val screenshotRequestProcessor: ScreenshotRequestProcessor,
@@ -83,7 +83,7 @@ constructor(
     private val headlessScreenshotHandler: HeadlessScreenshotHandler,
 ) : TakeScreenshotExecutor {
     private val displays = displayRepository.displays
-    private var screenshotController: ScreenshotController? = null
+    private var screenshotController: InteractiveScreenshotHandler? = null
     private val notificationControllers = mutableMapOf<Int, ScreenshotNotificationsController>()
 
     /**
@@ -99,6 +99,9 @@ constructor(
     ) {
         val displays = getDisplaysToScreenshot(screenshotRequest.type)
         val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
+        if (displays.isEmpty()) {
+            Log.wtf(TAG, "No displays found for screenshot.")
+        }
         displays.forEach { display ->
             val displayId = display.displayId
             var screenshotHandler: ScreenshotHandler =
@@ -174,7 +177,7 @@ constructor(
     private suspend fun getDisplaysToScreenshot(requestType: Int): List<Display> {
         val allDisplays = displays.first()
         return if (requestType == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            // If this is a provided image, let's show the UI on the default display only.
+            // If this is a provided image just screenshot th default display
             allDisplays.filter { it.displayId == Display.DEFAULT_DISPLAY }
         } else {
             allDisplays.filter { it.type in ALLOWED_DISPLAY_TYPES }
@@ -183,7 +186,7 @@ constructor(
 
     /** Propagates the close system dialog signal to the ScreenshotController. */
     override fun onCloseSystemDialogsReceived() {
-        if (screenshotController?.isPendingSharedTransition == false) {
+        if (screenshotController?.isPendingSharedTransition() == false) {
             screenshotController?.requestDismissal(SCREENSHOT_DISMISSED_OTHER)
         }
     }
@@ -218,8 +221,8 @@ constructor(
         }
     }
 
-    private fun getScreenshotController(display: Display): ScreenshotController {
-        val controller = screenshotController ?: screenshotControllerFactory.create(display, false)
+    private fun getScreenshotController(display: Display): InteractiveScreenshotHandler {
+        val controller = screenshotController ?: interactiveScreenshotHandlerFactory.create(display)
         screenshotController = controller
         return controller
     }

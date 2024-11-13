@@ -190,7 +190,7 @@ public class ObservableUuidStore {
             }
             mCachedPerUser.set(userId, cachedObservableUuids);
         }
-        return cachedObservableUuids;
+        return cachedObservableUuids == null ? new ArrayList<>() : cachedObservableUuids;
     }
 
     /**

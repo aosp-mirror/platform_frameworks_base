@@ -28,7 +28,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IWindowContainerTransactionCallback;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 /**
  * Utilities and interfaces for transition-like usage on top of the legacy app-transition and

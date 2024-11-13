@@ -24,8 +24,13 @@ package {
 
 java_library {
     sdk_version: "current",
-    name: "PluginCoreLib",
-    srcs: ["src/**/*.java"],
+    name: "PluginAnnotationLib",
+    host_supported: true,
+    device_supported: true,
+    srcs: [
+        "src/**/annotations/*.java",
+        "src/**/annotations/*.kt",
+    ],
     optimize: {
         proguard_flags_files: ["proguard.flags"],
         // Ensure downstream clients that reference this as a shared lib
@@ -35,5 +40,61 @@ java_library {
 
     // Enforce that the library is built against java 8 so that there are
     // no compatibility issues with launcher
+    java_version: "1.8",
+}
+
+java_library {
+    sdk_version: "current",
+    name: "PluginCoreLib",
+    device_supported: true,
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+    exclude_srcs: [
+        "src/**/annotations/*.java",
+        "src/**/annotations/*.kt",
+        "src/**/processor/*.java",
+        "src/**/processor/*.kt",
+    ],
+    static_libs: [
+        "PluginAnnotationLib",
+    ],
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+        // Ensure downstream clients that reference this as a shared lib
+        // inherit the appropriate flags to preserve annotations.
+        export_proguard_flags_files: true,
+    },
+
+    // Enforce that the library is built against java 8 so that there are
+    // no compatibility issues with launcher
+    java_version: "1.8",
+}
+
+java_library {
+    java_version: "1.8",
+    name: "PluginAnnotationProcessorLib",
+    host_supported: true,
+    device_supported: false,
+    srcs: [
+        "src/**/processor/*.java",
+        "src/**/processor/*.kt",
+    ],
+    plugins: ["auto_service_plugin"],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "auto_service_annotations",
+        "auto_common",
+        "PluginAnnotationLib",
+        "guava",
+        "jsr330",
+    ],
+}
+
+java_plugin {
+    name: "PluginAnnotationProcessor",
+    processor_class: "com.android.systemui.plugins.processor.ProtectedPluginProcessor",
+    static_libs: ["PluginAnnotationProcessorLib"],
     java_version: "1.8",
 }

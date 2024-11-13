@@ -20,7 +20,7 @@ option java_multiple_files = true;
 package android.app;
 
 import "frameworks/base/core/proto/android/privacy.proto";
-import "frameworks/proto_logging/stats/enums/app/app_enums.proto";
+import "frameworks/proto_logging/stats/enums/app_shared/app_enums.proto";
 
 /**
  * An android.app.ApplicationStartInfo object.
@@ -40,4 +40,5 @@ message ApplicationStartInfoProto {
     optional bytes start_intent = 10;
     optional AppStartLaunchMode launch_mode = 11;
     optional bool was_force_stopped = 12;
+    optional int64 monotonic_creation_time_ms = 13;
 }

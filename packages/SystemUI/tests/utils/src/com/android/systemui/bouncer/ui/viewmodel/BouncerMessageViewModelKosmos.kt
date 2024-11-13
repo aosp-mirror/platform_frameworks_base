@@ -14,38 +14,43 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.applicationContext
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
-import com.android.systemui.bouncer.shared.flag.composeBouncerFlags
 import com.android.systemui.deviceentry.domain.interactor.biometricMessageInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.user.ui.viewmodel.userSwitcherViewModel
 import com.android.systemui.util.time.systemClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
-val Kosmos.bouncerMessageViewModel by
-    Kosmos.Fixture {
-        BouncerMessageViewModel(
-            applicationContext = applicationContext,
-            applicationScope = testScope.backgroundScope,
-            bouncerInteractor = bouncerInteractor,
-            simBouncerInteractor = simBouncerInteractor,
-            authenticationInteractor = authenticationInteractor,
-            selectedUser = userSwitcherViewModel.selectedUser,
-            clock = systemClock,
-            biometricMessageInteractor = biometricMessageInteractor,
-            faceAuthInteractor = deviceEntryFaceAuthInteractor,
-            deviceEntryInteractor = deviceEntryInteractor,
-            fingerprintInteractor = deviceEntryFingerprintAuthInteractor,
-            flags = composeBouncerFlags,
-        )
+val Kosmos.bouncerMessageViewModel by Fixture {
+    BouncerMessageViewModel(
+        applicationContext = applicationContext,
+        bouncerInteractor = bouncerInteractor,
+        simBouncerInteractor = simBouncerInteractor,
+        authenticationInteractor = authenticationInteractor,
+        userSwitcherViewModel = userSwitcherViewModel,
+        clock = systemClock,
+        biometricMessageInteractor = biometricMessageInteractor,
+        faceAuthInteractor = deviceEntryFaceAuthInteractor,
+        deviceUnlockedInteractor = deviceUnlockedInteractor,
+        deviceEntryBiometricsAllowedInteractor = deviceEntryBiometricsAllowedInteractor,
+    )
+}
+
+val Kosmos.bouncerMessageViewModelFactory by Fixture {
+    object : BouncerMessageViewModel.Factory {
+        override fun create(): BouncerMessageViewModel {
+            return bouncerMessageViewModel
+        }
     }
+}

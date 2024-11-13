@@ -47,3 +47,32 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "add_battery_usage_stats_slice_atom"
+    namespace: "backstage_power"
+    description: "Adds battery_usage_stats_slice atom"
+    bug: "324602949"
+}
+
+flag {
+    name: "battery_usage_stats_by_power_and_screen_state"
+    namespace: "backstage_power"
+    description: "Batterystats dumpsys is enhanced by including power break-down by power s"
+    bug: "352835319"
+}
+
+flag {
+    name: "disable_composite_battery_usage_stats_atoms"
+    namespace: "backstage_power"
+    description: "Disable deprecated BatteryUsageStatsAtom pulled atom"
+    bug: "324602949"
+}
+
+flag {
+    name: "battery_stats_screen_state_event"
+    namespace: "backstage_power"
+    description: "Guards the battery stats event for screen state changes."
+    bug: "364350206"
+    is_fixed_read_only: true
+}

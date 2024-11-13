@@ -76,11 +76,12 @@ public class SystemEmergencyHelper extends EmergencyHelper {
                     try {
                         mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(
                                 intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
-                        dispatchEmergencyStateChanged();
-                    } catch (IllegalStateException e) {
+                    } catch (IllegalStateException | UnsupportedOperationException e) {
                         Log.w(TAG, "Failed to call TelephonyManager.isEmergencyNumber().", e);
                     }
                 }
+
+                dispatchEmergencyStateChanged();
             }
         }, new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));
 
@@ -140,9 +141,10 @@ public class SystemEmergencyHelper extends EmergencyHelper {
                     if (mIsInEmergencyCall) {
                         mEmergencyCallEndRealtimeMs = SystemClock.elapsedRealtime();
                         mIsInEmergencyCall = false;
-                        dispatchEmergencyStateChanged();
                     }
                 }
+
+                dispatchEmergencyStateChanged();
             }
         }
     }

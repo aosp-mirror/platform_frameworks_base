@@ -59,9 +59,10 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
     public AcquisitionClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, boolean shouldVibrate,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            boolean isMandatoryBiometrics) {
         super(context, lazyDaemon, token, listener, userId, owner, cookie, sensorId,
-                logger, biometricContext);
+                logger, biometricContext, isMandatoryBiometrics);
         mPowerManager = context.getSystemService(PowerManager.class);
         mShouldVibrate = shouldVibrate;
     }

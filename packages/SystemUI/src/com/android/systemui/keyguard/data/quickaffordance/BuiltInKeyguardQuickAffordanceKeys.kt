@@ -28,8 +28,6 @@ object BuiltInKeyguardQuickAffordanceKeys {
     const val CREATE_NOTE = "create_note"
     const val DO_NOT_DISTURB = "do_not_disturb"
     const val FLASHLIGHT = "flashlight"
-    // TODO(b/339667383): delete or properly implement this once a product decision is made
-    const val GLANCEABLE_HUB = "glanceable_hub"
     const val HOME_CONTROLS = "home"
     const val MUTE = "mute"
     const val QR_CODE_SCANNER = "qr_code_scanner"

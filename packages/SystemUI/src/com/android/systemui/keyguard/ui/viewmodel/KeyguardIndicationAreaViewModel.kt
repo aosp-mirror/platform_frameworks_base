@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.doze.util.BurnInHelperWrapper
@@ -28,9 +29,11 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
+import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -44,14 +47,16 @@ class KeyguardIndicationAreaViewModel
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
-    private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
+    bottomAreaInteractor: KeyguardBottomAreaInteractor,
     keyguardBottomAreaViewModel: KeyguardBottomAreaViewModel,
     private val burnInHelperWrapper: BurnInHelperWrapper,
-    private val burnInInteractor: BurnInInteractor,
-    private val shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
+    burnInInteractor: BurnInInteractor,
+    @Named(KeyguardQuickAffordancesCombinedViewModelModule.Companion.LOCKSCREEN_INSTANCE)
+    shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
     configurationInteractor: ConfigurationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    @Background private val backgroundCoroutineContext: CoroutineContext,
+    communalSceneInteractor: CommunalSceneInteractor,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Main private val mainDispatcher: CoroutineDispatcher,
 ) {
 
@@ -60,6 +65,13 @@ constructor(
 
     /** An observable for the alpha level for the entire bottom area. */
     val alpha: Flow<Float> = keyguardBottomAreaViewModel.alpha
+
+    /** An observable for the visibility value for the indication area view. */
+    val visible: Flow<Boolean> =
+        anyOf(
+            keyguardInteractor.statusBarState.map { state -> state == StatusBarState.KEYGUARD },
+            communalSceneInteractor.isCommunalVisible
+        )
 
     /** An observable for whether the indication area should be padded. */
     val isIndicationAreaPadded: Flow<Boolean> =
@@ -97,7 +109,7 @@ constructor(
                 )
             }
             .distinctUntilChanged()
-            .flowOn(backgroundCoroutineContext)
+            .flowOn(backgroundDispatcher)
 
     /** An observable for the x-offset by which the indication area should be translated. */
     val indicationAreaTranslationX: Flow<Float> =

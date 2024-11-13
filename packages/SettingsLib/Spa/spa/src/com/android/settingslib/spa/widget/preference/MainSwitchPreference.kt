@@ -18,6 +18,7 @@ package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 import com.android.settingslib.spa.framework.util.EntryHighlight
 
 @Composable
@@ -38,16 +40,17 @@ fun MainSwitchPreference(model: SwitchPreferenceModel) {
                 true -> MaterialTheme.colorScheme.primaryContainer
                 else -> MaterialTheme.colorScheme.secondaryContainer
             },
-            shape = SettingsShape.CornerExtraLarge,
+            shape = if (isSpaExpressiveEnabled) CircleShape
+            else SettingsShape.CornerExtraLarge,
         ) {
             InternalSwitchPreference(
                 title = model.title,
                 checked = model.checked(),
                 changeable = model.changeable(),
                 onCheckedChange = model.onCheckedChange,
-                paddingStart = 20.dp,
+                paddingStart = if (isSpaExpressiveEnabled) 32.dp else 20.dp,
                 paddingEnd = 20.dp,
-                paddingVertical = 24.dp,
+                paddingVertical = if (isSpaExpressiveEnabled) 16.dp else 24.dp,
             )
         }
     }

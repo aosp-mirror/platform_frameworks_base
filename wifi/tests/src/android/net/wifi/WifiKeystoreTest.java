@@ -61,6 +61,7 @@ public class WifiKeystoreTest {
         mSession = ExtendedMockito.mockitoSession()
                 .mockStatic(WifiBlobStore.class, withSettings().lenient())
                 .startMocking();
+        when(WifiBlobStore.supplicantCanAccessBlobstore()).thenReturn(true);
         when(WifiBlobStore.getLegacyKeystore()).thenReturn(mLegacyKeystore);
         when(WifiBlobStore.getInstance()).thenReturn(mWifiBlobStore);
     }
@@ -74,13 +75,27 @@ public class WifiKeystoreTest {
     }
 
     /**
-     * Test that put() only writes to the WifiBlobStore database.
+     * Test that put() writes to the WifiBlobStore database when it
+     * is available to supplicant.
      */
     @Test
-    public void testPut() throws Exception {
+    public void testPut_wifiBlobstore() throws Exception {
+        when(WifiBlobStore.supplicantCanAccessBlobstore()).thenReturn(true);
         WifiKeystore.put(TEST_ALIAS, TEST_VALUE);
         verify(mWifiBlobStore).put(anyString(), any());
         verify(mLegacyKeystore, never()).put(anyString(), anyInt(), any());
+    }
+
+    /**
+     * Test that put() writes to Legacy Keystore if the WifiBlobstore database
+     * is not available to supplicant.
+     */
+    @Test
+    public void testPut_legacyKeystore() throws Exception {
+        when(WifiBlobStore.supplicantCanAccessBlobstore()).thenReturn(false);
+        WifiKeystore.put(TEST_ALIAS, TEST_VALUE);
+        verify(mLegacyKeystore).put(anyString(), anyInt(), any());
+        verify(mWifiBlobStore, never()).put(anyString(), any());
     }
 
     /**

@@ -34,14 +34,16 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
+import android.util.SparseLongArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.io.PrintWriter;
@@ -58,12 +60,13 @@ class InsetsStateController {
     private final DisplayContent mDisplayContent;
 
     private final SparseArray<InsetsSourceProvider> mProviders = new SparseArray<>();
+    private final SparseLongArray mSurfaceTransactionIds = new SparseLongArray();
     private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
             mControlTargetProvidersMap = new ArrayMap<>();
+    private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
+            mPendingTargetProvidersMap = new ArrayMap<>();
     private final SparseArray<InsetsControlTarget> mIdControlTargetMap = new SparseArray<>();
     private final SparseArray<InsetsControlTarget> mIdFakeControlTargetMap = new SparseArray<>();
-
-    private final ArraySet<InsetsControlTarget> mPendingControlChanged = new ArraySet<>();
 
     private final Consumer<WindowState> mDispatchInsetsChanged = w -> {
         if (w.isReadyToDispatchInsetsState()) {
@@ -216,10 +219,14 @@ class InsetsStateController {
         }
     }
 
-    void onRequestedVisibleTypesChanged(InsetsControlTarget caller) {
+    void onRequestedVisibleTypesChanged(InsetsTarget caller,
+            @Nullable ImeTracker.Token statsToken) {
         boolean changed = false;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
-            changed |= mProviders.valueAt(i).updateClientVisibility(caller);
+            final InsetsSourceProvider provider = mProviders.valueAt(i);
+            final boolean isImeProvider = provider.getSource().getType() == WindowInsets.Type.ime();
+            changed |= provider.updateClientVisibility(caller,
+                    isImeProvider ? statsToken : null);
         }
         if (!android.view.inputmethod.Flags.refactorInsetsController()) {
             if (changed) {
@@ -231,7 +238,7 @@ class InsetsStateController {
         }
     }
 
-    @InsetsType int getFakeControllingTypes(InsetsControlTarget target) {
+    @InsetsType int getFakeControllingTypes(InsetsTarget target) {
         @InsetsType int types = 0;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
@@ -310,7 +317,9 @@ class InsetsStateController {
             // aborted.
             provider.updateFakeControlTarget(target);
         } else {
-            provider.updateControlForTarget(target, false /* force */);
+            // TODO(b/329229469) if the IME controlTarget changes, any pending requests should fail
+            provider.updateControlForTarget(target, false /* force */,
+                    null /* TODO(b/329229469) check if needed here */);
 
             // Get control target again in case the provider didn't accept the one we passed to it.
             target = provider.getControlTarget();
@@ -320,11 +329,11 @@ class InsetsStateController {
         }
         if (lastTarget != null) {
             removeFromControlMaps(lastTarget, provider, fake);
-            mPendingControlChanged.add(lastTarget);
+            addToPendingControlMaps(lastTarget, provider);
         }
         if (target != null) {
             addToControlMaps(target, provider, fake);
-            mPendingControlChanged.add(target);
+            addToPendingControlMaps(target, provider);
         }
     }
 
@@ -357,49 +366,91 @@ class InsetsStateController {
         }
     }
 
-    void notifyControlChanged(InsetsControlTarget target) {
-        mPendingControlChanged.add(target);
+    private void addToPendingControlMaps(@NonNull InsetsControlTarget target,
+            InsetsSourceProvider provider) {
+        final ArrayList<InsetsSourceProvider> array =
+                mPendingTargetProvidersMap.computeIfAbsent(target, key -> new ArrayList<>());
+        array.add(provider);
+    }
+
+    void notifyControlChanged(InsetsControlTarget target, InsetsSourceProvider provider) {
+        addToPendingControlMaps(target, provider);
         notifyPendingInsetsControlChanged();
 
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             notifyInsetsChanged();
             mDisplayContent.updateSystemGestureExclusion();
-            mDisplayContent.updateKeepClearAreas();
             mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
         }
     }
 
+    void notifySurfaceTransactionReady(InsetsSourceProvider provider, long id, boolean ready) {
+        if (ready) {
+            mSurfaceTransactionIds.put(provider.getSource().getId(), id);
+        } else {
+            mSurfaceTransactionIds.delete(provider.getSource().getId());
+        }
+    }
+
     private void notifyPendingInsetsControlChanged() {
-        if (mPendingControlChanged.isEmpty()) {
+        if (mPendingTargetProvidersMap.isEmpty()) {
             return;
         }
+        final int size = mSurfaceTransactionIds.size();
+        final SparseLongArray surfaceTransactionIds = new SparseLongArray(size);
+        for (int i = 0; i < size; i++) {
+            surfaceTransactionIds.append(
+                    mSurfaceTransactionIds.keyAt(i), mSurfaceTransactionIds.valueAt(i));
+        }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
-            for (int i = mProviders.size() - 1; i >= 0; i--) {
-                final InsetsSourceProvider provider = mProviders.valueAt(i);
-                provider.onSurfaceTransactionApplied();
+            for (int i = 0; i < size; i++) {
+                final int sourceId = surfaceTransactionIds.keyAt(i);
+                final InsetsSourceProvider provider = mProviders.get(sourceId);
+                if (provider == null) {
+                    continue;
+                }
+                provider.onSurfaceTransactionCommitted(surfaceTransactionIds.valueAt(i));
             }
             final ArraySet<InsetsControlTarget> newControlTargets = new ArraySet<>();
             int displayId = mDisplayContent.getDisplayId();
-            for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
-                final InsetsControlTarget controlTarget = mPendingControlChanged.valueAt(i);
-                controlTarget.notifyInsetsControlChanged(displayId);
-                if (mControlTargetProvidersMap.containsKey(controlTarget)) {
-                    // We only collect targets who get controls, not lose controls.
-                    newControlTargets.add(controlTarget);
+            final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>> pendingControlMap =
+                    mPendingTargetProvidersMap;
+            for (int i = pendingControlMap.size() - 1; i >= 0; i--) {
+                final InsetsControlTarget target = pendingControlMap.keyAt(i);
+                final ArrayList<InsetsSourceProvider> providers = pendingControlMap.valueAt(i);
+                for (int p = providers.size() - 1; p >= 0; p--) {
+                    final InsetsSourceProvider provider = providers.get(p);
+                    if (provider.isLeashReadyForDispatching(target)) {
+                        // Stop waiting for this provider.
+                        providers.remove(p);
+                    }
+                }
+                if (providers.isEmpty()) {
+                    pendingControlMap.removeAt(i);
+
+                    // All controls of this target are ready to be dispatched.
+                    target.notifyInsetsControlChanged(displayId);
+                    if (mControlTargetProvidersMap.containsKey(target)) {
+                        // We only collect targets who get controls, not lose controls.
+                        newControlTargets.add(target);
+                    }
                 }
             }
-            mPendingControlChanged.clear();
 
             // This updates the insets visibilities AFTER sending current insets state and controls
             // to the clients, so that the clients can change the current visibilities to the
             // requested visibilities with animations.
             for (int i = newControlTargets.size() - 1; i >= 0; i--) {
-                onRequestedVisibleTypesChanged(newControlTargets.valueAt(i));
+                // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
+                //  IME provider. Check if we have to create a new request here
+                onRequestedVisibleTypesChanged(newControlTargets.valueAt(i), null /* statsToken */);
             }
             newControlTargets.clear();
-            // Check for and try to run the scheduled show IME request (if it exists), as we
-            // now applied the surface transaction and notified the target of the new control.
-            getImeSourceProvider().checkAndStartShowImePostLayout();
+            if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+                // Check for and try to run the scheduled show IME request (if it exists), as we
+                // now applied the surface transaction and notified the target of the new control.
+                getImeSourceProvider().checkAndStartShowImePostLayout();
+            }
         });
     }
 
@@ -413,7 +464,7 @@ class InsetsStateController {
      * @param target the control target to check.
      */
     boolean hasPendingControls(@NonNull InsetsControlTarget target) {
-        return mPendingControlChanged.contains(target);
+        return mPendingTargetProvidersMap.containsKey(target);
     }
 
     void dump(String prefix, PrintWriter pw) {
@@ -451,7 +502,7 @@ class InsetsStateController {
         }
     }
 
-    void dumpDebug(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
+    void dumpDebug(ProtoOutputStream proto, @WindowTracingLogLevel int logLevel) {
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
             provider.dumpDebug(proto,

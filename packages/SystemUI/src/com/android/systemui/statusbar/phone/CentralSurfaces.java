@@ -41,9 +41,10 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.RemoteAnimationRunnerCompat;
 import com.android.systemui.display.data.repository.DisplayMetricsRepository;
-import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Compile;
 
@@ -259,8 +260,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable
     void setBouncerShowing(boolean bouncerShowing);
 
     boolean isScreenFullyOff();
-
-    boolean isCameraAllowedByAdmin();
 
     boolean isGoingToSleep();
 

@@ -18,8 +18,11 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -74,9 +77,9 @@ class AodAlphaViewModelTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
+    @DisableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun alpha_WhenNotGone_clockMigrationFlagIsOff_emitsKeyguardAlpha() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             val alpha by collectLastValue(underTest.alpha)
 
             keyguardTransitionRepository.sendTransitionSteps(
@@ -186,9 +189,9 @@ class AodAlphaViewModelTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
+    @EnableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun alpha_whenGone_equalsZero() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             val alpha by collectLastValue(underTest.alpha)
 
             keyguardTransitionRepository.sendTransitionStep(

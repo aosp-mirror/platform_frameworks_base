@@ -20,9 +20,9 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.core_core",
+        "androidx.activity_activity",
         "com.google.android.material_material",
         "SettingsLibSettingsTransition",
-        "SettingsLibUtils",
         "SettingsLibSettingsTheme",
     ],
     sdk_version: "system_current",

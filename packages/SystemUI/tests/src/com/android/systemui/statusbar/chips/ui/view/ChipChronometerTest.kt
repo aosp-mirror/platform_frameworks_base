@@ -16,10 +16,10 @@
 
 package com.android.systemui.statusbar.chips.ui.view
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
@@ -36,7 +36,7 @@ private const val LARGE_TEXT = "00:000"
 private const val XL_TEXT = "00:0000"
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ChipChronometerTest : SysuiTestCase() {
 

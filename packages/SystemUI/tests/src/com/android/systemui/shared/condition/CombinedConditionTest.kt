@@ -16,7 +16,7 @@
 
 package com.android.systemui.shared.condition
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.condition.Condition.START_EAGERLY
@@ -32,7 +32,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class CombinedConditionTest : SysuiTestCase() {
 
     class FakeCondition

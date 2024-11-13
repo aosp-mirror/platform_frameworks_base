@@ -1997,6 +1997,8 @@ public abstract class BatteryStats {
                 STATE2_VIDEO_ON_FLAG | STATE2_FLASHLIGHT_FLAG | STATE2_CAMERA_FLAG
                 | STATE2_GPS_SIGNAL_QUALITY_MASK;
 
+        public static final int GNSS_SIGNAL_QUALITY_NONE = 2;
+
         @UnsupportedAppUsage
         public int states2;
 
@@ -2064,9 +2066,11 @@ public abstract class BatteryStats {
         public static final int EVENT_LONG_WAKE_LOCK = 0x0014;
         // Event for reporting change of some device states, triggered by a specific UID
         public static final int EVENT_STATE_CHANGE = 0x0015;
+        // Event for reporting change of screen states.
+        public static final int EVENT_DISPLAY_STATE_CHANGED = 0x0016;
 
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0016;
+        public static final int EVENT_COUNT = 0x0017;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -2220,7 +2224,7 @@ public abstract class BatteryStats {
             modemRailChargeMah = 0;
             wifiRailChargeMah = 0;
             states = 0;
-            states2 = 0;
+            states2 = GNSS_SIGNAL_QUALITY_NONE << HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT;
             wakelockTag = null;
             wakeReasonTag = null;
             eventCode = EVENT_NONE;
@@ -2491,7 +2495,7 @@ public abstract class BatteryStats {
     public static final int SCREEN_BRIGHTNESS_LIGHT = 3;
     public static final int SCREEN_BRIGHTNESS_BRIGHT = 4;
 
-    static final String[] SCREEN_BRIGHTNESS_NAMES = {
+    public static final String[] SCREEN_BRIGHTNESS_NAMES = {
         "dark", "dim", "medium", "light", "bright"
     };
 
@@ -3077,13 +3081,14 @@ public abstract class BatteryStats {
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
             "active", "pkginst", "pkgunin", "alarm", "stats", "pkginactive", "pkgactive",
-            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "est_capacity", "state"
+            "tmpwhitelist", "screenwake", "wakeupap", "longwake", "state",
+            "display_state_changed"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
             "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw",
-            "Esw", "Ewa", "Elw", "Eec", "Esc"
+            "Esw", "Ewa", "Elw", "Eec", "Esc", "Eds"
     };
 
     @FunctionalInterface
@@ -9025,6 +9030,10 @@ public abstract class BatteryStats {
 
             final int uid = consumer.getUid();
             final Uid u = uidStats.get(uid);
+            if (u == null) {
+                continue;
+            }
+
             final long rxPackets = u.getNetworkActivityPackets(
                     BatteryStats.NETWORK_MOBILE_RX_DATA, STATS_SINCE_CHARGED);
             final long txPackets = u.getNetworkActivityPackets(

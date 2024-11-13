@@ -25,6 +25,7 @@ import static com.android.server.hdmi.HdmiCecLocalDevicePlayback.POPUP_AFTER_ACT
 import static com.android.server.hdmi.HdmiCecLocalDevicePlayback.STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_BOOT_UP;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.PowerStatusMonitorActionFromPlayback.MONITORING_INTERVAL_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -144,6 +145,11 @@ public class HdmiCecLocalDevicePlaybackTest {
                     @Override
                     protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
                         // do nothing
+                    }
+
+                    @Override
+                    protected boolean isHdmiControlEnhancedBehaviorFlagEnabled() {
+                        return true;
                     }
                 };
 
@@ -2554,6 +2560,44 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDevicePlayback.getActions(ActiveSourceAction.class)).isEmpty();
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(unexpectedMessage);
+    }
+
+    @Test
+    public void powerStatusMonitorActionFromPlayback_TvReportPowerOff_goToSleep() {
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(
+                PowerStatusMonitorActionFromPlayback.class)).hasSize(1);
+        assertThat(mPowerManager.isInteractive()).isTrue();
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(MONITORING_INTERVAL_MS);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage givePowerStatus =
+                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(mPlaybackLogicalAddress,
+                        Constants.ADDR_TV);
+        HdmiCecMessage reportPowerStatusTvOn =
+                HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_TV, mPlaybackLogicalAddress,
+                        HdmiControlManager.POWER_STATUS_ON);
+        HdmiCecMessage reportPowerStatusTvStandby =
+                HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_TV, mPlaybackLogicalAddress,
+                        HdmiControlManager.POWER_STATUS_STANDBY);
+
+        assertThat(mNativeWrapper.getResultMessages().contains(givePowerStatus)).isTrue();
+        mNativeWrapper.onCecMessage(reportPowerStatusTvOn);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isTrue();
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(MONITORING_INTERVAL_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages().contains(givePowerStatus)).isTrue();
+        mNativeWrapper.onCecMessage(reportPowerStatusTvStandby);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
     private void skipActiveSourceLostUi(long idleDuration) {

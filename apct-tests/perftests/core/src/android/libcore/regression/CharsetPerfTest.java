@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -34,7 +34,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CharsetPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(
@@ -91,7 +91,7 @@ public class CharsetPerfTest {
     @Parameters(method = "getData")
     public void time_new_String_BString(int length, String name) throws Exception {
         byte[] bytes = makeBytes(makeString(length));
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new String(bytes, name);
         }
@@ -101,7 +101,7 @@ public class CharsetPerfTest {
     @Parameters(method = "getData")
     public void time_new_String_BII(int length, String name) throws Exception {
         byte[] bytes = makeBytes(makeString(length));
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new String(bytes, 0, bytes.length);
         }
@@ -111,7 +111,7 @@ public class CharsetPerfTest {
     @Parameters(method = "getData")
     public void time_new_String_BIIString(int length, String name) throws Exception {
         byte[] bytes = makeBytes(makeString(length));
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new String(bytes, 0, bytes.length, name);
         }
@@ -121,7 +121,7 @@ public class CharsetPerfTest {
     @Parameters(method = "getData")
     public void time_String_getBytes(int length, String name) throws Exception {
         String string = makeString(length);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             string.getBytes(name);
         }

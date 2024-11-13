@@ -46,7 +46,7 @@ import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleIcon;
 import java.util.Objects;
 
 /**
- * A hybrid view which may contain information about one ore more conversations.
+ * A hybrid view which may contain information about one or more conversations.
  */
 public class HybridConversationNotificationView extends HybridNotificationView {
 

@@ -29,13 +29,19 @@ import android.os.Trace;
 
 /**
  * Request to move an activity to started and visible state.
+ *
  * @hide
  */
 public class StartActivityItem extends ActivityLifecycleItem {
 
-    private static final String TAG = "StartActivityItem";
+    @Nullable
+    private final SceneTransitionInfo mSceneTransitionInfo;
 
-    private SceneTransitionInfo mSceneTransitionInfo;
+    public StartActivityItem(@NonNull IBinder activityToken,
+            @Nullable SceneTransitionInfo sceneTransitionInfo) {
+        super(activityToken);
+        mSceneTransitionInfo = sceneTransitionInfo;
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
@@ -50,41 +56,16 @@ public class StartActivityItem extends ActivityLifecycleItem {
         return ON_START;
     }
 
-    // ObjectPoolItem implementation
-
-    private StartActivityItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static StartActivityItem obtain(@NonNull IBinder activityToken,
-            @Nullable SceneTransitionInfo sceneTransitionInfo) {
-        StartActivityItem instance = ObjectPool.obtain(StartActivityItem.class);
-        if (instance == null) {
-            instance = new StartActivityItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mSceneTransitionInfo = sceneTransitionInfo;
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mSceneTransitionInfo = null;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeTypedObject(mSceneTransitionInfo, flags);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private StartActivityItem(@NonNull Parcel in) {
         super(in);
         mSceneTransitionInfo = in.readTypedObject(SceneTransitionInfo.CREATOR);

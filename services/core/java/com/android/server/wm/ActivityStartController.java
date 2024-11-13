@@ -618,11 +618,10 @@ public class ActivityStartController {
         final Task task = r.getTask();
         mService.deferWindowLayout();
         try {
-            final TransitionController controller = r.mTransitionController;
-            final Transition transition = controller.getCollectingTransition();
+            final Transition transition = r.mTransitionController.getCollectingTransition();
             if (transition != null) {
                 transition.setRemoteAnimationApp(r.app.getThread());
-                controller.setTransientLaunch(r, TaskDisplayArea.getRootTaskAbove(rootTask));
+                transition.setTransientLaunch(r, TaskDisplayArea.getRootTaskAbove(rootTask));
             }
             task.moveToFront("startExistingRecents");
             task.mInResumeTopActivity = true;

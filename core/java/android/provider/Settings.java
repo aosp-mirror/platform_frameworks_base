@@ -111,6 +111,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1403,6 +1404,19 @@ public final class Settings {
             "android.settings.QUICK_LAUNCH_SETTINGS";
 
     /**
+     * Activity Action: Showing settings to manage adaptive notifications.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_ADAPTIVE_NOTIFICATIONS =
+            "android.settings.MANAGE_ADAPTIVE_NOTIFICATIONS";
+
+    /**
      * Activity Action: Show settings to manage installed applications.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -1959,10 +1973,10 @@ public final class Settings {
             "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
 
     /**
-     * Activity Action: Show Do Not Disturb access settings.
+     * Activity Action: Show Notification Policy access settings.
      * <p>
-     * Users can grant and deny access to Do Not Disturb configuration from here. Managed
-     * profiles cannot grant Do Not Disturb access.
+     * Users can grant and deny access to Notification Policy (DND / Modes) configuration
+     * from here. Managed profiles cannot grant Notification Policy access.
      * See {@link android.app.NotificationManager#isNotificationPolicyAccessGranted()} for more
      * details.
      * <p>
@@ -2637,7 +2651,7 @@ public final class Settings {
     /**
      * Activity Action: Show screen that let user select its Autofill Service.
      * <p>
-     * Input: Intent's data URI set with an application name, using the
+     * Input: Intent's data URI set with an application package name, using the
      * "package" schema (like "package:com.my.app").
      *
      * <p>
@@ -2657,7 +2671,7 @@ public final class Settings {
     /**
      * Activity Action: Show screen that let user enable a Credential Manager provider.
      * <p>
-     * Input: Intent's data URI set with an application name, using the
+     * Input: Intent's data URI set with an application package name, using the
      * "package" schema (like "package:com.my.app").
      *
      * <p>
@@ -3008,6 +3022,9 @@ public final class Settings {
 
     /** @hide - Private call() method to query the 'configuration' table */
     public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
+
+    /** @hide - Private call() method to query the 'configuration' tables' namespaces */
+    public static final String CALL_METHOD_LIST_NAMESPACES_CONFIG = "LIST_namespaces_config";
 
     /** @hide - Private call() method to disable / re-enable syncs to the 'configuration' table */
     public static final String CALL_METHOD_SET_SYNC_DISABLED_MODE_CONFIG =
@@ -5137,13 +5154,19 @@ public final class Settings {
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
         /**
-         * The screen backlight brightness between 0 and 255.
+         * The screen backlight brightness between 1 (minimum) and 255 (maximum).
+         *
+         * Use {@link android.view.WindowManager.LayoutParams#screenBrightness} to set the screen
+         * brightness instead.
          */
         @Readable
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
         /**
-         * Control whether to enable automatic brightness mode.
+         * Controls whether to enable automatic brightness mode. Value can be set to
+         * {@link #SCREEN_BRIGHTNESS_MODE_MANUAL} or {@link #SCREEN_BRIGHTNESS_MODE_AUTOMATIC}.
+         * If {@link #SCREEN_BRIGHTNESS_MODE_AUTOMATIC} is set, the system may change
+         * {@link #SCREEN_BRIGHTNESS} automatically.
          */
         @Readable
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
@@ -5919,6 +5942,14 @@ public final class Settings {
         public static final String SHOW_KEY_PRESSES = "show_key_presses";
 
         /**
+         * Show touchpad input visualization on screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String TOUCHPAD_VISUALIZER = "touchpad_visualizer";
+
+        /**
          * Show rotary input dispatched to focused windows on the screen.
          * 0 = no
          * 1 = yes
@@ -6185,6 +6216,15 @@ public final class Settings {
         public static final String POINTER_FILL_STYLE = "pointer_fill_style";
 
         /**
+         * Pointer stroke style, specified by
+         * {@link android.view.PointerIcon.PointerIconVectorStyleStroke} constants.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String POINTER_STROKE_STYLE = "pointer_stroke_style";
+
+        /**
          * Whether lock-to-app will be triggered by long-press on recents.
          * @hide
          */
@@ -6387,6 +6427,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SIP_ASK_ME_EACH_TIME);
             PRIVATE_SETTINGS.add(POINTER_SPEED);
             PRIVATE_SETTINGS.add(POINTER_FILL_STYLE);
+            PRIVATE_SETTINGS.add(POINTER_STROKE_STYLE);
             PRIVATE_SETTINGS.add(POINTER_SCALE);
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
@@ -9117,15 +9158,27 @@ public final class Settings {
         public static final String MULTI_PRESS_TIMEOUT = "multi_press_timeout";
 
         /**
+         * Whether to enable key repeats for Physical Keyboard.
+         *
+         * If set to false, continuous key presses on
+         * physical keyboard will not cause the pressed key to repeated.
+         * @hide
+         */
+        @Readable
+        public static final String KEY_REPEAT_ENABLED = "key_repeat_enabled";
+
+        /**
          * The duration before a key repeat begins in milliseconds.
          * @hide
          */
+        @Readable
         public static final String KEY_REPEAT_TIMEOUT_MS = "key_repeat_timeout";
 
         /**
          * The duration between successive key repeats in milliseconds.
          * @hide
          */
+        @Readable
         public static final String KEY_REPEAT_DELAY_MS = "key_repeat_delay";
 
         /**
@@ -11066,6 +11119,19 @@ public final class Settings {
         public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
 
         /**
+         * Whether or not mandatory biometrics is enabled.
+         * @hide
+         */
+        public static final String MANDATORY_BIOMETRICS = "mandatory_biometrics";
+
+        /**
+         * Whether or not requirements for mandatory biometrics is satisfied.
+         * @hide
+         */
+        public static final String MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED =
+                "mandatory_biometrics_requirements_satisfied";
+
+        /**
          * Whether or not active unlock triggers on wake.
          * @hide
          */
@@ -12315,6 +12381,18 @@ public final class Settings {
                 "accessibility_force_invert_color_enabled";
 
         /**
+         * Whether to enable mouse keys for Physical Keyboard accessibility.
+         *
+         * If set to true, key presses (of the mouse keys) on
+         * physical keyboard will control mouse pointer on the display.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ACCESSIBILITY_MOUSE_KEYS_ENABLED =
+                "accessibility_mouse_keys_enabled";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide
@@ -12507,6 +12585,19 @@ public final class Settings {
                 "launcher_taskbar_education_showing";
 
         /**
+         * Whether any Compat UI Education is currently showing.
+         *
+         * <p>1 if true, 0 or unset otherwise.
+         *
+         * <p>This setting is used to inform other components that the Compat UI Education is
+         * currently showing, which can prevent them from showing something else to the user.
+         *
+         * @hide
+         */
+        public static final String COMPAT_UI_EDUCATION_SHOWING =
+                "compat_ui_education_showing";
+
+        /**
          * Whether or not adaptive charging feature is enabled by user.
          * Type: int (0 for false, 1 for true)
          * Default: 1
@@ -12530,6 +12621,14 @@ public final class Settings {
          */
         public static final String CONTEXTUAL_SCREEN_TIMEOUT_ENABLED =
                 "contextual_screen_timeout_enabled";
+
+        /**
+         * Whether hinge angle lidevent is enabled.
+         *
+         * @hide
+         */
+        public static final String HINGE_ANGLE_LIDEVENT_ENABLED =
+                "hinge_angle_lidevent_enabled";
 
         /**
          * Whether lockscreen weather is enabled.
@@ -13397,7 +13496,19 @@ public final class Settings {
                 = "enable_freeform_support";
 
         /**
-         * Whether to enable experimental desktop mode on secondary displays.
+         * Whether to override the availability of the desktop mode on the main display of the
+         * device. If on, users can make move an app to the desktop, allowing a freeform windowing
+         * experience.
+         * @hide
+         */
+        @Readable
+        public static final String DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES =
+                "override_desktop_mode_features";
+
+        /**
+         * Whether to enable the legacy freeform support on secondary displays. If enabled, the
+         * SECONDARY_HOME of the launcher is started on any secondary display, allowing for a
+         * desktop experience.
          * @hide
          */
         @Readable
@@ -14864,6 +14975,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String MUTE_ALARM_STREAM_WITH_RINGER_MODE =
                 "mute_alarm_stream_with_ringer_mode";
 
@@ -15772,7 +15884,7 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * screen_brightness_array         (int[])
+         * screen_brightness_array         (int[], values in range [1, 255])
          * dimming_scrim_array             (int[])
          * prox_screen_off_delay           (long)
          * prox_cooldown_trigger           (long)
@@ -17722,6 +17834,12 @@ public final class Settings {
         public static final String FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT =
                 "force_non_debuggable_final_build_for_compat";
 
+        /**
+         * Flag to enable the use of ApplicationInfo for getting not-launched status.
+         *
+         * @hide
+         */
+        public static final String ENABLE_USE_APP_INFO_NOT_LAUNCHED = "use_app_info_not_launched";
 
         /**
          * Current version of signed configuration applied.
@@ -19576,6 +19694,8 @@ public final class Settings {
             public static final int PAIRED_DEVICE_OS_TYPE_ANDROID = 1;
             /** @hide */
             public static final int PAIRED_DEVICE_OS_TYPE_IOS = 2;
+            /** @hide */
+            public static final int PAIRED_DEVICE_OS_TYPE_NONE = 3;
 
             /**
              * The bluetooth settings selected BLE role for the companion.
@@ -20102,13 +20222,43 @@ public final class Settings {
              */
             public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS = 11;
 
+            /**
+             * Phone switching request source
+             * @hide
+             */
+            public static final String PHONE_SWITCHING_REQUEST_SOURCE =
+                    "phone_switching_request_source";
+
+            /**
+             * No phone switching request source
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_NONE = 0;
+
+            /**
+             * Phone switching triggered by watch
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_WATCH = 1;
+
+            /**
+             * Phone switching triggered by companion, user confirmation required
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_COMPANION_USER_CONFIRMATION = 2;
+
+            /**
+             * Phone switching triggered by companion, user confirmation not required
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_COMPANION = 3;
 
             /**
              * Whether the device has enabled the feature to reduce motion and animation
              * (0 = false, 1 = true)
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String REDUCE_MOTION = "reduce_motion";
 
             /**
@@ -20147,14 +20297,6 @@ public final class Settings {
              * Device is set in restricted mode.
              */
             public static final int TETHERED_CONFIG_RESTRICTED = 3;
-
-            /**
-             * Whether phone switching is supported.
-             *
-             * (0 = false, 1 = true)
-             * @hide
-             */
-            public static final String PHONE_SWITCHING_SUPPORTED = "phone_switching_supported";
 
             /**
              * Setting indicating the name of the Wear OS package that hosts the Media Controls UI.
@@ -20332,6 +20474,10 @@ public final class Settings {
          *
          * The keys take the form {@code namespace/flag}, and the values are the flag values.
          *
+         * Note: this API is _not_ performant, and may make a large number of
+         * Binder calls. It is intended for use in testing and debugging, and
+         * should not be used in performance-sensitive code.
+         *
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
@@ -20343,13 +20489,33 @@ public final class Settings {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, resolver.getUserId());
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                Bundle b = cp.call(resolver.getAttributionSource(),
-                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_LIST_CONFIG, null, arg);
-                if (b != null) {
-                    Map<String, String> flagsToValues =
-                            (HashMap) b.getSerializable(Settings.NameValueTable.VALUE,
-                                            java.util.HashMap.class);
-                    allFlags.putAll(flagsToValues);
+
+                if (Flags.reduceBinderTransactionSizeForGetAllProperties()) {
+                    Bundle b = cp.call(resolver.getAttributionSource(),
+                            sProviderHolder.mUri.getAuthority(),
+                                CALL_METHOD_LIST_NAMESPACES_CONFIG, null, arg);
+                    if (b != null) {
+                        HashSet<String> namespaces =
+                                (HashSet) b.getSerializable(Settings.NameValueTable.VALUE,
+                                                java.util.HashSet.class);
+                        for (String namespace : namespaces) {
+                            Map<String, String> keyValues =
+                                    getStrings(namespace, new ArrayList());
+                            for (String key : keyValues.keySet()) {
+                                allFlags.put(namespace + "/" + key, keyValues.get(key));
+                            }
+                        }
+                    }
+                } else {
+                    Bundle b = cp.call(resolver.getAttributionSource(),
+                            sProviderHolder.mUri.getAuthority(),
+                            CALL_METHOD_LIST_CONFIG, null, arg);
+                    if (b != null) {
+                        Map<String, String> flagsToValues =
+                                (HashMap) b.getSerializable(Settings.NameValueTable.VALUE,
+                                                java.util.HashMap.class);
+                        allFlags.putAll(flagsToValues);
+                    }
                 }
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't query configuration table for " + CONTENT_URI, e);

@@ -19,6 +19,8 @@ package android.telephony;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.telephony.uicc.IccUtils;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -84,8 +86,8 @@ public class PcoData implements Parcelable {
 
     @Override
     public String toString() {
-        return "PcoData(" + cid + ", " + bearerProto + ", " + pcoId + ", contents[" +
-                contents.length + "])";
+        return "PcoData(" + cid + ", " + bearerProto + ", " + pcoId + " "
+                + IccUtils.bytesToHexString(contents) + ")";
     }
 
     @Override

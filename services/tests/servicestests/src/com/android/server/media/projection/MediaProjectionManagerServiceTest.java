@@ -17,6 +17,7 @@
 package com.android.server.media.projection;
 
 
+import static android.Manifest.permission.RECORD_SENSITIVE_CONTENT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.media.projection.MediaProjectionManager.TYPE_MIRRORING;
@@ -38,6 +39,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -48,10 +50,12 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions.LaunchCookie;
+import android.app.AppOpsManager;
+import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
@@ -66,7 +70,10 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
+import android.testing.TestableContext;
 import android.view.ContentRecordingSession;
 import android.view.ContentRecordingSession.RecordContent;
 
@@ -81,6 +88,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -93,13 +101,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the {@link MediaProjectionManagerService} class.
- *
+ * <p>
  * Build/Install/Run:
  * atest FrameworksServicesTests:MediaProjectionManagerServiceTest
  */
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
+@SuppressLint({"UseCheckPermission", "VisibleForTests", "MissingPermission"})
 public class MediaProjectionManagerServiceTest {
     private static final int UID = 10;
     private static final String PACKAGE_NAME = "test.package";
@@ -145,11 +154,17 @@ public class MediaProjectionManagerServiceTest {
                 }
             };
 
-    private Context mContext;
+    @Rule
+    public final TestableContext mContext = spy(
+            new TestableContext(InstrumentationRegistry.getInstrumentation().getContext()));
+
     private MediaProjectionManagerService mService;
     private OffsettableClock mClock;
     private ContentRecordingSession mWaitingDisplaySession =
             createDisplaySession(DEFAULT_DISPLAY);
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private ActivityManagerInternal mAmInternal;
@@ -157,6 +172,10 @@ public class MediaProjectionManagerServiceTest {
     private WindowManagerInternal mWindowManagerInternal;
     @Mock
     private PackageManager mPackageManager;
+    @Mock
+    private KeyguardManager mKeyguardManager;
+    @Mock
+    AppOpsManager mAppOpsManager;
     @Mock
     private IMediaProjectionWatcherCallback mWatcherCallback;
     @Mock
@@ -174,9 +193,9 @@ public class MediaProjectionManagerServiceTest {
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
 
-        mContext = spy(new ContextWrapper(
-                InstrumentationRegistry.getInstrumentation().getTargetContext()));
-        doReturn(mPackageManager).when(mContext).getPackageManager();
+        mContext.addMockSystemService(AppOpsManager.class, mAppOpsManager);
+        mContext.addMockSystemService(KeyguardManager.class, mKeyguardManager);
+        mContext.setMockPackageManager(mPackageManager);
 
         mClock = new OffsettableClock.Stopped();
         mWaitingDisplaySession.setWaitingForConsent(true);
@@ -244,6 +263,60 @@ public class MediaProjectionManagerServiceTest {
 
         assertThat(stoppedCallback1).isTrue();
         assertThat(stoppedCallback2).isFalse();
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testCreateProjection_keyguardLocked() throws Exception {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+
+        doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager)
+                .checkPermission(RECORD_SENSITIVE_CONTENT, projection.packageName);
+        projection.start(mIMediaProjectionCallback);
+        projection.notifyVirtualDisplayCreated(10);
+
+        assertThat(mService.getActiveProjectionInfo()).isNull();
+        assertThat(mIMediaProjectionCallback.mLatch.await(5, TimeUnit.SECONDS)).isTrue();
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testCreateProjection_keyguardLocked_packageAllowlisted()
+            throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+
+        doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPackageManager)
+                .checkPermission(RECORD_SENSITIVE_CONTENT, projection.packageName);
+        projection.start(mIMediaProjectionCallback);
+        projection.notifyVirtualDisplayCreated(10);
+
+        // The projection was started because it was allowed to capture the keyguard.
+        assertThat(mService.getActiveProjectionInfo()).isNotNull();
+    }
+
+    @SuppressLint("MissingPermission")
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testCreateProjection_keyguardLocked_AppOpMediaProjection()
+            throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        doReturn(true).when(mAppOpsManager).isOperationActive(eq(AppOpsManager.OP_PROJECT_MEDIA),
+                eq(projection.uid), eq(projection.packageName));
+        doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
+                RECORD_SENSITIVE_CONTENT, projection.packageName);
+
+        projection.start(mIMediaProjectionCallback);
+        projection.notifyVirtualDisplayCreated(10);
+
+        // The projection was started because it was allowed to capture the keyguard.
+        assertThat(mService.getActiveProjectionInfo()).isNotNull();
     }
 
     @Test
@@ -315,6 +388,81 @@ public class MediaProjectionManagerServiceTest {
 
         // But this is a new projection.
         assertThat(secondProjection).isNotEqualTo(projection);
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testReuseProjection_keyguardNotLocked_startConsentDialog()
+            throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        projection.start(mIMediaProjectionCallback);
+
+        doNothing().when(mContext).startActivityAsUser(any(), any());
+        doReturn(false).when(mKeyguardManager).isKeyguardLocked();
+
+        MediaProjectionManagerService.BinderService mediaProjectionBinderService =
+                mService.new BinderService(mContext);
+        mediaProjectionBinderService.requestConsentForInvalidProjection(projection);
+
+        verify(mContext).startActivityAsUser(any(), any());
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testReuseProjection_keyguardLocked_noConsentDialog() throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        projection.start(mIMediaProjectionCallback);
+
+        doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+        MediaProjectionManagerService.BinderService mediaProjectionBinderService =
+                mService.new BinderService(mContext);
+        mediaProjectionBinderService.requestConsentForInvalidProjection(projection);
+
+        verify(mContext, never()).startActivityAsUser(any(), any());
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testKeyguardLocked_stopsActiveProjection() throws Exception {
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+
+        assertThat(service.getActiveProjectionInfo()).isNotNull();
+
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager)
+                .checkPermission(RECORD_SENSITIVE_CONTENT, projection.packageName);
+        service.onKeyguardLockedStateChanged(true);
+
+        verify(mMediaProjectionMetricsLogger).logStopped(UID, TARGET_UID_UNKNOWN);
+        assertThat(service.getActiveProjectionInfo()).isNull();
+        assertThat(mIMediaProjectionCallback.mLatch.await(5, TimeUnit.SECONDS)).isTrue();
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testKeyguardLocked_packageAllowlisted_doesNotStopActiveProjection()
+            throws NameNotFoundException {
+        MediaProjectionManagerService service =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+        MediaProjectionManagerService.MediaProjection projection =
+                startProjectionPreconditions(service);
+        projection.start(mIMediaProjectionCallback);
+
+        assertThat(service.getActiveProjectionInfo()).isNotNull();
+
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPackageManager).checkPermission(
+                RECORD_SENSITIVE_CONTENT, projection.packageName);
+        service.onKeyguardLockedStateChanged(true);
+
+        verifyZeroInteractions(mMediaProjectionMetricsLogger);
+        assertThat(service.getActiveProjectionInfo()).isNotNull();
     }
 
     @Test

@@ -18,9 +18,7 @@ package android.os.vibrator.persistence;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
 import android.annotation.TestApi;
-import android.os.CombinedVibration;
 import android.os.VibrationEffect;
 import android.util.Xml;
 
@@ -37,14 +35,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Serializes {@link CombinedVibration} and {@link VibrationEffect} instances to XML.
+ * Serializes {@link VibrationEffect} instances to XML.
  *
  * <p>This uses the same schema expected by the {@link VibrationXmlParser}.
  *
  * @hide
  */
 @TestApi
-@SuppressLint("UnflaggedApi") // @TestApi without associated feature.
 public final class VibrationXmlSerializer {
 
     /**
@@ -80,20 +77,19 @@ public final class VibrationXmlSerializer {
             "http://xmlpull.org/v1/doc/features.html#indent-output";
 
     /**
-     * Serializes a {@link VibrationEffect} to XML and writes output to given {@link Writer}.
+     * Serializes a {@link VibrationEffect} to XML and writes output to given {@link Writer} using
+     * UTF-8 encoding.
      *
-     * <p>This method will only write into the {@link Writer} if the effect can successfully
-     * be represented by the XML serialization. It will throw an exception otherwise.
+     * <p>This method will only write to the stream if the effect can successfully be represented by
+     * the XML serialization. It will throw an exception otherwise.
      *
-     * @throws SerializationFailedException serialization of input effect failed, no data was
-     *                                      written into given {@link Writer}.
-     * @throws IOException error writing to given {@link Writer}.
+     * @throws IOException serialization of input effect failed or error writing to output stream.
      *
      * @hide
      */
     @TestApi
     public static void serialize(@NonNull VibrationEffect effect, @NonNull Writer writer)
-            throws SerializationFailedException, IOException {
+            throws IOException {
         serialize(effect, writer, /* flags= */ 0);
     }
 
@@ -106,9 +102,9 @@ public final class VibrationXmlSerializer {
      * @hide
      */
     public static void serialize(@NonNull VibrationEffect effect, @NonNull Writer writer,
-            @Flags int flags) throws SerializationFailedException, IOException {
+            @Flags int flags) throws IOException {
         // Serialize effect first to fail early.
-        XmlSerializedVibration<VibrationEffect> serializedVibration =
+        XmlSerializedVibration<? extends VibrationEffect> serializedVibration =
                 toSerializedVibration(effect, flags);
         TypedXmlSerializer xmlSerializer = Xml.newFastSerializer();
         xmlSerializer.setFeature(XML_FEATURE_INDENT_OUTPUT, (flags & FLAG_PRETTY_PRINT) != 0);
@@ -118,9 +114,9 @@ public final class VibrationXmlSerializer {
         xmlSerializer.endDocument();
     }
 
-    private static XmlSerializedVibration<VibrationEffect> toSerializedVibration(
+    private static XmlSerializedVibration<? extends VibrationEffect> toSerializedVibration(
             VibrationEffect effect, @Flags int flags) throws SerializationFailedException {
-        XmlSerializedVibration<VibrationEffect> serializedVibration;
+        XmlSerializedVibration<? extends VibrationEffect> serializedVibration;
         int serializerFlags = 0;
         if ((flags & FLAG_ALLOW_HIDDEN_APIS) != 0) {
             serializerFlags |= XmlConstants.FLAG_ALLOW_HIDDEN_APIS;
@@ -138,17 +134,16 @@ public final class VibrationXmlSerializer {
     }
 
     /**
-     * Exception thrown when a {@link VibrationEffect} instance serialization fails.
+     * Exception thrown when a {@link VibrationEffect} serialization fails.
      *
      * <p>The serialization can fail if a given vibration cannot be represented using the public
-     * format, or if it uses hidden APIs that are not supported for serialization (e.g.
-     * {@link VibrationEffect.WaveformBuilder}).
+     * format, or if it uses a non-public representation that is not supported for serialization.
      *
      * @hide
      */
     @TestApi
-    public static final class SerializationFailedException extends RuntimeException {
-        SerializationFailedException(VibrationEffect effect, Throwable cause) {
+    public static final class SerializationFailedException extends IOException {
+        private SerializationFailedException(VibrationEffect effect, Throwable cause) {
             super("Serialization failed for vibration effect " + effect, cause);
         }
     }

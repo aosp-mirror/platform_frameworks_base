@@ -16,39 +16,53 @@
 
 package android.media;
 
+import android.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Objects;
 
 /** @hide */
+@TestApi
+@SuppressLint("UnflaggedApi") // @TestApi without associated feature.
 public final class VolumePolicy implements Parcelable {
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @NonNull
     public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, false, 400);
 
     /**
      * Accessibility volume policy where the STREAM_MUSIC volume (i.e. media volume) affects
      * the STREAM_ACCESSIBILITY volume, and vice-versa.
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public static final int A11Y_MODE_MEDIA_A11Y_VOLUME = 0;
     /**
      * Accessibility volume policy where the STREAM_ACCESSIBILITY volume is independent from
      * any other volume.
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public static final int A11Y_MODE_INDEPENDENT_A11Y_VOLUME = 1;
 
     /** Allow volume adjustments lower from vibrate to enter ringer mode = silent */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public final boolean volumeDownToEnterSilent;
 
     /** Allow volume adjustments higher to exit ringer mode = silent */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public final boolean volumeUpToExitSilent;
 
     /** Automatically enter do not disturb when ringer mode = silent */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public final boolean doNotDisturbWhenSilent;
 
     /** Only allow volume adjustment from vibrate to silent after this
         number of milliseconds since an adjustment from normal to vibrate. */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public final int vibrateToSilentDebounce;
 
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public VolumePolicy(boolean volumeDownToEnterSilent, boolean volumeUpToExitSilent,
             boolean doNotDisturbWhenSilent, int vibrateToSilentDebounce) {
         this.volumeDownToEnterSilent = volumeDownToEnterSilent;
@@ -82,19 +96,22 @@ public final class VolumePolicy implements Parcelable {
                 && other.vibrateToSilentDebounce == vibrateToSilentDebounce;
     }
 
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     @Override
     public int describeContents() {
         return 0;
     }
 
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(volumeDownToEnterSilent ? 1 : 0);
         dest.writeInt(volumeUpToExitSilent ? 1 : 0);
         dest.writeInt(doNotDisturbWhenSilent ? 1 : 0);
         dest.writeInt(vibrateToSilentDebounce);
     }
 
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     public static final @android.annotation.NonNull Parcelable.Creator<VolumePolicy> CREATOR
             = new Parcelable.Creator<VolumePolicy>() {
         @Override

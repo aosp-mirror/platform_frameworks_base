@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.base.viewmodel
 
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -27,5 +28,5 @@ class QSTileCoroutineScopeFactory
 constructor(@Application private val applicationScope: CoroutineScope) {
 
     fun create(): CoroutineScope =
-        CoroutineScope(applicationScope.coroutineContext + SupervisorJob())
+        CoroutineScope(applicationScope.coroutineContext + SupervisorJob() + createCoroutineTracingContext("QSTileScope"))
 }

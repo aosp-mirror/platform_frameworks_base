@@ -19,12 +19,13 @@ package com.android.server.power.stats;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 
+import com.android.server.power.stats.format.BinaryStatePowerStatsLayout;
+
 public class CameraPowerStatsCollector extends EnergyConsumerPowerStatsCollector {
 
-    CameraPowerStatsCollector(Injector injector) {
+    public CameraPowerStatsCollector(Injector injector) {
         super(injector, BatteryConsumer.POWER_COMPONENT_CAMERA,
                 BatteryConsumer.powerComponentIdToString(BatteryConsumer.POWER_COMPONENT_CAMERA),
-                EnergyConsumerType.CAMERA, /* energy consumer name */ null,
-                new BinaryStatePowerStatsLayout());
+                EnergyConsumerType.CAMERA, new BinaryStatePowerStatsLayout());
     }
 }

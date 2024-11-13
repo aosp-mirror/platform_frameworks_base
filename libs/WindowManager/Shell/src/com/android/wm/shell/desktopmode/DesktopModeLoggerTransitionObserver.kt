@@ -22,6 +22,8 @@ import android.app.TaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.os.IBinder
+import android.os.SystemProperties
+import android.os.Trace
 import android.util.SparseArray
 import android.view.SurfaceControl
 import android.view.WindowManager
@@ -35,7 +37,7 @@ import androidx.core.util.plus
 import androidx.core.util.putAll
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
@@ -46,11 +48,10 @@ import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
-import com.android.wm.shell.shared.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
-import com.android.wm.shell.util.KtProtoLog
 
 /**
  * A [Transitions.TransitionObserver] that observes transitions and the proposed changes to log
@@ -84,6 +85,10 @@ class DesktopModeLoggerTransitionObserver(
     // Caching whether the previous transition was exit to overview.
     private var wasPreviousTransitionExitToOverview: Boolean = false
 
+    // Caching whether the previous transition was exit due to screen off. This helps check if a
+    // following enter reason could be Screen On
+    private var wasPreviousTransitionExitByScreenOff: Boolean = false
+
     // The instanceId for the current logging session
     private var loggerInstanceId: InstanceId? = null
 
@@ -106,7 +111,7 @@ class DesktopModeLoggerTransitionObserver(
     ) {
         // this was a new recents animation
         if (info.isExitToRecentsTransition() && tasksSavedForRecents.isEmpty()) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopModeLogger: Recents animation running, saving tasks for later"
             )
@@ -132,7 +137,7 @@ class DesktopModeLoggerTransitionObserver(
                 info.flags == 0 &&
                 tasksSavedForRecents.isNotEmpty()
         ) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopModeLogger: Canceled recents animation, restoring tasks"
             )
@@ -202,7 +207,7 @@ class DesktopModeLoggerTransitionObserver(
             }
         }
 
-        KtProtoLog.v(
+        ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: taskInfo map after processing changes %s",
             postTransitionFreeformTasks.size()
@@ -282,41 +287,73 @@ class DesktopModeLoggerTransitionObserver(
         visibleFreeformTaskInfos.putAll(postTransitionVisibleFreeformTasks)
     }
 
-    // TODO(b/326231724) - Add logging around taskInfoChanges Updates
     /** Compare the old and new state of taskInfos and identify and log the changes */
     private fun identifyAndLogTaskUpdates(
         sessionId: Int,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>
     ) {
-        // find new tasks that were added
         postTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
-            if (!preTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                desktopModeEventLogger.logTaskAdded(sessionId, buildTaskUpdateForTask(taskInfo))
+            val currentTaskUpdate = buildTaskUpdateForTask(taskInfo,
+                postTransitionVisibleFreeformTasks.size())
+            val previousTaskInfo = preTransitionVisibleFreeformTasks[taskId]
+            when {
+                // new tasks added
+                previousTaskInfo == null -> {
+                    desktopModeEventLogger.logTaskAdded(sessionId, currentTaskUpdate)
+                    Trace.setCounter(
+                        Trace.TRACE_TAG_WINDOW_MANAGER,
+                        VISIBLE_TASKS_COUNTER_NAME,
+                        postTransitionVisibleFreeformTasks.size().toLong()
+                    )
+                    SystemProperties.set(VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+                        postTransitionVisibleFreeformTasks.size().toString())
+                }
+                // old tasks that were resized or repositioned
+                // TODO(b/347935387): Log changes only once they are stable.
+                buildTaskUpdateForTask(previousTaskInfo, postTransitionVisibleFreeformTasks.size())
+                        != currentTaskUpdate ->
+                            desktopModeEventLogger.logTaskInfoChanged(sessionId, currentTaskUpdate)
             }
         }
 
         // find old tasks that were removed
         preTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
             if (!postTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                desktopModeEventLogger.logTaskRemoved(sessionId, buildTaskUpdateForTask(taskInfo))
+                desktopModeEventLogger.logTaskRemoved(sessionId,
+                    buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size()))
+                Trace.setCounter(
+                    Trace.TRACE_TAG_WINDOW_MANAGER,
+                    VISIBLE_TASKS_COUNTER_NAME,
+                    postTransitionVisibleFreeformTasks.size().toLong()
+                )
+                SystemProperties.set(VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+                    postTransitionVisibleFreeformTasks.size().toString())
             }
         }
     }
 
-    // TODO(b/326231724: figure out how to get taskWidth and taskHeight from TaskInfo
-    private fun buildTaskUpdateForTask(taskInfo: TaskInfo): TaskUpdate {
-        val taskUpdate = TaskUpdate(taskInfo.taskId, taskInfo.userId)
-        // add task x, y if available
-        taskInfo.positionInParent?.let { taskUpdate.copy(taskX = it.x, taskY = it.y) }
-
-        return taskUpdate
+    private fun buildTaskUpdateForTask(taskInfo: TaskInfo, visibleTasks: Int): TaskUpdate {
+        val screenBounds = taskInfo.configuration.windowConfiguration.bounds
+        val positionInParent = taskInfo.positionInParent
+        return TaskUpdate(
+            instanceId = taskInfo.taskId,
+            uid = taskInfo.effectiveUid,
+            taskHeight = screenBounds.height(),
+            taskWidth = screenBounds.width(),
+            taskX = positionInParent.x,
+            taskY = positionInParent.y,
+            visibleTaskCount = visibleTasks,
+        )
     }
 
     /** Get [EnterReason] for this session enter */
-    private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason =
-        when {
-            transitionInfo.type == WindowManager.TRANSIT_WAKE -> EnterReason.SCREEN_ON
+    private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason {
+       val enterReason = when {
+            transitionInfo.type == WindowManager.TRANSIT_WAKE
+                   // If there is a screen lock, desktop window entry is after dismissing keyguard
+                   || (transitionInfo.type == WindowManager.TRANSIT_TO_BACK
+                   && wasPreviousTransitionExitByScreenOff) -> EnterReason.SCREEN_ON
             transitionInfo.type == Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
                 EnterReason.APP_HANDLE_DRAG
             transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON ->
@@ -338,17 +375,23 @@ class DesktopModeLoggerTransitionObserver(
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
-                    "Unknown enter reason for transition type ${transitionInfo.type}",
+                    "Unknown enter reason for transition type: %s",
                     transitionInfo.type
                 )
                 EnterReason.UNKNOWN_ENTER
             }
         }
+        wasPreviousTransitionExitByScreenOff = false
+        return enterReason
+    }
 
     /** Get [ExitReason] for this session exit */
     private fun getExitReason(transitionInfo: TransitionInfo): ExitReason =
          when {
-            transitionInfo.type == WindowManager.TRANSIT_SLEEP -> ExitReason.SCREEN_OFF
+            transitionInfo.type == WindowManager.TRANSIT_SLEEP -> {
+                wasPreviousTransitionExitByScreenOff = true
+                ExitReason.SCREEN_OFF
+            }
             transitionInfo.type == WindowManager.TRANSIT_CLOSE -> ExitReason.TASK_FINISHED
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG -> ExitReason.DRAG_TO_EXIT
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON ->
@@ -359,7 +402,7 @@ class DesktopModeLoggerTransitionObserver(
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
-                    "Unknown exit reason for transition type ${transitionInfo.type}",
+                    "Unknown exit reason for transition type: %s",
                     transitionInfo.type
                 )
                 ExitReason.UNKNOWN_EXIT
@@ -390,5 +433,13 @@ class DesktopModeLoggerTransitionObserver(
     private fun TransitionInfo.isExitToRecentsTransition(): Boolean {
         return this.type == WindowManager.TRANSIT_TO_FRONT &&
             this.flags == WindowManager.TRANSIT_FLAG_IS_RECENTS
+    }
+
+    companion object {
+        @VisibleForTesting
+        const val VISIBLE_TASKS_COUNTER_NAME = "desktop_mode_visible_tasks"
+        @VisibleForTesting
+        const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY =
+            "debug.tracing." + VISIBLE_TASKS_COUNTER_NAME
     }
 }

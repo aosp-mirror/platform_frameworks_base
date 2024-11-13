@@ -28,3 +28,42 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "wear_frameworks"
+    name: "optional_background_install_control"
+    description: "Enable BackgroundInstallControl based on system feature to prevent it from starting on form factors."
+    bug: "340928990"
+}
+
+flag {
+    namespace: "input"
+    name: "modifier_shortcut_manager_multiuser"
+    description: "Update Modifier Shortcut Manager to work correctly with multiple users, including HSUM"
+    bug: "351963350"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "consolidate_battery_change_events"
+    description: "Optimize battery status updates by delivering only the most recent battery information"
+    bug: "361334584"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "trace_battery_changed_broadcast_event"
+    description: "Add tracing to record battery changed broadcast event"
+    bug: "365410144"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

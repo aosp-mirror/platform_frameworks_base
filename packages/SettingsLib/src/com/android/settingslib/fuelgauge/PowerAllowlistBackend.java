@@ -136,12 +136,10 @@ public class PowerAllowlistBackend {
             return true;
         }
 
-        if (android.app.admin.flags.Flags.disallowUserControlBgUsageFix()) {
-            // App is subject to DevicePolicyManager.setUserControlDisabledPackages() policy.
-            final int userId = UserHandle.getUserId(uid);
-            if (mAppContext.getPackageManager().isPackageStateProtected(pkg, userId)) {
-                return true;
-            }
+        // App is subject to DevicePolicyManager.setUserControlDisabledPackages() policy.
+        final int userId = UserHandle.getUserId(uid);
+        if (mAppContext.getPackageManager().isPackageStateProtected(pkg, userId)) {
+            return true;
         }
 
         return false;
@@ -325,6 +323,14 @@ public class PowerAllowlistBackend {
                 sInstance = new PowerAllowlistBackend(context);
             }
             return sInstance;
+        }
+    }
+
+    /** Testing only. Reset the instance to avoid tests affecting each other. */
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public static void resetInstance() {
+        synchronized (PowerAllowlistBackend.class) {
+            sInstance = null;
         }
     }
 }

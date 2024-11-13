@@ -21,21 +21,21 @@ import com.android.systemui.log.table.TableRowLogger
 
 /** Data model of media on the communal hub. */
 data class CommunalMediaModel(
-    val hasActiveMediaOrRecommendation: Boolean,
+    val hasAnyMediaOrRecommendation: Boolean,
     val createdTimestampMillis: Long = 0L,
 ) : Diffable<CommunalMediaModel> {
     companion object {
         val INACTIVE =
             CommunalMediaModel(
-                hasActiveMediaOrRecommendation = false,
+                hasAnyMediaOrRecommendation = false,
             )
     }
 
     override fun logDiffs(prevVal: CommunalMediaModel, row: TableRowLogger) {
-        if (hasActiveMediaOrRecommendation != prevVal.hasActiveMediaOrRecommendation) {
+        if (hasAnyMediaOrRecommendation != prevVal.hasAnyMediaOrRecommendation) {
             row.logChange(
                 columnName = "isMediaActive",
-                value = hasActiveMediaOrRecommendation,
+                value = hasAnyMediaOrRecommendation,
             )
         }
 

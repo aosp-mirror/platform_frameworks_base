@@ -79,6 +79,7 @@ final class VibrationStats {
     private int mVibratorSetAmplitudeCount;
     private int mVibratorSetExternalControlCount;
     private int mVibratorPerformCount;
+    private int mVibratorPerformVendorCount;
     private int mVibratorComposeCount;
     private int mVibratorComposePwleCount;
 
@@ -165,7 +166,7 @@ final class VibrationStats {
      * @return true if the status was accepted. This method will only accept given values if
      * the end timestamp was never set.
      */
-    boolean reportEnded(@Nullable Vibration.CallerInfo endedBy) {
+    boolean reportEnded(@Nullable VibrationSession.CallerInfo endedBy) {
         if (hasEnded()) {
             // Vibration already ended, keep first ending stats set and ignore this one.
             return false;
@@ -186,7 +187,7 @@ final class VibrationStats {
      * <p>This method will only accept the first value as the one that was interrupted by this
      * vibration, and will ignore all successive calls.
      */
-    void reportInterruptedAnotherVibration(@NonNull Vibration.CallerInfo callerInfo) {
+    void reportInterruptedAnotherVibration(@NonNull VibrationSession.CallerInfo callerInfo) {
         if (mInterruptedUsage < 0) {
             mInterruptedUsage = callerInfo.attrs.getUsage();
         }
@@ -237,6 +238,11 @@ final class VibrationStats {
             // Effect unsupported or request failed.
             mVibratorEffectsUsed.put(prebaked.getEffectId(), false);
         }
+    }
+
+    /** Report a call to vibrator method to trigger a vendor vibration effect. */
+    void reportPerformVendorEffect(long halResult) {
+        mVibratorPerformVendorCount++;
     }
 
     /** Report a call to vibrator method to trigger a vibration as a composition of primitives. */
@@ -313,6 +319,7 @@ final class VibrationStats {
         public final int halOnCount;
         public final int halOffCount;
         public final int halPerformCount;
+        public final int halPerformVendorCount;
         public final int halSetAmplitudeCount;
         public final int halSetExternalControlCount;
         public final int halCompositionSize;
@@ -323,7 +330,7 @@ final class VibrationStats {
         public final int[] halUnsupportedEffectsUsed;
         private boolean mIsWritten;
 
-        StatsInfo(int uid, int vibrationType, int usage, Vibration.Status status,
+        StatsInfo(int uid, int vibrationType, int usage, VibrationSession.Status status,
                 VibrationStats stats, long completionUptimeMillis) {
             this.uid = uid;
             this.vibrationType = vibrationType;
@@ -357,6 +364,7 @@ final class VibrationStats {
             halOnCount = stats.mVibratorOnCount;
             halOffCount = stats.mVibratorOffCount;
             halPerformCount = stats.mVibratorPerformCount;
+            halPerformVendorCount = stats.mVibratorPerformVendorCount;
             halSetAmplitudeCount = stats.mVibratorSetAmplitudeCount;
             halSetExternalControlCount = stats.mVibratorSetExternalControlCount;
             halCompositionSize = stats.mVibrationCompositionTotalSize;
@@ -390,7 +398,8 @@ final class VibrationStats {
                     halOnCount, halOffCount, halPerformCount, halSetAmplitudeCount,
                     halSetExternalControlCount, halSupportedCompositionPrimitivesUsed,
                     halSupportedEffectsUsed, halUnsupportedCompositionPrimitivesUsed,
-                    halUnsupportedEffectsUsed, halCompositionSize, halPwleSize, adaptiveScale);
+                    halUnsupportedEffectsUsed, halCompositionSize, halPwleSize, adaptiveScale,
+                    halPerformVendorCount);
         }
 
         private static int[] filteredKeys(SparseBooleanArray supportArray, boolean supported) {

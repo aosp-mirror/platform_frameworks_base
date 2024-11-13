@@ -19,6 +19,7 @@
 
 #include <android/gui/BnScreenCaptureListener.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
+#include <gui/AidlUtil.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
@@ -141,12 +142,13 @@ private:
 };
 
 static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& captureArgs) {
-    captureArgs.pixelFormat = static_cast<ui::PixelFormat>(
+    captureArgs.pixelFormat = static_cast<int32_t>(
             env->GetIntField(captureArgsObject, gCaptureArgsClassInfo.pixelFormat));
-    captureArgs.sourceCrop =
+    const auto sourceCrop =
             JNICommon::rectFromObj(env,
                                    env->GetObjectField(captureArgsObject,
                                                        gCaptureArgsClassInfo.sourceCrop));
+    captureArgs.sourceCrop = gui::aidl_utils::toARect(sourceCrop);
     captureArgs.frameScaleX =
             env->GetFloatField(captureArgsObject, gCaptureArgsClassInfo.frameScaleX);
     captureArgs.frameScaleY =
@@ -172,7 +174,7 @@ static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& 
                 jniThrowNullPointerException(env, "Exclude layer is null");
                 return;
             }
-            captureArgs.excludeHandles.emplace(excludeObject->getHandle());
+            captureArgs.excludeHandles.emplace_back(excludeObject->getHandle());
         }
     }
     captureArgs.hintForSeamlessTransition =
@@ -182,18 +184,18 @@ static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& 
 
 static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
                                                        jobject displayCaptureArgsObject) {
-    DisplayCaptureArgs captureArgs;
-    getCaptureArgs(env, displayCaptureArgsObject, captureArgs);
+    DisplayCaptureArgs displayCaptureArgs;
+    getCaptureArgs(env, displayCaptureArgsObject, displayCaptureArgs.captureArgs);
 
-    captureArgs.displayToken =
+    displayCaptureArgs.displayToken =
             ibinderForJavaObject(env,
                                  env->GetObjectField(displayCaptureArgsObject,
                                                      gDisplayCaptureArgsClassInfo.displayToken));
-    captureArgs.width =
+    displayCaptureArgs.width =
             env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.width);
-    captureArgs.height =
+    displayCaptureArgs.height =
             env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.height);
-    return captureArgs;
+    return displayCaptureArgs;
 }
 
 static jint nativeCaptureDisplay(JNIEnv* env, jclass clazz, jobject displayCaptureArgsObject,
@@ -212,8 +214,8 @@ static jint nativeCaptureDisplay(JNIEnv* env, jclass clazz, jobject displayCaptu
 
 static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureArgsObject,
                                 jlong screenCaptureListenerObject, jboolean sync) {
-    LayerCaptureArgs captureArgs;
-    getCaptureArgs(env, layerCaptureArgsObject, captureArgs);
+    LayerCaptureArgs layerCaptureArgs;
+    getCaptureArgs(env, layerCaptureArgsObject, layerCaptureArgs.captureArgs);
 
     SurfaceControl* layer = reinterpret_cast<SurfaceControl*>(
             env->GetLongField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.layer));
@@ -221,13 +223,13 @@ static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureA
         return BAD_VALUE;
     }
 
-    captureArgs.layerHandle = layer->getHandle();
-    captureArgs.childrenOnly =
+    layerCaptureArgs.layerHandle = layer->getHandle();
+    layerCaptureArgs.childrenOnly =
             env->GetBooleanField(layerCaptureArgsObject, gLayerCaptureArgsClassInfo.childrenOnly);
 
     sp<gui::IScreenCaptureListener> captureListener =
             reinterpret_cast<gui::IScreenCaptureListener*>(screenCaptureListenerObject);
-    return ScreenshotClient::captureLayers(captureArgs, captureListener, sync);
+    return ScreenshotClient::captureLayers(layerCaptureArgs, captureListener, sync);
 }
 
 static jlong nativeCreateScreenCaptureListener(JNIEnv* env, jclass clazz, jobject consumerObj) {

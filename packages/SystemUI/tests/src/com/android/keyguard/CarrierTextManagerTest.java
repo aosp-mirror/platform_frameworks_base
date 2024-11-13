@@ -50,9 +50,9 @@ import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.logging.CarrierTextManagerLogger;
@@ -84,7 +84,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class CarrierTextManagerTest extends SysuiTestCase {
 
     private static final CharSequence SEPARATOR = " \u2014 ";
@@ -445,15 +445,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         assertFalse(mWifiRepository.isWifiConnectedWithValidSsid());
         mWifiRepository.setWifiNetwork(
-                new WifiNetworkModel.Active(
-                        /* networkId= */ 0,
+                WifiNetworkModel.Active.Companion.of(
                         /* isValidated= */ false,
                         /* level= */ 0,
                         /* ssid= */ "",
-                        /* hotspotDeviceType= */ WifiNetworkModel.HotspotDeviceType.NONE,
-                        /* isPasspointAccessPoint= */ false,
-                        /* isOnlineSignUpForPasspointAccessPoint= */ false,
-                        /* passpointProviderFriendlyName= */ null));
+                        /* hotspotDeviceType= */ WifiNetworkModel.HotspotDeviceType.NONE));
         assertTrue(mWifiRepository.isWifiConnectedWithValidSsid());
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();

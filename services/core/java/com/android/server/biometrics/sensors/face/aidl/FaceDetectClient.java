@@ -83,7 +83,8 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
             boolean isStrongBiometric, SensorPrivacyManager sensorPrivacyManager) {
         super(context, lazyDaemon, token, listener, options.getUserId(),
                 options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
-                false /* shouldVibrate */, logger, biometricContext);
+                false /* shouldVibrate */, logger, biometricContext,
+                false /* isMandatoryBiometrics */);
         setRequestId(requestId);
         mAuthenticationStateListeners = authenticationStateListeners;
         mIsStrongBiometric = isStrongBiometric;

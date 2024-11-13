@@ -57,6 +57,7 @@
 #include "java/ManifestClassGenerator.h"
 #include "java/ProguardRules.h"
 #include "link/FeatureFlagsFilter.h"
+#include "link/FlagDisabledResourceRemover.h"
 #include "link/Linkers.h"
 #include "link/ManifestFixer.h"
 #include "link/NoDefaultResourceRemover.h"
@@ -305,6 +306,7 @@ struct ResourceFileFlattenerOptions {
   OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
   std::optional<std::regex> regex_to_not_compress;
+  FeatureFlagValues feature_flag_values;
 };
 
 // A sampling of public framework resource IDs.
@@ -669,6 +671,13 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               if (!result) {
                 return false;
               }
+            }
+
+            FeatureFlagsFilterOptions flags_filter_options;
+            flags_filter_options.flags_must_be_readonly = true;
+            FeatureFlagsFilter flags_filter(options_.feature_flag_values, flags_filter_options);
+            if (!flags_filter.Consume(context_, doc.get())) {
+              return 1;
             }
 
             error |= !FlattenXml(context_, *doc, dst_path, options_.keep_raw_values,
@@ -1840,11 +1849,57 @@ class Linker {
     return validate(attr->value);
   }
 
+  class FlagDisabledStringVisitor : public DescendingValueVisitor {
+   public:
+    using DescendingValueVisitor::Visit;
+
+    explicit FlagDisabledStringVisitor(android::StringPool& string_pool)
+        : string_pool_(string_pool) {
+    }
+
+    void Visit(RawString* value) override {
+      value->value = string_pool_.MakeRef("");
+    }
+
+    void Visit(String* value) override {
+      value->value = string_pool_.MakeRef("");
+    }
+
+    void Visit(StyledString* value) override {
+      value->value = string_pool_.MakeRef(android::StyleString{{""}, {}});
+    }
+
+   private:
+    DISALLOW_COPY_AND_ASSIGN(FlagDisabledStringVisitor);
+    android::StringPool& string_pool_;
+  };
+
   // Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
   // to the IArchiveWriter.
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
     TRACE_CALL();
+
+    FlagDisabledStringVisitor visitor(table->string_pool);
+
+    for (auto& package : table->packages) {
+      for (auto& type : package->types) {
+        for (auto& entry : type->entries) {
+          for (auto& config_value : entry->values) {
+            if (config_value->value->GetFlagStatus() == FlagStatus::Disabled) {
+              config_value->value->Accept(&visitor);
+            }
+          }
+        }
+      }
+    }
+
+    if (!FlagDisabledResourceRemover{}.Consume(context_, table)) {
+      context_->GetDiagnostics()->Error(android::DiagMessage()
+                                        << "failed removing resources behind disabled flags");
+      return 1;
+    }
+
     const bool keep_raw_values = (context_->GetPackageType() == PackageType::kStaticLib)
                                  || options_.keep_raw_values;
     bool result = FlattenXml(context_, *manifest, kAndroidManifestPath, keep_raw_values,
@@ -1879,6 +1934,7 @@ class Linker {
         static_cast<bool>(options_.generate_proguard_rules_path);
     file_flattener_options.output_format = options_.output_format;
     file_flattener_options.do_not_fail_on_missing_resources = options_.merge_only;
+    file_flattener_options.feature_flag_values = options_.feature_flag_values;
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
     if (!file_flattener.Flatten(table, writer)) {
@@ -2331,18 +2387,18 @@ class Linker {
       return 1;
     };
 
+    if (options_.generate_java_class_path || options_.generate_text_symbols_path) {
+      if (!GenerateJavaClasses()) {
+        return 1;
+      }
+    }
+
     if (!WriteApk(archive_writer.get(), &proguard_keep_set, manifest_xml.get(), &final_table_)) {
       return 1;
     }
 
     if (!CopyAssetsDirsToApk(archive_writer.get())) {
       return 1;
-    }
-
-    if (options_.generate_java_class_path || options_.generate_text_symbols_path) {
-      if (!GenerateJavaClasses()) {
-        return 1;
-      }
     }
 
     if (!WriteProguardFile(options_.generate_proguard_rules_path, proguard_keep_set)) {

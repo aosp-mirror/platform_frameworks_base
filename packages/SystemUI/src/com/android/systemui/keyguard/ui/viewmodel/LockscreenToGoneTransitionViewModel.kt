@@ -67,7 +67,7 @@ constructor(
         var leaveShadeOpen = false
 
         return transitionAnimation.sharedFlow(
-            duration = 200.milliseconds,
+            duration = 80.milliseconds,
             onStart = {
                 leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
                 startAlpha = viewState.alpha()

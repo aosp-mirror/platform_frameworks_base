@@ -54,3 +54,94 @@ flag {
     description: "Offers a setting to enable touchpad tap dragging"
     bug: "321978150"
 }
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_glyph_map"
+    description: "Allows system to provide keyboard specific key drawables and shortcuts via config files"
+    bug: "345440920"
+}
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_a11y_mouse_keys"
+    description: "Controls if the mouse keys accessibility feature for physical keyboard is available to the user"
+    bug: "341799888"
+}
+
+flag {
+    namespace: "input_native"
+    name: "touchpad_visualizer"
+    description: "Enables a developer overlay that displays raw touchpad input data and gesture recognition status in real-time."
+    bug: "286551975"
+}
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_layout_manager_multi_user_ime_setup"
+    description: "Update KeyboardLayoutManager to work correctly with multi-user IME setup"
+    bug: "354333072"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "modifier_shortcut_dump"
+  namespace: "input"
+  description: "Dump keyboard shortcuts in dumpsys window"
+  bug: "351963350"
+}
+
+flag {
+  name: "modifier_shortcut_manager_refactor"
+  namespace: "input"
+  description: "Refactor ModifierShortcutManager internal representation of shortcuts."
+  bug: "358603902"
+}
+
+flag {
+    namespace: "input_native"
+    name: "manage_key_gestures"
+    description: "Manage key gestures through Input APIs"
+    is_exported: true
+    bug: "358569822"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "input_native"
+    name: "use_key_gesture_event_handler"
+    description: "Use KeyGestureEvent handler APIs to control system shortcuts and key gestures"
+    bug: "358569822"
+}
+
+flag {
+    namespace: "input_native"
+    name: "use_key_gesture_event_handler_multi_press_gestures"
+    description: "Use KeyGestureEvent handler APIs to control multi key press gestures"
+    bug: "358569822"
+}
+
+flag {
+  name: "keyboard_repeat_keys"
+  namespace: "input_native"
+  description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"
+  bug: "336585002"
+}
+
+flag {
+  name: "mouse_reverse_vertical_scrolling"
+  namespace: "input"
+  description: "Controls whether external mouse vertical scrolling can be reversed"
+  bug: "352598211"
+}
+
+flag {
+  name: "mouse_swap_primary_button"
+  namespace: "input"
+  description: "Controls whether the connected mice's primary buttons, left and right, can be swapped."
+  bug: "352598211"
+}
