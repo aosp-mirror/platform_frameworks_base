@@ -4566,14 +4566,31 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
-        /** @hide */
+        /**
+         * Sets the Luts for the layer.
+         *
+         * <p> The function also allows to clear previously applied lut(s). To do this,
+         * set the displayluts to be either {@code nullptr} or
+         * an empty {@link android.hardware.DisplayLuts} instance.
+         *
+         * @param sc The SurfaceControl to update
+         *
+         * @param displayLuts The selected Lut(s)
+         *
+         * @return this
+         * @see DisplayLuts
+         */
+        @FlaggedApi(android.hardware.flags.Flags.FLAG_LUTS_API)
         public @NonNull Transaction setLuts(@NonNull SurfaceControl sc,
-                @NonNull DisplayLuts displayLuts) {
+                @Nullable DisplayLuts displayLuts) {
             checkPreconditions(sc);
-
-            nativeSetLuts(mNativeObject, sc.mNativeObject, displayLuts.getLutBuffers(),
-                    displayLuts.getOffsets(), displayLuts.getLutDimensions(),
-                    displayLuts.getLutSizes(), displayLuts.getLutSamplingKeys());
+            if (displayLuts != null && displayLuts.valid()) {
+                nativeSetLuts(mNativeObject, sc.mNativeObject, displayLuts.getLutBuffers(),
+                        displayLuts.getOffsets(), displayLuts.getLutDimensions(),
+                        displayLuts.getLutSizes(), displayLuts.getLutSamplingKeys());
+            } else {
+                nativeSetLuts(mNativeObject, sc.mNativeObject, null, null, null, null, null);
+            }
             return this;
         }
 
