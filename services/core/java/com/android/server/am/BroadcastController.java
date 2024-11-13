@@ -57,7 +57,6 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationThreadConstants;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
-import android.app.BroadcastStickyCache;
 import android.app.IApplicationThread;
 import android.app.compat.CompatChanges;
 import android.appwidget.AppWidgetManager;
@@ -702,7 +701,6 @@ class BroadcastController {
             boolean serialized, boolean sticky, int userId) {
         mService.enforceNotIsolatedCaller("broadcastIntent");
 
-        int result;
         synchronized (mService) {
             intent = verifyBroadcastLocked(intent);
 
@@ -724,7 +722,7 @@ class BroadcastController {
 
             final long origId = Binder.clearCallingIdentity();
             try {
-                result = broadcastIntentLocked(callerApp,
+                return broadcastIntentLocked(callerApp,
                         callerApp != null ? callerApp.info.packageName : null, callingFeatureId,
                         intent, resolvedType, resultToApp, resultTo, resultCode, resultData,
                         resultExtras, requiredPermissions, excludedPermissions, excludedPackages,
@@ -735,10 +733,6 @@ class BroadcastController {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
-        if (sticky && result == ActivityManager.BROADCAST_SUCCESS) {
-            BroadcastStickyCache.incrementVersion(intent.getAction());
-        }
-        return result;
     }
 
     // Not the binder call surface
@@ -749,7 +743,6 @@ class BroadcastController {
             boolean serialized, boolean sticky, int userId,
             BackgroundStartPrivileges backgroundStartPrivileges,
             @Nullable int[] broadcastAllowList) {
-        int result;
         synchronized (mService) {
             intent = verifyBroadcastLocked(intent);
 
@@ -757,7 +750,7 @@ class BroadcastController {
             String[] requiredPermissions = requiredPermission == null ? null
                     : new String[] {requiredPermission};
             try {
-                result = broadcastIntentLocked(null, packageName, featureId, intent, resolvedType,
+                return broadcastIntentLocked(null, packageName, featureId, intent, resolvedType,
                         resultToApp, resultTo, resultCode, resultData, resultExtras,
                         requiredPermissions, null, null, OP_NONE, bOptions, serialized, sticky, -1,
                         uid, realCallingUid, realCallingPid, userId,
@@ -767,10 +760,6 @@ class BroadcastController {
                 Binder.restoreCallingIdentity(origId);
             }
         }
-        if (sticky && result == ActivityManager.BROADCAST_SUCCESS) {
-            BroadcastStickyCache.incrementVersion(intent.getAction());
-        }
-        return result;
     }
 
     @GuardedBy("mService")
@@ -1469,7 +1458,6 @@ class BroadcastController {
                     list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive,
                             callingUid, callerAppProcessState, resolvedType));
                 }
-                BroadcastStickyCache.incrementVersion(intent.getAction());
             }
         }
 
@@ -1736,7 +1724,6 @@ class BroadcastController {
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        final ArrayList<String> changedStickyBroadcasts = new ArrayList<>();
         synchronized (mStickyBroadcasts) {
             ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
             if (stickies != null) {
@@ -1753,15 +1740,11 @@ class BroadcastController {
                     if (list.size() <= 0) {
                         stickies.remove(intent.getAction());
                     }
-                    changedStickyBroadcasts.add(intent.getAction());
                 }
                 if (stickies.size() <= 0) {
                     mStickyBroadcasts.remove(userId);
                 }
             }
-        }
-        for (int i = changedStickyBroadcasts.size() - 1; i >= 0; --i) {
-            BroadcastStickyCache.incrementVersionIfExists(changedStickyBroadcasts.get(i));
         }
     }
 
@@ -1925,9 +1908,7 @@ class BroadcastController {
 
     private void sendPackageBroadcastLocked(int cmd, String[] packages, int userId) {
         mService.mProcessList.sendPackageBroadcastLocked(cmd, packages, userId);
-    }
-
-    private List<ResolveInfo> collectReceiverComponents(
+    }private List<ResolveInfo> collectReceiverComponents(
             Intent intent, String resolvedType, int callingUid, int callingPid,
             int[] users, int[] broadcastAllowList) {
         // TODO: come back and remove this assumption to triage all broadcasts
@@ -2143,17 +2124,8 @@ class BroadcastController {
     }
 
     void removeStickyBroadcasts(int userId) {
-        final ArrayList<String> changedStickyBroadcasts = new ArrayList<>();
         synchronized (mStickyBroadcasts) {
-            final ArrayMap<String, ArrayList<StickyBroadcast>> stickies =
-                    mStickyBroadcasts.get(userId);
-            if (stickies != null) {
-                changedStickyBroadcasts.addAll(stickies.keySet());
-            }
             mStickyBroadcasts.remove(userId);
-        }
-        for (int i = changedStickyBroadcasts.size() - 1; i >= 0; --i) {
-            BroadcastStickyCache.incrementVersionIfExists(changedStickyBroadcasts.get(i));
         }
     }
 
