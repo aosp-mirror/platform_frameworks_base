@@ -720,6 +720,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public void testDefaultAllowedKeyAdjustments_readWriteXml() throws Exception {
         mAssistants.loadDefaultsFromConfig(true);
 
