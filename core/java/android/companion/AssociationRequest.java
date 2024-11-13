@@ -90,9 +90,9 @@ public final class AssociationRequest implements Parcelable {
     public static final String DEVICE_PROFILE_GLASSES = "android.app.role.COMPANION_DEVICE_GLASSES";
 
     /**
-     * Device profile: a virtual display capable of rendering Android applications, and sending back
+     * Device profile: a virtual device capable of rendering Android applications, and sending back
      * input events.
-     *
+     * <p>
      * Only applications that have been granted
      * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_APP_STREAMING} are allowed to
      * request to be associated with such devices.
@@ -106,7 +106,7 @@ public final class AssociationRequest implements Parcelable {
     /**
      * Device profile: a virtual device capable of rendering content from an Android host to a
      * nearby device.
-     *
+     * <p>
      * Only applications that have been granted
      * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING}
      * are allowed to request to be associated with such devices.
@@ -116,6 +116,21 @@ public final class AssociationRequest implements Parcelable {
     @RequiresPermission(Manifest.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING)
     public static final String DEVICE_PROFILE_NEARBY_DEVICE_STREAMING =
             "android.app.role.COMPANION_DEVICE_NEARBY_DEVICE_STREAMING";
+
+    /**
+     * Device profile: a virtual device capable of streaming sensor data such as camera, audio and
+     * IMU between an Android host and a nearby device.
+     * <p>
+     * Only applications that have been granted
+     * {@link android.Manifest.permission#REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING}
+     * are allowed to request to be associated with such devices.
+     *
+     * @see AssociationRequest.Builder#setDeviceProfile
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ENABLE_LIMITED_VDM_ROLE)
+    @RequiresPermission(Manifest.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING)
+    public static final String DEVICE_PROFILE_SENSOR_DEVICE_STREAMING =
+            "android.app.role.COMPANION_DEVICE_SENSOR_DEVICE_STREAMING";
 
     /**
      * Device profile: Android Automotive Projection

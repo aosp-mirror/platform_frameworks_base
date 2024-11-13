@@ -21,6 +21,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PRO
 import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_GLASSES;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_SENSOR_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 
@@ -116,6 +117,7 @@ final class CompanionDeviceResources {
         map.put(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, R.string.title_automotive_projection);
         map.put(DEVICE_PROFILE_COMPUTER, R.string.title_computer);
         map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING, R.string.title_nearby_device_streaming);
+        map.put(DEVICE_PROFILE_SENSOR_DEVICE_STREAMING, R.string.title_sensor_device_streaming);
         map.put(DEVICE_PROFILE_WATCH, R.string.confirmation_title);
         map.put(DEVICE_PROFILE_GLASSES, R.string.confirmation_title_glasses);
         map.put(null, R.string.confirmation_title);
@@ -130,6 +132,7 @@ final class CompanionDeviceResources {
         map.put(DEVICE_PROFILE_GLASSES, R.string.summary_glasses);
         map.put(DEVICE_PROFILE_APP_STREAMING, R.string.summary_app_streaming);
         map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING, R.string.summary_nearby_device_streaming);
+        map.put(DEVICE_PROFILE_SENSOR_DEVICE_STREAMING, R.string.summary_sensor_device_streaming);
         map.put(null, R.string.summary_generic);
 
         PROFILE_SUMMARIES = unmodifiableMap(map);
@@ -141,6 +144,8 @@ final class CompanionDeviceResources {
         map.put(DEVICE_PROFILE_APP_STREAMING, R.string.helper_summary_app_streaming);
         map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
                 R.string.helper_summary_nearby_device_streaming);
+        map.put(DEVICE_PROFILE_SENSOR_DEVICE_STREAMING,
+                R.string.helper_summary_sensor_device_streaming);
         map.put(DEVICE_PROFILE_COMPUTER, R.string.helper_summary_computer);
 
         PROFILE_HELPER_SUMMARIES = unmodifiableMap(map);
@@ -204,6 +209,7 @@ final class CompanionDeviceResources {
         set.add(DEVICE_PROFILE_COMPUTER);
         set.add(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION);
         set.add(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING);
+        set.add(DEVICE_PROFILE_SENSOR_DEVICE_STREAMING);
         set.add(null);
 
         SUPPORTED_SELF_MANAGED_PROFILES = unmodifiableSet(set);

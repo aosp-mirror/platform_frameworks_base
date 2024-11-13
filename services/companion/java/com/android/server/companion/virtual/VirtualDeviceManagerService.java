@@ -103,7 +103,8 @@ public class VirtualDeviceManagerService extends SystemService {
     private static final List<String> VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES = Arrays.asList(
             AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION,
             AssociationRequest.DEVICE_PROFILE_APP_STREAMING,
-            AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING);
+            AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
+            AssociationRequest.DEVICE_PROFILE_SENSOR_DEVICE_STREAMING);
 
     /** Enable default device camera access for apps running on virtual devices. */
     @ChangeId
