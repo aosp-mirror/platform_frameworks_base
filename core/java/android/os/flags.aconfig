@@ -148,6 +148,13 @@ flag {
 }
 
 flag {
+    name: "cpu_gpu_headrooms"
+    namespace: "game"
+    description: "Feature flag for adding CPU/GPU headroom API"
+    bug: "346604998"
+}
+
+flag {
     name: "disallow_cellular_null_ciphers_restriction"
     namespace: "cellular_security"
     description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."

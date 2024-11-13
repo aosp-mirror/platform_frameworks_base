@@ -17,6 +17,8 @@
 
 package android.os;
 
+import android.os.CpuHeadroomParamsInternal;
+import android.os.GpuHeadroomParamsInternal;
 import android.os.IHintSession;
 import android.hardware.power.ChannelConfig;
 import android.hardware.power.SessionConfig;
@@ -50,4 +52,8 @@ interface IHintManager {
      */
     @nullable ChannelConfig getSessionChannel(in IBinder token);
     oneway void closeSessionChannel();
+    float[] getCpuHeadroom(in CpuHeadroomParamsInternal params);
+    long getCpuHeadroomMinIntervalMillis();
+    float getGpuHeadroom(in GpuHeadroomParamsInternal params);
+    long getGpuHeadroomMinIntervalMillis();
 }
