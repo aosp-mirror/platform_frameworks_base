@@ -22,8 +22,11 @@ import android.app.NotificationChannelGroup;
 import android.app.backup.BackupRestoreEventLogger;
 import android.service.notification.DeviceEffectsApplier;
 
+import com.android.internal.annotations.Keep;
+
 import java.util.Set;
 
+@Keep
 public interface NotificationManagerInternal {
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
     NotificationChannelGroup getNotificationChannelGroup(String pkg, int uid, String channelId);

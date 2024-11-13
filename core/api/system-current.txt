@@ -709,8 +709,8 @@ package android.app {
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
     field public static final String OPSTR_READ_MEDIA_VIDEO = "android:read_media_video";
     field public static final String OPSTR_READ_MEDIA_VISUAL_USER_SELECTED = "android:read_media_visual_user_selected";
-    field @FlaggedApi("android.permission.flags.platform_oxygen_saturation_enabled") public static final String OPSTR_READ_OXYGEN_SATURATION = "android:read_oxygen_saturation";
-    field @FlaggedApi("android.permission.flags.platform_skin_temperature_enabled") public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
+    field @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled") public static final String OPSTR_READ_OXYGEN_SATURATION = "android:read_oxygen_saturation";
+    field @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled") public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
     field public static final String OPSTR_READ_WRITE_HEALTH_DATA = "android:read_write_health_data";
     field public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO = "android:receive_ambient_trigger_audio";
     field public static final String OPSTR_RECEIVE_EMERGENCY_BROADCAST = "android:receive_emergency_broadcast";
@@ -1368,6 +1368,7 @@ package android.app.admin {
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean packageHasActiveAdmins(String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, android.Manifest.permission.PROVISION_DEMO_DEVICE}) public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
+    method @FlaggedApi("android.app.admin.flags.remove_managed_profile_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean removeManagedProfile();
     method @RequiresPermission(android.Manifest.permission.TRIGGER_LOST_MODE) public void sendLostModeLocationUpdate(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public boolean setActiveProfileOwner(@NonNull android.content.ComponentName, String) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS) public void setApplicationExemptions(@NonNull String, @NonNull java.util.Set<java.lang.Integer>) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -1377,7 +1378,8 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setDpcDownloaded(boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setMaxPolicyStorageLimit(int);
     method @Deprecated @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIds(@NonNull android.content.ComponentName);
-    method public void setSecondaryLockscreenEnabled(@NonNull android.content.ComponentName, boolean);
+    method @Deprecated @FlaggedApi("android.app.admin.flags.secondary_lockscreen_api_enabled") public void setSecondaryLockscreenEnabled(@NonNull android.content.ComponentName, boolean);
+    method @FlaggedApi("android.app.admin.flags.secondary_lockscreen_api_enabled") public void setSecondaryLockscreenEnabled(boolean, @Nullable android.os.PersistableBundle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setUserProvisioningState(int, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
@@ -8245,6 +8247,26 @@ package android.media.tv {
     method public void onSetMain(boolean);
   }
 
+  @FlaggedApi("android.media.tv.flags.tif_extension_standardization") public final class TvInputServiceExtensionManager {
+    method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public int registerExtensionIBinder(@NonNull String, @NonNull android.os.IBinder);
+    field public static final String IBROADCAST_TIME = "android.media.tv.extension.time.BroadcastTime";
+    field public static final String ICAM_APP_INFO_SERVICE = "android.media.tv.extension.cam.ICamAppInfoService";
+    field public static final String ICLIENT_TOKEN = "android.media.tv.extension.clienttoken.IClientToken";
+    field public static final String IDATA_SERVICE_SIGNAL_INFO = "android.media.tv.extension.teletext.IDataServiceSignalInfo";
+    field public static final String IEVENT_MONITOR = "android.media.tv.extension.event.IEventMonitor";
+    field public static final String IHDMI_SIGNAL_INTERFACE = "android.media.tv.extension.signal.IHdmiSignalInterface";
+    field public static final String IOAD_UPDATE_INTERFACE = "android.media.tv.extension.oad.IOadUpdateInterface";
+    field public static final String IRATING_INTERFACE = "android.media.tv.extension.rating.IRatingInterface";
+    field public static final String IRECORDED_CONTENTS = "android.media.tv.extension.pvr.IRecordedContents";
+    field public static final String ISCAN_INTERFACE = "android.media.tv.extension.scan.IScanInterface";
+    field public static final String ISCREEN_MODE_SETTINGS = "android.media.tv.extension.screenmode.IScreenModeSettings";
+    field public static final String ISERVICE_LIST_EDIT_LISTENER = "android.media.tv.extension.servicedb.IServiceListEditListener";
+    field public static final int REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED = 2; // 0x2
+    field public static final int REGISTER_FAIL_NAME_NOT_STANDARDIZED = 1; // 0x1
+    field public static final int REGISTER_FAIL_REMOTE_EXCEPTION = 3; // 0x3
+    field public static final int REGISTER_SUCCESS = 0; // 0x0
+  }
+
   public abstract static class TvRecordingClient.RecordingCallback {
     method public void onEvent(String, String, android.os.Bundle);
   }
@@ -12531,8 +12553,19 @@ package android.security.advancedprotection {
   }
 
   @FlaggedApi("android.security.aapm_api") public final class AdvancedProtectionManager {
+    method @NonNull public android.content.Intent createSupportIntent(@NonNull String, @Nullable String);
     method @NonNull @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public java.util.List<android.security.advancedprotection.AdvancedProtectionFeature> getAdvancedProtectionFeatures();
     method @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public void setAdvancedProtectionEnabled(boolean);
+    field @FlaggedApi("android.security.aapm_api") public static final String ACTION_SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG = "android.security.advancedprotection.action.SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG";
+    field public static final String EXTRA_SUPPORT_DIALOG_FEATURE = "android.security.advancedprotection.extra.SUPPORT_DIALOG_FEATURE";
+    field public static final String EXTRA_SUPPORT_DIALOG_TYPE = "android.security.advancedprotection.extra.SUPPORT_DIALOG_TYPE";
+    field public static final String FEATURE_ID_DISALLOW_CELLULAR_2G = "android.security.advancedprotection.feature_disallow_2g";
+    field public static final String FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES = "android.security.advancedprotection.feature_disallow_install_unknown_sources";
+    field public static final String FEATURE_ID_DISALLOW_USB = "android.security.advancedprotection.feature_disallow_usb";
+    field public static final String FEATURE_ID_DISALLOW_WEP = "android.security.advancedprotection.feature_disallow_wep";
+    field public static final String FEATURE_ID_ENABLE_MTE = "android.security.advancedprotection.feature_enable_mte";
+    field public static final String SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION = "android.security.advancedprotection.type_blocked_interaction";
+    field public static final String SUPPORT_DIALOG_TYPE_DISABLED_SETTING = "android.security.advancedprotection.type_disabled_setting";
   }
 
 }
@@ -18792,6 +18825,10 @@ package android.webkit {
 
   public class WebChromeClient {
     method @Deprecated public void openFileChooser(android.webkit.ValueCallback<android.net.Uri>, String, String);
+  }
+
+  public abstract static class WebChromeClient.FileChooserParams {
+    field @FlaggedApi("android.webkit.file_system_access") public static final long ENABLE_FILE_SYSTEM_ACCESS = 364980165L; // 0x15c127c5L
   }
 
   public abstract class WebHistoryItem implements java.lang.Cloneable {

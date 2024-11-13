@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.model;
+package com.android.systemui.keyboard.shortcut.data.repository
 
-/**  A helper class containing special indexing file constants. */
-public final class IndexingFileConstants {
-    // We empirically experimented with different block sizes and identified that 50 is in the
-    // optimal range of efficient computation.
-    public static final int INDEXING_BLOCK_SIZE = 50;
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
+import kotlinx.coroutines.flow.Flow
 
-    public static final String START_INDEXING_KEY = "START_KEY";
-    public static final String END_INDEXING_KEY = "END_KEY";
+interface ShortcutCategoriesRepository {
+    val categories: Flow<List<ShortcutCategory>>
 }

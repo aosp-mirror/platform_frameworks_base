@@ -376,7 +376,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
 
         mHomeStatusBarViewBinder.bind(
-                mStatusBar, mHomeStatusBarViewModel, mStatusBarVisibilityChangeListener);
+                mStatusBar,
+                mHomeStatusBarViewModel,
+                /* systemEventChipAnimateIn */ null,
+                /* systemEventChipAnimateOut */ null,
+                mStatusBarVisibilityChangeListener);
     }
 
     private String getDumpableName() {

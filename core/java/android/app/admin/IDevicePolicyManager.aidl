@@ -378,6 +378,9 @@ interface IDevicePolicyManager {
     void setAutoTimeZoneEnabled(in ComponentName who, String callerPackageName, boolean enabled);
     boolean getAutoTimeZoneEnabled(in ComponentName who, String callerPackageName);
 
+    void setAutoTimeZonePolicy(String callerPackageName, int policy);
+    int getAutoTimeZonePolicy(String callerPackageName);
+
     void setForceEphemeralUsers(in ComponentName who, boolean forceEpehemeralUsers);
     boolean getForceEphemeralUsers(in ComponentName who);
 
@@ -566,6 +569,8 @@ interface IDevicePolicyManager {
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
 
     void finalizeWorkProfileProvisioning(in UserHandle managedProfileUser, in Account migratedAccount);
+
+    boolean removeManagedProfile(int userId);
 
     void setDeviceOwnerType(in ComponentName admin, in int deviceOwnerType);
     int getDeviceOwnerType(in ComponentName admin);

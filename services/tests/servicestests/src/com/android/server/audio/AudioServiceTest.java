@@ -123,7 +123,7 @@ public class AudioServiceTest {
             Assert.assertEquals("mic mute reporting wrong value",
                     muted, mAudioService.isMicrophoneMuted());
             // verify the intent for mic mute changed is supposed to be fired
-            Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+            mTestLooper.dispatchAll();
             verify(mSpySystemServer, times(1))
                     .sendMicrophoneMuteChangedIntent();
             reset(mSpySystemServer);
@@ -148,7 +148,7 @@ public class AudioServiceTest {
             Assert.assertEquals("mic mute reporting wrong value",
                     !muted, mAudioService.isMicrophoneMuted());
             // verify the intent for mic mute changed is supposed to be fired
-            Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+            mTestLooper.dispatchAll();
             verify(mSpySystemServer, times(1))
                     .sendMicrophoneMuteChangedIntent();
             reset(mSpySystemServer);
@@ -159,8 +159,7 @@ public class AudioServiceTest {
     public void testRingNotifAlias() throws Exception {
         Log.i(TAG, "running testRingNotifAlias");
         Assert.assertNotNull(mAudioService);
-        // TODO add initialization message that can be caught here instead of sleeping
-        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS); // wait for full AudioService initialization
+        mTestLooper.dispatchAll(); // wait for full AudioService initialization
 
         // test with aliasing RING and NOTIFICATION
         mAudioService.setNotifAliasRingForTest(true);
@@ -171,7 +170,7 @@ public class AudioServiceTest {
         mAudioService.setStreamVolume(AudioSystem.STREAM_NOTIFICATION,
                 ringVol, 0, "bla");
         mAudioService.setStreamVolume(AudioSystem.STREAM_RING, ringMaxVol, 0, "bla");
-        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+        mTestLooper.dispatchAll();
         Assert.assertEquals(ringMaxVol,
                 mAudioService.getStreamVolume(AudioSystem.STREAM_NOTIFICATION));
 

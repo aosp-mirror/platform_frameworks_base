@@ -3139,11 +3139,13 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testOnStartingWindowDrawn() {
+        // Skip unnecessary resume top.
+        mSupervisor.beginDeferResume();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         // The task-has-been-visible should not affect the decision of making transition ready.
         activity.getTask().setHasBeenVisible(true);
         activity.detachFromProcess();
-        activity.mStartingData = mock(StartingData.class);
+        activity.mStartingData = new SplashScreenStartingData(mWm, 0, 0);
         registerTestTransitionPlayer();
         final Transition transition = activity.mTransitionController.requestTransitionIfNeeded(
                 WindowManager.TRANSIT_OPEN, 0 /* flags */, null /* trigger */, mDisplayContent);
@@ -3151,7 +3153,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity.mStartingData.mIsDisplayed);
         // The transition can be ready by the starting window of a visible-requested activity
         // without a running process.
-        assertTrue(transition.allReady());
+        if (!transition.allReady()) {
+            // Print unsatisfied conditions.
+            transition.onReadyTimeout();
+            Assert.fail(transition + " must be ready by onStartingWindowDrawn");
+        }
 
         // If other event makes the transition unready, the reentrant of onStartingWindowDrawn
         // should not replace the readiness again.

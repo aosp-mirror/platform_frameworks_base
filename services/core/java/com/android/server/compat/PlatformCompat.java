@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
@@ -75,6 +76,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     private final ChangeReporter mChangeReporter;
     private final CompatConfig mCompatConfig;
     private final AndroidBuildClassifier mBuildClassifier;
+    private Boolean mIsWear;
 
     public PlatformCompat(Context context) {
         super(PermissionEnforcer.fromContext(context));
@@ -511,9 +513,16 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     private ApplicationInfo fixTargetSdk(ApplicationInfo appInfo, int uid) {
+
+        // mIsWear doesn't need to be locked, ok if executes twice
+        if (mIsWear == null) {
+            mIsWear = mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+        }
+
         // b/282922910 - we don't want apps sharing system uid and targeting
         // older target sdk to impact all system uid apps
-        if (Flags.systemUidTargetSystemSdk() && uid == Process.SYSTEM_UID) {
+        if (Flags.systemUidTargetSystemSdk() && !mIsWear &&
+                uid == Process.SYSTEM_UID) {
             appInfo.targetSdkVersion = Build.VERSION.SDK_INT;
         }
         return appInfo;

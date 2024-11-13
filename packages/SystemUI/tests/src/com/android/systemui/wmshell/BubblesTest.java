@@ -49,6 +49,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -2507,17 +2508,54 @@ public class BubblesTest extends SysuiTestCase {
 
     @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
     @Test
-    public void testEventLogging_bubbleBar_dragBubbleToDismiss() {
+    public void testEventLogging_bubbleBar_dragSelectedBubbleToDismiss() {
         mBubbleProperties.mIsBubbleBarEnabled = true;
         mPositioner.setIsLargeScreen(true);
         FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
 
         mEntryListener.onEntryAdded(mRow);
-        mBubbleController.dragBubbleToDismiss(mRow.getKey(), 1L);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mRow2.getKey(), 0);
 
+        clearInvocations(mBubbleLogger);
+
+        // Dismiss selected bubble
+        mBubbleController.startBubbleDrag(mRow2.getKey());
+        mBubbleController.dragBubbleToDismiss(mRow2.getKey(), System.currentTimeMillis());
+
+        // Log bubble dismissed via drag and new bubble selected
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow2.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_BUBBLE));
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED));
+
+        verifyNoMoreInteractions(mBubbleLogger);
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_dragOtherBubbleToDismiss() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mRow2.getKey(), 0);
+
+        clearInvocations(mBubbleLogger);
+
+        // Dismiss other bubble
+        mBubbleController.startBubbleDrag(mRow.getKey());
+        mBubbleController.dragBubbleToDismiss(mRow.getKey(), System.currentTimeMillis());
+
+        // Log bubble dismissed via drag, but no switch event
         verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
                 eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_BUBBLE));
+
+        verifyNoMoreInteractions(mBubbleLogger);
     }
 
     @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
@@ -2640,6 +2678,32 @@ public class BubblesTest extends SysuiTestCase {
         mEntryListener.onEntryAdded(mRow);
 
         verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_EXPANDED));
+    }
+
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_switchBubble() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mRow.getKey(), 0);
+
+        // First select is expand
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_EXPANDED));
+        verify(mBubbleLogger, never()).log(eqBubbleWithKey(mRow.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED));
+
+        // Second select is switch
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mRow2.getKey(), 0);
+        verify(mBubbleLogger).log(eqBubbleWithKey(mRow2.getKey()),
+                eq(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED));
+        verify(mBubbleLogger, never()).log(eqBubbleWithKey(mRow2.getKey()),
                 eq(BubbleLogger.Event.BUBBLE_BAR_EXPANDED));
     }
 

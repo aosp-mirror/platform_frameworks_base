@@ -111,6 +111,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 // If the server visibility didn't change (still visible), and mGivenInsetsReady
                 // is set, we won't call into notifyControlChanged. Therefore, we can reset the
                 // statsToken, if available.
+                ProtoLog.d(WM_DEBUG_IME, "onPostLayout cancel statsToken, ws=%s", ws);
                 ImeTracker.forLogging().onCancelled(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStatsToken = null;
@@ -174,9 +175,13 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             if (control != null && control.getLeash() != null) {
                 ImeTracker.Token statsToken = getAndClearStatsToken();
-                ImeTracker.forLogging().onProgress(statsToken,
-                        ImeTracker.PHASE_WM_GET_CONTROL_WITH_LEASH);
-                control.setImeStatsToken(statsToken);
+                if (statsToken == null) {
+                    ProtoLog.d(WM_DEBUG_IME, "IME getControl without statsToken");
+                } else {
+                    ImeTracker.forLogging().onProgress(statsToken,
+                            ImeTracker.PHASE_WM_GET_CONTROL_WITH_LEASH);
+                    control.setImeStatsToken(statsToken);
+                }
             }
         }
         return control;
