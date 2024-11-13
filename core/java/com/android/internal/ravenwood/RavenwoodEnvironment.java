@@ -15,12 +15,6 @@
  */
 package com.android.internal.ravenwood;
 
-import static android.os.Build.VERSION_CODES.S;
-import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
-
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
-import android.compat.annotation.EnabledAfter;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.ravenwood.annotation.RavenwoodRedirect;
 import android.ravenwood.annotation.RavenwoodRedirectionClass;
@@ -83,21 +77,5 @@ public final class RavenwoodEnvironment {
     @RavenwoodRedirect
     public String getRavenwoodRuntimePath() {
         throw notSupportedOnDevice();
-    }
-
-    /** @hide */
-    public static class CompatIdsForTest {
-        // Enabled by default
-        @ChangeId
-        public static final long TEST_COMPAT_ID_1 = 368131859L;
-
-        @Disabled
-        @ChangeId public static final long TEST_COMPAT_ID_2 = 368131701L;
-
-        @EnabledAfter(targetSdkVersion = S)
-        @ChangeId public static final long TEST_COMPAT_ID_3 = 368131659L;
-
-        @EnabledAfter(targetSdkVersion = UPSIDE_DOWN_CAKE)
-        @ChangeId public static final long TEST_COMPAT_ID_4 = 368132057L;
     }
 }

@@ -45,7 +45,6 @@ import com.android.internal.compat.OverrideAllowedState;
 /**
  * Implementation of the policy for allowing compat change overrides.
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class OverrideValidatorImpl extends IOverrideValidator.Stub {
 
     private AndroidBuildClassifier mAndroidBuildClassifier;

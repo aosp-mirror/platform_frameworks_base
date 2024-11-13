@@ -36,7 +36,6 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class PackageOverride {
 
     /** @hide */

@@ -22,7 +22,6 @@ import android.os.Build;
  * Platform private class for determining the type of Android build installed.
  *
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class AndroidBuildClassifier {
 
     public boolean isDebuggableBuild() {
