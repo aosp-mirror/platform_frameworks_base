@@ -30,9 +30,12 @@ import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AppCompatCallbacks;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
 import android.app.UiAutomation;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
@@ -41,6 +44,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process_ravenwood;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig_host;
 import android.system.ErrnoException;
@@ -58,6 +62,7 @@ import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.RavenwoodRuntimeException;
 import com.android.ravenwood.common.SneakyThrow;
 import com.android.server.LocalServices;
+import com.android.server.compat.PlatformCompat;
 
 import org.junit.runner.Description;
 
@@ -331,6 +336,8 @@ public class RavenwoodRuntimeEnvironmentController {
 
         RavenwoodSystemServer.init(config);
 
+        initializeCompatIds(config);
+
         if (ENABLE_TIMEOUT_STACKS) {
             sPendingTimeout = sTimeoutExecutor.schedule(
                     RavenwoodRuntimeEnvironmentController::dumpStacks,
@@ -344,6 +351,31 @@ public class RavenwoodRuntimeEnvironmentController {
     public static void reinit() {
         var config = sRunner.mState.getConfig();
         Binder.restoreCallingIdentity(packBinderIdentityToken(false, config.mUid, config.mPid));
+    }
+
+    private static void initializeCompatIds(RavenwoodConfig config) {
+        // Set up compat-IDs for the app side.
+        // TODO: Inside the system server, all the compat-IDs should be enabled,
+        // Due to the `AppCompatCallbacks.install(new long[0], new long[0])` call in
+        // SystemServer.
+
+        // Compat framework only uses the package name and the target SDK level.
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.packageName = config.mTargetPackageName;
+        appInfo.targetSdkVersion = config.mTargetSdkLevel;
+
+        PlatformCompat platformCompat = null;
+        try {
+            platformCompat = (PlatformCompat) ServiceManager.getServiceOrThrow(
+                    Context.PLATFORM_COMPAT_SERVICE);
+        } catch (ServiceNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        var disabledChanges = platformCompat.getDisabledChanges(appInfo);
+        var loggableChanges = platformCompat.getLoggableChanges(appInfo);
+
+        AppCompatCallbacks.install(disabledChanges, loggableChanges);
     }
 
     /**
