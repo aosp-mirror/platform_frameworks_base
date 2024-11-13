@@ -19148,6 +19148,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private boolean isAnyResetPasswordTokenActiveForUser(int userId) {
+        return mDevicePolicyEngine
+                .getLocalPoliciesSetByAdmins(PolicyDefinition.RESET_PASSWORD_TOKEN, userId)
+                .values()
+                .stream()
+                .anyMatch((p) -> isResetPasswordTokenActiveForUserLocked(p.getValue(), userId));
+    }
+
     private boolean isResetPasswordTokenActiveForUserLocked(
             long passwordTokenHandle, int userHandle) {
         if (passwordTokenHandle != 0) {
@@ -21003,6 +21011,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(isSystemUid(getCallerIdentity()),
                 String.format(NOT_SYSTEM_CALLER_MSG,
                         "call canProfileOwnerResetPasswordWhenLocked"));
+        if (Flags.resetPasswordWithTokenCoexistence()) {
+            return isAnyResetPasswordTokenActiveForUser(userId);
+        }
         synchronized (getLockObject()) {
             final ActiveAdmin poAdmin = getProfileOwnerAdminLocked(userId);
             DevicePolicyData policy = getUserData(userId);
