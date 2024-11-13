@@ -1250,7 +1250,6 @@ public final class ViewRootImpl implements ViewParent,
         mExtraDisplayListenerLogging = !TextUtils.isEmpty(name) && name.equals(mBasePackageName);
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
-        mLocation.fillInStackTrace();
         mWidth = -1;
         mHeight = -1;
         mDirty = new Rect();
