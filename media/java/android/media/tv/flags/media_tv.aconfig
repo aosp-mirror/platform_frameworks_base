@@ -80,3 +80,11 @@ flag {
     description : "Feature flag to add setResourceHolderRetain api to MediaCas and Tuner JAVA."
     bug: "372973197"
 }
+
+flag {
+    name: "apply_picture_profiles"
+    is_exported: true
+    namespace: "media_tv"
+    description : "Feature flag to enable APIs for applying picture profiles"
+    bug: "337330263"
+}
