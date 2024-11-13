@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 /** Accepts touch events, detects long press, and calls ShadeViewController#onStatusBarLongPress. */
 @SysUISingleton
-class StatusBarLongPressGestureDetector
+class LongPressGestureDetector
 @Inject
 constructor(context: Context, val shadeViewController: ShadeViewController) {
     val gestureDetector =
