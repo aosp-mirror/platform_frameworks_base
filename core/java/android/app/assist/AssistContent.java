@@ -30,6 +30,31 @@ public class AssistContent implements Parcelable {
     public static final String EXTRA_APP_FUNCTION_DATA =
             "android.app.assist.extra.APP_FUNCTION_DATA";
 
+    /**
+     * This extra can be optionally supplied in the {@link #getExtras} bundle to provide a
+     * {@link Uri} which will be utilized when transitioning a user's session to another surface.
+     *
+     * <p>If provided, instead of using the URI provided in {@link #setWebUri}, the
+     * "Open in browser" feature will use this URI to transition the current session from one
+     * surface to the other. Apps may choose to encode session or user information into this
+     * URI in order to provide a better session transfer experience.
+     *
+     * <p>Unlike {@link #setWebUri}, this URI will not be used for features where the user might
+     * accidentally share it with another user. However, developers should not encode
+     * authentication credentials into this URI, because it will be surfaced in the browser URL
+     * bar and may be copied and shared from there.
+     *
+     * <p>When providing this extra, developers should still continue to provide
+     * {@link #setWebUri} for backwards compatibility with features such as
+     * <a href="https://developer.android.com/guide/components/activities/recents#url-sharing">
+     * recents URL sharing</a> which do not benefit from a session-transfer web URI.
+     *
+     * @see android.app.Activity#requestOpenInBrowserEducation()
+     */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION)
+    public static final String EXTRA_SESSION_TRANSFER_WEB_URI =
+            "android.app.assist.extra.SESSION_TRANSFER_WEB_URI";
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mIsAppProvidedIntent = false;
     private boolean mIsAppProvidedWebUri = false;
