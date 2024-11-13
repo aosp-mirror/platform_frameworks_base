@@ -139,7 +139,7 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER,
+                                            VerticalAlignment.BASELINE,
                                         ),
                                     dateTimeFormat = "hh",
                                 ),
@@ -158,7 +158,7 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER,
+                                            VerticalAlignment.BASELINE,
                                         ),
                                     dateTimeFormat = "hh",
                                 ),
@@ -177,7 +177,7 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER,
+                                            VerticalAlignment.BASELINE,
                                         ),
                                     dateTimeFormat = "mm",
                                 ),
@@ -196,7 +196,7 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER,
+                                            VerticalAlignment.BASELINE,
                                         ),
                                     dateTimeFormat = "mm",
                                 ),

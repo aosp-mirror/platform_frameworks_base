@@ -19,6 +19,7 @@ package com.android.systemui.shared.clocks.view
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Point
+import android.icu.text.NumberFormat
 import android.util.MathUtils.constrainedMap
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +29,7 @@ import com.android.systemui.customization.R
 import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.shared.clocks.AssetLoader
 import com.android.systemui.shared.clocks.DigitTranslateAnimator
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -37,10 +39,14 @@ fun clamp(value: Float, minVal: Float, maxVal: Float): Float = max(min(value, ma
 class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: MessageBuffer) :
     DigitalClockFaceView(context, messageBuffer) {
     override var digitalClockTextViewMap = mutableMapOf<Int, SimpleDigitalClockTextView>()
-    val digitLeftTopMap = mutableMapOf<Int, Point>()
-    var maxSingleDigitSize = Point(-1, -1)
-    val lockscreenTranslate = Point(0, 0)
-    var aodTranslate = Point(0, 0)
+    private val digitLeftTopMap = mutableMapOf<Int, Point>()
+
+    private var maxSingleDigitSize = Point(-1, -1)
+    private val lockscreenTranslate = Point(0, 0)
+    private var aodTranslate = Point(0, 0)
+
+    // Does the current language have mono vertical size when displaying numerals
+    private var isMonoVerticalNumericLineSpacing = true
 
     init {
         setWillNotDraw(false)
@@ -49,6 +55,7 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             )
+        updateLocale(Locale.getDefault())
     }
 
     private val digitOffsets = mutableMapOf<Int, Float>()
@@ -61,12 +68,19 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
 
     protected override fun calculateSize(widthMeasureSpec: Int, heightMeasureSpec: Int): Point {
         maxSingleDigitSize = Point(-1, -1)
+        val bottomLocation: (textView: SimpleDigitalClockTextView) -> Int = { textView ->
+            if (isMonoVerticalNumericLineSpacing) {
+                maxSingleDigitSize.y
+            } else {
+                (textView.paint.fontMetrics.descent - textView.paint.fontMetrics.ascent).toInt()
+            }
+        }
+
         digitalClockTextViewMap.forEach { (_, textView) ->
             textView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
             maxSingleDigitSize.x = max(maxSingleDigitSize.x, textView.measuredWidth)
-            maxSingleDigitSize.y = max(maxSingleDigitSize.y, textView.measuredHeight)
+            maxSingleDigitSize.y = max(bottomLocation(textView), textView.measuredHeight)
         }
-        val textView = digitalClockTextViewMap[R.id.HOUR_FIRST_DIGIT]!!
         aodTranslate = Point(0, 0)
         return Point(
             ((maxSingleDigitSize.x + abs(aodTranslate.x)) * 2),
@@ -104,6 +118,11 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
             // reset the canvas location back to 0 without drawing
             canvas.restore()
         }
+    }
+
+    override fun onLocaleChanged(locale: Locale) {
+        updateLocale(locale)
+        requestLayout()
     }
 
     override fun animateDoze(isDozing: Boolean, isAnimated: Boolean) {
@@ -164,6 +183,18 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
                 )
             }
         }
+    }
+
+    private fun updateLocale(locale: Locale) {
+        isMonoVerticalNumericLineSpacing =
+            !NON_MONO_VERTICAL_NUMERIC_LINE_SPACING_LANGUAGES.any {
+                val newLocaleNumberFormat =
+                    NumberFormat.getInstance(locale).format(FORMAT_NUMBER.toLong())
+                val nonMonoVerticalNumericLineSpaceNumberFormat =
+                    NumberFormat.getInstance(Locale.forLanguageTag(it))
+                        .format(FORMAT_NUMBER.toLong())
+                newLocaleNumberFormat == nonMonoVerticalNumericLineSpaceNumberFormat
+            }
     }
 
     /**
@@ -264,9 +295,17 @@ class FlexClockView(context: Context, val assets: AssetLoader, messageBuffer: Me
         // Constants for the animation
         private val MOVE_INTERPOLATOR = Interpolators.EMPHASIZED
 
+        private const val FORMAT_NUMBER = 1234567890
+
         // Total available transition time for each digit, taking into account the step. If step is
         // 0.1, then digit 0 would animate over 0.0 - 0.7, making availableTime 0.7.
         private const val AVAILABLE_ANIMATION_TIME = 1.0f - MOVE_DIGIT_STEP * (NUM_DIGITS - 1)
+
+        // Add language tags below that do not have vertically mono spaced numerals
+        private val NON_MONO_VERTICAL_NUMERIC_LINE_SPACING_LANGUAGES =
+            setOf(
+                "my", // Burmese
+            )
 
         // Use the sign of targetTranslation to control the direction of digit translation
         fun updateDirectionalTargetTranslate(id: Int, targetTranslation: Point): Point {
