@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -56,11 +57,12 @@ public final class BroadcastFilter extends IntentFilter {
     final boolean visibleToInstantApp;
     public final boolean exported;
     final int initialPriority;
+    final ApplicationInfo applicationInfo;
 
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
             String _packageName, String _featureId, String _receiverId, String _requiredPermission,
             int _owningUid, int _userId, boolean _instantApp, boolean _visibleToInstantApp,
-            boolean _exported, ApplicationInfo applicationInfo, PlatformCompat platformCompat) {
+            boolean _exported, ApplicationInfo _applicationInfo, PlatformCompat platformCompat) {
         super(_filter);
         receiverList = _receiverList;
         packageName = _packageName;
@@ -72,6 +74,7 @@ public final class BroadcastFilter extends IntentFilter {
         instantApp = _instantApp;
         visibleToInstantApp = _visibleToInstantApp;
         exported = _exported;
+        applicationInfo = _applicationInfo;
         initialPriority = getPriority();
         setPriority(calculateAdjustedPriority(owningUid, initialPriority,
                 applicationInfo, platformCompat));
@@ -85,6 +88,10 @@ public final class BroadcastFilter extends IntentFilter {
             }
         }
         return null;
+    }
+
+    public @NonNull ApplicationInfo getApplicationInfo() {
+        return applicationInfo;
     }
 
     @NeverCompile
