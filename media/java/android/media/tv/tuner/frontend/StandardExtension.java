@@ -29,16 +29,16 @@ import android.media.tv.flags.Flags;
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
-public final class StandardExt {
-    private final int mDvbsStandardExt;
-    private final int mDvbtStandardExt;
+public final class StandardExtension {
+    private final int mDvbsStandardExtension;
+    private final int mDvbtStandardExtension;
 
     /**
      * Private constructor called by JNI only.
      */
-    private StandardExt(int dvbsStandardExt, int dvbtStandardExt) {
-        mDvbsStandardExt = dvbsStandardExt;
-        mDvbtStandardExt = dvbtStandardExt;
+    private StandardExtension(int dvbsStandardExtension, int dvbtStandardExtension) {
+        mDvbsStandardExtension = dvbsStandardExtension;
+        mDvbtStandardExtension = dvbtStandardExtension;
     }
 
     /**
@@ -50,11 +50,11 @@ public final class StandardExt {
      * @see android.media.tv.tuner.frontend.DvbsFrontendSettings
      */
     @DvbsFrontendSettings.Standard
-    public int getDvbsStandardExt() {
-        if (mDvbsStandardExt == FrontendDvbsStandard.UNDEFINED) {
+    public int getDvbsStandardExtension() {
+        if (mDvbsStandardExtension == FrontendDvbsStandard.UNDEFINED) {
             throw new IllegalStateException("No DVB-S standard transition");
         }
-        return mDvbsStandardExt;
+        return mDvbsStandardExtension;
     }
 
     /**
@@ -66,10 +66,10 @@ public final class StandardExt {
      * @see android.media.tv.tuner.frontend.DvbtFrontendSettings
      */
     @DvbtFrontendSettings.Standard
-    public int getDvbtStandardExt() {
-        if (mDvbtStandardExt == FrontendDvbtStandard.UNDEFINED) {
+    public int getDvbtStandardExtension() {
+        if (mDvbtStandardExtension == FrontendDvbtStandard.UNDEFINED) {
             throw new IllegalStateException("No DVB-T standard transition");
         }
-        return mDvbtStandardExt;
+        return mDvbtStandardExtension;
     }
 }

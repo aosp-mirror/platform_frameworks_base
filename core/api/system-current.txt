@@ -9604,7 +9604,7 @@ package android.media.tv.tuner.frontend {
     method public int getSignalStrength();
     method public int getSnr();
     method public int getSpectralInversion();
-    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @NonNull public android.media.tv.tuner.frontend.StandardExt getStandardExt();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @NonNull public android.media.tv.tuner.frontend.StandardExtension getStandardExtension();
     method @NonNull public int[] getStreamIds();
     method public int getSymbolRate();
     method @IntRange(from=0, to=65535) public int getSystemId();
@@ -9659,7 +9659,7 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
     field public static final int FRONTEND_STATUS_TYPE_SPECTRAL = 10; // 0xa
-    field @FlaggedApi("android.media.tv.flags.tuner_w_apis") public static final int FRONTEND_STATUS_TYPE_STANDARD_EXT = 47; // 0x2f
+    field @FlaggedApi("android.media.tv.flags.tuner_w_apis") public static final int FRONTEND_STATUS_TYPE_STANDARD_EXTENSION = 47; // 0x2f
     field public static final int FRONTEND_STATUS_TYPE_STREAM_IDS = 39; // 0x27
     field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
     field public static final int FRONTEND_STATUS_TYPE_T2_SYSTEM_ID = 29; // 0x1d
@@ -9951,9 +9951,9 @@ package android.media.tv.tuner.frontend {
     method public default void onUnlocked();
   }
 
-  @FlaggedApi("android.media.tv.flags.tuner_w_apis") public final class StandardExt {
-    method public int getDvbsStandardExt();
-    method public int getDvbtStandardExt();
+  @FlaggedApi("android.media.tv.flags.tuner_w_apis") public final class StandardExtension {
+    method public int getDvbsStandardExtension();
+    method public int getDvbtStandardExtension();
   }
 
 }
