@@ -19,9 +19,12 @@ package com.android.settingslib.service
 import android.app.Application
 import com.android.settingslib.graph.GetPreferenceGraphApiHandler
 import com.android.settingslib.graph.GetPreferenceGraphRequest
+import com.android.settingslib.preference.PreferenceScreenProvider
 
 /** Api to get preference graph. */
-internal class PreferenceGraphApi : GetPreferenceGraphApiHandler() {
+internal class PreferenceGraphApi(
+    preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>>
+) : GetPreferenceGraphApiHandler(preferenceScreenProviders) {
 
     override val id: Int
         get() = API_GET_PREFERENCE_GRAPH

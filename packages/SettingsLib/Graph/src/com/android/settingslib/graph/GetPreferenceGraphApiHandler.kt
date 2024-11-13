@@ -22,11 +22,13 @@ import com.android.settingslib.graph.proto.PreferenceGraphProto
 import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.MessageCodec
 import com.android.settingslib.metadata.PreferenceScreenRegistry
+import com.android.settingslib.preference.PreferenceScreenProvider
 import java.util.Locale
 
 /** API to get preference graph. */
-abstract class GetPreferenceGraphApiHandler :
-    ApiHandler<GetPreferenceGraphRequest, PreferenceGraphProto> {
+abstract class GetPreferenceGraphApiHandler(
+    private val preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>>
+) : ApiHandler<GetPreferenceGraphRequest, PreferenceGraphProto> {
 
     override val requestCodec: MessageCodec<GetPreferenceGraphRequest>
         get() = GetPreferenceGraphRequestCodec
@@ -40,14 +42,16 @@ abstract class GetPreferenceGraphApiHandler :
         callingUid: Int,
         request: GetPreferenceGraphRequest,
     ): PreferenceGraphProto {
-        val builderRequest =
-            if (request.screenKeys.isEmpty()) {
-                val keys = PreferenceScreenRegistry.preferenceScreens.keys
-                GetPreferenceGraphRequest(keys, request.visitedScreens, request.locale)
-            } else {
-                request
+        val builder = PreferenceGraphBuilder.of(application, request)
+        if (request.screenKeys.isEmpty()) {
+            for (key in PreferenceScreenRegistry.preferenceScreens.keys) {
+                builder.addPreferenceScreenFromRegistry(key)
             }
-        return PreferenceGraphBuilder.of(application, builderRequest).build()
+            for (provider in preferenceScreenProviders) {
+                builder.addPreferenceScreenProvider(provider)
+            }
+        }
+        return builder.build()
     }
 }
 
