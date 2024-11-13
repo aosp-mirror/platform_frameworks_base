@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.os.Binder;
 import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -58,7 +60,7 @@ public final class BroadcastFilter extends IntentFilter {
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
             String _packageName, String _featureId, String _receiverId, String _requiredPermission,
             int _owningUid, int _userId, boolean _instantApp, boolean _visibleToInstantApp,
-            boolean _exported, PlatformCompat platformCompat) {
+            boolean _exported, ApplicationInfo applicationInfo, PlatformCompat platformCompat) {
         super(_filter);
         receiverList = _receiverList;
         packageName = _packageName;
@@ -71,7 +73,8 @@ public final class BroadcastFilter extends IntentFilter {
         visibleToInstantApp = _visibleToInstantApp;
         exported = _exported;
         initialPriority = getPriority();
-        setPriority(calculateAdjustedPriority(owningUid, initialPriority, platformCompat));
+        setPriority(calculateAdjustedPriority(owningUid, initialPriority,
+                applicationInfo, platformCompat));
     }
 
     public @Nullable String getReceiverClassName() {
@@ -125,13 +128,18 @@ public final class BroadcastFilter extends IntentFilter {
 
     @VisibleForTesting
     static int calculateAdjustedPriority(int owningUid, int priority,
-            PlatformCompat platformCompat) {
+            ApplicationInfo applicationInfo, PlatformCompat platformCompat) {
         if (!Flags.restrictPriorityValues()) {
             return priority;
         }
-        if (!platformCompat.isChangeEnabledByUidInternalNoLogging(
-                RESTRICT_PRIORITY_VALUES, owningUid)) {
-            return priority;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (!platformCompat.isChangeEnabledInternalNoLogging(
+                    RESTRICT_PRIORITY_VALUES, applicationInfo)) {
+                return priority;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         if (!UserHandle.isCore(owningUid)) {
             if (priority >= SYSTEM_HIGH_PRIORITY) {
