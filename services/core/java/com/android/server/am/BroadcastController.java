@@ -554,7 +554,7 @@ class BroadcastController {
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage, callerFeatureId,
                     receiverId, permission, callingUid, userId, instantApp, visibleToInstantApps,
-                    exported, mService.mPlatformCompat);
+                    exported, callerApp.info, mService.mPlatformCompat);
             if (rl.containsFilter(filter)) {
                 Slog.w(TAG, "Receiver with filter " + filter
                         + " already registered for pid " + rl.pid
