@@ -14,7 +14,8 @@
     limitations under the License.
 -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:paddingMode="stack">
     <item>
@@ -30,8 +31,8 @@
         android:end="20dp"
         android:gravity="end|center_vertical">
         <vector
-            android:width="@dimen/hearing_devices_preset_spinner_arrow_size"
-            android:height="@dimen/hearing_devices_preset_spinner_arrow_size"
+            android:width="@dimen/hearing_devices_preset_spinner_icon_size"
+            android:height="@dimen/hearing_devices_preset_spinner_icon_size"
             android:viewportWidth="24"
             android:viewportHeight="24"
             android:tint="?androidprv:attr/colorControlNormal">
