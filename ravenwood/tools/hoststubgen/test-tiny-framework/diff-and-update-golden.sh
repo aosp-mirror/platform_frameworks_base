@@ -30,7 +30,7 @@ help() {
 EOF
 }
 
-source "${0%/*}"/../../common.sh
+source "${0%/*}"/../common.sh
 
 SCRIPT_NAME="${0##*/}"
 
@@ -60,7 +60,6 @@ case "$opt" in
 esac
 done
 shift $(($OPTIND - 1))
-
 
 # Build the dump files, which are the input of this test.
 run m  dump-jar tiny-framework-dump-test

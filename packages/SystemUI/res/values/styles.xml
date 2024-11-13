@@ -557,6 +557,16 @@
         <item name="android:showWhenLocked">true</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog.Volume">
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:showWhenLocked">true</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <style name="SystemUI.Material3.Slider.Volume">
         <item name="trackHeight">40dp</item>
         <item name="thumbHeight">52dp</item>

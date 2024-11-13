@@ -322,7 +322,7 @@ public class PipController implements ConfigurationChangeListener,
             mPipBoundsAlgorithm.applySnapFraction(toBounds, snapFraction);
             mPipBoundsState.setBounds(toBounds);
         }
-        t.setBounds(mPipTransitionState.mPipTaskToken, mPipBoundsState.getBounds());
+        t.setBounds(mPipTransitionState.getPipTaskToken(), mPipBoundsState.getBounds());
     }
 
     private void setDisplayLayout(DisplayLayout layout) {

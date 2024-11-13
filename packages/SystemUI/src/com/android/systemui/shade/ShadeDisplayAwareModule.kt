@@ -157,7 +157,6 @@ object ShadeDisplayAwareModule {
 
     @SysUISingleton
     @Provides
-    @ShadeDisplayAware
     fun provideShadePositionRepository(impl: ShadePositionRepositoryImpl): ShadePositionRepository {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
         return impl

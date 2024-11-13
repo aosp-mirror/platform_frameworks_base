@@ -103,7 +103,7 @@ class DesktopTilingDecorViewModel(
     fun moveTaskToFrontIfTiled(taskInfo: RunningTaskInfo): Boolean {
         return tilingTransitionHandlerByDisplayId
             .get(taskInfo.displayId)
-            ?.moveTiledPairToFront(taskInfo) ?: false
+            ?.moveTiledPairToFront(taskInfo, isTaskFocused = true) ?: false
     }
 
     fun onOverviewAnimationStateChange(isRunning: Boolean) {

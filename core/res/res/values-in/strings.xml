@@ -612,6 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Mengizinkan aplikasi menentukan posisi relatif antar-perangkat Ultra-Wideband di sekitar"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"berinteraksi dengan perangkat Wi-Fi di sekitar"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Mengizinkan aplikasi menampilkan, menghubungkan, dan menentukan posisi relatif perangkat Wi-Fi di sekitar"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informasi Layanan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Mengizinkan aplikasi untuk mendapatkan informasi layanan pembayaran NFC pilihan seperti bantuan terdaftar dan tujuan rute."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrol NFC"</string>

@@ -17,7 +17,7 @@
 package com.android.systemui.keyboard.shortcut.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperCategoriesRepository
+import com.android.systemui.keyboard.shortcut.data.repository.DefaultShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
@@ -28,9 +28,7 @@ import kotlinx.coroutines.flow.map
 @SysUISingleton
 class ShortcutHelperCategoriesInteractor
 @Inject
-constructor(
-    categoriesRepository: ShortcutHelperCategoriesRepository,
-) {
+constructor(categoriesRepository: DefaultShortcutCategoriesRepository) {
 
     val shortcutCategories: Flow<List<ShortcutCategory>> =
         categoriesRepository.categories.map { categories ->
@@ -42,12 +40,12 @@ constructor(
             shortcutCategory.subCategories.map {
                 ShortcutSubCategory(
                     label = it.label,
-                    shortcuts = groupShortcutsInSubcategory(it.shortcuts)
+                    shortcuts = groupShortcutsInSubcategory(it.shortcuts),
                 )
             }
         return ShortcutCategory(
             type = shortcutCategory.type,
-            subCategories = subCategoriesWithGroupedShortcuts
+            subCategories = subCategoriesWithGroupedShortcuts,
         )
     }
 
@@ -59,7 +57,7 @@ constructor(
                 Shortcut(
                     label = commonLabel,
                     icon = groupedShortcuts.firstOrNull()?.icon,
-                    commands = groupedShortcuts.flatMap { it.commands }
+                    commands = groupedShortcuts.flatMap { it.commands },
                 )
             }
 }

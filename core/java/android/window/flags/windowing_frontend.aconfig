@@ -160,12 +160,21 @@ flag {
 }
 
 flag {
-  name: "delegate_unhandled_drags"
-  is_exported: true
-  namespace: "multitasking"
-  description: "Enables delegating unhandled drags to SystemUI"
-  bug: "320797628"
-  is_fixed_read_only: true
+    name: "delegate_unhandled_drags"
+    is_exported: true
+    namespace: "multitasking"
+    description: "Enables delegating unhandled drags to SystemUI"
+    bug: "320797628"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "supports_drag_assistant_to_multiwindow"
+    is_exported: true
+    namespace: "multitasking"
+    description: "Enables support for dragging the assistant into multiwindow"
+    bug: "371206207"
+    is_fixed_read_only: true
 }
 
 flag {

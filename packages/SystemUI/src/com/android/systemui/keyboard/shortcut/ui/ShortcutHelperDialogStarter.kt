@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
@@ -36,6 +37,7 @@ import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelperBottom
 import com.android.systemui.keyboard.shortcut.ui.composable.getWidth
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.statusbar.phone.createBottomSheet
 import javax.inject.Inject
@@ -86,6 +88,7 @@ constructor(
                     },
                 )
                 dialog.setOnDismissListener { shortcutHelperViewModel.onViewClosed() }
+                dialog.setTitle(stringResource(R.string.shortcut_helper_title))
             },
             maxWidth = ShortcutHelperBottomSheet.LargeScreenWidthLandscape,
         )

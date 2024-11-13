@@ -130,15 +130,7 @@ fun Tile(
 
     // TODO(b/361789146): Draw the shapes instead of clipping
     val tileShape = TileDefaults.animateTileShape(uiState.state)
-    val animatedColor by
-        animateColorAsState(
-            if (iconOnly || !uiState.handlesSecondaryClick) {
-                colors.iconBackground
-            } else {
-                colors.background
-            },
-            label = "QSTileBackgroundColor",
-        )
+    val animatedColor by animateColorAsState(colors.background, label = "QSTileBackgroundColor")
 
     TileExpandable(
         color = { animatedColor },
@@ -199,6 +191,7 @@ fun Tile(
                     label = uiState.label,
                     secondaryLabel = uiState.secondaryLabel,
                     icon = icon,
+                    sideDrawable = uiState.sideDrawable,
                     colors = colors,
                     iconShape = iconShape,
                     toggleClick = secondaryClick,

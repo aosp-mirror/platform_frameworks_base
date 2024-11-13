@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.NotificationCompat
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -41,7 +42,7 @@ import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.flow.merge
 
 /** When the scheduler is due, show a notification to launch tutorial */
 @SysUISingleton
@@ -56,7 +57,11 @@ constructor(
 ) {
     fun start() {
         backgroundScope.launch {
-            tutorialSchedulerInteractor.tutorials.collect { showNotification(it) }
+            merge(
+                    tutorialSchedulerInteractor.tutorials,
+                    tutorialSchedulerInteractor.commandTutorials,
+                )
+                .collect { showNotification(it) }
         }
     }
 

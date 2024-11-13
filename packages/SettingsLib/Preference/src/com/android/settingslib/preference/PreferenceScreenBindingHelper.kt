@@ -218,33 +218,46 @@ class PreferenceScreenBindingHelper(
             preferenceScreen: PreferenceScreen,
             preferenceBindingFactory: PreferenceBindingFactory,
             preferenceHierarchy: PreferenceHierarchy,
-        ) =
-            preferenceScreen.bindRecursively(
-                preferenceBindingFactory,
-                preferenceHierarchy.getAllPreferences().associateBy { it.metadata.key },
-            )
-
-        private fun PreferenceGroup.bindRecursively(
-            preferenceBindingFactory: PreferenceBindingFactory,
-            preferences: Map<String, PreferenceHierarchyNode>,
-            storages: MutableMap<KeyValueStore, PreferenceDataStore> = mutableMapOf(),
         ) {
-            preferences[key]?.let { preferenceBindingFactory.bind(this, it) }
-            val count = preferenceCount
-            for (index in 0 until count) {
-                val preference = getPreference(index)
-                if (preference is PreferenceGroup) {
-                    preference.bindRecursively(preferenceBindingFactory, preferences, storages)
-                } else {
-                    preferences[preference.key]?.let {
-                        val metadata = it.metadata
-                        (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
-                            preference.preferenceDataStore =
-                                storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
+            val preferences = mutableMapOf<String, PreferenceHierarchyNode>()
+            preferenceHierarchy.forEachRecursively {
+                val metadata = it.metadata
+                preferences[metadata.key] = it
+            }
+            val storages = mutableMapOf<KeyValueStore, PreferenceDataStore>()
+
+            fun Preference.setPreferenceDataStore(metadata: PreferenceMetadata) {
+                (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
+                    preferenceDataStore =
+                        storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
+                }
+            }
+
+            fun PreferenceGroup.bindRecursively() {
+                preferences.remove(key)?.let { preferenceBindingFactory.bind(this, it) }
+                val count = preferenceCount
+                for (index in 0 until count) {
+                    val preference = getPreference(index)
+                    if (preference is PreferenceGroup) {
+                        preference.bindRecursively()
+                    } else {
+                        preferences.remove(preference.key)?.let {
+                            preference.setPreferenceDataStore(it.metadata)
+                            preferenceBindingFactory.bind(preference, it)
                         }
-                        preferenceBindingFactory.bind(preference, it)
                     }
                 }
+            }
+
+            preferenceScreen.bindRecursively()
+            for (node in preferences.values) {
+                val metadata = node.metadata
+                val binding = preferenceBindingFactory.getPreferenceBinding(metadata)
+                if (binding !is PreferenceBindingPlaceholder) continue
+                val preference = binding.createWidget(preferenceScreen.context)
+                preference.setPreferenceDataStore(metadata)
+                preferenceBindingFactory.bind(preference, node, binding)
+                preferenceScreen.addPreference(preference)
             }
         }
     }

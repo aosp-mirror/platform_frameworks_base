@@ -1429,6 +1429,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.packageSource = params.packageSource;
             info.applicationEnabledSettingPersistent = params.applicationEnabledSettingPersistent;
             info.pendingUserActionReason = userActionRequirementToReason(mUserActionRequirement);
+            info.isAutoInstallingDependenciesEnabled = params.isAutoInstallDependenciesEnabled;
         }
         return info;
     }
@@ -3415,7 +3416,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
-        if (Flags.sdkDependencyInstaller() && !isMultiPackage()) {
+        if (Flags.sdkDependencyInstaller()
+                && params.isAutoInstallDependenciesEnabled
+                && !isMultiPackage()) {
             resolveLibraryDependenciesIfNeeded();
         } else {
             install();

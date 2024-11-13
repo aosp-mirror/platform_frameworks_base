@@ -33,6 +33,7 @@ public class MediaQualityContract {
      */
     public interface BaseParameters {
         String PARAMETER_ID = "_id";
+        String PARAMETER_TYPE = "_type";
         String PARAMETER_NAME = "_name";
         String PARAMETER_PACKAGE = "_package";
         String PARAMETER_INPUT_ID = "_input_id";
@@ -43,7 +44,7 @@ public class MediaQualityContract {
      * Parameters picture quality.
      * @hide
      */
-    public static final class PictureQuality {
+    public static final class PictureQuality implements BaseParameters {
         /**
          * The brightness.
          *

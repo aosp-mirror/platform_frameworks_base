@@ -612,6 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించడానికి యాప్‌ను అనుమతించండి"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"సమీపంలోని Wi-Fi పరికరాలతో ఇంటరాక్ట్ చేస్తుంది"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"అడ్వర్టయిజ్, కనెక్ట్ చేయడానికి, సమీపంలోని Wi-Fi పరికరాల సంబంధిత పొజిషన్‌ను నిర్ణయించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
+    <!-- no translation found for permlab_ranging (2854543350668593390) -->
+    <skip />
+    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారం"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారాన్ని, అంటే రిజిస్టర్ చేయబడిన సహాయక సాధనాలు, మార్గం, గమ్యస్థానం వంటి వాటిని పొందేందుకు యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"సమీప క్షేత్ర కమ్యూనికేషన్‌ను నియంత్రించడం"</string>

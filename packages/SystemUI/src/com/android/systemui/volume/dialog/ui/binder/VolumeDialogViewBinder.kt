@@ -17,21 +17,22 @@
 package com.android.systemui.volume.dialog.ui.binder
 
 import android.app.Dialog
-import android.graphics.Color
-import android.graphics.PixelFormat
-import android.graphics.drawable.ColorDrawable
+import android.graphics.Rect
+import android.graphics.Region
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
+import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.InternalInsetsInfo
+import android.widget.FrameLayout
+import androidx.annotation.GravityInt
 import com.android.internal.view.RotationPolicy
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
+import com.android.systemui.util.children
 import com.android.systemui.volume.SystemUIInterpolators
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerViewBinder
 import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
@@ -52,6 +53,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /** Binds the root view of the Volume Dialog. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -61,65 +64,41 @@ class VolumeDialogViewBinder
 constructor(
     private val volumeResources: VolumeDialogResources,
     private val gravityViewModel: VolumeDialogGravityViewModel,
-    private val viewModelFactory: VolumeDialogViewModel.Factory,
+    private val dialogViewModelFactory: VolumeDialogViewModel.Factory,
     private val jankListenerFactory: JankListenerFactory,
     private val tracer: VolumeTracer,
-    @VolumeDialog private val coroutineScope: CoroutineScope,
     private val volumeDialogRingerViewBinder: VolumeDialogRingerViewBinder,
     private val slidersViewBinder: VolumeDialogSlidersViewBinder,
     private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
 ) {
 
     fun bind(dialog: Dialog) {
-        setupDialog(dialog)
-        val view: View = dialog.requireViewById(R.id.volume_dialog_container)
-        view.alpha = 0f
-        view.repeatWhenAttached {
-            view.viewModel(
+        // Root view of the Volume Dialog.
+        val root: ViewGroup = dialog.requireViewById(R.id.volume_dialog_root)
+        // Volume Dialog container view that contains the dialog itself without the floating sliders
+        val container: View = root.requireViewById(R.id.volume_dialog_container)
+        container.alpha = 0f
+        container.repeatWhenAttached {
+            root.viewModel(
                 traceName = "VolumeDialogViewBinder",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                factory = { viewModelFactory.create() },
+                factory = { dialogViewModelFactory.create() },
             ) { viewModel ->
-                viewModel.dialogTitle.onEach { dialog.window?.setTitle(it) }.launchIn(this)
+                animateVisibility(container, dialog, viewModel.dialogVisibilityModel)
 
-                animateVisibility(view, dialog, viewModel.dialogVisibilityModel)
+                viewModel.dialogTitle.onEach { dialog.window?.setTitle(it) }.launchIn(this)
+                gravityViewModel.dialogGravity
+                    .onEach { container.setLayoutGravity(it) }
+                    .launchIn(this)
+
+                launch { root.viewTreeObserver.computeInternalInsetsListener(root) }
 
                 awaitCancellation()
             }
         }
-        volumeDialogRingerViewBinder.bind(view)
-        slidersViewBinder.bind(view)
-        settingsButtonViewBinder.bind(view)
-    }
-
-    /** Configures [Window] for the [Dialog]. */
-    private fun setupDialog(dialog: Dialog) {
-        with(dialog.window!!) {
-            clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            addFlags(
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
-                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-            )
-            addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
-
-            requestFeature(Window.FEATURE_NO_TITLE)
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-            setWindowAnimations(-1)
-            setFormat(PixelFormat.TRANSLUCENT)
-
-            attributes =
-                attributes.apply {
-                    title = "VolumeDialog" // Not the same as Window#setTitle
-                }
-            setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-            gravityViewModel.dialogGravity.onEach { setGravity(it) }.launchIn(coroutineScope)
-        }
-        dialog.setContentView(R.layout.volume_dialog)
-        dialog.setCanceledOnTouchOutside(true)
+        volumeDialogRingerViewBinder.bind(root)
+        slidersViewBinder.bind(root)
+        settingsButtonViewBinder.bind(root)
     }
 
     private fun CoroutineScope.animateVisibility(
@@ -208,5 +187,34 @@ constructor(
             animator.translationX(translationX)
         }
         animator.suspendAnimate(jankListenerFactory.dismiss(this, duration))
+    }
+
+    private suspend fun ViewTreeObserver.computeInternalInsetsListener(viewGroup: ViewGroup) =
+        suspendCancellableCoroutine<Unit> { continuation ->
+            val listener =
+                ViewTreeObserver.OnComputeInternalInsetsListener { inoutInfo ->
+                    viewGroup.fillTouchableBounds(inoutInfo)
+                }
+            addOnComputeInternalInsetsListener(listener)
+            continuation.invokeOnCancellation { removeOnComputeInternalInsetsListener(listener) }
+        }
+
+    private fun ViewGroup.fillTouchableBounds(internalInsetsInfo: InternalInsetsInfo) {
+        for (child in children) {
+            val boundsRect = Rect()
+            internalInsetsInfo.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
+
+            child.getBoundsInWindow(boundsRect, false)
+            internalInsetsInfo.touchableRegion.op(boundsRect, Region.Op.UNION)
+        }
+        val boundsRect = Rect()
+        getBoundsInWindow(boundsRect, false)
+    }
+
+    private fun View.setLayoutGravity(@GravityInt newGravity: Int) {
+        val frameLayoutParams =
+            layoutParams as? FrameLayout.LayoutParams
+                ?: error("View must be a child of a FrameLayout")
+        layoutParams = frameLayoutParams.apply { gravity = newGravity }
     }
 }

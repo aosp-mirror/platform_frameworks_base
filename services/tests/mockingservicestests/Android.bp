@@ -129,23 +129,6 @@ java_library {
     ],
 }
 
-android_ravenwood_test {
-    name: "FrameworksMockingServicesTestsRavenwood",
-    libs: [
-        "android.test.mock.stubs.system",
-    ],
-    static_libs: [
-        "androidx.annotation_annotation",
-        "androidx.test.rules",
-        "services.core",
-        "servicestests-utils-mockito-extended",
-    ],
-    srcs: [
-        "src/com/android/server/am/BroadcastRecordTest.java",
-    ],
-    auto_gen_config: true,
-}
-
 test_module_config {
     name: "FrameworksMockingServicesTests_blob",
     base: "FrameworksMockingServicesTests",
