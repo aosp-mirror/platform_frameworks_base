@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.development.data.repository
 
-import com.android.systemui.development.ui.viewmodel.buildNumberViewModelFactory
+import android.os.userManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.util.settings.fakeGlobalSettings
 
-val Kosmos.paginatedGridViewModel by
-    Kosmos.Fixture {
-        PaginatedGridViewModel(
-            iconTilesViewModel,
-            qsColumnsViewModelFactory,
-            paginatedGridInteractor,
-            inFirstPageViewModel,
-            buildNumberViewModelFactory,
-        )
-    }
+val Kosmos.developmentSettingRepository by
+    Kosmos.Fixture { DevelopmentSettingRepository(fakeGlobalSettings, userManager, testDispatcher) }
