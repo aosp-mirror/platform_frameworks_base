@@ -821,6 +821,7 @@ public class Notification implements Parcelable
         if (Flags.notificationsRedesignTemplates()) {
             switch(layoutId) {
                 case R.layout.notification_2025_template_collapsed_base:
+                case R.layout.notification_2025_template_header:
                     return true;
             }
         }
@@ -6726,7 +6727,7 @@ public class Notification implements Parcelable
             // Headers on their own are never colorized
             p.disallowColorization();
             RemoteViews header = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    R.layout.notification_template_header);
+                    getHeaderLayoutResource());
             resetNotificationHeader(header);
             bindNotificationHeader(header, p);
             return header;
@@ -7484,6 +7485,14 @@ public class Notification implements Parcelable
                 clone.extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
             }
             return clone;
+        }
+
+        private int getHeaderLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_header;
+            } else {
+                return R.layout.notification_template_header;
+            }
         }
 
         @UnsupportedAppUsage
