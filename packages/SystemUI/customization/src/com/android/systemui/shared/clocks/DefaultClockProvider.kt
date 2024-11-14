@@ -67,11 +67,7 @@ class DefaultClockProvider(
             val buffers = messageBuffers ?: ClockMessageBuffers(LogUtil.DEFAULT_MESSAGE_BUFFER)
             val fontAxes = ClockFontAxis.merge(FlexClockController.FONT_AXES, settings.axes)
             val clockSettings = settings.copy(axes = fontAxes.map { it.toSetting() })
-            val typefaceCache =
-                TypefaceCache(buffers.infraMessageBuffer) {
-                    // TODO(b/364680873): Move constant to config_clockFontFamily when shipping
-                    return@TypefaceCache Typeface.create("google-sans-flex-clock", Typeface.NORMAL)
-                }
+            val typefaceCache = TypefaceCache(buffers.infraMessageBuffer) { FLEX_TYPEFACE }
             FlexClockController(
                 ClockContext(
                     ctx,
@@ -130,6 +126,11 @@ class DefaultClockProvider(
                 ClockFontAxisSetting("ROND", 100f),
                 ClockFontAxisSetting("slnt", 0f),
             )
+
+        val FLEX_TYPEFACE by lazy {
+            // TODO(b/364680873): Move constant to config_clockFontFamily when shipping
+            Typeface.create("google-sans-flex-clock", Typeface.NORMAL)
+        }
 
         val FLEX_DESIGN = run {
             val largeLayer =
