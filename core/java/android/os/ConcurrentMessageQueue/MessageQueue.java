@@ -52,7 +52,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("MessageQueue_host")
+@RavenwoodRedirectionClass("MessageQueue_ravenwood")
 public final class MessageQueue {
     private static final String TAG = "ConcurrentMessageQueue";
     private static final boolean DEBUG = false;
