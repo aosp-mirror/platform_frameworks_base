@@ -640,8 +640,8 @@ class TransitionController {
         }
         // Always allow WindowState to assign layers since it won't affect transition.
         return wc.asWindowState() != null || (!isPlaying()
-                // Don't assign task while collecting.
-                && !(wc.asTask() != null && isCollecting()));
+                // Don't assign task or display area layers while collecting.
+                && !((wc.asTask() != null || wc.asDisplayArea() != null) && isCollecting()));
     }
 
     @WindowConfiguration.WindowingMode
