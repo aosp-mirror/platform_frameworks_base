@@ -5220,6 +5220,19 @@ package android.hardware.contexthub {
     method @NonNull public android.hardware.contexthub.HubEndpointInfo getHubEndpointInfo();
   }
 
+  @FlaggedApi("android.chre.flags.offload_api") public class HubEndpoint {
+    method @Nullable public android.hardware.contexthub.IHubEndpointLifecycleCallback getLifecycleCallback();
+    method @Nullable public String getTag();
+  }
+
+  public static final class HubEndpoint.Builder {
+    ctor public HubEndpoint.Builder(@NonNull android.content.Context);
+    method @NonNull public android.hardware.contexthub.HubEndpoint build();
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setLifecycleCallback(@NonNull android.hardware.contexthub.IHubEndpointLifecycleCallback);
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setLifecycleCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.IHubEndpointLifecycleCallback);
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setTag(@NonNull String);
+  }
+
   @FlaggedApi("android.chre.flags.offload_api") public final class HubEndpointInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.hardware.contexthub.HubEndpointInfo.HubEndpointIdentifier getIdentifier();
@@ -5232,6 +5245,26 @@ package android.hardware.contexthub {
   public static class HubEndpointInfo.HubEndpointIdentifier {
     method public long getEndpoint();
     method public long getHub();
+  }
+
+  @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSession implements java.lang.AutoCloseable {
+    method public void close();
+  }
+
+  @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSessionResult {
+    method @NonNull public static android.hardware.contexthub.HubEndpointSessionResult accept();
+    method @Nullable public String getReason();
+    method public boolean isAccepted();
+    method @NonNull public static android.hardware.contexthub.HubEndpointSessionResult reject(@NonNull String);
+  }
+
+  @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointLifecycleCallback {
+    method public void onSessionClosed(@NonNull android.hardware.contexthub.HubEndpointSession, int);
+    method @NonNull public android.hardware.contexthub.HubEndpointSessionResult onSessionOpenRequest(@NonNull android.hardware.contexthub.HubEndpointInfo);
+    method public void onSessionOpened(@NonNull android.hardware.contexthub.HubEndpointSession);
+    field public static final int REASON_CLOSE_ENDPOINT_SESSION_REQUESTED = 4; // 0x4
+    field public static final int REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED = 3; // 0x3
+    field public static final int REASON_UNSPECIFIED = 0; // 0x0
   }
 
 }
@@ -6235,13 +6268,16 @@ package android.hardware.location {
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.NanoAppInstanceInfo getNanoAppInstanceInfo(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int loadNanoApp(int, @NonNull android.hardware.location.NanoApp);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> loadNanoApp(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.NanoAppBinary);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void openSession(@NonNull android.hardware.contexthub.HubEndpoint, @NonNull android.hardware.contexthub.HubEndpointInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.util.List<android.hardware.location.NanoAppState>> queryNanoApps(@NonNull android.hardware.location.ContextHubInfo);
     method @Deprecated public int registerCallback(@NonNull android.hardware.location.ContextHubManager.Callback);
     method @Deprecated public int registerCallback(android.hardware.location.ContextHubManager.Callback, android.os.Handler);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpoint(@NonNull android.hardware.contexthub.HubEndpoint);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int sendMessage(int, int, @NonNull android.hardware.location.ContextHubMessage);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int unloadNanoApp(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> unloadNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
     method @Deprecated public int unregisterCallback(@NonNull android.hardware.location.ContextHubManager.Callback);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void unregisterEndpoint(@NonNull android.hardware.contexthub.HubEndpoint);
     field public static final int AUTHORIZATION_DENIED = 0; // 0x0
     field public static final int AUTHORIZATION_DENIED_GRACE_PERIOD = 1; // 0x1
     field public static final int AUTHORIZATION_GRANTED = 2; // 0x2
