@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -223,6 +224,7 @@ public class RemoteCallbackList<E extends IInterface> {
     public static final class Builder<E extends IInterface> {
         private @FrozenCalleePolicy int mFrozenCalleePolicy;
         private int mMaxQueueSize = DEFAULT_MAX_QUEUE_SIZE;
+        private InterfaceDiedCallback mInterfaceDiedCallback;
 
         /**
          * Creates a Builder for {@link RemoteCallbackList}.
@@ -262,11 +264,46 @@ public class RemoteCallbackList<E extends IInterface> {
         }
 
         /**
+         * Sets the callback to be invoked when an interface dies.
+         */
+        public @NonNull Builder setInterfaceDiedCallback(
+                @NonNull InterfaceDiedCallback<E> callback) {
+            mInterfaceDiedCallback = callback;
+            return this;
+        }
+
+        /**
+         * For notifying when the process hosting a callback interface has died.
+         *
+         * @param <E> The remote callback interface type.
+         */
+        @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+        public interface InterfaceDiedCallback<E extends IInterface> {
+            /**
+             * Invoked when a callback interface has died.
+             *
+             * @param remoteCallbackList the list that the interface was registered with.
+             * @param deadInterface the interface that has died.
+             * @param cookie the cookie specified on interface registration.
+             */
+            void onInterfaceDied(@NonNull RemoteCallbackList<E> remoteCallbackList,
+                    E deadInterface, @Nullable Object cookie);
+        }
+
+        /**
          * Builds and returns a {@link RemoteCallbackList}.
          *
          * @return The built {@link RemoteCallbackList} object.
          */
         public @NonNull RemoteCallbackList<E> build() {
+            if (mInterfaceDiedCallback != null) {
+                return new RemoteCallbackList<E>(mFrozenCalleePolicy, mMaxQueueSize) {
+                    @Override
+                    public void onCallbackDied(E deadInterface, Object cookie) {
+                        mInterfaceDiedCallback.onInterfaceDied(this, deadInterface, cookie);
+                    }
+                };
+            }
             return new RemoteCallbackList<E>(mFrozenCalleePolicy, mMaxQueueSize);
         }
     }
