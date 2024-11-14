@@ -101,7 +101,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
         }
     }
 
-    override var verticalAlignment: VerticalAlignment = VerticalAlignment.CENTER
+    override var verticalAlignment: VerticalAlignment = VerticalAlignment.BASELINE
     override var horizontalAlignment: HorizontalAlignment = HorizontalAlignment.LEFT
     override var isAnimationEnabled = true
     override var dozeFraction: Float = 0F
@@ -242,7 +242,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
                 -translation.y.toFloat(),
                 (-translation.x + measuredWidth).toFloat(),
                 (-translation.y + measuredHeight).toFloat(),
-                Paint().also { it.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT) },
+                PORTER_DUFF_XFER_MODE_PAINT,
             )
             canvas.restore()
             canvas.restore()
@@ -387,7 +387,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
 
     // translation of reference point of text
     // used for translation when calling textInterpolator
-    fun getLocalTranslation(): Point {
+    private fun getLocalTranslation(): Point {
         val viewHeight = if (isVertical) measuredWidth else measuredHeight
         val interpolatedTextBounds = updateInterpolatedTextBounds()
         val localTranslation = Point(0, 0)
@@ -413,7 +413,9 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
                         correctedBaseline
             }
             VerticalAlignment.BASELINE -> {
-                localTranslation.y = -lockScreenPaint.strokeWidth.toInt()
+                // account for max bottom distance of font, so clock doesn't collide with elements
+                localTranslation.y =
+                    -lockScreenPaint.strokeWidth.toInt() - paint.fontMetrics.descent.toInt()
             }
         }
 
@@ -533,7 +535,9 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     }
 
     companion object {
-        val AOD_STROKE_WIDTH = "2dp"
+        private val PORTER_DUFF_XFER_MODE_PAINT =
+            Paint().also { it.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT) }
+
         val AOD_COLOR = Color.WHITE
         val OPTICAL_SIZE_AXIS = ClockFontAxisSetting("opsz", 144f)
         val DEFAULT_LS_VARIATION =
