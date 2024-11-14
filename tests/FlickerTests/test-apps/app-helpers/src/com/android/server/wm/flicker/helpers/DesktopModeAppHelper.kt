@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.helpers
 
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.graphics.Insets
 import android.graphics.Rect
@@ -74,13 +75,28 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .waitForAndVerify()
     }
 
+    /** Launch an app and ensure it's moved to Desktop if it has not. */
+    fun enterDesktopMode(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH),
+    ) {
+        innerHelper.launchViaIntent(wmHelper)
+        if (!isInDesktopWindowingMode(wmHelper)) {
+            enterDesktopModeWithDrag(
+                wmHelper = wmHelper,
+                device = device,
+                motionEventHelper = motionEventHelper
+            )
+        }
+    }
+
     /** Move an app to Desktop by dragging the app handle at the top. */
-    fun enterDesktopWithDrag(
+    fun enterDesktopModeWithDrag(
         wmHelper: WindowManagerStateHelper,
         device: UiDevice,
         motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH)
     ) {
-        innerHelper.launchViaIntent(wmHelper)
         dragToDesktop(
             wmHelper = wmHelper,
             device = device,
@@ -414,6 +430,10 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         val metricInsets = wm.currentWindowMetrics.windowInsets
         return metricInsets.getInsetsIgnoringVisibility(typeMask)
     }
+
+    // Requirement of DesktopWindowingMode is having a minimum of 1 app in WINDOWING_MODE_FREEFORM.
+    private fun isInDesktopWindowingMode(wmHelper: WindowManagerStateHelper) =
+        wmHelper.getWindow(innerHelper)?.windowingMode == WINDOWING_MODE_FREEFORM
 
     private companion object {
         val TIMEOUT: Duration = Duration.ofSeconds(3)
