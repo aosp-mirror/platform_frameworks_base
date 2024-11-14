@@ -194,15 +194,27 @@ public class RemoteCallbackList<E extends IInterface> {
             }
         }
 
-        public void maybeSubscribeToFrozenCallback() throws RemoteException {
+        void maybeSubscribeToFrozenCallback() throws RemoteException {
             if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
-                mBinder.addFrozenStateChangeCallback(this);
+                try {
+                    mBinder.addFrozenStateChangeCallback(this);
+                } catch (UnsupportedOperationException e) {
+                    // The kernel does not support frozen notifications. In this case we want to
+                    // silently fall back to FROZEN_CALLEE_POLICY_UNSET. This is done by simply
+                    // ignoring the error and moving on. mCurrentState would always be
+                    // STATE_UNFROZEN and all callbacks are invoked immediately.
+                }
             }
         }
 
-        public void maybeUnsubscribeFromFrozenCallback() {
+        void maybeUnsubscribeFromFrozenCallback() {
             if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
-                mBinder.removeFrozenStateChangeCallback(this);
+                try {
+                    mBinder.removeFrozenStateChangeCallback(this);
+                } catch (UnsupportedOperationException e) {
+                    // The kernel does not support frozen notifications. Ignore the error and move
+                    // on.
+                }
             }
         }
 
