@@ -2,6 +2,9 @@
 
 com.android.internal.ravenwood.*
 
+com.android.server.FgThread
+com.android.server.ServiceThread
+
 com.android.internal.display.BrightnessSynchronizer
 com.android.internal.util.ArrayUtils
 com.android.internal.logging.MetricsLogger
@@ -371,4 +374,3 @@ android.app.compat.*
 com.android.server.compat.*
 com.android.internal.compat.*
 android.app.AppCompatCallbacks
-
