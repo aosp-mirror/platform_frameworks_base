@@ -16,9 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.view.inputmethod.Flags.FLAG_VERIFY_KEY_EVENT;
-
-import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -196,12 +193,6 @@ public abstract class AbstractInputMethodService extends WindowProviderService
             }
         }
 
-        @FlaggedApi(FLAG_VERIFY_KEY_EVENT)
-        @Override
-        public boolean onShouldVerifyKeyEvent(@NonNull KeyEvent event) {
-            return AbstractInputMethodService.this.onShouldVerifyKeyEvent(event);
-        }
-
         /**
          * Take care of dispatching incoming trackball events to the appropriate
          * callbacks on the service, and tell the client when this is done.
@@ -314,14 +305,6 @@ public abstract class AbstractInputMethodService extends WindowProviderService
      * @see android.view.View#onGenericMotionEvent(MotionEvent)
      */
     public boolean onGenericMotionEvent(MotionEvent event) {
-        return false;
-    }
-
-    /**
-     * @see InputMethodService#onShouldVerifyKeyEvent(KeyEvent)
-     */
-    @FlaggedApi(FLAG_VERIFY_KEY_EVENT)
-    public boolean onShouldVerifyKeyEvent(@NonNull KeyEvent event) {
         return false;
     }
 
