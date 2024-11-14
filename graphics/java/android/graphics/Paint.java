@@ -836,11 +836,13 @@ public class Paint {
             mNativeColorFilter = newNativeColorFilter;
             nSetColorFilter(mNativePaint, mNativeColorFilter);
         }
-        if (mXfermode instanceof RuntimeXfermode) {
-            long newNativeXfermode = ((RuntimeXfermode) mXfermode).createNativeInstance();
-            if (newNativeXfermode != mNativeXfermode) {
-                mNativeXfermode = newNativeXfermode;
-                nSetXfermode(mNativePaint, mNativeXfermode);
+        if (com.android.graphics.hwui.flags.Flags.runtimeColorFiltersBlenders()) {
+            if (mXfermode instanceof RuntimeXfermode) {
+                long newNativeXfermode = ((RuntimeXfermode) mXfermode).createNativeInstance();
+                if (newNativeXfermode != mNativeXfermode) {
+                    mNativeXfermode = newNativeXfermode;
+                    nSetXfermode(mNativePaint, mNativeXfermode);
+                }
             }
         }
         return mNativePaint;
@@ -1470,10 +1472,12 @@ public class Paint {
 
     @Nullable
     private Xfermode installXfermode(Xfermode xfermode) {
-        if (xfermode instanceof RuntimeXfermode) {
-            mXfermode = xfermode;
-            nSetXfermode(mNativePaint, ((RuntimeXfermode) xfermode).createNativeInstance());
-            return xfermode;
+        if (com.android.graphics.hwui.flags.Flags.runtimeColorFiltersBlenders()) {
+            if (xfermode instanceof RuntimeXfermode) {
+                mXfermode = xfermode;
+                nSetXfermode(mNativePaint, ((RuntimeXfermode) xfermode).createNativeInstance());
+                return xfermode;
+            }
         }
         int newMode = (xfermode instanceof PorterDuffXfermode)
                 ? ((PorterDuffXfermode) xfermode).porterDuffMode : PorterDuffXfermode.DEFAULT;
