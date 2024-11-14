@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.dynamicanimation.animation.SpringAnimation
 import com.android.internal.dynamicanimation.animation.SpringForce
 import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
+import com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived
 import java.util.concurrent.Executor
 import kotlin.math.abs
 import kotlin.math.max
@@ -113,12 +114,25 @@ class TransitionAnimator(
             )
         }
 
-        internal fun checkReturnAnimationFrameworkFlag() {
-            check(returnAnimationFrameworkLibrary()) {
-                "isLaunching cannot be false when the returnAnimationFrameworkLibrary flag is " +
-                    "disabled"
+        internal fun assertReturnAnimations() {
+            check(returnAnimationsEnabled()) {
+                "isLaunching cannot be false when the returnAnimationFrameworkLibrary flag " +
+                    "is disabled"
             }
         }
+
+        internal fun returnAnimationsEnabled() = returnAnimationFrameworkLibrary()
+
+        internal fun assertLongLivedReturnAnimations() {
+            check(longLivedReturnAnimationsEnabled()) {
+                "Long-lived registrations cannot be used when the " +
+                    "returnAnimationFrameworkLibrary or the " +
+                    "returnAnimationFrameworkLongLived flag are disabled"
+            }
+        }
+
+        internal fun longLivedReturnAnimationsEnabled() =
+            returnAnimationFrameworkLibrary() && returnAnimationFrameworkLongLived()
 
         internal fun WindowAnimationState.toTransitionState() =
             State().also {
@@ -467,7 +481,8 @@ class TransitionAnimator(
         drawHole: Boolean = false,
         startVelocity: PointF? = null,
     ): Animation {
-        if (!controller.isLaunching || startVelocity != null) checkReturnAnimationFrameworkFlag()
+        if (!controller.isLaunching) assertReturnAnimations()
+        if (startVelocity != null) assertLongLivedReturnAnimations()
 
         // We add an extra layer with the same color as the dialog/app splash screen background
         // color, which is usually the same color of the app background. We first fade in this layer
