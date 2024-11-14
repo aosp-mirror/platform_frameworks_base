@@ -1350,11 +1350,7 @@ public class BubbleController implements ConfigurationChangeListener,
         if (BubbleOverflow.KEY.equals(key)) {
             mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
             mLayerView.showExpandedView(mBubbleData.getOverflow());
-            if (wasExpanded) {
-                mLogger.log(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
-            } else {
-                mLogger.log(BubbleLogger.Event.BUBBLE_BAR_EXPANDED);
-            }
+            mLogger.log(BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_SELECTED);
             return;
         }
 

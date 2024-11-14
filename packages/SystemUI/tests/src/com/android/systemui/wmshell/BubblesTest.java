@@ -2707,6 +2707,22 @@ public class BubblesTest extends SysuiTestCase {
                 eq(BubbleLogger.Event.BUBBLE_BAR_EXPANDED));
     }
 
+    @EnableFlags(FLAG_ENABLE_BUBBLE_BAR)
+    @Test
+    public void testEventLogging_bubbleBar_openOverflow() {
+        mBubbleProperties.mIsBubbleBarEnabled = true;
+        mPositioner.setIsLargeScreen(true);
+        FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
+        mBubbleController.registerBubbleStateListener(bubbleStateListener);
+
+        mEntryListener.onEntryAdded(mRow);
+
+        clearInvocations(mBubbleLogger);
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(BubbleOverflow.KEY, 0);
+        verify(mBubbleLogger).log(BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_SELECTED);
+        verifyNoMoreInteractions(mBubbleLogger);
+    }
+
     /** Creates a bubble using the userId and package. */
     private Bubble createBubble(int userId, String pkg) {
         final UserHandle userHandle = new UserHandle(userId);
