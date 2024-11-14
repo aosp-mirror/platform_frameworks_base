@@ -356,6 +356,12 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean) {
         checkThread()
 
+        // Prepare the transition before starting it. This is outside of the try/finally block on
+        // purpose because preparing a transition might throw an exception (e.g. if we find multiple
+        // specs matching this transition), in which case we want to throw that exception here
+        // before even starting the transition.
+        prepareTransitionBeforeStarting(transition)
+
         try {
             // Start the transition.
             startTransitionInternal(transition, chain)
@@ -367,7 +373,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         }
     }
 
-    private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {
+    private fun prepareTransitionBeforeStarting(transition: TransitionState.Transition) {
         // Set the current scene and overlays on the transition.
         val currentState = transitionState
         transition.currentSceneWhenTransitionStarted = currentState.currentScene
@@ -395,7 +401,9 @@ internal class MutableSceneTransitionLayoutStateImpl(
         } else {
             transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
         }
+    }
 
+    private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {
         when (val currentState = transitionStates.last()) {
             is TransitionState.Idle -> {
                 // Replace [Idle] by [transition].
