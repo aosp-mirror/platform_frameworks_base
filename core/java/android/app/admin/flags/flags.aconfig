@@ -343,6 +343,16 @@ flag {
 }
 
 flag {
+    name: "active_admin_cleanup"
+    namespace: "enterprise"
+    description: "Remove ActiveAdmin from EnforcingAdmin and related cleanups"
+    bug: "335663055"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "user_provisioning_same_state"
     namespace: "enterprise"
     description: "Handle exceptions while setting same provisioning state."

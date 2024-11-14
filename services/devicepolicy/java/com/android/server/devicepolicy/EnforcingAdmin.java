@@ -23,6 +23,7 @@ import android.app.admin.DeviceAdminAuthority;
 import android.app.admin.DpcAuthority;
 import android.app.admin.RoleAuthority;
 import android.app.admin.UnknownAuthority;
+import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.os.UserHandle;
 
@@ -295,7 +296,15 @@ final class EnforcingAdmin {
 
     @Nullable
     public ActiveAdmin getActiveAdmin() {
+        if (Flags.activeAdminCleanup()) {
+            throw new UnsupportedOperationException("getActiveAdmin() no longer supported");
+        }
         return mActiveAdmin;
+    }
+
+    @Nullable
+    ComponentName getComponentName() {
+        return mComponentName;
     }
 
     @NonNull
