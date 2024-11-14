@@ -16,13 +16,3 @@ flag {
      is_exported: true
      bug: "376339506"
 }
-
-flag {
-    name: "fix_config_garbage_collection"
-    namespace: "vcn"
-    description: "Handle race condition in subscription change"
-    bug: "370862489"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
