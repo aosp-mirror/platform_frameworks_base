@@ -1327,7 +1327,11 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /** Promote the provided bubble from the overflow view. */
     public void promoteBubbleFromOverflow(Bubble bubble) {
-        mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
+        if (isShowingAsBubbleBar()) {
+            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_REMOVE_BACK_TO_BAR);
+        } else {
+            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
+        }
         ProtoLog.d(WM_SHELL_BUBBLES, "promoteBubbleFromOverflow=%s", bubble.getKey());
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.setShouldAutoExpand(true);
