@@ -1659,8 +1659,9 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
         final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
 
-        doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(receiverBlueApp.uid));
+        doReturn(false).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE),
+                argThat(appInfoEquals(receiverBlueApp.uid)));
 
         // Enqueue a normal broadcast that will go to several processes, and
         // then enqueue a foreground broadcast that risks reordering
@@ -2471,8 +2472,9 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
         final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
-        doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(receiverBlueApp.uid));
+        doReturn(false).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE),
+                argThat(appInfoEquals(receiverBlueApp.uid)));
 
         mUidObserver.onUidStateChanged(receiverGreenApp.info.uid,
                 ActivityManager.PROCESS_STATE_TOP, 0, ActivityManager.PROCESS_CAPABILITY_NONE);
