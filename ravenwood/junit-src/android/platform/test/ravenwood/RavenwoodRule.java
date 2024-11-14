@@ -155,7 +155,7 @@ public final class RavenwoodRule implements TestRule {
          * Has no effect on non-Ravenwood environments.
          */
         public Builder setSystemPropertyImmutable(@NonNull String key, @Nullable Object value) {
-            mBuilder.setSystemPropertyImmutable(key, value);
+            mBuilder.setSystemPropertyImmutableReal(key, value);
             return this;
         }
 
@@ -170,7 +170,7 @@ public final class RavenwoodRule implements TestRule {
          * Has no effect on non-Ravenwood environments.
          */
         public Builder setSystemPropertyMutable(@NonNull String key, @Nullable Object value) {
-            mBuilder.setSystemPropertyMutable(key, value);
+            mBuilder.setSystemPropertyMutableReal(key, value);
             return this;
         }
 
