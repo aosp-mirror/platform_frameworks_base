@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Dp
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
+import com.android.compose.animation.scene.transformation.CustomPropertyTransformation
 import com.android.compose.animation.scene.transformation.DrawScale
 import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
@@ -173,7 +174,7 @@ internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
         range = null
     }
 
-    protected fun transformation(transformation: Transformation) {
+    protected fun addTransformation(transformation: Transformation) {
         val transformationWithRange = TransformationWithRange(transformation, range)
         transformations.add(
             if (reversed) {
@@ -185,11 +186,11 @@ internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
     }
 
     override fun fade(matcher: ElementMatcher) {
-        transformation(Fade(matcher))
+        addTransformation(Fade(matcher))
     }
 
     override fun translate(matcher: ElementMatcher, x: Dp, y: Dp) {
-        transformation(Translate(matcher, x, y))
+        addTransformation(Translate(matcher, x, y))
     }
 
     override fun translate(
@@ -197,19 +198,19 @@ internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
         edge: Edge,
         startsOutsideLayoutBounds: Boolean,
     ) {
-        transformation(EdgeTranslate(matcher, edge, startsOutsideLayoutBounds))
+        addTransformation(EdgeTranslate(matcher, edge, startsOutsideLayoutBounds))
     }
 
     override fun anchoredTranslate(matcher: ElementMatcher, anchor: ElementKey) {
-        transformation(AnchoredTranslate(matcher, anchor))
+        addTransformation(AnchoredTranslate(matcher, anchor))
     }
 
     override fun scaleSize(matcher: ElementMatcher, width: Float, height: Float) {
-        transformation(ScaleSize(matcher, width, height))
+        addTransformation(ScaleSize(matcher, width, height))
     }
 
     override fun scaleDraw(matcher: ElementMatcher, scaleX: Float, scaleY: Float, pivot: Offset) {
-        transformation(DrawScale(matcher, scaleX, scaleY, pivot))
+        addTransformation(DrawScale(matcher, scaleX, scaleY, pivot))
     }
 
     override fun anchoredSize(
@@ -218,7 +219,12 @@ internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
         anchorWidth: Boolean,
         anchorHeight: Boolean,
     ) {
-        transformation(AnchoredSize(matcher, anchor, anchorWidth, anchorHeight))
+        addTransformation(AnchoredSize(matcher, anchor, anchorWidth, anchorHeight))
+    }
+
+    override fun transformation(transformation: CustomPropertyTransformation<*>) {
+        check(range == null) { "Custom transformations can not be applied inside a range" }
+        addTransformation(transformation)
     }
 }
 
@@ -257,7 +263,7 @@ internal class TransitionBuilderImpl(override val transition: TransitionState.Tr
                 "(${transition.toContent.debugName})"
         }
 
-        transformation(SharedElementTransformation(matcher, enabled, elevateInContent))
+        addTransformation(SharedElementTransformation(matcher, enabled, elevateInContent))
     }
 
     override fun timestampRange(
@@ -288,6 +294,6 @@ internal open class OverscrollBuilderImpl : BaseTransitionBuilderImpl(), Overscr
         x: OverscrollScope.() -> Float,
         y: OverscrollScope.() -> Float,
     ) {
-        transformation(OverscrollTranslate(matcher, x, y))
+        addTransformation(OverscrollTranslate(matcher, x, y))
     }
 }

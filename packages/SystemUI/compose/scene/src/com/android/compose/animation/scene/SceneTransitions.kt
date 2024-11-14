@@ -26,18 +26,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.transformation.AnchoredSize
-import com.android.compose.animation.scene.transformation.AnchoredTranslate
-import com.android.compose.animation.scene.transformation.DrawScale
-import com.android.compose.animation.scene.transformation.EdgeTranslate
-import com.android.compose.animation.scene.transformation.Fade
-import com.android.compose.animation.scene.transformation.OverscrollTranslate
+import com.android.compose.animation.scene.transformation.CustomAlphaTransformation
+import com.android.compose.animation.scene.transformation.CustomOffsetTransformation
+import com.android.compose.animation.scene.transformation.CustomScaleTransformation
+import com.android.compose.animation.scene.transformation.CustomSizeTransformation
+import com.android.compose.animation.scene.transformation.InterpolatedAlphaTransformation
+import com.android.compose.animation.scene.transformation.InterpolatedOffsetTransformation
+import com.android.compose.animation.scene.transformation.InterpolatedScaleTransformation
+import com.android.compose.animation.scene.transformation.InterpolatedSizeTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformation
-import com.android.compose.animation.scene.transformation.ScaleSize
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationWithRange
-import com.android.compose.animation.scene.transformation.Translate
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
 class SceneTransitions
@@ -359,35 +359,34 @@ internal class TransformationSpecImpl(
                         transformationWithRange
                             as TransformationWithRange<SharedElementTransformation>
                 }
-                is Translate,
-                is OverscrollTranslate,
-                is EdgeTranslate,
-                is AnchoredTranslate -> {
+                is InterpolatedOffsetTransformation,
+                is CustomOffsetTransformation -> {
                     throwIfNotNull(offset, element, name = "offset")
                     offset =
                         transformationWithRange
                             as TransformationWithRange<PropertyTransformation<Offset>>
                 }
-                is ScaleSize,
-                is AnchoredSize -> {
+                is InterpolatedSizeTransformation,
+                is CustomSizeTransformation -> {
                     throwIfNotNull(size, element, name = "size")
                     size =
                         transformationWithRange
                             as TransformationWithRange<PropertyTransformation<IntSize>>
                 }
-                is DrawScale -> {
+                is InterpolatedScaleTransformation,
+                is CustomScaleTransformation -> {
                     throwIfNotNull(drawScale, element, name = "drawScale")
                     drawScale =
                         transformationWithRange
                             as TransformationWithRange<PropertyTransformation<Scale>>
                 }
-                is Fade -> {
+                is InterpolatedAlphaTransformation,
+                is CustomAlphaTransformation -> {
                     throwIfNotNull(alpha, element, name = "alpha")
                     alpha =
                         transformationWithRange
                             as TransformationWithRange<PropertyTransformation<Float>>
                 }
-                else -> error("Unknown transformation: $transformation")
             }
         }
 

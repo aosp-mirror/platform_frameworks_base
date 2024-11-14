@@ -30,7 +30,7 @@ internal class Translate(
     override val matcher: ElementMatcher,
     private val x: Dp = 0.dp,
     private val y: Dp = 0.dp,
-) : PropertyTransformation<Offset> {
+) : InterpolatedOffsetTransformation {
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
@@ -45,7 +45,7 @@ internal class OverscrollTranslate(
     override val matcher: ElementMatcher,
     val x: OverscrollScope.() -> Float = { 0f },
     val y: OverscrollScope.() -> Float = { 0f },
-) : PropertyTransformation<Offset> {
+) : InterpolatedOffsetTransformation {
     private val cachedOverscrollScope = CachedOverscrollScope()
 
     override fun PropertyTransformationScope.transform(

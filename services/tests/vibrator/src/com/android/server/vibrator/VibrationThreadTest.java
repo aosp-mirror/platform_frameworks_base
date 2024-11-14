@@ -754,7 +754,7 @@ public class VibrationThreadTest {
         HalVibration vibration = startThreadAndDispatcher(effect);
         waitForCompletion();
 
-        verify(mManagerHooks).noteVibratorOn(eq(UID), eq(0L));
+        verify(mManagerHooks, never()).noteVibratorOn(eq(UID), anyLong());
         verify(mManagerHooks, never()).noteVibratorOff(eq(UID));
         verify(mControllerCallbacks, never()).onComplete(eq(VIBRATOR_ID), eq(vibration.id));
         verifyCallbacksTriggered(vibration, Status.IGNORED_UNSUPPORTED);
@@ -1913,6 +1913,55 @@ public class VibrationThreadTest {
                 fakeVibrator.getEffectSegments(vibration5.id));
     }
 
+    @Test
+    public void vibrate_multipleVibratorsSequentialInSession_runsInOrderWithoutDelaysAndNoOffs() {
+        mockVibrators(1, 2, 3);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        mVibratorProviders.get(2).setSupportedPrimitives(
+                VibrationEffect.Composition.PRIMITIVE_CLICK);
+        mVibratorProviders.get(3).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+
+        CombinedVibration effect = CombinedVibration.startSequential()
+                .addNext(3,
+                        VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                        /* delay= */ TEST_TIMEOUT_MILLIS)
+                .addNext(1,
+                        VibrationEffect.createWaveform(
+                                new long[] {TEST_TIMEOUT_MILLIS, TEST_TIMEOUT_MILLIS},
+                                /* repeat= */ -1),
+                        /* delay= */ TEST_TIMEOUT_MILLIS)
+                .addNext(2,
+                        VibrationEffect.startComposition()
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1,
+                                        /* delay= */ TEST_TIMEOUT_MILLIS)
+                                .compose(),
+                        /* delay= */ TEST_TIMEOUT_MILLIS)
+                .combine();
+        HalVibration vibration = startThreadAndDispatcher(effect, /* isInSession= */ true);
+
+        // Should not timeout as delays will not affect in session playback time.
+        waitForCompletion();
+
+        // Vibrating state remains ON until session resets it.
+        verifyCallbacksTriggered(vibration, Status.FINISHED);
+        assertTrue(mControllers.get(1).isVibrating());
+        assertTrue(mControllers.get(2).isVibrating());
+        assertTrue(mControllers.get(3).isVibrating());
+
+        assertEquals(0, mVibratorProviders.get(1).getOffCount());
+        assertEquals(0, mVibratorProviders.get(2).getOffCount());
+        assertEquals(0, mVibratorProviders.get(3).getOffCount());
+        assertEquals(Arrays.asList(expectedOneShot(TEST_TIMEOUT_MILLIS)),
+                mVibratorProviders.get(1).getEffectSegments(vibration.id));
+        assertEquals(expectedAmplitudes(255), mVibratorProviders.get(1).getAmplitudes());
+        assertEquals(Arrays.asList(expectedPrimitive(
+                VibrationEffect.Composition.PRIMITIVE_CLICK, 1, TEST_TIMEOUT_MILLIS)),
+                mVibratorProviders.get(2).getEffectSegments(vibration.id));
+        assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
+                mVibratorProviders.get(3).getEffectSegments(vibration.id));
+    }
+
     private void mockVibrators(int... vibratorIds) {
         for (int vibratorId : vibratorIds) {
             mVibratorProviders.put(vibratorId,
@@ -1935,8 +1984,14 @@ public class VibrationThreadTest {
         return startThreadAndDispatcher(createVibration(effect));
     }
 
+    private HalVibration startThreadAndDispatcher(CombinedVibration effect, boolean isInSession) {
+        return startThreadAndDispatcher(createVibration(effect), isInSession,
+                /* requestVibrationParamsFuture= */ null);
+    }
+
     private HalVibration startThreadAndDispatcher(HalVibration vib) {
-        return startThreadAndDispatcher(vib, /* requestVibrationParamsFuture= */ null);
+        return startThreadAndDispatcher(vib, /* isInSession= */ false,
+                /* requestVibrationParamsFuture= */ null);
     }
 
     private HalVibration startThreadAndDispatcher(VibrationEffect effect,
@@ -1947,15 +2002,17 @@ public class VibrationThreadTest {
         HalVibration vib = new HalVibration(
                 new CallerInfo(attrs, UID, DEVICE_ID, PACKAGE_NAME, "reason"),
                 CombinedVibration.createParallel(effect));
-        return startThreadAndDispatcher(vib, requestVibrationParamsFuture);
+        return startThreadAndDispatcher(vib, /* isInSession= */ false,
+                requestVibrationParamsFuture);
     }
 
-    private HalVibration startThreadAndDispatcher(HalVibration vib,
+    private HalVibration startThreadAndDispatcher(HalVibration vib, boolean isInSession,
             CompletableFuture<Void> requestVibrationParamsFuture) {
         mControllers = createVibratorControllers();
         DeviceAdapter deviceAdapter = new DeviceAdapter(mVibrationSettings, mControllers);
-        mVibrationConductor = new VibrationStepConductor(vib, mVibrationSettings, deviceAdapter,
-                mVibrationScaler, mStatsLoggerMock, requestVibrationParamsFuture, mManagerHooks);
+        mVibrationConductor = new VibrationStepConductor(vib, isInSession, mVibrationSettings,
+                deviceAdapter, mVibrationScaler, mStatsLoggerMock, requestVibrationParamsFuture,
+                mManagerHooks);
         assertTrue(mThread.runVibrationOnVibrationThread(mVibrationConductor));
         return mVibrationConductor.getVibration();
     }

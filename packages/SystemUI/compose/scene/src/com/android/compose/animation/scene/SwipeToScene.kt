@@ -165,8 +165,7 @@ private class SwipeToSceneNode(
 
     private val nestedScrollHandlerImpl =
         NestedScrollHandlerImpl(
-            layoutImpl = draggableHandler.layoutImpl,
-            orientation = draggableHandler.orientation,
+            draggableHandler = draggableHandler,
             topOrLeftBehavior = NestedScrollBehavior.Default,
             bottomOrRightBehavior = NestedScrollBehavior.Default,
             isExternalOverscrollGesture = { false },

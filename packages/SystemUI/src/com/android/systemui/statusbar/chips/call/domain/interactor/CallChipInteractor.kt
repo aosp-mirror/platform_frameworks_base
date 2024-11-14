@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
@@ -47,6 +48,6 @@ constructor(
             .stateIn(scope, SharingStarted.Lazily, OngoingCallModel.NoCall)
 
     companion object {
-        private const val TAG = "OngoingCall"
+        private val TAG = "OngoingCall".pad()
     }
 }

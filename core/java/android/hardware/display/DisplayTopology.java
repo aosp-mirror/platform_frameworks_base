@@ -23,6 +23,7 @@ import static android.hardware.display.DisplayTopology.TreeNode.POSITION_TOP;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -148,6 +149,138 @@ public final class DisplayTopology implements Parcelable {
         } else {
             Slog.i(TAG, "Display with ID " + displayId + " removed");
         }
+    }
+
+    /**
+     * Rearranges the topology toward the positions given for each display. The width and height of
+     * each display, as well as the primary display, are not changed by this call.
+     * <p>
+     * Upon returning, the topology will be valid and normalized with each display as close to the
+     * requested positions as possible.
+     *
+     * @param newPos the desired positions (upper-left corner) of each display. The keys in the map
+     *               are the display IDs.
+     * @throws IllegalArgumentException if the keys in {@code positions} are not the exact display
+     *                                  IDs in this topology, no more, no less
+     */
+    public void rearrange(Map<Integer, PointF> newPos) {
+        var availableParents = new ArrayList<TreeNode>();
+
+        availableParents.addLast(mRoot);
+
+        var needsParent = allNodesIdMap();
+
+        // In the case of missing items, if this check doesn't detect it, a NPE will be thrown
+        // later.
+        if (needsParent.size() != newPos.size()) {
+            throw new IllegalArgumentException("newPos has wrong number of entries: " + newPos);
+        }
+
+        mRoot.mChildren.clear();
+        for (TreeNode n : needsParent.values()) {
+            n.mChildren.clear();
+        }
+
+        needsParent.remove(mRoot.mDisplayId);
+        // Start with a root island and add children to it one-by-one until the island consists of
+        // all the displays. The root island begins with only the root node, which has no
+        // parent. Then we greedily choose an optimal pairing of two nodes, consisting of a node
+        // from the island and a node not yet in the island. This is repeating until all nodes are
+        // in the island.
+        //
+        // The optimal pair is the pair which has the smallest deviation. The deviation consists of
+        // an x-axis component and a y-axis component, called xDeviation and yDeviation.
+        //
+        // The deviations are like distances but a little different. They are calculated in two
+        // steps. The first step calculates both axes in a similar way. The next step compares the
+        // two values and chooses which axis to attach along. Depending on which axis is chosen,
+        // the deviation for one axis is updated. See below for details.
+        while (!needsParent.isEmpty()) {
+            double bestDist = Double.POSITIVE_INFINITY;
+            TreeNode bestChild = null, bestParent = null;
+
+            for (var child : needsParent.values()) {
+                PointF childPos = newPos.get(child.mDisplayId);
+                float childRight = childPos.x + child.getWidth();
+                float childBottom = childPos.y + child.getHeight();
+                for (var parent : availableParents) {
+                    PointF parentPos = newPos.get(parent.mDisplayId);
+                    float parentRight = parentPos.x + parent.getWidth();
+                    float parentBottom = parentPos.y + parent.getHeight();
+
+                    // This is the smaller of the two ranges minus the amount of overlap shared
+                    // between them. The "amount of overlap" is negative if there is no overlap, but
+                    // this does not make a parenting ineligible, because we allow for attaching at
+                    // the corner and for floating point error. The overlap is more negative the
+                    // farther apart the closest corner pair is.
+                    //
+                    // For each axis, this calculates (SmallerRange - Overlap). If one range lies
+                    // completely in the other (or they are equal), the axis' deviation will be
+                    // zero.
+                    //
+                    // The "SmallerRange," which refers to smaller of the widths of the two rects,
+                    // or smaller of the heights of the two rects, is added to the deviation so that
+                    // a maximum overlap results in a deviation of zero.
+                    float xSmallerRange = Math.min(child.getWidth(), parent.getWidth());
+                    float ySmallerRange = Math.min(child.getHeight(), parent.getHeight());
+                    float xOverlap
+                            = Math.min(parentRight, childRight)
+                            - Math.max(parentPos.x, childPos.x);
+                    float yOverlap
+                            = Math.min(parentBottom, childBottom)
+                            - Math.max(parentPos.y, childPos.y);
+                    float xDeviation = xSmallerRange - xOverlap;
+                    float yDeviation = ySmallerRange - yOverlap;
+
+                    float offset;
+                    int pos;
+                    if (xDeviation <= yDeviation) {
+                        if (childPos.y < parentPos.y) {
+                            yDeviation = childBottom - parentPos.y;
+                            pos = POSITION_TOP;
+                        } else {
+                            yDeviation = parentBottom - childPos.y;
+                            pos = POSITION_BOTTOM;
+                        }
+                        offset = childPos.x - parentPos.x;
+                    } else {
+                        if (childPos.x < parentPos.x) {
+                            xDeviation = childRight - parentPos.x;
+                            pos = POSITION_LEFT;
+                        } else {
+                            xDeviation = parentRight - childPos.x;
+                            pos = POSITION_RIGHT;
+                        }
+                        offset = childPos.y - parentPos.y;
+                    }
+
+                    double dist = Math.hypot(xDeviation, yDeviation);
+                    if (dist >= bestDist) {
+                        continue;
+                    }
+
+                    bestDist = dist;
+                    bestChild = child;
+                    bestParent = parent;
+                    // Eagerly update the child's parenting info, even though we may not use it, in
+                    // which case it will be overwritten later.
+                    bestChild.mPosition = pos;
+                    bestChild.mOffset = offset;
+                }
+            }
+
+            assert bestParent != null & bestChild != null;
+
+            bestParent.addChild(bestChild);
+            if (null == needsParent.remove(bestChild.mDisplayId)) {
+                throw new IllegalStateException("child not in pending set! " + bestChild);
+            }
+            availableParents.add(bestChild);
+        }
+
+        // The conversion may have introduced an intersection of two display rects. If they are
+        // bigger than our error tolerance, this function will remove them.
+        normalize();
     }
 
     @Override
@@ -448,6 +581,20 @@ public final class DisplayTopology implements Parcelable {
      */
     private static boolean floatEquals(float a, float b) {
         return a == b || (Float.isNaN(a) && Float.isNaN(b)) || Math.abs(a - b) < EPSILON;
+    }
+
+    private Map<Integer, TreeNode> allNodesIdMap() {
+        var pend = new ArrayDeque<TreeNode>();
+        var found = new HashMap<Integer, TreeNode>();
+
+        pend.push(mRoot);
+        do {
+            TreeNode node = pend.pop();
+            found.put(node.mDisplayId, node);
+            pend.addAll(node.mChildren);
+        } while (!pend.isEmpty());
+
+        return found;
     }
 
     public static final class TreeNode implements Parcelable {

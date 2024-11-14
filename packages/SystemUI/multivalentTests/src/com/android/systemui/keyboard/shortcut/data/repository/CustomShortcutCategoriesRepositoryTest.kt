@@ -218,11 +218,11 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
             simpleShortcutCategory(System, "System controls", "View recent apps"),
             simpleShortcutCategory(AppCategories, "Applications", "Calculator"),
             simpleShortcutCategory(AppCategories, "Applications", "Calendar"),
-            simpleShortcutCategory(AppCategories, "Applications", "Chrome"),
+            simpleShortcutCategory(AppCategories, "Applications", "Browser"),
             simpleShortcutCategory(AppCategories, "Applications", "Contacts"),
-            simpleShortcutCategory(AppCategories, "Applications", "Gmail"),
+            simpleShortcutCategory(AppCategories, "Applications", "Email"),
             simpleShortcutCategory(AppCategories, "Applications", "Maps"),
-            simpleShortcutCategory(AppCategories, "Applications", "Messages"),
+            simpleShortcutCategory(AppCategories, "Applications", "SMS"),
             simpleShortcutCategory(MultiTasking, "Recent apps", "Cycle forward through recent apps"),
         )
 

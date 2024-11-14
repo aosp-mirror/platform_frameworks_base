@@ -31,7 +31,7 @@ internal class ScaleSize(
     override val matcher: ElementMatcher,
     private val width: Float = 1f,
     private val height: Float = 1f,
-) : PropertyTransformation<IntSize> {
+) : InterpolatedSizeTransformation {
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

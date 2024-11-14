@@ -257,6 +257,7 @@ interface IDevicePolicyManager {
     void setUserRestriction(in ComponentName who, in String callerPackage, in String key, boolean enable, boolean parent);
     void setUserRestrictionForUser(in String systemEntity, in String key, boolean enable, int targetUser);
     void setUserRestrictionGlobally(in String callerPackage, in String key);
+    void setUserRestrictionGloballyFromSystem(in String systemEntity, in String key, boolean enable);
     Bundle getUserRestrictions(in ComponentName who, in String callerPackage, boolean parent);
     Bundle getUserRestrictionsGlobally(in String callerPackage);
 
@@ -374,6 +375,9 @@ interface IDevicePolicyManager {
 
     void setAutoTimeEnabled(in ComponentName who, String callerPackageName, boolean enabled);
     boolean getAutoTimeEnabled(in ComponentName who, String callerPackageName);
+
+    void setAutoTimePolicy(String callerPackageName, int policy);
+    int getAutoTimePolicy(String callerPackageName);
 
     void setAutoTimeZoneEnabled(in ComponentName who, String callerPackageName, boolean enabled);
     boolean getAutoTimeZoneEnabled(in ComponentName who, String callerPackageName);

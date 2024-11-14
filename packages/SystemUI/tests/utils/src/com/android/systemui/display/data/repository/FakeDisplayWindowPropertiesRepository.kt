@@ -35,4 +35,9 @@ class FakeDisplayWindowPropertiesRepository : DisplayWindowPropertiesRepository 
                 )
                 .also { properties.put(displayId, windowType, it) }
     }
+
+    /** Sets an instance, just for testing purposes. */
+    fun insert(instance: DisplayWindowProperties) {
+        properties.put(instance.displayId, instance.windowType, instance)
+    }
 }

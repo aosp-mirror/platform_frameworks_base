@@ -28,6 +28,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
@@ -179,6 +180,6 @@ constructor(
 
     companion object {
         @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_present_to_all
-        private const val TAG = "ShareToAppVM"
+        private val TAG = "ShareToAppVM".pad()
     }
 }

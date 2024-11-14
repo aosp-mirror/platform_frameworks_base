@@ -19,7 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.server.am.BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE;
+import static com.android.server.am.BroadcastRecord.LIMIT_PRIORITY_SCOPE;
 import static com.android.server.am.BroadcastRecord.DELIVERY_DEFERRED;
 import static com.android.server.am.BroadcastRecord.DELIVERY_DELIVERED;
 import static com.android.server.am.BroadcastRecord.DELIVERY_PENDING;
@@ -109,7 +109,7 @@ public class BroadcastRecordTest {
         MockitoAnnotations.initMocks(this);
 
         doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), anyInt());
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), anyInt());
     }
 
     @Test
@@ -223,7 +223,7 @@ public class BroadcastRecordTest {
     @Test
     public void testIsPrioritized_withDifferentPriorities_withFirstUidChangeIdDisabled() {
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(1)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(1)));
 
         assertTrue(isPrioritized(List.of(
                 createResolveInfo(PACKAGE1, getAppId(1), 10),
@@ -257,7 +257,7 @@ public class BroadcastRecordTest {
     @Test
     public void testIsPrioritized_withDifferentPriorities_withLastUidChangeIdDisabled() {
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(3)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(3)));
 
         assertTrue(isPrioritized(List.of(
                 createResolveInfo(PACKAGE1, getAppId(1), 10),
@@ -295,7 +295,7 @@ public class BroadcastRecordTest {
     @Test
     public void testIsPrioritized_withDifferentPriorities_withUidChangeIdDisabled() {
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(2)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(2)));
 
         assertTrue(isPrioritized(List.of(
                 createResolveInfo(PACKAGE1, getAppId(1), 10),
@@ -329,9 +329,9 @@ public class BroadcastRecordTest {
     @Test
     public void testIsPrioritized_withDifferentPriorities_withMultipleUidChangeIdDisabled() {
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(1)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(1)));
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(2)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(2)));
 
         assertTrue(isPrioritized(List.of(
                 createResolveInfo(PACKAGE1, getAppId(1), 10),
@@ -593,7 +593,7 @@ public class BroadcastRecordTest {
     @Test
     public void testSetDeliveryState_DeferUntilActive_changeIdDisabled() {
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(1)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(1)));
         final BroadcastRecord r = createBroadcastRecord(
                 new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED), List.of(
                         createResolveInfo(PACKAGE1, getAppId(1), 10),
@@ -961,7 +961,7 @@ public class BroadcastRecordTest {
                         createResolveInfo(PACKAGE3, getAppId(3)))));
 
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(1)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(1)));
         assertArrayEquals(new boolean[] {false, true, true}, calculateChangeState(
                 List.of(createResolveInfo(PACKAGE1, getAppId(1)),
                         createResolveInfo(PACKAGE2, getAppId(2)),
@@ -973,7 +973,7 @@ public class BroadcastRecordTest {
                         createResolveInfo(PACKAGE3, getAppId(3)))));
 
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(2)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(2)));
         assertArrayEquals(new boolean[] {false, false, true}, calculateChangeState(
                 List.of(createResolveInfo(PACKAGE1, getAppId(1)),
                         createResolveInfo(PACKAGE2, getAppId(2)),
@@ -988,7 +988,7 @@ public class BroadcastRecordTest {
                                 createResolveInfo(PACKAGE3, getAppId(3)))));
 
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), eq(getAppId(3)));
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), eq(getAppId(3)));
         assertArrayEquals(new boolean[] {false, false, false}, calculateChangeState(
                 List.of(createResolveInfo(PACKAGE1, getAppId(1)),
                         createResolveInfo(PACKAGE2, getAppId(2)),
@@ -1005,7 +1005,7 @@ public class BroadcastRecordTest {
 
     private boolean[] calculateChangeState(List<Object> receivers) {
         return BroadcastRecord.calculateChangeStateForReceivers(receivers,
-                CHANGE_LIMIT_PRIORITY_SCOPE, mPlatformCompat);
+                LIMIT_PRIORITY_SCOPE, mPlatformCompat);
     }
 
     private static void cleanupDisabledPackageReceivers(BroadcastRecord record,

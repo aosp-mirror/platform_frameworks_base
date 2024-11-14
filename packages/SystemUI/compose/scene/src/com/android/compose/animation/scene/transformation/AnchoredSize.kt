@@ -28,7 +28,7 @@ internal class AnchoredSize(
     private val anchor: ElementKey,
     private val anchorWidth: Boolean,
     private val anchorHeight: Boolean,
-) : PropertyTransformation<IntSize> {
+) : InterpolatedSizeTransformation {
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

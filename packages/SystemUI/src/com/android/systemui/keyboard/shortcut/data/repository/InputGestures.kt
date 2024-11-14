@@ -44,6 +44,7 @@ import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATI
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.AppCategories
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
+import com.android.systemui.res.R
 
 object InputGestures {
     val gestureToShortcutCategoryTypeMap =
@@ -80,77 +81,97 @@ object InputGestures {
             KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to AppCategories,
         )
 
-    // TODO move all string to to resources use the same resources as the original shortcuts
-    // - that way when the strings are translated there are no discrepancies
     val gestureToInternalKeyboardShortcutGroupLabelMap =
         mapOf(
             // System Category
-            KEY_GESTURE_TYPE_HOME to "System controls",
-            KEY_GESTURE_TYPE_RECENT_APPS to "System controls",
-            KEY_GESTURE_TYPE_BACK to "System controls",
-            KEY_GESTURE_TYPE_TAKE_SCREENSHOT to "System controls",
-            KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER to "System controls",
-            KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL to "System controls",
-            KEY_GESTURE_TYPE_LOCK_SCREEN to "System controls",
-            KEY_GESTURE_TYPE_ALL_APPS to "System controls",
-            KEY_GESTURE_TYPE_OPEN_NOTES to "System apps",
-            KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS to "System apps",
-            KEY_GESTURE_TYPE_LAUNCH_ASSISTANT to "System apps",
-            KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT to "System apps",
+            KEY_GESTURE_TYPE_HOME to R.string.shortcut_helper_category_system_controls,
+            KEY_GESTURE_TYPE_RECENT_APPS to R.string.shortcut_helper_category_system_controls,
+            KEY_GESTURE_TYPE_BACK to R.string.shortcut_helper_category_system_controls,
+            KEY_GESTURE_TYPE_TAKE_SCREENSHOT to R.string.shortcut_helper_category_system_controls,
+            KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER to
+                R.string.shortcut_helper_category_system_controls,
+            KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL to
+                R.string.shortcut_helper_category_system_controls,
+            KEY_GESTURE_TYPE_LOCK_SCREEN to R.string.shortcut_helper_category_system_controls,
+            KEY_GESTURE_TYPE_ALL_APPS to R.string.shortcut_helper_category_system_controls,
+            KEY_GESTURE_TYPE_OPEN_NOTES to R.string.shortcut_helper_category_system_apps,
+            KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS to
+                R.string.shortcut_helper_category_system_apps,
+            KEY_GESTURE_TYPE_LAUNCH_ASSISTANT to R.string.shortcut_helper_category_system_apps,
+            KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT to
+                R.string.shortcut_helper_category_system_apps,
 
             // Multitasking Category
-            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER to "Recent apps",
-            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to "Split screen",
-            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT to "Split screen",
-            KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION to "Split screen",
-            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT to "Split screen",
-            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT to "Split screen",
+            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER to R.string.shortcutHelper_category_recent_apps,
+            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to
+                R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT to
+                R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION to
+                R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT to
+                R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT to
+                R.string.shortcutHelper_category_split_screen,
 
             // App Category
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR to "Applications",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR to "Applications",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER to "Applications",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS to "Applications",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL to "Applications",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS to "Applications",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to "Applications",
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR to
+                R.string.keyboard_shortcut_group_applications,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR to
+                R.string.keyboard_shortcut_group_applications,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER to
+                R.string.keyboard_shortcut_group_applications,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS to
+                R.string.keyboard_shortcut_group_applications,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL to R.string.keyboard_shortcut_group_applications,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS to R.string.keyboard_shortcut_group_applications,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to
+                R.string.keyboard_shortcut_group_applications,
         )
 
     val gestureToInternalKeyboardShortcutInfoLabelMap =
         mapOf(
             // System Category
-            KEY_GESTURE_TYPE_HOME to "Go to home screen",
-            KEY_GESTURE_TYPE_RECENT_APPS to "View recent apps",
-            KEY_GESTURE_TYPE_BACK to "Go back",
-            KEY_GESTURE_TYPE_TAKE_SCREENSHOT to "Take screenshot",
-            KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER to "Show shortcuts",
-            KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL to "View notifications",
-            KEY_GESTURE_TYPE_LOCK_SCREEN to "Lock screen",
-            KEY_GESTURE_TYPE_ALL_APPS to "Open apps list",
-            KEY_GESTURE_TYPE_OPEN_NOTES to "Take a note",
-            KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS to "Open settings",
-            KEY_GESTURE_TYPE_LAUNCH_ASSISTANT to "Open assistant",
-            KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT to "Open assistant",
+            KEY_GESTURE_TYPE_HOME to R.string.group_system_access_home_screen,
+            KEY_GESTURE_TYPE_RECENT_APPS to R.string.group_system_overview_open_apps,
+            KEY_GESTURE_TYPE_BACK to R.string.group_system_go_back,
+            KEY_GESTURE_TYPE_TAKE_SCREENSHOT to R.string.group_system_full_screenshot,
+            KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER to
+                R.string.group_system_access_system_app_shortcuts,
+            KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL to
+                R.string.group_system_access_notification_shade,
+            KEY_GESTURE_TYPE_LOCK_SCREEN to R.string.group_system_lock_screen,
+            KEY_GESTURE_TYPE_ALL_APPS to R.string.group_system_access_all_apps_search,
+            KEY_GESTURE_TYPE_OPEN_NOTES to R.string.group_system_quick_memo,
+            KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS to R.string.group_system_access_system_settings,
+            KEY_GESTURE_TYPE_LAUNCH_ASSISTANT to R.string.group_system_access_google_assistant,
+            KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT to
+                R.string.group_system_access_google_assistant,
 
             // Multitasking Category
-            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER to "Cycle forward through recent apps",
-            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to
-                "Use split screen with current app on the left",
-            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT to
-                "Use split screen with current app on the right",
-            KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION to "Switch from split screen to full screen",
+            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER to R.string.group_system_cycle_forward,
+            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to R.string.system_multitasking_lhs,
+            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT to R.string.system_multitasking_rhs,
+            KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION to R.string.system_multitasking_full_screen,
             KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT to
-                "Switch to app on left or above while using split screen",
+                R.string.system_multitasking_splitscreen_focus_lhs,
             KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT to
-                "Switch to app on right or below while using split screen",
+                R.string.system_multitasking_splitscreen_focus_rhs,
 
             // App Category
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR to "Calculator",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR to "Calendar",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER to "Chrome",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS to "Contacts",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL to "Gmail",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS to "Maps",
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to "Messages",
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR to
+                R.string.keyboard_shortcut_group_applications_calculator,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR to
+                R.string.keyboard_shortcut_group_applications_calendar,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER to
+                R.string.keyboard_shortcut_group_applications_browser,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS to
+                R.string.keyboard_shortcut_group_applications_contacts,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL to
+                R.string.keyboard_shortcut_group_applications_email,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS to
+                R.string.keyboard_shortcut_group_applications_maps,
+            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to
+                R.string.keyboard_shortcut_group_applications_sms,
         )
 }

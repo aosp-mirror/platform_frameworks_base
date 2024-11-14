@@ -18,6 +18,7 @@ package com.android.systemui.keyboard.shortcut.ui.composable
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.IndicationNodeFactory
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -126,8 +127,7 @@ fun SelectableShortcutSurface(
                     .selectable(
                         selected = selected,
                         interactionSource = interactionSource,
-                        indication =
-                            ShortcutHelperIndication(interactionSource, interactionsConfig),
+                        indication = ShortcutHelperIndication(interactionsConfig),
                         enabled = enabled,
                         onClick = onClick,
                     )
@@ -181,8 +181,7 @@ fun ClickableShortcutSurface(
                     )
                     .clickable(
                         interactionSource = interactionSource,
-                        indication =
-                            ShortcutHelperIndication(interactionSource, interactionsConfig),
+                        indication = ShortcutHelperIndication(interactionsConfig),
                         enabled = enabled,
                         onClick = onClick,
                     ),
@@ -507,10 +506,8 @@ private class ShortcutHelperInteractionsNode(
     }
 }
 
-data class ShortcutHelperIndication(
-    private val interactionSource: InteractionSource,
-    private val interactionsConfig: InteractionsConfig,
-) : IndicationNodeFactory {
+data class ShortcutHelperIndication(private val interactionsConfig: InteractionsConfig) :
+    IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode {
         return ShortcutHelperInteractionsNode(interactionSource, interactionsConfig)
     }
@@ -529,3 +526,15 @@ data class InteractionsConfig(
     val hoverPadding: Dp = 0.dp,
     val pressedPadding: Dp = hoverPadding,
 )
+
+@Composable
+fun ProvideShortcutHelperIndication(
+    interactionsConfig: InteractionsConfig,
+    content: @Composable () -> Unit,
+) {
+    CompositionLocalProvider(
+        LocalIndication provides ShortcutHelperIndication(interactionsConfig)
+    ) {
+        content()
+    }
+}

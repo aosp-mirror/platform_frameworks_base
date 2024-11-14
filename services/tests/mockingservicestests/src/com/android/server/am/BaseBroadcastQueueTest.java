@@ -185,10 +185,10 @@ public abstract class BaseBroadcastQueueTest {
 
         doReturn(mAppStartInfoTracker).when(mProcessList).getAppStartInfoTracker();
 
+        doReturn(true).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), any(ApplicationInfo.class));
         doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
-        doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE), anyInt());
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE), anyInt());
     }
 
     public void tearDown() throws Exception {
@@ -298,7 +298,7 @@ public abstract class BaseBroadcastQueueTest {
         filter.setPriority(priority);
         final BroadcastFilter res = new BroadcastFilter(filter, receiverList,
                 receiverList.app.info.packageName, null, null, null, receiverList.uid,
-                receiverList.userId, false, false, true,
+                receiverList.userId, false, false, true, receiverList.app.info,
                 mock(PlatformCompat.class));
         receiverList.add(res);
         return res;

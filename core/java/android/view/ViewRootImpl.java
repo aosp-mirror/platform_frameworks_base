@@ -140,6 +140,8 @@ import android.accessibilityservice.AccessibilityService;
 import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -1250,7 +1252,6 @@ public final class ViewRootImpl implements ViewParent,
         mExtraDisplayListenerLogging = !TextUtils.isEmpty(name) && name.equals(mBasePackageName);
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
-        mLocation.fillInStackTrace();
         mWidth = -1;
         mHeight = -1;
         mDirty = new Rect();
@@ -2758,6 +2759,9 @@ public final class ViewRootImpl implements ViewParent,
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.
         mSurface.transferFrom(blastSurface);
+
+        // Since the SurfaceControl is a VRI, indicate that it can recover from buffer stuffing.
+        mTransaction.setRecoverableFromBufferStuffing(mSurfaceControl).applyAsyncUnsafe();
     }
 
     private void setBoundsLayerCrop(Transaction t) {
@@ -11894,6 +11898,20 @@ public final class ViewRootImpl implements ViewParent,
     @NonNull
     public IBinder getWindowToken() {
         return mAttachInfo.mWindowToken;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @NonNull
+    @Override
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_JANK_API)
+    public SurfaceControl.OnJankDataListenerRegistration registerOnJankDataListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SurfaceControl.OnJankDataListener listener) {
+        SurfaceControl.OnJankDataListener wrapped = (data) ->
+                executor.execute(() -> listener.onJankDataAvailable(data));
+        return mSurfaceControl.addOnJankDataListener(wrapped);
     }
 
     /**

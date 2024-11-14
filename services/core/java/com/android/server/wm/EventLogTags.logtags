@@ -87,3 +87,16 @@ option java_package com.android.server.wm
 
 # Entering pip called
 38000 wm_enter_pip (User|1|5),(Token|1|5),(Component Name|3),(is Auto Enter|3)
+
+# Dim layer is created
+38200 wm_dim_created (Host|3),(Surface|1)
+# Dimmer is ready for removal
+38201 wm_dim_exit (Surface|1),(dimmingWindow|3),(hostIsVisible|1),(removeImmediately|1)
+# Dimmer is starting an animation
+38202 wm_dim_animate (Surface|1, (toAlpha|5), (toBlur|5))
+# Dimmer animation is cancelled
+38203 wm_dim_cancel_anim (Surface|1),(reason|3)
+# Dimmer animation is finished
+38204 wm_dim_finish_anim (Surface|1)
+# Dimmer removing surface
+38205 wm_dim_removed (Surface|1)

@@ -623,9 +623,10 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
-        mKeyGestureController.systemRunning();
-
-        initKeyGestures();
+        if (useKeyGestureEventHandler()) {
+            mKeyGestureController.systemRunning();
+            initKeyGestures();
+        }
     }
 
     private void reloadDeviceAliases() {
@@ -2608,9 +2609,6 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private void initKeyGestures() {
-        if (!useKeyGestureEventHandler()) {
-            return;
-        }
         InputManager im = Objects.requireNonNull(mContext.getSystemService(InputManager.class));
         im.registerKeyGestureEventHandler(new InputManager.KeyGestureEventHandler() {
             @Override

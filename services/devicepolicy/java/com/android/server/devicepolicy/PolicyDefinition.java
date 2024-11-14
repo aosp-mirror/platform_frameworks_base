@@ -349,6 +349,16 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::setMtePolicy,
                     new IntegerPolicySerializer());
 
+    static PolicyDefinition<Integer> AUTO_TIME = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.AUTO_TIME_POLICY),
+            new TopPriority<>(List.of(
+                    EnforcingAdmin.getRoleAuthorityOf(SYSTEM_SUPERVISION_ROLE),
+                    EnforcingAdmin.getRoleAuthorityOf(DEVICE_LOCK_CONTROLLER_ROLE),
+                    EnforcingAdmin.DPC_AUTHORITY)),
+            POLICY_FLAG_GLOBAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::setAutoTimePolicy,
+            new IntegerPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -397,6 +407,7 @@ final class PolicyDefinition<V> {
                 PACKAGES_SUSPENDED);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.MEMORY_TAGGING_POLICY,
                 MEMORY_TAGGING);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIME_POLICY, AUTO_TIME);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);

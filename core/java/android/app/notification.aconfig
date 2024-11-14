@@ -268,3 +268,10 @@ flag {
   description: "Adds UI for NAS classification of notifications"
   bug: "367996732"
 }
+
+flag {
+  name: "no_sbnholder"
+  namespace: "systemui"
+  description: "removes sbnholder from NLS"
+  bug: "362981561"
+}

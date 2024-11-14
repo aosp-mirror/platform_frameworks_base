@@ -51,6 +51,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEYGUARD_QUICK_AFFORDANCE_ID_NONE
@@ -90,7 +91,7 @@ constructor(
     private val dockManager: DockManager,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-    @Application private val appContext: Context,
+    @ShadeDisplayAware private val appContext: Context,
     private val sceneInteractor: Lazy<SceneInteractor>,
 ) {
     /**
