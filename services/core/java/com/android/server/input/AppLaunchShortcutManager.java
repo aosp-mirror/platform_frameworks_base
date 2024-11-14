@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.hardware.input.AppLaunchData;
 import android.hardware.input.InputGestureData;
@@ -137,11 +138,19 @@ final class AppLaunchShortcutManager {
                 String categoryName = parser.getAttributeValue(null, ATTRIBUTE_CATEGORY);
                 String shiftName = parser.getAttributeValue(null, ATTRIBUTE_SHIFT);
                 String roleName = parser.getAttributeValue(null, ATTRIBUTE_ROLE);
-
-                // TODO(b/358569822): Shift bookmarks to use keycode instead of shortcutChar
-                int keycode = KeyEvent.KEYCODE_UNKNOWN;
                 String shortcut = parser.getAttributeValue(null, ATTRIBUTE_SHORTCUT);
-                if (!TextUtils.isEmpty(shortcut)) {
+                int keycode;
+                int modifierState;
+                TypedArray a = mContext.getResources().obtainAttributes(parser,
+                        R.styleable.Bookmark);
+                try {
+                    keycode = a.getInt(R.styleable.Bookmark_keycode, KeyEvent.KEYCODE_UNKNOWN);
+                    modifierState = a.getInt(R.styleable.Bookmark_modifierState, 0);
+                } finally {
+                    a.recycle();
+                }
+                if (keycode == KeyEvent.KEYCODE_UNKNOWN && !TextUtils.isEmpty(shortcut)) {
+                    // Fetch keycode using shortcut char
                     KeyEvent[] events = virtualKcm.getEvents(new char[]{shortcut.toLowerCase(
                             Locale.ROOT).charAt(0)});
                     // Single key press can generate the character
@@ -153,12 +162,17 @@ final class AppLaunchShortcutManager {
                     Log.w(TAG, "Keycode required for bookmark with category=" + categoryName
                             + " packageName=" + packageName + " className=" + className
                             + " role=" + roleName + " shiftName=" + shiftName
-                            + " shortcut=" + shortcut);
+                            + " shortcut=" + shortcut + " modifierState=" + modifierState);
                     continue;
                 }
 
-                final boolean isShiftShortcut = (shiftName != null && shiftName.toLowerCase(
-                        Locale.ROOT).equals("true"));
+                if (modifierState == 0) {
+                    // Fetch modifierState using shiftName
+                    boolean isShiftShortcut = shiftName != null && shiftName.toLowerCase(
+                            Locale.ROOT).equals("true");
+                    modifierState =
+                            KeyEvent.META_META_ON | (isShiftShortcut ? KeyEvent.META_SHIFT_ON : 0);
+                }
                 AppLaunchData launchData = null;
                 if (!TextUtils.isEmpty(packageName) && !TextUtils.isEmpty(className)) {
                     launchData = AppLaunchData.createLaunchDataForComponent(packageName, className);
@@ -168,11 +182,9 @@ final class AppLaunchShortcutManager {
                     launchData = AppLaunchData.createLaunchDataForRole(roleName);
                 }
                 if (launchData != null) {
-                    Log.d(TAG, "adding shortcut " + launchData + "shift="
-                            + isShiftShortcut + " keycode=" + keycode);
+                    Log.d(TAG, "adding shortcut " + launchData + " modifierState="
+                            + modifierState + " keycode=" + keycode);
                     // All bookmarks are based on Action key
-                    int modifierState =
-                            KeyEvent.META_META_ON | (isShiftShortcut ? KeyEvent.META_SHIFT_ON : 0);
                     InputGestureData bookmark = new InputGestureData.Builder()
                             .setTrigger(InputGestureData.createKeyTrigger(keycode, modifierState))
                             .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
