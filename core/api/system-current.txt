@@ -5171,6 +5171,28 @@ package android.hardware.camera2.params {
 
 }
 
+package android.hardware.contexthub {
+
+  @FlaggedApi("android.chre.flags.offload_api") public class HubDiscoveryInfo {
+    method @NonNull public android.hardware.contexthub.HubEndpointInfo getHubEndpointInfo();
+  }
+
+  @FlaggedApi("android.chre.flags.offload_api") public final class HubEndpointInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.hardware.contexthub.HubEndpointInfo.HubEndpointIdentifier getIdentifier();
+    method @NonNull public String getName();
+    method @Nullable public String getTag();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.contexthub.HubEndpointInfo> CREATOR;
+  }
+
+  public static class HubEndpointInfo.HubEndpointIdentifier {
+    method public long getEndpoint();
+    method public long getHub();
+  }
+
+}
+
 package android.hardware.devicestate {
 
   @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceState {
@@ -6162,6 +6184,7 @@ package android.hardware.location {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.app.PendingIntent, long);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> disableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> enableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
+    method @FlaggedApi("android.chre.flags.offload_api") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public java.util.List<android.hardware.contexthub.HubDiscoveryInfo> findEndpoints(long);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int[] findNanoAppOnHub(int, @NonNull android.hardware.location.NanoAppFilter);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int[] getContextHubHandles();
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubInfo getContextHubInfo(int);
