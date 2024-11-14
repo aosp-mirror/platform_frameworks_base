@@ -253,6 +253,7 @@ class BubbleBarLayerViewTest {
 
         getInstrumentation().runOnMainSync {
             bubbleBarLayerView.showExpandedView(bubble)
+            bubble.bubbleBarExpandedView!!.onContentVisibilityChanged(true)
         }
         waitForExpandedViewAnimation()
 
@@ -276,6 +277,7 @@ class BubbleBarLayerViewTest {
 
         getInstrumentation().runOnMainSync {
             bubbleBarLayerView.showExpandedView(bubble)
+            bubble.bubbleBarExpandedView!!.onContentVisibilityChanged(true)
         }
         waitForExpandedViewAnimation()
 

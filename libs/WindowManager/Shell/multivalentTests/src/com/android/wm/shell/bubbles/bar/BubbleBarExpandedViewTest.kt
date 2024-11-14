@@ -17,6 +17,7 @@
 package com.android.wm.shell.bubbles.bar
 
 import android.app.ActivityManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ShortcutInfo
 import android.graphics.Insets
@@ -24,6 +25,7 @@ import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -110,9 +112,9 @@ class BubbleBarExpandedViewTest {
 
         regionSamplingProvider = TestRegionSamplingProvider()
 
-        bubbleExpandedView = (inflater.inflate(
+        bubbleExpandedView = inflater.inflate(
             R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */
-        ) as BubbleBarExpandedView)
+        ) as BubbleBarExpandedView
         bubbleExpandedView.initialize(
             expandedViewManager,
             positioner,
@@ -124,11 +126,11 @@ class BubbleBarExpandedViewTest {
             regionSamplingProvider,
         )
 
-        getInstrumentation().runOnMainSync(Runnable {
+        getInstrumentation().runOnMainSync {
             bubbleExpandedView.onAttachedToWindow()
             // Helper should be created once attached to window
             testableRegionSamplingHelper = regionSamplingProvider!!.helper
-        })
+        }
 
         bubble = Bubble(
             "key",
@@ -252,6 +254,93 @@ class BubbleBarExpandedViewTest {
         assertThat(uiEventLoggerFake.logs[0].eventId)
             .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_APP_MENU_OPT_OUT.id)
         assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
+    }
+
+    @Test
+    fun animateExpansion_waitsUntilTaskCreated() {
+        var animated = false
+        bubbleExpandedView.animateExpansionWhenTaskViewVisible { animated = true }
+        assertThat(animated).isFalse()
+        bubbleExpandedView.onTaskCreated()
+        assertThat(animated).isTrue()
+    }
+
+    @Test
+    fun animateExpansion_taskViewAttachedAndVisible() {
+        val inflater = LayoutInflater.from(context)
+        val expandedView = inflater.inflate(
+            R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */
+        ) as BubbleBarExpandedView
+        val taskView = FakeBubbleTaskViewFactory().create()
+        val taskViewParent = FrameLayout(context)
+        taskViewParent.addView(taskView.taskView)
+        taskView.listener.onTaskCreated(666, ComponentName(context, "BubbleBarExpandedViewTest"))
+        assertThat(taskView.isVisible).isTrue()
+
+        expandedView.initialize(
+            expandedViewManager,
+            positioner,
+            BubbleLogger(uiEventLoggerFake),
+            false /* isOverflow */,
+            taskView,
+            mainExecutor,
+            bgExecutor,
+            regionSamplingProvider,
+        )
+
+        // the task view should be removed from its parent
+        assertThat(taskView.taskView.parent).isNull()
+
+        var animated = false
+        expandedView.animateExpansionWhenTaskViewVisible { animated = true }
+        assertThat(animated).isFalse()
+
+        // send an invisible signal to simulate the surface getting destroyed
+        expandedView.onContentVisibilityChanged(false)
+
+        // send a visible signal to simulate a new surface getting created
+        expandedView.onContentVisibilityChanged(true)
+
+        assertThat(taskView.taskView.parent).isEqualTo(expandedView)
+        assertThat(animated).isTrue()
+    }
+
+    @Test
+    fun animateExpansion_taskViewAttachedAndInvisible() {
+        val inflater = LayoutInflater.from(context)
+        val expandedView = inflater.inflate(
+            R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */
+        ) as BubbleBarExpandedView
+        val taskView = FakeBubbleTaskViewFactory().create()
+        val taskViewParent = FrameLayout(context)
+        taskViewParent.addView(taskView.taskView)
+        taskView.listener.onTaskCreated(666, ComponentName(context, "BubbleBarExpandedViewTest"))
+        assertThat(taskView.isVisible).isTrue()
+        taskView.listener.onTaskVisibilityChanged(666, false)
+        assertThat(taskView.isVisible).isFalse()
+
+        expandedView.initialize(
+            expandedViewManager,
+            positioner,
+            BubbleLogger(uiEventLoggerFake),
+            false /* isOverflow */,
+            taskView,
+            mainExecutor,
+            bgExecutor,
+            regionSamplingProvider,
+        )
+
+        // the task view should be added to the expanded view
+        assertThat(taskView.taskView.parent).isEqualTo(expandedView)
+
+        var animated = false
+        expandedView.animateExpansionWhenTaskViewVisible { animated = true }
+        assertThat(animated).isFalse()
+
+        // send a visible signal to simulate a new surface getting created
+        expandedView.onContentVisibilityChanged(true)
+
+        assertThat(animated).isTrue()
     }
 
     private fun BubbleBarExpandedView.menuView(): BubbleBarMenuView {
