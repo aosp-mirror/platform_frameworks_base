@@ -182,10 +182,12 @@ public class BubbleLogger {
     }
 
     /**
+     * Log when a bubble is removed from overflow in stack view
+     *
      * @param b Bubble removed from overflow
      * @param r Reason that bubble was removed
      */
-    public void logOverflowRemove(Bubble b, @Bubbles.DismissReason int r) {
+    public void logStackOverflowRemove(Bubble b, @Bubbles.DismissReason int r) {
         if (r == Bubbles.DISMISS_NOTIF_CANCEL) {
             log(b, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_CANCEL);
         } else if (r == Bubbles.DISMISS_GROUP_CANCELLED) {
