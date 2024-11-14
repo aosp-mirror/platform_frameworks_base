@@ -18,8 +18,8 @@ package com.android.server.wm;
 
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
+import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
@@ -166,12 +166,12 @@ class AppCompatCameraOverrides {
      * <p>The treatment is enabled when the following conditions are met:
      * <ul>
      * <li>Feature flag gating the camera compatibility free-form treatment is enabled.
-     * <li>Activity isn't opted out by the device manufacturer with override.
+     * <li>Activity is opted in by the device manufacturer with override.
      * </ul>
      */
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return Flags.enableCameraCompatForDesktopWindowing() && !isChangeEnabled(mActivityRecord,
-                OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
+        return Flags.enableCameraCompatForDesktopWindowing() && isChangeEnabled(mActivityRecord,
+                OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT);
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {
