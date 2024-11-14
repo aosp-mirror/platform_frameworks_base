@@ -37,6 +37,9 @@ constructor(
     private var toastView: View? = null
 
     fun show(viewContext: Context, @StringRes resId: Int) {
+        if (isToastActive()) {
+            return
+        }
         val res = viewContext.resources
         // Show the brightness warning toast with passing the toast inflation required context,
         // userId and resId from SystemUI package.
@@ -79,13 +82,15 @@ constructor(
         val inAnimator = systemUIToast.inAnimation
         inAnimator?.start()
 
-        toastView!!.postDelayed({
+        toastView?.postDelayed({
             val outAnimator = systemUIToast.outAnimation
             if (outAnimator != null) {
                 outAnimator.start()
                 outAnimator.addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animator: Animator) {
-                        windowManager.removeViewImmediate(toastView)
+                        if (isToastActive()) {
+                            windowManager.removeViewImmediate(toastView)
+                        }
                         toastView = null
                     }
                 })
@@ -94,7 +99,7 @@ constructor(
     }
 
     fun isToastActive(): Boolean {
-        return toastView != null && toastView!!.isAttachedToWindow
+        return toastView?.isAttachedToWindow == true
     }
 
     companion object {
