@@ -351,6 +351,30 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
+    public void testRemoveBubbleFromBubbleBar_addToOverflow_logEvent() {
+        mPositioner.setShowingInBubbleBar(true);
+
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_AGED);
+        assertThat(mUiEventLogger.numLogs()).isEqualTo(1);
+        assertThat(mUiEventLogger.eventId(0)).isEqualTo(
+                BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_ADD_AGED.getId());
+    }
+
+    @Test
+    public void testRemoveBubble_notifCancelled_noLog() {
+        mPositioner.setShowingInBubbleBar(false);
+
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_BLOCKED);
+        assertThat(mUiEventLogger.numLogs()).isEqualTo(0);
+    }
+
+    @Test
     public void ifSuppress_hideFlyout() {
         // Setup
         mBubbleData.setListener(mListener);

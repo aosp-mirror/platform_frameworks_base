@@ -885,7 +885,7 @@ public class BubbleData {
             return;
         }
         ProtoLog.d(WM_SHELL_BUBBLES, "overflowBubble=%s", bubble.getKey());
-        mLogger.logOverflowAdd(bubble, reason);
+        mLogger.logOverflowAdd(bubble, mPositioner.isShowingInBubbleBar(), reason);
         if (mOverflowBubbles.isEmpty()) {
             mStateChange.showOverflowChanged = true;
         }
