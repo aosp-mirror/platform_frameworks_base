@@ -3,7 +3,7 @@ container: "system"
 
 flag {
     name: "launch_wallet_option_on_power_double_tap"
-    namespace: "wallet_integrations"
+    namespace: "wallet_integration"
     description: "Option to launch the Wallet app on double-tap of the power button"
     bug: "378469025"
 }

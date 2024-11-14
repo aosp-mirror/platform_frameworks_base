@@ -1429,7 +1429,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     void makeOverlayToast(int stringId) {
         final Resources res = mContext.getResources();
 
-        final SystemUIToast systemUIToast = mToastFactory.createToast(mContext,
+        final SystemUIToast systemUIToast = mToastFactory.createToast(mContext, mContext,
                 res.getString(stringId), mContext.getPackageName(), UserHandle.myUserId(),
                 res.getConfiguration().orientation);
         if (systemUIToast == null) {

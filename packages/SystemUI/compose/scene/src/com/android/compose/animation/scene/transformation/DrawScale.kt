@@ -32,7 +32,7 @@ internal class DrawScale(
     private val scaleX: Float,
     private val scaleY: Float,
     private val pivot: Offset = Offset.Unspecified,
-) : PropertyTransformation<Scale> {
+) : InterpolatedScaleTransformation {
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,

@@ -17,12 +17,12 @@
 package com.android.systemui.statusbar.phone
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.HeadsUpManagerPhone
+import com.android.systemui.statusbar.policy.BaseHeadsUpManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Binds
 import dagger.Module
 
 @Module
 interface HeadsUpModule {
-    @Binds @SysUISingleton fun bindsHeadsUpManager(hum: HeadsUpManagerPhone): HeadsUpManager
+    @Binds @SysUISingleton fun bindsHeadsUpManager(hum: BaseHeadsUpManager): HeadsUpManager
 }

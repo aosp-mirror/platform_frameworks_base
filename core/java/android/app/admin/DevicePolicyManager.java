@@ -12196,6 +12196,33 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Adds a user restriction globally, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity The service entity that adds the restriction. A user restriction set by
+     *                     a service entity can only be cleared by the same entity. This can be
+     *                     just the calling package name, or any string of the caller's choice
+     *                     can be used.
+     * @param key The key of the restriction.
+     * @throws SecurityException if the caller is not a system service.
+     *
+     * @hide
+     */
+    public void addUserRestrictionGlobally(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionGloballyFromSystem(systemEntity, key,
+                        /* enable= */ true);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Called by a profile owner, device owner or a holder of any permission that is associated with
      * a user restriction to clear a user restriction specified by the key.
      * <p>
@@ -12274,6 +12301,33 @@ public class DevicePolicyManager {
             try {
                 mService.setUserRestrictionForUser(
                         systemEntity, key, /* enable= */ false, targetUser);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clears a user restriction globally, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity The system entity that clears the restriction. A user restriction
+     *                     set by a system entity can only be cleared by the same entity. This
+     *                     can be just the calling package name, or any string of the caller's
+     *                     choice can be used.
+     * @param key The key of the restriction.
+     * @throws SecurityException if the caller is not a system service.
+     *
+     * @hide
+     */
+    public void clearUserRestrictionGlobally(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionGloballyFromSystem(systemEntity, key,
+                        /* enable= */ false);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

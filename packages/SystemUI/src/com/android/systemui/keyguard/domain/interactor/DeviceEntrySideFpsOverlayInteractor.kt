@@ -28,6 +28,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -47,7 +48,7 @@ import kotlinx.coroutines.flow.onEach
 class DeviceEntrySideFpsOverlayInteractor
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val sceneInteractor: SceneInteractor,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,

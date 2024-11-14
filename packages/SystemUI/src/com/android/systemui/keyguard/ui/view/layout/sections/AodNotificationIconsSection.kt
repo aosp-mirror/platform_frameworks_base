@@ -47,7 +47,7 @@ import kotlinx.coroutines.DisposableHandle
 class AodNotificationIconsSection
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @ShadeDisplayAware private val configurationState: ConfigurationState,
     private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,

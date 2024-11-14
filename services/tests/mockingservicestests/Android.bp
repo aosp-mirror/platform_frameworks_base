@@ -78,7 +78,7 @@ android_test {
         "am_flags_lib",
         "device_policy_aconfig_flags_lib",
     ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
-        "true": ["service-crashrecovery.impl"],
+        "true": ["service-crashrecovery-pre-jarjar"],
         default: [],
     }),
 

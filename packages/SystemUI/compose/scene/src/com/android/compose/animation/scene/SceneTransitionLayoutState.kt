@@ -32,6 +32,7 @@ import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
@@ -466,9 +467,9 @@ internal class MutableSceneTransitionLayoutStateImpl(
             return
         }
 
-        // Make sure that this transition settles in case it was force finished, for instance by
-        // calling snapToScene().
-        transition.freezeAndAnimateToCurrentState()
+        // Make sure that this transition is cancelled in case it was force finished, for instance
+        // if snapToScene() is called.
+        transition.coroutineScope.cancel()
 
         val transitionStates = this.transitionStates
         if (!transitionStates.contains(transition)) {
@@ -550,8 +551,8 @@ internal class MutableSceneTransitionLayoutStateImpl(
         }
 
         val shouldSnap =
-            (isProgressCloseTo(0f) && transition.currentScene == transition.fromContent) ||
-                (isProgressCloseTo(1f) && transition.currentScene == transition.toContent)
+            (isProgressCloseTo(0f) && transition.isFromCurrentContent()) ||
+                (isProgressCloseTo(1f) && transition.isToCurrentContent())
         return if (shouldSnap) {
             finishAllTransitions()
             true

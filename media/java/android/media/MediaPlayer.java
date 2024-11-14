@@ -18,7 +18,9 @@ package android.media;
 
 import static android.Manifest.permission.BIND_IMS_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.media.audio.Flags.FLAG_ROUTED_DEVICE_IDS;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -84,6 +86,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -1542,6 +1545,8 @@ public class MediaPlayer extends PlayerBase
      * Note: The query is only valid if the MediaPlayer is currently playing.
      * If the player is not playing, the returned device can be null or correspond to previously
      * selected device when the player was last active.
+     * Audio may play on multiple devices simultaneously (e.g. an alarm playing on headphones and
+     * speaker on a phone), so prefer using {@link #getRoutedDevices}.
      */
     @Override
     public AudioDeviceInfo getRoutedDevice() {
@@ -1552,6 +1557,23 @@ public class MediaPlayer extends PlayerBase
         return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_OUTPUTS);
     }
 
+    /**
+     * Returns a List of {@link AudioDeviceInfo} identifying the current routing of this
+     * MediaPlayer.
+     * Note: The query is only valid if the MediaPlayer is currently playing.
+     * If the player is not playing, the returned devices can be empty or correspond to previously
+     * selected devices when the player was last active.
+     */
+    @Override
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
+    public @NonNull List<AudioDeviceInfo> getRoutedDevices() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        AudioDeviceInfo audioDeviceInfo = getRoutedDevice();
+        if (audioDeviceInfo != null) {
+            audioDeviceInfos.add(audioDeviceInfo);
+        }
+        return audioDeviceInfos;
+    }
 
     /**
      * Sends device list change notification to all listeners.

@@ -34,44 +34,26 @@ import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POST
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN
 import com.android.systemui.statusbar.policy.devicePostureController
 import com.android.systemui.testKosmos
-import com.android.systemui.tuner.TunerService
-import com.android.systemui.tuner.tunerService
-import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
-import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer
 class KeyguardBypassRepositoryTest : SysuiTestCase() {
-    @JvmField @Rule val mockito: MockitoRule = MockitoJUnit.rule()
 
-    private lateinit var tunableCallback: TunerService.Tunable
     private lateinit var postureControllerCallback: DevicePostureController.Callback
 
     private val kosmos = testKosmos()
     private lateinit var underTest: KeyguardBypassRepository
     private val testScope = kosmos.testScope
-
-    @Before
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-    }
 
     // overrideFaceBypassSetting overridden to true
     // isFaceEnrolledAndEnabled true
@@ -148,24 +130,25 @@ class KeyguardBypassRepositoryTest : SysuiTestCase() {
             val bypassEnabled by collectLastValue(underTest.isBypassAvailable)
             runCurrent()
             postureControllerCallback = kosmos.devicePostureController.verifyCallback()
-            tunableCallback = kosmos.tunerService.captureCallback()
 
             // Update face auth posture to match config
             postureControllerCallback.onPostureChanged(DEVICE_POSTURE_CLOSED)
 
             // FACE_UNLOCK_DISMISSES_KEYGUARD setting true
-            whenever(kosmos.tunerService.getValue(eq(faceUnlockDismissesKeyguard), anyInt()))
-                .thenReturn(1)
-            tunableCallback.onTuningChanged(faceUnlockDismissesKeyguard, "")
+            kosmos.userAwareSecureSettingsRepository.setBoolean(
+                Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
+                true,
+            )
 
             runCurrent()
             // Assert bypass enabled
             assertThat(bypassEnabled).isTrue()
 
             // FACE_UNLOCK_DISMISSES_KEYGUARD setting false
-            whenever(kosmos.tunerService.getValue(eq(faceUnlockDismissesKeyguard), anyInt()))
-                .thenReturn(0)
-            tunableCallback.onTuningChanged(faceUnlockDismissesKeyguard, "")
+            kosmos.userAwareSecureSettingsRepository.setBoolean(
+                Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
+                false,
+            )
 
             runCurrent()
             // Assert bypass not enabled
@@ -229,10 +212,3 @@ class KeyguardBypassRepositoryTest : SysuiTestCase() {
         private const val FACE_UNLOCK_BYPASS_NEVER = 2
     }
 }
-
-private const val faceUnlockDismissesKeyguard = Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD
-
-private fun TunerService.captureCallback() =
-    withArgCaptor<TunerService.Tunable> {
-        verify(this@captureCallback).addTunable(capture(), eq(faceUnlockDismissesKeyguard))
-    }

@@ -68,6 +68,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -126,7 +127,7 @@ public interface KeyguardModule {
     @Provides
     @SysUISingleton
     static KeyguardViewMediator newKeyguardViewMediator(
-            Context context,
+            @ShadeDisplayAware Context context,
             UiEventLogger uiEventLogger,
             SessionTracker sessionTracker,
             UserTracker userTracker,

@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
 import com.android.systemui.shade.PulsingGestureListener
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -58,7 +59,7 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 class KeyguardTouchHandlingInteractor
 @Inject
 constructor(
-    @Application private val appContext: Context,
+    @ShadeDisplayAware private val context: Context,
     @Application private val scope: CoroutineScope,
     transitionInteractor: KeyguardTransitionInteractor,
     repository: KeyguardRepository,
@@ -188,7 +189,7 @@ constructor(
 
     private fun isFeatureEnabled(): Boolean {
         return featureFlags.isEnabled(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED) &&
-            appContext.resources.getBoolean(R.bool.long_press_keyguard_customize_lockscreen_enabled)
+            context.resources.getBoolean(R.bool.long_press_keyguard_customize_lockscreen_enabled)
     }
 
     /** Updates application state to ask to show the menu. */

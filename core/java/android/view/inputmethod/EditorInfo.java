@@ -523,7 +523,6 @@ public class EditorInfo implements InputType, Parcelable {
     @Nullable
     public LocaleList hintLocales = null;
 
-
     /**
      * List of acceptable MIME types for
      * {@link InputConnection#commitContent(InputContentInfo, int, Bundle)}.
@@ -756,6 +755,30 @@ public class EditorInfo implements InputType, Parcelable {
     @FlaggedApi(FLAG_EDITORINFO_HANDWRITING_ENABLED)
     public boolean isStylusHandwritingEnabled() {
         return mIsStylusHandwritingEnabled;
+    }
+
+    private boolean mWritingToolsEnabled = true;
+
+    /**
+     * Returns {@code true} when an {@code Editor} has writing tools enabled.
+     * {@code true} by default for all editors. Toolkits can optionally disable them where not
+     * relevant e.g. passwords, number input, etc.
+     * @see #setWritingToolsEnabled(boolean)
+     */
+    @FlaggedApi(Flags.FLAG_WRITING_TOOLS)
+    public boolean isWritingToolsEnabled() {
+        return mWritingToolsEnabled;
+    }
+
+    /**
+     * Set {@code false} if {@code Editor} opts-out of writing tools, that enable IMEs to replace
+     * text with generative AI text.
+     * @param enabled set {@code true} to enabled or {@code false to disable} support.
+     * @see #isWritingToolsEnabled()
+     */
+    @FlaggedApi(Flags.FLAG_WRITING_TOOLS)
+    public void setWritingToolsEnabled(boolean enabled) {
+        mWritingToolsEnabled = enabled;
     }
 
     /**
@@ -1276,6 +1299,7 @@ public class EditorInfo implements InputType, Parcelable {
                 + InputMethodDebug.handwritingGestureTypeFlagsToString(
                         mSupportedHandwritingGesturePreviewTypes));
         pw.println(prefix + "isStylusHandwritingEnabled=" + mIsStylusHandwritingEnabled);
+        pw.println(prefix + "writingToolsEnabled=" + mWritingToolsEnabled);
         pw.println(prefix + "contentMimeTypes=" + Arrays.toString(contentMimeTypes));
         if (targetInputMethodUser != null) {
             pw.println(prefix + "targetInputMethodUserId=" + targetInputMethodUser.getIdentifier());
@@ -1356,6 +1380,7 @@ public class EditorInfo implements InputType, Parcelable {
         }
         dest.writeStringArray(contentMimeTypes);
         UserHandle.writeToParcel(targetInputMethodUser, dest);
+        dest.writeBoolean(mWritingToolsEnabled);
     }
 
     /**
@@ -1396,6 +1421,7 @@ public class EditorInfo implements InputType, Parcelable {
                     res.hintLocales = hintLocales.isEmpty() ? null : hintLocales;
                     res.contentMimeTypes = source.readStringArray();
                     res.targetInputMethodUser = UserHandle.readFromParcel(source);
+                    res.mWritingToolsEnabled = source.readBoolean();
                     return res;
                 }
 

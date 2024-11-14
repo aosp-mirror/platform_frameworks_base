@@ -18,7 +18,9 @@ package com.android.compose.animation.scene.transformation
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
@@ -27,7 +29,9 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.ElementStateScope
+import com.android.compose.animation.scene.Scale
 import com.android.compose.animation.scene.content.state.TransitionState
+import kotlinx.coroutines.CoroutineScope
 
 /** A transformation applied to one or more elements during a transition. */
 sealed interface Transformation {
@@ -35,12 +39,6 @@ sealed interface Transformation {
      * The matcher that should match the element(s) to which this transformation should be applied.
      */
     val matcher: ElementMatcher
-
-    /*
-     * Reverse this transformation. This is called when we use Transition(from = A, to = B) when
-     * animating from B to A and there is no Transition(from = B, to = A) defined.
-     */
-    fun reversed(): Transformation = this
 }
 
 internal class SharedElementTransformation(
@@ -50,7 +48,13 @@ internal class SharedElementTransformation(
 ) : Transformation
 
 /** A transformation that changes the value of an element property, like its size or offset. */
-interface PropertyTransformation<T> : Transformation {
+sealed interface PropertyTransformation<T> : Transformation
+
+/**
+ * A transformation to a target/transformed value that is automatically interpolated using the
+ * transition progress and transformation range.
+ */
+sealed interface InterpolatedPropertyTransformation<T> : PropertyTransformation<T> {
     /**
      * Return the transformed value for the given property, i.e.:
      * - the value at progress = 0% for elements that are entering the layout (i.e. elements in the
@@ -58,8 +62,8 @@ interface PropertyTransformation<T> : Transformation {
      * - the value at progress = 100% for elements that are leaving the layout (i.e. elements in the
      *   content we are transitioning from).
      *
-     * The returned value will be interpolated using the [transition] progress and [idleValue], the
-     * value of the property when we are idle.
+     * The returned value will be automatically interpolated using the [transition] progress, the
+     * transformation range and [idleValue], the value of the property when we are idle.
      */
     fun PropertyTransformationScope.transform(
         content: ContentKey,
@@ -68,6 +72,50 @@ interface PropertyTransformation<T> : Transformation {
         idleValue: T,
     ): T
 }
+
+/** An [InterpolatedPropertyTransformation] applied to the size of one or more elements. */
+interface InterpolatedSizeTransformation : InterpolatedPropertyTransformation<IntSize>
+
+/** An [InterpolatedPropertyTransformation] applied to the offset of one or more elements. */
+interface InterpolatedOffsetTransformation : InterpolatedPropertyTransformation<Offset>
+
+/** An [InterpolatedPropertyTransformation] applied to the alpha of one or more elements. */
+interface InterpolatedAlphaTransformation : InterpolatedPropertyTransformation<Float>
+
+/** An [InterpolatedPropertyTransformation] applied to the scale of one or more elements. */
+interface InterpolatedScaleTransformation : InterpolatedPropertyTransformation<Scale>
+
+sealed interface CustomPropertyTransformation<T> : PropertyTransformation<T> {
+    /**
+     * Return the value that the property should have in the current frame for the given [content]
+     * and [element].
+     *
+     * This transformation can use [transitionScope] to launch animations associated to
+     * [transition], which will not finish until at least one animation/job is still running in the
+     * scope.
+     *
+     * Important: Make sure to never launch long-running jobs in [transitionScope], otherwise
+     * [transition] will never be considered as finished.
+     */
+    fun PropertyTransformationScope.transform(
+        content: ContentKey,
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        transitionScope: CoroutineScope,
+    ): T
+}
+
+/** A [CustomPropertyTransformation] applied to the size of one or more elements. */
+interface CustomSizeTransformation : CustomPropertyTransformation<IntSize>
+
+/** A [CustomPropertyTransformation] applied to the offset of one or more elements. */
+interface CustomOffsetTransformation : CustomPropertyTransformation<Offset>
+
+/** A [CustomPropertyTransformation] applied to the alpha of one or more elements. */
+interface CustomAlphaTransformation : CustomPropertyTransformation<Float>
+
+/** A [CustomPropertyTransformation] applied to the scale of one or more elements. */
+interface CustomScaleTransformation : CustomPropertyTransformation<Scale>
 
 interface PropertyTransformationScope : Density, ElementStateScope {
     /** The current [direction][LayoutDirection] of the layout. */
@@ -101,7 +149,7 @@ data class TransformationRange(val start: Float, val end: Float, val easing: Eas
     }
 
     /** Reverse this range. */
-    fun reversed() =
+    internal fun reversed() =
         TransformationRange(start = reverseBound(end), end = reverseBound(start), easing = easing)
 
     /** Get the progress of this range given the global [transitionProgress]. */
@@ -128,6 +176,6 @@ data class TransformationRange(val start: Float, val end: Float, val easing: Eas
     }
 
     companion object {
-        const val BoundUnspecified = Float.MIN_VALUE
+        internal const val BoundUnspecified = Float.MIN_VALUE
     }
 }

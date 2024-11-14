@@ -50,7 +50,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -75,6 +74,7 @@ import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.SideIconWidth
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.longPressLabel
 import com.android.systemui.qs.panels.ui.viewmodel.AccessibilityUiState
+import com.android.systemui.qs.ui.compose.borderOnFocus
 import com.android.systemui.res.R
 
 private const val TEST_TAG_TOGGLE = "qs_tile_toggle_target"
@@ -88,7 +88,7 @@ fun LargeTileContent(
     colors: TileColors,
     squishiness: () -> Float,
     accessibilityUiState: AccessibilityUiState? = null,
-    iconShape: Shape = RoundedCornerShape(CommonTileDefaults.InactiveCornerRadius),
+    iconShape: RoundedCornerShape = RoundedCornerShape(CommonTileDefaults.InactiveCornerRadius),
     toggleClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
@@ -100,10 +100,12 @@ fun LargeTileContent(
         val longPressLabel = longPressLabel().takeIf { onLongClick != null }
         val animatedBackgroundColor by
             animateColorAsState(colors.iconBackground, label = "QSTileDualTargetBackgroundColor")
+        val focusBorderColor = MaterialTheme.colorScheme.secondary
         Box(
             modifier =
                 Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClick != null) {
-                    Modifier.clip(iconShape)
+                    Modifier.borderOnFocus(color = focusBorderColor, iconShape.topEnd)
+                        .clip(iconShape)
                         .verticalSquish(squishiness)
                         .drawBehind { drawRect(animatedBackgroundColor) }
                         .combinedClickable(

@@ -190,6 +190,7 @@ import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
+import android.os.IHintManager;
 import android.os.IPowerManager;
 import android.os.IPowerStatsService;
 import android.os.IRecoverySystem;
@@ -1195,8 +1196,10 @@ public final class SystemServiceRegistry {
             public SystemHealthManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder batteryStats = ServiceManager.getServiceOrThrow(BatteryStats.SERVICE_NAME);
                 IBinder powerStats = ServiceManager.getService(Context.POWER_STATS_SERVICE);
+                IBinder perfHint = ServiceManager.getService(Context.PERFORMANCE_HINT_SERVICE);
                 return new SystemHealthManager(IBatteryStats.Stub.asInterface(batteryStats),
-                        IPowerStatsService.Stub.asInterface(powerStats));
+                        IPowerStatsService.Stub.asInterface(powerStats),
+                        IHintManager.Stub.asInterface(perfHint));
             }});
 
         registerService(Context.CONTEXTHUB_SERVICE, ContextHubManager.class,

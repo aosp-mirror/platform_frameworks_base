@@ -30,7 +30,7 @@ import com.android.systemui.shade.pulsingGestureListener
 val Kosmos.keyguardTouchHandlingInteractor by
     Kosmos.Fixture {
         KeyguardTouchHandlingInteractor(
-            appContext = applicationContext,
+            context = applicationContext,
             scope = applicationCoroutineScope,
             transitionInteractor = keyguardTransitionInteractor,
             repository = keyguardRepository,

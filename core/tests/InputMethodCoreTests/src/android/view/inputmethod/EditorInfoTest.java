@@ -507,7 +507,8 @@ public class EditorInfoTest {
                 + "prefix: supportedHandwritingGestureTypes=(none)\n"
                 + "prefix: supportedHandwritingGesturePreviewTypes=(none)\n"
                 + "prefix: isStylusHandwritingEnabled=false\n"
-                + "prefix: contentMimeTypes=null\n");
+                + "prefix: contentMimeTypes=null\n"
+                + "prefix: writingToolsEnabled=true\n");
     }
 
     @Test
@@ -539,6 +540,7 @@ public class EditorInfoTest {
         info.hintLocales = LocaleList.forLanguageTags("en,es,zh");
         info.contentMimeTypes = new String[] {"image/png"};
         info.targetInputMethodUser = UserHandle.of(10);
+        info.setWritingToolsEnabled(false);
         final StringBuilder sb = new StringBuilder();
         info.dump(new StringBuilderPrinter(sb), "prefix2: ");
         assertThat(sb.toString()).isEqualTo(
@@ -555,7 +557,8 @@ public class EditorInfoTest {
                         + "prefix2: supportedHandwritingGesturePreviewTypes=SELECT\n"
                         + "prefix2: isStylusHandwritingEnabled=" + isStylusHandwritingEnabled + "\n"
                         + "prefix2: contentMimeTypes=[image/png]\n"
-                        + "prefix2: targetInputMethodUserId=10\n");
+                        + "prefix2: targetInputMethodUserId=10\n"
+                        + "prefix2: writingToolsEnabled=false\n");
     }
 
     @Test
@@ -576,7 +579,8 @@ public class EditorInfoTest {
                         + "prefix: supportedHandwritingGestureTypes=(none)\n"
                         + "prefix: supportedHandwritingGesturePreviewTypes=(none)\n"
                         + "prefix: isStylusHandwritingEnabled=false\n"
-                        + "prefix: contentMimeTypes=null\n");
+                        + "prefix: contentMimeTypes=null\n"
+                        + "prefix: writingToolsEnabled=true\n");
     }
 
     @Test
@@ -620,5 +624,10 @@ public class EditorInfoTest {
         final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
         infoCopy.extras.putString("testKey2", "testValue");
         assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
+    }
+
+    @Test
+    public void testWritingToolsEnabledbyDefault() {
+        assertTrue(TEST_EDITOR_INFO.isWritingToolsEnabled());
     }
 }

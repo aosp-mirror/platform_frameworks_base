@@ -95,7 +95,7 @@ constructor(
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
     @ShadeDisplayAware private val configuration: ConfigurationState,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
     private val shadeInteractor: ShadeInteractor,
     private val interactionJankMonitor: InteractionJankMonitor,

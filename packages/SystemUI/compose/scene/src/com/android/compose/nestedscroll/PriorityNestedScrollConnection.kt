@@ -365,12 +365,16 @@ private class OnStopScopeImpl(private val controller: ScrollController) : OnStop
         flingBehavior: FlingBehavior,
     ): Float {
         return with(flingBehavior) {
-            object : ScrollScope {
-                    override fun scrollBy(pixels: Float): Float {
-                        return controller.onScroll(pixels, NestedScrollSource.SideEffect)
+            val remainingVelocity =
+                object : ScrollScope {
+                        override fun scrollBy(pixels: Float): Float {
+                            return controller.onScroll(pixels, NestedScrollSource.SideEffect)
+                        }
                     }
-                }
-                .performFling(initialVelocity)
+                    .performFling(initialVelocity)
+
+            // returns the consumed velocity
+            initialVelocity - remainingVelocity
         }
     }
 }

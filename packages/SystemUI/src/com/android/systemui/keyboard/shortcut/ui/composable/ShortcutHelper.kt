@@ -118,6 +118,7 @@ import com.android.systemui.keyboard.shortcut.ui.model.IconSource
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
+import kotlinx.coroutines.delay
 
 @Composable
 fun ShortcutHelper(
@@ -901,7 +902,12 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
     var queryInternal by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    LaunchedEffect(Unit) {
+        // TODO(b/272065229): Added minor delay so TalkBack can take focus of search box by default,
+        //  remove when default a11y focus is fixed.
+        delay(50)
+        focusRequester.requestFocus()
+    }
     SearchBar(
         modifier =
             Modifier.fillMaxWidth().focusRequester(focusRequester).onKeyEvent {

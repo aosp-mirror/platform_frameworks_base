@@ -28,6 +28,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.interactor.MediaRouterChipInteractor
 import com.android.systemui.statusbar.chips.casttootherdevice.domain.model.MediaRouterCastModel
@@ -255,6 +256,6 @@ constructor(
 
     companion object {
         @DrawableRes val CAST_TO_OTHER_DEVICE_ICON = R.drawable.ic_cast_connected
-        private const val TAG = "CastToOtherVM"
+        private val TAG = "CastToOtherVM".pad()
     }
 }

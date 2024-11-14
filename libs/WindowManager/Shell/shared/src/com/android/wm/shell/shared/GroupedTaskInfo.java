@@ -249,9 +249,10 @@ public class GroupedTaskInfo implements Parcelable {
             return null;
         }
         return "id=" + taskInfo.taskId
-                + " baseIntent=" + (taskInfo.baseIntent != null
-                        ? taskInfo.baseIntent.getComponent()
-                        : "null")
+                + " baseIntent=" +
+                        (taskInfo.baseIntent != null && taskInfo.baseIntent.getComponent() != null
+                                ? taskInfo.baseIntent.getComponent().flattenToString()
+                                : "null")
                 + " winMode=" + WindowConfiguration.windowingModeToString(
                         taskInfo.getWindowingMode());
     }
