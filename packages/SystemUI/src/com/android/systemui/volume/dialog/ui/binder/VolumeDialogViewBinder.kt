@@ -19,13 +19,11 @@ package com.android.systemui.volume.dialog.ui.binder
 import android.app.Dialog
 import android.graphics.Rect
 import android.graphics.Region
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.InternalInsetsInfo
-import android.widget.FrameLayout
-import androidx.annotation.GravityInt
+import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.internal.view.RotationPolicy
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -41,7 +39,6 @@ import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSlidersViewBind
 import com.android.systemui.volume.dialog.ui.VolumeDialogResources
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
 import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
-import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogGravityViewModel
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
 import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
@@ -53,6 +50,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 
@@ -63,7 +61,6 @@ class VolumeDialogViewBinder
 @Inject
 constructor(
     private val volumeResources: VolumeDialogResources,
-    private val gravityViewModel: VolumeDialogGravityViewModel,
     private val dialogViewModelFactory: VolumeDialogViewModel.Factory,
     private val jankListenerFactory: JankListenerFactory,
     private val tracer: VolumeTracer,
@@ -74,21 +71,23 @@ constructor(
 
     fun bind(dialog: Dialog) {
         // Root view of the Volume Dialog.
-        val root: ViewGroup = dialog.requireViewById(R.id.volume_dialog_root)
-        // Volume Dialog container view that contains the dialog itself without the floating sliders
-        val container: View = root.requireViewById(R.id.volume_dialog_container)
-        container.alpha = 0f
-        container.repeatWhenAttached {
+        val root: MotionLayout = dialog.requireViewById(R.id.volume_dialog_root)
+        root.alpha = 0f
+        root.repeatWhenAttached {
             root.viewModel(
                 traceName = "VolumeDialogViewBinder",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
                 factory = { dialogViewModelFactory.create() },
             ) { viewModel ->
-                animateVisibility(container, dialog, viewModel.dialogVisibilityModel)
+                animateVisibility(root, dialog, viewModel.dialogVisibilityModel)
 
                 viewModel.dialogTitle.onEach { dialog.window?.setTitle(it) }.launchIn(this)
-                gravityViewModel.dialogGravity
-                    .onEach { container.setLayoutGravity(it) }
+                viewModel.motionState
+                    .scan(0) { acc, motionState ->
+                        // don't animate the initial state
+                        root.transitionToState(motionState, animate = acc != 0)
+                        acc + 1
+                    }
                     .launchIn(this)
 
                 launch { root.viewTreeObserver.computeInternalInsetsListener(root) }
@@ -130,15 +129,13 @@ constructor(
             .launchIn(this)
     }
 
-    private suspend fun calculateTranslationX(view: View): Float? {
+    private fun calculateTranslationX(view: View): Float? {
         return if (view.display.rotation == RotationPolicy.NATURAL_ROTATION) {
-            val dialogGravity = gravityViewModel.dialogGravity.first()
-            val isGravityLeft = (dialogGravity and Gravity.LEFT) == Gravity.LEFT
-            if (isGravityLeft) {
+            if (view.isLayoutRtl) {
                 -1
             } else {
                 1
-            } * view.width / 2.0f
+            } * view.width / 2f
         } else {
             null
         }
@@ -211,10 +208,11 @@ constructor(
         getBoundsInWindow(boundsRect, false)
     }
 
-    private fun View.setLayoutGravity(@GravityInt newGravity: Int) {
-        val frameLayoutParams =
-            layoutParams as? FrameLayout.LayoutParams
-                ?: error("View must be a child of a FrameLayout")
-        layoutParams = frameLayoutParams.apply { gravity = newGravity }
+    private fun MotionLayout.transitionToState(newState: Int, animate: Boolean) {
+        if (animate) {
+            transitionToState(newState)
+        } else {
+            jumpToState(newState)
+        }
     }
 }
