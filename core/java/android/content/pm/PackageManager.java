@@ -292,6 +292,10 @@ public abstract class PackageManager {
      * <p>
      * The value of a property will only have a single type, as defined by
      * the property itself.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * In android version {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and earlier,
+     * the {@code equals} and {@code hashCode} methods for this class may not function as expected.
      */
     public static final class Property implements Parcelable {
         private static final int TYPE_BOOLEAN = 1;
@@ -523,6 +527,40 @@ public abstract class PackageManager {
                 return new Property[size];
             }
         };
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Property)) {
+                return false;
+            }
+            final Property property = (Property) obj;
+            return mType == property.mType &&
+                    Objects.equals(mName, property.mName) &&
+                    Objects.equals(mClassName, property.mClassName) &&
+                    Objects.equals(mPackageName, property.mPackageName) &&
+                    (mType == TYPE_BOOLEAN ? mBooleanValue == property.mBooleanValue :
+                     mType == TYPE_FLOAT ? Float.compare(mFloatValue, property.mFloatValue) == 0 :
+                     mType == TYPE_INTEGER ? mIntegerValue == property.mIntegerValue :
+                     mType == TYPE_RESOURCE ? mIntegerValue == property.mIntegerValue :
+                     mStringValue.equals(property.mStringValue));
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(mName, mType, mClassName, mPackageName);
+            if (mType == TYPE_BOOLEAN) {
+                result = 31 * result + (mBooleanValue ? 1 : 0);
+            } else if (mType == TYPE_FLOAT) {
+                result = 31 * result + Float.floatToIntBits(mFloatValue);
+            } else if (mType == TYPE_INTEGER) {
+                result = 31 * result + mIntegerValue;
+            } else if (mType == TYPE_RESOURCE) {
+                result = 31 * result + mIntegerValue;
+            } else if (mType == TYPE_STRING) {
+                result = 31 * result + mStringValue.hashCode();
+            }
+            return result;
+        }
     }
 
     /**
