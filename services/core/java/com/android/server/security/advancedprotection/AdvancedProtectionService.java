@@ -46,6 +46,7 @@ import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.security.advancedprotection.features.AdvancedProtectionHook;
 import com.android.server.security.advancedprotection.features.AdvancedProtectionProvider;
+import com.android.server.security.advancedprotection.features.DisallowCellular2GAdvancedProtectionHook;
 import com.android.server.security.advancedprotection.features.DisallowInstallUnknownSourcesAdvancedProtectionHook;
 import com.android.server.security.advancedprotection.features.MemoryTaggingExtensionHook;
 
@@ -83,6 +84,9 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
         }
         if (android.security.Flags.aapmFeatureMemoryTaggingExtension()) {
             mHooks.add(new MemoryTaggingExtensionHook(mContext, enabled));
+        }
+        if (android.security.Flags.aapmFeatureDisableCellular2g()) {
+            mHooks.add(new DisallowCellular2GAdvancedProtectionHook(mContext, enabled));
         }
     }
 
