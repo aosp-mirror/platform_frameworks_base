@@ -872,7 +872,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         if (windowingMode > -1) {
             if (mService.isInLockTaskMode()
-                    && WindowConfiguration.inMultiWindowMode(windowingMode)) {
+                    && WindowConfiguration.inMultiWindowMode(windowingMode)
+                    && !container.isEmbedded()) {
                 Slog.w(TAG, "Dropping unsupported request to set multi-window windowing mode"
                         + " during locked task mode.");
                 return effects;
