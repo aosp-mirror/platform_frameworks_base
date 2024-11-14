@@ -65,6 +65,7 @@ package android {
     field @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public static final String BIND_EXPLICIT_HEALTH_CHECK_SERVICE = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
     field public static final String BIND_FIELD_CLASSIFICATION_SERVICE = "android.permission.BIND_FIELD_CLASSIFICATION_SERVICE";
+    field @FlaggedApi("android.security.afl_api") public static final String BIND_FORENSIC_EVENT_TRANSPORT_SERVICE = "android.permission.BIND_FORENSIC_EVENT_TRANSPORT_SERVICE";
     field public static final String BIND_GBA_SERVICE = "android.permission.BIND_GBA_SERVICE";
     field public static final String BIND_HOTWORD_DETECTION_SERVICE = "android.permission.BIND_HOTWORD_DETECTION_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
@@ -209,6 +210,7 @@ package android {
     field @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public static final String MANAGE_ENHANCED_CONFIRMATION_STATES = "android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES";
     field public static final String MANAGE_ETHERNET_NETWORKS = "android.permission.MANAGE_ETHERNET_NETWORKS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
+    field @FlaggedApi("android.security.afl_api") public static final String MANAGE_FORENSIC_STATE = "android.permission.MANAGE_FORENSIC_STATE";
     field public static final String MANAGE_GAME_ACTIVITY = "android.permission.MANAGE_GAME_ACTIVITY";
     field public static final String MANAGE_GAME_MODE = "android.permission.MANAGE_GAME_MODE";
     field @FlaggedApi("android.media.tv.flags.media_quality_fw") public static final String MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE = "android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE";
@@ -304,6 +306,7 @@ package android {
     field public static final String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
     field public static final String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
+    field @FlaggedApi("android.security.afl_api") public static final String READ_FORENSIC_STATE = "android.permission.READ_FORENSIC_STATE";
     field public static final String READ_GLOBAL_APP_SEARCH_DATA = "android.permission.READ_GLOBAL_APP_SEARCH_DATA";
     field @FlaggedApi("android.content.pm.get_resolved_apk_path") public static final String READ_INSTALLED_SESSION_PATHS = "android.permission.READ_INSTALLED_SESSION_PATHS";
     field public static final String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
@@ -12590,6 +12593,29 @@ package android.security.advancedprotection {
     field public static final String FEATURE_ID_ENABLE_MTE = "android.security.advancedprotection.feature_enable_mte";
     field public static final String SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION = "android.security.advancedprotection.type_blocked_interaction";
     field public static final String SUPPORT_DIALOG_TYPE_DISABLED_SETTING = "android.security.advancedprotection.type_disabled_setting";
+  }
+
+}
+
+package android.security.forensic {
+
+  @FlaggedApi("android.security.afl_api") public class ForensicManager {
+    method @RequiresPermission(android.Manifest.permission.READ_FORENSIC_STATE) public void addStateCallback(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_FORENSIC_STATE) public void disable(@NonNull java.util.concurrent.Executor, @NonNull android.security.forensic.ForensicManager.CommandCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_FORENSIC_STATE) public void enable(@NonNull java.util.concurrent.Executor, @NonNull android.security.forensic.ForensicManager.CommandCallback);
+    method @RequiresPermission(android.Manifest.permission.READ_FORENSIC_STATE) public void removeStateCallback(@NonNull java.util.function.Consumer<java.lang.Integer>);
+    field public static final int ERROR_DATA_SOURCE_UNAVAILABLE = 4; // 0x4
+    field public static final int ERROR_PERMISSION_DENIED = 1; // 0x1
+    field public static final int ERROR_TRANSPORT_UNAVAILABLE = 3; // 0x3
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
+    field public static final int STATE_DISABLED = 1; // 0x1
+    field public static final int STATE_ENABLED = 2; // 0x2
+    field public static final int STATE_UNKNOWN = 0; // 0x0
+  }
+
+  public static interface ForensicManager.CommandCallback {
+    method public void onFailure(int);
+    method public void onSuccess();
   }
 
 }

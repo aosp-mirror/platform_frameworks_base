@@ -251,6 +251,7 @@ import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.adaptiveauthentication.AdaptiveAuthenticationService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
+import com.android.server.security.forensic.ForensicService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
@@ -1759,6 +1760,13 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartLogcatManager");
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
+
+            if (!isWatch && !isTv && !isAutomotive
+                    && android.security.Flags.aflApi()) {
+                t.traceBegin("StartForensicService");
+                mSystemServiceManager.startService(ForensicService.class);
+                t.traceEnd();
+            }
 
             if (AppFunctionManagerConfiguration.isSupported(context)) {
                 t.traceBegin("StartAppFunctionManager");

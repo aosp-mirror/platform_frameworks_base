@@ -239,6 +239,8 @@ import android.security.advancedprotection.AdvancedProtectionManager;
 import android.security.advancedprotection.IAdvancedProtectionService;
 import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
+import android.security.forensic.ForensicManager;
+import android.security.forensic.IForensicService;
 import android.security.keystore.KeyStoreManager;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
@@ -1790,6 +1792,18 @@ public final class SystemServiceRegistry {
                         IMediaQualityManager service = IMediaQualityManager
                                 .Stub.asInterface(iBinder);
                         return new MediaQualityManager(ctx, service);
+                    }
+                });
+
+        registerService(Context.FORENSIC_SERVICE, ForensicManager.class,
+                new CachedServiceFetcher<ForensicManager>() {
+                    @Override
+                    public ForensicManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.FORENSIC_SERVICE);
+                        IForensicService service = IForensicService.Stub.asInterface(b);
+                        return new ForensicManager(service);
                     }
                 });
 

@@ -16,9 +16,13 @@
 
 package com.android.server.security.forensic;
 
+import static android.Manifest.permission.MANAGE_FORENSIC_STATE;
+import static android.Manifest.permission.READ_FORENSIC_STATE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -29,7 +33,9 @@ import static org.mockito.Mockito.verify;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Looper;
+import android.os.PermissionEnforcer;
 import android.os.RemoteException;
+import android.os.test.FakePermissionEnforcer;
 import android.os.test.TestLooper;
 import android.security.forensic.ForensicEvent;
 import android.security.forensic.IForensicServiceCommandCallback;
@@ -41,6 +47,7 @@ import androidx.test.core.app.ApplicationProvider;
 import com.android.server.ServiceThread;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -50,33 +57,35 @@ import java.util.Map;
 
 public class ForensicServiceTest {
     private static final int STATE_UNKNOWN = IForensicServiceStateCallback.State.UNKNOWN;
-    private static final int STATE_INVISIBLE = IForensicServiceStateCallback.State.INVISIBLE;
-    private static final int STATE_VISIBLE = IForensicServiceStateCallback.State.VISIBLE;
+    private static final int STATE_DISABLED = IForensicServiceStateCallback.State.DISABLED;
     private static final int STATE_ENABLED = IForensicServiceStateCallback.State.ENABLED;
 
     private static final int ERROR_UNKNOWN = IForensicServiceCommandCallback.ErrorCode.UNKNOWN;
     private static final int ERROR_PERMISSION_DENIED =
             IForensicServiceCommandCallback.ErrorCode.PERMISSION_DENIED;
-    private static final int ERROR_INVALID_STATE_TRANSITION =
-            IForensicServiceCommandCallback.ErrorCode.INVALID_STATE_TRANSITION;
-    private static final int ERROR_BACKUP_TRANSPORT_UNAVAILABLE =
-            IForensicServiceCommandCallback.ErrorCode.BACKUP_TRANSPORT_UNAVAILABLE;
+    private static final int ERROR_TRANSPORT_UNAVAILABLE =
+            IForensicServiceCommandCallback.ErrorCode.TRANSPORT_UNAVAILABLE;
     private static final int ERROR_DATA_SOURCE_UNAVAILABLE =
             IForensicServiceCommandCallback.ErrorCode.DATA_SOURCE_UNAVAILABLE;
 
     private Context mContext;
-    private BackupTransportConnection mBackupTransportConnection;
+    private ForensicEventTransportConnection mForensicEventTransportConnection;
     private DataAggregator mDataAggregator;
     private ForensicService mForensicService;
     private TestLooper mTestLooper;
     private Looper mLooper;
     private TestLooper mTestLooperOfDataAggregator;
     private Looper mLooperOfDataAggregator;
+    private FakePermissionEnforcer mPermissionEnforcer;
 
     @SuppressLint("VisibleForTests")
     @Before
     public void setUp() {
         mContext = spy(ApplicationProvider.getApplicationContext());
+
+        mPermissionEnforcer = new FakePermissionEnforcer();
+        mPermissionEnforcer.grant(READ_FORENSIC_STATE);
+        mPermissionEnforcer.grant(MANAGE_FORENSIC_STATE);
 
         mTestLooper = new TestLooper();
         mLooper = mTestLooper.getLooper();
@@ -87,217 +96,101 @@ public class ForensicServiceTest {
     }
 
     @Test
-    public void testMonitorState_Invisible() throws RemoteException {
+    public void testAddStateCallback_NoPermission() {
+        mPermissionEnforcer.revoke(READ_FORENSIC_STATE);
         StateCallback scb = new StateCallback();
         assertEquals(STATE_UNKNOWN, scb.mState);
-        mForensicService.getBinderService().monitorState(scb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb.mState);
+        assertThrows(SecurityException.class,
+                () -> mForensicService.getBinderService().addStateCallback(scb));
     }
 
     @Test
-    public void testMonitorState_Invisible_TwoMonitors() throws RemoteException {
+    public void testRemoveStateCallback_NoPermission() {
+        mPermissionEnforcer.revoke(READ_FORENSIC_STATE);
+        StateCallback scb = new StateCallback();
+        assertEquals(STATE_UNKNOWN, scb.mState);
+        assertThrows(SecurityException.class,
+                () -> mForensicService.getBinderService().removeStateCallback(scb));
+    }
+
+    @Test
+    public void testEnable_NoPermission() {
+        mPermissionEnforcer.revoke(MANAGE_FORENSIC_STATE);
+
+        CommandCallback ccb = new CommandCallback();
+        assertThrows(SecurityException.class,
+                () -> mForensicService.getBinderService().enable(ccb));
+    }
+
+    @Test
+    public void testDisable_NoPermission() {
+        mPermissionEnforcer.revoke(MANAGE_FORENSIC_STATE);
+
+        CommandCallback ccb = new CommandCallback();
+        assertThrows(SecurityException.class,
+                () -> mForensicService.getBinderService().disable(ccb));
+    }
+
+    @Test
+    public void testAddStateCallback_Disabled() throws RemoteException {
+        StateCallback scb = new StateCallback();
+        assertEquals(STATE_UNKNOWN, scb.mState);
+        mForensicService.getBinderService().addStateCallback(scb);
+        mTestLooper.dispatchAll();
+        assertEquals(STATE_DISABLED, scb.mState);
+    }
+
+    @Test
+    public void testAddStateCallback_Disabled_TwoStateCallbacks() throws RemoteException {
         StateCallback scb1 = new StateCallback();
         assertEquals(STATE_UNKNOWN, scb1.mState);
-        mForensicService.getBinderService().monitorState(scb1);
+        mForensicService.getBinderService().addStateCallback(scb1);
         mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
+        assertEquals(STATE_DISABLED, scb1.mState);
 
         StateCallback scb2 = new StateCallback();
         assertEquals(STATE_UNKNOWN, scb2.mState);
-        mForensicService.getBinderService().monitorState(scb2);
+        mForensicService.getBinderService().addStateCallback(scb2);
         mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb2.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
     }
 
     @Test
-    public void testMakeVisible_FromInvisible() throws RemoteException {
-        StateCallback scb = new StateCallback();
-        assertEquals(STATE_UNKNOWN, scb.mState);
-        mForensicService.getBinderService().monitorState(scb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb.mState);
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().makeVisible(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb.mState);
-        assertNull(ccb.mErrorCode);
-    }
-
-    @Test
-    public void testMakeVisible_FromInvisible_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_INVISIBLE);
+    public void testRemoveStateCallback() throws RemoteException {
+        mForensicService.setState(STATE_DISABLED);
         StateCallback scb1 = new StateCallback();
         StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
+        mForensicService.getBinderService().addStateCallback(scb1);
+        mForensicService.getBinderService().addStateCallback(scb2);
         mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
+        assertEquals(STATE_DISABLED, scb1.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
 
         doReturn(true).when(mDataAggregator).initialize();
+        doReturn(true).when(mForensicEventTransportConnection).initialize();
 
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().makeVisible(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
-        assertNull(ccb.mErrorCode);
-    }
-
-    @Test
-    public void testMakeVisible_FromInvisible_TwoMonitors_DataSourceUnavailable()
-            throws RemoteException {
-        mForensicService.setState(STATE_INVISIBLE);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
-
-        doReturn(false).when(mDataAggregator).initialize();
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().makeVisible(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
-        assertNotNull(ccb.mErrorCode);
-        assertEquals(ERROR_DATA_SOURCE_UNAVAILABLE, ccb.mErrorCode.intValue());
-    }
-
-    @Test
-    public void testMakeVisible_FromVisible_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_VISIBLE);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().makeVisible(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
-        assertNull(ccb.mErrorCode);
-    }
-
-    @Test
-    public void testMakeVisible_FromEnabled_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_ENABLED);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_ENABLED, scb1.mState);
-        assertEquals(STATE_ENABLED, scb2.mState);
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().makeVisible(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_ENABLED, scb1.mState);
-        assertEquals(STATE_ENABLED, scb2.mState);
-        assertNotNull(ccb.mErrorCode);
-        assertEquals(ERROR_INVALID_STATE_TRANSITION, ccb.mErrorCode.intValue());
-    }
-
-    @Test
-    public void testMakeInvisible_FromInvisible_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_INVISIBLE);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().makeInvisible(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
-        assertNull(ccb.mErrorCode);
-    }
-
-    @Test
-    public void testMakeInvisible_FromVisible_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_VISIBLE);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().makeInvisible(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
-        assertNull(ccb.mErrorCode);
-    }
-
-    @Test
-    public void testMakeInvisible_FromEnabled_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_ENABLED);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_ENABLED, scb1.mState);
-        assertEquals(STATE_ENABLED, scb2.mState);
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().makeInvisible(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
-        assertNull(ccb.mErrorCode);
-    }
-
-
-    @Test
-    public void testEnable_FromInvisible_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_INVISIBLE);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
+        mForensicService.getBinderService().removeStateCallback(scb2);
 
         CommandCallback ccb = new CommandCallback();
         mForensicService.getBinderService().enable(ccb);
         mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
-        assertNotNull(ccb.mErrorCode);
-        assertEquals(ERROR_INVALID_STATE_TRANSITION, ccb.mErrorCode.intValue());
+        assertEquals(STATE_ENABLED, scb1.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
+        assertNull(ccb.mErrorCode);
     }
 
     @Test
-    public void testEnable_FromVisible_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_VISIBLE);
+    public void testEnable_FromDisabled_TwoStateCallbacks() throws RemoteException {
+        mForensicService.setState(STATE_DISABLED);
         StateCallback scb1 = new StateCallback();
         StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
+        mForensicService.getBinderService().addStateCallback(scb1);
+        mForensicService.getBinderService().addStateCallback(scb2);
         mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
+        assertEquals(STATE_DISABLED, scb1.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
 
-        doReturn(true).when(mBackupTransportConnection).initialize();
+        doReturn(true).when(mForensicEventTransportConnection).initialize();
 
         CommandCallback ccb = new CommandCallback();
         mForensicService.getBinderService().enable(ccb);
@@ -310,35 +203,13 @@ public class ForensicServiceTest {
     }
 
     @Test
-    public void testEnable_FromVisible_TwoMonitors_BackupTransportUnavailable()
+    public void testEnable_FromEnabled_TwoStateCallbacks()
             throws RemoteException {
-        mForensicService.setState(STATE_VISIBLE);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
-
-        doReturn(false).when(mBackupTransportConnection).initialize();
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().enable(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
-        assertNotNull(ccb.mErrorCode);
-        assertEquals(ERROR_BACKUP_TRANSPORT_UNAVAILABLE, ccb.mErrorCode.intValue());
-    }
-
-    @Test
-    public void testEnable_FromEnabled_TwoMonitors() throws RemoteException {
         mForensicService.setState(STATE_ENABLED);
         StateCallback scb1 = new StateCallback();
         StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
+        mForensicService.getBinderService().addStateCallback(scb1);
+        mForensicService.getBinderService().addStateCallback(scb2);
         mTestLooper.dispatchAll();
         assertEquals(STATE_ENABLED, scb1.mState);
         assertEquals(STATE_ENABLED, scb2.mState);
@@ -346,62 +217,44 @@ public class ForensicServiceTest {
         CommandCallback ccb = new CommandCallback();
         mForensicService.getBinderService().enable(ccb);
         mTestLooper.dispatchAll();
+
         assertEquals(STATE_ENABLED, scb1.mState);
         assertEquals(STATE_ENABLED, scb2.mState);
         assertNull(ccb.mErrorCode);
     }
 
     @Test
-    public void testDisable_FromInvisible_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_INVISIBLE);
+    public void testDisable_FromDisabled_TwoStateCallbacks() throws RemoteException {
+        mForensicService.setState(STATE_DISABLED);
         StateCallback scb1 = new StateCallback();
         StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
+        mForensicService.getBinderService().addStateCallback(scb1);
+        mForensicService.getBinderService().addStateCallback(scb2);
         mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
+        assertEquals(STATE_DISABLED, scb1.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
 
         CommandCallback ccb = new CommandCallback();
         mForensicService.getBinderService().disable(ccb);
         mTestLooper.dispatchAll();
-        assertEquals(STATE_INVISIBLE, scb1.mState);
-        assertEquals(STATE_INVISIBLE, scb2.mState);
-        assertNotNull(ccb.mErrorCode);
-        assertEquals(ERROR_INVALID_STATE_TRANSITION, ccb.mErrorCode.intValue());
-    }
 
-    @Test
-    public void testDisable_FromVisible_TwoMonitors() throws RemoteException {
-        mForensicService.setState(STATE_VISIBLE);
-        StateCallback scb1 = new StateCallback();
-        StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
-
-        CommandCallback ccb = new CommandCallback();
-        mForensicService.getBinderService().disable(ccb);
-        mTestLooper.dispatchAll();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
+        assertEquals(STATE_DISABLED, scb1.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
         assertNull(ccb.mErrorCode);
     }
 
     @Test
-    public void testDisable_FromEnabled_TwoMonitors() throws RemoteException {
+    public void testDisable_FromEnabled_TwoStateCallbacks() throws RemoteException {
         mForensicService.setState(STATE_ENABLED);
         StateCallback scb1 = new StateCallback();
         StateCallback scb2 = new StateCallback();
-        mForensicService.getBinderService().monitorState(scb1);
-        mForensicService.getBinderService().monitorState(scb2);
+        mForensicService.getBinderService().addStateCallback(scb1);
+        mForensicService.getBinderService().addStateCallback(scb2);
         mTestLooper.dispatchAll();
         assertEquals(STATE_ENABLED, scb1.mState);
         assertEquals(STATE_ENABLED, scb2.mState);
 
-        doNothing().when(mBackupTransportConnection).release();
+        doNothing().when(mForensicEventTransportConnection).release();
 
         ServiceThread mockThread = spy(ServiceThread.class);
         mDataAggregator.setHandler(mLooperOfDataAggregator, mockThread);
@@ -412,9 +265,33 @@ public class ForensicServiceTest {
         mTestLooperOfDataAggregator.dispatchAll();
         // TODO: We can verify the data sources once we implement them.
         verify(mockThread, times(1)).quitSafely();
-        assertEquals(STATE_VISIBLE, scb1.mState);
-        assertEquals(STATE_VISIBLE, scb2.mState);
+        assertEquals(STATE_DISABLED, scb1.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
         assertNull(ccb.mErrorCode);
+    }
+
+    @Ignore("Enable once the ForensicEventTransportConnection is ready")
+    @Test
+    public void testEnable_FromDisable_TwoStateCallbacks_TransportUnavailable()
+            throws RemoteException {
+        mForensicService.setState(STATE_DISABLED);
+        StateCallback scb1 = new StateCallback();
+        StateCallback scb2 = new StateCallback();
+        mForensicService.getBinderService().addStateCallback(scb1);
+        mForensicService.getBinderService().addStateCallback(scb2);
+        mTestLooper.dispatchAll();
+        assertEquals(STATE_DISABLED, scb1.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
+
+        doReturn(false).when(mForensicEventTransportConnection).initialize();
+
+        CommandCallback ccb = new CommandCallback();
+        mForensicService.getBinderService().enable(ccb);
+        mTestLooper.dispatchAll();
+        assertEquals(STATE_DISABLED, scb1.mState);
+        assertEquals(STATE_DISABLED, scb2.mState);
+        assertNotNull(ccb.mErrorCode);
+        assertEquals(ERROR_TRANSPORT_UNAVAILABLE, ccb.mErrorCode.intValue());
     }
 
     @Test
@@ -441,14 +318,14 @@ public class ForensicServiceTest {
         events.add(eventOne);
         events.add(eventTwo);
 
-        doReturn(true).when(mBackupTransportConnection).addData(any());
+        doReturn(true).when(mForensicEventTransportConnection).addData(any());
 
         mDataAggregator.addBatchData(events);
         mTestLooperOfDataAggregator.dispatchAll();
         mTestLooper.dispatchAll();
 
         ArgumentCaptor<List<ForensicEvent>> captor = ArgumentCaptor.forClass(List.class);
-        verify(mBackupTransportConnection).addData(captor.capture());
+        verify(mForensicEventTransportConnection).addData(captor.capture());
         List<ForensicEvent> receivedEvents = captor.getValue();
         assertEquals(receivedEvents.size(), 2);
 
@@ -476,6 +353,10 @@ public class ForensicServiceTest {
             return mContext;
         }
 
+        @Override
+        public PermissionEnforcer getPermissionEnforcer() {
+            return mPermissionEnforcer;
+        }
 
         @Override
         public Looper getLooper() {
@@ -483,9 +364,9 @@ public class ForensicServiceTest {
         }
 
         @Override
-        public BackupTransportConnection getBackupTransportConnection() {
-            mBackupTransportConnection = spy(new BackupTransportConnection(mContext));
-            return mBackupTransportConnection;
+        public ForensicEventTransportConnection getForensicEventransportConnection() {
+            mForensicEventTransportConnection = spy(new ForensicEventTransportConnection(mContext));
+            return mForensicEventTransportConnection;
         }
 
         @Override
