@@ -265,6 +265,26 @@ public class HdmiCecAtomWriter {
                 enumLogReason);
     }
 
+    /**
+     * Writes a HdmiPowerStateChangeOnActiveSourceLostToggled atom representing a
+     * HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST setting change.
+     * @param isEnabled           Whether the setting is enabled.
+     * @param enumLogReason       The event that triggered the log.
+     * @param manufacturerPnpId   Manufacturer PNP ID reported in the EDID.
+     * @param manufacturerYear    Manufacture year reported in the EDID.
+     * @param manufacturerWeek    Manufacture week reporter in the EDID.
+     */
+    public void powerStateChangeOnActiveSourceLostChanged(boolean isEnabled, int enumLogReason,
+            String manufacturerPnpId, int manufacturerYear, int manufacturerWeek) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.HDMI_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLED,
+                isEnabled,
+                enumLogReason,
+                manufacturerPnpId,
+                manufacturerYear,
+                manufacturerWeek);
+    }
+
     private int earcStateToEnum(int earcState) {
         switch (earcState) {
             case HDMI_EARC_STATUS_IDLE:

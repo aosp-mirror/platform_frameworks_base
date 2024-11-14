@@ -433,4 +433,21 @@ public class HdmiCecAtomLoggingTest {
                 .dsmStatusChanged(anyBoolean(), anyBoolean(),
                         eq(HdmiStatsEnums.LOG_REASON_DSM_SETTING_TOGGLED));
     }
+
+    @Test
+    public void testPowerStateChangeOnActiveSourceLostToggled_writesAtom_logReasonSetting() {
+        mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
+        Mockito.clearInvocations(mHdmiCecAtomWriterSpy);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.writePowerStateChangeOnActiveSourceLostAtom(true);
+        mTestLooper.dispatchAll();
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .powerStateChangeOnActiveSourceLostChanged(eq(true),
+                        eq(HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_SETTING), anyString(), anyInt(), anyInt());
+        verify(mHdmiCecAtomWriterSpy, never())
+                .powerStateChangeOnActiveSourceLostChanged(eq(true),
+                        eq(HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_POP_UP), anyString(), anyInt(), anyInt());
+    }
 }
