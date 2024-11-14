@@ -71,6 +71,7 @@ public class Paint {
     private long mNativePaint;
     private long mNativeShader;
     private long mNativeColorFilter;
+    private long mNativeXfermode;
 
     // Use a Holder to allow static initialization of Paint in the boot image.
     private static class NoImagePreloadHolder {
@@ -735,6 +736,7 @@ public class Paint {
         mPathEffect = null;
         mShader = null;
         mNativeShader = 0;
+        mNativeXfermode = 0;
         mTypeface = null;
         mXfermode = null;
 
@@ -780,6 +782,7 @@ public class Paint {
         mNativeShader = paint.mNativeShader;
         mTypeface = paint.mTypeface;
         mXfermode = paint.mXfermode;
+        mNativeXfermode = paint.mNativeXfermode;
 
         mHasCompatScaling = paint.mHasCompatScaling;
         mCompatScaling = paint.mCompatScaling;
@@ -815,7 +818,7 @@ public class Paint {
      *
      * Note: Although this method is |synchronized|, this is simply so it
      * is not thread-hostile to multiple threads calling this method. It
-     * is still unsafe to attempt to change the Shader/ColorFilter while
+     * is still unsafe to attempt to change the Shader/ColorFilter/Xfermode while
      * another thread attempts to access the native object.
      *
      * @hide
@@ -832,6 +835,13 @@ public class Paint {
         if (newNativeColorFilter != mNativeColorFilter) {
             mNativeColorFilter = newNativeColorFilter;
             nSetColorFilter(mNativePaint, mNativeColorFilter);
+        }
+        if (mXfermode instanceof RuntimeXfermode) {
+            long newNativeXfermode = ((RuntimeXfermode) mXfermode).createNativeInstance();
+            if (newNativeXfermode != mNativeXfermode) {
+                mNativeXfermode = newNativeXfermode;
+                nSetXfermode(mNativePaint, mNativeXfermode);
+            }
         }
         return mNativePaint;
     }
@@ -1427,16 +1437,17 @@ public class Paint {
     }
 
     /**
-     * Get the paint's blend mode object.
+     * Get the paint's blend mode object. Will return null if there is a Xfermode applied that
+     * cannot be represented by a blend mode (i.e. a custom {@code RuntimeXfermode}
      *
      * @return the paint's blend mode (or null)
      */
     @Nullable
     public BlendMode getBlendMode() {
-        if (mXfermode == null) {
+        if (mXfermode == null || !(mXfermode instanceof PorterDuffXfermode)) {
             return null;
         } else {
-            return BlendMode.fromValue(mXfermode.porterDuffMode);
+            return BlendMode.fromValue(((PorterDuffXfermode) mXfermode).porterDuffMode);
         }
     }
 
@@ -1459,8 +1470,15 @@ public class Paint {
 
     @Nullable
     private Xfermode installXfermode(Xfermode xfermode) {
-        int newMode = xfermode != null ? xfermode.porterDuffMode : Xfermode.DEFAULT;
-        int curMode = mXfermode != null ? mXfermode.porterDuffMode : Xfermode.DEFAULT;
+        if (xfermode instanceof RuntimeXfermode) {
+            mXfermode = xfermode;
+            nSetXfermode(mNativePaint, ((RuntimeXfermode) xfermode).createNativeInstance());
+            return xfermode;
+        }
+        int newMode = (xfermode instanceof PorterDuffXfermode)
+                ? ((PorterDuffXfermode) xfermode).porterDuffMode : PorterDuffXfermode.DEFAULT;
+        int curMode = (mXfermode instanceof PorterDuffXfermode)
+                ? ((PorterDuffXfermode) mXfermode).porterDuffMode : PorterDuffXfermode.DEFAULT;
         if (newMode != curMode) {
             nSetXfermode(mNativePaint, newMode);
         }
@@ -3822,6 +3840,8 @@ public class Paint {
     private static native long nSetColorFilter(long paintPtr, long filter);
     @CriticalNative
     private static native void nSetXfermode(long paintPtr, int xfermode);
+    @CriticalNative
+    private static native void nSetXfermode(long paintPtr, long xfermodePtr);
     @CriticalNative
     private static native long nSetPathEffect(long paintPtr, long effect);
     @CriticalNative
