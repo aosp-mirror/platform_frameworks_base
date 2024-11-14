@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.testTransition
@@ -47,8 +46,9 @@ class CustomTransformationTest {
     @Test
     fun customSize() {
         /** A size transformation that adds [add] to the size of the transformed element(s). */
-        class AddSizeTransformation(override val matcher: ElementMatcher, private val add: Dp) :
-            CustomSizeTransformation {
+        class AddSizeTransformation(private val add: Dp) : CustomPropertyTransformation<IntSize> {
+            override val property = PropertyTransformation.Property.Size
+
             override fun PropertyTransformationScope.transform(
                 content: ContentKey,
                 element: ElementKey,
@@ -69,7 +69,7 @@ class CustomTransformationTest {
                 spec = tween(16 * 4, easing = LinearEasing)
 
                 // Add 80dp to the width and height of Foo.
-                transformation(AddSizeTransformation(TestElements.Foo, 80.dp))
+                transformation(TestElements.Foo) { AddSizeTransformation(80.dp) }
             },
         ) {
             before { onElement(TestElements.Foo).assertSizeIsEqualTo(40.dp, 20.dp) }
@@ -84,8 +84,9 @@ class CustomTransformationTest {
     @Test
     fun customOffset() {
         /** An offset transformation that adds [add] to the offset of the transformed element(s). */
-        class AddOffsetTransformation(override val matcher: ElementMatcher, private val add: Dp) :
-            CustomOffsetTransformation {
+        class AddOffsetTransformation(private val add: Dp) : CustomPropertyTransformation<Offset> {
+            override val property = PropertyTransformation.Property.Offset
+
             override fun PropertyTransformationScope.transform(
                 content: ContentKey,
                 element: ElementKey,
@@ -106,7 +107,7 @@ class CustomTransformationTest {
                 spec = tween(16 * 4, easing = LinearEasing)
 
                 // Add 80dp to the offset of Foo.
-                transformation(AddOffsetTransformation(TestElements.Foo, 80.dp))
+                transformation(TestElements.Foo) { AddOffsetTransformation(80.dp) }
             },
         ) {
             before { onElement(TestElements.Foo).assertPositionInRootIsEqualTo(0.dp, 0.dp) }

@@ -267,11 +267,12 @@ internal class MutableSceneTransitionLayoutStateImpl(
         private set
 
     /**
-     * The flattened list of [SharedElementTransformation] within all the transitions in
+     * The flattened list of [SharedElementTransformation.Factory] within all the transitions in
      * [transitionStates].
      */
-    private val transformationsWithElevation: List<SharedElementTransformation> by derivedStateOf {
-        transformationsWithElevation(transitionStates)
+    private val transformationFactoriesWithElevation:
+        List<SharedElementTransformation.Factory> by derivedStateOf {
+        transformationFactoriesWithElevation(transitionStates)
     }
 
     override val currentScene: SceneKey
@@ -692,22 +693,23 @@ internal class MutableSceneTransitionLayoutStateImpl(
         animate()
     }
 
-    private fun transformationsWithElevation(
+    private fun transformationFactoriesWithElevation(
         transitionStates: List<TransitionState>
-    ): List<SharedElementTransformation> {
+    ): List<SharedElementTransformation.Factory> {
         return buildList {
             transitionStates.fastForEach { state ->
                 if (state !is TransitionState.Transition) {
                     return@fastForEach
                 }
 
-                state.transformationSpec.transformations.fastForEach { transformationWithRange ->
-                    val transformation = transformationWithRange.transformation
+                state.transformationSpec.transformationMatchers.fastForEach { transformationMatcher
+                    ->
+                    val factory = transformationMatcher.factory
                     if (
-                        transformation is SharedElementTransformation &&
-                            transformation.elevateInContent != null
+                        factory is SharedElementTransformation.Factory &&
+                            factory.elevateInContent != null
                     ) {
-                        add(transformation)
+                        add(factory)
                     }
                 }
             }
@@ -722,10 +724,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
      * necessary, for performance.
      */
     internal fun isElevationPossible(content: ContentKey, element: ElementKey?): Boolean {
-        if (transformationsWithElevation.isEmpty()) return false
-        return transformationsWithElevation.fastAny { transformation ->
-            transformation.elevateInContent == content &&
-                (element == null || transformation.matcher.matches(element, content))
+        if (transformationFactoriesWithElevation.isEmpty()) return false
+        return transformationFactoriesWithElevation.fastAny { factory ->
+            factory.elevateInContent == content &&
+                (element == null || factory.matcher.matches(element, content))
         }
     }
 }

@@ -26,17 +26,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.transformation.CustomAlphaTransformation
-import com.android.compose.animation.scene.transformation.CustomOffsetTransformation
-import com.android.compose.animation.scene.transformation.CustomScaleTransformation
-import com.android.compose.animation.scene.transformation.CustomSizeTransformation
-import com.android.compose.animation.scene.transformation.InterpolatedAlphaTransformation
-import com.android.compose.animation.scene.transformation.InterpolatedOffsetTransformation
-import com.android.compose.animation.scene.transformation.InterpolatedScaleTransformation
-import com.android.compose.animation.scene.transformation.InterpolatedSizeTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
-import com.android.compose.animation.scene.transformation.Transformation
+import com.android.compose.animation.scene.transformation.TransformationMatcher
 import com.android.compose.animation.scene.transformation.TransformationWithRange
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
@@ -169,7 +161,7 @@ internal constructor(
 }
 
 /** The definition of a transition between [from] and [to]. */
-interface TransitionSpec {
+internal interface TransitionSpec {
     /** The key of this [TransitionSpec]. */
     val key: TransitionKey?
 
@@ -209,7 +201,7 @@ interface TransitionSpec {
     fun previewTransformationSpec(transition: TransitionState.Transition): TransformationSpec?
 }
 
-interface TransformationSpec {
+internal interface TransformationSpec {
     /**
      * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
      * the transition is triggered (i.e. it is not gesture-based).
@@ -232,8 +224,8 @@ interface TransformationSpec {
      */
     val distance: UserActionDistance?
 
-    /** The list of [Transformation] applied to elements during this transition. */
-    val transformations: List<TransformationWithRange<*>>
+    /** The list of [TransformationMatcher] applied to elements during this transformation. */
+    val transformationMatchers: List<TransformationMatcher>
 
     companion object {
         internal val Empty =
@@ -241,7 +233,7 @@ interface TransformationSpec {
                 progressSpec = snap(),
                 swipeSpec = null,
                 distance = null,
-                transformations = emptyList(),
+                transformationMatchers = emptyList(),
             )
         internal val EmptyProvider = { _: TransitionState.Transition -> Empty }
     }
@@ -272,7 +264,14 @@ internal class TransitionSpecImpl(
                     progressSpec = reverse.progressSpec,
                     swipeSpec = reverse.swipeSpec,
                     distance = reverse.distance,
-                    transformations = reverse.transformations.map { it.reversed() },
+                    transformationMatchers =
+                        reverse.transformationMatchers.map {
+                            TransformationMatcher(
+                                matcher = it.matcher,
+                                factory = it.factory,
+                                range = it.range?.reversed(),
+                            )
+                        },
                 )
             },
         )
@@ -288,7 +287,7 @@ internal class TransitionSpecImpl(
 }
 
 /** The definition of the overscroll behavior of the [content]. */
-interface OverscrollSpec {
+internal interface OverscrollSpec {
     /** The scene we are over scrolling. */
     val content: ContentKey
 
@@ -325,7 +324,7 @@ internal class TransformationSpecImpl(
     override val progressSpec: AnimationSpec<Float>,
     override val swipeSpec: SpringSpec<Float>?,
     override val distance: UserActionDistance?,
-    override val transformations: List<TransformationWithRange<*>>,
+    override val transformationMatchers: List<TransformationMatcher>,
 ) : TransformationSpec {
     private val cache = mutableMapOf<ElementKey, MutableMap<ContentKey, ElementTransformations>>()
 
@@ -335,7 +334,7 @@ internal class TransformationSpecImpl(
             .getOrPut(content) { computeTransformations(element, content) }
     }
 
-    /** Filter [transformations] to compute the [ElementTransformations] of [element]. */
+    /** Filter [transformationMatchers] to compute the [ElementTransformations] of [element]. */
     private fun computeTransformations(
         element: ElementKey,
         content: ContentKey,
@@ -346,46 +345,55 @@ internal class TransformationSpecImpl(
         var drawScale: TransformationWithRange<PropertyTransformation<Scale>>? = null
         var alpha: TransformationWithRange<PropertyTransformation<Float>>? = null
 
-        transformations.fastForEach { transformationWithRange ->
-            val transformation = transformationWithRange.transformation
-            if (!transformation.matcher.matches(element, content)) {
+        transformationMatchers.fastForEach { transformationMatcher ->
+            if (!transformationMatcher.matcher.matches(element, content)) {
                 return@fastForEach
             }
 
-            when (transformation) {
-                is SharedElementTransformation -> {
-                    throwIfNotNull(shared, element, name = "shared")
-                    shared =
-                        transformationWithRange
-                            as TransformationWithRange<SharedElementTransformation>
+            val transformation = transformationMatcher.factory.create()
+            val property =
+                when (transformation) {
+                    is SharedElementTransformation -> {
+                        throwIfNotNull(shared, element, name = "shared")
+                        shared =
+                            TransformationWithRange(transformation, transformationMatcher.range)
+                        return@fastForEach
+                    }
+                    is PropertyTransformation<*> -> transformation.property
                 }
-                is InterpolatedOffsetTransformation,
-                is CustomOffsetTransformation -> {
+
+            when (property) {
+                is PropertyTransformation.Property.Offset -> {
                     throwIfNotNull(offset, element, name = "offset")
                     offset =
-                        transformationWithRange
-                            as TransformationWithRange<PropertyTransformation<Offset>>
+                        TransformationWithRange(
+                            transformation as PropertyTransformation<Offset>,
+                            transformationMatcher.range,
+                        )
                 }
-                is InterpolatedSizeTransformation,
-                is CustomSizeTransformation -> {
+                is PropertyTransformation.Property.Size -> {
                     throwIfNotNull(size, element, name = "size")
                     size =
-                        transformationWithRange
-                            as TransformationWithRange<PropertyTransformation<IntSize>>
+                        TransformationWithRange(
+                            transformation as PropertyTransformation<IntSize>,
+                            transformationMatcher.range,
+                        )
                 }
-                is InterpolatedScaleTransformation,
-                is CustomScaleTransformation -> {
+                is PropertyTransformation.Property.Scale -> {
                     throwIfNotNull(drawScale, element, name = "drawScale")
                     drawScale =
-                        transformationWithRange
-                            as TransformationWithRange<PropertyTransformation<Scale>>
+                        TransformationWithRange(
+                            transformation as PropertyTransformation<Scale>,
+                            transformationMatcher.range,
+                        )
                 }
-                is InterpolatedAlphaTransformation,
-                is CustomAlphaTransformation -> {
+                is PropertyTransformation.Property.Alpha -> {
                     throwIfNotNull(alpha, element, name = "alpha")
                     alpha =
-                        transformationWithRange
-                            as TransformationWithRange<PropertyTransformation<Float>>
+                        TransformationWithRange(
+                            transformation as PropertyTransformation<Float>,
+                            transformationMatcher.range,
+                        )
                 }
             }
         }
