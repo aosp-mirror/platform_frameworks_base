@@ -822,6 +822,8 @@ class DesktopTasksController(
         taskInfo: RunningTaskInfo,
         resizeTrigger: ResizeTrigger,
         inputMethod: InputMethod,
+        maximizeCujRecorder: (() -> Unit)? = null,
+        unmaximizeCujRecorder: (() -> Unit)? = null,
     ) {
         val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         desktopModeEventLogger.logTaskResizingStarted(
@@ -843,6 +845,7 @@ class DesktopTasksController(
         // helpful to eliminate the current task from logic to calculate taskbar corner rounding.
         val willMaximize = !isMaximized
         if (isMaximized) {
+            unmaximizeCujRecorder?.invoke()
             // The desktop task is at the maximized width and/or height of the stable bounds.
             // If the task's pre-maximize stable bounds were saved, toggle the task to those bounds.
             // Otherwise, toggle to the default bounds.
@@ -858,6 +861,7 @@ class DesktopTasksController(
                 }
             }
         } else {
+            maximizeCujRecorder?.invoke()
             // Save current bounds so that task can be restored back to original bounds if necessary
             // and toggle to the stable bounds.
             desktopTilingDecorViewModel.removeTaskIfTiled(taskInfo.displayId, taskInfo.taskId)
@@ -914,7 +918,7 @@ class DesktopTasksController(
         toggleDesktopTaskSize(
             taskInfo,
             ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
-            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
+            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
         )
     }
 

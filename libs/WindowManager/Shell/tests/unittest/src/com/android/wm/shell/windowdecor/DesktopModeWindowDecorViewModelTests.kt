@@ -397,9 +397,11 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         maxOrRestoreListenerCaptor.value.invoke()
 
         verify(mockDesktopTasksController).toggleDesktopTaskSize(
-            decor.mTaskInfo,
-            ResizeTrigger.MAXIMIZE_MENU,
-            InputMethod.UNKNOWN_INPUT_METHOD
+            eq(decor.mTaskInfo),
+            eq(ResizeTrigger.MAXIMIZE_MENU),
+            eq(InputMethod.UNKNOWN_INPUT_METHOD),
+            any(),
+            any()
         )
     }
 
@@ -1034,9 +1036,11 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
 
         verify(mockDesktopTasksController)
             .toggleDesktopTaskSize(
-                decor.mTaskInfo,
-                ResizeTrigger.MAXIMIZE_BUTTON,
-                InputMethod.UNKNOWN_INPUT_METHOD
+                eq(decor.mTaskInfo),
+                eq(ResizeTrigger.MAXIMIZE_BUTTON),
+                    eq(InputMethod.UNKNOWN_INPUT_METHOD),
+                any(),
+                any(),
             )
     }
 

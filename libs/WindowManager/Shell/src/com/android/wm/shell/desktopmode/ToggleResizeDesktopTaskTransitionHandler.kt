@@ -119,6 +119,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                             initialBounds = null
                             boundsAnimator = null
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                            interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW)
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
                         }
                     )
