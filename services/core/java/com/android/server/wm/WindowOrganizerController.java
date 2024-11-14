@@ -788,7 +788,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 deferResume = false;
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible();
-                mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
+                if (!mService.mRootWindowContainer.resumeFocusedTasksTopActivities()) {
+                    mService.mTaskSupervisor.updateTopResumedActivityIfNeeded("endWCT-effects");
+                }
             } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                 for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
                     haveConfigChanges.valueAt(i).forAllActivities(r -> {
