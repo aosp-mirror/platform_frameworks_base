@@ -20,7 +20,7 @@ import android.view.Display
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class FakeShadePositionRepository : ShadePositionRepository {
+class FakeShadeDisplayRepository : ShadeDisplaysRepository {
     private val _displayId = MutableStateFlow(Display.DEFAULT_DISPLAY)
 
     override fun setDisplayId(displayId: Int) {

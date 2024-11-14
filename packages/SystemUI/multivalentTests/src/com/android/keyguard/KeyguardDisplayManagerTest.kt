@@ -28,7 +28,7 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.settings.FakeDisplayTracker
-import com.android.systemui.shade.data.repository.FakeShadePositionRepository
+import com.android.systemui.shade.data.repository.FakeShadeDisplayRepository
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,7 +62,7 @@ class KeyguardDisplayManagerTest : SysuiTestCase() {
         mock(ConnectedDisplayKeyguardPresentation::class.java)
     @Mock private val deviceStateHelper = mock(DeviceStateHelper::class.java)
     @Mock private val keyguardStateController = mock(KeyguardStateController::class.java)
-    private val shadePositionRepository = FakeShadePositionRepository()
+    private val shadePositionRepository = FakeShadeDisplayRepository()
 
     private val mainExecutor = Executor { it.run() }
     private val backgroundExecutor = Executor { it.run() }

@@ -34,13 +34,13 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class ShadePositionRepositoryTest : SysuiTestCase() {
+class ShadeDisplaysRepositoryTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val commandRegistry = kosmos.commandRegistry
     private val pw = PrintWriter(StringWriter())
 
-    private val underTest = ShadePositionRepositoryImpl(commandRegistry)
+    private val underTest = ShadeDisplaysRepositoryImpl(commandRegistry)
 
     @Before
     fun setUp() {
