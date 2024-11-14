@@ -1002,6 +1002,10 @@
     <string name="hearing_devices_presets_error">Couldn\'t update preset</string>
     <!-- QuickSettings: Title for hearing aids presets. Preset is a set of hearing aid settings. User can apply different settings in different environments (e.g. Outdoor, Restaurant, Home) [CHAR LIMIT=40]-->
     <string name="hearing_devices_preset_label">Preset</string>
+    <!-- QuickSettings: Content description for the icon that indicates the item is selected [CHAR LIMIT=NONE]-->
+    <string name="hearing_devices_spinner_item_selected">Selected</string>
+    <!-- QuickSettings: Title for related tools of hearing. [CHAR LIMIT=40]-->
+    <string name="hearing_devices_tools_label">Tools</string>
     <!-- QuickSettings: Tool name for hearing devices dialog related tools [CHAR LIMIT=40] [BACKUP_MESSAGE_ID=8916875614623730005]-->
     <string name="quick_settings_hearing_devices_live_caption_title">Live Caption</string>
 

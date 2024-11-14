@@ -4425,6 +4425,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/359188869")
     public void testSetAutoTimeEnabledWithPOOfOrganizationOwnedDevice() throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);

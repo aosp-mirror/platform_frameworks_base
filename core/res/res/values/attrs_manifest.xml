@@ -1855,12 +1855,22 @@
          {@link android.R.styleable#AndroidManifestProcess process} tag, or to an
          {@link android.R.styleable#AndroidManifestApplication application} tag (to supply
          a default setting for all application components). -->
-    <attr name="memtagMode">
+     <attr name="memtagMode">
        <enum name="default" value="-1" />
        <enum name="off" value="0" />
        <enum name="async" value="1" />
        <enum name="sync" value="2" />
     </attr>
+
+    <!-- This attribute will be used to override app compatibility mode on 16 KB devices.
+         If set to enabled, Natives lib will be extracted from APK if they are not page aligned on
+         16 KB device. 4 KB natives libs will be loaded app-compat mode if they are eligible.
+         @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
+    <attr name="pageSizeCompat">
+        <enum name="enabled" value="5" />
+        <enum name="disabled" value="6" />
+    </attr>
+
 
     <!-- Attribution tag to be used for permission sub-attribution if a
       permission is checked in  {@link android.content.Context#sendBroadcast(Intent, String)}.
@@ -2211,6 +2221,9 @@
         <attr name="gwpAsanMode" />
 
         <attr name="memtagMode" />
+
+        <!-- @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
+        <attr name="pageSizeCompat" />
 
         <!-- If {@code true} enables automatic zero initialization of all native heap
              allocations. -->

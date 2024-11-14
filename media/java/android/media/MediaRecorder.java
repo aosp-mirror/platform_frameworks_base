@@ -16,7 +16,10 @@
 
 package android.media;
 
+import static android.media.audio.Flags.FLAG_ROUTED_DEVICE_IDS;
+
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1693,6 +1696,24 @@ public class MediaRecorder implements AudioRouting,
             return null;
         }
         return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_INPUTS);
+    }
+
+    /**
+     * Returns a List of {@link AudioDeviceInfo} identifying the current routing of this
+     * MediaRecorder.
+     * Note: The query is only valid if the MediaRecorder is currently recording.
+     * If the recorder is not recording, the returned devices can be empty or correspond to
+     * previously selected devices when the recorder was last active.
+     */
+    @Override
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
+    public @NonNull List<AudioDeviceInfo> getRoutedDevices() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        AudioDeviceInfo audioDeviceInfo = getRoutedDevice();
+        if (audioDeviceInfo != null) {
+            audioDeviceInfos.add(audioDeviceInfo);
+        }
+        return audioDeviceInfos;
     }
 
     /*

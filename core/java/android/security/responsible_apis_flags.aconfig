@@ -103,3 +103,10 @@ flag {
     description: "Applies intentMatchingFlags while matching intents to application components"
     bug: "364354494"
 }
+
+flag {
+    name: "aapm_feature_disable_install_unknown_sources"
+    namespace: "responsible_apis"
+    description: "Android Advanced Protection Mode Feature: Disable Install Unknown Sources"
+    bug: "369361373"
+}

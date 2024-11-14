@@ -353,6 +353,29 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDestroySurface() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+        win.mHasSurface = win.mAnimatingExit = true;
+        win.mWinAnimator.mSurfaceControl = mock(SurfaceControl.class);
+        win.onExitAnimationDone();
+
+        assertFalse("Case 1 destroySurface no-op",
+                win.destroySurface(false /* cleanupOnResume */, false /* appStopped */));
+        assertTrue(win.mHasSurface);
+        assertTrue(win.mDestroying);
+
+        assertFalse("Case 2 destroySurface no-op",
+                win.destroySurface(true /* cleanupOnResume */, false /* appStopped */));
+        assertTrue(win.mHasSurface);
+        assertTrue(win.mDestroying);
+
+        assertTrue("Case 3 destroySurface destroys surface",
+                win.destroySurface(false /* cleanupOnResume */, true /* appStopped */));
+        assertFalse(win.mDestroying);
+        assertFalse(win.mHasSurface);
+    }
+
+    @Test
     public void testPrepareWindowToDisplayDuringRelayout() {
         // Call prepareWindowToDisplayDuringRelayout for a window without FLAG_TURN_SCREEN_ON before
         // calling setCurrentLaunchCanTurnScreenOn for windows with flag in the same activity.

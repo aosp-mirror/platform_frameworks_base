@@ -20,6 +20,7 @@ import android.content.Context
 import android.view.MotionEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.settings.DisplayTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.gesture.SwipeUpGestureHandler
 import com.android.systemui.statusbar.gesture.SwipeUpGestureLogger
 import javax.inject.Inject
@@ -29,7 +30,7 @@ import javax.inject.Inject
 class SwipeUpAnywhereGestureHandler
 @Inject
 constructor(
-    context: Context,
+    @ShadeDisplayAware context: Context,
     displayTracker: DisplayTracker,
     logger: SwipeUpGestureLogger,
 ) :

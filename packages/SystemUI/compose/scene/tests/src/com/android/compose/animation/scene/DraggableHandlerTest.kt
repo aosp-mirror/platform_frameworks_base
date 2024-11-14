@@ -133,8 +133,8 @@ class DraggableHandlerTest {
                 )
                 .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 
-        val draggableHandler = layoutImpl.draggableHandler(Orientation.Vertical)
-        val horizontalDraggableHandler = layoutImpl.draggableHandler(Orientation.Horizontal)
+        val draggableHandler = layoutImpl.verticalDraggableHandler
+        val horizontalDraggableHandler = layoutImpl.horizontalDraggableHandler
 
         var pointerInfoOwner: () -> PointersInfo = { pointersDown() }
 
@@ -143,8 +143,7 @@ class DraggableHandlerTest {
             isExternalOverscrollGesture: Boolean = false,
         ) =
             NestedScrollHandlerImpl(
-                    layoutImpl = layoutImpl,
-                    orientation = draggableHandler.orientation,
+                    draggableHandler = draggableHandler,
                     topOrLeftBehavior = nestedScrollBehavior,
                     bottomOrRightBehavior = nestedScrollBehavior,
                     isExternalOverscrollGesture = { isExternalOverscrollGesture },

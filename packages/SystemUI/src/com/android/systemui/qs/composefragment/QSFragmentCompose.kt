@@ -51,6 +51,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -78,6 +79,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.viewinterop.AndroidView
@@ -102,6 +104,8 @@ import com.android.systemui.Dumpable
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyboard.shortcut.ui.composable.InteractionsConfig
+import com.android.systemui.keyboard.shortcut.ui.composable.ProvideShortcutHelperIndication
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -240,51 +244,54 @@ constructor(
 
     @Composable
     private fun Content() {
-        PlatformTheme {
-            AnimatedVisibility(
-                visible = viewModel.isQsVisible,
-                modifier =
-                    Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
-                        // Clipping before translation to match QSContainerImpl.onDraw
-                        .offset {
-                            IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
-                        }
-                        .thenIf(notificationScrimClippingParams.isEnabled) {
-                            Modifier.notificationScrimClip {
-                                notificationScrimClippingParams.params
+        PlatformTheme(isDarkTheme = true) {
+            ProvideShortcutHelperIndication(interactionsConfig = interactionsConfig()) {
+                AnimatedVisibility(
+                    visible = viewModel.isQsVisible,
+                    modifier =
+                        Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
+                            // Clipping before translation to match QSContainerImpl.onDraw
+                            .offset {
+                                IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
                             }
+                            .thenIf(notificationScrimClippingParams.isEnabled) {
+                                Modifier.notificationScrimClip {
+                                    notificationScrimClippingParams.params
+                                }
+                            }
+                            // Disable touches in the whole composable while the mirror is showing.
+                            // While the mirror is showing, an ancestor of the ComposeView is made
+                            // alpha 0, but touches are still being captured by the composables.
+                            .gesturesDisabled(viewModel.showingMirror),
+                ) {
+                    val isEditing by
+                        viewModel.containerViewModel.editModeViewModel.isEditing
+                            .collectAsStateWithLifecycle()
+                    val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
+                    AnimatedContent(
+                        targetState = isEditing,
+                        transitionSpec = {
+                            fadeIn(animationSpecEditMode) togetherWith
+                                fadeOut(animationSpecEditMode)
+                        },
+                        label = "EditModeAnimatedContent",
+                    ) { editing ->
+                        if (editing) {
+                            val qqsPadding = viewModel.qqsHeaderHeight
+                            EditMode(
+                                viewModel = viewModel.containerViewModel.editModeViewModel,
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .padding(top = { qqsPadding })
+                                        .padding(
+                                            horizontal = {
+                                                QuickSettingsShade.Dimensions.Padding.roundToPx()
+                                            }
+                                        ),
+                            )
+                        } else {
+                            CollapsableQuickSettingsSTL()
                         }
-                        // Disable touches in the whole composable while the mirror is showing.
-                        // While the mirror is showing, an ancestor of the ComposeView is made
-                        // alpha 0, but touches are still being captured by the composables.
-                        .gesturesDisabled(viewModel.showingMirror),
-            ) {
-                val isEditing by
-                    viewModel.containerViewModel.editModeViewModel.isEditing
-                        .collectAsStateWithLifecycle()
-                val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
-                AnimatedContent(
-                    targetState = isEditing,
-                    transitionSpec = {
-                        fadeIn(animationSpecEditMode) togetherWith fadeOut(animationSpecEditMode)
-                    },
-                    label = "EditModeAnimatedContent",
-                ) { editing ->
-                    if (editing) {
-                        val qqsPadding = viewModel.qqsHeaderHeight
-                        EditMode(
-                            viewModel = viewModel.containerViewModel.editModeViewModel,
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(top = { qqsPadding })
-                                    .padding(
-                                        horizontal = {
-                                            QuickSettingsShade.Dimensions.Padding.roundToPx()
-                                        }
-                                    ),
-                        )
-                    } else {
-                        CollapsableQuickSettingsSTL()
                     }
                 }
             }
@@ -1090,3 +1097,14 @@ private object ResIdTags {
     const val qsScroll = "expanded_qs_scroll_view"
     const val qsFooterActions = "qs_footer_actions"
 }
+
+@Composable
+private fun interactionsConfig() =
+    InteractionsConfig(
+        hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
+        hoverOverlayAlpha = 0.11f,
+        pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
+        pressedOverlayAlpha = 0.15f,
+        // we are OK using this as our content is clipped and all corner radius are larger than this
+        surfaceCornerRadius = 28.dp,
+    )

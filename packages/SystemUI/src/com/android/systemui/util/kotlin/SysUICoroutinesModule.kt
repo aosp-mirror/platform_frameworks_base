@@ -22,6 +22,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Tracing
 import com.android.systemui.dagger.qualifiers.UiBackground
+import com.android.systemui.util.settings.SettingsSingleThreadBackground
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher

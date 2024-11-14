@@ -46,6 +46,7 @@ import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.security.advancedprotection.features.AdvancedProtectionHook;
 import com.android.server.security.advancedprotection.features.AdvancedProtectionProvider;
+import com.android.server.security.advancedprotection.features.DisallowInstallUnknownSourcesAdvancedProtectionHook;
 
 import java.io.FileDescriptor;
 import java.util.ArrayList;
@@ -76,10 +77,9 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
     }
 
     private void initFeatures(boolean enabled) {
-        // Empty until features are added.
-        // Examples:
-        // mHooks.add(new SideloadingAdvancedProtectionHook(mContext, enabled));
-        // mProviders.add(new WifiAdvancedProtectionProvider());
+        if (android.security.Flags.aapmFeatureDisableInstallUnknownSources()) {
+            mHooks.add(new DisallowInstallUnknownSourcesAdvancedProtectionHook(mContext, enabled));
+        }
     }
 
     // Only for tests

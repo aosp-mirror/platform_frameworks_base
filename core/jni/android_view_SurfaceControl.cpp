@@ -758,54 +758,64 @@ static void nativeSetLuts(JNIEnv* env, jclass clazz, jlong transactionObj, jlong
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
 
-    ScopedIntArrayRW joffsets(env, joffsetArray);
-    if (joffsets.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from joffsetArray");
-        return;
-    }
-    ScopedIntArrayRW jdimensions(env, jdimensionArray);
-    if (jdimensions.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jdimensionArray");
-        return;
-    }
-    ScopedIntArrayRW jsizes(env, jsizeArray);
-    if (jsizes.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsizeArray");
-        return;
-    }
-    ScopedIntArrayRW jsamplingKeys(env, jsamplingKeyArray);
-    if (jsamplingKeys.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsamplingKeyArray");
-        return;
-    }
+    std::vector<int32_t> offsets;
+    std::vector<int32_t> dimensions;
+    std::vector<int32_t> sizes;
+    std::vector<int32_t> samplingKeys;
+    int32_t fd = -1;
 
-    jsize numLuts = env->GetArrayLength(jdimensionArray);
-    std::vector<int32_t> offsets(joffsets.get(), joffsets.get() + numLuts);
-    std::vector<int32_t> dimensions(jdimensions.get(), jdimensions.get() + numLuts);
-    std::vector<int32_t> sizes(jsizes.get(), jsizes.get() + numLuts);
-    std::vector<int32_t> samplingKeys(jsamplingKeys.get(), jsamplingKeys.get() + numLuts);
+    if (jdimensionArray) {
+        jsize numLuts = env->GetArrayLength(jdimensionArray);
+        ScopedIntArrayRW joffsets(env, joffsetArray);
+        if (joffsets.get() == nullptr) {
+            jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from joffsetArray");
+            return;
+        }
+        ScopedIntArrayRW jdimensions(env, jdimensionArray);
+        if (jdimensions.get() == nullptr) {
+            jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jdimensionArray");
+            return;
+        }
+        ScopedIntArrayRW jsizes(env, jsizeArray);
+        if (jsizes.get() == nullptr) {
+            jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsizeArray");
+            return;
+        }
+        ScopedIntArrayRW jsamplingKeys(env, jsamplingKeyArray);
+        if (jsamplingKeys.get() == nullptr) {
+            jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsamplingKeyArray");
+            return;
+        }
 
-    ScopedFloatArrayRW jbuffers(env, jbufferArray);
-    if (jbuffers.get() == nullptr) {
-        jniThrowRuntimeException(env, "Failed to get ScopedFloatArrayRW from jbufferArray");
-        return;
-    }
+        if (numLuts > 0) {
+            offsets = std::vector<int32_t>(joffsets.get(), joffsets.get() + numLuts);
+            dimensions = std::vector<int32_t>(jdimensions.get(), jdimensions.get() + numLuts);
+            sizes = std::vector<int32_t>(jsizes.get(), jsizes.get() + numLuts);
+            samplingKeys = std::vector<int32_t>(jsamplingKeys.get(), jsamplingKeys.get() + numLuts);
 
-    // create the shared memory and copy jbuffers
-    size_t bufferSize = jbuffers.size() * sizeof(float);
-    int32_t fd = ashmem_create_region("lut_shread_mem", bufferSize);
-    if (fd < 0) {
-        jniThrowRuntimeException(env, "ashmem_create_region() failed");
-        return;
+            ScopedFloatArrayRW jbuffers(env, jbufferArray);
+            if (jbuffers.get() == nullptr) {
+                jniThrowRuntimeException(env, "Failed to get ScopedFloatArrayRW from jbufferArray");
+                return;
+            }
+
+            // create the shared memory and copy jbuffers
+            size_t bufferSize = jbuffers.size() * sizeof(float);
+            fd = ashmem_create_region("lut_shared_mem", bufferSize);
+            if (fd < 0) {
+                jniThrowRuntimeException(env, "ashmem_create_region() failed");
+                return;
+            }
+            void* ptr = mmap(nullptr, bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+            if (ptr == MAP_FAILED) {
+                jniThrowRuntimeException(env, "Failed to map the shared memory");
+                return;
+            }
+            memcpy(ptr, jbuffers.get(), bufferSize);
+            // unmap
+            munmap(ptr, bufferSize);
+        }
     }
-    void* ptr = mmap(nullptr, bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (ptr == MAP_FAILED) {
-        jniThrowRuntimeException(env, "Failed to map the shared memory");
-        return;
-    }
-    memcpy(ptr, jbuffers.get(), bufferSize);
-    // unmap
-    munmap(ptr, bufferSize);
 
     transaction->setLuts(ctrl, base::unique_fd(fd), offsets, dimensions, sizes, samplingKeys);
 }
@@ -2163,7 +2173,7 @@ static void nativeClearTrustedPresentationCallback(JNIEnv* env, jclass clazz, jl
 
 class JankDataListenerWrapper : public JankDataListener {
 public:
-    JankDataListenerWrapper(JNIEnv* env, jobject onJankDataListenerObject) {
+    JankDataListenerWrapper(JNIEnv* env, jobject onJankDataListenerObject) : mRemovedVsyncId(-1) {
         mOnJankDataListenerWeak = env->NewWeakGlobalRef(onJankDataListenerObject);
         env->GetJavaVM(&mVm);
     }
@@ -2174,6 +2184,12 @@ public:
     }
 
     bool onJankDataAvailable(const std::vector<gui::JankData>& jankData) override {
+        // Don't invoke the listener if we've been force removed and got this
+        // out-of-order callback.
+        if (mRemovedVsyncId == 0) {
+            return false;
+        }
+
         JNIEnv* env = getEnv();
 
         jobject target = env->NewLocalRef(mOnJankDataListenerWeak);
@@ -2181,9 +2197,29 @@ public:
             return false;
         }
 
-        jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
-                gJankDataClassInfo.clazz, nullptr);
-        for (size_t i = 0; i < jankData.size(); i++) {
+        // Compute the count of data items we'll actually forward to Java.
+        size_t count = 0;
+        if (mRemovedVsyncId <= 0) {
+            count = jankData.size();
+        } else {
+            for (const gui::JankData& frame : jankData) {
+                if (frame.frameVsyncId <= mRemovedVsyncId) {
+                    count++;
+                }
+            }
+        }
+
+        if (count == 0) {
+            return false;
+        }
+
+        jobjectArray jJankDataArray = env->NewObjectArray(count, gJankDataClassInfo.clazz, nullptr);
+        for (size_t i = 0, j = 0; i < jankData.size() && j < count; i++) {
+            // Filter any data for frames past our removal vsync.
+            if (mRemovedVsyncId > 0 && jankData[i].frameVsyncId > mRemovedVsyncId) {
+                continue;
+            }
+
             // The exposed constants in SurfaceControl are simplified, so we need to translate the
             // jank type we get from SF to what is exposed in Java.
             int sfJankType = jankData[i].jankType;
@@ -2210,7 +2246,7 @@ public:
                                    jankData[i].frameVsyncId, javaJankType,
                                    jankData[i].frameIntervalNs, jankData[i].scheduledAppFrameTimeNs,
                                    jankData[i].actualAppFrameTimeNs);
-            env->SetObjectArrayElement(jJankDataArray, i, jJankData);
+            env->SetObjectArrayElement(jJankDataArray, j++, jJankData);
             env->DeleteLocalRef(jJankData);
         }
 
@@ -2225,6 +2261,11 @@ public:
         return true;
     }
 
+    void removeListener(int64_t afterVsyncId) {
+        mRemovedVsyncId = (afterVsyncId <= 0) ? 0 : afterVsyncId;
+        JankDataListener::removeListener(afterVsyncId);
+    }
+
 private:
 
     JNIEnv* getEnv() {
@@ -2235,6 +2276,7 @@ private:
 
     JavaVM* mVm;
     jobject mOnJankDataListenerWeak;
+    int64_t mRemovedVsyncId;
 };
 
 static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,

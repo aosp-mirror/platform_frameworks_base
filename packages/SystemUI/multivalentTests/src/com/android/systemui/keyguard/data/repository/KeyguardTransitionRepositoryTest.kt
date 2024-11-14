@@ -527,6 +527,29 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
             assertEquals(0, steps.size)
         }
 
+    @Test
+    fun testForceFinishCurrentTransition_noTransitionRunning_unlocksMutex() =
+        testScope.runTest {
+            val steps by collectValues(underTest.transitions.dropWhile { step -> step.from == OFF })
+            underTest.forceFinishCurrentTransition()
+
+            assertThat(steps.isEmpty())
+
+            underTest.forceFinishCurrentTransition()
+            runCurrent()
+
+            assertThat(steps.isEmpty())
+            runner.startTransition(
+                this,
+                TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, getAnimator()),
+                maxFrames = 100,
+            )
+
+            advanceTimeBy(5000L)
+
+            assertThat(steps.isNotEmpty())
+        }
+
     private fun listWithStep(
         step: BigDecimal,
         start: BigDecimal = BigDecimal.ZERO,

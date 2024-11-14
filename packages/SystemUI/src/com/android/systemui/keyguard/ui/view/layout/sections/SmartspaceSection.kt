@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.res.R as R
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
@@ -44,7 +45,7 @@ import kotlinx.coroutines.DisposableHandle
 open class SmartspaceSection
 @Inject
 constructor(
-    val context: Context,
+    @ShadeDisplayAware val context: Context,
     val keyguardClockViewModel: KeyguardClockViewModel,
     val keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel,
     private val keyguardSmartspaceInteractor: KeyguardSmartspaceInteractor,

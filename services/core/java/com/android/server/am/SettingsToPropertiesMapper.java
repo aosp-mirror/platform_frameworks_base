@@ -221,6 +221,7 @@ public class SettingsToPropertiesMapper {
         "preload_safety",
         "printing",
         "privacy_infra_policy",
+        "psap_ai",
         "ravenwood",
         "resource_manager",
         "responsible_apis",

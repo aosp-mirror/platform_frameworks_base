@@ -7180,13 +7180,16 @@ public class NotificationManagerService extends SystemService {
                         Slog.i(TAG, "Removing app summary (all children bundled): "
                                 + groupSummary);
                     }
-                    canceledSummary = groupSummary;
-                    mSummaryByGroupKey.remove(oldGroupKey);
-                    cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(),
+                    if (convertSummaryToNotificationLocked(groupSummary.getKey())) {
+                        groupSummary.isCanceled = true;
+                        canceledSummary = groupSummary;
+                        mSummaryByGroupKey.remove(oldGroupKey);
+                        cancelNotification(Binder.getCallingUid(), Binder.getCallingPid(),
                             groupSummary.getSbn().getPackageName(),
                             groupSummary.getSbn().getTag(),
                             groupSummary.getSbn().getId(), 0, 0, false, groupSummary.getUserId(),
                             NotificationListenerService.REASON_GROUP_OPTIMIZATION, null);
+                    }
                 }
             }
         }
@@ -11937,16 +11940,19 @@ public class NotificationManagerService extends SystemService {
                     TrimCache trimCache = new TrimCache(sbn);
                     final INotificationListener assistant = (INotificationListener) info.service;
                     final StatusBarNotification sbnToPost = trimCache.ForListener(info);
-                    final StatusBarNotificationHolder sbnHolder =
-                            new StatusBarNotificationHolder(sbnToPost);
+                    final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
+
                     try {
-                        if (debug) {
-                            Slog.v(TAG,
-                                    "calling onNotificationEnqueuedWithChannel " + sbnHolder);
+                        if (android.app.Flags.noSbnholder()) {
+                            assistant.onNotificationEnqueuedWithChannelFull(sbnToPost,
+                                    r.getChannel(), update);
+                        } else {
+                            final StatusBarNotificationHolder sbnHolder =
+                                    new StatusBarNotificationHolder(sbnToPost);
+
+                            assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel(),
+                                    update);
                         }
-                        final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
-                        assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel(),
-                                update);
                     } catch (RemoteException ex) {
                         Slog.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
                     }
@@ -11966,7 +11972,7 @@ public class NotificationManagerService extends SystemService {
                     r.getSbn(),
                     r.getNotificationType(),
                     true /* sameUserOnly */,
-                    (assistant, sbnHolder) -> {
+                    (assistant, unused) -> {
                         try {
                             assistant.onNotificationVisibilityChanged(key, isVisible);
                         } catch (RemoteException ex) {
@@ -11986,7 +11992,7 @@ public class NotificationManagerService extends SystemService {
                     sbn,
                     notificationType,
                     true /* sameUserOnly */,
-                    (assistant, sbnHolder) -> {
+                    (assistant, unused) -> {
                         try {
                             assistant.onNotificationExpansionChanged(key, isUserAction, isExpanded);
                         } catch (RemoteException ex) {
@@ -12003,7 +12009,7 @@ public class NotificationManagerService extends SystemService {
                     r.getSbn(),
                     r.getNotificationType(),
                     true /* sameUserOnly */,
-                    (assistant, sbnHolder) -> {
+                    (assistant, unused) -> {
                         try {
                             assistant.onNotificationDirectReply(key);
                         } catch (RemoteException ex) {
@@ -12021,7 +12027,7 @@ public class NotificationManagerService extends SystemService {
                     sbn,
                     notificationType,
                     true /* sameUserOnly */,
-                    (assistant, sbnHolder) -> {
+                    (assistant, unused) -> {
                         try {
                             assistant.onSuggestedReplySent(
                                     key,
@@ -12044,7 +12050,7 @@ public class NotificationManagerService extends SystemService {
                     r.getSbn(),
                     r.getNotificationType(),
                     true /* sameUserOnly */,
-                    (assistant, sbnHolder) -> {
+                    (assistant, unused) -> {
                         try {
                             assistant.onActionClicked(
                                     key,
@@ -12069,10 +12075,17 @@ public class NotificationManagerService extends SystemService {
                     r.getSbn(),
                     r.getNotificationType(),
                     true /* sameUserOnly */,
-                    (assistant, sbnHolder) -> {
+                    (assistant, sbnToPost) -> {
                         try {
-                            assistant.onNotificationSnoozedUntilContext(
-                                    sbnHolder, snoozeCriterionId);
+                            if (android.app.Flags.noSbnholder()) {
+                                assistant.onNotificationSnoozedUntilContextFull(
+                                        sbnToPost, snoozeCriterionId);
+                            } else {
+                                final StatusBarNotificationHolder sbnHolder =
+                                        new StatusBarNotificationHolder(sbnToPost);
+                                assistant.onNotificationSnoozedUntilContext(
+                                        sbnHolder, snoozeCriterionId);
+                            }
                         } catch (RemoteException ex) {
                             Slog.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
                         }
@@ -12086,7 +12099,7 @@ public class NotificationManagerService extends SystemService {
                     r.getSbn(),
                     r.getNotificationType(),
                     true /* sameUserOnly */,
-                    (assistant, sbnHolder) -> {
+                    (assistant, unused) -> {
                         try {
                             assistant.onNotificationClicked(key);
                         } catch (RemoteException ex) {
@@ -12129,7 +12142,7 @@ public class NotificationManagerService extends SystemService {
                 final StatusBarNotification sbn,
                 int notificationType,
                 boolean sameUserOnly,
-                BiConsumer<INotificationListener, StatusBarNotificationHolder> callback) {
+                BiConsumer<INotificationListener, StatusBarNotification> callback) {
             TrimCache trimCache = new TrimCache(sbn);
             // There should be only one, but it's a list, so while we enforce
             // singularity elsewhere, we keep it general here, to avoid surprises.
@@ -12151,9 +12164,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 final INotificationListener assistant = (INotificationListener) info.service;
                 final StatusBarNotification sbnToPost = trimCache.ForListener(info);
-                final StatusBarNotificationHolder sbnHolder =
-                        new StatusBarNotificationHolder(sbnToPost);
-                mHandler.post(() -> callback.accept(assistant, sbnHolder));
+                mHandler.post(() -> callback.accept(assistant, sbnToPost));
             }
         }
 
@@ -13399,9 +13410,13 @@ public class NotificationManagerService extends SystemService {
         private void notifyPosted(final ManagedServiceInfo info,
                 final StatusBarNotification sbn, NotificationRankingUpdate rankingUpdate) {
             final INotificationListener listener = (INotificationListener) info.service;
-            StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
-                listener.onNotificationPosted(sbnHolder, rankingUpdate);
+                if (android.app.Flags.noSbnholder()) {
+                    listener.onNotificationPostedFull(sbn, rankingUpdate);
+                } else {
+                    StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
+                    listener.onNotificationPosted(sbnHolder, rankingUpdate);
+                }
             } catch (DeadObjectException ex) {
                 Slog.wtf(TAG, "unable to notify listener (posted): " + info, ex);
             } catch (RemoteException ex) {
@@ -13412,7 +13427,6 @@ public class NotificationManagerService extends SystemService {
         private void notifyRemoved(ManagedServiceInfo info, StatusBarNotification sbn,
                 NotificationRankingUpdate rankingUpdate, NotificationStats stats, int reason) {
             final INotificationListener listener = (INotificationListener) info.service;
-            StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
                 if (!CompatChanges.isChangeEnabled(NOTIFICATION_CANCELLATION_REASONS, info.uid)
                         && (reason == REASON_CHANNEL_REMOVED || reason == REASON_CLEAR_DATA)) {
@@ -13424,7 +13438,12 @@ public class NotificationManagerService extends SystemService {
                         && reason == REASON_ASSISTANT_CANCEL) {
                     reason = REASON_LISTENER_CANCEL;
                 }
-                listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
+                if (android.app.Flags.noSbnholder()) {
+                    listener.onNotificationRemovedFull(sbn, rankingUpdate, stats, reason);
+                } else {
+                    StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
+                    listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
+                }
             } catch (DeadObjectException ex) {
                 Slog.wtf(TAG, "unable to notify listener (removed): " + info, ex);
             } catch (RemoteException ex) {

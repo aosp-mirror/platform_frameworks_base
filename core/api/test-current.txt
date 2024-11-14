@@ -2065,6 +2065,29 @@ package android.media {
     method public boolean isAidlHal();
   }
 
+  public final class MediaCodec {
+    method @FlaggedApi("android.media.codec.codec_availability") @NonNull public static java.util.List<android.media.MediaCodec.GlobalResourceInfo> getGloballyAvailableResources();
+    method @FlaggedApi("android.media.codec.codec_availability") @NonNull public java.util.List<android.media.MediaCodec.InstanceResourceInfo> getRequiredResources();
+  }
+
+  public abstract static class MediaCodec.Callback {
+    method @FlaggedApi("android.media.codec.codec_availability") public void onRequiredResourcesChanged(@NonNull android.media.MediaCodec);
+  }
+
+  @FlaggedApi("android.media.codec.codec_availability") public static final class MediaCodec.GlobalResourceInfo {
+    ctor public MediaCodec.GlobalResourceInfo();
+    method public long getAvailable();
+    method public long getCapacity();
+    method @NonNull public String getName();
+  }
+
+  @FlaggedApi("android.media.codec.codec_availability") public static final class MediaCodec.InstanceResourceInfo {
+    ctor public MediaCodec.InstanceResourceInfo();
+    method @NonNull public String getName();
+    method public long getPerFrameCount();
+    method public long getStaticCount();
+  }
+
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);

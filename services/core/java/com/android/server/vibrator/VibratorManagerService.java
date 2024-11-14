@@ -1114,8 +1114,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             mVibrationSettings.getRequestVibrationParamsTimeoutMs());
         }
 
-        return new VibrationStepConductor(vib, mVibrationSettings, mDeviceAdapter, mVibrationScaler,
-                mFrameworkStatsLogger, requestVibrationParamsFuture, mVibrationThreadCallbacks);
+        return new VibrationStepConductor(vib, /* isInSession= */ false, mVibrationSettings,
+                mDeviceAdapter, mVibrationScaler, mFrameworkStatsLogger,
+                requestVibrationParamsFuture, mVibrationThreadCallbacks);
     }
 
     private Status startVibrationOnInputDevicesLocked(HalVibration vib) {

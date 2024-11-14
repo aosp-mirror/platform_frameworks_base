@@ -207,14 +207,13 @@ static ResourceTable::CollisionResult MergeConfigValue(
   Value* dst_value = dst_config_value->value.get();
   Value* src_value = src_config_value->value.get();
 
-  CollisionResult collision_result;
-  if (overlay) {
-    collision_result =
-        ResolveMergeCollision(override_styles_instead_of_overlaying, dst_value, src_value, pool);
-  } else {
-    collision_result =
-        ResourceTable::ResolveFlagCollision(dst_value->GetFlagStatus(), src_value->GetFlagStatus());
-    if (collision_result == CollisionResult::kConflict) {
+  CollisionResult collision_result =
+      ResourceTable::ResolveFlagCollision(dst_value->GetFlagStatus(), src_value->GetFlagStatus());
+  if (collision_result == CollisionResult::kConflict) {
+    if (overlay) {
+      collision_result =
+          ResolveMergeCollision(override_styles_instead_of_overlaying, dst_value, src_value, pool);
+    } else {
       collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value);
     }
   }
