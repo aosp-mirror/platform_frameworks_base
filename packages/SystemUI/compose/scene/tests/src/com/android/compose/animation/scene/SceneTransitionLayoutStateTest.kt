@@ -686,4 +686,30 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.transitionState).isIdle()
         assertThat(job.isCancelled).isTrue()
     }
+
+    @Test
+    fun badTransitionSpecThrowsMeaningfulMessageWhenStartingTransition() {
+        val state =
+            MutableSceneTransitionLayoutState(
+                SceneA,
+                transitions {
+                    // This transition definition is bad because they both match when transitioning
+                    // from A to B.
+                    from(SceneA) {}
+                    to(SceneB) {}
+                },
+            )
+
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                runBlocking { state.startTransition(transition(from = SceneA, to = SceneB)) }
+            }
+
+        assertThat(exception)
+            .hasMessageThat()
+            .isEqualTo(
+                "Found multiple transition specs for transition SceneKey(debugName=SceneA) => " +
+                    "SceneKey(debugName=SceneB)"
+            )
+    }
 }
