@@ -18,5 +18,14 @@ package com.android.settingslib.service
 
 const val PREFERENCE_SERVICE_ACTION = "com.android.settingslib.PREFERENCE_SERVICE"
 
+/** API id for retrieving preference graph. */
 internal const val API_GET_PREFERENCE_GRAPH = 1
+
+/** API id for preference value setter. */
 internal const val API_PREFERENCE_SETTER = 2
+
+/**
+ * The max API id reserved for internal preference service usages. Custom API id should start with
+ * **1000** to avoid conflict.
+ */
+internal const val API_MAX_RESERVED = 999
