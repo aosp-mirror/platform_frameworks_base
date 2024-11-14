@@ -112,8 +112,8 @@ interface IActivityClientController {
     oneway void requestMultiwindowFullscreen(in IBinder token, in int request,
             in IRemoteCallback callback);
 
-    oneway void startLockTaskModeByToken(in IBinder token);
-    oneway void stopLockTaskModeByToken(in IBinder token);
+    void startLockTaskModeByToken(in IBinder token);
+    void stopLockTaskModeByToken(in IBinder token);
     oneway void showLockTaskEscapeMessage(in IBinder token);
     void setTaskDescription(in IBinder token, in ActivityManager.TaskDescription values);
 
