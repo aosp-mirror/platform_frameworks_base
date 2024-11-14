@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.hardware.power.CpuHeadroomResult;
+import android.hardware.power.GpuHeadroomResult;
 import android.os.BatteryStats;
 import android.os.Build;
 import android.os.Bundle;
@@ -110,15 +112,16 @@ public class SystemHealthManager {
     }
 
     /**
-     * Provides an estimate of global available CPU headroom of the calling thread.
+     * Provides an estimate of global available CPU headroom.
      * <p>
      *
      * @param  params params to customize the CPU headroom calculation, null to use default params.
-     * @return a single value a {@code Float.NaN} if it's temporarily unavailable.
+     * @return a single value headroom or a {@code Float.NaN} if it's temporarily unavailable.
      *         A valid value is ranged from [0, 100], where 0 indicates no more CPU resources can be
      *         granted.
-     * @throws UnsupportedOperationException if the API is unsupported or the request params can't
-     *         be served.
+     * @throws UnsupportedOperationException if the API is unsupported.
+     * @throws SecurityException if the TIDs of the params don't belong to the same process.
+     * @throws IllegalStateException if the TIDs of the params don't have the same affinity setting.
      */
     @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
     public @FloatRange(from = 0f, to = 100f) float getCpuHeadroom(
@@ -127,8 +130,12 @@ public class SystemHealthManager {
             throw new UnsupportedOperationException();
         }
         try {
-            return mHintManager.getCpuHeadroom(
-                    params != null ? params.getInternal() : new CpuHeadroomParamsInternal())[0];
+            final CpuHeadroomResult ret = mHintManager.getCpuHeadroom(
+                    params != null ? params.getInternal() : new CpuHeadroomParamsInternal());
+            if (ret == null || ret.getTag() != CpuHeadroomResult.globalHeadroom) {
+                return Float.NaN;
+            }
+            return ret.getGlobalHeadroom();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -144,8 +151,7 @@ public class SystemHealthManager {
      * @return a single value headroom or a {@code Float.NaN} if it's temporarily unavailable.
      *         A valid value is ranged from [0, 100], where 0 indicates no more GPU resources can be
      *         granted.
-     * @throws UnsupportedOperationException if the API is unsupported or the request params can't
-     *         be served.
+     * @throws UnsupportedOperationException if the API is unsupported.
      */
     @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
     public @FloatRange(from = 0f, to = 100f) float getGpuHeadroom(
@@ -154,8 +160,12 @@ public class SystemHealthManager {
             throw new UnsupportedOperationException();
         }
         try {
-            return mHintManager.getGpuHeadroom(
+            final GpuHeadroomResult ret = mHintManager.getGpuHeadroom(
                     params != null ? params.getInternal() : new GpuHeadroomParamsInternal());
+            if (ret == null || ret.getTag() != GpuHeadroomResult.globalHeadroom) {
+                return Float.NaN;
+            }
+            return ret.getGlobalHeadroom();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
