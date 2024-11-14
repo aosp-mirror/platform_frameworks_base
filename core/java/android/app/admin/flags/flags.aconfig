@@ -382,7 +382,7 @@ flag {
     is_exported: true
     namespace: "enterprise"
     description: "Allows DPMS to enable or disable SupervisionService based on whether the device is being managed by the supervision role holder."
-    bug: "376213673"
+    bug: "358134581"
 }
 
 flag {
