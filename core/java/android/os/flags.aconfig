@@ -66,6 +66,14 @@ flag {
 }
 
 flag {
+    name: "adpf_use_load_hints"
+    namespace: "game"
+    description: "Guards use of the ADPF public load hints behind a readonly flag"
+    is_fixed_read_only: true
+    bug: "367803904"
+}
+
+flag {
     name: "allow_consentless_bugreport_delegated_consent"
     namespace: "crumpet"
     description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"
@@ -145,6 +153,13 @@ flag {
     namespace: "system_performance"
     description: "Guards the frozen state change callback API."
     bug: "361157077"
+}
+
+flag {
+    name: "cpu_gpu_headrooms"
+    namespace: "game"
+    description: "Feature flag for adding CPU/GPU headroom API"
+    bug: "346604998"
 }
 
 flag {
@@ -249,6 +264,15 @@ flag {
     is_exported: true
     is_fixed_read_only: true
     bug: "377557749"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "enable_has_binders"
+     is_exported: true
+     description: "Add hasBinders to Public API under a flag."
+     is_fixed_read_only: true
+     bug: "330345513"
 }
 
 flag {

@@ -8920,12 +8920,9 @@ public class DevicePolicyManager {
     /**
      * Called by a device owner, a profile owner for the primary user or a profile
      * owner of an organization-owned managed profile to turn auto time on and off.
-     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
-     * to prevent the user from changing this setting.
      * <p>
-     * If user restriction {@link UserManager#DISALLOW_CONFIG_DATE_TIME} is used,
-     * no user will be able set the date and time. Instead, the network date
-     * and time will be used.
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to prevent the
+     * user from changing this setting, that way no user will be able set the date and time zone.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *              caller is not a device admin.
@@ -8938,7 +8935,13 @@ public class DevicePolicyManager {
         throwIfParentInstance("setAutoTimeEnabled");
         if (mService != null) {
             try {
-                mService.setAutoTimeEnabled(admin, mContext.getPackageName(), enabled);
+                if (Flags.setAutoTimeEnabledCoexistence()) {
+                    mService.setAutoTimePolicy(mContext.getPackageName(),
+                            enabled ? DevicePolicyManager.AUTO_TIME_ENABLED
+                                    : DevicePolicyManager.AUTO_TIME_DISABLED);
+                } else {
+                    mService.setAutoTimeEnabled(admin, mContext.getPackageName(), enabled);
+                }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8965,6 +8968,97 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Specifies that the auto time state is not controlled by device policy.
+     *
+     * @see #setAutoTimePolicy(ComponentName, int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_NOT_CONTROLLED_BY_POLICY = 0;
+
+    /**
+     * Specifies the "disabled" auto time state.
+     *
+     * @see #setAutoTimePolicy(ComponentName, int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_DISABLED = 1;
+
+    /**
+     * Specifies the "enabled" auto time state.
+     *
+     * @see #setAutoTimePolicy(ComponentName, int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_ENABLED = 2;
+
+    /**
+     * Flags supplied to {@link #setAutoTimePolicy}(ComponentName, int)}.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "AUTO_TIME_" }, value = {
+            AUTO_TIME_NOT_CONTROLLED_BY_POLICY,
+            AUTO_TIME_DISABLED,
+            AUTO_TIME_ENABLED
+    })
+    public @interface AutoTimePolicy {}
+
+    /**
+     * Called by a device owner, a profile owner for the primary user or a profile owner of an
+     * organization-owned managed profile to turn auto time on and off i.e. Whether time should be
+     * obtained automatically from the network or not.
+     * <p>
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to prevent the
+     * user from changing this setting, that way no user will be able set the date and time zone.
+     *
+     * @param policy The desired state among {@link #AUTO_TIME_ENABLED} to enable,
+     *              {@link #AUTO_TIME_DISABLED} to disable and
+     *              {@link #AUTO_TIME_NOT_CONTROLLED_BY_POLICY} to unset the policy.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile, or if the caller
+     * does not hold the required permission.
+     */
+    @SupportsCoexistence
+    @RequiresPermission(value = SET_TIME, conditional = true)
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public void setAutoTimePolicy(@AutoTimePolicy int policy) {
+        throwIfParentInstance("setAutoTimePolicy");
+        if (mService != null) {
+            try {
+                mService.setAutoTimePolicy(mContext.getPackageName(), policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns current auto time policy's state.
+     *
+     * @return One of {@link #AUTO_TIME_ENABLED} if enabled, {@link #AUTO_TIME_DISABLED} if disabled
+     *              and {@link #AUTO_TIME_NOT_CONTROLLED_BY_POLICY} if it's not controlled by
+     *              policy.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile, or if the caller
+     * does not hold the required permission.
+     */
+    @SupportsCoexistence
+    @RequiresPermission(anyOf = {SET_TIME, QUERY_ADMIN_POLICY}, conditional = true)
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public @AutoTimePolicy int getAutoTimePolicy() {
+        throwIfParentInstance("getAutoTimePolicy");
+        if (mService != null) {
+            try {
+                return mService.getAutoTimePolicy(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return DevicePolicyManager.AUTO_TIME_NOT_CONTROLLED_BY_POLICY;
     }
 
     /**
@@ -12102,6 +12196,33 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Adds a user restriction globally, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity The service entity that adds the restriction. A user restriction set by
+     *                     a service entity can only be cleared by the same entity. This can be
+     *                     just the calling package name, or any string of the caller's choice
+     *                     can be used.
+     * @param key The key of the restriction.
+     * @throws SecurityException if the caller is not a system service.
+     *
+     * @hide
+     */
+    public void addUserRestrictionGlobally(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionGloballyFromSystem(systemEntity, key,
+                        /* enable= */ true);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Called by a profile owner, device owner or a holder of any permission that is associated with
      * a user restriction to clear a user restriction specified by the key.
      * <p>
@@ -12180,6 +12301,33 @@ public class DevicePolicyManager {
             try {
                 mService.setUserRestrictionForUser(
                         systemEntity, key, /* enable= */ false, targetUser);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clears a user restriction globally, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity The system entity that clears the restriction. A user restriction
+     *                     set by a system entity can only be cleared by the same entity. This
+     *                     can be just the calling package name, or any string of the caller's
+     *                     choice can be used.
+     * @param key The key of the restriction.
+     * @throws SecurityException if the caller is not a system service.
+     *
+     * @hide
+     */
+    public void clearUserRestrictionGlobally(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionGloballyFromSystem(systemEntity, key,
+                        /* enable= */ false);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -22,6 +22,7 @@ import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
+import static android.view.flags.Flags.bufferStuffingRecovery;
 import static android.view.SurfaceControlProto.HASH_CODE;
 import static android.view.SurfaceControlProto.LAYER_ID;
 import static android.view.SurfaceControlProto.NAME;
@@ -410,8 +411,19 @@ public final class SurfaceControl implements Parcelable {
 
     /**
      * Jank information to be fed back via {@link OnJankDataListener}.
-     * @hide
+     * <p>
+     * Apps may register a {@link OnJankDataListener} to get periodic batches of jank classification
+     * data from the (<a
+     * href="https://source.android.com/docs/core/graphics/surfaceflinger-windowmanagersystem">
+     * composer</a> regarding rendered frames. A frame is considered janky if it did not reach the
+     * display at the intended time, typically due to missing a rendering deadline. This API
+     * provides information that can be used to identify the root cause of the scheduling misses
+     * and provides overall frame scheduling statistics.
+     * <p>
+     * This API can be used in conjunction with the {@link FrameMetrics} API by associating jank
+     * classification data with {@link FrameMetrics} data via the frame VSync id.
      */
+    @FlaggedApi(Flags.FLAG_JANK_API)
     public static class JankData {
 
         /**
@@ -428,29 +440,105 @@ public final class SurfaceControl implements Parcelable {
         @Retention(RetentionPolicy.SOURCE)
         public @interface JankType {}
 
-        // No Jank
+        /**
+         * No jank detected, the frame was on time.
+         */
         public static final int JANK_NONE = 0;
-        // Jank caused by the composer missing a deadline
+
+        /**
+         * Bitmask for jank due to deadlines missed by the composer.
+         */
         public static final int JANK_COMPOSER = 1 << 0;
-        // Jank caused by the application missing the composer's deadline
+
+        /**
+         * Bitmask for jank due to deadlines missed by the application.
+         */
         public static final int JANK_APPLICATION = 1 << 1;
-        // Jank due to other unknown reasons
+
+        /**
+         * Bitmask for jank due to deadlines missed by other system components.
+         */
         public static final int JANK_OTHER = 1 << 2;
 
+        private final long mFrameVsyncId;
+        private final @JankType int mJankType;
+        private final long mFrameIntervalNs;
+        private final long mScheduledAppFrameTimeNs;
+        private final long mActualAppFrameTimeNs;
+
+        /**
+         * @hide
+         */
         public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs,
                 long scheduledAppFrameTimeNs, long actualAppFrameTimeNs) {
-            this.frameVsyncId = frameVsyncId;
-            this.jankType = jankType;
-            this.frameIntervalNs = frameIntervalNs;
-            this.scheduledAppFrameTimeNs = scheduledAppFrameTimeNs;
-            this.actualAppFrameTimeNs = actualAppFrameTimeNs;
+            mFrameVsyncId = frameVsyncId;
+            mJankType = jankType;
+            mFrameIntervalNs = frameIntervalNs;
+            mScheduledAppFrameTimeNs = scheduledAppFrameTimeNs;
+            mActualAppFrameTimeNs = actualAppFrameTimeNs;
         }
 
-        public final long frameVsyncId;
-        public final @JankType int jankType;
-        public final long frameIntervalNs;
-        public final long scheduledAppFrameTimeNs;
-        public final long actualAppFrameTimeNs;
+        /**
+         * Returns the id of the frame for this jank classification.
+         *
+         * @see FrameMetrics#FRAME_TIMELINE_VSYNC_ID
+         * @see Choreographer.FrameTimeline#getVsyncId
+         * @see Transaction#setFrameTimeline
+         * @return the frame id
+         */
+        public long getVsyncId() {
+            return mFrameVsyncId;
+        }
+
+        /**
+         * Returns the bitmask indicating the types of jank observed.
+         *
+         * @return the jank type bitmask
+         */
+        public @JankType int getJankType() {
+            return mJankType;
+        }
+
+        /**
+         * Returns the time between frame VSyncs in nanoseconds.
+         *
+         * @return the frame interval in ns
+         * @hide
+         */
+        public long getFrameIntervalNanos() {
+            return mFrameIntervalNs;
+        }
+
+        /**
+         * Returns the duration in nanoseconds the application was scheduled to use to render this
+         * frame.
+         * <p>
+         * Note that this may be higher than the frame interval to allow for CPU/GPU
+         * parallelization of work.
+         *
+         * @return scheduled app time in ns
+         */
+        public long getScheduledAppFrameTimeNanos() {
+            return mScheduledAppFrameTimeNs;
+        }
+
+        /**
+         * Returns the actual time in nanoseconds taken by the application to render this frame.
+         *
+         * @return the actual app time in ns
+         */
+        public long getActualAppFrameTimeNanos() {
+            return mActualAppFrameTimeNs;
+        }
+
+        @Override
+        public String toString() {
+            return "JankData{vsync=" + mFrameVsyncId
+                    + ", jankType=0x" + Integer.toHexString(mJankType)
+                    + ", frameInterval=" + mFrameIntervalNs + "ns"
+                    + ", scheduledAppTime=" + mScheduledAppFrameTimeNs + "ns"
+                    + ", actualAppTime=" + mActualAppFrameTimeNs + "ns}";
+        }
     }
 
     /**
@@ -458,12 +546,13 @@ public final class SurfaceControl implements Parcelable {
      * surface.
      *
      * @see JankData
-     * @see #addJankDataListener
-     * @hide
+     * @see #addOnJankDataListener
      */
+    @FlaggedApi(Flags.FLAG_JANK_API)
     public interface OnJankDataListener {
         /**
-         * Called when new jank classifications are available.
+         * Called when new jank classifications are available. The listener is invoked out of band
+         * of the rendered frames with jank classification data for a batch of frames.
          */
         void onJankDataAvailable(@NonNull List<JankData> jankData);
 
@@ -471,9 +560,22 @@ public final class SurfaceControl implements Parcelable {
 
     /**
      * Handle to a registered {@link OnJankDatalistener}.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_JANK_API)
     public static class OnJankDataListenerRegistration {
+        /** @hide */
+        public static final OnJankDataListenerRegistration NONE =
+                new OnJankDataListenerRegistration() {
+                    @Override
+                    public void flush() {}
+
+                    @Override
+                    public void removeAfter(long afterVsync) {}
+
+                    @Override
+                    public void release() {}
+                };
+
         private final long mNativeObject;
 
         private static final NativeAllocationRegistry sRegistry =
@@ -483,6 +585,11 @@ public final class SurfaceControl implements Parcelable {
 
         private final Runnable mFreeNativeResources;
         private boolean mRemoved = false;
+
+        private OnJankDataListenerRegistration() {
+            mNativeObject = 0;
+            mFreeNativeResources = () -> {};
+        }
 
         OnJankDataListenerRegistration(SurfaceControl surface, OnJankDataListener listener) {
             mNativeObject = nativeCreateJankDataListenerWrapper(surface.mNativeObject, listener);
@@ -499,10 +606,17 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Request the removal of the registered listener after the VSync with the provided ID. Use
-         * a value <= 0 for afterVsync to remove the listener immediately. The given listener will
-         * not be removed before the given VSync, but may still reveive data for frames past the
-         * provided VSync.
+         * Schedule the removal of the registered listener after the frame with the provided id.
+         * <p>
+         * Because jank classification is only possible after frames have been displayed, the
+         * callbacks are always delayed. To ensure receipt of all jank classification data, an
+         * application can schedule the removal to happen no sooner than after the data for the
+         * frame with the provided id has been provided.
+         * <p>
+         * Use a value &lt;= 0 for afterVsync to remove the listener immediately, ensuring no future
+         * callbacks.
+         *
+         * @param afterVsync the id of the Vsync after which to remove the listener
          */
         public void removeAfter(long afterVsync) {
             mRemoved = true;
@@ -511,6 +625,7 @@ public final class SurfaceControl implements Parcelable {
 
         /**
          * Free the native resources associated with the listener registration.
+         * @hide
          */
         public void release() {
             if (!mRemoved) {
@@ -661,6 +776,13 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int CAN_OCCLUDE_PRESENTATION = 0x00001000;
+
+    /**
+     * Indicates that the SurfaceControl should recover from buffer stuffing when
+     * possible. This is the case when the SurfaceControl is a ViewRootImpl.
+     * @hide
+     */
+    public static final int RECOVERABLE_FROM_BUFFER_STUFFING = 0x00002000;
 
     /**
      * Surface creation flag: Creates a surface where color components are interpreted
@@ -4444,14 +4566,31 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
-        /** @hide */
+        /**
+         * Sets the Luts for the layer.
+         *
+         * <p> The function also allows to clear previously applied lut(s). To do this,
+         * set the displayluts to be either {@code nullptr} or
+         * an empty {@link android.hardware.DisplayLuts} instance.
+         *
+         * @param sc The SurfaceControl to update
+         *
+         * @param displayLuts The selected Lut(s)
+         *
+         * @return this
+         * @see DisplayLuts
+         */
+        @FlaggedApi(android.hardware.flags.Flags.FLAG_LUTS_API)
         public @NonNull Transaction setLuts(@NonNull SurfaceControl sc,
-                @NonNull DisplayLuts displayLuts) {
+                @Nullable DisplayLuts displayLuts) {
             checkPreconditions(sc);
-
-            nativeSetLuts(mNativeObject, sc.mNativeObject, displayLuts.getLutBuffers(),
-                    displayLuts.getOffsets(), displayLuts.getLutDimensions(),
-                    displayLuts.getLutSizes(), displayLuts.getLutSamplingKeys());
+            if (displayLuts != null && displayLuts.valid()) {
+                nativeSetLuts(mNativeObject, sc.mNativeObject, displayLuts.getLutBuffers(),
+                        displayLuts.getOffsets(), displayLuts.getLutDimensions(),
+                        displayLuts.getLutSizes(), displayLuts.getLutSamplingKeys());
+            } else {
+                nativeSetLuts(mNativeObject, sc.mNativeObject, null, null, null, null, null);
+            }
             return this;
         }
 
@@ -4867,6 +5006,23 @@ public final class SurfaceControl implements Parcelable {
             nativeSetDesiredPresentTimeNanos(mNativeObject, desiredPresentTimeNanos);
             return this;
         }
+
+        /**
+         * Specifies that the SurfaceControl is a buffer producer that should recover from buffer
+         * stuffing, meaning that the SurfaceControl is a ViewRootImpl.
+         *
+         * @hide
+         */
+        @NonNull
+        public Transaction setRecoverableFromBufferStuffing(@NonNull SurfaceControl sc) {
+            if (bufferStuffingRecovery()) {
+                checkPreconditions(sc);
+                nativeSetFlags(mNativeObject, sc.mNativeObject, RECOVERABLE_FROM_BUFFER_STUFFING,
+                        RECOVERABLE_FROM_BUFFER_STUFFING);
+            }
+            return this;
+        }
+
         /**
          * Writes the transaction to parcel, clearing the transaction as if it had been applied so
          * it can be used to store future transactions. It's the responsibility of the parcel

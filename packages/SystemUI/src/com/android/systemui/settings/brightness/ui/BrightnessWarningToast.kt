@@ -41,7 +41,7 @@ constructor(
         // Show the brightness warning toast with passing the toast inflation required context,
         // userId and resId from SystemUI package.
         val systemUIToast = toastFactory.createToast(
-            viewContext,
+            viewContext, viewContext,
             res.getString(resId), viewContext.packageName, viewContext.getUserId(),
             res.configuration.orientation
         )

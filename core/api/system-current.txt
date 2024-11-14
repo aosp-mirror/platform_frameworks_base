@@ -7464,6 +7464,7 @@ package android.media {
   }
 
   public final class AudioPlaybackConfiguration implements android.os.Parcelable {
+    method @FlaggedApi("android.media.audio.routed_device_ids") @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceInfo> getAudioDeviceInfos();
     method public int getChannelMask();
     method public int getClientPid();
     method public int getClientUid();
@@ -7618,7 +7619,7 @@ package android.media {
 
   public final class MediaCas implements java.lang.AutoCloseable {
     method @FlaggedApi("android.media.tv.flags.set_resource_holder_retain") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public void setResourceHolderRetain(boolean);
-    method @FlaggedApi("com.android.media.flags.update_client_profile_priority") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean updateResourcePriority(int, int);
+    method @FlaggedApi("android.media.tv.flags.mediacas_update_client_profile_priority") @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean updateResourcePriority(int, int);
   }
 
   public final class MediaCodec {

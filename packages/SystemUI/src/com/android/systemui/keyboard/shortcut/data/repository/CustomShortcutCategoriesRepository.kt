@@ -49,6 +49,7 @@ constructor(
     @Background private val backgroundScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val shortcutCategoriesUtils: ShortcutCategoriesUtils,
+    private val context: Context,
 ) : ShortcutCategoriesRepository {
 
     private val userContext: Context
@@ -147,25 +148,23 @@ constructor(
     private fun fetchGroupLabelByGestureType(
         @KeyGestureEvent.KeyGestureType keyGestureType: Int
     ): String? {
-        return InputGestures.gestureToInternalKeyboardShortcutGroupLabelMap.getOrDefault(
-            keyGestureType,
-            null,
-        )
+        InputGestures.gestureToInternalKeyboardShortcutGroupLabelMap[keyGestureType]?.let {
+            return context.getString(it)
+        } ?: return null
     }
 
     private fun fetchShortcutInfoLabelByGestureType(
         @KeyGestureEvent.KeyGestureType keyGestureType: Int
     ): String? {
-        return InputGestures.gestureToInternalKeyboardShortcutInfoLabelMap.getOrDefault(
-            keyGestureType,
-            null,
-        )
+        InputGestures.gestureToInternalKeyboardShortcutInfoLabelMap[keyGestureType]?.let {
+            return context.getString(it)
+        } ?: return null
     }
 
     private fun fetchShortcutCategoryTypeByGestureType(
         @KeyGestureEvent.KeyGestureType keyGestureType: Int
     ): ShortcutCategoryType? {
-        return InputGestures.gestureToShortcutCategoryTypeMap.getOrDefault(keyGestureType, null)
+        return InputGestures.gestureToShortcutCategoryTypeMap[keyGestureType]
     }
 
     private data class InternalGroupsSource(

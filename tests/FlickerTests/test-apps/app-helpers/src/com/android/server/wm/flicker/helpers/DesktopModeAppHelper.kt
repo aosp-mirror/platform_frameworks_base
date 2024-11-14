@@ -347,6 +347,14 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         waitForTransitionToFullscreen(wmHelper)
     }
 
+    /** Maximize an app by dragging the app handle to the top drag zone. */
+    fun maximizeAppWithDragToTopDragZone(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+    ) {
+        dragAppWindowToTopDragZone(wmHelper, device)
+    }
+
     private fun dragAppWindowToTopDragZone(wmHelper: WindowManagerStateHelper, device: UiDevice) {
         val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
         val displayRect = getDisplayRect(wmHelper)

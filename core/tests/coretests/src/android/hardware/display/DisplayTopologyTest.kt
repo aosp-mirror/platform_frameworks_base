@@ -16,7 +16,10 @@
 
 package android.hardware.display
 
+import android.graphics.PointF
+import android.graphics.RectF
 import android.hardware.display.DisplayTopology.TreeNode.POSITION_BOTTOM
+import android.hardware.display.DisplayTopology.TreeNode.POSITION_LEFT
 import android.hardware.display.DisplayTopology.TreeNode.POSITION_TOP
 import android.hardware.display.DisplayTopology.TreeNode.POSITION_RIGHT
 import android.view.Display
@@ -468,5 +471,206 @@ class DisplayTopologyTest {
         assertThat(actualDisplay4.position).isEqualTo(POSITION_RIGHT)
         assertThat(actualDisplay4.offset).isEqualTo(-400f)
         assertThat(actualDisplay4.children).isEmpty()
+    }
+
+    @Test
+    fun rearrange_twoDisplays() {
+        val nodes = rearrangeRects(
+            // Arrange in staggered manner, connected vertically.
+            RectF(100f, 100f, 250f, 200f),
+            RectF(150f, 200f, 300f, 300f),
+        )
+
+        assertThat(nodes[0].children).containsExactly(nodes[1])
+        assertThat(nodes[1].children).isEmpty()
+        assertPositioning(nodes, Pair(POSITION_BOTTOM, 50f))
+    }
+
+    @Test
+    fun rearrange_reverseOrderOfSeveralDisplays() {
+        val nodes = rearrangeRects(
+            RectF(0f, 0f, 150f, 100f),
+            RectF(-150f, 0f, 0f, 100f),
+            RectF(-300f, 0f, -150f, 100f),
+            RectF(-450f, 0f, -300f, 100f),
+        )
+
+        assertPositioning(
+            nodes,
+            Pair(POSITION_LEFT, 0f),
+            Pair(POSITION_LEFT, 0f),
+            Pair(POSITION_LEFT, 0f),
+        )
+
+        assertThat(nodes[0].children).containsExactly(nodes[1])
+        assertThat(nodes[1].children).containsExactly(nodes[2])
+        assertThat(nodes[2].children).containsExactly(nodes[3])
+        assertThat(nodes[3].children).isEmpty()
+    }
+
+    @Test
+    fun rearrange_crossWithRootInCenter() {
+        val nodes = rearrangeRects(
+            RectF(0f, 0f, 150f, 100f),
+            RectF(-150f, 0f, 0f, 100f),
+            RectF(0f,-100f, 150f, 0f),
+            RectF(150f, 0f, 300f, 100f),
+            RectF(0f, 100f, 150f, 200f),
+        )
+
+        assertPositioning(
+            nodes,
+            Pair(POSITION_LEFT, 0f),
+            Pair(POSITION_TOP, 0f),
+            Pair(POSITION_RIGHT, 0f),
+            Pair(POSITION_BOTTOM, 0f),
+        )
+
+        assertThat(nodes[0].children)
+            .containsExactly(nodes[1], nodes[2], nodes[3], nodes[4])
+    }
+
+    @Test
+    fun rearrange_elbowArrangementDoesNotUseCornerAdjacency1() {
+        val nodes = rearrangeRects(
+            //     2
+            //     |
+            // 0 - 1
+
+            RectF(0f, 0f, 100f, 100f),
+            RectF(100f, 0f, 200f, 100f),
+            RectF(100f, -100f, 200f, 0f),
+        )
+
+        assertThat(nodes[0].children).containsExactly(nodes[1])
+        assertThat(nodes[1].children).containsExactly(nodes[2])
+        assertThat(nodes[2].children).isEmpty()
+
+        assertPositioning(
+            nodes,
+            Pair(POSITION_RIGHT, 0f),
+            Pair(POSITION_TOP, 0f),
+        )
+    }
+
+    @Test
+    fun rearrange_elbowArrangementDoesNotUseCornerAdjacency2() {
+        val nodes = rearrangeRects(
+            //     0
+            //     |
+            //     1
+            //     |
+            // 3 - 2
+
+            RectF(0f, 0f, 100f, 100f),
+            RectF(0f, 100f, 100f, 200f),
+            RectF(0f, 200f, 100f, 300f),
+            RectF(-100f, 200f, 0f, 300f),
+        )
+
+        assertThat(nodes[0].children).containsExactly(nodes[1])
+        assertThat(nodes[1].children).containsExactly(nodes[2])
+        assertThat(nodes[2].children).containsExactly(nodes[3])
+        assertThat(nodes[3].children).isEmpty()
+
+        assertPositioning(
+            nodes,
+            Pair(POSITION_BOTTOM, 0f),
+            Pair(POSITION_BOTTOM, 0f),
+            Pair(POSITION_LEFT, 0f),
+        )
+    }
+
+    @Test
+    fun rearrange_useLargerEdge() {
+        val nodes = rearrangeRects(
+            //444111
+            //444111
+            //444111
+            //  000222
+            //  000222
+            //  000222
+            //    333
+            //    333
+            //    333
+            RectF(20f, 30f, 50f, 60f),
+            RectF(30f, 0f, 60f, 30f),
+            RectF(50f, 30f, 80f, 60f),
+            RectF(40f, 60f, 70f, 90f),
+            RectF(0f, 0f, 30f, 30f),
+        )
+
+        assertPositioning(
+            nodes,
+            Pair(POSITION_TOP, 10f),
+            Pair(POSITION_RIGHT, 0f),
+            Pair(POSITION_BOTTOM, -10f),
+            Pair(POSITION_LEFT, 0f),
+        )
+
+        assertThat(nodes[0].children).containsExactly(nodes[1], nodes[2])
+        assertThat(nodes[1].children).containsExactly(nodes[4])
+        assertThat(nodes[2].children).containsExactly(nodes[3])
+        (3..4).forEach { assertThat(nodes[it].children).isEmpty() }
+    }
+
+    @Test
+    fun rearrange_closeGaps() {
+        val nodes = rearrangeRects(
+            //000
+            //000 111
+            //000 111
+            //    111
+            //
+            //        222
+            //        222
+            //        222
+            RectF(0f, 0f, 30f, 30f),
+            RectF(40f, 10f, 70f, 40f),
+            RectF(80.5f, 50f, 110f, 80f),  // left+=0.5 to cause a preference for TOP/BOTTOM attach
+        )
+
+        assertPositioning(
+            nodes,
+            // In the case of corner adjacency, we prefer a left/right attachment.
+            Pair(POSITION_RIGHT, 10f),
+            Pair(POSITION_BOTTOM, 40.5f),  // TODO: fix implementation to remove this gap
+        )
+
+        assertThat(nodes[0].children).containsExactly(nodes[1])
+        assertThat(nodes[1].children).containsExactly(nodes[2])
+        assertThat(nodes[2].children).isEmpty()
+    }
+
+    /**
+     * Runs the rearrange algorithm and returns the resulting tree as a list of nodes, with the
+     * root at index 0. The number of nodes is inferred from the number of positions passed.
+     */
+    private fun rearrangeRects(vararg pos : RectF) : List<DisplayTopology.TreeNode> {
+        // Generates a linear sequence of nodes in order in the List from root to leaf,
+        // left-to-right. IDs are ascending from 0 to count - 1.
+
+        val nodes = pos.indices.map {
+            DisplayTopology.TreeNode(it, pos[it].width(), pos[it].height(), POSITION_RIGHT, 0f)
+        }
+
+        nodes.forEachIndexed { id, node ->
+            if (id > 0) {
+                nodes[id - 1].addChild(node)
+            }
+        }
+
+        DisplayTopology(nodes[0], 0).rearrange(pos.indices.associateWith {
+            PointF(pos[it].left, pos[it].top)
+        })
+
+        return nodes
+    }
+
+    private fun assertPositioning(
+            nodes : List<DisplayTopology.TreeNode>, vararg positions : Pair<Int, Float>) {
+        assertThat(nodes.drop(1).map { Pair(it.position, it.offset )})
+            .containsExactly(*positions)
+            .inOrder()
     }
 }

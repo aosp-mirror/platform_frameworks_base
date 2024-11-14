@@ -205,7 +205,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mTaskSplitBoundsMap.put(taskId1, splitBounds);
         mTaskSplitBoundsMap.put(taskId2, splitBounds);
         notifyRecentTasksChanged();
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENT_TASKS, "Add split pair: %d, %d, %s",
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Add split pair: %d, %d, %s",
                 taskId1, taskId2, splitBounds);
         return true;
     }
@@ -221,7 +221,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             mTaskSplitBoundsMap.remove(taskId);
             mTaskSplitBoundsMap.remove(pairedTaskId);
             notifyRecentTasksChanged();
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENT_TASKS, "Remove split pair: %d, %d",
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Remove split pair: %d, %d",
                     taskId, pairedTaskId);
         }
     }
@@ -234,7 +234,17 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
         // We could do extra verification of requiring both taskIds of a pair and verifying that
         // the same split bounds object is returned... but meh. Seems unnecessary.
-        return mTaskSplitBoundsMap.get(taskId);
+        SplitBounds splitBounds = mTaskSplitBoundsMap.get(taskId);
+        if (splitBounds != null) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "getSplitBoundsForTaskId: taskId=%d splitBoundsTasks=[%d, %d]", taskId,
+                    splitBounds.leftTopTaskId, splitBounds.rightBottomTaskId);
+        } else {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "getSplitBoundsForTaskId: expected split bounds for taskId=%d but not found",
+                    taskId);
+        }
+        return splitBounds;
     }
 
     @Override

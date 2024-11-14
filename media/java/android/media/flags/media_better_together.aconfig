@@ -78,13 +78,6 @@ flag {
 }
 
 flag {
-    name: "update_client_profile_priority"
-    namespace: "media_solutions"
-    description : "Feature flag to add updateResourcePriority api to MediaCas"
-    bug: "300565729"
-}
-
-flag {
      name: "enable_built_in_speaker_route_suitability_statuses"
      is_exported: true
      namespace: "media_solutions"

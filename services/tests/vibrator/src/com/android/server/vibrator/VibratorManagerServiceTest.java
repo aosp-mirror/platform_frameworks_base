@@ -1531,6 +1531,8 @@ public class VibratorManagerServiceTest {
         FakeVibratorControllerProvider fakeVibrator1 = mVibratorProviders.get(1);
         fakeVibrator1.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
         mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        mVibratorProviders.get(2).setSupportedPrimitives(
+                VibrationEffect.Composition.PRIMITIVE_CLICK);
         VibratorManagerService service = createSystemReadyService();
 
         CombinedVibration effect = CombinedVibration.startParallel()
@@ -2115,7 +2117,8 @@ public class VibratorManagerServiceTest {
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
         mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
         mVibratorProviders.get(1).setSupportedPrimitives(
-                VibrationEffect.Composition.PRIMITIVE_CLICK);
+                VibrationEffect.Composition.PRIMITIVE_CLICK,
+                VibrationEffect.Composition.PRIMITIVE_TICK);
 
         VibratorManagerService service = createSystemReadyService();
         vibrateAndWaitUntilFinished(service,
@@ -2132,9 +2135,10 @@ public class VibratorManagerServiceTest {
         assertTrue(segments.size() > 2);
         // 0: Supported effect played
         assertTrue(segments.get(0) instanceof PrebakedSegment);
-        // 1: No segment for unsupported primitive
+        // 1: Supported primitive played
+        assertTrue(segments.get(1) instanceof PrimitiveSegment);
         // 2: One or more intermediate step segments as fallback for unsupported effect
-        for (int i = 1; i < segments.size() - 1; i++) {
+        for (int i = 2; i < segments.size() - 1; i++) {
             assertTrue(segments.get(i) instanceof StepSegment);
         }
         // 3: Supported primitive played
@@ -3277,7 +3281,8 @@ public class VibratorManagerServiceTest {
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
         mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
         mVibratorProviders.get(1).setSupportedPrimitives(
-                VibrationEffect.Composition.PRIMITIVE_TICK);
+                VibrationEffect.Composition.PRIMITIVE_TICK,
+                VibrationEffect.Composition.PRIMITIVE_CLICK);
 
         VibratorManagerService service = createSystemReadyService();
         vibrateAndWaitUntilFinished(service,
@@ -3320,10 +3325,12 @@ public class VibratorManagerServiceTest {
         assertEquals(3, metrics.halPerformCount); // CLICK, TICK, then CLICK
         assertEquals(4, metrics.halCompositionSize); // 2*TICK + 2*CLICK
         // No repetitions in reported effect/primitive IDs.
-        assertArrayEquals(new int[] {VibrationEffect.Composition.PRIMITIVE_TICK},
+        assertArrayEquals(
+                new int[] {
+                        VibrationEffect.Composition.PRIMITIVE_CLICK,
+                        VibrationEffect.Composition.PRIMITIVE_TICK,
+                },
                 metrics.halSupportedCompositionPrimitivesUsed);
-        assertArrayEquals(new int[] {VibrationEffect.Composition.PRIMITIVE_CLICK},
-                metrics.halUnsupportedCompositionPrimitivesUsed);
         assertArrayEquals(new int[] {VibrationEffect.EFFECT_CLICK},
                 metrics.halSupportedEffectsUsed);
         assertArrayEquals(new int[] {VibrationEffect.EFFECT_TICK},

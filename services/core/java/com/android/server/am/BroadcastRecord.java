@@ -88,7 +88,7 @@ final class BroadcastRecord extends Binder {
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
     @VisibleForTesting
-    static final long CHANGE_LIMIT_PRIORITY_SCOPE = 371307720L;
+    static final long LIMIT_PRIORITY_SCOPE = 371307720L;
 
     final @NonNull Intent intent;    // the original intent that generated us
     final @Nullable ComponentName targetComp; // original component name set on the intent
@@ -781,7 +781,7 @@ final class BroadcastRecord extends Binder {
         } else {
             if (Flags.limitPriorityScope()) {
                 final boolean[] changeEnabled = calculateChangeStateForReceivers(
-                        receivers, CHANGE_LIMIT_PRIORITY_SCOPE, platformCompat);
+                        receivers, LIMIT_PRIORITY_SCOPE, platformCompat);
 
                 // Priority of the previous tranche
                 int lastTranchePriority = 0;

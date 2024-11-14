@@ -142,8 +142,11 @@ public final class OemLogItems implements Parcelable {
         dest.writeByteArray(mCommandApdus);
         dest.writeInt(mResponseApdus.length);
         dest.writeByteArray(mResponseApdus);
-        dest.writeLong(mRfFieldOnTime.getEpochSecond());
-        dest.writeInt(mRfFieldOnTime.getNano());
+        dest.writeBoolean(mRfFieldOnTime != null);
+        if (mRfFieldOnTime != null) {
+            dest.writeLong(mRfFieldOnTime.getEpochSecond());
+            dest.writeInt(mRfFieldOnTime.getNano());
+        }
         dest.writeParcelable(mTag, 0);
     }
 
@@ -305,7 +308,12 @@ public final class OemLogItems implements Parcelable {
         in.readByteArray(this.mCommandApdus);
         this.mResponseApdus = new byte[in.readInt()];
         in.readByteArray(this.mResponseApdus);
-        this.mRfFieldOnTime = Instant.ofEpochSecond(in.readLong(), in.readInt());
+        boolean isRfFieldOnTimeSet = in.readBoolean();
+        if (isRfFieldOnTimeSet) {
+            this.mRfFieldOnTime = Instant.ofEpochSecond(in.readLong(), in.readInt());
+        } else {
+            this.mRfFieldOnTime = null;
+        }
         this.mTag = in.readParcelable(Tag.class.getClassLoader(), Tag.class);
     }
 

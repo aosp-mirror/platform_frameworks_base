@@ -19,6 +19,7 @@ package android.media;
 import static android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL;
 import static android.media.AudioAttributes.ALLOW_CAPTURE_BY_NONE;
 import static android.media.audio.Flags.FLAG_MUTED_BY_PORT_VOLUME_API;
+import static android.media.audio.Flags.FLAG_ROUTED_DEVICE_IDS;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -39,6 +40,8 @@ import com.android.internal.annotations.GuardedBy;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -461,8 +464,12 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * Returns information about the {@link AudioDeviceInfo} used for this playback.
-     * @return the audio playback device or null if the device is not available at the time of query
+     * @return the audio playback device or null if the device is not available at the time of
+     * query.
+     * @deprecated this information was never populated
      */
+    @Deprecated
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
     public @Nullable AudioDeviceInfo getAudioDeviceInfo() {
         final int deviceId;
         synchronized (mUpdateablePropLock) {
@@ -472,6 +479,23 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             return null;
         }
         return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_OUTPUTS);
+    }
+
+    /**
+     * @hide
+     * Returns information about the List of {@link AudioDeviceInfo} used for this playback.
+     * @return the audio playback devices
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull List<AudioDeviceInfo> getAudioDeviceInfos() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        AudioDeviceInfo audioDeviceInfo = getAudioDeviceInfo();
+        if (audioDeviceInfo != null) {
+            audioDeviceInfos.add(audioDeviceInfo);
+        }
+        return audioDeviceInfos;
     }
 
     /**

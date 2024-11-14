@@ -1186,7 +1186,6 @@ public class ResourcesManager {
         synchronized (mLock) {
             if (DEBUG) {
                 Throwable here = new Throwable();
-                here.fillInStackTrace();
                 Slog.w(TAG, "!! Create resources for key=" + key, here);
             }
 
@@ -1207,7 +1206,6 @@ public class ResourcesManager {
         synchronized (mLock) {
             if (DEBUG) {
                 Throwable here = new Throwable();
-                here.fillInStackTrace();
                 Slog.w(TAG, "!! Get resources for activity=" + activityToken + " key=" + key, here);
             }
 
@@ -1351,7 +1349,6 @@ public class ResourcesManager {
 
                 if (DEBUG) {
                     Throwable here = new Throwable();
-                    here.fillInStackTrace();
                     Slog.d(TAG, "updating resources override for activity=" + activityToken
                             + " from oldConfig="
                             + Configuration.resourceQualifierString(oldConfig)
