@@ -727,6 +727,25 @@ public class PackageWatchdog {
     }
 
     /**
+     * The minimum value that can be returned by any observer.
+     * It represents that no mitigations were available.
+     */
+    public static final int LEAST_PACKAGE_HEALTH_OBSERVER_IMPACT =
+            PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
+
+    /**
+     * The mitigation impact beyond which the user will start noticing the mitigations.
+     */
+    public static final int MEDIUM_USER_IMPACT_THRESHOLD =
+            PackageHealthObserverImpact.USER_IMPACT_LEVEL_20;
+
+    /**
+     * The mitigation impact beyond which the user impact is severely high.
+     */
+    public static final int HIGH_USER_IMPACT_THRESHOLD =
+            PackageHealthObserverImpact.USER_IMPACT_LEVEL_71;
+
+    /**
      * Possible severity values of the user impact of a
      * {@link PackageHealthObserver#onExecuteHealthCheckMitigation}.
      * @hide
@@ -769,6 +788,11 @@ public class PackageWatchdog {
         /**
          * Called when health check fails for the {@code versionedPackage}.
          *
+         * Note: if the returned user impact is higher than
+         * {@link #DEFAULT_HIGH_USER_IMPACT_THRESHOLD}, then
+         * {@link #onExecuteHealthCheckMitigation} would be called only in severe device conditions
+         * like boot-loop or network failure.
+         *
          * @param versionedPackage the package that is failing. This may be null if a native
          *                          service is crashing.
          * @param failureReason   the type of failure that is occurring.
@@ -776,8 +800,8 @@ public class PackageWatchdog {
          *                        (including this time).
          *
          *
-         * @return any one of {@link PackageHealthObserverImpact} to express the impact
-         * to the user on {@link #onExecuteHealthCheckMitigation}
+         * @return any value greater than {@link #LEAST_PACKAGE_HEALTH_OBSERVER_IMPACT} to express
+         * the impact of mitigation on the user in {@link #onExecuteHealthCheckMitigation}
          */
         @PackageHealthObserverImpact int onHealthCheckFailed(
                 @Nullable VersionedPackage versionedPackage,
@@ -786,9 +810,8 @@ public class PackageWatchdog {
 
         /**
          * This would be called after {@link #onHealthCheckFailed}.
-         * This is called only if current observer returned least
-         * {@link PackageHealthObserverImpact} mitigation for failed health
-         * check.
+         * This is called only if current observer returned least impact mitigation for failed
+         * health check.
          *
          * @param versionedPackage the package that is failing. This may be null if a native
          *                          service is crashing.
@@ -807,6 +830,9 @@ public class PackageWatchdog {
          *
          * @param mitigationCount the number of times mitigation has been attempted for this
          *                        boot loop (including this time).
+         *
+         * @return any value greater than {@link #LEAST_PACKAGE_HEALTH_OBSERVER_IMPACT} to express
+         * the impact of mitigation on the user in {@link #onExecuteBootLoopMitigation}
          */
         default @PackageHealthObserverImpact int onBootLoop(int mitigationCount) {
             return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
@@ -814,11 +840,13 @@ public class PackageWatchdog {
 
         /**
          * This would be called after {@link #onBootLoop}.
-         * This is called only if current observer returned least
-         * {@link PackageHealthObserverImpact} mitigation for fixing boot loop
+         * This is called only if current observer returned least impact mitigation for fixing
+         * boot loop.
          *
          * @param mitigationCount the number of times mitigation has been attempted for this
          *                        boot loop (including this time).
+         *
+         * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
         default boolean onExecuteBootLoopMitigation(int mitigationCount) {
             return false;
