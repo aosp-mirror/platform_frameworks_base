@@ -1947,10 +1947,12 @@ public class PropertyInvalidatedCache<Query, Result> {
     }
 
     // Return true if this cache has had any activity.  If the hits, misses, and skips are all
-    // zero then the client never tried to use the cache.
-    private boolean isActive() {
+    // zero then the client never tried to use the cache.  If invalidations and corks are also
+    // zero then the server never tried to use the cache.
+    private boolean isActive(NonceHandler.Stats stats) {
         synchronized (mLock) {
-            return mHits + mMisses + getSkipsLocked() > 0;
+            return mHits + mMisses + getSkipsLocked()
+                    + stats.invalidated + stats.corkedInvalidates > 0;
         }
     }
 
@@ -1968,15 +1970,15 @@ public class PropertyInvalidatedCache<Query, Result> {
         NonceHandler.Stats stats = mNonce.getStats();
 
         synchronized (mLock) {
-            if (brief && !isActive()) {
+            if (brief && !isActive(stats)) {
                 return;
             }
 
             pw.println(formatSimple("  Cache Name: %s", cacheName()));
             pw.println(formatSimple("    Property: %s", mPropertyName));
             pw.println(formatSimple(
-                "    Hits: %d, Misses: %d, Skips: %d, Clears: %d, Uids: %d",
-                mHits, mMisses, getSkipsLocked(), mClears, mCache.size()));
+                "    Hits: %d, Misses: %d, Skips: %d, Clears: %d",
+                mHits, mMisses, getSkipsLocked(), mClears));
 
             // Print all the skip reasons.
             pw.format("    Skip-%s: %d", sNonceName[0], mSkips[0]);
@@ -1986,7 +1988,7 @@ public class PropertyInvalidatedCache<Query, Result> {
             pw.println();
 
             pw.println(formatSimple(
-                "    Nonce: 0x%016x, Invalidates: %d, CorkedInvalidates: %d",
+                "    Nonce: 0x%016x, Invalidates: %d, Corked: %d",
                 mLastSeenNonce, stats.invalidated, stats.corkedInvalidates));
             pw.println(formatSimple(
                 "    Current Size: %d, Max Size: %d, HW Mark: %d, Overflows: %d",
