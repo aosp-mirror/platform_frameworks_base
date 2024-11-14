@@ -18,9 +18,12 @@ package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.util.ArrayMap;
 import android.view.Window;
+
+import com.android.graphics.hwui.flags.Flags;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -525,6 +528,45 @@ public class RuntimeShader extends Shader {
         discardNativeInstance();
     }
 
+    /**
+     * Assigns the uniform color filter to the provided color filter parameter.  If the shader
+     * program does not have a uniform color filter with that name then an IllegalArgumentException
+     * is thrown.
+     *
+     * @param filterName name matching the uniform declared in the AGSL program
+     * @param colorFilter filter passed into the AGSL program for sampling
+     */
+    @FlaggedApi(Flags.FLAG_RUNTIME_COLOR_FILTERS_BLENDERS)
+    public void setInputColorFilter(@NonNull String filterName, @NonNull ColorFilter colorFilter) {
+        if (filterName == null) {
+            throw new NullPointerException("The filterName parameter must not be null");
+        }
+        if (colorFilter == null) {
+            throw new NullPointerException("The colorFilter parameter must not be null");
+        }
+        nativeUpdateChild(mNativeInstanceRuntimeShaderBuilder, filterName,
+                colorFilter.getNativeInstance());
+    }
+
+    /**
+     * Assigns the uniform xfermode to the provided xfermode parameter.  If the shader program does
+     * not have a uniform xfermode with that name then an IllegalArgumentException is thrown.
+     *
+     * @param xfermodeName name matching the uniform declared in the AGSL program
+     * @param xfermode filter passed into the AGSL program for sampling
+     */
+    @FlaggedApi(Flags.FLAG_RUNTIME_COLOR_FILTERS_BLENDERS)
+    public void setInputXfermode(@NonNull String xfermodeName, @NonNull RuntimeXfermode xfermode) {
+        if (xfermodeName == null) {
+            throw new NullPointerException("The xfermodeName parameter must not be null");
+        }
+        if (xfermode == null) {
+            throw new NullPointerException("The xfermode parameter must not be null");
+        }
+        nativeUpdateChild(mNativeInstanceRuntimeShaderBuilder, xfermodeName,
+                xfermode.createNativeInstance());
+    }
+
 
     /** @hide */
     @Override
@@ -552,5 +594,7 @@ public class RuntimeShader extends Shader {
             int value4, int count);
     private static native void nativeUpdateShader(
             long shaderBuilder, String shaderName, long shader);
+    private static native void nativeUpdateChild(
+            long shaderBuilder, String childName, long child);
 }
 
