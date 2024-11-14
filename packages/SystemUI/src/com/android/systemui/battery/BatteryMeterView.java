@@ -82,8 +82,10 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     private boolean mDisplayShieldEnabled;
     // Error state where we know nothing about the current battery state
     private boolean mBatteryStateUnknown;
+    private boolean mBatteryStateAlert;
     // Lazily-loaded since this is expected to be a rare-if-ever state
     private Drawable mUnknownStateDrawable;
+    private Drawable mAlertStateDrawable;
 
     private DualToneHandler mDualToneHandler;
 
@@ -204,8 +206,14 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     public void onBatteryLevelChanged(@IntRange(from = 0, to = 100) int level, boolean pluggedIn) {
         mDrawable.setCharging(pluggedIn);
         mDrawable.setBatteryLevel(level);
-        mCharging = pluggedIn;
         mLevel = level;
+
+        boolean chargingChanged = mCharging != pluggedIn;
+        mCharging = pluggedIn;
+        if (chargingChanged) {
+            switchBatteryIcon();
+        }
+
         updatePercentText();
     }
 
@@ -367,6 +375,15 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         return mUnknownStateDrawable;
     }
 
+    private Drawable getAlertStateDrawable() {
+        if (mAlertStateDrawable == null) {
+            mAlertStateDrawable = mContext.getDrawable(R.drawable.ic_battery_alert);
+            mAlertStateDrawable.setTint(mTextColor);
+        }
+
+        return mAlertStateDrawable;
+    }
+
     void onBatteryUnknownStateChanged(boolean isUnknown) {
         if (mBatteryStateUnknown == isUnknown) {
             return;
@@ -375,13 +392,32 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         mBatteryStateUnknown = isUnknown;
         updateContentDescription();
 
+        switchBatteryIcon();
+        updateShowPercent();
+    }
+
+    void onBatteryAlertStateChanged(boolean isAlert) {
+        if (mBatteryStateAlert == isAlert) {
+            return;
+        }
+
+        mBatteryStateAlert = isAlert;
+        updateContentDescription();
+
+        switchBatteryIcon();
+        updateShowPercent();
+    }
+
+    private void switchBatteryIcon() {
         if (mBatteryStateUnknown) {
             mBatteryIconView.setImageDrawable(getUnknownStateDrawable());
+        } else if (mCharging) {
+            mBatteryIconView.setImageDrawable(mDrawable);
+        } else if (mBatteryStateAlert) {
+            mBatteryIconView.setImageDrawable(getAlertStateDrawable());
         } else {
             mBatteryIconView.setImageDrawable(mDrawable);
         }
-
-        updateShowPercent();
     }
 
     /**
@@ -462,6 +498,10 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         if (mUnknownStateDrawable != null) {
             mUnknownStateDrawable.setTint(singleToneColor);
         }
+
+        if (mAlertStateDrawable != null) {
+            mAlertStateDrawable.setTint(singleToneColor);
+        }
     }
 
     public void dump(PrintWriter pw, String[] args) {
@@ -472,6 +512,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         pw.println("    mBatteryPercentView.getText(): " + percent);
         pw.println("    mTextColor: #" + Integer.toHexString(mTextColor));
         pw.println("    mBatteryStateUnknown: " + mBatteryStateUnknown);
+        pw.println("    mBatteryStateAlert: " + mBatteryStateAlert);
         pw.println("    mLevel: " + mLevel);
         pw.println("    mMode: " + mShowPercentMode);
     }

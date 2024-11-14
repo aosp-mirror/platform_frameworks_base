@@ -94,6 +94,11 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 public void onIsOverheatedChanged(boolean isOverheated) {
                     mView.onIsOverheatedChanged(isOverheated);
                 }
+
+                @Override
+                public void onBatteryAlertStateChanged(boolean isAlert) {
+                    mView.onBatteryAlertStateChanged(isAlert);
+                }
             };
 
     private final UserTracker.Callback mUserChangedCallback =

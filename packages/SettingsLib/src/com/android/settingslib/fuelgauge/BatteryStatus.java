@@ -16,6 +16,7 @@
 
 package com.android.settingslib.fuelgauge;
 
+import static android.os.BatteryManager.BATTERY_HEALTH_DEAD;
 import static android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT;
 import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
@@ -154,6 +155,15 @@ public class BatteryStatus {
      */
     public boolean isOverheated() {
         return health == BATTERY_HEALTH_OVERHEAT;
+    }
+
+    /**
+     * Whether battery is dead.
+     *
+     * @return true if battery is dead
+     */
+    public boolean isDead() {
+        return health == BATTERY_HEALTH_DEAD;
     }
 
     /**

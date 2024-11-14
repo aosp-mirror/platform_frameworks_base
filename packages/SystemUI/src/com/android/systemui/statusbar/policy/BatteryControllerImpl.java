@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.os.BatteryManager.BATTERY_HEALTH_DEAD;
 import static android.os.BatteryManager.BATTERY_HEALTH_OVERHEAT;
 import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
 import static android.os.BatteryManager.EXTRA_HEALTH;
@@ -88,6 +89,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private int mPluggedChargingSource;
     protected boolean mCharging;
     private boolean mStateUnknown = false;
+    private boolean mStateAlert = false;
     private boolean mCharged;
     protected boolean mPowerSave;
     private boolean mAodPowerSave;
@@ -164,6 +166,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         pw.print("  mIsOverheated="); pw.println(mIsOverheated);
         pw.print("  mPowerSave="); pw.println(mPowerSave);
         pw.print("  mStateUnknown="); pw.println(mStateUnknown);
+        pw.print("  mStateAlert="); pw.println(mStateAlert);
     }
 
     @Override
@@ -195,6 +198,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         cb.onBatteryUnknownStateChanged(mStateUnknown);
         cb.onWirelessChargingChanged(mWirelessCharging);
         cb.onIsOverheatedChanged(mIsOverheated);
+        cb.onBatteryAlertStateChanged(mStateAlert);
     }
 
     @Override
@@ -238,6 +242,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             if (isOverheated != mIsOverheated) {
                 mIsOverheated = isOverheated;
                 fireIsOverheatedChanged();
+            }
+            boolean isAlert = batteryHealth == BATTERY_HEALTH_DEAD;
+            if (isAlert != mStateAlert) {
+                mStateAlert = isAlert;
+                fireBatteryAlertStateChanged();
             }
 
             fireBatteryLevelChanged();
@@ -434,6 +443,15 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
     }
 
+    private void fireBatteryAlertStateChanged() {
+        synchronized (mChangeCallbacks) {
+            final int n = mChangeCallbacks.size();
+            for (int i = 0; i < n; i++) {
+                mChangeCallbacks.get(i).onBatteryAlertStateChanged(mStateAlert);
+            }
+        }
+    }
+
     @Override
     public void dispatchDemoCommand(String command, Bundle args) {
         if (!mDemoModeController.isInDemoMode()) {
@@ -445,6 +463,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         String powerSave = args.getString("powersave");
         String present = args.getString("present");
         String overheated = args.getString("overheated");
+        String alert = args.getString("alert");
         if (level != null) {
             mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
         }
@@ -462,6 +481,10 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         if (overheated != null) {
             mIsOverheated = overheated.equals("true");
             fireIsOverheatedChanged();
+        }
+        if (alert != null) {
+            mStateAlert = alert.equals("true");
+            fireBatteryAlertStateChanged();
         }
         fireBatteryLevelChanged();
     }
