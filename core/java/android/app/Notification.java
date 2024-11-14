@@ -814,8 +814,8 @@ public class Notification implements Parcelable
         if (Flags.notificationsRedesignTemplates()) {
             return switch (layoutId) {
                 case R.layout.notification_2025_template_collapsed_base,
+                     R.layout.notification_2025_template_heads_up_base,
                      R.layout.notification_2025_template_header,
-                     R.layout.notification_template_material_heads_up_base,
                      R.layout.notification_template_material_big_base,
                      R.layout.notification_template_material_big_picture,
                      R.layout.notification_template_material_big_text,
@@ -7517,7 +7517,11 @@ public class Notification implements Parcelable
         }
 
         private int getHeadsUpBaseLayoutResource() {
-            return R.layout.notification_template_material_heads_up_base;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_heads_up_base;
+            } else {
+                return R.layout.notification_template_material_heads_up_base;
+            }
         }
 
         private int getCompactHeadsUpBaseLayoutResource() {
