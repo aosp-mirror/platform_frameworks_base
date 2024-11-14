@@ -16,8 +16,11 @@
 
 package com.android.server.security.authenticationpolicy;
 
+import static android.Manifest.permission.MANAGE_SECURE_LOCK_DEVICE;
+
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 
+import android.annotation.EnforcePermission;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -32,9 +35,14 @@ import android.hardware.biometrics.events.AuthenticationStoppedInfo;
 import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.security.authenticationpolicy.AuthenticationPolicyManager;
+import android.security.authenticationpolicy.DisableSecureLockDeviceParams;
+import android.security.authenticationpolicy.EnableSecureLockDeviceParams;
+import android.security.authenticationpolicy.IAuthenticationPolicyService;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -74,6 +82,7 @@ public class AuthenticationPolicyService extends SystemService {
     private final KeyguardManager mKeyguardManager;
     private final WindowManagerInternal mWindowManager;
     private final UserManagerInternal mUserManager;
+    private SecureLockDeviceServiceInternal mSecureLockDeviceService;
     @VisibleForTesting
     final SparseIntArray mFailedAttemptsForUser = new SparseIntArray();
     private final SparseLongArray mLastLockedTimestamp = new SparseLongArray();
@@ -94,10 +103,16 @@ public class AuthenticationPolicyService extends SystemService {
         mWindowManager = Objects.requireNonNull(
                 LocalServices.getService(WindowManagerInternal.class));
         mUserManager = Objects.requireNonNull(LocalServices.getService(UserManagerInternal.class));
+        if (android.security.Flags.secureLockdown()) {
+            mSecureLockDeviceService = Objects.requireNonNull(
+                    LocalServices.getService(SecureLockDeviceServiceInternal.class));
+        }
     }
 
     @Override
-    public void onStart() {}
+    public void onStart() {
+        publishBinderService(Context.AUTHENTICATION_POLICY_SERVICE, mService);
+    }
 
     @Override
     public void onBootPhase(int phase) {
@@ -294,4 +309,36 @@ public class AuthenticationPolicyService extends SystemService {
         // next successful primary or biometric auth happens
         mLastLockedTimestamp.put(userId, SystemClock.elapsedRealtime());
     }
+
+    private final IBinder mService = new IAuthenticationPolicyService.Stub() {
+        /**
+         * @see AuthenticationPolicyManager#enableSecureLockDevice(EnableSecureLockDeviceParams)
+         * @param params EnableSecureLockDeviceParams for caller to supply params related
+         *               to the secure lock device request
+         * @return @EnableSecureLockDeviceRequestStatus int indicating the result of the Secure
+         * Lock Device request
+         */
+        @Override
+        @EnforcePermission(MANAGE_SECURE_LOCK_DEVICE)
+        @AuthenticationPolicyManager.EnableSecureLockDeviceRequestStatus
+        public int enableSecureLockDevice(EnableSecureLockDeviceParams params) {
+            enableSecureLockDevice_enforcePermission();
+            return mSecureLockDeviceService.enableSecureLockDevice(params);
+        }
+
+        /**
+         * @see AuthenticationPolicyManager#disableSecureLockDevice(DisableSecureLockDeviceParams)
+         * @param params @DisableSecureLockDeviceParams for caller to supply params related
+         *               to the secure lock device request
+         * @return @DisableSecureLockDeviceRequestStatus int indicating the result of the Secure
+         * Lock Device request
+         */
+        @Override
+        @EnforcePermission(MANAGE_SECURE_LOCK_DEVICE)
+        @AuthenticationPolicyManager.DisableSecureLockDeviceRequestStatus
+        public int disableSecureLockDevice(DisableSecureLockDeviceParams params) {
+            disableSecureLockDevice_enforcePermission();
+            return mSecureLockDeviceService.disableSecureLockDevice(params);
+        }
+    };
 }
