@@ -49,5 +49,5 @@ fun getWidth(): Dp {
 object ShortcutHelperBottomSheet {
     val DefaultWidth = 412.dp
     val LargeScreenWidthPortrait = 704.dp
-    val LargeScreenWidthLandscape = 864.dp
+    val LargeScreenWidthLandscape = 960.dp
 }
