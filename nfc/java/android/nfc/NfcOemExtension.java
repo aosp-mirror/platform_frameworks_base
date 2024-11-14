@@ -23,6 +23,7 @@ import static android.nfc.cardemulation.CardEmulation.routeIntToString;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -603,12 +604,12 @@ public final class NfcOemExtension {
     /**
      * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
      * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
-     * use {@link #resumePolling() to resume the polling.
-     * @param timeoutInMs the pause polling duration in millisecond
+     * use {@link #resumePolling()} to resume the polling.
+     * @param timeoutInMs the pause polling duration in millisecond, ranging from 0 to 40000.
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void pausePolling(int timeoutInMs) {
+    public void pausePolling(@DurationMillisLong int timeoutInMs) {
         NfcAdapter.callService(() -> NfcAdapter.sService.pausePolling(timeoutInMs));
     }
 
