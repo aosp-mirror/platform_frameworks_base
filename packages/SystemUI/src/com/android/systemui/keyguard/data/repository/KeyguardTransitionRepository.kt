@@ -305,11 +305,11 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
     }
 
     override suspend fun forceFinishCurrentTransition() {
-        withContextMutex.lock()
-
         if (lastAnimator?.isRunning != true) {
             return
         }
+
+        withContextMutex.lock()
 
         return withContext("$TAG#forceFinishCurrentTransition", mainDispatcher) {
             withContextMutex.unlock()

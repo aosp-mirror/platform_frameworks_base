@@ -35,7 +35,9 @@ import static com.android.server.display.DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DE
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_ADDED;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_CONNECTED;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_DISCONNECTED;
+import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REFRESH_RATE_CHANGED;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REMOVED;
+import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_STATE_CHANGED;
 import static com.android.server.display.layout.Layout.Display.POSITION_REAR;
 import static com.android.server.display.layout.Layout.Display.POSITION_UNKNOWN;
 import static com.android.server.utils.FoldSettingProvider.SETTING_VALUE_SELECTIVE_STAY_AWAKE;
@@ -1156,6 +1158,29 @@ public class LogicalDisplayMapperTest {
                 mLogicalDisplayMapper.getDisplayLocked(device1).getDevicePositionLocked());
         assertEquals(POSITION_REAR,
                 mLogicalDisplayMapper.getDisplayLocked(device2).getDevicePositionLocked());
+    }
+
+    @Test
+    public void updateAndGetMaskForDisplayPropertyChanges_getsPropertyChangedFlags() {
+        // Change the display state
+        DisplayInfo newDisplayInfo = new DisplayInfo();
+        newDisplayInfo.state = STATE_OFF;
+        assertEquals(LOGICAL_DISPLAY_EVENT_STATE_CHANGED,
+                mLogicalDisplayMapper.updateAndGetMaskForDisplayPropertyChanges(newDisplayInfo));
+
+        // Change the refresh rate override
+        newDisplayInfo = new DisplayInfo();
+        newDisplayInfo.refreshRateOverride = 30;
+        assertEquals(LOGICAL_DISPLAY_EVENT_REFRESH_RATE_CHANGED,
+                mLogicalDisplayMapper.updateAndGetMaskForDisplayPropertyChanges(newDisplayInfo));
+
+        // Change multiple properties
+        newDisplayInfo = new DisplayInfo();
+        newDisplayInfo.refreshRateOverride = 30;
+        newDisplayInfo.state = STATE_OFF;
+        assertEquals(LOGICAL_DISPLAY_EVENT_REFRESH_RATE_CHANGED
+                        | LOGICAL_DISPLAY_EVENT_STATE_CHANGED,
+                mLogicalDisplayMapper.updateAndGetMaskForDisplayPropertyChanges(newDisplayInfo));
     }
 
     /////////////////

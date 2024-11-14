@@ -28,7 +28,6 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
-import com.android.systemui.statusbar.notification.HeadsUpManagerPhone
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -52,6 +51,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
+import com.android.systemui.statusbar.policy.BaseHeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -101,7 +101,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     private val notifPipeline: NotifPipeline = mock()
     private val logger = HeadsUpCoordinatorLogger(logcatLogBuffer(), verbose = true)
-    private val headsUpManager: HeadsUpManagerPhone = mock()
+    private val headsUpManager: BaseHeadsUpManager = mock()
     private val headsUpViewBinder: HeadsUpViewBinder = mock()
     private val visualInterruptionDecisionProvider: VisualInterruptionDecisionProvider = mock()
     private val remoteInputManager: NotificationRemoteInputManager = mock()

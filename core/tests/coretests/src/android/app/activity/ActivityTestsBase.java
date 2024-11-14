@@ -22,7 +22,7 @@ import android.content.Intent;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 
-public class ActivityTestsBase extends AndroidTestCase 
+public class ActivityTestsBase extends AndroidTestCase
         implements PerformanceTestCase, LaunchpadActivity.CallingTest {
     public static final String PERMISSION_GRANTED =
             "com.android.frameworks.coretests.permission.TEST_GRANTED";
@@ -111,7 +111,6 @@ public class ActivityTestsBase extends AndroidTestCase
 
     public void finishWithResult(int resultCode, Intent data) {
         RuntimeException where = new RuntimeException("Original error was here");
-        where.fillInStackTrace();
         finishWithResult(resultCode, data, where);
     }
 
@@ -194,15 +193,15 @@ public class ActivityTestsBase extends AndroidTestCase
     public int getResultCode() {
         return mResultCode;
     }
-    
+
     public Intent getResultData() {
         return mData;
     }
-    
+
     public RuntimeException getResultStack() {
         return mResultStack;
     }
-    
+
     public void onTimeout() {
         String msg = mExpecting == null
                 ? "Timeout" : ("Timeout while expecting " + mExpecting);

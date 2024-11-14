@@ -37,7 +37,7 @@ android_test {
         "truth",
     ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
         "true": [
-            "service-crashrecovery.impl",
+            "service-crashrecovery-pre-jarjar",
             "framework-crashrecovery.impl",
         ],
         default: [],

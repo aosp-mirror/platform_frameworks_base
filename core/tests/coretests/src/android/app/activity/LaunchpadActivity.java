@@ -461,7 +461,6 @@ public class LaunchpadActivity extends Activity {
         mResultCode = resultCode;
         mData = data;
         mResultStack = new RuntimeException("Original error was here");
-        mResultStack.fillInStackTrace();
     }
 
     private void registerMyReceiver(IntentFilter filter) {

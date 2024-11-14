@@ -85,6 +85,12 @@ abstract class UserAwareSettingsRepository(
         }
     }
 
+    suspend fun setBoolean(name: String, value: Boolean) {
+        withContext(bgContext) {
+            userSettings.putBoolForUser(name, value, userRepository.getSelectedUserInfo().id)
+        }
+    }
+
     suspend fun getString(name: String): String? {
         return withContext(bgContext) {
             userSettings.getStringForUser(name, userRepository.getSelectedUserInfo().id)

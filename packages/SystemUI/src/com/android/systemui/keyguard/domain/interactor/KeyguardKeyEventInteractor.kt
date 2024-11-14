@@ -28,6 +28,7 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.ShadeController
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import javax.inject.Inject
@@ -39,7 +40,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardKeyEventInteractor
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val statusBarStateController: StatusBarStateController,
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val shadeController: ShadeController,

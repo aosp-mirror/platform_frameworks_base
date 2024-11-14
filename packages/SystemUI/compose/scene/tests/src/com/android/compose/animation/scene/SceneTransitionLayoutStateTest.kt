@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
@@ -35,12 +36,15 @@ import com.android.compose.test.runMonotonicClockTest
 import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Rule
@@ -185,6 +189,25 @@ class SceneTransitionLayoutStateTest {
     }
 
     @Test
+    fun snapToIdleIfClose_snapToStart_overlays() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
+        state.startTransitionImmediately(
+            animationScope = backgroundScope,
+            transition(SceneA, OverlayA, isEffectivelyShown = { false }, progress = { 0.2f }),
+        )
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
+        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Go to the initial scene if it is close to 0.
+        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
+        assertThat(state.isTransitioning()).isFalse()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneA))
+    }
+
+    @Test
     fun snapToIdleIfClose_snapToEnd() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
         state.startTransitionImmediately(
@@ -201,6 +224,25 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
         assertThat(state.isTransitioning()).isFalse()
         assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneB))
+    }
+
+    @Test
+    fun snapToIdleIfClose_snapToEnd_overlays() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
+        state.startTransitionImmediately(
+            animationScope = backgroundScope,
+            transition(SceneA, OverlayA, isEffectivelyShown = { true }, progress = { 0.8f }),
+        )
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
+        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Go to the final scene if it is close to 1.
+        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
+        assertThat(state.isTransitioning()).isFalse()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneA, setOf(OverlayA)))
     }
 
     @Test
@@ -600,5 +642,48 @@ class SceneTransitionLayoutStateTest {
         assertThrows(IllegalStateException::class.java) {
             runBlocking { state.startTransition(transition) }
         }
+    }
+
+    @Test
+    fun transitionFinishedWhenScopeIsEmpty() = runTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+
+        // Start a transition.
+        val transition = transition(from = SceneA, to = SceneB)
+        state.startTransitionImmediately(backgroundScope, transition)
+        assertThat(state.transitionState).isSceneTransition()
+
+        // Start a job in the transition scope.
+        val jobCompletable = CompletableDeferred<Unit>()
+        transition.coroutineScope.launch { jobCompletable.await() }
+
+        // Finish the transition (i.e. make its #run() method return). The transition should not be
+        // considered as finished yet given that there is a job still running in its scope.
+        transition.finish()
+        runCurrent()
+        assertThat(state.transitionState).isSceneTransition()
+
+        // Finish the job in the scope. Now the transition should be considered as finished.
+        jobCompletable.complete(Unit)
+        runCurrent()
+        assertThat(state.transitionState).isIdle()
+    }
+
+    @Test
+    fun transitionScopeIsCancelledWhenTransitionIsForceFinished() = runTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+
+        // Start a transition.
+        val transition = transition(from = SceneA, to = SceneB)
+        state.startTransitionImmediately(backgroundScope, transition)
+        assertThat(state.transitionState).isSceneTransition()
+
+        // Start a job in the transition scope that never finishes.
+        val job = transition.coroutineScope.launch { awaitCancellation() }
+
+        // Force snap state to SceneB to force finish all current transitions.
+        state.snapToScene(SceneB)
+        assertThat(state.transitionState).isIdle()
+        assertThat(job.isCancelled).isTrue()
     }
 }

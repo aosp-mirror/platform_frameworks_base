@@ -96,7 +96,35 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public PictureProfile getPictureProfile(int type, String name) {
-            return null;
+            SQLiteDatabase db = mMediaQualityDbHelper.getReadableDatabase();
+
+            String selection = PictureQuality.PARAMETER_TYPE + " = ? AND "
+                    + PictureQuality.PARAMETER_NAME + " = ?";
+            String[] selectionArguments = {Integer.toString(type), name};
+
+            try (
+                    Cursor cursor = db.query(
+                            mMediaQualityDbHelper.PICTURE_QUALITY_TABLE_NAME,
+                            getAllPictureProfileColumns(),
+                            selection,
+                            selectionArguments,
+                            /*groupBy=*/ null,
+                            /*having=*/ null,
+                            /*orderBy=*/ null)
+            ) {
+                int count = cursor.getCount();
+                if (count == 0) {
+                    return null;
+                }
+                if (count > 1) {
+                    Log.wtf(TAG, String.format(Locale.US, "%d entries found for type=%d and name=%s"
+                                    + " in %s. Should only ever be 0 or 1.", count, type, name,
+                                    mMediaQualityDbHelper.PICTURE_QUALITY_TABLE_NAME));
+                    return null;
+                }
+                cursor.moveToFirst();
+                return getPictureProfileFromCursor(cursor);
+            }
         }
 
         private String bundleToJson(Bundle bundle) {
@@ -145,17 +173,79 @@ public class MediaQualityService extends SystemService {
             return bundle;
         }
 
+        private String[] getAllPictureProfileColumns() {
+            return new String[]{
+                    PictureQuality.PARAMETER_ID,
+                    PictureQuality.PARAMETER_TYPE,
+                    PictureQuality.PARAMETER_NAME,
+                    PictureQuality.PARAMETER_INPUT_ID,
+                    PictureQuality.PARAMETER_PACKAGE,
+                    mMediaQualityDbHelper.SETTINGS
+            };
+        }
+
+        private PictureProfile getPictureProfileFromCursor(Cursor cursor) {
+            String returnId = cursor.getString(
+                    cursor.getColumnIndexOrThrow(PictureQuality.PARAMETER_ID));
+            int type = cursor.getInt(
+                    cursor.getColumnIndexOrThrow(PictureQuality.PARAMETER_TYPE));
+            String name = cursor.getString(
+                    cursor.getColumnIndexOrThrow(PictureQuality.PARAMETER_NAME));
+            String inputId = cursor.getString(
+                    cursor.getColumnIndexOrThrow(PictureQuality.PARAMETER_INPUT_ID));
+            String packageName = cursor.getString(
+                    cursor.getColumnIndexOrThrow(PictureQuality.PARAMETER_PACKAGE));
+            String settings = cursor.getString(
+                    cursor.getColumnIndexOrThrow(mMediaQualityDbHelper.SETTINGS));
+            return new PictureProfile(returnId, type, name, inputId,
+                    packageName, jsonToBundle(settings));
+        }
+
         @Override
         public List<PictureProfile> getPictureProfilesByPackage(String packageName) {
-            return new ArrayList<>();
+            String selection = PictureQuality.PARAMETER_PACKAGE + " = ?";
+            String[] selectionArguments = {packageName};
+            return getPictureProfilesBasedOnConditions(getAllPictureProfileColumns(), selection,
+                    selectionArguments);
         }
+
         @Override
         public List<PictureProfile> getAvailablePictureProfiles() {
             return new ArrayList<>();
         }
+
         @Override
         public List<String> getPictureProfilePackageNames() {
-            return new ArrayList<>();
+            String [] column = {PictureQuality.PARAMETER_NAME};
+            List<PictureProfile> pictureProfiles = getPictureProfilesBasedOnConditions(column,
+                    null, null);
+            List<String> packageNames = new ArrayList<>();
+            for (PictureProfile pictureProfile: pictureProfiles) {
+                packageNames.add(pictureProfile.getName());
+            }
+            return packageNames;
+        }
+
+        private List<PictureProfile> getPictureProfilesBasedOnConditions(String[] columns,
+                String selection, String[] selectionArguments) {
+            SQLiteDatabase db = mMediaQualityDbHelper.getReadableDatabase();
+
+            try (
+                    Cursor cursor = db.query(
+                            mMediaQualityDbHelper.PICTURE_QUALITY_TABLE_NAME,
+                            columns,
+                            selection,
+                            selectionArguments,
+                            /*groupBy=*/ null,
+                            /*having=*/ null,
+                            /*orderBy=*/ null)
+            ) {
+                List<PictureProfile> pictureProfiles = new ArrayList<>();
+                while (cursor.moveToNext()) {
+                    pictureProfiles.add(getPictureProfileFromCursor(cursor));
+                }
+                return pictureProfiles;
+            }
         }
 
         @Override

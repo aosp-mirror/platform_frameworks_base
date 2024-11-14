@@ -40,7 +40,7 @@ public final class BroadcastFilter extends IntentFilter {
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
     @VisibleForTesting
-    static final long CHANGE_RESTRICT_PRIORITY_VALUES = 371309185L;
+    static final long RESTRICT_PRIORITY_VALUES = 371309185L;
 
     // Back-pointer to the list this filter is in.
     final ReceiverList receiverList;
@@ -130,7 +130,7 @@ public final class BroadcastFilter extends IntentFilter {
             return priority;
         }
         if (!platformCompat.isChangeEnabledByUidInternalNoLogging(
-                CHANGE_RESTRICT_PRIORITY_VALUES, owningUid)) {
+                RESTRICT_PRIORITY_VALUES, owningUid)) {
             return priority;
         }
         if (!UserHandle.isCore(owningUid)) {

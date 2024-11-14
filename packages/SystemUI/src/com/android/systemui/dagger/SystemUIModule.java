@@ -100,7 +100,7 @@ import com.android.systemui.qs.QSFragmentStartableModule;
 import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recordissue.RecordIssueModule;
-import com.android.systemui.retail.dagger.RetailModeModule;
+import com.android.systemui.retail.RetailModeModule;
 import com.android.systemui.scene.shared.model.SceneContainerConfig;
 import com.android.systemui.scene.shared.model.SceneDataSource;
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator;

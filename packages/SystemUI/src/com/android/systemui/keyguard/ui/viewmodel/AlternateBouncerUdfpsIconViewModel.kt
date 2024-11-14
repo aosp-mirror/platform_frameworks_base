@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.onStart
 class AlternateBouncerUdfpsIconViewModel
 @Inject
 constructor(
-    val context: Context,
+    @ShadeDisplayAware val context: Context,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     deviceEntryBackgroundViewModel: DeviceEntryBackgroundViewModel,

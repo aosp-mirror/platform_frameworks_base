@@ -1236,6 +1236,8 @@ final class DevicePolicyEngine {
                 }
             }
             for (EnforcingAdmin admin : admins) {
+                // No need to make changes to system enforcing admins.
+                if (admin.isSystemAuthority()) break;
                 if (updatedPackage == null || updatedPackage.equals(admin.getPackageName())) {
                     if (!isPackageInstalled(admin.getPackageName(), userId)) {
                         Slogf.i(TAG, String.format(

@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.onStart
 class DeviceEntryForegroundViewModel
 @Inject
 constructor(
-    val context: Context,
+    @ShadeDisplayAware val context: Context,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     transitionInteractor: KeyguardTransitionInteractor,

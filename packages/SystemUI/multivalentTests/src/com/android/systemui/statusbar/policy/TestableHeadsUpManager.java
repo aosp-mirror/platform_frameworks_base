@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
 
 import static org.mockito.Mockito.spy;
@@ -28,8 +27,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
@@ -37,16 +42,39 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
 
     private HeadsUpEntry mLastCreatedEntry;
 
-    TestableHeadsUpManager(Context context,
+    TestableHeadsUpManager(
+            Context context,
             HeadsUpManagerLogger logger,
+            StatusBarStateController statusBarStateController,
+            KeyguardBypassController bypassController,
+            GroupMembershipManager groupMembershipManager,
+            VisualStabilityProvider visualStabilityProvider,
+            ConfigurationController configurationController,
             DelayableExecutor executor,
             GlobalSettings globalSettings,
             SystemClock systemClock,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger,
+            JavaAdapter javaAdapter,
+            ShadeInteractor shadeInteractor,
             AvalancheController avalancheController) {
-        super(context, logger, mockExecutorHandler(executor), globalSettings, systemClock,
-                executor, accessibilityManagerWrapper, uiEventLogger, avalancheController);
+        super(
+                context,
+                logger,
+                statusBarStateController,
+                bypassController,
+                groupMembershipManager,
+                visualStabilityProvider,
+                configurationController,
+                mockExecutorHandler(executor),
+                globalSettings,
+                systemClock,
+                executor,
+                accessibilityManagerWrapper,
+                uiEventLogger,
+                javaAdapter,
+                shadeInteractor,
+                avalancheController);
 
         mTouchAcceptanceDelay = BaseHeadsUpManagerTest.TEST_TOUCH_ACCEPTANCE_TIME;
         mMinimumDisplayTime = BaseHeadsUpManagerTest.TEST_MINIMUM_DISPLAY_TIME;
@@ -59,11 +87,6 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
     protected HeadsUpEntry createHeadsUpEntry(NotificationEntry entry) {
         mLastCreatedEntry = spy(super.createHeadsUpEntry(entry));
         return mLastCreatedEntry;
-    }
-
-    @Override
-    public int getContentFlag() {
-        return FLAG_CONTENT_VIEW_CONTRACTED;
     }
 
     // The following are only implemented by HeadsUpManagerPhone. If you need them, use that.

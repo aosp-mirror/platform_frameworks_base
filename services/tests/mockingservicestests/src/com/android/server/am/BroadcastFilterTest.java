@@ -59,7 +59,7 @@ public class BroadcastFilterTest {
     @EnableFlags(Flags.FLAG_RESTRICT_PRIORITY_VALUES)
     public void testCalculateAdjustedPriority() {
         doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), anyInt());
 
         {
             // Pairs of {initial-priority, expected-adjusted-priority}
@@ -96,7 +96,7 @@ public class BroadcastFilterTest {
     @EnableFlags(Flags.FLAG_RESTRICT_PRIORITY_VALUES)
     public void testCalculateAdjustedPriority_withChangeIdDisabled() {
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), anyInt());
 
         {
             // Pairs of {initial-priority, expected-adjusted-priority}
@@ -133,7 +133,7 @@ public class BroadcastFilterTest {
     @DisableFlags(Flags.FLAG_RESTRICT_PRIORITY_VALUES)
     public void testCalculateAdjustedPriority_withFlagDisabled() {
         doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), anyInt());
 
         {
             // Pairs of {initial-priority, expected-adjusted-priority}
@@ -170,7 +170,7 @@ public class BroadcastFilterTest {
     @DisableFlags(Flags.FLAG_RESTRICT_PRIORITY_VALUES)
     public void testCalculateAdjustedPriority_withFlagDisabled_withChangeIdDisabled() {
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), anyInt());
 
         {
             // Pairs of {initial-priority, expected-adjusted-priority}

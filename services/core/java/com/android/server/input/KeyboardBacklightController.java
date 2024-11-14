@@ -20,6 +20,7 @@ import android.animation.ValueAnimator;
 import android.annotation.BinderThread;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IKeyboardBacklightState;
@@ -81,9 +82,6 @@ final class KeyboardBacklightController implements
     private static final String UEVENT_KEYBOARD_BACKLIGHT_TAG = "kbd_backlight";
 
     @VisibleForTesting
-    static final long USER_INACTIVITY_THRESHOLD_MILLIS = Duration.ofSeconds(30).toMillis();
-
-    @VisibleForTesting
     static final int[] DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL =
             new int[DEFAULT_NUM_BRIGHTNESS_CHANGE_STEPS + 1];
 
@@ -112,6 +110,7 @@ final class KeyboardBacklightController implements
     private AmbientKeyboardBacklightController.AmbientKeyboardBacklightListener mAmbientListener;
 
     private int mAmbientBacklightValue = 0;
+    private final int mUserInactivityThresholdMs;
 
     static {
         // Fixed brightness levels to avoid issues when converting back and forth from the
@@ -139,6 +138,9 @@ final class KeyboardBacklightController implements
         mAnimatorFactory = animatorFactory;
         mAmbientController = new AmbientKeyboardBacklightController(context, looper);
         mUEventManager = uEventManager;
+        Resources res = mContext.getResources();
+        mUserInactivityThresholdMs = res.getInteger(
+                com.android.internal.R.integer.config_keyboardBacklightTimeoutMs);
     }
 
     @Override
@@ -300,7 +302,7 @@ final class KeyboardBacklightController implements
         }
         mHandler.removeMessages(MSG_NOTIFY_USER_INACTIVITY);
         mHandler.sendEmptyMessageAtTime(MSG_NOTIFY_USER_INACTIVITY,
-                SystemClock.uptimeMillis() + USER_INACTIVITY_THRESHOLD_MILLIS);
+                SystemClock.uptimeMillis() + mUserInactivityThresholdMs);
     }
 
     private void handleUserInactivity() {

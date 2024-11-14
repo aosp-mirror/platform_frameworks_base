@@ -32,6 +32,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.sdk.Flags;
+import android.sysprop.BackportedFixesProperties;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -1612,12 +1613,25 @@ public class Build {
      * is not applicable on this device,
      * otherwise {@link #BACKPORTED_FIX_STATUS_UNKNOWN}.
      */
-
     @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
     public static @BackportedFixStatus int getBackportedFixStatus(long id) {
-        // TODO: b/308461809 - query aliases from system prop
-        // TODO: b/372518979 - use backported fix datastore.
-        return BACKPORTED_FIX_STATUS_UNKNOWN;
+        if (id <= 0 || id > 1023) {
+            return BACKPORTED_FIX_STATUS_UNKNOWN;
+        }
+        return isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
+                ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
+    }
+
+    private static boolean isBitSet(List<Long> bitsetLongArray, int bitIndex) {
+        // Because java.util.BitSet is not threadsafe do the calculations here instead.
+        if (bitIndex < 0) {
+            return false;
+        }
+        int arrayIndex = bitIndex >> 6;
+        if (bitsetLongArray.size() <= arrayIndex) {
+            return false;
+        }
+        return (bitsetLongArray.get(arrayIndex) & (1L << bitIndex)) != 0;
     }
 
     /**

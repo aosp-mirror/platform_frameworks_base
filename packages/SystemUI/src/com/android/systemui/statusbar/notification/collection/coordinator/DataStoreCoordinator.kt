@@ -27,13 +27,13 @@ import com.android.systemui.statusbar.notification.collection.render.requireSumm
 import javax.inject.Inject
 
 /**
- * A small coordinator which updates the notif stack (the view layer which holds notifications)
- * with high-level data after the stack is populated with the final entries.
+ * A small coordinator which updates the notif stack (the view layer which holds notifications) with
+ * high-level data after the stack is populated with the final entries.
  */
 @CoordinatorScope
-class DataStoreCoordinator @Inject internal constructor(
-    private val notifLiveDataStoreImpl: NotifLiveDataStoreImpl
-) : CoreCoordinator {
+class DataStoreCoordinator
+@Inject
+internal constructor(private val notifLiveDataStoreImpl: NotifLiveDataStoreImpl) : CoreCoordinator {
 
     override fun attach(pipeline: NotifPipeline) {
         pipeline.addOnAfterRenderListListener { entries, _ -> onAfterRenderList(entries) }

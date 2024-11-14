@@ -18,6 +18,7 @@ package android.hardware;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.hardware.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -72,9 +73,11 @@ public final class OverlayProperties implements Parcelable {
     }
 
     /**
-     * Gets the lut properties of the display.
-     * @hide
+     * Returns the lut properties of the device.
      */
+    @FlaggedApi(Flags.FLAG_LUTS_API)
+    @SuppressLint("ArrayReturn")
+    @NonNull
     public LutProperties[] getLutProperties() {
         if (mNativeObject == 0) {
             return null;

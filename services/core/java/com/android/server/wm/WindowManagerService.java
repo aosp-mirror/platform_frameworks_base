@@ -10233,6 +10233,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Resets the spatial ordering of recents for testing purposes.
+     */
+    void resetFreezeRecentTaskListReordering() {
+        if (!checkCallingPermission(permission.MANAGE_ACTIVITY_TASKS,
+                "resetFreezeRecentTaskListReordering()")) {
+            throw new SecurityException("Requires MANAGE_ACTIVITY_TASKS permission");
+        }
+        mAtmService.getRecentTasks().resetFreezeTaskListReorderingOnTimeout();
+    }
+
     @Override
     public void registerTrustedPresentationListener(IBinder window,
             ITrustedPresentationListener listener,

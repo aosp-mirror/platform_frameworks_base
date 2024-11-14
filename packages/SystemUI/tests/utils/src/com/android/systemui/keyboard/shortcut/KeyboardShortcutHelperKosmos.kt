@@ -109,6 +109,7 @@ val Kosmos.customShortcutCategoriesRepository by
             applicationCoroutineScope,
             testDispatcher,
             shortcutCategoriesUtils,
+            applicationContext,
         )
     }
 

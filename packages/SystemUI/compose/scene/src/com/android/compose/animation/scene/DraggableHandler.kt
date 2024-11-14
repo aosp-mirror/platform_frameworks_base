@@ -530,16 +530,12 @@ internal class Swipes(val upOrLeft: Swipe.Resolved, val downOrRight: Swipe.Resol
 }
 
 internal class NestedScrollHandlerImpl(
-    private val layoutImpl: SceneTransitionLayoutImpl,
-    private val orientation: Orientation,
+    private val draggableHandler: DraggableHandlerImpl,
     internal var topOrLeftBehavior: NestedScrollBehavior,
     internal var bottomOrRightBehavior: NestedScrollBehavior,
     internal var isExternalOverscrollGesture: () -> Boolean,
     private val pointersInfoOwner: PointersInfoOwner,
 ) {
-    private val layoutState = layoutImpl.state
-    private val draggableHandler = layoutImpl.draggableHandler(orientation)
-
     val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
     private fun nestedScrollConnection(): PriorityNestedScrollConnection {
@@ -550,13 +546,15 @@ internal class NestedScrollHandlerImpl(
         var lastPointersDown: PointersInfo.PointersDown? = null
 
         fun shouldEnableSwipes(): Boolean {
-            return layoutImpl.contentForUserActions().shouldEnableSwipes(orientation)
+            return draggableHandler.layoutImpl
+                .contentForUserActions()
+                .shouldEnableSwipes(draggableHandler.orientation)
         }
 
         var isIntercepting = false
 
         return PriorityNestedScrollConnection(
-            orientation = orientation,
+            orientation = draggableHandler.orientation,
             canStartPreScroll = { offsetAvailable, offsetBeforeStart, _ ->
                 val pointersDown: PointersInfo.PointersDown? =
                     when (val info = pointersInfoOwner.pointersInfo()) {
@@ -578,8 +576,9 @@ internal class NestedScrollHandlerImpl(
                         draggableHandler.shouldImmediatelyIntercept(pointersDown)
                 if (!canInterceptSwipeTransition) return@PriorityNestedScrollConnection false
 
+                val layoutImpl = draggableHandler.layoutImpl
                 val threshold = layoutImpl.transitionInterceptionThreshold
-                val hasSnappedToIdle = layoutState.snapToIdleIfClose(threshold)
+                val hasSnappedToIdle = layoutImpl.state.snapToIdleIfClose(threshold)
                 if (hasSnappedToIdle) {
                     // If the current swipe transition is closed to 0f or 1f, then we want to
                     // interrupt the transition (snapping it to Idle) and scroll the list.

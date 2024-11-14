@@ -2298,6 +2298,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         final String pkg = "package";
         final String expectedGroupKey_alerting = GroupHelper.getFullAggregateGroupKey(pkg,
                 AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
+        final int numNotifications = 2 * AUTOGROUP_AT_COUNT;
         int numNotificationChannel1 = 0;
         final NotificationChannel channel1 = new NotificationChannel("TEST_CHANNEL_ID1",
                 "TEST_CHANNEL_ID1", IMPORTANCE_DEFAULT);
@@ -2307,7 +2308,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
         // Post notifications with different channels that autogroup within the same section
         NotificationRecord r;
-        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+        for (int i = 0; i < numNotifications; i++) {
             if (i % 2 == 0) {
                 r = getNotificationRecord(pkg, i, String.valueOf(i),
                         UserHandle.SYSTEM, "testGrp " + i, false, channel1);
@@ -2324,12 +2325,12 @@ public class GroupHelperTest extends UiServiceTestCase {
                 "TEST_CHANNEL_ID1");
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
                 eq(expectedGroupKey_alerting), anyInt(), eq(expectedSummaryAttr));
-        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+        verify(mCallback, times(numNotifications)).addAutoGroup(anyString(),
                 eq(expectedGroupKey_alerting), eq(true));
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
-        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
-                any());
+        verify(mCallback, times(numNotifications - AUTOGROUP_AT_COUNT)).updateAutogroupSummary(
+                anyInt(), anyString(), anyString(), any());
         Mockito.reset(mCallback);
 
         // Update channel1's importance
@@ -2375,7 +2376,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         final List<NotificationRecord> notificationList = new ArrayList<>();
         final String pkg = "package";
         final int summaryId = 0;
-        final int numChildNotif = 4;
+        final int numChildNotif = 2 * AUTOGROUP_AT_COUNT;
 
         // Create an app-provided group: summary + child notifications
         final NotificationChannel channel1 = new NotificationChannel("TEST_CHANNEL_ID1",
@@ -2435,8 +2436,8 @@ public class GroupHelperTest extends UiServiceTestCase {
                 eq(expectedGroupKey_social), eq(true));
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
-        verify(mCallback, times(numChildNotif / 2)).updateAutogroupSummary(anyInt(), anyString(),
-                anyString(), any());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
         verify(mCallback, times(numChildNotif)).removeAppProvidedSummaryOnClassification(
                 anyString(), eq(originalAppGroupKey));
     }
@@ -2513,9 +2514,10 @@ public class GroupHelperTest extends UiServiceTestCase {
         final List<NotificationRecord> notificationList = new ArrayList<>();
         final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
         final String pkg = "package";
+        final int numChildNotifications = AUTOGROUP_AT_COUNT;
 
         // Post singleton groups, above forced group limit
-        for (int i = 0; i < AUTOGROUP_SINGLETONS_AT_COUNT; i++) {
+        for (int i = 0; i < numChildNotifications; i++) {
             NotificationRecord summary = getNotificationRecord(pkg, i,
                     String.valueOf(i), UserHandle.SYSTEM, "testGrp " + i, true);
             notificationList.add(summary);
@@ -2545,13 +2547,13 @@ public class GroupHelperTest extends UiServiceTestCase {
         // Check that notifications are forced grouped and app-provided summaries are canceled
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
                 eq(expectedGroupKey_social), anyInt(), eq(expectedSummaryAttr_social));
-        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).addAutoGroup(anyString(),
+        verify(mCallback, times(numChildNotifications)).addAutoGroup(anyString(),
                 eq(expectedGroupKey_social), eq(true));
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
-        verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
                 any());
-        verify(mCallback, times(2)).removeAppProvidedSummaryOnClassification(
+        verify(mCallback, times(numChildNotifications)).removeAppProvidedSummaryOnClassification(
                 anyString(), anyString());
 
         // Adjust group key and cancel summaries
@@ -2593,14 +2595,16 @@ public class GroupHelperTest extends UiServiceTestCase {
                 AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
         String expectedTriggeringKey = null;
         // Post singleton groups, above forced group limit
-        for (int i = 0; i < AUTOGROUP_SINGLETONS_AT_COUNT; i++) {
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
             NotificationRecord summary = getNotificationRecord(pkg, i,
                     String.valueOf(i), UserHandle.SYSTEM, "testGrp " + i, true);
             notificationList.add(summary);
             NotificationRecord child = getNotificationRecord(pkg, i + 42,
                     String.valueOf(i + 42), UserHandle.SYSTEM, "testGrp " + i, false);
             notificationList.add(child);
-            expectedTriggeringKey = child.getKey();
+            if (i == AUTOGROUP_SINGLETONS_AT_COUNT - 1) {
+                expectedTriggeringKey = child.getKey();
+            }
             summaryByGroup.put(summary.getGroupKey(), summary);
             mGroupHelper.onNotificationPostedWithDelay(child, notificationList, summaryByGroup);
             summary.isCanceled = true;  // simulate removing the app summary
@@ -2611,14 +2615,8 @@ public class GroupHelperTest extends UiServiceTestCase {
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg),
                 eq(expectedTriggeringKey), eq(expectedGroupKey_alerting), anyInt(),
                 eq(getNotificationAttributes(BASE_FLAGS)));
-        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).addAutoGroup(anyString(),
-                eq(expectedGroupKey_alerting), eq(true));
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
-        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
-                any());
-        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).removeAppProvidedSummary(
-                anyString());
         assertThat(mGroupHelper.findCanceledSummary(pkg, String.valueOf(0), 0,
                 UserHandle.SYSTEM.getIdentifier())).isNotNull();
         assertThat(mGroupHelper.findCanceledSummary(pkg, String.valueOf(1), 1,
@@ -2645,12 +2643,12 @@ public class GroupHelperTest extends UiServiceTestCase {
         // Check that all notifications are moved to the social section group
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
                 eq(expectedGroupKey_social), anyInt(), eq(expectedSummaryAttr_social));
-        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).addAutoGroup(anyString(),
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
                 eq(expectedGroupKey_social), eq(true));
         // Check that the alerting section group is removed
         verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), eq(pkg),
                 eq(expectedGroupKey_alerting));
-        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).updateAutogroupSummary(anyInt(),
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).updateAutogroupSummary(anyInt(),
                 anyString(), anyString(), any());
     }
 
@@ -2666,7 +2664,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         final String pkg = "package";
 
         final int summaryId = 0;
-        final int numChildren = 3;
+        final int numChildren = AUTOGROUP_AT_COUNT;
         // Post a regular/valid group: summary + notifications
         NotificationRecord summary = getNotificationRecord(pkg, summaryId,
                 String.valueOf(summaryId), UserHandle.SYSTEM, "testGrp", true);
@@ -2706,10 +2704,208 @@ public class GroupHelperTest extends UiServiceTestCase {
                 eq(true));
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
-        verify(mCallback, times(numChildren - 1)).updateAutogroupSummary(anyInt(), anyString(),
-                anyString(), any());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
         verify(mCallback, times(numChildren)).removeAppProvidedSummaryOnClassification(anyString(),
                 anyString());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            FLAG_NOTIFICATION_CLASSIFICATION})
+    public void testUnbundleNotification_originalSummaryMissing_autogroupInNewSection() {
+        // Check that unbundled notifications are moved to the original section and aggregated
+        // with existing autogrouped notifications
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        final String pkg = "package";
+
+        final int summaryId = 0;
+        final int numChildren = AUTOGROUP_AT_COUNT - 1;
+        // Post a regular/valid group: summary + notifications (one less than autogroup limit)
+        NotificationRecord summary = getNotificationRecord(pkg, summaryId,
+                String.valueOf(summaryId), UserHandle.SYSTEM, "testGrp", true);
+        notificationList.add(summary);
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        final String originalAppGroupKey = summary.getGroupKey();
+        final NotificationChannel originalChannel = summary.getChannel();
+        for (int i = 0; i < numChildren; i++) {
+            NotificationRecord child = getNotificationRecord(pkg, i + 42, String.valueOf(i + 42),
+                    UserHandle.SYSTEM, "testGrp", false);
+            notificationList.add(child);
+            mGroupHelper.onNotificationPostedWithDelay(child, notificationList, summaryByGroup);
+        }
+
+        // Classify/bundle all child notifications: original group & summary is removed
+        final NotificationChannel socialChannel = new NotificationChannel(
+                NotificationChannel.SOCIAL_MEDIA_ID, NotificationChannel.SOCIAL_MEDIA_ID,
+                IMPORTANCE_DEFAULT);
+        for (NotificationRecord record: notificationList) {
+            if (record.getOriginalGroupKey().contains("testGrp")
+                    && record.getNotification().isGroupChild()) {
+                record.updateNotificationChannel(socialChannel);
+                mGroupHelper.onChannelUpdated(record);
+            }
+        }
+
+        // Check that no autogroup summaries were created for the social section
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any());
+        verify(mCallback, never()).addAutoGroup(anyString(), anyString(), anyBoolean());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
+        verify(mCallback, times(numChildren)).removeAppProvidedSummaryOnClassification(
+                anyString(), eq(originalAppGroupKey));
+
+        // Cancel summary
+        summary.isCanceled = true;
+        summaryByGroup.clear();
+        notificationList.remove(summary);
+
+        // Add 1 ungrouped notification in the original section
+        NotificationRecord ungroupedNotification = getNotificationRecord(pkg, 4242,
+                String.valueOf(4242), UserHandle.SYSTEM);
+        notificationList.add(ungroupedNotification);
+        mGroupHelper.onNotificationPosted(ungroupedNotification, false);
+
+        // Unbundle the bundled notifications => notifications are moved back to the original group
+        // and an aggregate group is created because autogroup limit is reached
+        reset(mCallback);
+        for (NotificationRecord record: notificationList) {
+            if (record.getNotification().isGroupChild()
+                    && record.getOriginalGroupKey().contains("testGrp")
+                    && NotificationChannel.SYSTEM_RESERVED_IDS.contains(
+                        record.getChannel().getId())) {
+                record.updateNotificationChannel(originalChannel);
+                mGroupHelper.onNotificationUnbundled(record, false);
+            }
+        }
+
+        // Check that a new aggregate group is created
+        final String expectedGroupKey_alerting = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey_alerting), anyInt(), any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey_alerting), eq(true));
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, times(numChildren)).removeAutoGroupSummary(anyInt(), anyString(),
+                anyString());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION,
+            FLAG_NOTIFICATION_CLASSIFICATION})
+    public void testUnbundleNotification_originalSummaryExists() {
+        // Check that unbundled notifications are moved to the original section and original group
+        // when the original summary is still present
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        final String pkg = "package";
+
+        final int summaryId = 0;
+        final int numChildren = AUTOGROUP_AT_COUNT + 1;
+        // Post a regular/valid group: summary + notifications
+        NotificationRecord summary = getNotificationRecord(pkg, summaryId,
+                String.valueOf(summaryId), UserHandle.SYSTEM, "testGrp", true);
+        notificationList.add(summary);
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        final String originalAppGroupKey = summary.getGroupKey();
+        final NotificationChannel originalChannel = summary.getChannel();
+        for (int i = 0; i < numChildren; i++) {
+            NotificationRecord child = getNotificationRecord(pkg, i + 42, String.valueOf(i + 42),
+                    UserHandle.SYSTEM, "testGrp", false);
+            notificationList.add(child);
+            mGroupHelper.onNotificationPostedWithDelay(child, notificationList, summaryByGroup);
+        }
+
+        // Classify/bundle child notifications: all except one, to keep the original group
+        final NotificationChannel socialChannel = new NotificationChannel(
+                NotificationChannel.SOCIAL_MEDIA_ID, NotificationChannel.SOCIAL_MEDIA_ID,
+                IMPORTANCE_DEFAULT);
+        final String expectedGroupKey_social = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "SocialSection", UserHandle.SYSTEM.getIdentifier());
+        final NotificationAttributes expectedSummaryAttr_social = new NotificationAttributes(
+                BASE_FLAGS, mSmallIcon, COLOR_DEFAULT, DEFAULT_VISIBILITY, DEFAULT_GROUP_ALERT,
+                NotificationChannel.SOCIAL_MEDIA_ID);
+        int numChildrenBundled = 0;
+        for (NotificationRecord record: notificationList) {
+            if (record.getOriginalGroupKey().contains("testGrp")
+                    && record.getNotification().isGroupChild()) {
+                record.updateNotificationChannel(socialChannel);
+                mGroupHelper.onChannelUpdated(record);
+                numChildrenBundled++;
+                if (numChildrenBundled == AUTOGROUP_AT_COUNT) {
+                    break;
+                }
+            }
+        }
+
+        // Check that 1 autogroup summaries were created for the social section
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey_social), anyInt(), eq(expectedSummaryAttr_social));
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey_social), eq(true));
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).removeAppProvidedSummaryOnClassification(
+                anyString(), eq(originalAppGroupKey));
+
+        // Adjust group key and cancel summaries
+        for (NotificationRecord record: notificationList) {
+            if (record.getNotification().isGroupSummary()) {
+                record.isCanceled = true;
+            } else if (record.getOriginalGroupKey().contains("testGrp")
+                        && NotificationChannel.SYSTEM_RESERVED_IDS.contains(
+                        record.getChannel().getId())) {
+                record.setOverrideGroupKey(expectedGroupKey_social);
+            }
+        }
+
+        // Add 1 ungrouped notification in the original section
+        NotificationRecord ungroupedNotification = getNotificationRecord(pkg, 4242,
+                String.valueOf(4242), UserHandle.SYSTEM);
+        notificationList.add(ungroupedNotification);
+        mGroupHelper.onNotificationPosted(ungroupedNotification, false);
+
+        // Unbundle the bundled notifications => social section summary is destroyed
+        // and notifications are moved back to the original group
+        reset(mCallback);
+        for (NotificationRecord record: notificationList) {
+            if (record.getNotification().isGroupChild()
+                    && record.getOriginalGroupKey().contains("testGrp")
+                    && NotificationChannel.SYSTEM_RESERVED_IDS.contains(
+                        record.getChannel().getId())) {
+                record.updateNotificationChannel(originalChannel);
+                mGroupHelper.onNotificationUnbundled(record, true);
+            }
+        }
+
+        // Check that the autogroup summary for the social section was removed
+        // and that no new autogroup summaries were created
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any());
+        verify(mCallback, never()).addAutoGroup(anyString(), anyString(), anyBoolean());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), eq(pkg),
+                eq(expectedGroupKey_social));
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).updateAutogroupSummary(anyInt(), eq(pkg),
+                eq(expectedGroupKey_social), any());
+
+        for (NotificationRecord record: notificationList) {
+            if (record.getNotification().isGroupChild()
+                    && record.getOriginalGroupKey().contains("testGrp")) {
+                assertThat(record.getSbn().getOverrideGroupKey()).isNull();
+            }
+        }
     }
 
     @Test

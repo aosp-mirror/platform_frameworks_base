@@ -226,6 +226,9 @@ public class DisplayManagerServiceTest {
             "EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED";
     private static final String EVENT_DISPLAY_CONNECTED = "EVENT_DISPLAY_CONNECTED";
     private static final String EVENT_DISPLAY_DISCONNECTED = "EVENT_DISPLAY_DISCONNECTED";
+    private static final String EVENT_DISPLAY_REFRESH_RATE_CHANGED =
+            "EVENT_DISPLAY_REFRESH_RATE_CHANGED";
+    private static final String EVENT_DISPLAY_STATE_CHANGED = "EVENT_DISPLAY_STATE_CHANGED";
     private static final String DISPLAY_GROUP_EVENT_ADDED = "DISPLAY_GROUP_EVENT_ADDED";
     private static final String DISPLAY_GROUP_EVENT_REMOVED = "DISPLAY_GROUP_EVENT_REMOVED";
     private static final String DISPLAY_GROUP_EVENT_CHANGED = "DISPLAY_GROUP_EVENT_CHANGED";
@@ -4234,6 +4237,10 @@ public class DisplayManagerServiceTest {
                     return EVENT_DISPLAY_CONNECTED;
                 case DisplayManagerGlobal.EVENT_DISPLAY_DISCONNECTED:
                     return EVENT_DISPLAY_DISCONNECTED;
+                case DisplayManagerGlobal.EVENT_DISPLAY_REFRESH_RATE_CHANGED:
+                    return EVENT_DISPLAY_REFRESH_RATE_CHANGED;
+                case DisplayManagerGlobal.EVENT_DISPLAY_STATE_CHANGED:
+                    return EVENT_DISPLAY_STATE_CHANGED;
                 default:
                     return "UNKNOWN: " + eventType;
             }

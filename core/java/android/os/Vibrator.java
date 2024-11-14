@@ -35,6 +35,7 @@ import android.media.AudioAttributes;
 import android.os.vibrator.Flags;
 import android.os.vibrator.VendorVibrationSession;
 import android.os.vibrator.VibrationConfig;
+import android.os.vibrator.VibratorEnvelopeEffectInfo;
 import android.os.vibrator.VibratorFrequencyProfile;
 import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.Log;
@@ -136,6 +137,9 @@ public abstract class Vibrator {
     // This is lazily loaded only for the few clients that need this (e. Settings app).
     @Nullable
     private volatile VibrationConfig mVibrationConfig;
+
+    private VibratorFrequencyProfile mVibratorFrequencyProfile;
+    private VibratorEnvelopeEffectInfo mVibratorEnvelopeEffectInfo;
 
     /**
      * @hide to prevent subclassing from outside of the framework
@@ -351,7 +355,11 @@ public abstract class Vibrator {
             return null;
         }
 
-        return new VibratorFrequencyProfile(frequencyProfile);
+        if (mVibratorFrequencyProfile == null) {
+            mVibratorFrequencyProfile = new VibratorFrequencyProfile(frequencyProfile);
+        }
+
+        return mVibratorFrequencyProfile;
     }
 
     /**
@@ -383,70 +391,28 @@ public abstract class Vibrator {
     }
 
     /**
-     * Retrieves the maximum duration supported for an envelope effect, in milliseconds.
+     * Retrieves the vibrator's capabilities and limitations for envelope effects.
      *
-     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
-     * this value will be positive. Devices with envelope effects capabilities guarantees a
-     * maximum duration equivalent to the product of {@link #getMaxEnvelopeEffectSize()} and
-     * {@link #getMaxEnvelopeEffectControlPointDurationMillis()}. If the device does not support
-     * envelope effects, this method will return 0.
+     * <p>These parameters can be used with {@link VibrationEffect.WaveformEnvelopeBuilder}
+     * to create custom envelope effects.
      *
-     * @return The maximum duration (in milliseconds) allowed for an envelope effect, or 0 if
-     * envelope effects are not supported.
+     * @return The vibrator's envelope effect information, or null if not supported. If this
+     * vibrator is a composite of multiple physical devices then this will return a profile
+     * supported in all devices, or null if the intersection is empty or not available.
+     *
+     * @see VibrationEffect.WaveformEnvelopeBuilder
      */
     @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    public int getMaxEnvelopeEffectDurationMillis() {
-        return getInfo().getMaxEnvelopeEffectDurationMillis();
-    }
+    @NonNull
+    public VibratorEnvelopeEffectInfo getEnvelopeEffectInfo() {
+        if (mVibratorEnvelopeEffectInfo == null) {
+            mVibratorEnvelopeEffectInfo = new VibratorEnvelopeEffectInfo(
+                    getInfo().getMaxEnvelopeEffectSize(),
+                    getInfo().getMinEnvelopeEffectControlPointDurationMillis(),
+                    getInfo().getMaxEnvelopeEffectControlPointDurationMillis());
+        }
 
-    /**
-     * Retrieves the maximum number of control points supported for an envelope effect.
-     *
-     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
-     * this value will be positive. Devices with envelope effects capabilities guarantee support
-     * for a minimum of 16 control points. If the device does not support envelope effects,
-     * this method will return 0.
-     *
-     * @return the maximum number of control points allowed for an envelope effect, or 0 if
-     * envelope effects are not supported.
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    public int getMaxEnvelopeEffectSize() {
-        return getInfo().getMaxEnvelopeEffectSize();
-    }
-
-    /**
-     * Retrieves the minimum duration supported between two control points within an envelope
-     * effect, in milliseconds.
-     *
-     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
-     * this value will be positive. Devices with envelope effects capabilities guarantee
-     * support for durations down to at least 20 milliseconds. If the device does
-     * not support envelope effects, this method will return 0.
-     *
-     * @return the minimum allowed duration between two control points in an envelope effect,
-     * or 0 if envelope effects are not supported.
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    public int getMinEnvelopeEffectControlPointDurationMillis() {
-        return getInfo().getMinEnvelopeEffectControlPointDurationMillis();
-    }
-
-    /**
-     * Retrieves the maximum duration supported between two control points within an envelope
-     * effect, in milliseconds.
-     *
-     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
-     * this value will be positive. Devices with envelope effects capabilities guarantee support
-     * for durations up to at least 1 second. If the device does not support envelope effects,
-     * this method will return 0.
-     *
-     * @return the maximum allowed duration between two control points in an envelope effect,
-     * or 0 if envelope effects are not supported.
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    public int getMaxEnvelopeEffectControlPointDurationMillis() {
-        return getInfo().getMaxEnvelopeEffectControlPointDurationMillis();
+        return mVibratorEnvelopeEffectInfo;
     }
 
     /**

@@ -280,6 +280,10 @@ final class EnforcingAdmin {
         return getAuthorities().contains(authority);
     }
 
+    boolean isSystemAuthority() {
+        return mIsSystemAuthority;
+    }
+
     @NonNull
     String getPackageName() {
         return mPackageName;

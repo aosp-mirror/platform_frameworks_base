@@ -50,6 +50,8 @@ import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.transformation.CustomPropertyTransformation
+import com.android.compose.animation.scene.transformation.InterpolatedPropertyTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.TransformationWithRange
@@ -1308,7 +1310,14 @@ private inline fun <T> computeValue(
                 checkNotNull(if (currentContent == toContent) toState else fromState)
             val idleValue = contentValue(overscrollState)
             val targetValue =
-                with(propertySpec.transformation) {
+                with(
+                    propertySpec.transformation.requireInterpolatedTransformation(
+                        element,
+                        transition,
+                    ) {
+                        "Custom transformations in overscroll specs should not be possible"
+                    }
+                ) {
                     layoutImpl.propertyTransformationScope.transform(
                         currentContent,
                         element.key,
@@ -1390,7 +1399,7 @@ private inline fun <T> computeValue(
     // fromContent or toContent during interruptions.
     val content = contentState.content
 
-    val transformation =
+    val transformationWithRange =
         transformation(transition.transformationSpec.transformations(element.key, content))
 
     val previewTransformation =
@@ -1403,7 +1412,14 @@ private inline fun <T> computeValue(
         val idleValue = contentValue(contentState)
         val isEntering = content == toContent
         val previewTargetValue =
-            with(previewTransformation.transformation) {
+            with(
+                previewTransformation.transformation.requireInterpolatedTransformation(
+                    element,
+                    transition,
+                ) {
+                    "Custom transformations in preview specs should not be possible"
+                }
+            ) {
                 layoutImpl.propertyTransformationScope.transform(
                     content,
                     element.key,
@@ -1413,8 +1429,15 @@ private inline fun <T> computeValue(
             }
 
         val targetValueOrNull =
-            transformation?.let { transformation ->
-                with(transformation.transformation) {
+            transformationWithRange?.let { transformation ->
+                with(
+                    transformation.transformation.requireInterpolatedTransformation(
+                        element,
+                        transition,
+                    ) {
+                        "Custom transformations are not allowed for properties with a preview"
+                    }
+                ) {
                     layoutImpl.propertyTransformationScope.transform(
                         content,
                         element.key,
@@ -1461,7 +1484,7 @@ private inline fun <T> computeValue(
             lerp(
                 lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress),
                 idleValue,
-                transformation?.range?.progress(transition.progress) ?: transition.progress,
+                transformationWithRange?.range?.progress(transition.progress) ?: transition.progress,
             )
         } else {
             if (targetValueOrNull == null) {
@@ -1474,22 +1497,39 @@ private inline fun <T> computeValue(
                 lerp(
                     lerp(idleValue, previewTargetValue, previewRangeProgress),
                     targetValueOrNull,
-                    transformation.range?.progress(transition.progress) ?: transition.progress,
+                    transformationWithRange.range?.progress(transition.progress)
+                        ?: transition.progress,
                 )
             }
         }
     }
 
-    if (transformation == null) {
+    if (transformationWithRange == null) {
         // If there is no transformation explicitly associated to this element value, let's use
         // the value given by the system (like the current position and size given by the layout
         // pass).
         return currentValue()
     }
 
+    val transformation = transformationWithRange.transformation
+    when (transformation) {
+        is CustomPropertyTransformation ->
+            return with(transformation) {
+                layoutImpl.propertyTransformationScope.transform(
+                    content,
+                    element.key,
+                    transition,
+                    transition.coroutineScope,
+                )
+            }
+        is InterpolatedPropertyTransformation -> {
+            /* continue */
+        }
+    }
+
     val idleValue = contentValue(contentState)
     val targetValue =
-        with(transformation.transformation) {
+        with(transformation) {
             layoutImpl.propertyTransformationScope.transform(
                 content,
                 element.key,
@@ -1506,7 +1546,7 @@ private inline fun <T> computeValue(
 
     val progress = transition.progress
     // TODO(b/290184746): Make sure that we don't overflow transformations associated to a range.
-    val rangeProgress = transformation.range?.progress(progress) ?: progress
+    val rangeProgress = transformationWithRange.range?.progress(progress) ?: progress
 
     // Interpolate between the value at rest and the value before entering/after leaving.
     val isEntering =
@@ -1520,6 +1560,22 @@ private inline fun <T> computeValue(
         lerp(targetValue, idleValue, rangeProgress)
     } else {
         lerp(idleValue, targetValue, rangeProgress)
+    }
+}
+
+private inline fun <T> PropertyTransformation<T>.requireInterpolatedTransformation(
+    element: Element,
+    transition: TransitionState.Transition,
+    errorMessage: () -> String,
+): InterpolatedPropertyTransformation<T> {
+    return when (this) {
+        is InterpolatedPropertyTransformation -> this
+        is CustomPropertyTransformation -> {
+            val elem = element.key.debugName
+            val fromContent = transition.fromContent
+            val toContent = transition.toContent
+            error("${errorMessage()} (element=$elem fromContent=$fromContent toContent=$toContent)")
+        }
     }
 }
 

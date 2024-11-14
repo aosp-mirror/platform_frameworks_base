@@ -24,6 +24,8 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_UNKNOWN;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static android.service.notification.Condition.SOURCE_UNKNOWN;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_FALSE;
@@ -44,8 +46,6 @@ import static android.service.notification.ZenModeConfig.isImplicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 
 import static java.util.Objects.requireNonNull;
 
@@ -300,6 +300,15 @@ public class ZenModeHelper {
         mHandler.postMetricsTimer();
         cleanUpZenRules();
         mIsSystemServicesReady = true;
+    }
+
+    /**
+     * @return whether a {@link DeviceEffectsApplier} has already been set or not
+     */
+    boolean hasDeviceEffectsApplier() {
+        synchronized (mConfigLock) {
+            return mDeviceEffectsApplier != null;
+        }
     }
 
     /**

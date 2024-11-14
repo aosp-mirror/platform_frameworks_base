@@ -17,8 +17,10 @@
 package android.media;
 
 import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+import static android.media.audio.Flags.FLAG_ROUTED_DEVICE_IDS;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -54,7 +56,9 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -3783,6 +3787,8 @@ public class AudioTrack extends PlayerBase
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioTrack.
      * Note: The query is only valid if the AudioTrack is currently playing. If it is not,
      * <code>getRoutedDevice()</code> will return null.
+     * Audio may play on multiple devices simultaneously (e.g. an alarm playing on headphones and
+     * speaker on a phone), so prefer using {@link #getRoutedDevices}.
      */
     @Override
     public AudioDeviceInfo getRoutedDevice() {
@@ -3791,6 +3797,23 @@ public class AudioTrack extends PlayerBase
             return null;
         }
         return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_OUTPUTS);
+    }
+
+    /**
+     * Returns a List of {@link AudioDeviceInfo} identifying the current routing of this
+     * AudioTrack.
+     * Note: The query is only valid if the AudioTrack is currently playing. If it is not,
+     * <code>getRoutedDevices()</code> will return an empty list.
+     */
+    @Override
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
+    public @NonNull List<AudioDeviceInfo> getRoutedDevices() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        AudioDeviceInfo audioDeviceInfo = getRoutedDevice();
+        if (audioDeviceInfo != null) {
+            audioDeviceInfos.add(audioDeviceInfo);
+        }
+        return audioDeviceInfos;
     }
 
     private void tryToDisableNativeRoutingCallback() {
