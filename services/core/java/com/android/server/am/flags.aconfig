@@ -270,3 +270,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "app_start_info_isolated_process"
+    namespace: "system_performance"
+    description: "Adjust handling of isolated process records to be discarded."
+    bug: "374032823"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
