@@ -155,14 +155,16 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             ?: error("Unable to find resource $MINIMIZE_BUTTON_VIEW\n")
     }
 
-    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice, isPip: Boolean = false) {
         val caption = getCaptionForTheApp(wmHelper, device)
         val minimizeButton = getMinimizeButtonForTheApp(caption)
         minimizeButton.click()
         wmHelper
             .StateSyncBuilder()
             .withAppTransitionIdle()
-            .withWindowSurfaceDisappeared(innerHelper)
+            .apply {
+                if (isPip) withPipShown() else withWindowSurfaceDisappeared(innerHelper)
+            }
             .waitForAndVerify()
     }
 
