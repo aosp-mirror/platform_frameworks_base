@@ -118,16 +118,26 @@ public final class MessageQueue {
         mUseConcurrent = UserHandle.isCore(Process.myUid());
         // Even then, we don't use it if instrumentation is loaded as it breaks some
         // platform tests.
-        final ActivityThread activityThread = ActivityThread.currentActivityThread();
-        if (activityThread != null) {
-            final Instrumentation instrumentation = activityThread.getInstrumentation();
-            mUseConcurrent &= instrumentation == null || !instrumentation.isInstrumenting();
-        }
+        final Instrumentation instrumentation = getInstrumentation();
+        mUseConcurrent &= instrumentation == null || !instrumentation.isInstrumenting();
         // We can lift this restriction in the future after we've made it possible for test authors
         // to test Looper and MessageQueue without resorting to reflection.
 
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace(blockedBy = ActivityThread.class)
+    private static Instrumentation getInstrumentation() {
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread != null) {
+            return activityThread.getInstrumentation();
+        }
+        return null;
+    }
+
+    private static Instrumentation getInstrumentation$ravenwood() {
+        return null; // Instrumentation not supported on Ravenwood yet.
     }
 
     @Override
