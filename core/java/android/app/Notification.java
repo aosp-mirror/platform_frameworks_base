@@ -9499,7 +9499,6 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.icon, View.GONE);
                 contentView.setViewVisibility(R.id.conversation_face_pile, View.GONE);
                 contentView.setViewVisibility(R.id.conversation_icon, View.VISIBLE);
-                contentView.setBoolean(R.id.conversation_icon, "setApplyCircularCrop", true);
                 contentView.setImageViewIcon(R.id.conversation_icon, conversationIcon);
             } else if (mIsGroupConversation) {
                 contentView.setViewVisibility(R.id.icon, View.GONE);
