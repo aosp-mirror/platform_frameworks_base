@@ -1613,7 +1613,7 @@ public class PackageInstaller {
     @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public final @VerificationPolicy int getVerificationPolicy() {
         try {
-            return mInstaller.getVerificationPolicy(mUserId);
+            return mInstaller.getVerificationPolicy();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1631,7 +1631,7 @@ public class PackageInstaller {
     @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public final boolean setVerificationPolicy(@VerificationPolicy int policy) {
         try {
-            return mInstaller.setVerificationPolicy(policy, mUserId);
+            return mInstaller.setVerificationPolicy(policy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

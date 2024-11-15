@@ -22,7 +22,6 @@ import android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DEFAUL
 import android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DENIED
 import android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
 import android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_CLOSED
-import android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_OPEN
 import android.content.pm.PackageManager
 import android.content.pm.verify.domain.DomainSet
 import android.os.Parcel
@@ -200,8 +199,7 @@ class PackageInstallerSessionTest {
             /* stagedSessionErrorMessage */ "some error",
             /* preVerifiedDomains */ DomainSet(setOf("com.foo", "com.bar")),
             /* VerifierController */ mock(VerifierController::class.java),
-            /* initialVerificationPolicy */ VERIFICATION_POLICY_BLOCK_FAIL_OPEN,
-            /* currentVerificationPolicy */ VERIFICATION_POLICY_BLOCK_FAIL_CLOSED,
+            VERIFICATION_POLICY_BLOCK_FAIL_CLOSED,
             /* installDependencyHelper */ null
         )
     }
@@ -346,8 +344,7 @@ class PackageInstallerSessionTest {
         assertThat(expected.childSessionIds).asList()
             .containsExactlyElementsIn(actual.childSessionIds.toList())
         assertThat(expected.preVerifiedDomains).isEqualTo(actual.preVerifiedDomains)
-        assertThat(expected.initialVerificationPolicy).isEqualTo(actual.initialVerificationPolicy)
-        assertThat(expected.currentVerificationPolicy).isEqualTo(actual.currentVerificationPolicy)
+        assertThat(expected.verificationPolicy).isEqualTo(actual.verificationPolicy)
     }
 
     private fun assertInstallSourcesEquivalent(expected: InstallSource, actual: InstallSource) {

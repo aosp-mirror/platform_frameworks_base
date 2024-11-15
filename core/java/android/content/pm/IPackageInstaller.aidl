@@ -95,8 +95,8 @@ interface IPackageInstaller {
     void reportUnarchivalStatus(int unarchiveId, int status, long requiredStorageBytes, in PendingIntent userActionIntent, in UserHandle userHandle);
 
     @EnforcePermission("VERIFICATION_AGENT")
-    int getVerificationPolicy(int userId);
+    int getVerificationPolicy();
 
     @EnforcePermission("VERIFICATION_AGENT")
-    boolean setVerificationPolicy(int policy, int userId);
+    boolean setVerificationPolicy(int policy);
 }

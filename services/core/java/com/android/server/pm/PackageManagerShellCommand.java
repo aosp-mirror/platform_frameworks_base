@@ -4683,7 +4683,7 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             final IPackageInstaller installer = mInterface.getPackageInstaller();
             // TODO(b/360129657): global verification policy should be per user
-            final int policy = installer.getVerificationPolicy(translatedUserId);
+            final int policy = installer.getVerificationPolicy();
             pw.println(policy);
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");
@@ -4724,8 +4724,7 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             final IPackageInstaller installer = mInterface.getPackageInstaller();
             // TODO(b/360129657): global verification policy should be per user
-            final boolean success = installer.setVerificationPolicy(Integer.parseInt(policyStr),
-                    translatedUserId);
+            final boolean success = installer.setVerificationPolicy(Integer.parseInt(policyStr));
             if (!success) {
                 pw.println("Failure setting verification policy.");
                 return 1;
