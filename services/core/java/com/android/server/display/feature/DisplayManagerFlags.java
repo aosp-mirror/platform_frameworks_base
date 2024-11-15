@@ -251,6 +251,11 @@ public class DisplayManagerFlags {
             Flags::displayListenerPerformanceImprovements
     );
 
+    private final FlagState mSubscribeGranularDisplayEvents = new FlagState(
+            Flags.FLAG_SUBSCRIBE_GRANULAR_DISPLAY_EVENTS,
+            Flags::subscribeGranularDisplayEvents
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -538,6 +543,13 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return {@code true} if the flag for subscribing to granular display events is enabled
+     */
+    public boolean isSubscribeGranularDisplayEventsEnabled() {
+        return mSubscribeGranularDisplayEvents.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -590,6 +602,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mAutoBrightnessModeBedtimeWearFlagState);
         pw.println(" " + mEnablePluginManagerFlagState);
         pw.println(" " + mDisplayListenerPerformanceImprovementsFlagState);
+        pw.println(" " + mSubscribeGranularDisplayEvents);
     }
 
     private static class FlagState {
