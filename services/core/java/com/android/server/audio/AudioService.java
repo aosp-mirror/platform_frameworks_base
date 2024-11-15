@@ -14166,10 +14166,10 @@ public class AudioService extends IAudioService.Stub
      * Update player event
      * @param piid Player id to update
      * @param event The new player event
-     * @param eventValue The value associated with this event
+     * @param eventValues The values associated with this event
      */
-    public void playerEvent(int piid, int event, int eventValue) {
-        mPlaybackMonitor.playerEvent(piid, event, eventValue, Binder.getCallingUid());
+    public void playerEvent(int piid, int event, int[] eventValues) {
+        mPlaybackMonitor.playerEvent(piid, event, eventValues, Binder.getCallingUid());
     }
 
     /**
