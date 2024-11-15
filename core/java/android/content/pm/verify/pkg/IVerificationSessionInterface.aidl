@@ -25,6 +25,4 @@ interface IVerificationSessionInterface {
     long getTimeoutTime(int verificationId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
     long extendTimeRemaining(int verificationId, long additionalMs);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
-    boolean setVerificationPolicy(int verificationId, int policy);
 }

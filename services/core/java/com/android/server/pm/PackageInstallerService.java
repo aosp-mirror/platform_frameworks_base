@@ -25,14 +25,12 @@ import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_NO_CONNECTIVI
 import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_USER_ACTION_NEEDED;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_GENERIC_ERROR;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
-import static android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_WARN;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
-import static com.android.server.pm.PackageInstallerSession.isValidVerificationPolicy;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -152,7 +150,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 
@@ -278,13 +275,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             return isStageName(name);
         }
     };
-
-    /**
-     * Default verification policy for incoming installation sessions.
-     * TODO(b/360129657): update the default policy.
-     */
-    private final AtomicInteger mVerificationPolicy = new AtomicInteger(
-            VERIFICATION_POLICY_BLOCK_FAIL_WARN);
 
     private static final class Lifecycle extends SystemService {
         private final PackageInstallerService mPackageInstallerService;
@@ -1055,8 +1045,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,
                 null, null, false, false, false, false, null, SessionInfo.INVALID_ID,
                 false, false, false, PackageManager.INSTALL_UNKNOWN, "", null,
-                mVerifierController, verificationPolicy, verificationPolicy,
-                mVerifierController, mVerificationPolicy.get(),
+                mVerifierController,
                 mInstallDependencyHelper);
 
         synchronized (mSessions) {
@@ -1879,34 +1868,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 UNARCHIVAL_GENERIC_ERROR).contains(status)) {
             throw new IllegalStateException("Invalid status code passed " + status);
         }
-    }
-
-    @Override
-    public @PackageInstaller.VerificationPolicy int getVerificationPolicy() {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.VERIFICATION_AGENT)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("You need the "
-                    + "com.android.permission.VERIFICATION_AGENT permission "
-                    + "to get the verification policy");
-        }
-        return mVerificationPolicy.get();
-    }
-
-    @Override
-    public boolean setVerificationPolicy(@PackageInstaller.VerificationPolicy int policy) {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.VERIFICATION_AGENT)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("You need the "
-                    + "com.android.permission.VERIFICATION_AGENT permission "
-                    + "to set the verification policy");
-        }
-        if (!isValidVerificationPolicy(policy)) {
-            return false;
-        }
-        if (policy != mVerificationPolicy.get()) {
-            mVerificationPolicy.set(policy);
-        }
-        return true;
     }
 
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,

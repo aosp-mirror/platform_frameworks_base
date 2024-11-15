@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.pm.Flags;
-import android.content.pm.PackageInstaller;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
 import android.net.Uri;
@@ -53,12 +52,17 @@ public final class VerificationSession implements Parcelable {
      * The verification cannot be completed because the network is unavailable.
      */
     public static final int VERIFICATION_INCOMPLETE_NETWORK_UNAVAILABLE = 1;
+    /**
+     * The verification cannot be completed because the network is limited.
+     */
+    public static final int VERIFICATION_INCOMPLETE_NETWORK_LIMITED = 2;
 
     /**
      * @hide
      */
     @IntDef(prefix = {"VERIFICATION_INCOMPLETE_"}, value = {
             VERIFICATION_INCOMPLETE_NETWORK_UNAVAILABLE,
+            VERIFICATION_INCOMPLETE_NETWORK_LIMITED,
             VERIFICATION_INCOMPLETE_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -81,15 +85,6 @@ public final class VerificationSession implements Parcelable {
     private final IVerificationSessionInterface mSession;
     @NonNull
     private final IVerificationSessionCallback mCallback;
-    /**
-     * The current policy that is active for the session. It might not be
-     * the same as the original policy that was initially assigned for this verification session,
-     * because the active policy can be overridden by {@link #setVerificationPolicy(int)}.
-     * <p>To improve the latency, store the original policy value and any changes made to it,
-     * so that {@link #getVerificationPolicy()} does not need to make a binder call to retrieve the
-     * currently active policy.</p>
-     */
-    private volatile @PackageInstaller.VerificationPolicy int mVerificationPolicy;
 
     /**
      * Constructor used by the system to describe the details of a verification session.
@@ -99,7 +94,6 @@ public final class VerificationSession implements Parcelable {
             @NonNull Uri stagedPackageUri, @NonNull SigningInfo signingInfo,
             @NonNull List<SharedLibraryInfo> declaredLibraries,
             @NonNull PersistableBundle extensionParams,
-            @PackageInstaller.VerificationPolicy int defaultPolicy,
             @NonNull IVerificationSessionInterface session,
             @NonNull IVerificationSessionCallback callback) {
         mId = id;
@@ -109,7 +103,6 @@ public final class VerificationSession implements Parcelable {
         mSigningInfo = signingInfo;
         mDeclaredLibraries = declaredLibraries;
         mExtensionParams = extensionParams;
-        mVerificationPolicy = defaultPolicy;
         mSession = session;
         mCallback = callback;
     }
@@ -151,7 +144,7 @@ public final class VerificationSession implements Parcelable {
 
     /**
      * Returns a mapping of any shared libraries declared in the manifest
-     * to the {@link SharedLibraryInfo.Type} that is declared. This will be an empty
+     * to the {@link SharedLibraryInfo#Type} that is declared. This will be an empty
      * map if no shared libraries are declared by the package.
      */
     @NonNull
@@ -175,39 +168,6 @@ public final class VerificationSession implements Parcelable {
     public long getTimeoutTime() {
         try {
             return mSession.getTimeoutTime(mId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Return the current policy that is active for this session.
-     * <p>If the policy for this session has been changed by {@link #setVerificationPolicy},
-     * the return value of this method is the current policy that is active for this session.
-     * Otherwise, the return value is the same as the initial policy that was assigned to the
-     * session when it was first created.</p>
-     */
-    public @PackageInstaller.VerificationPolicy int getVerificationPolicy() {
-        return mVerificationPolicy;
-    }
-
-    /**
-     * Override the verification policy for this session.
-     * @return True if the override was successful, False otherwise.
-     */
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
-    public boolean setVerificationPolicy(@PackageInstaller.VerificationPolicy int policy) {
-        if (mVerificationPolicy == policy) {
-            // No effective policy change
-            return true;
-        }
-        try {
-            if (mSession.setVerificationPolicy(mId, policy)) {
-                mVerificationPolicy = policy;
-                return true;
-            } else {
-                return false;
-            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -279,7 +239,6 @@ public final class VerificationSession implements Parcelable {
         mSigningInfo = SigningInfo.CREATOR.createFromParcel(in);
         mDeclaredLibraries = in.createTypedArrayList(SharedLibraryInfo.CREATOR);
         mExtensionParams = in.readPersistableBundle(getClass().getClassLoader());
-        mVerificationPolicy = in.readInt();
         mSession = IVerificationSessionInterface.Stub.asInterface(in.readStrongBinder());
         mCallback = IVerificationSessionCallback.Stub.asInterface(in.readStrongBinder());
     }
@@ -298,7 +257,6 @@ public final class VerificationSession implements Parcelable {
         mSigningInfo.writeToParcel(dest, flags);
         dest.writeTypedList(mDeclaredLibraries);
         dest.writePersistableBundle(mExtensionParams);
-        dest.writeInt(mVerificationPolicy);
         dest.writeStrongBinder(mSession.asBinder());
         dest.writeStrongBinder(mCallback.asBinder());
     }

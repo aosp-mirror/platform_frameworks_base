@@ -16,9 +16,6 @@
 
 package android.content.pm.verify;
 
-import static android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_CLOSED;
-import static android.content.pm.PackageInstaller.VERIFICATION_POLICY_BLOCK_FAIL_WARN;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -26,8 +23,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.SharedLibraryInfo;
@@ -78,7 +73,6 @@ public class VerificationSessionTest {
     private static final long TEST_EXTEND_TIME = 2000L;
     private static final String TEST_KEY = "test key";
     private static final String TEST_VALUE = "test value";
-    private static final int TEST_POLICY = VERIFICATION_POLICY_BLOCK_FAIL_CLOSED;
 
     private final ArrayList<SharedLibraryInfo> mTestDeclaredLibraries = new ArrayList<>();
     private final PersistableBundle mTestExtensionParams = new PersistableBundle();
@@ -96,7 +90,7 @@ public class VerificationSessionTest {
         mTestExtensionParams.putString(TEST_KEY, TEST_VALUE);
         mTestSession = new VerificationSession(TEST_ID, TEST_INSTALL_SESSION_ID,
                 TEST_PACKAGE_NAME, TEST_PACKAGE_URI, TEST_SIGNING_INFO, mTestDeclaredLibraries,
-                mTestExtensionParams, TEST_POLICY, mTestSessionInterface, mTestCallback);
+                mTestExtensionParams, mTestSessionInterface, mTestCallback);
     }
 
     @Test
@@ -124,7 +118,6 @@ public class VerificationSessionTest {
         // structure is different, but all the key/value pairs should be preserved as before.
         assertThat(sessionFromParcel.getExtensionParams().getString(TEST_KEY))
                 .isEqualTo(mTestExtensionParams.getString(TEST_KEY));
-        assertThat(sessionFromParcel.getVerificationPolicy()).isEqualTo(TEST_POLICY);
     }
 
     @Test
@@ -158,43 +151,5 @@ public class VerificationSessionTest {
         mTestSession.reportVerificationIncomplete(reason);
         verify(mTestCallback, times(1)).reportVerificationIncomplete(
                 eq(TEST_ID), eq(reason));
-    }
-
-    @Test
-    public void testPolicyNoOverride() {
-        assertThat(mTestSession.getVerificationPolicy()).isEqualTo(TEST_POLICY);
-        // This "set" is a no-op
-        assertThat(mTestSession.setVerificationPolicy(TEST_POLICY)).isTrue();
-        assertThat(mTestSession.getVerificationPolicy()).isEqualTo(TEST_POLICY);
-        verifyZeroInteractions(mTestSessionInterface);
-    }
-
-    @Test
-    public void testPolicyOverrideFail() throws Exception {
-        final int newPolicy = VERIFICATION_POLICY_BLOCK_FAIL_WARN;
-        when(mTestSessionInterface.setVerificationPolicy(anyInt(), anyInt())).thenReturn(false);
-        assertThat(mTestSession.setVerificationPolicy(newPolicy)).isFalse();
-        verify(mTestSessionInterface, times(1))
-                .setVerificationPolicy(eq(TEST_ID), eq(newPolicy));
-        // Next "get" should not trigger binder call because the previous "set" has failed
-        assertThat(mTestSession.getVerificationPolicy()).isEqualTo(TEST_POLICY);
-        verifyNoMoreInteractions(mTestSessionInterface);
-    }
-
-    @Test
-    public void testPolicyOverrideSuccess() throws Exception {
-        final int newPolicy = VERIFICATION_POLICY_BLOCK_FAIL_WARN;
-        when(mTestSessionInterface.setVerificationPolicy(anyInt(), anyInt())).thenReturn(true);
-        assertThat(mTestSession.setVerificationPolicy(newPolicy)).isTrue();
-        verify(mTestSessionInterface, times(1))
-                .setVerificationPolicy(eq(TEST_ID), eq(newPolicy));
-        assertThat(mTestSession.getVerificationPolicy()).isEqualTo(newPolicy);
-        assertThat(mTestSession.getVerificationPolicy()).isEqualTo(newPolicy);
-
-        // Setting back to the original policy should still trigger binder calls
-        assertThat(mTestSession.setVerificationPolicy(TEST_POLICY)).isTrue();
-        verify(mTestSessionInterface, times(1))
-                .setVerificationPolicy(eq(TEST_ID), eq(TEST_POLICY));
-        assertThat(mTestSession.getVerificationPolicy()).isEqualTo(TEST_POLICY);
     }
 }
