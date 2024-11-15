@@ -109,7 +109,6 @@ import android.content.pm.PackageInstaller.UserActionReason;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.dex.DexMetadataHelper;
@@ -2874,18 +2873,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (Flags.verificationService()) {
             final Supplier<Computer> snapshotSupplier = mPm::snapshotComputer;
             if (mVerifierController.isVerifierInstalled(snapshotSupplier, userId)) {
+                // TODO: extract shared library declarations
                 final SigningInfo signingInfo;
-                final List<SharedLibraryInfo> declaredLibraries;
                 synchronized (mLock) {
                     signingInfo = new SigningInfo(mSigningDetails);
-                    declaredLibraries =
-                            mPackageLite == null ? null : mPackageLite.getDeclaredLibraries();
                 }
                 // Send the request to the verifier and wait for its response before the rest of
                 // the installation can proceed.
                 if (!mVerifierController.startVerificationSession(snapshotSupplier, userId,
                         sessionId, getPackageName(), Uri.fromFile(stageDir), signingInfo,
-                        declaredLibraries, /* extensionParams= */ null,
+                        /* declaredLibraries= */null, /* extensionParams= */ null,
                         new VerifierCallback(), /* retry= */ false)) {
                     // A verifier is installed but cannot be connected. Installation disallowed.
                     onSessionVerificationFailure(INSTALL_FAILED_INTERNAL_ERROR,
