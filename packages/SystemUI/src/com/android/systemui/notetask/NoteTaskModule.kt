@@ -41,6 +41,7 @@ import com.android.systemui.qs.tiles.impl.notes.domain.model.NotesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
+import com.android.systemui.qs.tiles.viewmodel.StubQSTileViewModel
 import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
@@ -106,12 +107,14 @@ interface NoteTaskModule {
             stateInteractor: NotesTileDataInteractor,
             userActionInteractor: NotesTileUserActionInteractor,
         ): QSTileViewModel =
-            factory.create(
-                TileSpec.create(NOTES_TILE_SPEC),
-                userActionInteractor,
-                stateInteractor,
-                mapper,
-            )
+            if (com.android.systemui.Flags.qsNewTilesFuture())
+                factory.create(
+                    TileSpec.create(NOTES_TILE_SPEC),
+                    userActionInteractor,
+                    stateInteractor,
+                    mapper,
+                )
+            else StubQSTileViewModel
 
         @Provides
         @IntoMap
@@ -120,10 +123,10 @@ interface NoteTaskModule {
             QSTileConfig(
                 tileSpec = TileSpec.create(NOTES_TILE_SPEC),
                 uiConfig =
-                QSTileUIConfig.Resource(
-                    iconRes = R.drawable.ic_qs_notes,
-                    labelRes = R.string.quick_settings_notes_label,
-                ),
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_qs_notes,
+                        labelRes = R.string.quick_settings_notes_label,
+                    ),
                 instanceId = uiEventLogger.getNewInstanceId(),
                 category = TileCategory.UTILITIES,
             )
