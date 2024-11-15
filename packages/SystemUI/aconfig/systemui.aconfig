@@ -632,9 +632,9 @@ flag {
 
 flag {
   name: "status_bar_connected_displays"
-  namespace: "systemui"
+  namespace: "lse_desktop_experience"
   description: "Shows the status bar on connected displays"
-  bug: "362720336"
+  bug: "379264862"
 }
 
 flag {
