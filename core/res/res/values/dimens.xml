@@ -247,8 +247,13 @@
     <!-- Default padding for dialogs. -->
     <dimen name="dialog_padding">16dp</dimen>
 
-    <!-- The margin on the start of the content view (accommodates the icon) -->
+    <!-- The margin on the start of the content view (accommodates the icon)
+     This represents 16dp for the left margin + 24dp for the icon + 12dp for the right margin -->
     <dimen name="notification_content_margin_start">52dp</dimen>
+
+    <!-- The margin on the start of the content view (accommodates the icon), 2025 redesign version
+     This represents 16dp for the left margin + 40dp for the icon + 16dp for the right margin -->
+    <dimen name="notification_2025_content_margin_start">72dp</dimen>
 
     <!-- The margin on the end of most content views (ignores the expander) -->
     <dimen name="notification_content_margin_end">16dp</dimen>
@@ -310,6 +315,9 @@
     <!-- height of the notification header -->
     <dimen name="notification_header_height">56dp</dimen>
 
+    <!-- height of the notification header (2025 redesign version) -->
+    <dimen name="notification_2025_header_height">72dp</dimen>
+
     <!-- The height of the background for a notification header on a group -->
     <dimen name="notification_header_background_height">49.5dp</dimen>
 
@@ -331,8 +339,16 @@
     <!-- size (width and height) of the circle around the icon in the notification header -->
     <dimen name="notification_icon_circle_size">24dp</dimen>
 
+    <!-- size (width and height) of the circular icon in the notification header
+         (2025 redesign version) -->
+    <dimen name="notification_2025_icon_circle_size">40dp</dimen>
+
     <!-- padding between the notification icon and the circle containing it -->
     <dimen name="notification_icon_circle_padding">4dp</dimen>
+
+    <!-- padding between the notification icon and the circle containing it
+         (2025 redesign version) -->
+    <dimen name="notification_2025_icon_circle_padding">8dp</dimen>
 
     <!-- start margin of the icon circle in the notification view -->
     <dimen name="notification_icon_circle_start">16dp</dimen>
@@ -803,6 +819,8 @@
     <dimen name="notification_right_icon_big_margin_top">16dp</dimen>
     <!-- The size of the left icon -->
     <dimen name="notification_left_icon_size">@dimen/notification_icon_circle_size</dimen>
+    <!-- The size of the left icon (2025 redesign version) -->
+    <dimen name="notification_2025_left_icon_size">@dimen/notification_2025_icon_circle_size</dimen>
     <!-- The left padding of the left icon -->
     <dimen name="notification_left_icon_start">@dimen/notification_icon_circle_start</dimen>
     <!-- The alpha of a disabled notification button -->
