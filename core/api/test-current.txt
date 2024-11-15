@@ -3398,6 +3398,10 @@ package android.telephony {
     ctor public BarringInfo.BarringServiceInfo(int, boolean, int, int);
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.cellular_identifier_disclosure_indications") public final class CellularIdentifierDisclosure implements android.os.Parcelable {
+    ctor public CellularIdentifierDisclosure(int, int, @NonNull String, boolean);
+  }
+
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
     field public static final String MBMS_DOWNLOAD_SERVICE_OVERRIDE_METADATA = "mbms-download-service-override";
   }
@@ -3423,6 +3427,10 @@ package android.telephony {
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {
     ctor @Deprecated public PreciseDataConnectionState(int, int, int, @NonNull String, @Nullable android.net.LinkProperties, int);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.security_algorithms_update_indications") public final class SecurityAlgorithmUpdate implements android.os.Parcelable {
+    ctor public SecurityAlgorithmUpdate(int, int, int, boolean);
   }
 
   public class ServiceState implements android.os.Parcelable {

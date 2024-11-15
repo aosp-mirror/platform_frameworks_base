@@ -15146,6 +15146,32 @@ package android.telephony {
     method @NonNull public android.telephony.CellIdentityWcdma sanitizeLocationInfo();
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.cellular_identifier_disclosure_indications") public final class CellularIdentifierDisclosure implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCellularIdentifier();
+    method public int getNasProtocolMessage();
+    method @NonNull public String getPlmn();
+    method public boolean isEmergency();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CELLULAR_IDENTIFIER_IMEI = 2; // 0x2
+    field public static final int CELLULAR_IDENTIFIER_IMSI = 1; // 0x1
+    field public static final int CELLULAR_IDENTIFIER_SUCI = 3; // 0x3
+    field public static final int CELLULAR_IDENTIFIER_UNKNOWN = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CellularIdentifierDisclosure> CREATOR;
+    field public static final int NAS_PROTOCOL_MESSAGE_ATTACH_REQUEST = 1; // 0x1
+    field public static final int NAS_PROTOCOL_MESSAGE_AUTHENTICATION_AND_CIPHERING_RESPONSE = 6; // 0x6
+    field public static final int NAS_PROTOCOL_MESSAGE_CM_REESTABLISHMENT_REQUEST = 9; // 0x9
+    field public static final int NAS_PROTOCOL_MESSAGE_CM_SERVICE_REQUEST = 10; // 0xa
+    field public static final int NAS_PROTOCOL_MESSAGE_DEREGISTRATION_REQUEST = 8; // 0x8
+    field public static final int NAS_PROTOCOL_MESSAGE_DETACH_REQUEST = 3; // 0x3
+    field public static final int NAS_PROTOCOL_MESSAGE_IDENTITY_RESPONSE = 2; // 0x2
+    field public static final int NAS_PROTOCOL_MESSAGE_IMSI_DETACH_INDICATION = 11; // 0xb
+    field public static final int NAS_PROTOCOL_MESSAGE_LOCATION_UPDATE_REQUEST = 5; // 0x5
+    field public static final int NAS_PROTOCOL_MESSAGE_REGISTRATION_REQUEST = 7; // 0x7
+    field public static final int NAS_PROTOCOL_MESSAGE_TRACKING_AREA_UPDATE_REQUEST = 4; // 0x4
+    field public static final int NAS_PROTOCOL_MESSAGE_UNKNOWN = 0; // 0x0
+  }
+
   public final class DataFailCause {
     field @Deprecated public static final int VSNCP_APN_UNATHORIZED = 2238; // 0x8be
   }
@@ -15597,6 +15623,75 @@ package android.telephony {
     field public static final int USER_NOT_MEMBER_OF_CUG = 87; // 0x57
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.security_algorithms_update_indications") public final class SecurityAlgorithmUpdate implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConnectionEvent();
+    method public int getEncryption();
+    method public int getIntegrity();
+    method public boolean isUnprotectedEmergency();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONNECTION_EVENT_AS_SIGNALLING_5G = 11; // 0xb
+    field public static final int CONNECTION_EVENT_AS_SIGNALLING_LTE = 5; // 0x5
+    field public static final int CONNECTION_EVENT_CS_SIGNALLING_3G = 2; // 0x2
+    field public static final int CONNECTION_EVENT_CS_SIGNALLING_GSM = 0; // 0x0
+    field public static final int CONNECTION_EVENT_NAS_SIGNALLING_5G = 10; // 0xa
+    field public static final int CONNECTION_EVENT_NAS_SIGNALLING_LTE = 4; // 0x4
+    field public static final int CONNECTION_EVENT_PS_SIGNALLING_3G = 3; // 0x3
+    field public static final int CONNECTION_EVENT_PS_SIGNALLING_GPRS = 1; // 0x1
+    field public static final int CONNECTION_EVENT_VOLTE_RTP = 8; // 0x8
+    field public static final int CONNECTION_EVENT_VOLTE_RTP_SOS = 9; // 0x9
+    field public static final int CONNECTION_EVENT_VOLTE_SIP = 6; // 0x6
+    field public static final int CONNECTION_EVENT_VOLTE_SIP_SOS = 7; // 0x7
+    field public static final int CONNECTION_EVENT_VONR_RTP = 14; // 0xe
+    field public static final int CONNECTION_EVENT_VONR_RTP_SOS = 15; // 0xf
+    field public static final int CONNECTION_EVENT_VONR_SIP = 12; // 0xc
+    field public static final int CONNECTION_EVENT_VONR_SIP_SOS = 13; // 0xd
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.SecurityAlgorithmUpdate> CREATOR;
+    field public static final int SECURITY_ALGORITHM_A50 = 0; // 0x0
+    field public static final int SECURITY_ALGORITHM_A51 = 1; // 0x1
+    field public static final int SECURITY_ALGORITHM_A52 = 2; // 0x2
+    field public static final int SECURITY_ALGORITHM_A53 = 3; // 0x3
+    field public static final int SECURITY_ALGORITHM_A54 = 4; // 0x4
+    field public static final int SECURITY_ALGORITHM_AES_CBC = 71; // 0x47
+    field public static final int SECURITY_ALGORITHM_AES_EDE3_CBC = 73; // 0x49
+    field public static final int SECURITY_ALGORITHM_AES_GCM = 69; // 0x45
+    field public static final int SECURITY_ALGORITHM_AES_GMAC = 70; // 0x46
+    field public static final int SECURITY_ALGORITHM_AUTH_HMAC_SHA2_256_128 = 101; // 0x65
+    field public static final int SECURITY_ALGORITHM_DES_EDE3_CBC = 72; // 0x48
+    field public static final int SECURITY_ALGORITHM_EEA0 = 41; // 0x29
+    field public static final int SECURITY_ALGORITHM_EEA1 = 42; // 0x2a
+    field public static final int SECURITY_ALGORITHM_EEA2 = 43; // 0x2b
+    field public static final int SECURITY_ALGORITHM_EEA3 = 44; // 0x2c
+    field public static final int SECURITY_ALGORITHM_ENCR_AES_CBC = 100; // 0x64
+    field public static final int SECURITY_ALGORITHM_ENCR_AES_GCM_16 = 99; // 0x63
+    field public static final int SECURITY_ALGORITHM_GEA0 = 14; // 0xe
+    field public static final int SECURITY_ALGORITHM_GEA1 = 15; // 0xf
+    field public static final int SECURITY_ALGORITHM_GEA2 = 16; // 0x10
+    field public static final int SECURITY_ALGORITHM_GEA3 = 17; // 0x11
+    field public static final int SECURITY_ALGORITHM_GEA4 = 18; // 0x12
+    field public static final int SECURITY_ALGORITHM_GEA5 = 19; // 0x13
+    field public static final int SECURITY_ALGORITHM_HMAC_MD5_96 = 75; // 0x4b
+    field public static final int SECURITY_ALGORITHM_HMAC_SHA1_96 = 74; // 0x4a
+    field public static final int SECURITY_ALGORITHM_IMS_NULL = 67; // 0x43
+    field public static final int SECURITY_ALGORITHM_NEA0 = 55; // 0x37
+    field public static final int SECURITY_ALGORITHM_NEA1 = 56; // 0x38
+    field public static final int SECURITY_ALGORITHM_NEA2 = 57; // 0x39
+    field public static final int SECURITY_ALGORITHM_NEA3 = 58; // 0x3a
+    field public static final int SECURITY_ALGORITHM_ORYX = 124; // 0x7c
+    field public static final int SECURITY_ALGORITHM_OTHER = 114; // 0x72
+    field public static final int SECURITY_ALGORITHM_RTP = 85; // 0x55
+    field public static final int SECURITY_ALGORITHM_SIP_NO_IPSEC_CONFIG = 66; // 0x42
+    field public static final int SECURITY_ALGORITHM_SIP_NULL = 68; // 0x44
+    field public static final int SECURITY_ALGORITHM_SRTP_AES_COUNTER = 87; // 0x57
+    field public static final int SECURITY_ALGORITHM_SRTP_AES_F8 = 88; // 0x58
+    field public static final int SECURITY_ALGORITHM_SRTP_HMAC_SHA1 = 89; // 0x59
+    field public static final int SECURITY_ALGORITHM_SRTP_NULL = 86; // 0x56
+    field public static final int SECURITY_ALGORITHM_UEA0 = 29; // 0x1d
+    field public static final int SECURITY_ALGORITHM_UEA1 = 30; // 0x1e
+    field public static final int SECURITY_ALGORITHM_UEA2 = 31; // 0x1f
+    field public static final int SECURITY_ALGORITHM_UNKNOWN = 113; // 0x71
+  }
+
   public class ServiceState implements android.os.Parcelable {
     method @Nullable public android.telephony.NetworkRegistrationInfo getNetworkRegistrationInfo(int, int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
@@ -15821,6 +15916,7 @@ package android.telephony {
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_CALL_FORWARDING_INDICATOR_CHANGED = 4; // 0x4
     field public static final int EVENT_CALL_STATE_CHANGED = 6; // 0x6
     field public static final int EVENT_CARRIER_NETWORK_CHANGED = 17; // 0x11
+    field @FlaggedApi("com.android.internal.telephony.flags.cellular_identifier_disclosure_indications") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED = 47; // 0x2f
     field @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_CELL_INFO_CHANGED = 11; // 0xb
     field @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public static final int EVENT_CELL_LOCATION_CHANGED = 5; // 0x5
     field public static final int EVENT_DATA_ACTIVATION_STATE_CHANGED = 19; // 0x13
@@ -15845,6 +15941,7 @@ package android.telephony {
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED = 13; // 0xd
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_RADIO_POWER_STATE_CHANGED = 24; // 0x18
     field @RequiresPermission(allOf={android.Manifest.permission.READ_PRECISE_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public static final int EVENT_REGISTRATION_FAILURE = 31; // 0x1f
+    field @FlaggedApi("com.android.internal.telephony.flags.cellular_identifier_disclosure_indications") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_SECURITY_ALGORITHMS_CHANGED = 46; // 0x2e
     field public static final int EVENT_SERVICE_STATE_CHANGED = 1; // 0x1
     field public static final int EVENT_SIGNAL_STRENGTHS_CHANGED = 9; // 0x9
     field public static final int EVENT_SIGNAL_STRENGTH_CHANGED = 2; // 0x2
@@ -15861,6 +15958,10 @@ package android.telephony {
   public static interface TelephonyCallback.CallAttributesListener {
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallStatesChanged(@NonNull java.util.List<android.telephony.CallState>);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.cellular_identifier_disclosure_indications") public static interface TelephonyCallback.CellularIdentifierDisclosedListener {
+    method public void onCellularIdentifierDisclosedChanged(@NonNull android.telephony.CellularIdentifierDisclosure);
   }
 
   public static interface TelephonyCallback.DataEnabledListener {
@@ -15899,6 +16000,10 @@ package android.telephony {
 
   public static interface TelephonyCallback.RadioPowerStateListener {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onRadioPowerStateChanged(int);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.security_algorithms_update_indications") public static interface TelephonyCallback.SecurityAlgorithmsListener {
+    method public void onSecurityAlgorithmsChanged(@NonNull android.telephony.SecurityAlgorithmUpdate);
   }
 
   @FlaggedApi("com.android.internal.telephony.flags.simultaneous_calling_indications") public static interface TelephonyCallback.SimultaneousCellularCallingSupportListener {
