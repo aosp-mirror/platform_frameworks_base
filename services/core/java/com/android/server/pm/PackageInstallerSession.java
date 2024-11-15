@@ -3428,8 +3428,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void resolveLibraryDependenciesIfNeeded() {
         synchronized (mLock) {
-            // TODO(b/372862145): Callback should be called on a handler passed as parameter
             mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(mPackageLite,
+                    mPm.snapshotComputer(), userId, mHandler,
                     new OutcomeReceiver<>() {
 
                         @Override
