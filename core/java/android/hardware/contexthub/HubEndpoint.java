@@ -31,6 +31,10 @@ import android.util.SparseArray;
 
 import androidx.annotation.GuardedBy;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -57,7 +61,10 @@ public class HubEndpoint {
     private final IContextHubEndpointCallback mServiceCallback =
             new IContextHubEndpointCallback.Stub() {
                 @Override
-                public void onSessionOpenRequest(int sessionId, HubEndpointInfo initiator)
+                public void onSessionOpenRequest(
+                        int sessionId,
+                        HubEndpointInfo initiator,
+                        @Nullable HubServiceInfo serviceInfo)
                         throws RemoteException {
                     HubEndpointSession activeSession;
                     synchronized (mLock) {
@@ -78,20 +85,24 @@ public class HubEndpoint {
                                         processSessionOpenRequestResult(
                                                 sessionId,
                                                 initiator,
+                                                serviceInfo,
                                                 mLifecycleCallback.onSessionOpenRequest(
-                                                        initiator)));
+                                                        initiator, serviceInfo)));
                     }
                 }
 
                 private void processSessionOpenRequestResult(
-                        int sessionId, HubEndpointInfo initiator, HubEndpointSessionResult result) {
+                        int sessionId,
+                        HubEndpointInfo initiator,
+                        @Nullable HubServiceInfo serviceInfo,
+                        HubEndpointSessionResult result) {
                     if (result == null) {
                         throw new IllegalArgumentException(
                                 "HubEndpointSessionResult shouldn't be null.");
                     }
 
                     if (result.isAccepted()) {
-                        acceptSession(sessionId, initiator);
+                        acceptSession(sessionId, initiator, serviceInfo);
                     } else {
                         Log.i(
                                 TAG,
@@ -105,7 +116,10 @@ public class HubEndpoint {
                     }
                 }
 
-                private void acceptSession(int sessionId, HubEndpointInfo initiator) {
+                private void acceptSession(
+                        int sessionId,
+                        HubEndpointInfo initiator,
+                        @Nullable HubServiceInfo serviceInfo) {
                     if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
                         // No longer registered?
                         return;
@@ -129,7 +143,8 @@ public class HubEndpoint {
                                         sessionId,
                                         HubEndpoint.this,
                                         mAssignedHubEndpointInfo,
-                                        initiator);
+                                        initiator,
+                                        serviceInfo);
                         try {
                             // oneway call to notify system service that the request is completed
                             mServiceToken.openSessionRequestComplete(sessionId);
@@ -331,7 +346,7 @@ public class HubEndpoint {
     }
 
     /** @hide */
-    public void openSession(HubEndpointInfo destinationInfo) {
+    public void openSession(HubEndpointInfo destinationInfo, @Nullable HubServiceInfo serviceInfo) {
         // TODO(b/378974199): Consider refactor these assertions
         if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
             // No longer registered?
@@ -341,7 +356,7 @@ public class HubEndpoint {
         HubEndpointSession newSession;
         try {
             // Request system service to assign session id.
-            int sessionId = mServiceToken.openSession(destinationInfo);
+            int sessionId = mServiceToken.openSession(destinationInfo, serviceInfo);
 
             // Save the newly created session
             synchronized (mLock) {
@@ -350,7 +365,8 @@ public class HubEndpoint {
                                 sessionId,
                                 HubEndpoint.this,
                                 destinationInfo,
-                                mAssignedHubEndpointInfo);
+                                mAssignedHubEndpointInfo,
+                                serviceInfo);
                 mActiveSessions.put(sessionId, newSession);
             }
         } catch (RemoteException e) {
@@ -412,6 +428,11 @@ public class HubEndpoint {
         return mPendingHubEndpointInfo.getTag();
     }
 
+    @NonNull
+    public Collection<HubServiceInfo> getServiceInfoCollection() {
+        return mPendingHubEndpointInfo.getServiceInfoCollection();
+    }
+
     @Nullable
     public IHubEndpointLifecycleCallback getLifecycleCallback() {
         return mLifecycleCallback;
@@ -434,6 +455,8 @@ public class HubEndpoint {
         @NonNull private Executor mMessageCallbackExecutor;
 
         @Nullable private String mTag;
+
+        private List<HubServiceInfo> mServiceInfos = Collections.emptyList();
 
         /** Create a builder for {@link HubEndpoint} */
         public Builder(@NonNull Context context) {
@@ -493,11 +516,23 @@ public class HubEndpoint {
             return this;
         }
 
+        /**
+         * Add a service to the available services from this endpoint. The {@link HubServiceInfo}
+         * object can be built with {@link HubServiceInfo.Builder}.
+         */
+        @NonNull
+        public Builder setServiceInfoCollection(
+                @NonNull Collection<HubServiceInfo> hubServiceInfos) {
+            // Make a copy first
+            mServiceInfos = new ArrayList<>(hubServiceInfos);
+            return this;
+        }
+
         /** Build the {@link HubEndpoint} object. */
         @NonNull
         public HubEndpoint build() {
             return new HubEndpoint(
-                    new HubEndpointInfo(mPackageName, mTag),
+                    new HubEndpointInfo(mPackageName, mTag, mServiceInfos),
                     mLifecycleCallback,
                     mLifecycleCallbackExecutor,
                     mMessageCallback,

@@ -37,6 +37,7 @@ import android.hardware.contexthub.ErrorCode;
 import android.hardware.contexthub.HubDiscoveryInfo;
 import android.hardware.contexthub.HubEndpoint;
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IHubEndpointLifecycleCallback;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -1052,11 +1053,12 @@ public final class ContextHubManager {
     }
 
     /**
-     * Use a registered endpoint to connect to another endpoint (destination).
+     * Use a registered endpoint to connect to another endpoint (destination) without specifying a
+     * service.
      *
      * <p>Context Hub Service will create the endpoint session and notify the registered endpoint.
      * The registered endpoint will receive callbacks on its {@link IHubEndpointLifecycleCallback}
-     * object regarding the lifecycle events of the session
+     * object regarding the lifecycle events of the session.
      *
      * @param hubEndpoint {@link HubEndpoint} object previously registered via {@link
      *     ContextHubManager#registerEndpoint(HubEndpoint)}.
@@ -1067,7 +1069,31 @@ public final class ContextHubManager {
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void openSession(
             @NonNull HubEndpoint hubEndpoint, @NonNull HubEndpointInfo destination) {
-        hubEndpoint.openSession(destination);
+        hubEndpoint.openSession(destination, null);
+    }
+
+    /**
+     * Use a registered endpoint to connect to another endpoint (destination) for a service
+     * described by a {@link HubServiceInfo} object.
+     *
+     * <p>Context Hub Service will create the endpoint session and notify the registered endpoint.
+     * The registered endpoint will receive callbacks on its {@link IHubEndpointLifecycleCallback}
+     * object regarding the lifecycle events of the session.
+     *
+     * @param hubEndpoint {@link HubEndpoint} object previously registered via {@link
+     *     ContextHubManager#registerEndpoint(HubEndpoint)}.
+     * @param destination {@link HubEndpointInfo} object that represents an endpoint from previous
+     *     endpoint discovery results (e.g. from {@link ContextHubManager#findEndpoints(long)}).
+     * @param serviceInfo {@link HubServiceInfo} object that describes the service associated with
+     *     this session. The information will be sent to the destination as part of open request.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void openSession(
+            @NonNull HubEndpoint hubEndpoint,
+            @NonNull HubEndpointInfo destination,
+            @NonNull HubServiceInfo serviceInfo) {
+        hubEndpoint.openSession(destination, serviceInfo);
     }
 
     /**

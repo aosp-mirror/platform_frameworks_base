@@ -24,6 +24,10 @@ import android.chre.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -106,6 +110,8 @@ public final class HubEndpointInfo implements Parcelable {
     private final String mName;
     @Nullable private final String mTag;
 
+    @NonNull private final List<HubServiceInfo> mHubServiceInfos;
+
     // TODO(b/375487784): Add Service/version and other information to this object
 
     /** @hide */
@@ -113,28 +119,39 @@ public final class HubEndpointInfo implements Parcelable {
         mId = new HubEndpointIdentifier(endpointInfo.id.hubId, endpointInfo.id.id);
         mName = endpointInfo.name;
         mTag = endpointInfo.tag;
+        mHubServiceInfos = new ArrayList<>(endpointInfo.services.length);
+        for (int i = 0; i < endpointInfo.services.length; i++) {
+            mHubServiceInfos.set(i, new HubServiceInfo(endpointInfo.services[i]));
+        }
     }
 
     /** @hide */
-    public HubEndpointInfo(String name, @Nullable String tag) {
+    public HubEndpointInfo(
+            String name, @Nullable String tag, @NonNull List<HubServiceInfo> hubServiceInfos) {
         mId = HubEndpointIdentifier.invalid();
         mName = name;
         mTag = tag;
+        mHubServiceInfos = hubServiceInfos;
     }
 
     private HubEndpointInfo(Parcel in) {
         long hubId = in.readLong();
         long endpointId = in.readLong();
+        mId = new HubEndpointIdentifier(hubId, endpointId);
         mName = in.readString();
         mTag = in.readString();
-
-        mId = new HubEndpointIdentifier(hubId, endpointId);
+        mHubServiceInfos = new ArrayList<>();
+        in.readTypedList(mHubServiceInfos, HubServiceInfo.CREATOR);
     }
 
     /** Parcel implementation details */
     @Override
     public int describeContents() {
-        return 0;
+        int flags = 0;
+        for (HubServiceInfo serviceInfo : mHubServiceInfos) {
+            flags |= serviceInfo.describeContents();
+        }
+        return flags;
     }
 
     /** Parcel implementation details */
@@ -144,6 +161,7 @@ public final class HubEndpointInfo implements Parcelable {
         dest.writeLong(mId.getEndpoint());
         dest.writeString(mName);
         dest.writeString(mTag);
+        dest.writeTypedList(mHubServiceInfos, flags);
     }
 
     /** Get a unique identifier for this endpoint. */
@@ -167,6 +185,16 @@ public final class HubEndpointInfo implements Parcelable {
     @Nullable
     public String getTag() {
         return mTag;
+    }
+
+    /**
+     * Get the list of services provided by this endpoint.
+     *
+     * <p>See {@link HubServiceInfo} for more information.
+     */
+    @NonNull
+    public Collection<HubServiceInfo> getServiceInfoCollection() {
+        return Collections.unmodifiableList(mHubServiceInfos);
     }
 
     @Override
