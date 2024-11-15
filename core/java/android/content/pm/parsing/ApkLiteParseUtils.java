@@ -537,6 +537,9 @@ public class ApkLiteParseUtils {
                                     hasBindDeviceAdminPermission);
                             break;
                         case TAG_USES_SDK_LIBRARY:
+                            if (!android.content.pm.Flags.sdkDependencyInstaller()) {
+                                break;
+                            }
                             String usesSdkLibName = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "name");
                             long usesSdkLibVersionMajor = parser.getAttributeIntValue(
