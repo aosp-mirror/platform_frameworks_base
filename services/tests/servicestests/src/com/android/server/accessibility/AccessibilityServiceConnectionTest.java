@@ -448,4 +448,14 @@ public class AccessibilityServiceConnectionTest {
         mConnection.binderDied();
         assertThat(mConnection.getServiceInfo().flags & flag).isEqualTo(0);
     }
+
+    @Test
+    public void setInputMethodEnabled_checksAccessWithProvidedImeIdAndUserId() {
+        final String imeId = "test_ime_id";
+        final int callingUserId = UserHandle.getCallingUserId();
+        mConnection.setInputMethodEnabled(imeId, true);
+
+        verify(mMockSecurityPolicy).canEnableDisableInputMethod(
+                eq(imeId), any(), eq(callingUserId));
+    }
 }

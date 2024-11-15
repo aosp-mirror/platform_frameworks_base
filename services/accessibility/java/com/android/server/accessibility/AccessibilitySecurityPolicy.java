@@ -405,10 +405,9 @@ public class AccessibilitySecurityPolicy {
      * @throws SecurityException if the input method is not in the same package as the service.
      */
     @AccessibilityService.SoftKeyboardController.EnableImeResult
-    int canEnableDisableInputMethod(String imeId, AbstractAccessibilityServiceConnection service)
-            throws SecurityException {
+    int canEnableDisableInputMethod(String imeId, AbstractAccessibilityServiceConnection service,
+            int callingUserId) throws SecurityException {
         final String servicePackageName = service.getComponentName().getPackageName();
-        final int callingUserId = UserHandle.getCallingUserId();
 
         InputMethodInfo inputMethodInfo = null;
         List<InputMethodInfo> inputMethodInfoList =
