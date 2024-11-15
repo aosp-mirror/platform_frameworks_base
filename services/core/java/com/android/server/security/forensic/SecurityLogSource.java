@@ -22,9 +22,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.Context;
 import android.security.forensic.ForensicEvent;
-import android.util.ArrayMap;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -34,10 +32,6 @@ import java.util.stream.Collectors;
 public class SecurityLogSource implements DataSource {
 
     private static final String TAG = "Forensic SecurityLogSource";
-    private static final String EVENT_TYPE = "SecurityEvent";
-    private static final String EVENT_TAG = "TAG";
-    private static final String EVENT_TIME = "TIME";
-    private static final String EVENT_DATA = "DATA";
 
     private SecurityEventCallback mEventCallback = new SecurityEventCallback();
     private DevicePolicyManager mDpm;
@@ -94,46 +88,9 @@ public class SecurityLogSource implements DataSource {
             List<ForensicEvent> forensicEvents =
                     events.stream()
                             .filter(event -> event != null)
-                            .map(event -> toForensicEvent(event))
+                            .map(event -> new ForensicEvent(event))
                             .collect(Collectors.toList());
             mDataAggregator.addBatchData(forensicEvents);
-        }
-
-        private ForensicEvent toForensicEvent(SecurityEvent event) {
-            ArrayMap<String, String> keyValuePairs = new ArrayMap<>();
-            keyValuePairs.put(EVENT_TIME, String.valueOf(event.getTimeNanos()));
-            // TODO: Map tag to corresponding string
-            keyValuePairs.put(EVENT_TAG, String.valueOf(event.getTag()));
-            keyValuePairs.put(EVENT_DATA, eventDataToString(event.getData()));
-            return new ForensicEvent(EVENT_TYPE, keyValuePairs);
-        }
-
-        /**
-         * Convert event data to a String.
-         *
-         * @param obj Object containing an Integer, Long, Float, String, null, or Object[] of the
-         *     same.
-         * @return String representation of event data.
-         */
-        private String eventDataToString(Object obj) {
-            if (obj == null) {
-                return "";
-            } else if (obj instanceof Integer
-                    || obj instanceof Long
-                    || obj instanceof Float
-                    || obj instanceof String) {
-                return String.valueOf(obj);
-            } else if (obj instanceof Object[]) {
-                Object[] objArray = (Object[]) obj;
-                String[] strArray = new String[objArray.length];
-                for (int i = 0; i < objArray.length; ++i) {
-                    strArray[i] = eventDataToString(objArray[i]);
-                }
-                return Arrays.toString((String[]) strArray);
-            } else {
-                throw new IllegalArgumentException(
-                        "Unsupported data type: " + obj.getClass().getSimpleName());
-            }
         }
     }
 }
