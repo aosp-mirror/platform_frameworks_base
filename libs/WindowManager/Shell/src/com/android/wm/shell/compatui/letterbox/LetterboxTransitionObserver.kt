@@ -43,12 +43,7 @@ class LetterboxTransitionObserver(
 
     init {
         if (appCompatRefactoring()) {
-            ProtoLog.v(
-                WM_SHELL_APP_COMPAT,
-                "%s: %s",
-                TAG,
-                "Initializing LetterboxTransitionObserver"
-            )
+            logV("Initializing LetterboxTransitionObserver")
             shellInit.addInitCallback({
                 transitions.registerObserver(this)
             }, this)
@@ -69,38 +64,45 @@ class LetterboxTransitionObserver(
         for (change in info.changes) {
             change.taskInfo?.let { ti ->
                 val key = LetterboxKey(ti.displayId, ti.taskId)
-                if (isClosingType(change.mode)) {
-                    letterboxController.destroyLetterboxSurface(
-                        key,
-                        startTransaction
-                    )
-                } else {
-                    val isTopActivityLetterboxed = ti.appCompatTaskInfo.isTopActivityLetterboxed
-                    if (isTopActivityLetterboxed) {
-                        letterboxController.createLetterboxSurface(
+                val taskBounds = Rect(
+                    change.endRelOffset.x,
+                    change.endRelOffset.y,
+                    change.endAbsBounds.width(),
+                    change.endAbsBounds.height()
+                )
+                with(letterboxController) {
+                    if (isClosingType(change.mode)) {
+                        destroyLetterboxSurface(
                             key,
-                            startTransaction,
-                            change.leash
+                            startTransaction
                         )
-                        letterboxController.updateLetterboxSurfaceBounds(
+                    } else {
+                        val isTopActivityLetterboxed = ti.appCompatTaskInfo.isTopActivityLetterboxed
+                        if (isTopActivityLetterboxed) {
+                            createLetterboxSurface(
+                                key,
+                                startTransaction,
+                                change.leash
+                            )
+                            updateLetterboxSurfaceBounds(
+                                key,
+                                startTransaction,
+                                taskBounds
+                            )
+                        }
+                        updateLetterboxSurfaceVisibility(
                             key,
                             startTransaction,
-                            Rect(
-                                change.endRelOffset.x,
-                                change.endRelOffset.y,
-                                change.endAbsBounds.width(),
-                                change.endAbsBounds.height()
-                            )
+                            isTopActivityLetterboxed
                         )
                     }
-                    letterboxController.updateLetterboxSurfaceVisibility(
-                        key,
-                        startTransaction,
-                        isTopActivityLetterboxed
-                    )
+                    dump()
                 }
-                letterboxController.dump()
             }
         }
+    }
+
+    private fun logV(msg: String) {
+        ProtoLog.v(WM_SHELL_APP_COMPAT, "%s: %s", TAG, msg)
     }
 }
