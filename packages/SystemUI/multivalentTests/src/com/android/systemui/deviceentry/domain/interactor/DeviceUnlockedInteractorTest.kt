@@ -568,6 +568,20 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
             assertThat(isUnlocked).isFalse()
         }
 
+    @Test
+    fun lockNow() =
+        testScope.runTest {
+            setLockAfterScreenTimeout(5000)
+            val isUnlocked by collectLastValue(underTest.deviceUnlockStatus.map { it.isUnlocked })
+            unlockDevice()
+            assertThat(isUnlocked).isTrue()
+
+            underTest.lockNow()
+            runCurrent()
+
+            assertThat(isUnlocked).isFalse()
+        }
+
     private fun TestScope.unlockDevice() {
         val deviceUnlockStatus by collectLastValue(underTest.deviceUnlockStatus)
 
