@@ -30,12 +30,16 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 @SysUISingleton
 class CustomTileMapper
 @Inject
-constructor(private val context: Context, private val uriGrantsManager: IUriGrantsManager) :
+constructor(
+    @ShadeDisplayAware private val context: Context,
+    private val uriGrantsManager: IUriGrantsManager
+) :
     QSTileDataToStateMapper<CustomTileDataModel> {
 
     override fun map(config: QSTileConfig, data: CustomTileDataModel): QSTileState {
