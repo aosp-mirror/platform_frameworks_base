@@ -904,7 +904,7 @@ public class VibrationThreadTest {
         fakeVibrator.setMaxEnvelopeEffectSize(10);
         fakeVibrator.setMinEnvelopeEffectControlPointDurationMillis(20);
 
-        VibrationEffect effect = VibrationEffect.startWaveformEnvelope()
+        VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
                 .addControlPoint(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 20)
                 .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*timeMillis=*/ 30)
                 .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 20)
@@ -939,12 +939,14 @@ public class VibrationThreadTest {
         fakeVibrator.setMaxEnvelopeEffectSize(10);
         fakeVibrator.setMinEnvelopeEffectControlPointDurationMillis(20);
 
-        VibrationEffect effect = VibrationEffect.startWaveformEnvelope(/*initialFrequency=*/ 30)
+        VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
+                .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
                 .addControlPoint(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 20)
                 .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*timeMillis=*/ 30)
                 .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 20)
                 .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 30)
                 .build();
+
         HalVibration vibration = startThreadAndDispatcher(effect);
         waitForCompletion();
 
