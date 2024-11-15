@@ -45,6 +45,8 @@ import com.android.compose.test.runMonotonicClockTest
 import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -266,7 +268,7 @@ class DraggableHandlerTest {
         ) {
             val velocityConsumed = onDragStoppedAnimateLater(velocity, canChangeScene)
             onAnimationStart()
-            onAnimationEnd(velocityConsumed.invoke())
+            onAnimationEnd(velocityConsumed.await())
         }
 
         suspend fun DragController.onDragStoppedAnimateNow(
@@ -285,8 +287,10 @@ class DraggableHandlerTest {
         fun DragController.onDragStoppedAnimateLater(
             velocity: Float,
             canChangeScene: Boolean = true,
-        ): SuspendedValue<Float> {
-            return onStop(velocity, canChangeScene)
+        ): Deferred<Float> {
+            val velocityConsumed = testScope.async { onStop(velocity, canChangeScene) }
+            testScope.testScheduler.runCurrent()
+            return velocityConsumed
         }
 
         fun NestedScrollConnection.scroll(
@@ -1112,6 +1116,7 @@ class DraggableHandlerTest {
         // Freeze the transition.
         val transition = transitionState as Transition
         transition.freezeAndAnimateToCurrentState()
+        runCurrent()
         assertTransition(isUserInputOngoing = false)
         advanceUntilIdle()
         assertIdle(SceneC)
@@ -1279,14 +1284,13 @@ class DraggableHandlerTest {
         // Release the finger.
         dragController.onDragStoppedAnimateNow(
             velocity = -velocityThreshold,
-            onAnimationStart = { assertTransition(fromScene = SceneA, toScene = SceneB) },
+            onAnimationStart = {
+                // Given that we are at progress >= 100% and that the overscroll on scene B is doing
+                // nothing, we are already idle.
+                assertIdle(SceneB)
+            },
             expectedConsumedVelocity = 0f,
         )
-
-        // Exhaust all coroutines *without advancing the clock*. Given that we are at progress >=
-        // 100% and that the overscroll on scene B is doing nothing, we are already idle.
-        runCurrent()
-        assertIdle(SceneB)
     }
 
     @Test
