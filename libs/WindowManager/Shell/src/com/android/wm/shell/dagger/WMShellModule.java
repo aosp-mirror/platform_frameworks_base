@@ -20,6 +20,7 @@ import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRA
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 import static android.window.DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -62,6 +63,8 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.compatui.letterbox.LetterboxController;
+import com.android.wm.shell.compatui.letterbox.LetterboxTransitionObserver;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
@@ -1229,8 +1232,23 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
+            @NonNull LetterboxTransitionObserver letterboxTransitionObserver,
             Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
             Optional<DesktopDisplayEventHandler> desktopDisplayEventHandler) {
         return new Object();
+    }
+
+    //
+    // App Compat
+    //
+
+    @WMSingleton
+    @Provides
+    static LetterboxTransitionObserver provideLetterboxTransitionObserver(
+            @NonNull ShellInit shellInit,
+            @NonNull Transitions transitions,
+            @NonNull LetterboxController letterboxController
+    ) {
+        return new LetterboxTransitionObserver(shellInit, transitions, letterboxController);
     }
 }
