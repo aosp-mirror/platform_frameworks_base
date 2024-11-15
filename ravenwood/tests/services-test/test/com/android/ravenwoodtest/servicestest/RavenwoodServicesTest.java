@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.hardware.SerialManager;
 import android.hardware.SerialManagerInternal;
-import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodConfig;
 import android.platform.test.ravenwood.RavenwoodConfig.Config;
 
