@@ -307,6 +307,6 @@ private fun draggableTopPadding(): Dp {
 
 private object DraggableBottomSheet {
     val DefaultTopPadding = 64.dp
-    val LargeScreenTopPadding = 72.dp
+    val LargeScreenTopPadding = 56.dp
     val MaxWidth = 640.dp
 }
