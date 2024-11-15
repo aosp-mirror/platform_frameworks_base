@@ -4594,6 +4594,24 @@ package android.content.pm {
 
 }
 
+package android.content.pm.dependencyinstaller {
+
+  @FlaggedApi("android.content.pm.sdk_dependency_installer") public final class DependencyInstallerCallback implements android.os.Parcelable {
+    method public int describeContents();
+    method public void onAllDependenciesResolved(@NonNull int[]);
+    method public void onFailureToResolveAllDependencies();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.dependencyinstaller.DependencyInstallerCallback> CREATOR;
+  }
+
+  @FlaggedApi("android.content.pm.sdk_dependency_installer") public abstract class DependencyInstallerService extends android.app.Service {
+    ctor public DependencyInstallerService();
+    method @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
+    method public abstract void onDependenciesRequired(@NonNull java.util.List<android.content.pm.SharedLibraryInfo>, @NonNull android.content.pm.dependencyinstaller.DependencyInstallerCallback);
+  }
+
+}
+
 package android.content.pm.dex {
 
   public class ArtManager {
