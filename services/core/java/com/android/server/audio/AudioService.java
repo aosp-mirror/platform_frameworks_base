@@ -9224,6 +9224,9 @@ public class AudioService extends IAudioService.Stub
                 return;
             }
 
+            // index values sent to APM are in the stream type SDK range, not *10
+            int indexMinVolCurve = MIN_STREAM_VOLUME[mStreamType];
+            int indexMaxVolCurve = MAX_STREAM_VOLUME[mStreamType];
             synchronized (this) {
                 if (mStreamType == AudioSystem.STREAM_VOICE_CALL) {
                     if (MAX_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO]
@@ -9234,11 +9237,15 @@ public class AudioService extends IAudioService.Stub
                     if (!equalScoLeaVcIndexRange() && isStreamBluetoothSco(mStreamType)) {
                         // SCO devices have a different min index
                         mIndexMin = MIN_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO] * 10;
+                        indexMinVolCurve = MIN_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO];
+                        indexMaxVolCurve = MAX_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO];
                         mIndexStepFactor = 1.f;
                     } else if (equalScoLeaVcIndexRange() && isStreamBluetoothComm(mStreamType)) {
                         // For non SCO devices the stream state does not change the min index
                         if (mBtCommDeviceActive.get() == BT_COMM_DEVICE_ACTIVE_SCO) {
                             mIndexMin = MIN_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO] * 10;
+                            indexMinVolCurve = MIN_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO];
+                            indexMaxVolCurve = MAX_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO];
                         } else {
                             mIndexMin = MIN_STREAM_VOLUME[mStreamType] * 10;
                         }
@@ -9259,7 +9266,7 @@ public class AudioService extends IAudioService.Stub
             }
 
             final int status = AudioSystem.initStreamVolume(
-                    mStreamType, mIndexMin / 10, mIndexMax / 10);
+                    mStreamType, indexMinVolCurve, indexMaxVolCurve);
             sVolumeLogger.enqueue(new EventLogger.StringEvent(
                     "updateIndexFactors() stream:" + mStreamType + " index min/max:"
                             + mIndexMin / 10 + "/" + mIndexMax / 10 + " indexStepFactor:"
