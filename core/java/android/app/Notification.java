@@ -811,18 +811,30 @@ public class Notification implements Parcelable
     }
 
     private static boolean isStandardLayout(int layoutId) {
-        // TODO: b/359128724 - Add to static list when inlining the flag.
+        if (Flags.notificationsRedesignTemplates()) {
+            return switch (layoutId) {
+                case R.layout.notification_2025_template_collapsed_base,
+                     R.layout.notification_2025_template_header,
+                     R.layout.notification_template_material_heads_up_base,
+                     R.layout.notification_template_material_big_base,
+                     R.layout.notification_template_material_big_picture,
+                     R.layout.notification_template_material_big_text,
+                     R.layout.notification_template_material_inbox,
+                     R.layout.notification_template_material_messaging,
+                     R.layout.notification_template_material_big_messaging,
+                     R.layout.notification_template_material_conversation,
+                     R.layout.notification_template_material_media,
+                     R.layout.notification_template_material_big_media,
+                     R.layout.notification_template_material_call,
+                     R.layout.notification_template_material_big_call,
+                     R.layout.notification_template_header -> true;
+                case R.layout.notification_template_material_progress -> Flags.apiRichOngoing();
+                default -> false;
+            };
+        }
         if (Flags.apiRichOngoing()) {
             if (layoutId == R.layout.notification_template_material_progress) {
                 return true;
-            }
-        }
-        // TODO: b/378660052 - Add to static list when inlining the flag.
-        if (Flags.notificationsRedesignTemplates()) {
-            switch(layoutId) {
-                case R.layout.notification_2025_template_collapsed_base:
-                case R.layout.notification_2025_template_header:
-                    return true;
             }
         }
         return STANDARD_LAYOUTS.contains(layoutId);
