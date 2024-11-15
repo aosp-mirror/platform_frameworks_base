@@ -1951,6 +1951,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun handleRequest_fullscreenTask_noTasks_enforceDesktop_freeformDisplay_returnFreeformWCT() {
     whenever(DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)).thenReturn(true)
     val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
@@ -1962,8 +1963,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertNotNull(wct, "should handle request")
     assertThat(wct.changes[fullscreenTask.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_UNDEFINED)
-    assertThat(wct.hierarchyOps).hasSize(1)
-    wct.assertReorderAt(0, fullscreenTask, toTop = true)
+    assertThat(wct.hierarchyOps).hasSize(3)
+    // There are 3 hops that are happening in this case:
+    // 1. Moving the fullscreen task to top as we add moveToDesktop() changes
+    // 2. Pending intent for the wallpaper
+    // 3. Bringing the fullscreen task back at the top
+    wct.assertPendingIntentAt(1, desktopWallpaperIntent)
+    wct.assertReorderAt(2, fullscreenTask, toTop = true)
   }
 
   @Test
