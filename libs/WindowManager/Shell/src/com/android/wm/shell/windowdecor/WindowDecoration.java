@@ -600,13 +600,25 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     private Rect calculateBoundingRectLocal(@NonNull OccludingCaptionElement element,
             int elementWidthPx, @NonNull Rect captionRect) {
+        final boolean isRtl =
+                mDecorWindowContext.getResources().getConfiguration().getLayoutDirection()
+                        == View.LAYOUT_DIRECTION_RTL;
         switch (element.mAlignment) {
             case START -> {
-                return new Rect(0, 0, elementWidthPx, captionRect.height());
+                if (isRtl) {
+                    return new Rect(captionRect.width() - elementWidthPx, 0,
+                            captionRect.width(), captionRect.height());
+                } else {
+                    return new Rect(0, 0, elementWidthPx, captionRect.height());
+                }
             }
             case END -> {
-                return new Rect(captionRect.width() - elementWidthPx, 0,
-                        captionRect.width(), captionRect.height());
+                if (isRtl) {
+                    return new Rect(0, 0, elementWidthPx, captionRect.height());
+                } else {
+                    return new Rect(captionRect.width() - elementWidthPx, 0,
+                            captionRect.width(), captionRect.height());
+                }
             }
         }
         throw new IllegalArgumentException("Unexpected alignment " + element.mAlignment);
