@@ -53,6 +53,8 @@ interface IMediaQualityManager {
     void registerSoundProfileCallback(in ISoundProfileCallback cb);
     void registerAmbientBacklightCallback(in IAmbientBacklightCallback cb);
 
+    void unregisterAmbientBacklightCallback(in IAmbientBacklightCallback cb);
+
     List<ParamCapability> getParamCapabilities(in List<String> names);
 
     boolean isSupported();
