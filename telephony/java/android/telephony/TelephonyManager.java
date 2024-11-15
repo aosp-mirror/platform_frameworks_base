@@ -19594,4 +19594,37 @@ public class TelephonyManager {
             throw ex.rethrowAsRuntimeException();
         }
     }
+
+    /**
+     * Returns carrier id maps to the passing CarrierIdentifier.
+     * To recognize a carrier (including MVNO) as a first-class identity,
+     * Android assigns each carrier with a canonical integer a.k.a. carrier id.
+     * The carrier ID is an Android platform-wide identifier for a carrier.
+     * AOSP maintains carrier ID assignments in
+     * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/latest_carrier_id/carrier_list.textpb">here</a>
+     *
+     * @param carrierIdentifier {@link CarrierIdentifier}
+     *
+     * @return Carrier id. Return {@link #UNKNOWN_CARRIER_ID} if the carrier cannot be identified.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ID_FROM_CARRIER_IDENTIFIER)
+    @SystemApi
+    @WorkerThread
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getCarrierIdFromCarrierIdentifier(@NonNull CarrierIdentifier carrierIdentifier) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCarrierIdFromIdentifier(carrierIdentifier);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
+    }
 }
