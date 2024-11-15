@@ -293,7 +293,6 @@ class PackageInstallerSessionTest {
         assertThat(expected.installerPackageName).isEqualTo(actual.installerPackageName)
         assertThat(expected.isMultiPackage).isEqualTo(actual.isMultiPackage)
         assertThat(expected.isStaged).isEqualTo(actual.isStaged)
-        assertThat(expected.forceVerification).isEqualTo(actual.forceVerification)
     }
 
     private fun assertEquals(

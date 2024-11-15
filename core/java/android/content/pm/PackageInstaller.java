@@ -2935,8 +2935,6 @@ public class PackageInstaller {
         /** {@hide} */
         public @Nullable String dexoptCompilerFilter = null;
         /** {@hide} */
-        public boolean forceVerification;
-        /** {@hide} */
         public boolean isAutoInstallDependenciesEnabled = true;
 
         private final ArrayMap<String, Integer> mPermissionStates;
@@ -2992,7 +2990,6 @@ public class PackageInstaller {
             developmentInstallFlags = source.readInt();
             unarchiveId = source.readInt();
             dexoptCompilerFilter = source.readString();
-            forceVerification = source.readBoolean();
             isAutoInstallDependenciesEnabled = source.readBoolean();
         }
 
@@ -3030,7 +3027,6 @@ public class PackageInstaller {
             ret.developmentInstallFlags = developmentInstallFlags;
             ret.unarchiveId = unarchiveId;
             ret.dexoptCompilerFilter = dexoptCompilerFilter;
-            ret.forceVerification = forceVerification;
             ret.isAutoInstallDependenciesEnabled = isAutoInstallDependenciesEnabled;
             return ret;
         }
@@ -3741,14 +3737,6 @@ public class PackageInstaller {
         }
 
         /**
-         * Used by adb installations to force enable the verification for this install.
-         * {@hide}
-         */
-        public void setForceVerification() {
-            this.forceVerification = true;
-        }
-
-        /**
          * Optionally indicate whether missing SDK or static shared library dependencies should be
          * automatically fetched and installed when installing an app that wants to use these
          * dependencies.
@@ -3800,7 +3788,6 @@ public class PackageInstaller {
             pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
             pw.printPair("unarchiveId", unarchiveId);
             pw.printPair("dexoptCompilerFilter", dexoptCompilerFilter);
-            pw.printPair("forceVerification", forceVerification);
             pw.printPair("isAutoInstallDependenciesEnabled", isAutoInstallDependenciesEnabled);
             pw.println();
         }
@@ -3848,7 +3835,6 @@ public class PackageInstaller {
             dest.writeInt(developmentInstallFlags);
             dest.writeInt(unarchiveId);
             dest.writeString(dexoptCompilerFilter);
-            dest.writeBoolean(forceVerification);
             dest.writeBoolean(isAutoInstallDependenciesEnabled);
         }
 
