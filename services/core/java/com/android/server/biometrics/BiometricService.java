@@ -101,6 +101,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 
 /**
@@ -132,7 +133,7 @@ public class BiometricService extends SystemService {
     IGateKeeperService mGateKeeper;
 
     // Get and cache the available biometric authenticators and their associated info.
-    final ArrayList<BiometricSensor> mSensors = new ArrayList<>();
+    final CopyOnWriteArrayList<BiometricSensor> mSensors = new CopyOnWriteArrayList<>();
 
     @VisibleForTesting
     BiometricStrengthController mBiometricStrengthController;
@@ -156,13 +157,13 @@ public class BiometricService extends SystemService {
         @NonNull private final Set<Integer> mSensorsPendingInvalidation;
 
         public static InvalidationTracker start(@NonNull Context context,
-                @NonNull ArrayList<BiometricSensor> sensors,
-                int userId, int fromSensorId, @NonNull IInvalidationCallback clientCallback) {
+                @NonNull List<BiometricSensor> sensors, int userId,
+                int fromSensorId, @NonNull IInvalidationCallback clientCallback) {
             return new InvalidationTracker(context, sensors, userId, fromSensorId, clientCallback);
         }
 
         private InvalidationTracker(@NonNull Context context,
-                @NonNull ArrayList<BiometricSensor> sensors, int userId,
+                @NonNull List<BiometricSensor> sensors, int userId,
                 int fromSensorId, @NonNull IInvalidationCallback clientCallback) {
             mClientCallback = clientCallback;
             mSensorsPendingInvalidation = new ArraySet<>();
@@ -844,7 +845,7 @@ public class BiometricService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
-        public synchronized void registerAuthenticator(int id, int modality,
+        public void registerAuthenticator(int id, int modality,
                 @Authenticators.Types int strength,
                 @NonNull IBiometricAuthenticator authenticator) {
 
