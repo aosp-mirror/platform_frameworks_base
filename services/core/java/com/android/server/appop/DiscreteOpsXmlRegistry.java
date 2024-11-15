@@ -24,48 +24,20 @@ import static android.app.AppOpsManager.FILTER_BY_ATTRIBUTION_TAG;
 import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
 import static android.app.AppOpsManager.FILTER_BY_UID;
-import static android.app.AppOpsManager.OP_CAMERA;
-import static android.app.AppOpsManager.OP_COARSE_LOCATION;
-import static android.app.AppOpsManager.OP_EMERGENCY_LOCATION;
-import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
-import static android.app.AppOpsManager.OP_FLAG_SELF;
-import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
-import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXY;
-import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
-import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
-import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
-import static android.app.AppOpsManager.OP_PROCESS_OUTGOING_CALLS;
-import static android.app.AppOpsManager.OP_READ_ICC_SMS;
-import static android.app.AppOpsManager.OP_READ_SMS;
-import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
-import static android.app.AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
-import static android.app.AppOpsManager.OP_RECORD_AUDIO;
-import static android.app.AppOpsManager.OP_RESERVED_FOR_TESTING;
-import static android.app.AppOpsManager.OP_SEND_SMS;
-import static android.app.AppOpsManager.OP_SMS_FINANCIAL_TRANSACTIONS;
-import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
-import static android.app.AppOpsManager.OP_WRITE_ICC_SMS;
-import static android.app.AppOpsManager.OP_WRITE_SMS;
 import static android.app.AppOpsManager.flagsToString;
 import static android.app.AppOpsManager.getUidStateName;
 import static android.companion.virtual.VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
 
-import static java.lang.Long.min;
 import static java.lang.Math.max;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.permission.flags.Flags;
-import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -84,10 +56,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -99,100 +68,30 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * This class manages information about recent accesses to ops for permission usage timeline.
+ * Xml persistence implementation for discrete ops.
  *
- * The discrete history is kept for limited time (initial default is 24 hours, set in
- * {@link DiscreteRegistry#sDiscreteHistoryCutoff) and discarded after that.
- *
- * Discrete history is quantized to reduce resources footprint. By default quantization is set to
- * one minute in {@link DiscreteRegistry#sDiscreteHistoryQuantization}. All access times are aligned
- * to the closest quantized time. All durations (except -1, meaning no duration) are rounded up to
- * the closest quantized interval.
- *
- * When data is queried through API, events are deduplicated and for every time quant there can
- * be only one {@link AppOpsManager.AttributedOpEntry}. Each entry contains information about
- * different accesses which happened in specified time quant - across dimensions of
- * {@link AppOpsManager.UidState} and {@link AppOpsManager.OpFlags}. For each dimension
- * it is only possible to know if at least one access happened in the time quant.
- *
+ * <p>
  * Every time state is saved (default is 30 minutes), memory state is dumped to a
  * new file and memory state is cleared. Files older than time limit are deleted
  * during the process.
- *
+ * <p>
  * When request comes in, files are read and requested information is collected
  * and delivered. Information is cached in memory until the next state save (up to 30 minutes), to
  * avoid reading disk if more API calls come in a quick succession.
- *
+ * <p>
  * THREADING AND LOCKING:
- * For in-memory transactions this class relies on {@link DiscreteRegistry#mInMemoryLock}. It is
- * assumed that the same lock is used for in-memory transactions in {@link AppOpsService},
- * {@link HistoricalRegistry}, and {@link DiscreteRegistry}.
- * {@link DiscreteRegistry#recordDiscreteAccess(int, String, int, String, int, int, long, long)}
- * must only be called while holding this lock.
- * {@link DiscreteRegistry#mOnDiskLock} is used when disk transactions are performed.
- * It is very important to release {@link DiscreteRegistry#mInMemoryLock} as soon as possible, as
- * no AppOps related transactions across the system can be performed while it is held.
+ * For in-memory transactions this class relies on {@link DiscreteOpsXmlRegistry#mInMemoryLock}.
+ * It is assumed that the same lock is used for in-memory transactions in {@link AppOpsService},
+ * {@link HistoricalRegistry}, and {@link DiscreteOpsXmlRegistry }.
+ * {@link DiscreteOpsRegistry#recordDiscreteAccess} must only be called while holding this lock.
+ * {@link DiscreteOpsXmlRegistry#mOnDiskLock} is used when disk transactions are performed.
+ * It is very important to release {@link DiscreteOpsXmlRegistry#mInMemoryLock} as soon as
+ * possible, as no AppOps related transactions across the system can be performed while it is held.
  *
- * INITIALIZATION: We can initialize persistence only after the system is ready
- * as we need to check the optional configuration override from the settings
- * database which is not initialized at the time the app ops service is created. This class
- * relies on {@link HistoricalRegistry} for controlling that no calls are allowed until then. All
- * outside calls are going through {@link HistoricalRegistry}, where
- * {@link HistoricalRegistry#isPersistenceInitializedMLocked()} check is done.
  */
-
-final class DiscreteRegistry {
+class DiscreteOpsXmlRegistry extends DiscreteOpsRegistry {
     static final String DISCRETE_HISTORY_FILE_SUFFIX = "tl";
-    private static final String TAG = DiscreteRegistry.class.getSimpleName();
-
-    private static final String PROPERTY_DISCRETE_HISTORY_CUTOFF = "discrete_history_cutoff_millis";
-    private static final String PROPERTY_DISCRETE_HISTORY_QUANTIZATION =
-            "discrete_history_quantization_millis";
-    private static final String PROPERTY_DISCRETE_FLAGS = "discrete_history_op_flags";
-    private static final String PROPERTY_DISCRETE_OPS_LIST = "discrete_history_ops_cslist";
-    private static final String DEFAULT_DISCRETE_OPS = OP_FINE_LOCATION + "," + OP_COARSE_LOCATION
-            + "," + OP_EMERGENCY_LOCATION + "," + OP_CAMERA + "," + OP_RECORD_AUDIO + ","
-            + OP_PHONE_CALL_MICROPHONE + "," + OP_PHONE_CALL_CAMERA + ","
-            + OP_RECEIVE_AMBIENT_TRIGGER_AUDIO + "," + OP_RECEIVE_SANDBOX_TRIGGER_AUDIO
-            + "," + OP_RESERVED_FOR_TESTING;
-    private static final int[] sDiscreteOpsToLog =
-            new int[]{OP_FINE_LOCATION, OP_COARSE_LOCATION, OP_EMERGENCY_LOCATION, OP_CAMERA,
-                    OP_RECORD_AUDIO, OP_PHONE_CALL_MICROPHONE, OP_PHONE_CALL_CAMERA,
-                    OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, OP_RECEIVE_SANDBOX_TRIGGER_AUDIO, OP_READ_SMS,
-                    OP_WRITE_SMS, OP_SEND_SMS, OP_READ_ICC_SMS, OP_WRITE_ICC_SMS,
-                    OP_SMS_FINANCIAL_TRANSACTIONS, OP_SYSTEM_ALERT_WINDOW, OP_MONITOR_LOCATION,
-                    OP_MONITOR_HIGH_POWER_LOCATION, OP_PROCESS_OUTGOING_CALLS,
-            };
-    private static final long DEFAULT_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(7).toMillis();
-    private static final long MAXIMUM_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(30).toMillis();
-    private static final long DEFAULT_DISCRETE_HISTORY_QUANTIZATION =
-            Duration.ofMinutes(1).toMillis();
-
-    static final int ACCESS_TYPE_NOTE_OP =
-            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__NOTE_OP;
-    static final int ACCESS_TYPE_START_OP =
-            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__START_OP;
-    static final int ACCESS_TYPE_FINISH_OP =
-            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__FINISH_OP;
-    static final int ACCESS_TYPE_PAUSE_OP =
-            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__PAUSE_OP;
-    static final int ACCESS_TYPE_RESUME_OP =
-            FrameworkStatsLog.APP_OP_ACCESS_TRACKED__ACCESS_TYPE__RESUME_OP;
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"ACCESS_TYPE_"}, value = {
-            ACCESS_TYPE_NOTE_OP,
-            ACCESS_TYPE_START_OP,
-            ACCESS_TYPE_FINISH_OP,
-            ACCESS_TYPE_PAUSE_OP,
-            ACCESS_TYPE_RESUME_OP
-    })
-    public @interface AccessType {}
-
-    private static long sDiscreteHistoryCutoff;
-    private static long sDiscreteHistoryQuantization;
-    private static int[] sDiscreteOps;
-    private static int sDiscreteFlags;
+    private static final String TAG = DiscreteOpsXmlRegistry.class.getSimpleName();
 
     private static final String TAG_HISTORY = "h";
     private static final String ATTR_VERSION = "v";
@@ -221,9 +120,6 @@ final class DiscreteRegistry {
     private static final String ATTR_ATTRIBUTION_FLAGS = "af";
     private static final String ATTR_CHAIN_ID = "ci";
 
-    private static final int OP_FLAGS_DISCRETE = OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED
-            | OP_FLAG_TRUSTED_PROXY;
-
     // Lock for read/write access to on disk state
     private final Object mOnDiskLock = new Object();
 
@@ -239,14 +135,12 @@ final class DiscreteRegistry {
     @GuardedBy("mOnDiskLock")
     private DiscreteOps mCachedOps = null;
 
-    private boolean mDebugMode = false;
-
-    DiscreteRegistry(Object inMemoryLock) {
+    DiscreteOpsXmlRegistry(Object inMemoryLock) {
         this(inMemoryLock, new File(new File(Environment.getDataSystemDirectory(), "appops"),
                 "discrete"));
     }
 
-    DiscreteRegistry(Object inMemoryLock, File discreteAccessDir) {
+    DiscreteOpsXmlRegistry(Object inMemoryLock, File discreteAccessDir) {
         mInMemoryLock = inMemoryLock;
         synchronized (mOnDiskLock) {
             mDiscreteAccessDir = discreteAccessDir;
@@ -256,42 +150,6 @@ final class DiscreteRegistry {
                 mDiscreteOps = new DiscreteOps(largestChainId);
             }
         }
-    }
-
-    void systemReady() {
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
-                AsyncTask.THREAD_POOL_EXECUTOR, (DeviceConfig.Properties p) -> {
-                    setDiscreteHistoryParameters(p);
-                });
-        setDiscreteHistoryParameters(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_PRIVACY));
-    }
-
-    private void setDiscreteHistoryParameters(DeviceConfig.Properties p) {
-        if (p.getKeyset().contains(PROPERTY_DISCRETE_HISTORY_CUTOFF)) {
-            sDiscreteHistoryCutoff = p.getLong(PROPERTY_DISCRETE_HISTORY_CUTOFF,
-                    DEFAULT_DISCRETE_HISTORY_CUTOFF);
-            if (!Build.IS_DEBUGGABLE && !mDebugMode) {
-                sDiscreteHistoryCutoff = min(MAXIMUM_DISCRETE_HISTORY_CUTOFF,
-                        sDiscreteHistoryCutoff);
-            }
-        } else {
-            sDiscreteHistoryCutoff = DEFAULT_DISCRETE_HISTORY_CUTOFF;
-        }
-        if (p.getKeyset().contains(PROPERTY_DISCRETE_HISTORY_QUANTIZATION)) {
-            sDiscreteHistoryQuantization = p.getLong(PROPERTY_DISCRETE_HISTORY_QUANTIZATION,
-                    DEFAULT_DISCRETE_HISTORY_QUANTIZATION);
-            if (!Build.IS_DEBUGGABLE && !mDebugMode) {
-                sDiscreteHistoryQuantization = max(DEFAULT_DISCRETE_HISTORY_QUANTIZATION,
-                        sDiscreteHistoryQuantization);
-            }
-        } else {
-            sDiscreteHistoryQuantization = DEFAULT_DISCRETE_HISTORY_QUANTIZATION;
-        }
-        sDiscreteFlags = p.getKeyset().contains(PROPERTY_DISCRETE_FLAGS) ? sDiscreteFlags =
-                p.getInt(PROPERTY_DISCRETE_FLAGS, OP_FLAGS_DISCRETE) : OP_FLAGS_DISCRETE;
-        sDiscreteOps = p.getKeyset().contains(PROPERTY_DISCRETE_OPS_LIST) ? parseOpsList(
-                p.getString(PROPERTY_DISCRETE_OPS_LIST, DEFAULT_DISCRETE_OPS)) : parseOpsList(
-                DEFAULT_DISCRETE_OPS);
     }
 
     void recordDiscreteAccess(int uid, String packageName, @NonNull String deviceId, int op,
@@ -1506,26 +1364,6 @@ final class DiscreteRegistry {
         }
     }
 
-    private static int[] parseOpsList(String opsList) {
-        String[] strArr;
-        if (opsList.isEmpty()) {
-            strArr = new String[0];
-        } else {
-            strArr = opsList.split(",");
-        }
-        int nOps = strArr.length;
-        int[] result = new int[nOps];
-        try {
-            for (int i = 0; i < nOps; i++) {
-                result[i] = Integer.parseInt(strArr[i]);
-            }
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "Failed to parse Discrete ops list: " + e.getMessage());
-            return parseOpsList(DEFAULT_DISCRETE_OPS);
-        }
-        return result;
-    }
-
     private static List<DiscreteOpEvent> stableListMerge(List<DiscreteOpEvent> a,
             List<DiscreteOpEvent> b) {
         int nA = a.size();
@@ -1571,33 +1409,8 @@ final class DiscreteRegistry {
         return result;
     }
 
-    private static boolean isDiscreteOp(int op, @AppOpsManager.OpFlags int flags) {
-        if (!ArrayUtils.contains(sDiscreteOps, op)) {
-            return false;
-        }
-        if ((flags & (sDiscreteFlags)) == 0) {
-            return false;
-        }
-        return true;
-    }
-
     private static boolean shouldLogAccess(int op) {
         return Flags.appopAccessTrackingLoggingEnabled()
                 && ArrayUtils.contains(sDiscreteOpsToLog, op);
     }
-
-    private static long discretizeTimeStamp(long timeStamp) {
-        return timeStamp / sDiscreteHistoryQuantization * sDiscreteHistoryQuantization;
-
-    }
-
-    private static long discretizeDuration(long duration) {
-        return duration == -1 ? -1 : (duration + sDiscreteHistoryQuantization - 1)
-                / sDiscreteHistoryQuantization * sDiscreteHistoryQuantization;
-    }
-
-    void setDebugMode(boolean debugMode) {
-        this.mDebugMode = debugMode;
-    }
 }
-

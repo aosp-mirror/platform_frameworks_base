@@ -135,7 +135,7 @@ final class HistoricalRegistry {
     private static final String PARAMETER_DELIMITER = ",";
     private static final String PARAMETER_ASSIGNMENT = "=";
 
-    private volatile @NonNull DiscreteRegistry mDiscreteRegistry;
+    private volatile @NonNull DiscreteOpsRegistry mDiscreteRegistry;
 
     @GuardedBy("mLock")
     private @NonNull LinkedList<HistoricalOps> mPendingWrites = new LinkedList<>();
@@ -198,7 +198,7 @@ final class HistoricalRegistry {
 
     HistoricalRegistry(@NonNull Object lock) {
         mInMemoryLock = lock;
-        mDiscreteRegistry = new DiscreteRegistry(lock);
+        mDiscreteRegistry = new DiscreteOpsXmlRegistry(lock);
     }
 
     HistoricalRegistry(@NonNull HistoricalRegistry other) {
@@ -475,7 +475,7 @@ final class HistoricalRegistry {
             @NonNull String deviceId, @Nullable String attributionTag, @UidState int uidState,
             @OpFlags int flags, long accessTime,
             @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId,
-            @DiscreteRegistry.AccessType int accessType, int accessCount) {
+            @DiscreteOpsRegistry.AccessType int accessType, int accessCount) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -512,7 +512,7 @@ final class HistoricalRegistry {
             @NonNull String deviceId, @Nullable String attributionTag, @UidState int uidState,
             @OpFlags int flags, long eventStartTime, long increment,
             @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId,
-            @DiscreteRegistry.AccessType int accessType) {
+            @DiscreteOpsRegistry.AccessType int accessType) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {

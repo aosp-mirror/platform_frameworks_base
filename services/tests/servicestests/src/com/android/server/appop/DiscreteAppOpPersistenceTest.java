@@ -47,9 +47,12 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.util.List;
 
+/**
+ * Test xml persistence implementation for discrete ops.
+ */
 @RunWith(AndroidJUnit4.class)
 public class DiscreteAppOpPersistenceTest {
-    private DiscreteRegistry mDiscreteRegistry;
+    private DiscreteOpsXmlRegistry mDiscreteRegistry;
     private final Object mLock = new Object();
     private File mMockDataDirectory;
     private final Context mContext =
@@ -61,7 +64,7 @@ public class DiscreteAppOpPersistenceTest {
     @Before
     public void setUp() {
         mMockDataDirectory = mContext.getDir("mock_data", Context.MODE_PRIVATE);
-        mDiscreteRegistry = new DiscreteRegistry(mLock, mMockDataDirectory);
+        mDiscreteRegistry = new DiscreteOpsXmlRegistry(mLock, mMockDataDirectory);
         mDiscreteRegistry.systemReady();
     }
 
@@ -87,7 +90,7 @@ public class DiscreteAppOpPersistenceTest {
 
         mDiscreteRegistry.recordDiscreteAccess(uid, packageName, deviceId, op, null, opFlags,
                 uidState, accessTime, duration, attributionFlags, attributionChainId,
-                DiscreteRegistry.ACCESS_TYPE_FINISH_OP);
+                DiscreteOpsXmlRegistry.ACCESS_TYPE_FINISH_OP);
 
         // Verify in-memory object is correct
         fetchDiscreteOpsAndValidate(uid, packageName, op, deviceId, null, accessTime,
@@ -119,7 +122,7 @@ public class DiscreteAppOpPersistenceTest {
 
         mDiscreteRegistry.recordDiscreteAccess(uid, packageName, deviceId, op, null, opFlags,
                 uidState, accessTime, duration, attributionFlags, attributionChainId,
-                DiscreteRegistry.ACCESS_TYPE_START_OP);
+                DiscreteOpsXmlRegistry.ACCESS_TYPE_START_OP);
 
         fetchDiscreteOpsAndValidate(uid, packageName, op, deviceId, null, accessTime,
                 duration, uidState, opFlags, attributionFlags, attributionChainId);
@@ -136,30 +139,31 @@ public class DiscreteAppOpPersistenceTest {
             int expectedOp, String expectedDeviceId, String expectedAttrTag,
             long expectedAccessTime, long expectedAccessDuration, int expectedUidState,
             int expectedOpFlags, int expectedAttrFlags, int expectedAttrChainId) {
-        DiscreteRegistry.DiscreteOps discreteOps = mDiscreteRegistry.getAllDiscreteOps();
+        DiscreteOpsXmlRegistry.DiscreteOps discreteOps = mDiscreteRegistry.getAllDiscreteOps();
 
         assertThat(discreteOps.isEmpty()).isFalse();
         assertThat(discreteOps.mUids.size()).isEqualTo(1);
 
-        DiscreteRegistry.DiscreteUidOps discreteUidOps = discreteOps.mUids.get(expectedUid);
+        DiscreteOpsXmlRegistry.DiscreteUidOps discreteUidOps = discreteOps.mUids.get(expectedUid);
         assertThat(discreteUidOps.mPackages.size()).isEqualTo(1);
 
-        DiscreteRegistry.DiscretePackageOps discretePackageOps =
+        DiscreteOpsXmlRegistry.DiscretePackageOps discretePackageOps =
                 discreteUidOps.mPackages.get(expectedPackageName);
         assertThat(discretePackageOps.mPackageOps.size()).isEqualTo(1);
 
-        DiscreteRegistry.DiscreteOp discreteOp = discretePackageOps.mPackageOps.get(expectedOp);
+        DiscreteOpsXmlRegistry.DiscreteOp discreteOp =
+                discretePackageOps.mPackageOps.get(expectedOp);
         assertThat(discreteOp.mDeviceAttributedOps.size()).isEqualTo(1);
 
-        DiscreteRegistry.DiscreteDeviceOp discreteDeviceOp =
+        DiscreteOpsXmlRegistry.DiscreteDeviceOp discreteDeviceOp =
                 discreteOp.mDeviceAttributedOps.get(expectedDeviceId);
         assertThat(discreteDeviceOp.mAttributedOps.size()).isEqualTo(1);
 
-        List<DiscreteRegistry.DiscreteOpEvent> discreteOpEvents =
+        List<DiscreteOpsXmlRegistry.DiscreteOpEvent> discreteOpEvents =
                 discreteDeviceOp.mAttributedOps.get(expectedAttrTag);
         assertThat(discreteOpEvents.size()).isEqualTo(1);
 
-        DiscreteRegistry.DiscreteOpEvent discreteOpEvent = discreteOpEvents.get(0);
+        DiscreteOpsXmlRegistry.DiscreteOpEvent discreteOpEvent = discreteOpEvents.get(0);
         assertThat(discreteOpEvent.mNoteTime).isEqualTo(expectedAccessTime);
         assertThat(discreteOpEvent.mNoteDuration).isEqualTo(expectedAccessDuration);
         assertThat(discreteOpEvent.mUidState).isEqualTo(expectedUidState);
