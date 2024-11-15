@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.icon
 import android.app.Notification
 import android.app.Notification.MessagingStyle
 import android.app.Person
+import android.content.Context
 import android.content.pm.LauncherApps
 import android.graphics.drawable.Icon
 import android.os.Build
@@ -36,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -68,6 +70,17 @@ constructor(
     @Background private val bgCoroutineContext: CoroutineContext,
     @Main private val mainCoroutineContext: CoroutineContext,
 ) : ConversationIconManager {
+
+    /**
+     * A listener that is notified when a [NotificationEntry] has been updated and the associated
+     * icons have to be updated as well.
+     */
+    fun interface OnIconUpdateRequiredListener {
+        fun onIconUpdateRequired(entry: NotificationEntry)
+    }
+
+    private val onIconUpdateRequiredListeners = mutableSetOf<OnIconUpdateRequiredListener>()
+
     private var unimportantConversationKeys: Set<String> = emptySet()
     /**
      * A map of running jobs for fetching the person avatar from launcher. The key is the
@@ -75,6 +88,16 @@ constructor(
      */
     private var launcherPeopleAvatarIconJobs: ConcurrentHashMap<String, Job> =
         ConcurrentHashMap<String, Job>()
+
+    fun addIconsUpdateListener(listener: OnIconUpdateRequiredListener) {
+        StatusBarConnectedDisplays.assertInNewMode()
+        onIconUpdateRequiredListeners += listener
+    }
+
+    fun removeIconsUpdateListener(listener: OnIconUpdateRequiredListener) {
+        StatusBarConnectedDisplays.assertInNewMode()
+        onIconUpdateRequiredListeners -= listener
+    }
 
     fun attach() {
         notifCollection.addCollectionListener(entryListener)
@@ -110,6 +133,21 @@ constructor(
             entry.icons.isImportantConversation = isImportant
         }
     }
+
+    /**
+     * Inflate the [StatusBarIconView] for the given [NotificationEntry], using the specified
+     * [Context].
+     */
+    fun createSbIconView(context: Context, entry: NotificationEntry): StatusBarIconView =
+        traceSection("IconManager.createSbIconView") {
+            StatusBarConnectedDisplays.assertInNewMode()
+
+            val sbIcon = iconBuilder.createIconView(entry, context)
+            sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
+            val (normalIconDescriptor, _) = getIconDescriptors(entry)
+            setIcon(entry, normalIconDescriptor, sbIcon)
+            return sbIcon
+        }
 
     /**
      * Inflate icon views for each icon variant and assign appropriate icons to them. Stores the
@@ -159,6 +197,18 @@ constructor(
             }
         }
 
+    /** Update the [StatusBarIconView] for the given [NotificationEntry]. */
+    fun updateSbIcon(entry: NotificationEntry, iconView: StatusBarIconView) =
+        traceSection("IconManager.updateSbIcon") {
+            StatusBarConnectedDisplays.assertInNewMode()
+
+            val (normalIconDescriptor, _) = getIconDescriptors(entry)
+            val notificationContentDescription =
+                entry.sbn.notification?.let { iconBuilder.getIconContentDescription(it) }
+            iconView.setNotification(entry.sbn, notificationContentDescription)
+            setIcon(entry, normalIconDescriptor, iconView)
+        }
+
     /**
      * Update the notification icons.
      *
@@ -170,6 +220,10 @@ constructor(
         traceSection("IconManager.updateIcons") {
             if (!entry.icons.areIconsAvailable) {
                 return@traceSection
+            }
+
+            if (StatusBarConnectedDisplays.isEnabled) {
+                onIconUpdateRequiredListeners.onEach { it.onIconUpdateRequired(entry) }
             }
 
             if (usingCache && !Flags.notificationsBackgroundIcons()) {

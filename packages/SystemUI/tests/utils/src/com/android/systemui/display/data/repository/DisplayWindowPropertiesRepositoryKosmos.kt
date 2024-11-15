@@ -16,10 +16,11 @@
 
 package com.android.systemui.display.data.repository
 
+import android.content.testableContext
 import com.android.systemui.kosmos.Kosmos
 
 val Kosmos.fakeDisplayWindowPropertiesRepository by
-    Kosmos.Fixture { FakeDisplayWindowPropertiesRepository() }
+    Kosmos.Fixture { FakeDisplayWindowPropertiesRepository(testableContext) }
 
 var Kosmos.displayWindowPropertiesRepository: DisplayWindowPropertiesRepository by
     Kosmos.Fixture { fakeDisplayWindowPropertiesRepository }
