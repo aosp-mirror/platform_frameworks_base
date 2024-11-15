@@ -2,6 +2,13 @@ package: "android.service.autofill"
 container: "system"
 
 flag {
+  name: "autofill_session_destroyed"
+  namespace: "autofill"
+  description: "Guards against new metrics definitions introduced in W"
+  bug: "342676602"
+}
+
+flag {
   name: "autofill_w_metrics"
   namespace: "autofill"
   description: "Guards against new metrics definitions introduced in W"
