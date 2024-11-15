@@ -1603,6 +1603,13 @@ class DesktopTasksController(
                     transition, wct, task.displayId
                 )
             }
+        } else if (taskRepository.isActiveTask(task.taskId)) {
+            // If a freeform task receives a request for a fullscreen launch, apply the same
+            // changes we do for similar transitions. The task not having WINDOWING_MODE_UNDEFINED
+            // set when needed can interfere with future split / multi-instance transitions.
+            return WindowContainerTransaction().also { wct ->
+                addMoveToFullscreenChanges(wct, task)
+            }
         }
         return null
     }
