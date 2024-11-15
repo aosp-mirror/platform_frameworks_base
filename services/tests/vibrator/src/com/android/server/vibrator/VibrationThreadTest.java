@@ -747,6 +747,23 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_PRIMITIVE_COMPOSITION_ABSOLUTE_DELAY)
+    public void vibrate_singleVibratorComposedAndNoCapability_triggersHalAndReturnsUnsupported() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
+                .compose();
+        HalVibration vibration = startThreadAndDispatcher(effect);
+        waitForCompletion();
+
+        verify(mManagerHooks).noteVibratorOn(eq(UID), eq(0L));
+        verify(mManagerHooks, never()).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks, never()).onComplete(eq(VIBRATOR_ID), eq(vibration.id));
+        verifyCallbacksTriggered(vibration, Status.IGNORED_UNSUPPORTED);
+        assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibration.id).isEmpty());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_PRIMITIVE_COMPOSITION_ABSOLUTE_DELAY)
     public void vibrate_singleVibratorComposedAndNoCapability_ignoresVibration() {
         VibrationEffect effect = VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
