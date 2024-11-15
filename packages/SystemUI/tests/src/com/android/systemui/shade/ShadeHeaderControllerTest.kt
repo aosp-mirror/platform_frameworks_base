@@ -96,7 +96,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val insetsProviderStore = kosmos.fakeStatusBarContentInsetsProviderStore
-    private val insetsProvider = insetsProviderStore.defaultDisplay
+    private val insetsProvider = insetsProviderStore.forDisplay(context.displayId)
 
     @Mock(answer = Answers.RETURNS_MOCKS) private lateinit var view: MotionLayout
     @Mock private lateinit var statusIcons: StatusIconContainer
@@ -196,6 +196,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
                 privacyIconsController,
                 insetsProviderStore,
                 configurationController,
+                context,
                 variableDateViewControllerFactory,
                 batteryMeterViewController,
                 dumpManager,

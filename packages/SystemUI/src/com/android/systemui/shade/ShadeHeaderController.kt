@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.IdRes
 import android.app.PendingIntent
 import android.app.StatusBarManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Insets
@@ -92,6 +93,7 @@ constructor(
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val insetsProviderStore: StatusBarContentInsetsProviderStore,
     @ShadeDisplayAware private val configurationController: ConfigurationController,
+    @ShadeDisplayAware private val shadeDisplayAwareContext: Context,
     private val variableDateViewControllerFactory: VariableDateViewController.Factory,
     @Named(SHADE_HEADER) private val batteryMeterViewController: BatteryMeterViewController,
     private val dumpManager: DumpManager,
@@ -104,7 +106,8 @@ constructor(
     private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
 ) : ViewController<View>(header), Dumpable {
 
-    private val insetsProvider = insetsProviderStore.defaultDisplay
+    private val insetsProvider
+        get() = insetsProviderStore.forDisplay(shadeDisplayAwareContext.displayId)
 
     companion object {
         /** IDs for transitions and constraints for the [MotionLayout]. */

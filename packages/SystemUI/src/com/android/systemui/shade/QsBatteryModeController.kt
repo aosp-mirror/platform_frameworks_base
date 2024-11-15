@@ -15,10 +15,11 @@ class QsBatteryModeController
 @Inject
 constructor(
     @ShadeDisplayAware private val context: Context,
-    insetsProviderStore: StatusBarContentInsetsProviderStore,
+    private val insetsProviderStore: StatusBarContentInsetsProviderStore,
 ) {
 
-    private val insetsProvider = insetsProviderStore.defaultDisplay
+    private val insetsProvider
+        get() = insetsProviderStore.forDisplay(context.displayId)
 
     private companion object {
         // MotionLayout frames are in [0, 100]. Where 0 and 100 are reserved for start and end
