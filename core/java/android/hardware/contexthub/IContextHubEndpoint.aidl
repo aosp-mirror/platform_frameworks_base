@@ -17,6 +17,8 @@
 package android.hardware.contexthub;
 
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubMessage;
+import android.hardware.location.IContextHubTransactionCallback;
 
 /**
  * @hide
@@ -62,4 +64,26 @@ interface IContextHubEndpoint {
      * Unregister this endpoint from the HAL, invalidate the EndpointInfo previously assigned.
      */
     void unregister();
+
+    /**
+     * Send a message parcelable to system service for a specific session.
+     *
+     * @param sessionId The integer representing the communication session, previously set in
+     *         IContextHubEndpoint.openSession(). This id is assigned by the HAL.
+     * @param message The HubMessage parcelable that represents the message and its delivery options.
+     * @param transactionCallback Nullable. If the hub message requires a reply, the transactionCallback
+     *                            will be set to non-null.
+     */
+    void sendMessage(int sessionId, in HubMessage message,
+                     in @nullable IContextHubTransactionCallback transactionCallback);
+
+    /**
+     * Send a message delivery status to system service for a specific message
+     *
+     * @param sessionId The integer representing the communication session, previously set in
+     *         IContextHubEndpoint.openSession(). This id is assigned by the HAL.
+     * @param messageSeqNumber The message sequence number, this should match a previously received HubMessage.
+     * @param errorCode The message delivery status detail.
+     */
+    void sendMessageDeliveryStatus(int sessionId, int messageSeqNumber, byte errorCode);
 }

@@ -51,18 +51,23 @@ public class ContextHubTransaction<T> {
 
     /**
      * Constants describing the type of a transaction through the Context Hub Service.
-     * {@hide}
+     *
+     * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "TYPE_" }, value = {
-            TYPE_LOAD_NANOAPP,
-            TYPE_UNLOAD_NANOAPP,
-            TYPE_ENABLE_NANOAPP,
-            TYPE_DISABLE_NANOAPP,
-            TYPE_QUERY_NANOAPPS,
-            TYPE_RELIABLE_MESSAGE,
-    })
-    public @interface Type { }
+    @IntDef(
+            prefix = {"TYPE_"},
+            value = {
+                TYPE_LOAD_NANOAPP,
+                TYPE_UNLOAD_NANOAPP,
+                TYPE_ENABLE_NANOAPP,
+                TYPE_DISABLE_NANOAPP,
+                TYPE_QUERY_NANOAPPS,
+                TYPE_RELIABLE_MESSAGE,
+                TYPE_HUB_MESSAGE_DEFAULT,
+                TYPE_HUB_MESSAGE_REQUIRES_RESPONSE,
+            })
+    public @interface Type {}
 
     public static final int TYPE_LOAD_NANOAPP = 0;
     public static final int TYPE_UNLOAD_NANOAPP = 1;
@@ -71,24 +76,34 @@ public class ContextHubTransaction<T> {
     public static final int TYPE_QUERY_NANOAPPS = 4;
     public static final int TYPE_RELIABLE_MESSAGE = 5;
 
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public static final int TYPE_HUB_MESSAGE_DEFAULT = 6;
+
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public static final int TYPE_HUB_MESSAGE_REQUIRES_RESPONSE = 7;
+
     /**
      * Constants describing the result of a transaction or request through the Context Hub Service.
-     * {@hide}
+     *
+     * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "RESULT_" }, value = {
-            RESULT_SUCCESS,
-            RESULT_FAILED_UNKNOWN,
-            RESULT_FAILED_BAD_PARAMS,
-            RESULT_FAILED_UNINITIALIZED,
-            RESULT_FAILED_BUSY,
-            RESULT_FAILED_AT_HUB,
-            RESULT_FAILED_TIMEOUT,
-            RESULT_FAILED_SERVICE_INTERNAL_FAILURE,
-            RESULT_FAILED_HAL_UNAVAILABLE,
-            RESULT_FAILED_NOT_SUPPORTED,
-    })
+    @IntDef(
+            prefix = {"RESULT_"},
+            value = {
+                RESULT_SUCCESS,
+                RESULT_FAILED_UNKNOWN,
+                RESULT_FAILED_BAD_PARAMS,
+                RESULT_FAILED_UNINITIALIZED,
+                RESULT_FAILED_BUSY,
+                RESULT_FAILED_AT_HUB,
+                RESULT_FAILED_TIMEOUT,
+                RESULT_FAILED_SERVICE_INTERNAL_FAILURE,
+                RESULT_FAILED_HAL_UNAVAILABLE,
+                RESULT_FAILED_NOT_SUPPORTED,
+            })
     public @interface Result {}
+
     public static final int RESULT_SUCCESS = 0;
     /**
      * Generic failure mode.
@@ -143,7 +158,8 @@ public class ContextHubTransaction<T> {
          */
         private R mContents;
 
-        Response(@ContextHubTransaction.Result int result, R contents) {
+        /** @hide */
+        public Response(@ContextHubTransaction.Result int result, R contents) {
             mResult = result;
             mContents = contents;
         }
@@ -206,7 +222,8 @@ public class ContextHubTransaction<T> {
      */
     private boolean mIsResponseSet = false;
 
-    ContextHubTransaction(@Type int type) {
+    /** @hide */
+    public ContextHubTransaction(@Type int type) {
         mTransactionType = type;
     }
 
@@ -338,16 +355,16 @@ public class ContextHubTransaction<T> {
     /**
      * Sets the response of the transaction.
      *
-     * This method should only be invoked by ContextHubManager as a result of a callback from
-     * the Context Hub Service indicating the response from a transaction. This method should not be
+     * <p>This method should only be invoked by ContextHubManager as a result of a callback from the
+     * Context Hub Service indicating the response from a transaction. This method should not be
      * invoked more than once.
      *
      * @param response the response to set
-     *
      * @throws IllegalStateException if this method is invoked multiple times
      * @throws NullPointerException if the response is null
+     * @hide
      */
-    /* package */ void setResponse(ContextHubTransaction.Response<T> response) {
+    public void setResponse(ContextHubTransaction.Response<T> response) {
         synchronized (this) {
             Objects.requireNonNull(response, "Response cannot be null");
             if (mIsResponseSet) {

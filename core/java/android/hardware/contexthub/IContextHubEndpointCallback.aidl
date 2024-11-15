@@ -17,6 +17,7 @@
 package android.hardware.contexthub;
 
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubMessage;
 
 /**
   * @hide
@@ -38,7 +39,6 @@ oneway interface IContextHubEndpointCallback {
      */
     void onSessionClosed(int sessionId, int reason);
 
-
     /**
      * Notifies the system service that the session requested by IContextHubEndpoint.openSession
      * is ready to use.
@@ -47,4 +47,13 @@ oneway interface IContextHubEndpointCallback {
      *         IContextHubEndpoint.openSession(). This id is assigned by the HAL.
      */
     void onSessionOpenComplete(int sessionId);
+
+    /**
+     * Message notification from system service for a specific session
+
+     * @param sessionId The integer representing the communication session, previously set in
+     *         IContextHubEndpoint.openSession(). This id is assigned by the HAL.
+     * @param message The HubMessage parcelable that represents the message.
+     */
+    void onMessageReceived(int sessionId, in HubMessage message);
 }
