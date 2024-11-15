@@ -18,12 +18,13 @@ package com.android.server.pm.verify.pkg;
 
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
-import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
@@ -113,17 +114,10 @@ public class VerifierController {
 
     private final Context mContext;
     private final Handler mHandler;
-    // Guards the remote service object, as well as the verifier name and UID, which should all be
-    // changed at the same time.
-    private final Object mLock = new Object();
     @Nullable
-    @GuardedBy("mLock")
     private ServiceConnector<IVerifierService> mRemoteService;
     @Nullable
-    @GuardedBy("mLock")
     private ComponentName mRemoteServiceComponentName;
-    @GuardedBy("mLock")
-    private int mRemoteServiceUid = INVALID_UID;
     @NonNull
     private Injector mInjector;
 
@@ -149,11 +143,9 @@ public class VerifierController {
      */
     @Nullable
     public String getVerifierPackageName(Supplier<Computer> snapshotSupplier, int userId) {
-        synchronized (mLock) {
-            if (isVerifierConnectedLocked()) {
-                // Verifier is connected or is being connected, so it must be installed.
-                return mRemoteServiceComponentName.getPackageName();
-            }
+        if (isVerifierConnected()) {
+            // Verifier is connected or is being connected, so it must be installed.
+            return mRemoteServiceComponentName.getPackageName();
         }
         // Verifier has been disconnected, or it hasn't been connected. Check if it's installed.
         return mInjector.getVerifierPackageName(snapshotSupplier.get(), userId);
@@ -186,29 +178,16 @@ public class VerifierController {
             }
             return true;
         }
-        Computer snapshot = snapshotSupplier.get();
         Pair<ServiceConnector<IVerifierService>, ComponentName> result =
-                mInjector.getRemoteService(snapshot, mContext, userId, mHandler);
+                mInjector.getRemoteService(snapshotSupplier.get(), mContext, userId, mHandler);
         if (result == null || result.first == null) {
             if (DEBUG) {
                 Slog.i(TAG, "Unable to find a qualified verifier.");
             }
             return false;
         }
-        final int verifierUid = snapshot.getPackageUidInternal(
-                result.second.getPackageName(), 0, userId, /* callingUid= */ SYSTEM_UID);
-        if (verifierUid == INVALID_UID) {
-            if (DEBUG) {
-                Slog.i(TAG, "Unable to find the UID of the qualified verifier.");
-            }
-            return false;
-        }
-        synchronized (mLock) {
-            mRemoteService = result.first;
-            mRemoteServiceComponentName = result.second;
-            mRemoteServiceUid = verifierUid;
-        }
-
+        mRemoteService = result.first;
+        mRemoteServiceComponentName = result.second;
         if (DEBUG) {
             Slog.i(TAG, "Connecting to a qualified verifier: " + mRemoteServiceComponentName);
         }
@@ -233,13 +212,10 @@ public class VerifierController {
                     }
 
                     private void destroy() {
-                        synchronized (mLock) {
-                            if (isVerifierConnectedLocked()) {
-                                mRemoteService.unbind();
-                                mRemoteService = null;
-                                mRemoteServiceComponentName = null;
-                                mRemoteServiceUid = INVALID_UID;
-                            }
+                        if (isVerifierConnected()) {
+                            mRemoteService.unbind();
+                            mRemoteService = null;
+                            mRemoteServiceComponentName = null;
                         }
                     }
                 });
@@ -247,8 +223,7 @@ public class VerifierController {
         return true;
     }
 
-    @GuardedBy("mLock")
-    private boolean isVerifierConnectedLocked() {
+    private boolean isVerifierConnected() {
         return mRemoteService != null && mRemoteServiceComponentName != null;
     }
 
@@ -257,21 +232,19 @@ public class VerifierController {
      * requested for verification.
      */
     public void notifyPackageNameAvailable(@NonNull String packageName) {
-        synchronized (mLock) {
-            if (!isVerifierConnectedLocked()) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Verifier is not connected. Not notifying package name available");
-                }
-                return;
+        if (!isVerifierConnected()) {
+            if (DEBUG) {
+                Slog.i(TAG, "Verifier is not connected. Not notifying package name available");
             }
-            // Best effort. We don't check for the result.
-            mRemoteService.run(service -> {
-                if (DEBUG) {
-                    Slog.i(TAG, "Notifying package name available for " + packageName);
-                }
-                service.onPackageNameAvailable(packageName);
-            });
+            return;
         }
+        // Best effort. We don't check for the result.
+        mRemoteService.run(service -> {
+            if (DEBUG) {
+                Slog.i(TAG, "Notifying package name available for " + packageName);
+            }
+            service.onPackageNameAvailable(packageName);
+        });
     }
 
     /**
@@ -280,29 +253,27 @@ public class VerifierController {
      * will no longer be requested for verification, possibly because the installation is canceled.
      */
     public void notifyVerificationCancelled(@NonNull String packageName) {
-        synchronized (mLock) {
-            if (!isVerifierConnectedLocked()) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Verifier is not connected. Not notifying verification cancelled");
-                }
-                return;
+        if (!isVerifierConnected()) {
+            if (DEBUG) {
+                Slog.i(TAG, "Verifier is not connected. Not notifying verification cancelled");
             }
-            // Best effort. We don't check for the result.
-            mRemoteService.run(service -> {
-                if (DEBUG) {
-                    Slog.i(TAG, "Notifying verification cancelled for " + packageName);
-                }
-                service.onVerificationCancelled(packageName);
-            });
+            return;
         }
+        // Best effort. We don't check for the result.
+        mRemoteService.run(service -> {
+            if (DEBUG) {
+                Slog.i(TAG, "Notifying verification cancelled for " + packageName);
+            }
+            service.onVerificationCancelled(packageName);
+        });
     }
 
     /**
      * Called to notify the bound verifier agent that a package that's pending installation needs
      * to be verified right now.
      * <p>The verification request must be sent to the verifier as soon as the verifier is
-     * connected. If the connection cannot be made within the specified time limit from
-     * when the request is sent out, we consider the verification to be failed and notify the
+     * connected. If the connection cannot be made within {@link #CONNECTION_TIMEOUT_SECONDS}</p>
+     * of when the request is sent out, we consider the verification to be failed and notify the
      * installation session.</p>
      * <p>If a response is not returned from the verifier agent within a timeout duration from the
      * time the request is sent to the verifier, the verification will be considered a failure.</p>
@@ -320,48 +291,43 @@ public class VerifierController {
         if (!bindToVerifierServiceIfNeeded(snapshotSupplier, userId)) {
             return false;
         }
+        if (!isVerifierConnected()) {
+            if (DEBUG) {
+                Slog.i(TAG, "Verifier is not connected. Not notifying verification required");
+            }
+            // Normally this should not happen because we just tried to bind. But if the verifier
+            // just crashed or just became unavailable, we should notify the installation session so
+            // it can finish with a verification failure.
+            return false;
+        }
         // For now, the verification id is the same as the installation session id.
         final int verificationId = installationSessionId;
-        synchronized (mLock) {
-            if (!isVerifierConnectedLocked()) {
+        final VerificationSession session = new VerificationSession(
+                /* id= */ verificationId,
+                /* installSessionId= */ installationSessionId,
+                packageName, stagedPackageUri, signingInfo, declaredLibraries, extensionParams,
+                verificationPolicy, new VerificationSessionInterface(callback));
+        AndroidFuture<Void> unusedFuture = mRemoteService.post(service -> {
+            if (!retry) {
                 if (DEBUG) {
-                    Slog.i(TAG, "Verifier is not connected. Not notifying verification required");
+                    Slog.i(TAG, "Notifying verification required for session " + verificationId);
                 }
-                // Normally this should not happen because we just tried to bind. But if the
-                // verifier just crashed or just became unavailable, we should notify the
-                // installation session so it can finish with a verification failure.
-                return false;
+                service.onVerificationRequired(session);
+            } else {
+                if (DEBUG) {
+                    Slog.i(TAG, "Notifying verification retry for session " + verificationId);
+                }
+                service.onVerificationRetry(session);
             }
-            final VerificationSession session = new VerificationSession(
-                    /* id= */ verificationId,
-                    /* installSessionId= */ installationSessionId,
-                    packageName, stagedPackageUri, signingInfo, declaredLibraries, extensionParams,
-                    verificationPolicy, new VerificationSessionInterface(callback));
-            AndroidFuture<Void> unusedFuture = mRemoteService.post(service -> {
-                if (!retry) {
-                    if (DEBUG) {
-                        Slog.i(TAG, "Notifying verification required for session "
-                                + verificationId);
-                    }
-                    service.onVerificationRequired(session);
-                } else {
-                    if (DEBUG) {
-                        Slog.i(TAG, "Notifying verification retry for session "
-                                + verificationId);
-                    }
-                    service.onVerificationRetry(session);
-                }
-            }).orTimeout(mInjector.getVerifierConnectionTimeoutMillis(), TimeUnit.MILLISECONDS)
-                    .whenComplete((res, err) -> {
-                        if (err != null) {
-                            Slog.e(TAG, "Error notifying verification request for session "
-                                    + verificationId, err);
-                            // Notify the installation session so it can finish with verification
-                            // failure.
-                            callback.onConnectionFailed();
-                        }
-                    });
-        }
+        }).orTimeout(mInjector.getVerifierConnectionTimeoutMillis(), TimeUnit.MILLISECONDS)
+                .whenComplete((res, err) -> {
+            if (err != null) {
+                Slog.e(TAG, "Error notifying verification request for session " + verificationId,
+                        err);
+                // Notify the installation session so it can finish with verification failure.
+                callback.onConnectionFailed();
+            }
+        });
         // Keep track of the session status with the ID. Start counting down the session timeout.
         final long defaultTimeoutMillis = mInjector.getVerificationRequestTimeoutMillis();
         final long maxExtendedTimeoutMillis = mInjector.getMaxVerificationExtendedTimeoutMillis();
@@ -403,27 +369,24 @@ public class VerifierController {
      * Called to notify the bound verifier agent that a verification request has timed out.
      */
     public void notifyVerificationTimeout(int verificationId) {
-        synchronized (mLock) {
-            if (!isVerifierConnectedLocked()) {
-                if (DEBUG) {
-                    Slog.i(TAG,
-                            "Verifier is not connected. Not notifying timeout for "
-                                    + verificationId);
-                }
-                return;
+        if (!isVerifierConnected()) {
+            if (DEBUG) {
+                Slog.i(TAG,
+                        "Verifier is not connected. Not notifying timeout for " + verificationId);
             }
-            AndroidFuture<Void> unusedFuture = mRemoteService.post(service -> {
-                if (DEBUG) {
-                    Slog.i(TAG, "Notifying timeout for " + verificationId);
-                }
-                service.onVerificationTimeout(verificationId);
-            }).whenComplete((res, err) -> {
-                if (err != null) {
-                    Slog.e(TAG, "Error notifying VerificationTimeout for session "
-                            + verificationId, err);
-                }
-            });
+            return;
         }
+        AndroidFuture<Void> unusedFuture = mRemoteService.post(service -> {
+            if (DEBUG) {
+                Slog.i(TAG, "Notifying timeout for " + verificationId);
+            }
+            service.onVerificationTimeout(verificationId);
+        }).whenComplete((res, err) -> {
+            if (err != null) {
+                Slog.e(TAG, "Error notifying VerificationTimeout for session "
+                        + verificationId, (Throwable) err);
+            }
+        });
     }
 
     /**
@@ -442,19 +405,17 @@ public class VerifierController {
         }
     }
 
-    /**
-     * Assert that the calling UID is the same as the UID of the currently connected verifier.
-     */
-    public void assertCallerIsCurrentVerifier(int callingUid) {
-        synchronized (mLock) {
-            if (!isVerifierConnectedLocked()) {
-                throw new IllegalStateException(
-                        "Unable to proceed because the verifier has been disconnected.");
-            }
-            if (callingUid != mRemoteServiceUid) {
-                throw new IllegalStateException(
-                        "Calling uid " + callingUid + " is not the current verifier.");
-            }
+    @RequiresPermission(Manifest.permission.VERIFICATION_AGENT)
+    private void checkCallerPermission() {
+        // TODO: think of a better way to test it on non-eng builds
+        if (Build.IS_ENG) {
+            return;
+        }
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.VERIFICATION_AGENT)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the"
+                    + " com.android.permission.VERIFICATION_AGENT permission"
+                    + " to use VerificationSession APIs.");
         }
     }
 
@@ -468,7 +429,7 @@ public class VerifierController {
 
         @Override
         public long getTimeoutTime(int verificationId) {
-            assertCallerIsCurrentVerifier(getCallingUid());
+            checkCallerPermission();
             synchronized (mVerificationStatus) {
                 final VerificationStatusTracker tracker = mVerificationStatus.get(verificationId);
                 if (tracker == null) {
@@ -481,7 +442,7 @@ public class VerifierController {
 
         @Override
         public long extendTimeRemaining(int verificationId, long additionalMs) {
-            assertCallerIsCurrentVerifier(getCallingUid());
+            checkCallerPermission();
             synchronized (mVerificationStatus) {
                 final VerificationStatusTracker tracker = mVerificationStatus.get(verificationId);
                 if (tracker == null) {
@@ -495,7 +456,7 @@ public class VerifierController {
         @Override
         public boolean setVerificationPolicy(int verificationId,
                 @PackageInstaller.VerificationPolicy int policy) {
-            assertCallerIsCurrentVerifier(getCallingUid());
+            checkCallerPermission();
             synchronized (mVerificationStatus) {
                 final VerificationStatusTracker tracker = mVerificationStatus.get(verificationId);
                 if (tracker == null) {
@@ -508,7 +469,7 @@ public class VerifierController {
 
         @Override
         public void reportVerificationIncomplete(int id, int reason) {
-            assertCallerIsCurrentVerifier(getCallingUid());
+            checkCallerPermission();
             final VerificationStatusTracker tracker;
             synchronized (mVerificationStatus) {
                 tracker = mVerificationStatus.get(id);
@@ -523,9 +484,15 @@ public class VerifierController {
         }
 
         @Override
-        public void reportVerificationComplete(int id, VerificationStatus verificationStatus,
-                @Nullable PersistableBundle extensionResponse) {
-            assertCallerIsCurrentVerifier(getCallingUid());
+        public void reportVerificationComplete(int id, VerificationStatus verificationStatus) {
+            reportVerificationCompleteWithExtensionResponse(id, verificationStatus,
+                    /* extensionResponse= */ null);
+        }
+
+        @Override
+        public void reportVerificationCompleteWithExtensionResponse(int id,
+                VerificationStatus verificationStatus, PersistableBundle extensionResponse) {
+            checkCallerPermission();
             final VerificationStatusTracker tracker;
             synchronized (mVerificationStatus) {
                 tracker = mVerificationStatus.get(id);

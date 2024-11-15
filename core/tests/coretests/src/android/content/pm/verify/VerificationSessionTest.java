@@ -142,10 +142,10 @@ public class VerificationSessionTest {
                 new VerificationStatus.Builder().setVerified(true).build();
         mTestSession.reportVerificationComplete(status);
         verify(mTestSessionInterface, times(1)).reportVerificationComplete(
-                eq(TEST_ID), eq(status), eq(null));
+                eq(TEST_ID), eq(status));
         mTestSession.reportVerificationComplete(status, response);
         verify(mTestSessionInterface, times(1))
-                .reportVerificationComplete(
+                .reportVerificationCompleteWithExtensionResponse(
                         eq(TEST_ID), eq(status), eq(response));
 
         final int reason = VerificationSession.VERIFICATION_INCOMPLETE_UNKNOWN;

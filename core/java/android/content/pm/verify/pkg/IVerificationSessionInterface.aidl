@@ -24,9 +24,16 @@ import android.os.PersistableBundle;
  * @hide
  */
 interface IVerificationSessionInterface {
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
     long getTimeoutTime(int verificationId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
     long extendTimeRemaining(int verificationId, long additionalMs);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
     boolean setVerificationPolicy(int verificationId, int policy);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
     void reportVerificationIncomplete(int verificationId, int reason);
-    void reportVerificationComplete(int verificationId, in VerificationStatus status, in @nullable PersistableBundle extensionResponse);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
+    void reportVerificationComplete(int verificationId, in VerificationStatus status);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
+    void reportVerificationCompleteWithExtensionResponse(int verificationId, in VerificationStatus status, in PersistableBundle response);
 }

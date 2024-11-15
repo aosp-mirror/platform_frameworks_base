@@ -4705,7 +4705,7 @@ package android.content.pm.verify.pkg {
 
   @FlaggedApi("android.content.pm.verification_service") public final class VerificationSession implements android.os.Parcelable {
     method public int describeContents();
-    method public long extendTimeRemaining(long);
+    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public long extendTimeRemaining(long);
     method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getDeclaredLibraries();
     method @NonNull public android.os.PersistableBundle getExtensionParams();
     method public int getId();
@@ -4713,12 +4713,12 @@ package android.content.pm.verify.pkg {
     method @NonNull public String getPackageName();
     method @NonNull public android.content.pm.SigningInfo getSigningInfo();
     method @NonNull public android.net.Uri getStagedPackageUri();
-    method public long getTimeoutTime();
+    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public long getTimeoutTime();
     method public int getVerificationPolicy();
-    method public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus);
-    method public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus, @NonNull android.os.PersistableBundle);
-    method public void reportVerificationIncomplete(int);
-    method public boolean setVerificationPolicy(int);
+    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus);
+    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus, @NonNull android.os.PersistableBundle);
+    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public void reportVerificationIncomplete(int);
+    method @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public boolean setVerificationPolicy(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.verify.pkg.VerificationSession> CREATOR;
     field public static final int VERIFICATION_INCOMPLETE_NETWORK_UNAVAILABLE = 1; // 0x1

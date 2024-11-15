@@ -24,7 +24,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -50,7 +49,6 @@ import android.util.Pair;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
@@ -124,10 +122,6 @@ public class VerifierControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        // Mock that the UID of this test becomes the UID of the verifier
-        when(mSnapshot.getPackageUidInternal(anyString(), anyLong(), anyInt(), anyInt()))
-                .thenReturn(InstrumentationRegistry.getInstrumentation().getContext()
-                        .getApplicationInfo().uid);
         when(mInjector.getVerifierPackageName(any(Computer.class), anyInt())).thenReturn(
                 TEST_VERIFIER_COMPONENT_NAME.getPackageName());
         when(mInjector.getRemoteService(

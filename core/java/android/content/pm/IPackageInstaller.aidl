@@ -94,9 +94,9 @@ interface IPackageInstaller {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES,android.Manifest.permission.REQUEST_INSTALL_PACKAGES})")
     void reportUnarchivalStatus(int unarchiveId, int status, long requiredStorageBytes, in PendingIntent userActionIntent, in UserHandle userHandle);
 
-    @EnforcePermission("VERIFICATION_AGENT")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
     int getVerificationPolicy();
 
-    @EnforcePermission("VERIFICATION_AGENT")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
     boolean setVerificationPolicy(int policy);
 }
