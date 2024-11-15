@@ -59,6 +59,8 @@ import java.util.TreeSet;
 public final class NotificationProgressBar extends ProgressBar {
     private static final String TAG = "NotificationProgressBar";
 
+    private NotificationProgressDrawable mNotificationProgressDrawable;
+
     private NotificationProgressModel mProgressModel;
 
     @Nullable
@@ -93,6 +95,12 @@ public final class NotificationProgressBar extends ProgressBar {
         saveAttributeDataForStyleable(context, R.styleable.NotificationProgressBar, attrs, a,
                 defStyleAttr,
                 defStyleRes);
+
+        try {
+            mNotificationProgressDrawable = getNotificationProgressDrawable();
+        } catch (IllegalStateException ex) {
+            Log.e(TAG, "Can't get NotificationProgressDrawable", ex);
+        }
 
         // Supports setting the tracker in xml, but ProgressStyle notifications set/override it
         // via {@code setProgressTrackerIcon}.
@@ -131,11 +139,8 @@ public final class NotificationProgressBar extends ProgressBar {
                     progressMax,
                     mProgressModel.isStyledByProgress());
 
-            try {
-                final NotificationProgressDrawable drawable = getNotificationProgressDrawable();
-                drawable.setParts(mProgressDrawableParts);
-            } catch (IllegalStateException ex) {
-                Log.e(TAG, "Can't set parts because can't get NotificationProgressDrawable", ex);
+            if (mNotificationProgressDrawable != null) {
+                mNotificationProgressDrawable.setParts(mProgressDrawableParts);
             }
 
             setMax(progressMax);
@@ -195,10 +200,6 @@ public final class NotificationProgressBar extends ProgressBar {
     }
 
     private void setTracker(@Nullable Drawable tracker) {
-        if (isIndeterminate() && tracker != null) {
-            return;
-        }
-
         final boolean needUpdate = mTracker != null && tracker != mTracker;
         if (needUpdate) {
             mTracker.setCallback(null);
@@ -222,6 +223,9 @@ public final class NotificationProgressBar extends ProgressBar {
         }
 
         mTracker = tracker;
+        if (mNotificationProgressDrawable != null) {
+            mNotificationProgressDrawable.setHasTrackerIcon(mTracker != null);
+        }
 
         configureTrackerBounds();
 
@@ -272,16 +276,6 @@ public final class NotificationProgressBar extends ProgressBar {
 
         mTrackerDrawMatrix.setScale(scale, scale);
         mTrackerDrawMatrix.postTranslate(Math.round(dx), Math.round(dy));
-    }
-
-    @Override
-    @RemotableViewMethod
-    public synchronized void setIndeterminate(boolean indeterminate) {
-        super.setIndeterminate(indeterminate);
-
-        if (isIndeterminate()) {
-            setTracker(null);
-        }
     }
 
     @Override
@@ -421,6 +415,8 @@ public final class NotificationProgressBar extends ProgressBar {
     @Override
     protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        if (isIndeterminate()) return;
         drawTracker(canvas);
     }
 

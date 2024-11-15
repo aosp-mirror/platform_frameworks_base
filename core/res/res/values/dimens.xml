@@ -838,13 +838,13 @@
     <!-- The gap between segments in the notification progress bar -->
     <dimen name="notification_progress_segSeg_gap">2dp</dimen>
     <!-- The gap between a segment and a point in the notification progress bar -->
-    <dimen name="notification_progress_segPoint_gap">8dp</dimen>
-    <!-- The dash gap of the notification progress bar segments -->
-    <dimen name="notification_progress_segments_dash_gap">8dp</dimen>
-    <!-- The dash width of the notification progress bar segments -->
-    <dimen name="notification_progress_segments_dash_width">3dp</dimen>
+    <dimen name="notification_progress_segPoint_gap">4dp</dimen>
     <!-- The height of the notification progress bar segments -->
     <dimen name="notification_progress_segments_height">6dp</dimen>
+    <!-- The height of the notification progress bar faded segments -->
+    <dimen name="notification_progress_segments_faded_height">2dp</dimen>
+    <!-- The corner radius of the notification progress bar segments -->
+    <dimen name="notification_progress_segments_corner_radius">16dp</dimen>
     <!-- The radius of the notification progress bar points -->
     <dimen name="notification_progress_points_radius">6dp</dimen>
     <!-- The corner radius of the notification progress bar points drawn as rects -->
