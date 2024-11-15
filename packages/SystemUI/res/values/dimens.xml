@@ -1955,8 +1955,6 @@
     <dimen name="dream_overlay_entry_y_offset">40dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
 
-    <dimen name="status_view_margin_horizontal">0dp</dimen>
-
     <!-- Media output broadcast dialog QR code picture size -->
     <dimen name="media_output_qrcode_size">216dp</dimen>
     <dimen name="media_output_broadcast_info">21dp</dimen>
@@ -2060,26 +2058,29 @@
     <dimen name="contextual_edu_dialog_elevation">2dp</dimen>
 
     <!-- Volume start -->
-    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
     <dimen name="volume_dialog_width">60dp</dimen>
-    <dimen name="volume_dialog_vertical_padding">10dp</dimen>
+
+    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
+    <dimen name="volume_dialog_background_vertical_margin">-10dp</dimen>
+
     <dimen name="volume_dialog_components_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_vertical_padding">10dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_vertical_padding_negative">-10dp</dimen>
     <dimen name="volume_dialog_floating_sliders_horizontal_padding">4dp</dimen>
-    <dimen name="volume_dialog_spacing">4dp</dimen>
     <dimen name="volume_dialog_button_size">48dp</dimen>
-    <dimen name="volume_dialog_floating_sliders_bottom_padding">48dp</dimen>
     <dimen name="volume_dialog_slider_width">52dp</dimen>
     <dimen name="volume_dialog_slider_height">254dp</dimen>
 
-    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
-    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
+    <fraction name="volume_dialog_half_opened_bias">0.2</fraction>
 
-    <dimen name="volume_dialog_ringer_horizontal_padding">10dp</dimen>
+    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
+
     <dimen name="volume_dialog_ringer_drawer_button_size">40dp</dimen>
     <dimen name="volume_dialog_ringer_drawer_button_icon_radius">10dp</dimen>
-    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
     <dimen name="volume_dialog_ringer_selected_button_background_radius">20dp</dimen>
+
+    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
+    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
     <!-- Volume end -->
 </resources>

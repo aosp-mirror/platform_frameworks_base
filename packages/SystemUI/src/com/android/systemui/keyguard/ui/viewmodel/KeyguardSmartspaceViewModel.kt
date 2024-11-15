@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
@@ -59,10 +60,9 @@ constructor(
 
     /** Whether the weather area should be visible. */
     val isWeatherVisible: StateFlow<Boolean> =
-        combine(
+        combine(isWeatherEnabled, keyguardClockViewModel.hasCustomWeatherDataDisplay) {
                 isWeatherEnabled,
-                keyguardClockViewModel.hasCustomWeatherDataDisplay,
-            ) { isWeatherEnabled, clockIncludesCustomWeatherDisplay ->
+                clockIncludesCustomWeatherDisplay ->
                 isWeatherVisible(
                     clockIncludesCustomWeatherDisplay = clockIncludesCustomWeatherDisplay,
                     isWeatherEnabled = isWeatherEnabled,
@@ -76,7 +76,7 @@ constructor(
                         clockIncludesCustomWeatherDisplay =
                             keyguardClockViewModel.hasCustomWeatherDataDisplay.value,
                         isWeatherEnabled = smartspaceInteractor.isWeatherEnabled.value,
-                    )
+                    ),
             )
 
     private fun isWeatherVisible(
@@ -92,12 +92,12 @@ constructor(
     companion object {
         fun getSmartspaceStartMargin(context: Context): Int {
             return context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+                context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal)
         }
 
         fun getSmartspaceEndMargin(context: Context): Int {
             return context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end) +
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+                context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal)
         }
     }
 }

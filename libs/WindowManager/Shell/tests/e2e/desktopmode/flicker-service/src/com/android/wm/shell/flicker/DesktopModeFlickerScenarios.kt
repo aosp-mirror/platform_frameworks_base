@@ -25,6 +25,7 @@ import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
 import android.tools.flicker.assertors.assertions.AppWindowAlignsWithOnlyOneDisplayCornerAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowBecomesInvisible
+import android.tools.flicker.assertors.assertions.AppWindowBecomesTopWindow
 import android.tools.flicker.assertors.assertions.AppWindowBecomesVisible
 import android.tools.flicker.assertors.assertions.AppWindowCoversLeftHalfScreenAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowCoversRightHalfScreenAtEnd
@@ -343,6 +344,30 @@ class DesktopModeFlickerScenarios {
                             AppWindowMaintainsAspectRatioAlways(DESKTOP_MODE_APP),
                             AppWindowHasMaxBoundsInOnlyOneDimension(DESKTOP_MODE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val BRING_APPS_TO_FRONT =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("BRING_APPS_TO_FRONT"),
+                extractor =
+                    ShellTransitionScenarioExtractor(
+                        transitionMatcher =
+                            object : ITransitionMatcher {
+                                override fun findAll(
+                                    transitions: Collection<Transition>
+                                ): Collection<Transition> {
+                                    return transitions.filter {
+                                        it.type == TransitionType.TO_FRONT
+                                    }
+                                }
+                            }
+                    ),
+                assertions =
+                    AssertionTemplates.COMMON_ASSERTIONS +
+                            listOf(
+                                AppWindowBecomesTopWindow(DESKTOP_MODE_APP),
+                                AppWindowOnTopAtEnd(DESKTOP_MODE_APP),
+                            ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
             )
 
         val CASCADE_APP =

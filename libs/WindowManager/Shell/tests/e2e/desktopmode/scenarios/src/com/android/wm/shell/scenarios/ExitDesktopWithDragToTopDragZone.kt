@@ -46,7 +46,7 @@ constructor(
             instrumentation.context.resources.getBoolean(R.bool.config_dragToMaximizeInDesktopMode))
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test

@@ -46,8 +46,6 @@
 
     <dimen name="lockscreen_shade_max_over_scroll_amount">32dp</dimen>
 
-    <dimen name="status_view_margin_horizontal">8dp</dimen>
-
     <!-- Lockscreen shade transition values -->
     <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
     <dimen name="lockscreen_shade_full_transition_distance">200dp</dimen>

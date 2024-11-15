@@ -235,8 +235,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         if (mBrightnessWarningToast.isToastActive()) {
             return;
         }
-        mBrightnessWarningToast.show(mView.getContext(),
-                R.string.quick_settings_brightness_unable_adjust_msg);
+        mBrightnessWarningToast.show(mView.getContext(), resId);
     }
 
     @Override

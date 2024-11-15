@@ -522,7 +522,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         // b/282922910 - we don't want apps sharing system uid and targeting
         // older target sdk to impact all system uid apps
         if (Flags.systemUidTargetSystemSdk() && !mIsWear &&
-                uid == Process.SYSTEM_UID) {
+                uid == Process.SYSTEM_UID && appInfo != null) {
             appInfo.targetSdkVersion = Build.VERSION.SDK_INT;
         }
         return appInfo;

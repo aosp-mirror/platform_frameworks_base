@@ -661,4 +661,7 @@
     <dimen name="desktop_windowing_education_promo_height">352dp</dimen>
     <!-- The corner radius of the desktop windowing education promo. -->
     <dimen name="desktop_windowing_education_promo_corner_radius">28dp</dimen>
+
+    <!-- The corner radius of freeform tasks in desktop windowing. -->
+    <dimen name="desktop_windowing_freeform_rounded_corner_radius">16dp</dimen>
 </resources>

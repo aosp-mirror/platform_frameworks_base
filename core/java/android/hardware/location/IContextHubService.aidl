@@ -18,17 +18,20 @@ package android.hardware.location;
 
 // Declare any non-default types here with import statements
 import android.app.PendingIntent;
-import android.hardware.location.HubInfo;
+import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.IContextHubEndpoint;
+import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
-import android.hardware.location.NanoApp;
-import android.hardware.location.NanoAppBinary;
-import android.hardware.location.NanoAppFilter;
-import android.hardware.location.NanoAppInstanceInfo;
+import android.hardware.location.HubInfo;
 import android.hardware.location.IContextHubCallback;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.IContextHubTransactionCallback;
+import android.hardware.location.NanoApp;
+import android.hardware.location.NanoAppBinary;
+import android.hardware.location.NanoAppFilter;
+import android.hardware.location.NanoAppInstanceInfo;
 
 /**
  * @hide
@@ -122,4 +125,12 @@ interface IContextHubService {
     // Enables or disables test mode
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     boolean setTestMode(in boolean enable);
+
+    // Finds all endpoints that havea specific ID
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    List<HubEndpointInfo> findEndpoints(long endpointId);
+
+    // Register an endpoint with the context hub
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    IContextHubEndpoint registerEndpoint(in HubEndpointInfo pendingEndpointInfo, in IContextHubEndpointCallback callback);
 }

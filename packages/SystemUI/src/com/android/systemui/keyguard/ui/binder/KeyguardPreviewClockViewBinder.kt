@@ -151,7 +151,5 @@ object KeyguardPreviewClockViewBinder {
         cs.applyTo(rootView)
     }
 
-    private const val DATE_WEATHER_VIEW_HEIGHT = "date_weather_view_height"
-    private const val ENHANCED_SMARTSPACE_HEIGHT = "enhanced_smartspace_height"
     private const val TAG = "KeyguardPreviewClockViewBinder"
 }

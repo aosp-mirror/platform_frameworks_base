@@ -35,26 +35,59 @@ import kotlinx.coroutines.CoroutineScope
 
 /** A transformation applied to one or more elements during a transition. */
 sealed interface Transformation {
-    /**
-     * The matcher that should match the element(s) to which this transformation should be applied.
-     */
-    val matcher: ElementMatcher
+    fun interface Factory {
+        fun create(): Transformation
+    }
 }
 
-internal class SharedElementTransformation(
-    override val matcher: ElementMatcher,
+// Important: SharedElementTransformation must be a data class because we check that we don't
+// provide 2 different transformations for the same element in Element.kt
+internal data class SharedElementTransformation(
     internal val enabled: Boolean,
     internal val elevateInContent: ContentKey?,
-) : Transformation
+) : Transformation {
+    class Factory(
+        internal val matcher: ElementMatcher,
+        internal val enabled: Boolean,
+        internal val elevateInContent: ContentKey?,
+    ) : Transformation.Factory {
+        override fun create(): Transformation {
+            return SharedElementTransformation(enabled, elevateInContent)
+        }
+    }
+}
 
-/** A transformation that changes the value of an element property, like its size or offset. */
-sealed interface PropertyTransformation<T> : Transformation
+/**
+ * A transformation that changes the value of an element [Property], like its [size][Property.Size]
+ * or [offset][Property.Offset].
+ */
+sealed interface PropertyTransformation<T> : Transformation {
+    /** The property to which this transformation is applied. */
+    val property: Property<T>
+
+    sealed class Property<T> {
+        /** The size of an element. */
+        data object Size : Property<IntSize>()
+
+        /** The offset (position) of an element. */
+        data object Offset : Property<androidx.compose.ui.geometry.Offset>()
+
+        /** The alpha of an element. */
+        data object Alpha : Property<Float>()
+
+        /**
+         * The drawing scale of an element. Animating the scale does not have any effect on the
+         * layout.
+         */
+        data object Scale : Property<com.android.compose.animation.scene.Scale>()
+    }
+}
 
 /**
  * A transformation to a target/transformed value that is automatically interpolated using the
  * transition progress and transformation range.
  */
-sealed interface InterpolatedPropertyTransformation<T> : PropertyTransformation<T> {
+interface InterpolatedPropertyTransformation<T> : PropertyTransformation<T> {
     /**
      * Return the transformed value for the given property, i.e.:
      * - the value at progress = 0% for elements that are entering the layout (i.e. elements in the
@@ -73,19 +106,7 @@ sealed interface InterpolatedPropertyTransformation<T> : PropertyTransformation<
     ): T
 }
 
-/** An [InterpolatedPropertyTransformation] applied to the size of one or more elements. */
-interface InterpolatedSizeTransformation : InterpolatedPropertyTransformation<IntSize>
-
-/** An [InterpolatedPropertyTransformation] applied to the offset of one or more elements. */
-interface InterpolatedOffsetTransformation : InterpolatedPropertyTransformation<Offset>
-
-/** An [InterpolatedPropertyTransformation] applied to the alpha of one or more elements. */
-interface InterpolatedAlphaTransformation : InterpolatedPropertyTransformation<Float>
-
-/** An [InterpolatedPropertyTransformation] applied to the scale of one or more elements. */
-interface InterpolatedScaleTransformation : InterpolatedPropertyTransformation<Scale>
-
-sealed interface CustomPropertyTransformation<T> : PropertyTransformation<T> {
+interface CustomPropertyTransformation<T> : PropertyTransformation<T> {
     /**
      * Return the value that the property should have in the current frame for the given [content]
      * and [element].
@@ -105,25 +126,20 @@ sealed interface CustomPropertyTransformation<T> : PropertyTransformation<T> {
     ): T
 }
 
-/** A [CustomPropertyTransformation] applied to the size of one or more elements. */
-interface CustomSizeTransformation : CustomPropertyTransformation<IntSize>
-
-/** A [CustomPropertyTransformation] applied to the offset of one or more elements. */
-interface CustomOffsetTransformation : CustomPropertyTransformation<Offset>
-
-/** A [CustomPropertyTransformation] applied to the alpha of one or more elements. */
-interface CustomAlphaTransformation : CustomPropertyTransformation<Float>
-
-/** A [CustomPropertyTransformation] applied to the scale of one or more elements. */
-interface CustomScaleTransformation : CustomPropertyTransformation<Scale>
-
 interface PropertyTransformationScope : Density, ElementStateScope {
     /** The current [direction][LayoutDirection] of the layout. */
     val layoutDirection: LayoutDirection
 }
 
+/** Defines the transformation-type to be applied to all elements matching [matcher]. */
+internal class TransformationMatcher(
+    val matcher: ElementMatcher,
+    val factory: Transformation.Factory,
+    val range: TransformationRange?,
+)
+
 /** A pair consisting of a [transformation] and optional [range]. */
-class TransformationWithRange<out T : Transformation>(
+internal data class TransformationWithRange<out T : Transformation>(
     val transformation: T,
     val range: TransformationRange?,
 ) {
@@ -135,7 +151,7 @@ class TransformationWithRange<out T : Transformation>(
 }
 
 /** The progress-based range of a [PropertyTransformation]. */
-data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
+internal data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
     constructor(
         start: Float? = null,
         end: Float? = null,

@@ -1543,7 +1543,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setDragController(null);
         mGroupParentWhenDismissed = mNotificationParent;
         mChildAfterViewWhenDismissed = null;
-        mEntry.getIcons().getStatusBarIcon().setDismissed();
         if (isChildInGroup()) {
             List<ExpandableNotificationRow> notificationChildren =
                     mNotificationParent.getAttachedChildren();

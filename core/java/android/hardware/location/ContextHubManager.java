@@ -34,6 +34,10 @@ import android.chre.flags.Flags;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.contexthub.ErrorCode;
+import android.hardware.contexthub.HubDiscoveryInfo;
+import android.hardware.contexthub.HubEndpoint;
+import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.IHubEndpointLifecycleCallback;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -42,6 +46,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -679,6 +684,29 @@ public final class ContextHubManager {
     }
 
     /**
+     * Find a list of endpoints that matches a specific ID.
+     *
+     * @param endpointId Statically generated ID for an endpoint.
+     * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
+     */
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull
+    public List<HubDiscoveryInfo> findEndpoints(long endpointId) {
+        try {
+            List<HubEndpointInfo> endpointInfos = mService.findEndpoints(endpointId);
+            List<HubDiscoveryInfo> results = new ArrayList<>(endpointInfos.size());
+            // Wrap with result type
+            for (HubEndpointInfo endpointInfo : endpointInfos) {
+                results.add(new HubDiscoveryInfo(endpointInfo));
+            }
+            return results;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Set a callback to receive messages from the context hub
      *
      * @param callback Callback object
@@ -1010,6 +1038,55 @@ public final class ContextHubManager {
     }
 
     /**
+     * Registers an endpoint and its callback with the Context Hub Service.
+     *
+     * <p>An endpoint is registered with the Context Hub Service and published to the HAL. When the
+     * registration succeeds, the endpoint can receive notifications through the provided callback.
+     *
+     * @param hubEndpoint {@link HubEndpoint} object created by {@link HubEndpoint.Builder}
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void registerEndpoint(@NonNull HubEndpoint hubEndpoint) {
+        hubEndpoint.register(mService);
+    }
+
+    /**
+     * Use a registered endpoint to connect to another endpoint (destination).
+     *
+     * <p>Context Hub Service will create the endpoint session and notify the registered endpoint.
+     * The registered endpoint will receive callbacks on its {@link IHubEndpointLifecycleCallback}
+     * object regarding the lifecycle events of the session
+     *
+     * @param hubEndpoint {@link HubEndpoint} object previously registered via {@link
+     *     ContextHubManager#registerEndpoint(HubEndpoint)}.
+     * @param destination {@link HubEndpointInfo} object that represents an endpoint from previous
+     *     endpoint discovery results (e.g. from {@link ContextHubManager#findEndpoints(long)}).
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void openSession(
+            @NonNull HubEndpoint hubEndpoint, @NonNull HubEndpointInfo destination) {
+        hubEndpoint.openSession(destination);
+    }
+
+    /**
+     * Unregisters an endpoint and its callback with the Context Hub Service.
+     *
+     * <p>An endpoint is unregistered from the HAL. The endpoint object will no longer receive
+     * notification through the provided callback.
+     *
+     * @param hubEndpoint {@link HubEndpoint} object created by {@link HubEndpoint.Builder}. This
+     *     should match a previously registered object via {@link
+     *     ContextHubManager#registerEndpoint(HubEndpoint)}.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void unregisterEndpoint(@NonNull HubEndpoint hubEndpoint) {
+        hubEndpoint.unregister();
+    }
+
+    /**
      * Queries for the list of preloaded nanoapp IDs on the system.
      *
      * @param hubInfo The Context Hub to query a list of nanoapp IDs from.
@@ -1168,6 +1245,7 @@ public final class ContextHubManager {
         requireNonNull(mainLooper, "mainLooper cannot be null");
         mService = service;
         mMainLooper = mainLooper;
+
         try {
             mService.registerCallback(mClientCallback);
         } catch (RemoteException e) {

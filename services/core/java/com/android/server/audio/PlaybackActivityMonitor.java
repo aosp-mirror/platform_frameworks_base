@@ -20,6 +20,7 @@ import static android.media.AudioPlaybackConfiguration.EXTRA_PLAYER_EVENT_MUTE;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_APP_OPS;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_CLIENT_VOLUME;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_MASTER;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_PORT_VOLUME;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_STREAM_MUTED;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_STREAM_VOLUME;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_VOLUME_SHAPER;
@@ -444,7 +445,7 @@ public final class PlaybackActivityMonitor
         }
 
         if (DEBUG) {
-            Log.v(TAG, TextUtils.formatSimple("BLA portEvent(portId=%d, event=%s, extras=%s)",
+            Log.v(TAG, TextUtils.formatSimple("portEvent(portId=%d, event=%s, extras=%s)",
                     portId, AudioPlaybackConfiguration.playerStateToString(event), extras));
         }
 
@@ -1380,6 +1381,9 @@ public final class PlaybackActivityMonitor
                         }
                         if ((mEventValue & MUTED_BY_VOLUME_SHAPER) != 0) {
                             builder.append("volumeShaper ");
+                        }
+                        if ((mEventValue & MUTED_BY_PORT_VOLUME) != 0) {
+                            builder.append("portVolume ");
                         }
                     }
                     return builder.toString();

@@ -56,6 +56,27 @@ interface ApiDescriptor<Request, Response> {
     val responseCodec: MessageCodec<Response>
 }
 
+/** Permission checker for api. */
+fun interface ApiPermissionChecker<R> {
+    /**
+     * Returns if the request is permitted.
+     *
+     * @param application application context
+     * @param myUid uid of current process
+     * @param callingUid uid of peer process
+     * @param request API request
+     * @return `false` if permission is denied, otherwise `true`
+     */
+    fun hasPermission(application: Application, myUid: Int, callingUid: Int, request: R): Boolean
+
+    companion object {
+        private val ALWAYS_ALLOW = ApiPermissionChecker<Any> { _, _, _, _ -> true }
+
+        @Suppress("UNCHECKED_CAST")
+        fun <T> alwaysAllow(): ApiPermissionChecker<T> = ALWAYS_ALLOW as ApiPermissionChecker<T>
+    }
+}
+
 /**
  * Handler of API.
  *
@@ -64,18 +85,8 @@ interface ApiDescriptor<Request, Response> {
  *
  * The implementation must be threadsafe.
  */
-interface ApiHandler<Request, Response> : ApiDescriptor<Request, Response> {
-    /**
-     * Returns if the request is permitted.
-     *
-     * @return `false` if permission is denied, otherwise `true`
-     */
-    fun hasPermission(
-        application: Application,
-        myUid: Int,
-        callingUid: Int,
-        request: Request,
-    ): Boolean
+interface ApiHandler<Request, Response> :
+    ApiDescriptor<Request, Response>, ApiPermissionChecker<Request> {
 
     /**
      * Invokes the API.

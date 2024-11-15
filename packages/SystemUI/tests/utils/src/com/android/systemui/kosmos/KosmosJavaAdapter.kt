@@ -71,6 +71,8 @@ import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.ui.viewmodel.notificationShadeWindowModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
@@ -183,4 +185,6 @@ class KosmosJavaAdapter() {
     val lockscreenToGlanceableHubTransitionViewModel by lazy {
         kosmos.lockscreenToGlanceableHubTransitionViewModel
     }
+    val disableFlagsInteractor by lazy { kosmos.disableFlagsInteractor }
+    val fakeDisableFlagsRepository by lazy { kosmos.fakeDisableFlagsRepository }
 }

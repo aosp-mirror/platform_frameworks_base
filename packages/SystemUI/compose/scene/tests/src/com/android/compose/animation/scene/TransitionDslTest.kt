@@ -28,11 +28,12 @@ import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.transformation.CustomSizeTransformation
+import com.android.compose.animation.scene.transformation.CustomPropertyTransformation
 import com.android.compose.animation.scene.transformation.OverscrollTranslate
+import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformationScope
+import com.android.compose.animation.scene.transformation.TransformationMatcher
 import com.android.compose.animation.scene.transformation.TransformationRange
-import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.test.transition
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
@@ -103,7 +104,7 @@ class TransitionDslTest {
         val transitions = transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } }
 
         val transformations =
-            transitions.transitionSpecs.single().transformationSpec(aToB()).transformations
+            transitions.transitionSpecs.single().transformationSpec(aToB()).transformationMatchers
         assertThat(transformations.size).isEqualTo(1)
         assertThat(transformations.single().range).isEqualTo(null)
     }
@@ -126,7 +127,7 @@ class TransitionDslTest {
         }
 
         val transformations =
-            transitions.transitionSpecs.single().transformationSpec(aToB()).transformations
+            transitions.transitionSpecs.single().transformationSpec(aToB()).transformationMatchers
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
             .containsExactly(
@@ -157,7 +158,7 @@ class TransitionDslTest {
         }
 
         val transformations =
-            transitions.transitionSpecs.single().transformationSpec(aToB()).transformations
+            transitions.transitionSpecs.single().transformationSpec(aToB()).transformationMatchers
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
             .containsExactly(
@@ -185,7 +186,7 @@ class TransitionDslTest {
         }
 
         val transformations =
-            transitions.transitionSpecs.single().transformationSpec(aToB()).transformations
+            transitions.transitionSpecs.single().transformationSpec(aToB()).transformationMatchers
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
             .containsExactly(
@@ -215,7 +216,7 @@ class TransitionDslTest {
         // to B we defined.
         val transitionSpec = transitions.transitionSpec(from = SceneB, to = SceneA, key = null)
 
-        val transformations = transitionSpec.transformationSpec(aToB()).transformations
+        val transformations = transitionSpec.transformationSpec(aToB()).transformationMatchers
 
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
@@ -225,7 +226,7 @@ class TransitionDslTest {
             )
 
         val previewTransformations =
-            transitionSpec.previewTransformationSpec(aToB())?.transformations
+            transitionSpec.previewTransformationSpec(aToB())?.transformationMatchers
 
         assertThat(previewTransformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
@@ -255,7 +256,7 @@ class TransitionDslTest {
                 key = TransitionKey.PredictiveBack,
             )
 
-        val transformations = transitionSpec.transformationSpec(aToB()).transformations
+        val transformations = transitionSpec.transformationSpec(aToB()).transformationMatchers
 
         assertThat(transformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
@@ -265,7 +266,7 @@ class TransitionDslTest {
             )
 
         val previewTransformations =
-            transitionSpec.previewTransformationSpec(aToB())?.transformations
+            transitionSpec.previewTransformationSpec(aToB())?.transformationMatchers
 
         assertThat(previewTransformations)
             .comparingElementsUsing(TRANSFORMATION_RANGE)
@@ -316,7 +317,7 @@ class TransitionDslTest {
 
         val overscrollSpec = transitions.overscrollSpecs.single()
         val transformation =
-            overscrollSpec.transformationSpec.transformations.single().transformation
+            overscrollSpec.transformationSpec.transformationMatchers.single().factory.create()
         assertThat(transformation).isInstanceOf(OverscrollTranslate::class.java)
     }
 
@@ -324,7 +325,7 @@ class TransitionDslTest {
     fun overscrollSpec_for_overscrollDisabled() {
         val transitions = transitions { overscrollDisabled(SceneA, Orientation.Vertical) }
         val overscrollSpec = transitions.overscrollSpecs.single()
-        assertThat(overscrollSpec.transformationSpec.transformations).isEmpty()
+        assertThat(overscrollSpec.transformationSpec.transformationMatchers).isEmpty()
     }
 
     @Test
@@ -353,9 +354,9 @@ class TransitionDslTest {
         val transitions = transitions {
             from(SceneA, to = SceneB) {
                 fractionRange {
-                    transformation(
-                        object : CustomSizeTransformation {
-                            override val matcher: ElementMatcher = TestElements.Foo
+                    transformation(TestElements.Foo) {
+                        object : CustomPropertyTransformation<IntSize> {
+                            override val property = PropertyTransformation.Property.Size
 
                             override fun PropertyTransformationScope.transform(
                                 content: ContentKey,
@@ -364,7 +365,7 @@ class TransitionDslTest {
                                 transitionScope: CoroutineScope,
                             ): IntSize = IntSize.Zero
                         }
-                    )
+                    }
                 }
             }
         }
@@ -377,7 +378,7 @@ class TransitionDslTest {
 
     companion object {
         private val TRANSFORMATION_RANGE =
-            Correspondence.transforming<TransformationWithRange<*>, TransformationRange?>(
+            Correspondence.transforming<TransformationMatcher, TransformationRange?>(
                 { it?.range },
                 "has range equal to",
             )

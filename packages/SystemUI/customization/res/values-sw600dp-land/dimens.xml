@@ -16,4 +16,5 @@
 
 <resources>
     <dimen name="keyguard_smartspace_top_offset">0dp</dimen>
+    <dimen name="status_view_margin_horizontal">8dp</dimen>
 </resources>
