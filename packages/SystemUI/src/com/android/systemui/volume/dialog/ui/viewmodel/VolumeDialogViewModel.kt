@@ -17,7 +17,12 @@
 package com.android.systemui.volume.dialog.ui.viewmodel
 
 import android.content.Context
+import android.content.res.Configuration
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.statusbar.policy.devicePosture
+import com.android.systemui.statusbar.policy.onConfigChanged
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStateModel
@@ -32,6 +37,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /** Provides a state for the Volume Dialog. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,8 +48,23 @@ constructor(
     dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
     volumeDialogSlidersInteractor: VolumeDialogSlidersInteractor,
     volumeDialogStateInteractor: VolumeDialogStateInteractor,
+    devicePostureController: DevicePostureController,
+    configurationController: ConfigurationController,
 ) {
 
+    val motionState: Flow<Int> =
+        combine(
+            devicePostureController.devicePosture(),
+            configurationController.onConfigChanged.onStart {
+                emit(context.resources.configuration)
+            },
+        ) { devicePosture, configuration ->
+            if (shouldOffsetVolumeDialog(devicePosture, configuration)) {
+                R.id.volume_dialog_half_folded_constraint_set
+            } else {
+                R.id.volume_dialog_constraint_set
+            }
+        }
     val dialogVisibilityModel: Flow<VolumeDialogVisibilityModel> =
         dialogVisibilityInteractor.dialogVisibility
     val dialogTitle: Flow<String> =
@@ -56,6 +77,13 @@ constructor(
                 }
             }
             .filterNotNull()
+
+    /** @return true when the foldable device screen curve is in the way of the volume dialog */
+    private fun shouldOffsetVolumeDialog(devicePosture: Int, config: Configuration): Boolean {
+        val isLandscape = config.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val isHalfOpen = devicePosture == DevicePostureController.DEVICE_POSTURE_HALF_OPENED
+        return isLandscape && isHalfOpen
+    }
 
     @AssistedFactory
     interface Factory {

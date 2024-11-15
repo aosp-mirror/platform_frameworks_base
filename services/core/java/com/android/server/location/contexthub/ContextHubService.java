@@ -31,6 +31,9 @@ import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.contexthub.ErrorCode;
+import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.IContextHubEndpoint;
+import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
@@ -249,6 +252,7 @@ public class ContextHubService extends IContextHubService.Stub {
         public void handleServiceRestart() {
             Log.i(TAG, "Recovering from Context Hub HAL restart...");
             initExistingCallbacks();
+            mHubInfoRegistry.onHalRestart();
             resetSettings();
             if (Flags.reconnectHostEndpointsAfterHalRestart()) {
                 mClientManager.forEachClientOfHub(mContextHubId,
@@ -330,6 +334,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         initDefaultClientMap();
+        initEndpointCallback();
 
         initLocationSettingNotifications();
         initWifiSettingNotifications();
@@ -506,6 +511,18 @@ public class ContextHubService extends IContextHubService.Stub {
             queryNanoAppsInternal(contextHubId);
         }
         mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
+    }
+
+    private void initEndpointCallback() {
+        if (mHubInfoRegistry == null) {
+            return;
+        }
+        try {
+            mContextHubWrapper.registerEndpointCallback(
+                    new ContextHubHalEndpointCallback(mHubInfoRegistry));
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while registering IEndpointCallback", e);
+        }
     }
 
     /**
@@ -737,6 +754,26 @@ public class ContextHubService extends IContextHubService.Stub {
             return Collections.emptyList();
         }
         return mHubInfoRegistry.getHubs();
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public List<HubEndpointInfo> findEndpoints(long endpointId) {
+        super.findEndpoints_enforcePermission();
+        if (mHubInfoRegistry == null) {
+            return Collections.emptyList();
+        }
+        return mHubInfoRegistry.findEndpoints(endpointId);
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public IContextHubEndpoint registerEndpoint(
+            HubEndpointInfo pendingHubEndpointInfo, IContextHubEndpointCallback callback)
+            throws RemoteException {
+        super.registerEndpoint_enforcePermission();
+        // TODO(b/375487784): Implement this
+        return null;
     }
 
     /**

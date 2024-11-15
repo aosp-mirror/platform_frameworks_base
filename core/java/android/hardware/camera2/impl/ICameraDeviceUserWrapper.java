@@ -301,4 +301,16 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
+    /**
+     * API to check if the client is primary client when camera device is opened in shared mode.
+     */
+    public boolean isPrimaryClient() throws CameraAccessException {
+        try {
+            return mRemoteDevice.isPrimaryClient();
+        } catch (ServiceSpecificException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        } catch (RemoteException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        }
+    }
 }

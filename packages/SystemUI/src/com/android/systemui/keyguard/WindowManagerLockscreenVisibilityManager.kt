@@ -122,10 +122,7 @@ constructor(
 
         if (visible) {
             if (enableNewKeyguardShellTransitions) {
-                keyguardTransitions.startKeyguardTransition(
-                    false /* keyguardShowing */,
-                    false, /* aodShowing */
-                )
+                startKeyguardTransition(false, /* keyguardShowing */ false /* aodShowing */)
                 isKeyguardGoingAway = true
                 return
             }
@@ -233,12 +230,16 @@ constructor(
                 "aodVisible=$aodVisible).",
         )
         if (enableNewKeyguardShellTransitions) {
-            keyguardTransitions.startKeyguardTransition(lockscreenShowing, aodVisible)
+            startKeyguardTransition(lockscreenShowing, aodVisible)
         } else {
             activityTaskManagerService.setLockScreenShown(lockscreenShowing, aodVisible)
         }
         this.isLockscreenShowing = lockscreenShowing
         this.isAodVisible = aodVisible
+    }
+
+    private fun startKeyguardTransition(keyguardShowing: Boolean, aodShowing: Boolean) {
+        keyguardTransitions.startKeyguardTransition(keyguardShowing, aodShowing)
     }
 
     private fun endKeyguardGoingAwayAnimation() {

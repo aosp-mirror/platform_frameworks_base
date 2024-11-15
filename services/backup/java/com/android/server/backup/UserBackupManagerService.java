@@ -43,6 +43,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
+import android.app.ApplicationThreadConstants;
 import android.app.IActivityManager;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
@@ -59,6 +60,9 @@ import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -298,6 +302,15 @@ public class UserBackupManagerService {
     private static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
     private static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
 
+    /**
+     * Enables the OS making a decision on whether backup restricted mode should be used for apps
+     * that haven't explicitly opted in or out. See
+     * {@link PackageManager#PROPERTY_USE_RESTRICTED_BACKUP_MODE} for details.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)
+    public static final long OS_DECIDES_BACKUP_RESTRICTED_MODE = 376661510;
+
     // Time delay for initialization operations that can be delayed so as not to consume too much
     // CPU on bring-up and increase time-to-UI.
     private static final long INITIALIZATION_DELAY_MILLIS = 3000;
@@ -351,6 +364,9 @@ public class UserBackupManagerService {
 
     // Backups that we haven't started yet.  Keys are package names.
     private final HashMap<String, BackupRequest> mPendingBackups = new HashMap<>();
+
+    private final ArraySet<String> mRestoreNoRestrictedModePackages = new ArraySet<>();
+    private final ArraySet<String> mBackupNoRestrictedModePackages = new ArraySet<>();
 
     // locking around the pending-backup management
     private final Object mQueueLock = new Object();
@@ -523,7 +539,8 @@ public class UserBackupManagerService {
     @VisibleForTesting
     UserBackupManagerService(Context context, PackageManager packageManager,
             LifecycleOperationStorage operationStorage, TransportManager transportManager,
-            BackupHandler backupHandler, BackupManagerConstants backupManagerConstants) {
+            BackupHandler backupHandler, BackupManagerConstants backupManagerConstants,
+            IActivityManager activityManager, ActivityManagerInternal activityManagerInternal) {
         mContext = context;
 
         mUserId = 0;
@@ -534,6 +551,8 @@ public class UserBackupManagerService {
         mFullBackupQueue = new ArrayList<>();
         mBackupHandler = backupHandler;
         mConstants = backupManagerConstants;
+        mActivityManager = activityManager;
+        mActivityManagerInternal = activityManagerInternal;
 
         mBaseStateDir = null;
         mDataDir = null;
@@ -543,13 +562,11 @@ public class UserBackupManagerService {
         mRunInitReceiver = null;
         mRunInitIntent = null;
         mAgentTimeoutParameters = null;
-        mActivityManagerInternal = null;
         mAlarmManager = null;
         mWakelock = null;
         mBackupPreferences = null;
         mBackupPasswordManager = null;
         mPackageManagerBinder = null;
-        mActivityManager = null;
         mBackupManagerBinder = null;
         mScheduledBackupEligibility = null;
     }
@@ -1651,9 +1668,11 @@ public class UserBackupManagerService {
         synchronized (mAgentConnectLock) {
             mConnecting = true;
             mConnectedAgent = null;
+            boolean useRestrictedMode = shouldUseRestrictedBackupModeForPackage(mode,
+                    app.packageName);
             try {
                 if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId,
-                        backupDestination)) {
+                        backupDestination, useRestrictedMode)) {
                     Slog.d(TAG, addUserIdToLogMessage(mUserId, "awaiting agent for " + app));
 
                     // success; wait for the agent to arrive
@@ -3101,6 +3120,91 @@ public class UserBackupManagerService {
                         /* caller */"BMS.reportDelayedRestoreResult");
             }
         }
+    }
+
+    /**
+     * Marks the given set of packages as packages that should not be put into restricted mode if
+     * they are started for the given {@link BackupAnnotations.OperationType}.
+     */
+    public void setNoRestrictedModePackages(Set<String> packageNames,
+            @BackupAnnotations.OperationType int opType) {
+        if (opType == BackupAnnotations.OperationType.BACKUP) {
+            mBackupNoRestrictedModePackages.clear();
+            mBackupNoRestrictedModePackages.addAll(packageNames);
+        } else if (opType == BackupAnnotations.OperationType.RESTORE) {
+            mRestoreNoRestrictedModePackages.clear();
+            mRestoreNoRestrictedModePackages.addAll(packageNames);
+        } else {
+            throw new IllegalArgumentException("opType must be BACKUP or RESTORE");
+        }
+    }
+
+    /**
+     * Clears the list of packages that should not be put into restricted mode for either backup or
+     * restore.
+     */
+    public void clearNoRestrictedModePackages() {
+        mBackupNoRestrictedModePackages.clear();
+        mRestoreNoRestrictedModePackages.clear();
+    }
+
+    /**
+     * If the app has specified {@link PackageManager#PROPERTY_USE_RESTRICTED_BACKUP_MODE}, then
+     * its value is returned. If it hasn't and it targets an SDK below
+     * {@link Build.VERSION_CODES#BAKLAVA} then returns true. If it targets a newer SDK, then
+     * returns the decision made by the {@link android.app.backup.BackupTransport}.
+     *
+     * <p>When this method is called, we should have already asked the transport and cached its
+     * response in {@link #mBackupNoRestrictedModePackages} or
+     * {@link #mRestoreNoRestrictedModePackages} so this method will immediately return without
+     * any IPC to the transport.
+     */
+    private boolean shouldUseRestrictedBackupModeForPackage(
+            @BackupAnnotations.OperationType int mode, String packageName) {
+        if (!Flags.enableRestrictedModeChanges()) {
+            return true;
+        }
+
+        // Key/Value apps are never put in restricted mode.
+        if (mode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
+                || mode == ApplicationThreadConstants.BACKUP_MODE_RESTORE) {
+            return false;
+        }
+
+        try {
+            PackageManager.Property property = mPackageManager.getPropertyAsUser(
+                    PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE,
+                    packageName, /* className= */ null,
+                    mUserId);
+            if (property.isBoolean()) {
+                // If the package has explicitly specified, we won't ask the transport.
+                return property.getBoolean();
+            } else {
+                Slog.w(TAG, PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE
+                        + "must be a boolean.");
+            }
+        } catch (NameNotFoundException e) {
+            // This is expected when the package has not defined the property in its manifest.
+        }
+
+        // The package has not specified the property. The behavior depends on the package's
+        // targetSdk.
+        // <36 gets the old behavior of always using restricted mode.
+        if (!CompatChanges.isChangeEnabled(OS_DECIDES_BACKUP_RESTRICTED_MODE, packageName,
+                UserHandle.of(mUserId))) {
+            return true;
+        }
+
+        // Apps targeting >=36 get the behavior decided by the transport.
+        // By this point, we should have asked the transport and cached its decision.
+        if ((mode == ApplicationThreadConstants.BACKUP_MODE_FULL
+                && mBackupNoRestrictedModePackages.contains(packageName))
+                || (mode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL
+                && mRestoreNoRestrictedModePackages.contains(packageName))) {
+            Slog.d(TAG, "Transport requested no restricted mode for: " + packageName);
+            return false;
+        }
+        return true;
     }
 
     private boolean startConfirmationUi(int token, String action) {

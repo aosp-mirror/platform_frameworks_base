@@ -23,9 +23,8 @@ package android.security.forensic;
     @Backing(type="int")
     enum State{
         UNKNOWN = 0,
-        INVISIBLE = 1,
-        VISIBLE = 2,
-        ENABLED = 3,
+        DISABLED = 1,
+        ENABLED = 2,
     }
     void onStateChange(State state);
  }

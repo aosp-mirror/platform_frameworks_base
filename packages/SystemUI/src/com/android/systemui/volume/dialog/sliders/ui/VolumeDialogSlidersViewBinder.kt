@@ -38,9 +38,10 @@ constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) 
 
     fun bind(view: View) {
         with(view) {
-            val volumeDialog: View = requireViewById(R.id.volume_dialog)
             val floatingSlidersContainer: ViewGroup =
                 requireViewById(R.id.volume_dialog_floating_sliders_container)
+            val mainSliderContainer: View =
+                requireViewById(R.id.volume_dialog_main_slider_container)
             repeatWhenAttached {
                 viewModel(
                     traceName = "VolumeDialogSlidersViewBinder",
@@ -49,7 +50,7 @@ constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) 
                 ) { viewModel ->
                     viewModel.sliders
                         .onEach { uiModel ->
-                            uiModel.sliderComponent.sliderViewBinder().bind(volumeDialog)
+                            uiModel.sliderComponent.sliderViewBinder().bind(mainSliderContainer)
 
                             val floatingSliderViewBinders = uiModel.floatingSliderComponent
                             floatingSlidersContainer.ensureChildCount(

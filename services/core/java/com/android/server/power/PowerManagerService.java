@@ -2332,6 +2332,8 @@ public final class PowerManagerService extends SystemService
         Trace.traceBegin(Trace.TRACE_TAG_POWER, traceMethodName);
         try {
             // Phase 2: Handle wakefulness change and bookkeeping.
+            // Under lock, invalidate before set ensures caches won't return stale values.
+            mInjector.invalidateIsInteractiveCaches();
             mWakefulnessRaw = newWakefulness;
             mWakefulnessChanging = true;
             mDirty |= DIRTY_WAKEFULNESS;
@@ -2429,7 +2431,6 @@ public final class PowerManagerService extends SystemService
     void onPowerGroupEventLocked(int event, PowerGroup powerGroup) {
         mWakefulnessChanging = true;
         mDirty |= DIRTY_WAKEFULNESS;
-        mInjector.invalidateIsInteractiveCaches();
         final int groupId = powerGroup.getGroupId();
         if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
             mPowerGroups.delete(groupId);

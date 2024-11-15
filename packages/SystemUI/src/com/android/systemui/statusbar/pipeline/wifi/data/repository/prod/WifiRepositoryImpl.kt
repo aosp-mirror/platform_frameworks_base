@@ -92,8 +92,7 @@ constructor(
 
     private var wifiPickerTracker: WifiPickerTracker? = null
 
-    @VisibleForTesting
-    val selectedUserContext: Flow<Context> =
+    private val selectedUserContext: Flow<Context> =
         userRepository.selectedUserInfo.map {
             applicationContext.createContextAsUser(UserHandle.of(it.id), /* flags= */ 0)
         }

@@ -570,6 +570,8 @@ interface IDevicePolicyManager {
     void setOrganizationIdForUser(in String callerPackage, in String enterpriseId, int userId);
 
     UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
+    UserHandle createManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
+    void finalizeCreateManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in UserHandle managedProfileUser);
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
 
     void finalizeWorkProfileProvisioning(in UserHandle managedProfileUser, in Account migratedAccount);

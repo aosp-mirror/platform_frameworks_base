@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.chre.flags.Flags;
 import android.hardware.contexthub.HostEndpointInfo;
+import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.contexthub.NanSessionRequest;
 import android.hardware.contexthub.V1_0.ContextHub;
@@ -228,6 +229,15 @@ public abstract class IContextHubWrapper {
     public List<HubInfo> getHubs() throws RemoteException {
         return Collections.emptyList();
     }
+
+    /** Calls the appropriate getEndpoints function depending on the HAL version. */
+    public List<HubEndpointInfo> getEndpoints() throws RemoteException {
+        return Collections.emptyList();
+    }
+
+    /** Calls the appropriate registerEndpointCallback function depending on the HAL version. */
+    public void registerEndpointCallback(android.hardware.contexthub.IEndpointCallback cb)
+            throws RemoteException {}
 
     /**
      * @return True if this version of the Contexthub HAL supports Location setting notifications.
@@ -620,6 +630,45 @@ public abstract class IContextHubWrapper {
                 Log.i(TAG, "getHubs: total count=" + retVal.size());
             }
             return retVal;
+        }
+
+        @Override
+        public List<HubEndpointInfo> getEndpoints() throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return Collections.emptyList();
+            }
+
+            List<HubEndpointInfo> retVal = new ArrayList<>();
+            final List<android.hardware.contexthub.EndpointInfo> halEndpointInfos =
+                    hub.getEndpoints();
+            for (android.hardware.contexthub.EndpointInfo halEndpointInfo : halEndpointInfos) {
+                /* HAL -> API Type conversion */
+                final HubEndpointInfo endpointInfo = new HubEndpointInfo(halEndpointInfo);
+                if (DEBUG) {
+                    Log.i(TAG, "getEndpoints: endpointInfo=" + endpointInfo);
+                }
+                retVal.add(endpointInfo);
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "getEndpoints: total count=" + retVal.size());
+            }
+            return retVal;
+        }
+
+        @Override
+        public void registerEndpointCallback(android.hardware.contexthub.IEndpointCallback cb)
+                throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return;
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "registerEndpointCallback: cb=" + cb);
+            }
+            hub.registerEndpointCallback(cb);
         }
 
         public boolean supportsLocationSettingNotifications() {

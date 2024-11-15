@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.supervision;
+package android.app.supervision;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.os.Bundle;
+import android.os.PersistableBundle;
 
 /**
  * Local system service interface for {@link SupervisionService}.
@@ -33,6 +33,11 @@ public abstract class SupervisionManagerInternal {
      * @return whether the user is supervised
      */
     public abstract boolean isSupervisionEnabledForUser(@UserIdInt int userId);
+
+    /**
+     * Returns whether the supervision lock screen needs to be shown.
+     */
+    public abstract boolean isSupervisionLockscreenEnabledForUser(@UserIdInt int userId);
 
     /**
      * Set whether supervision is enabled for the specified user.
@@ -50,5 +55,5 @@ public abstract class SupervisionManagerInternal {
      * @param options Optional configuration parameters for the supervision lock screen
      */
     public abstract void setSupervisionLockscreenEnabledForUser(
-            @UserIdInt int userId, boolean enabled, @Nullable Bundle options);
+            @UserIdInt int userId, boolean enabled, @Nullable PersistableBundle options);
 }

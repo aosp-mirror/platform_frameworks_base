@@ -1624,9 +1624,19 @@ public class AppOpsManager {
     /** @hide Access to read oxygen saturation. */
     public static final int OP_READ_OXYGEN_SATURATION = AppOpEnums.APP_OP_READ_OXYGEN_SATURATION;
 
+    /** @hide Access to write system preferences. */
+    public static final int OP_WRITE_SYSTEM_PREFERENCES =
+            AppOpEnums.APP_OP_WRITE_SYSTEM_PREFERENCES;
+
+    /** @hide Access to audio playback and control APIs. */
+    public static final int OP_CONTROL_AUDIO = AppOpEnums.APP_OP_CONTROL_AUDIO;
+
+    /** @hide Similar to {@link OP_CONTROL_AUDIO}, but doesn't require capabilities. */
+    public static final int OP_CONTROL_AUDIO_PARTIAL = AppOpEnums.APP_OP_CONTROL_AUDIO_PARTIAL;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 153;
+    public static final int _NUM_OP = 156;
 
     /**
      * All app ops represented as strings.
@@ -1783,6 +1793,9 @@ public class AppOpsManager {
             OPSTR_READ_SKIN_TEMPERATURE,
             OPSTR_RANGING,
             OPSTR_READ_OXYGEN_SATURATION,
+            OPSTR_WRITE_SYSTEM_PREFERENCES,
+            OPSTR_CONTROL_AUDIO,
+            OPSTR_CONTROL_AUDIO_PARTIAL,
     })
     public @interface AppOpString {}
 
@@ -2540,6 +2553,15 @@ public class AppOpsManager {
     @FlaggedApi(Flags.FLAG_RANGING_PERMISSION_ENABLED)
     public static final String OPSTR_RANGING = "android:ranging";
 
+    /** @hide Access to system preferences write services */
+    public static final String OPSTR_WRITE_SYSTEM_PREFERENCES = "android:write_system_preferences";
+
+    /** @hide Access to audio playback and control APIs */
+    public static final String OPSTR_CONTROL_AUDIO = "android:control_audio";
+
+    /** @hide Access to a audio playback and control APIs without capability requirements */
+    public static final String OPSTR_CONTROL_AUDIO_PARTIAL = "android:control_audio_partial";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2656,6 +2678,7 @@ public class AppOpsManager {
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
             OP_MEDIA_ROUTING_CONTROL,
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
+            OP_WRITE_SYSTEM_PREFERENCES,
     };
 
     @SuppressWarnings("FlaggedApi")
@@ -3144,6 +3167,14 @@ public class AppOpsManager {
                 Flags.replaceBodySensorPermissionEnabled()
                     ? HealthPermissions.READ_OXYGEN_SATURATION : null)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_SYSTEM_PREFERENCES, OPSTR_WRITE_SYSTEM_PREFERENCES,
+            "WRITE_SYSTEM_PREFERENCES").setPermission(
+                     com.android.settingslib.flags.Flags.writeSystemPreferencePermissionEnabled()
+                     ? Manifest.permission.WRITE_SYSTEM_PREFERENCES : null).build(),
+        new AppOpInfo.Builder(OP_CONTROL_AUDIO, OPSTR_CONTROL_AUDIO,
+                "CONTROL_AUDIO").setDefaultMode(AppOpsManager.MODE_FOREGROUND).build(),
+        new AppOpInfo.Builder(OP_CONTROL_AUDIO_PARTIAL, OPSTR_CONTROL_AUDIO_PARTIAL,
+                "CONTROL_AUDIO_PARTIAL").setDefaultMode(AppOpsManager.MODE_FOREGROUND).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops

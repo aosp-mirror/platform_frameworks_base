@@ -18,7 +18,8 @@ package com.android.systemui.statusbar.window
 
 import android.content.testableContext
 import android.view.windowManagerService
-import com.android.app.viewcapture.viewCaptureAwareWindowManager
+import com.android.app.viewcapture.realCaptureAwareWindowManager
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.fragments.fragmentService
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.phone.statusBarContentInsetsProvider
@@ -32,12 +33,13 @@ val Kosmos.statusBarWindowControllerImpl by
         StatusBarWindowControllerImpl(
             testableContext,
             statusBarWindowViewInflater,
-            viewCaptureAwareWindowManager,
+            realCaptureAwareWindowManager,
             statusBarConfigurationController,
             windowManagerService,
             statusBarContentInsetsProvider,
             fragmentService,
             Optional.empty(),
+            fakeExecutor,
         )
     }
 

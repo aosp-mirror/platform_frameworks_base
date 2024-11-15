@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,6 +58,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 import perfetto.protos.Protolog;
 import perfetto.protos.ProtologCommon;
@@ -856,6 +858,39 @@ public class ProcessedPerfettoProtoLogImplTest {
                 .isEqualTo(LogLevel.ERROR);
         Truth.assertThat(protolog.messages.get(1).getMessage())
                 .isEqualTo("This message should also be logged 567");
+    }
+
+    @Test
+    public void enablesLogGroupAfterLoadingConfig() {
+        sProtoLog.stopLoggingToLogcat(
+                new String[] { TestProtoLogGroup.TEST_GROUP.name() }, (msg) -> {});
+        Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isFalse();
+
+        doAnswer((Answer<Void>) invocation -> {
+            // logToLogcat is still false before we laod the viewer config
+            Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isFalse();
+            return null;
+        }).when(sReader).unloadViewerConfig(any(), any());
+
+        sProtoLog.startLoggingToLogcat(
+                new String[] { TestProtoLogGroup.TEST_GROUP.name() }, (msg) -> {});
+        Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isTrue();
+    }
+
+    @Test
+    public void disablesLogGroupBeforeUnloadingConfig() {
+        sProtoLog.startLoggingToLogcat(
+                new String[] { TestProtoLogGroup.TEST_GROUP.name() }, (msg) -> {});
+        Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isTrue();
+
+        doAnswer((Answer<Void>) invocation -> {
+            // Already set logToLogcat to false by the time we unload the config
+            Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isFalse();
+            return null;
+        }).when(sReader).unloadViewerConfig(any(), any());
+        sProtoLog.stopLoggingToLogcat(
+                new String[] { TestProtoLogGroup.TEST_GROUP.name() }, (msg) -> {});
+        Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isFalse();
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {

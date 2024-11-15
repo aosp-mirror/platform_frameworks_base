@@ -16,15 +16,18 @@
 
 package com.android.wm.shell.pip2.animation;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.kotlin.MatchersKt.eq;
-import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
@@ -34,12 +37,14 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -52,40 +57,40 @@ import org.mockito.MockitoAnnotations;
 public class PipResizeAnimatorTest {
 
     private static final float FLOAT_COMPARISON_DELTA = 0.001f;
+    private static final float TEST_CORNER_RADIUS = 1f;
+    private static final float TEST_SHADOW_RADIUS = 2f;
 
     @Mock private Context mMockContext;
-
+    @Mock private Resources mMockResources;
     @Mock private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory mMockFactory;
-
     @Mock private SurfaceControl.Transaction mMockTransaction;
-
     @Mock private SurfaceControl.Transaction mMockStartTransaction;
-
     @Mock private SurfaceControl.Transaction mMockFinishTransaction;
-
     @Mock private Runnable mMockStartCallback;
-
     @Mock private Runnable mMockEndCallback;
+
+    @Captor private ArgumentCaptor<Matrix> mArgumentCaptor;
 
     private PipResizeAnimator mPipResizeAnimator;
     private Rect mBaseBounds;
     private Rect mStartBounds;
     private Rect mEndBounds;
     private SurfaceControl mTestLeash;
-    private ArgumentCaptor<Matrix> mArgumentCaptor;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mMockFactory.getTransaction()).thenReturn(mMockTransaction);
-        when(mMockTransaction.setMatrix(any(SurfaceControl.class), any(Matrix.class), any()))
-                .thenReturn(mMockTransaction);
-        when(mMockStartTransaction.setMatrix(any(SurfaceControl.class), any(Matrix.class), any()))
-                .thenReturn(mMockStartTransaction);
-        when(mMockFinishTransaction.setMatrix(any(SurfaceControl.class), any(Matrix.class), any()))
-                .thenReturn(mMockFinishTransaction);
+        when(mMockContext.getResources()).thenReturn(mMockResources);
+        when(mMockResources.getDimensionPixelSize(R.dimen.pip_corner_radius))
+                .thenReturn((int) TEST_CORNER_RADIUS);
+        when(mMockResources.getDimensionPixelSize(R.dimen.pip_shadow_radius))
+                .thenReturn((int) TEST_SHADOW_RADIUS);
 
-        mArgumentCaptor = ArgumentCaptor.forClass(Matrix.class);
+        prepareTransaction(mMockTransaction);
+        prepareTransaction(mMockStartTransaction);
+        prepareTransaction(mMockFinishTransaction);
+
         mTestLeash = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("PipResizeAnimatorTest")
@@ -187,6 +192,12 @@ public class PipResizeAnimatorTest {
         assertEquals(matrix[Matrix.MSCALE_Y], 1f, FLOAT_COMPARISON_DELTA);
         assertEquals(matrix[Matrix.MTRANS_X], mEndBounds.left, FLOAT_COMPARISON_DELTA);
         assertEquals(matrix[Matrix.MTRANS_Y], mEndBounds.top, FLOAT_COMPARISON_DELTA);
+
+        // Check corner and shadow radii were set
+        verify(mMockTransaction, atLeastOnce())
+                .setCornerRadius(eq(mTestLeash), eq(TEST_CORNER_RADIUS));
+        verify(mMockTransaction, atLeastOnce())
+                .setShadowRadius(eq(mTestLeash), eq(TEST_SHADOW_RADIUS));
     }
 
     @Test
@@ -237,6 +248,12 @@ public class PipResizeAnimatorTest {
         assertEquals(matrix[Matrix.MSCALE_Y], 1f, FLOAT_COMPARISON_DELTA);
         assertEquals(matrix[Matrix.MTRANS_X], mEndBounds.left, FLOAT_COMPARISON_DELTA);
         assertEquals(matrix[Matrix.MTRANS_Y], mEndBounds.top, FLOAT_COMPARISON_DELTA);
+
+        // Check corner and shadow radii were set
+        verify(mMockTransaction, atLeastOnce())
+                .setCornerRadius(eq(mTestLeash), eq(TEST_CORNER_RADIUS));
+        verify(mMockTransaction, atLeastOnce())
+                .setShadowRadius(eq(mTestLeash), eq(TEST_SHADOW_RADIUS));
     }
 
     @Test
@@ -272,5 +289,21 @@ public class PipResizeAnimatorTest {
         mArgumentCaptor.getValue().getValues(matrix);
         assertEquals(matrix[Matrix.MSKEW_X], 0f, FLOAT_COMPARISON_DELTA);
         assertEquals(matrix[Matrix.MSKEW_Y], 0f, FLOAT_COMPARISON_DELTA);
+
+        // Check corner and shadow radii were set
+        verify(mMockTransaction, atLeastOnce())
+                .setCornerRadius(eq(mTestLeash), eq(TEST_CORNER_RADIUS));
+        verify(mMockTransaction, atLeastOnce())
+                .setShadowRadius(eq(mTestLeash), eq(TEST_SHADOW_RADIUS));
+    }
+
+    // set up transaction chaining
+    private void prepareTransaction(SurfaceControl.Transaction tx) {
+        when(tx.setMatrix(any(SurfaceControl.class), any(Matrix.class), any()))
+                .thenReturn(tx);
+        when(tx.setCornerRadius(any(SurfaceControl.class), anyFloat()))
+                .thenReturn(tx);
+        when(tx.setShadowRadius(any(SurfaceControl.class), anyFloat()))
+                .thenReturn(tx);
     }
 }

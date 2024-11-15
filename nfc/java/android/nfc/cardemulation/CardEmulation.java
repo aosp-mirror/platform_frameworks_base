@@ -185,6 +185,65 @@ public final class CardEmulation {
     @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
     public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET = -1;
 
+    /**
+     * Status code returned when {@link #setServiceEnabledForCategoryOther(ComponentName, boolean)}
+     * succeeded.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_SET_SERVICE_ENABLED_FOR_CATEGORY_OTHER)
+    public static final int SET_SERVICE_ENABLED_STATUS_OK = 0;
+
+    /**
+     * Status code returned when {@link #setServiceEnabledForCategoryOther(ComponentName, boolean)}
+     * failed due to the unsupported feature.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_SET_SERVICE_ENABLED_FOR_CATEGORY_OTHER)
+    public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_FEATURE_UNSUPPORTED = 1;
+
+    /**
+     * Status code returned when {@link #setServiceEnabledForCategoryOther(ComponentName, boolean)}
+     * failed due to the invalid service.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_SET_SERVICE_ENABLED_FOR_CATEGORY_OTHER)
+    public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_INVALID_SERVICE = 2;
+
+    /**
+     * Status code returned when {@link #setServiceEnabledForCategoryOther(ComponentName, boolean)}
+     * failed due to the service is already set to the requested status.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_SET_SERVICE_ENABLED_FOR_CATEGORY_OTHER)
+    public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_ALREADY_SET = 3;
+
+    /**
+     * Status code returned when {@link #setServiceEnabledForCategoryOther(ComponentName, boolean)}
+     * failed due to unknown error.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_SET_SERVICE_ENABLED_FOR_CATEGORY_OTHER)
+    public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_UNKNOWN_ERROR = 4;
+
+    /**
+     * Status code returned by {@link #setServiceEnabledForCategoryOther(ComponentName, boolean)}
+     * @hide
+     */
+    @IntDef(prefix = "SET_SERVICE_ENABLED_STATUS_", value = {
+            SET_SERVICE_ENABLED_STATUS_OK,
+            SET_SERVICE_ENABLED_STATUS_FAILURE_FEATURE_UNSUPPORTED,
+            SET_SERVICE_ENABLED_STATUS_FAILURE_INVALID_SERVICE,
+            SET_SERVICE_ENABLED_STATUS_FAILURE_ALREADY_SET,
+            SET_SERVICE_ENABLED_STATUS_FAILURE_UNKNOWN_ERROR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SetServiceEnabledStatusCode {}
+
     static boolean sIsInitialized = false;
     static HashMap<Context, CardEmulation> sCardEmus = new HashMap<Context, CardEmulation>();
     static INfcCardEmulation sService;
@@ -883,22 +942,24 @@ public final class CardEmulation {
     }
 
     /**
-     * Allows to set or unset preferred service (category other) to avoid  AID Collision.
+     * Allows to set or unset preferred service (category other) to avoid AID Collision. The user
+     * should use corresponding context using {@link Context#createContextAsUser(UserHandle, int)}
      *
      * @param service The ComponentName of the service
      * @param status  true to enable, false to disable
-     * @param userId the user handle of the user whose information is being requested.
-     * @return set service for the category and true if service is already set return false.
+     * @return true if preferred service is successfully set or unset, otherwise return false.
      *
      * @hide
      */
-    public boolean setServiceEnabledForCategoryOther(ComponentName service, boolean status,
-                                                     int userId) {
-        if (service == null) {
-            throw new NullPointerException("activity or service or category is null");
-        }
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_SET_SERVICE_ENABLED_FOR_CATEGORY_OTHER)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @SetServiceEnabledStatusCode
+    public int setServiceEnabledForCategoryOther(@NonNull ComponentName service,
+            boolean status) {
         return callServiceReturn(() ->
-                sService.setServiceEnabledForCategoryOther(userId, service, status), false);
+                sService.setServiceEnabledForCategoryOther(mContext.getUser().getIdentifier(),
+                        service, status), SET_SERVICE_ENABLED_STATUS_FAILURE_UNKNOWN_ERROR);
     }
 
     /** @hide */

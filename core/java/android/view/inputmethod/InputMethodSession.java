@@ -16,7 +16,6 @@
 
 package android.view.inputmethod;
 
-import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
@@ -124,11 +123,6 @@ public interface InputMethodSession {
      * @see android.view.KeyEvent
      */
     public void dispatchKeyEvent(int seq, KeyEvent event, EventCallback callback);
-
-    /**
-     * @hide
-     */
-    boolean onShouldVerifyKeyEvent(@NonNull KeyEvent event);
 
     /**
      * This method is called when there is a track ball event.

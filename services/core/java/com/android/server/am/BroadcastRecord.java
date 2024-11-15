@@ -49,6 +49,7 @@ import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -57,7 +58,6 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.PrintWriterPrinter;
-import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -865,23 +865,33 @@ final class BroadcastRecord extends Binder {
     @VisibleForTesting
     static @NonNull boolean[] calculateChangeStateForReceivers(@NonNull List<Object> receivers,
             long changeId, PlatformCompat platformCompat) {
-        final SparseBooleanArray changeStateForUids = new SparseBooleanArray();
+        // TODO: b/371307720 - Remove this method as we are already avoiding the packagemanager
+        // calls by checking the changeId state using ApplicationInfos.
+        final ArrayMap<String, Boolean> changeStates = new ArrayMap<>();
         final int count = receivers.size();
         final boolean[] changeStateForReceivers = new boolean[count];
         for (int i = 0; i < count; ++i) {
-            final int receiverUid = getReceiverUid(receivers.get(i));
+            final ApplicationInfo receiverAppInfo = getReceiverAppInfo(receivers.get(i));
             final boolean isChangeEnabled;
-            final int idx = changeStateForUids.indexOfKey(receiverUid);
+            final int idx = changeStates.indexOfKey(receiverAppInfo.packageName);
             if (idx >= 0) {
-                isChangeEnabled = changeStateForUids.valueAt(idx);
+                isChangeEnabled = changeStates.valueAt(idx);
             } else {
-                isChangeEnabled = platformCompat.isChangeEnabledByUidInternalNoLogging(
-                        changeId, receiverUid);
-                changeStateForUids.put(receiverUid, isChangeEnabled);
+                isChangeEnabled = platformCompat.isChangeEnabledInternalNoLogging(
+                        changeId, receiverAppInfo);
+                changeStates.put(receiverAppInfo.packageName, isChangeEnabled);
             }
             changeStateForReceivers[i] = isChangeEnabled;
         }
         return changeStateForReceivers;
+    }
+
+    static ApplicationInfo getReceiverAppInfo(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).getApplicationInfo();
+        } else {
+            return ((ResolveInfo) receiver).activityInfo.applicationInfo;
+        }
     }
 
     static int getReceiverUid(@NonNull Object receiver) {

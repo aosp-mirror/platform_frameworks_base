@@ -400,3 +400,12 @@ flag {
     description: "This flag is used to enable all the remaining permissions required to the supervision role"
     bug: "367333883"
 }
+
+flag {
+    name: "permission_request_short_circuit_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "This flag is used to short circuit the request for permananently denied permissions"
+    bug: "378923900"
+}

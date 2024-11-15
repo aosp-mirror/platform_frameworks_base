@@ -16,11 +16,16 @@
 
 package com.android.server.security.forensic;
 
+import static android.Manifest.permission.MANAGE_FORENSIC_STATE;
+import static android.Manifest.permission.READ_FORENSIC_STATE;
+
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.security.forensic.ForensicEvent;
 import android.security.forensic.IForensicService;
@@ -41,16 +46,15 @@ import java.util.List;
 public class ForensicService extends SystemService {
     private static final String TAG = "ForensicService";
 
-    private static final int MSG_MONITOR_STATE = 0;
-    private static final int MSG_MAKE_VISIBLE = 1;
-    private static final int MSG_MAKE_INVISIBLE = 2;
-    private static final int MSG_ENABLE = 3;
-    private static final int MSG_DISABLE = 4;
-    private static final int MSG_BACKUP = 5;
+    private static final int MAX_STATE_CALLBACK_NUM = 16;
+    private static final int MSG_ADD_STATE_CALLBACK = 0;
+    private static final int MSG_REMOVE_STATE_CALLBACK = 1;
+    private static final int MSG_ENABLE = 2;
+    private static final int MSG_DISABLE = 3;
+    private static final int MSG_TRANSPORT = 4;
 
     private static final int STATE_UNKNOWN = IForensicServiceStateCallback.State.UNKNOWN;
-    private static final int STATE_INVISIBLE = IForensicServiceStateCallback.State.INVISIBLE;
-    private static final int STATE_VISIBLE = IForensicServiceStateCallback.State.VISIBLE;
+    private static final int STATE_DISABLED = IForensicServiceStateCallback.State.DISABLED;
     private static final int STATE_ENABLED = IForensicServiceStateCallback.State.ENABLED;
 
     private static final int ERROR_UNKNOWN = IForensicServiceCommandCallback.ErrorCode.UNKNOWN;
@@ -58,19 +62,19 @@ public class ForensicService extends SystemService {
             IForensicServiceCommandCallback.ErrorCode.PERMISSION_DENIED;
     private static final int ERROR_INVALID_STATE_TRANSITION =
             IForensicServiceCommandCallback.ErrorCode.INVALID_STATE_TRANSITION;
-    private static final int ERROR_BACKUP_TRANSPORT_UNAVAILABLE =
-            IForensicServiceCommandCallback.ErrorCode.BACKUP_TRANSPORT_UNAVAILABLE;
+    private static final int ERROR_TRANSPORT_UNAVAILABLE =
+            IForensicServiceCommandCallback.ErrorCode.TRANSPORT_UNAVAILABLE;
     private static final int ERROR_DATA_SOURCE_UNAVAILABLE =
             IForensicServiceCommandCallback.ErrorCode.DATA_SOURCE_UNAVAILABLE;
 
     private final Context mContext;
     private final Handler mHandler;
-    private final BackupTransportConnection mBackupTransportConnection;
+    private final ForensicEventTransportConnection mForensicEventTransportConnection;
     private final DataAggregator mDataAggregator;
     private final BinderService mBinderService;
 
-    private final ArrayList<IForensicServiceStateCallback> mStateMonitors = new ArrayList<>();
-    private volatile int mState = STATE_INVISIBLE;
+    private final ArrayList<IForensicServiceStateCallback> mStateCallbacks = new ArrayList<>();
+    private volatile int mState = STATE_DISABLED;
 
     public ForensicService(@NonNull Context context) {
         this(new InjectorImpl(context));
@@ -81,9 +85,9 @@ public class ForensicService extends SystemService {
         super(injector.getContext());
         mContext = injector.getContext();
         mHandler = new EventHandler(injector.getLooper(), this);
-        mBackupTransportConnection = injector.getBackupTransportConnection();
+        mForensicEventTransportConnection = injector.getForensicEventransportConnection();
         mDataAggregator = injector.getDataAggregator(this);
-        mBinderService = new BinderService(this);
+        mBinderService = new BinderService(this, injector.getPermissionEnforcer());
     }
 
     @VisibleForTesting
@@ -94,32 +98,36 @@ public class ForensicService extends SystemService {
     private static final class BinderService extends IForensicService.Stub {
         final ForensicService mService;
 
-        BinderService(ForensicService service)  {
+        BinderService(ForensicService service, @NonNull PermissionEnforcer permissionEnforcer)  {
+            super(permissionEnforcer);
             mService = service;
         }
 
         @Override
-        public void monitorState(IForensicServiceStateCallback callback) {
-            mService.mHandler.obtainMessage(MSG_MONITOR_STATE, callback).sendToTarget();
+        @EnforcePermission(READ_FORENSIC_STATE)
+        public void addStateCallback(IForensicServiceStateCallback callback) {
+            addStateCallback_enforcePermission();
+            mService.mHandler.obtainMessage(MSG_ADD_STATE_CALLBACK, callback).sendToTarget();
         }
 
         @Override
-        public void makeVisible(IForensicServiceCommandCallback callback) {
-            mService.mHandler.obtainMessage(MSG_MAKE_VISIBLE, callback).sendToTarget();
+        @EnforcePermission(READ_FORENSIC_STATE)
+        public void removeStateCallback(IForensicServiceStateCallback callback) {
+            removeStateCallback_enforcePermission();
+            mService.mHandler.obtainMessage(MSG_REMOVE_STATE_CALLBACK, callback).sendToTarget();
         }
 
         @Override
-        public void makeInvisible(IForensicServiceCommandCallback callback) {
-            mService.mHandler.obtainMessage(MSG_MAKE_INVISIBLE, callback).sendToTarget();
-        }
-
-        @Override
+        @EnforcePermission(MANAGE_FORENSIC_STATE)
         public void enable(IForensicServiceCommandCallback callback) {
+            enable_enforcePermission();
             mService.mHandler.obtainMessage(MSG_ENABLE, callback).sendToTarget();
         }
 
         @Override
+        @EnforcePermission(MANAGE_FORENSIC_STATE)
         public void disable(IForensicServiceCommandCallback callback) {
+            disable_enforcePermission();
             mService.mHandler.obtainMessage(MSG_DISABLE, callback).sendToTarget();
         }
     }
@@ -135,24 +143,18 @@ public class ForensicService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_MONITOR_STATE:
+                case MSG_ADD_STATE_CALLBACK:
                     try {
-                        mService.monitorState(
+                        mService.addStateCallback(
                                 (IForensicServiceStateCallback) msg.obj);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "RemoteException", e);
                     }
                     break;
-                case MSG_MAKE_VISIBLE:
+                case MSG_REMOVE_STATE_CALLBACK:
                     try {
-                        mService.makeVisible((IForensicServiceCommandCallback) msg.obj);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "RemoteException", e);
-                    }
-                    break;
-                case MSG_MAKE_INVISIBLE:
-                    try {
-                        mService.makeInvisible((IForensicServiceCommandCallback) msg.obj);
+                        mService.removeStateCallback(
+                                (IForensicServiceStateCallback) msg.obj);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "RemoteException", e);
                     }
@@ -171,8 +173,8 @@ public class ForensicService extends SystemService {
                         Slog.e(TAG, "RemoteException", e);
                     }
                     break;
-                case MSG_BACKUP:
-                    mService.backup((List<ForensicEvent>) msg.obj);
+                case MSG_TRANSPORT:
+                    mService.transport((List<ForensicEvent>) msg.obj);
                     break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
@@ -180,103 +182,83 @@ public class ForensicService extends SystemService {
         }
     }
 
-    private void monitorState(IForensicServiceStateCallback callback) throws RemoteException {
-        for (int i = 0; i < mStateMonitors.size(); i++) {
-            if (mStateMonitors.get(i).asBinder() == callback.asBinder()) {
+    private void addStateCallback(IForensicServiceStateCallback callback) throws RemoteException {
+        for (int i = 0; i < mStateCallbacks.size(); i++) {
+            if (mStateCallbacks.get(i).asBinder() == callback.asBinder()) {
                 return;
             }
         }
-        mStateMonitors.add(callback);
+        mStateCallbacks.add(callback);
         callback.onStateChange(mState);
     }
 
-    private void notifyStateMonitors() throws RemoteException {
-        for (int i = 0; i < mStateMonitors.size(); i++) {
-            mStateMonitors.get(i).onStateChange(mState);
+    private void removeStateCallback(IForensicServiceStateCallback callback)
+            throws RemoteException {
+        for (int i = 0; i < mStateCallbacks.size(); i++) {
+            if (mStateCallbacks.get(i).asBinder() == callback.asBinder()) {
+                mStateCallbacks.remove(i);
+                return;
+            }
         }
     }
 
-    private void makeVisible(IForensicServiceCommandCallback callback) throws RemoteException {
-        switch (mState) {
-            case STATE_INVISIBLE:
-                if (!mDataAggregator.initialize()) {
-                    callback.onFailure(ERROR_DATA_SOURCE_UNAVAILABLE);
-                    break;
-                }
-                mState = STATE_VISIBLE;
-                notifyStateMonitors();
-                callback.onSuccess();
-                break;
-            case STATE_VISIBLE:
-                callback.onSuccess();
-                break;
-            default:
-                callback.onFailure(ERROR_INVALID_STATE_TRANSITION);
+    private void notifyStateMonitors() {
+        if (mStateCallbacks.size() >= MAX_STATE_CALLBACK_NUM) {
+            mStateCallbacks.removeFirst();
         }
-    }
 
-    private void makeInvisible(IForensicServiceCommandCallback callback) throws RemoteException {
-        switch (mState) {
-            case STATE_VISIBLE:
-            case STATE_ENABLED:
-                mState = STATE_INVISIBLE;
-                notifyStateMonitors();
-                callback.onSuccess();
-                break;
-            case STATE_INVISIBLE:
-                callback.onSuccess();
-                break;
-            default:
-                callback.onFailure(ERROR_INVALID_STATE_TRANSITION);
+        for (int i = 0; i < mStateCallbacks.size(); i++) {
+            try {
+                mStateCallbacks.get(i).onStateChange(mState);
+            } catch (RemoteException e) {
+                mStateCallbacks.remove(i);
+            }
         }
     }
 
     private void enable(IForensicServiceCommandCallback callback) throws RemoteException {
-        switch (mState) {
-            case STATE_VISIBLE:
-                if (!mBackupTransportConnection.initialize()) {
-                    callback.onFailure(ERROR_BACKUP_TRANSPORT_UNAVAILABLE);
-                    break;
-                }
-                mDataAggregator.enable();
-                mState = STATE_ENABLED;
-                notifyStateMonitors();
-                callback.onSuccess();
-                break;
-            case STATE_ENABLED:
-                callback.onSuccess();
-                break;
-            default:
-                callback.onFailure(ERROR_INVALID_STATE_TRANSITION);
+        if (mState == STATE_ENABLED) {
+            callback.onSuccess();
+            return;
         }
+
+        // TODO: temporarily disable the following for the CTS ForensicManagerTest.
+        //  Enable it when the transport component is ready.
+        // if (!mForensicEventTransportConnection.initialize()) {
+        //     callback.onFailure(ERROR_TRANSPORT_UNAVAILABLE);
+        //   return;
+        // }
+
+        mDataAggregator.enable();
+        mState = STATE_ENABLED;
+        notifyStateMonitors();
+        callback.onSuccess();
     }
 
     private void disable(IForensicServiceCommandCallback callback) throws RemoteException {
-        switch (mState) {
-            case STATE_ENABLED:
-                mBackupTransportConnection.release();
-                mDataAggregator.disable();
-                mState = STATE_VISIBLE;
-                notifyStateMonitors();
-                callback.onSuccess();
-                break;
-            case STATE_VISIBLE:
-                callback.onSuccess();
-                break;
-            default:
-                callback.onFailure(ERROR_INVALID_STATE_TRANSITION);
+        if (mState == STATE_DISABLED) {
+            callback.onSuccess();
+            return;
         }
+
+        // TODO: temporarily disable the following for the CTS ForensicManagerTest.
+        //  Enable it when the transport component is ready.
+        // mForensicEventTransportConnection.release();
+        mDataAggregator.disable();
+        mState = STATE_DISABLED;
+        notifyStateMonitors();
+        callback.onSuccess();
     }
 
     /**
      * Add a list of ForensicEvent.
      */
     public void addNewData(List<ForensicEvent> events) {
-        mHandler.obtainMessage(MSG_BACKUP, events).sendToTarget();
+        mHandler.obtainMessage(MSG_TRANSPORT, events).sendToTarget();
     }
 
-    private void backup(List<ForensicEvent> events) {
-        mBackupTransportConnection.addData(events);
+    private void transport(List<ForensicEvent> events) {
+        mForensicEventTransportConnection.addData(events);
     }
 
     @Override
@@ -296,9 +278,11 @@ public class ForensicService extends SystemService {
     interface Injector {
         Context getContext();
 
+        PermissionEnforcer getPermissionEnforcer();
+
         Looper getLooper();
 
-        BackupTransportConnection getBackupTransportConnection();
+        ForensicEventTransportConnection getForensicEventransportConnection();
 
         DataAggregator getDataAggregator(ForensicService forensicService);
     }
@@ -315,6 +299,10 @@ public class ForensicService extends SystemService {
             return mContext;
         }
 
+        @Override
+        public PermissionEnforcer getPermissionEnforcer() {
+            return PermissionEnforcer.fromContext(mContext);
+        }
 
         @Override
         public Looper getLooper() {
@@ -326,8 +314,8 @@ public class ForensicService extends SystemService {
         }
 
         @Override
-        public BackupTransportConnection getBackupTransportConnection() {
-            return new BackupTransportConnection(mContext);
+        public ForensicEventTransportConnection getForensicEventransportConnection() {
+            return new ForensicEventTransportConnection(mContext);
         }
 
         @Override

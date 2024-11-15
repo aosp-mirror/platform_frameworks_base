@@ -20,7 +20,7 @@ import android.app.admin.DevicePolicyManagerInternal
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.UserInfo
-import android.os.Bundle
+import android.os.PersistableBundle
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -139,7 +139,7 @@ class SupervisionServiceTest {
         assertThat(userData.supervisionLockScreenEnabled).isFalse()
         assertThat(userData.supervisionLockScreenOptions).isNull()
 
-        service.mInternal.setSupervisionLockscreenEnabledForUser(USER_ID, true, Bundle())
+        service.mInternal.setSupervisionLockscreenEnabledForUser(USER_ID, true, PersistableBundle())
         userData = service.getUserDataLocked(USER_ID)
         assertThat(userData.supervisionLockScreenEnabled).isTrue()
         assertThat(userData.supervisionLockScreenOptions).isNotNull()

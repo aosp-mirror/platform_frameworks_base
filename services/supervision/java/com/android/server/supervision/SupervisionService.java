@@ -21,10 +21,11 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.supervision.ISupervisionManager;
+import android.app.supervision.SupervisionManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -179,8 +180,15 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
 
         @Override
+        public boolean isSupervisionLockscreenEnabledForUser(@UserIdInt int userId) {
+            synchronized (getLockObject()) {
+                return getUserDataLocked(userId).supervisionLockScreenEnabled;
+            }
+        }
+
+        @Override
         public void setSupervisionLockscreenEnabledForUser(
-                @UserIdInt int userId, boolean enabled, @Nullable Bundle options) {
+                @UserIdInt int userId, boolean enabled, @Nullable PersistableBundle options) {
             synchronized (getLockObject()) {
                 SupervisionUserData data = getUserDataLocked(userId);
                 data.supervisionLockScreenEnabled = enabled;
