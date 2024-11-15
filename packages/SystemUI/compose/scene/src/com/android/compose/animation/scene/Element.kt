@@ -350,8 +350,7 @@ internal class ElementNode(
             val placeInThisContent =
                 elementContentWhenIdle(
                     layoutImpl,
-                    currentState.currentScene,
-                    currentState.currentOverlays,
+                    currentState,
                     isInContent = { it in element.stateByContent },
                 ) == content.key
 
@@ -639,20 +638,11 @@ internal inline fun elementState(
 
 internal inline fun elementContentWhenIdle(
     layoutImpl: SceneTransitionLayoutImpl,
-    idle: TransitionState.Idle,
+    currentState: TransitionState,
     isInContent: (ContentKey) -> Boolean,
 ): ContentKey {
-    val currentScene = idle.currentScene
-    val overlays = idle.currentOverlays
-    return elementContentWhenIdle(layoutImpl, currentScene, overlays, isInContent)
-}
-
-private inline fun elementContentWhenIdle(
-    layoutImpl: SceneTransitionLayoutImpl,
-    currentScene: SceneKey,
-    overlays: Set<OverlayKey>,
-    isInContent: (ContentKey) -> Boolean,
-): ContentKey {
+    val currentScene = currentState.currentScene
+    val overlays = currentState.currentOverlays
     if (overlays.isEmpty()) {
         return currentScene
     }
