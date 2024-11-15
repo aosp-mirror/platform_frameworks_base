@@ -195,7 +195,17 @@ soong_config_module_type {
     module_type: "java_library",
     config_namespace: "system_services",
     bool_variables: ["without_vibrator"],
-    properties: ["vintf_fragments"],
+    properties: ["vintf_fragment_modules"],
+}
+
+vintf_fragment {
+    name: "manifest_services.xml",
+    src: "manifest_services.xml",
+}
+
+vintf_fragment {
+    name: "manifest_services_android.frameworks.vibrator.xml",
+    src: "manifest_services_android.frameworks.vibrator.xml",
 }
 
 system_java_library {
@@ -265,11 +275,11 @@ system_java_library {
 
     soong_config_variables: {
         without_vibrator: {
-            vintf_fragments: [
+            vintf_fragment_modules: [
                 "manifest_services.xml",
             ],
             conditions_default: {
-                vintf_fragments: [
+                vintf_fragment_modules: [
                     "manifest_services.xml",
                     "manifest_services_android.frameworks.vibrator.xml",
                 ],
