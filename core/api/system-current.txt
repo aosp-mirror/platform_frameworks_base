@@ -5228,6 +5228,7 @@ package android.hardware.contexthub {
     method @Nullable public android.hardware.contexthub.IHubEndpointMessageCallback getMessageCallback();
     method @NonNull public java.util.Collection<android.hardware.contexthub.HubServiceInfo> getServiceInfoCollection();
     method @Nullable public String getTag();
+    method public int getVersion();
   }
 
   public static final class HubEndpoint.Builder {
@@ -5245,10 +5246,18 @@ package android.hardware.contexthub {
     method public int describeContents();
     method @NonNull public android.hardware.contexthub.HubEndpointInfo.HubEndpointIdentifier getIdentifier();
     method @NonNull public String getName();
+    method @NonNull public java.util.Collection<java.lang.String> getRequiredPermissions();
     method @NonNull public java.util.Collection<android.hardware.contexthub.HubServiceInfo> getServiceInfoCollection();
     method @Nullable public String getTag();
+    method public int getType();
+    method public int getVersion();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.contexthub.HubEndpointInfo> CREATOR;
+    field public static final int TYPE_APP = 2; // 0x2
+    field public static final int TYPE_FRAMEWORK = 1; // 0x1
+    field public static final int TYPE_HUB_ENDPOINT = 5; // 0x5
+    field public static final int TYPE_NANOAPP = 4; // 0x4
+    field public static final int TYPE_NATIVE = 3; // 0x3
   }
 
   public static class HubEndpointInfo.HubEndpointIdentifier {

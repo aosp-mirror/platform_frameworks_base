@@ -423,6 +423,10 @@ public class HubEndpoint {
         }
     }
 
+    public int getVersion() {
+        return mPendingHubEndpointInfo.getVersion();
+    }
+
     @Nullable
     public String getTag() {
         return mPendingHubEndpointInfo.getTag();
@@ -454,6 +458,7 @@ public class HubEndpoint {
         @Nullable private IHubEndpointMessageCallback mMessageCallback;
         @NonNull private Executor mMessageCallbackExecutor;
 
+        private int mVersion;
         @Nullable private String mTag;
 
         private List<HubServiceInfo> mServiceInfos = Collections.emptyList();
@@ -461,8 +466,20 @@ public class HubEndpoint {
         /** Create a builder for {@link HubEndpoint} */
         public Builder(@NonNull Context context) {
             mPackageName = context.getPackageName();
+            mVersion = (int) context.getApplicationInfo().longVersionCode;
             mLifecycleCallbackExecutor = context.getMainExecutor();
             mMessageCallbackExecutor = context.getMainExecutor();
+        }
+
+        /**
+         * Set the version for the endpoint. Default is 0.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setVersion(int version) {
+            mVersion = version;
+            return this;
         }
 
         /**
@@ -532,7 +549,7 @@ public class HubEndpoint {
         @NonNull
         public HubEndpoint build() {
             return new HubEndpoint(
-                    new HubEndpointInfo(mPackageName, mTag, mServiceInfos),
+                    new HubEndpointInfo(mPackageName, mVersion, mTag, mServiceInfos),
                     mLifecycleCallback,
                     mLifecycleCallbackExecutor,
                     mMessageCallback,
