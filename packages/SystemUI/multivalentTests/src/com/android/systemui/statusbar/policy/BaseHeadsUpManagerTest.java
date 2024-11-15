@@ -321,7 +321,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
                 BaseHeadsUpManager.HeadsUpEntry.class);
         headsUpEntry.mEntry = notifEntry;
 
-        hum.onEntryRemoved(headsUpEntry);
+        hum.onEntryRemoved(headsUpEntry, "test");
 
         verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(notifEntry));
     }
