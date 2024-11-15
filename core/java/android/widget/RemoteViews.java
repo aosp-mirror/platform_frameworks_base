@@ -8468,8 +8468,11 @@ public class RemoteViews implements Parcelable, Filter {
             }
             try {
                 LoadedApk.checkAndUpdateApkPaths(mApplication);
-                return context.createApplicationContext(mApplication,
+                Context applicationContext = context.createApplicationContext(mApplication,
                         Context.CONTEXT_RESTRICTED);
+                // Get the correct apk paths while maintaining the current context's configuration.
+                return applicationContext.createConfigurationContext(
+                        context.getResources().getConfiguration());
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package name " + mApplication.packageName + " not found");
             }
