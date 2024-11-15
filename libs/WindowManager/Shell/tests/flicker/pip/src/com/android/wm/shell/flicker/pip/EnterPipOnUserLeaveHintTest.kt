@@ -17,9 +17,11 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresFlagsDisabled
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.common.EnterPipTransition
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -43,6 +45,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 class EnterPipOnUserLeaveHintTest(flicker: LegacyFlickerTest) : EnterPipTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
 

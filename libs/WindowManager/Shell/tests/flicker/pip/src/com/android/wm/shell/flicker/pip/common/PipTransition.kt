@@ -20,6 +20,7 @@ import android.app.Instrumentation
 import android.content.Intent
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.tools.Rotation
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -31,9 +32,14 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.wm.shell.flicker.BaseTest
 import com.google.common.truth.Truth
+import org.junit.Rule
 import org.junit.Test
 
 abstract class PipTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
+    @JvmField
+    @Rule
+    val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
     protected val pipApp = PipAppHelper(instrumentation)
     protected val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
