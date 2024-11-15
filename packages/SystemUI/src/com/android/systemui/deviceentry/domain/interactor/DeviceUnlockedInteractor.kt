@@ -233,10 +233,12 @@ constructor(
                     .map { (isAsleep, lastSleepReason) ->
                         if (isAsleep) {
                             if (
-                                lastSleepReason == WakeSleepReason.POWER_BUTTON &&
+                                (lastSleepReason == WakeSleepReason.POWER_BUTTON) &&
                                     authenticationInteractor.getPowerButtonInstantlyLocks()
                             ) {
                                 LockImmediately("locked instantly from power button")
+                            } else if (lastSleepReason == WakeSleepReason.SLEEP_BUTTON) {
+                                LockImmediately("locked instantly from sleep button")
                             } else {
                                 LockWithDelay("entering sleep")
                             }
