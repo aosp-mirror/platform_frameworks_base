@@ -30,6 +30,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public class RavenwoodCommonUtils {
     private static final String TAG = "RavenwoodCommonUtils";
@@ -277,8 +278,35 @@ public class RavenwoodCommonUtils {
                 (isStatic ? "static" : "")));
     }
 
+    /**
+     * Run a supplier and swallow the exception, if any.
+     *
+     * It's a dangerous function. Only use it in an exception handler where we don't want to crash.
+     */
+    @Nullable
+    public static <T> T runIgnoringException(@NonNull Supplier<T> s) {
+        try {
+            return s.get();
+        } catch (Throwable th) {
+            log(TAG, "Warning: Exception detected! " + getStackTraceString(th));
+        }
+        return null;
+    }
+
+    /**
+     * Run a runnable and swallow the exception, if any.
+     *
+     * It's a dangerous function. Only use it in an exception handler where we don't want to crash.
+     */
+    public static void runIgnoringException(@NonNull Runnable r) {
+        runIgnoringException(() -> {
+            r.run();
+            return null;
+        });
+    }
+
     @NonNull
-    public static String getStackTraceString(@Nullable Throwable th) {
+    public static String getStackTraceString(@NonNull Throwable th) {
         StringWriter stringWriter = new StringWriter();
         PrintWriter writer = new PrintWriter(stringWriter);
         th.printStackTrace(writer);
