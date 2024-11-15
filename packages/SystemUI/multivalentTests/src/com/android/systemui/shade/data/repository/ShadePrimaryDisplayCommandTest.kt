@@ -21,7 +21,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.ShadePrimaryDisplayCommand
 import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -34,13 +36,16 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class ShadeDisplaysRepositoryTest : SysuiTestCase() {
+class ShadePrimaryDisplayCommandTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val commandRegistry = kosmos.commandRegistry
+    private val displayRepository = kosmos.displayRepository
+    private val shadeDisplaysRepository = ShadeDisplaysRepositoryImpl()
     private val pw = PrintWriter(StringWriter())
 
-    private val underTest = ShadeDisplaysRepositoryImpl(commandRegistry)
+    private val underTest =
+        ShadePrimaryDisplayCommand(commandRegistry, displayRepository, shadeDisplaysRepository)
 
     @Before
     fun setUp() {
@@ -50,7 +55,7 @@ class ShadeDisplaysRepositoryTest : SysuiTestCase() {
     @Test
     fun commandDisplayOverride_updatesDisplayId() =
         testScope.runTest {
-            val displayId by collectLastValue(underTest.displayId)
+            val displayId by collectLastValue(shadeDisplaysRepository.displayId)
             assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
 
             val newDisplayId = 2
@@ -65,7 +70,7 @@ class ShadeDisplaysRepositoryTest : SysuiTestCase() {
     @Test
     fun commandShadeDisplayOverride_resetsDisplayId() =
         testScope.runTest {
-            val displayId by collectLastValue(underTest.displayId)
+            val displayId by collectLastValue(shadeDisplaysRepository.displayId)
             assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
 
             val newDisplayId = 2
@@ -77,5 +82,18 @@ class ShadeDisplaysRepositoryTest : SysuiTestCase() {
 
             commandRegistry.onShellCommand(pw, arrayOf("shade_display_override", "reset"))
             assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+        }
+
+    @Test
+    fun commandShadeDisplayOverride_anyExternalDisplay_notOnDefaultAnymore() =
+        testScope.runTest {
+            val displayId by collectLastValue(shadeDisplaysRepository.displayId)
+            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+            val newDisplayId = 2
+            displayRepository.addDisplay(displayId = newDisplayId)
+
+            commandRegistry.onShellCommand(pw, arrayOf("shade_display_override", "any_external"))
+
+            assertThat(displayId).isEqualTo(newDisplayId)
         }
 }

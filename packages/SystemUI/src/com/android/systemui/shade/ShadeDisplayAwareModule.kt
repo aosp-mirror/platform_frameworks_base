@@ -164,10 +164,8 @@ object ShadeDisplayAwareModule {
 
     @Provides
     @IntoMap
-    @ClassKey(ShadeDisplaysRepositoryImpl::class)
-    fun provideShadePositionRepositoryAsCoreStartable(
-        impl: ShadeDisplaysRepositoryImpl
-    ): CoreStartable {
+    @ClassKey(ShadePrimaryDisplayCommand::class)
+    fun provideShadePrimaryDisplayCommand(impl: ShadePrimaryDisplayCommand): CoreStartable {
         return if (ShadeWindowGoesAround.isEnabled) {
             impl
         } else {
