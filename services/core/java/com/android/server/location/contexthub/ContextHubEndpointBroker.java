@@ -24,6 +24,7 @@ import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.location.IContextHubTransactionCallback;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -35,7 +36,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @hide
  */
-public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
+public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
+        implements IBinder.DeathRecipient {
     private static final String TAG = "ContextHubEndpointBroker";
 
     /** The context of the service. */
@@ -139,5 +141,17 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
     @Override
     public void sendMessageDeliveryStatus(int sessionId, int messageSeqNumber, byte errorCode) {
         // TODO(b/381102453): Implement this
+    }
+
+    /** Invoked when the underlying binder of this broker has died at the client process. */
+    @Override
+    public void binderDied() {
+        unregister();
+    }
+
+    /* package */ void attachDeathRecipient() throws RemoteException {
+        if (mContextHubEndpointCallback != null) {
+            mContextHubEndpointCallback.asBinder().linkToDeath(this, 0 /* flags */);
+        }
     }
 }

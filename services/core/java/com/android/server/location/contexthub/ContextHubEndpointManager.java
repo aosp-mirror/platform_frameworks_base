@@ -152,7 +152,14 @@ import java.util.concurrent.ConcurrentHashMap;
                         callback);
         mEndpointMap.put(endpointId, broker);
 
-        // TODO(b/378487799): Add death recipient
+        try {
+            broker.attachDeathRecipient();
+        } catch (RemoteException e) {
+            // The client process has died, so we close the connection and return null
+            Log.e(TAG, "Failed to attach death recipient to client", e);
+            broker.unregister();
+            return null;
+        }
 
         Log.d(TAG, "Registered endpoint with ID = " + endpointId);
         return IContextHubEndpoint.Stub.asInterface(broker);
