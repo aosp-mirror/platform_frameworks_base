@@ -126,7 +126,6 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.utils.RequestThrottle;
-import com.android.server.pm.verify.pkg.VerifierController;
 
 import libcore.io.IoUtils;
 
@@ -214,7 +213,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private final StagingManager mStagingManager;
 
     private AppOpsManager mAppOps;
-    private final VerifierController mVerifierController;
     private final InstallDependencyHelper mInstallDependencyHelper;
 
     private final HandlerThread mInstallThread;
@@ -328,7 +326,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mGentleUpdateHelper = new GentleUpdateHelper(
                 context, mInstallThread.getLooper(), new AppStateHelper(context));
         mPackageArchiver = new PackageArchiver(mContext, mPm);
-        mVerifierController = new VerifierController(mContext, mInstallHandler);
         mInstallDependencyHelper = new InstallDependencyHelper(mContext,
                 mPm.mInjector.getSharedLibrariesImpl());
 
@@ -528,7 +525,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             session = PackageInstallerSession.readFromXml(in, mInternalCallback,
                                     mContext, mPm, mInstallThread.getLooper(), mStagingManager,
                                     mSessionsDir, this, mSilentUpdatePolicy,
-                                    mVerifierController, mInstallDependencyHelper);
+                                    mInstallDependencyHelper);
                         } catch (Exception e) {
                             Slog.e(TAG, "Could not read session", e);
                             continue;
@@ -1045,7 +1042,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,
                 null, null, false, false, false, false, null, SessionInfo.INVALID_ID,
                 false, false, false, PackageManager.INSTALL_UNKNOWN, "", null,
-                mVerifierController,
                 mInstallDependencyHelper);
 
         synchronized (mSessions) {
@@ -1056,7 +1052,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mCallbacks.notifySessionCreated(session.sessionId, session.userId);
 
         mSettingsWriteRequest.schedule();
-
         if (LOGD) {
             Slog.d(TAG, "Created session id=" + sessionId + " staged=" + params.isStaged);
         }

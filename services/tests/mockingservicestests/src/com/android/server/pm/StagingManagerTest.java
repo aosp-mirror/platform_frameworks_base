@@ -741,7 +741,6 @@ public class StagingManagerTest {
                 /* stagedSessionErrorCode */ PackageManager.INSTALL_UNKNOWN,
                 /* stagedSessionErrorMessage */ "no error",
                 /* preVerifiedDomains */ null,
-                /* verifierController */ null,
                 /* installDependencyHelper */ null);
 
         StagingManager.StagedSession stagedSession = spy(session.mStagedSession);
