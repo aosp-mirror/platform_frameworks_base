@@ -1248,10 +1248,12 @@ class WifiRepositoryImplTest : SysuiTestCase() {
                 otherUserMockContext,
             )
             userRepository.setSelectedUserInfo(ANOTHER_USER)
+            verify(wifiPickerTracker).onStop()
 
             // THEN we use the different user's context to create WifiPickerTracker
             val newCaptor = argumentCaptor<Context>()
             verify(wifiPickerTrackerFactory).create(newCaptor.capture(), any(), any(), any())
+            verify(wifiPickerTracker).onStop()
             assertThat(newCaptor.firstValue).isEqualTo(otherUserMockContext)
         }
 
@@ -1288,6 +1290,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
             // THEN we do NOT re-create WifiPickerTracker because the multiuser flag is off
             verify(wifiPickerTrackerFactory, never()).create(any(), any(), any(), any())
+            verify(wifiPickerTracker, never()).onStop()
         }
 
     private fun getCallback(): WifiPickerTracker.WifiPickerTrackerCallback {

@@ -87,7 +87,11 @@ constructor(
 
     override val lifecycle =
         LifecycleRegistry(this).also {
-            mainExecutor.execute { it.currentState = Lifecycle.State.CREATED }
+            if (multiuserWifiPickerTrackerSupport()) {
+                mainExecutor.execute { it.currentState = Lifecycle.State.STARTED }
+            } else {
+                mainExecutor.execute { it.currentState = Lifecycle.State.CREATED }
+            }
         }
 
     private var wifiPickerTracker: WifiPickerTracker? = null
@@ -178,6 +182,10 @@ constructor(
                                         trySend(new)
                                     }
                                 }
+
+                            // If a WifiPicker already exists, call onStop to begin its shutdown
+                            // process in preparation for a new one to be created.
+                            wifiPickerTracker?.onStop()
                             wifiPickerTracker =
                                 wifiPickerTrackerFactory
                                     .create(currentContext, lifecycle, callback, "WifiRepository")
@@ -189,17 +197,7 @@ constructor(
                                         // costly and should be avoided whenever possible).
                                         this?.disableScanning()
                                     }
-
-                            // The lifecycle must be STARTED in order for the callback to receive
-                            // events.
-                            mainExecutor.execute {
-                                lifecycle.currentState = Lifecycle.State.STARTED
-                            }
-                            awaitClose {
-                                mainExecutor.execute {
-                                    lifecycle.currentState = Lifecycle.State.CREATED
-                                }
-                            }
+                            awaitClose { mainExecutor.execute { wifiPickerTracker?.onStop() } }
                         }
                         .stateIn(scope, SharingStarted.Eagerly, current)
                 }
@@ -275,7 +273,6 @@ constructor(
                                     trySend(new)
                                 }
                             }
-
                         wifiPickerTracker =
                             wifiPickerTrackerFactory
                                 .create(applicationContext, lifecycle, callback, "WifiRepository")
