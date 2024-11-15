@@ -29,17 +29,10 @@ import javax.inject.Inject
  */
 @WMSingleton
 class SingleSurfaceLetterboxController @Inject constructor(
-    private val letterboxConfiguration: LetterboxConfiguration
+    private val letterboxBuilder: LetterboxSurfaceBuilder
 ) : LetterboxController {
 
     companion object {
-        /*
-         * Letterbox surfaces need to stay below the activity layer which is 0.
-         */
-        // TODO(b/378673153): Consider adding this to [TaskConstants].
-        @JvmStatic
-        private val TASK_CHILD_LAYER_LETTERBOX_BACKGROUND = -1000
-
         @JvmStatic
         private val TAG = "LetterboxController"
     }
@@ -55,20 +48,12 @@ class SingleSurfaceLetterboxController @Inject constructor(
         parentLeash: SurfaceControl
     ) {
         letterboxMap.runOnItem(key, onMissed = { k, m ->
-            m[k] =
-                SurfaceControl.Builder()
-                    .setName("ShellLetterboxSurface-$key")
-                    .setHidden(true)
-                    .setColorLayer()
-                    .setParent(parentLeash)
-                    .setCallsite("LetterboxController-createLetterboxSurface")
-                    .build().apply {
-                        transaction.setLayer(
-                            this,
-                            TASK_CHILD_LAYER_LETTERBOX_BACKGROUND
-                        ).setColorSpaceAgnostic(this, true)
-                            .setColor(this, letterboxConfiguration.getBackgroundColorRgbArray())
-                    }
+            m[k] = letterboxBuilder.createSurface(
+                transaction,
+                parentLeash,
+                surfaceName = "ShellLetterboxSurface-$key",
+                callSite = "LetterboxController-createLetterboxSurface"
+            )
         })
     }
 
