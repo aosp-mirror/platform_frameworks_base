@@ -16,15 +16,19 @@
 
 package android.content.pm.verify.pkg;
 
+import android.content.pm.verify.pkg.VerificationStatus;
+import android.os.PersistableBundle;
+
 /**
- * Non-oneway interface that allows the verifier to retrieve information from the system.
+ * Oneway interface that allows the verifier to send response or verification results back to
+ * the system.
  * @hide
  */
-interface IVerificationSessionInterface {
+oneway interface IVerificationSessionCallback {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
-    long getTimeoutTime(int verificationId);
+    void reportVerificationIncomplete(int verificationId, int reason);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
-    long extendTimeRemaining(int verificationId, long additionalMs);
+    void reportVerificationComplete(int verificationId, in VerificationStatus status);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)")
-    boolean setVerificationPolicy(int verificationId, int policy);
+    void reportVerificationCompleteWithExtensionResponse(int verificationId, in VerificationStatus status, in PersistableBundle response);
 }

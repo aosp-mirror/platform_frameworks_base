@@ -79,6 +79,8 @@ public final class VerificationSession implements Parcelable {
     private final PersistableBundle mExtensionParams;
     @NonNull
     private final IVerificationSessionInterface mSession;
+    @NonNull
+    private final IVerificationSessionCallback mCallback;
     /**
      * The current policy that is active for the session. It might not be
      * the same as the original policy that was initially assigned for this verification session,
@@ -98,7 +100,8 @@ public final class VerificationSession implements Parcelable {
             @NonNull List<SharedLibraryInfo> declaredLibraries,
             @NonNull PersistableBundle extensionParams,
             @PackageInstaller.VerificationPolicy int defaultPolicy,
-            @NonNull IVerificationSessionInterface session) {
+            @NonNull IVerificationSessionInterface session,
+            @NonNull IVerificationSessionCallback callback) {
         mId = id;
         mInstallSessionId = installSessionId;
         mPackageName = packageName;
@@ -108,6 +111,7 @@ public final class VerificationSession implements Parcelable {
         mExtensionParams = extensionParams;
         mVerificationPolicy = defaultPolicy;
         mSession = session;
+        mCallback = callback;
     }
 
     /**
@@ -232,7 +236,7 @@ public final class VerificationSession implements Parcelable {
     @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public void reportVerificationIncomplete(@VerificationIncompleteReason int reason) {
         try {
-            mSession.reportVerificationIncomplete(mId, reason);
+            mCallback.reportVerificationIncomplete(mId, reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -246,7 +250,7 @@ public final class VerificationSession implements Parcelable {
     @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
     public void reportVerificationComplete(@NonNull VerificationStatus status) {
         try {
-            mSession.reportVerificationComplete(mId, status);
+            mCallback.reportVerificationComplete(mId, status);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -261,7 +265,7 @@ public final class VerificationSession implements Parcelable {
     public void reportVerificationComplete(@NonNull VerificationStatus status,
             @NonNull PersistableBundle response) {
         try {
-            mSession.reportVerificationCompleteWithExtensionResponse(mId, status, response);
+            mCallback.reportVerificationCompleteWithExtensionResponse(mId, status, response);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -277,6 +281,7 @@ public final class VerificationSession implements Parcelable {
         mExtensionParams = in.readPersistableBundle(getClass().getClassLoader());
         mVerificationPolicy = in.readInt();
         mSession = IVerificationSessionInterface.Stub.asInterface(in.readStrongBinder());
+        mCallback = IVerificationSessionCallback.Stub.asInterface(in.readStrongBinder());
     }
 
     @Override
@@ -295,6 +300,7 @@ public final class VerificationSession implements Parcelable {
         dest.writePersistableBundle(mExtensionParams);
         dest.writeInt(mVerificationPolicy);
         dest.writeStrongBinder(mSession.asBinder());
+        dest.writeStrongBinder(mCallback.asBinder());
     }
 
     @NonNull
