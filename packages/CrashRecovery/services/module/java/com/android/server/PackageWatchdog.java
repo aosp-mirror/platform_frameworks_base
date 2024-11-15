@@ -303,7 +303,11 @@ public class PackageWatchdog {
         sPackageWatchdog = this;
     }
 
-    /** Creates or gets singleton instance of PackageWatchdog. */
+    /**
+     * Creates or gets singleton instance of PackageWatchdog.
+     *
+     * @param context The system server context.
+     */
     public static  @NonNull PackageWatchdog getInstance(@NonNull Context context) {
         synchronized (sPackageWatchdogLock) {
             if (sPackageWatchdog == null) {
@@ -841,7 +845,10 @@ public class PackageWatchdog {
 
         /**
          * Returns {@code true} if this observer wishes to observe the given package, {@code false}
-         * otherwise
+         * otherwise.
+         * Any failing package can be passed on to the observer. Currently the packages that have
+         * ANRs and perform {@link android.service.watchdog.ExplicitHealthCheckService} are being
+         * passed to observers in these API.
          *
          * <p> A persistent observer may choose to start observing certain failing packages, even if
          * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
