@@ -313,6 +313,17 @@ internal class SwipeAnimation<T : ContentKey>(
 
     fun isAnimatingOffset(): Boolean = offsetAnimation != null
 
+    /** Get the [ContentKey] ([fromContent] or [toContent]) associated to the current [direction] */
+    fun contentByDirection(direction: Float): T {
+        require(direction != 0f) { "Cannot find a content in this direction: $direction" }
+        val isDirectionToContent = (isUpOrLeft && direction < 0) || (!isUpOrLeft && direction > 0)
+        return if (isDirectionToContent) {
+            toContent
+        } else {
+            fromContent
+        }
+    }
+
     /**
      * Animate the offset to a [targetContent], using the [initialVelocity] and an optional [spec]
      *
