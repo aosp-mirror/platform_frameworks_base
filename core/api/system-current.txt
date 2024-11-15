@@ -5220,6 +5220,7 @@ package android.hardware.contexthub {
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubDiscoveryInfo {
     method @NonNull public android.hardware.contexthub.HubEndpointInfo getHubEndpointInfo();
+    method @Nullable public android.hardware.contexthub.HubServiceInfo getHubServiceInfo();
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpoint {
@@ -6312,6 +6313,7 @@ package android.hardware.location {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> disableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> enableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
     method @FlaggedApi("android.chre.flags.offload_api") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public java.util.List<android.hardware.contexthub.HubDiscoveryInfo> findEndpoints(long);
+    method @FlaggedApi("android.chre.flags.offload_api") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public java.util.List<android.hardware.contexthub.HubDiscoveryInfo> findEndpoints(@NonNull String);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int[] findNanoAppOnHub(int, @NonNull android.hardware.location.NanoAppFilter);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int[] getContextHubHandles();
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubInfo getContextHubInfo(int);

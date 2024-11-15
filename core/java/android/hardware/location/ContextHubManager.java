@@ -694,12 +694,48 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull
     public List<HubDiscoveryInfo> findEndpoints(long endpointId) {
+        // TODO(b/379323274): Consider improving these getters to avoid racing with nano app load
+        //  timing.
         try {
             List<HubEndpointInfo> endpointInfos = mService.findEndpoints(endpointId);
             List<HubDiscoveryInfo> results = new ArrayList<>(endpointInfos.size());
             // Wrap with result type
             for (HubEndpointInfo endpointInfo : endpointInfos) {
                 results.add(new HubDiscoveryInfo(endpointInfo));
+            }
+            return results;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Find a list of endpoints that provides a specific service.
+     *
+     * @param serviceDescriptor Statically generated ID for an endpoint.
+     * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
+     * @throws IllegalArgumentException if the serviceDescriptor is empty/null.
+     */
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull
+    public List<HubDiscoveryInfo> findEndpoints(@NonNull String serviceDescriptor) {
+        // TODO(b/379323274): Consider improving these getters to avoid racing with nano app load
+        //  timing.
+        if (serviceDescriptor.isBlank()) {
+            throw new IllegalArgumentException("Invalid service descriptor: " + serviceDescriptor);
+        }
+        try {
+            List<HubEndpointInfo> endpointInfos =
+                    mService.findEndpointsWithService(serviceDescriptor);
+            List<HubDiscoveryInfo> results = new ArrayList<>(endpointInfos.size());
+            // Wrap with result type
+            for (HubEndpointInfo endpointInfo : endpointInfos) {
+                for (HubServiceInfo serviceInfo : endpointInfo.getServiceInfoCollection()) {
+                    if (serviceInfo.getServiceDescriptor().equals(serviceDescriptor)) {
+                        results.add(new HubDiscoveryInfo(endpointInfo, serviceInfo));
+                    }
+                }
             }
             return results;
         } catch (RemoteException e) {
