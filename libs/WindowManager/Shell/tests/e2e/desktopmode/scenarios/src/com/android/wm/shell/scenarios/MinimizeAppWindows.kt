@@ -61,7 +61,7 @@ constructor(private val rotation: Rotation = Rotation.ROTATION_0) {
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
         ChangeDisplayOrientationRule.setRotation(rotation)
-        testApp1.enterDesktopWithDrag(wmHelper, device)
+        testApp1.enterDesktopMode(wmHelper, device)
         testApp2.launchViaIntent(wmHelper)
         testApp3.launchViaIntent(wmHelper)
     }

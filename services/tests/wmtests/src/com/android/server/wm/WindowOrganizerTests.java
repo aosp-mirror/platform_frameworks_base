@@ -123,6 +123,8 @@ import java.util.function.BiConsumer;
  * Build/Install/Run:
  *  atest WmTests:WindowOrganizerTests
  */
+
+// TODO revert parts of this set to set the flag to test the behavior
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)

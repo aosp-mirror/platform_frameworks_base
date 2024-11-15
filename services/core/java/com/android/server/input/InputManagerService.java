@@ -193,7 +193,6 @@ public class InputManagerService extends IInputManager.Stub
     private DisplayManagerInternal mDisplayManagerInternal;
 
     private WindowManagerInternal mWindowManagerInternal;
-    private PackageManagerInternal mPackageManagerInternal;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -573,7 +572,6 @@ public class InputManagerService extends IInputManager.Stub
 
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
 
         mSettingsObserver.registerAndUpdate();
 
@@ -2937,10 +2935,11 @@ public class InputManagerService extends IInputManager.Stub
     private void enforceManageKeyGesturePermission() {
         // TODO(b/361567988): Use @EnforcePermission to enforce permission once flag guarding the
         //  permission is rolled out
-        if (mSystemReady) {
-            String systemUIPackage = mContext.getString(R.string.config_systemUi);
-            int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
-                    .getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
+        String systemUIPackage = mContext.getString(R.string.config_systemUi);
+        PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+        if (pm != null) {
+            int systemUIAppId = UserHandle.getAppId(
+                    pm.getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
                             UserHandle.USER_SYSTEM));
             if (UserHandle.getCallingAppId() == systemUIAppId) {
                 return;

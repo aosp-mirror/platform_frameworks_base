@@ -49,7 +49,7 @@ constructor(private val viewModelFactory: VolumeDialogRingerDrawerViewModel.Fact
             val drawerContainer = requireViewById<View>(R.id.volume_drawer_container)
             val selectedButtonView =
                 requireViewById<ImageButton>(R.id.volume_new_ringer_active_button)
-            val volumeDialogView = requireViewById<ViewGroup>(R.id.volume_dialog)
+            val volumeDialogBackgroundView = requireViewById<View>(R.id.volume_dialog_background)
             repeatWhenAttached {
                 viewModel(
                     traceName = "VolumeDialogRingerViewBinder",
@@ -71,19 +71,17 @@ constructor(private val viewModelFactory: VolumeDialogRingerDrawerViewModel.Fact
                                         is RingerDrawerState.Initial -> {
                                             drawerContainer.visibility = View.GONE
                                             selectedButtonView.visibility = View.VISIBLE
-                                            volumeDialogView.setBackgroundResource(
+                                            volumeDialogBackgroundView.setBackgroundResource(
                                                 R.drawable.volume_dialog_background
                                             )
                                         }
-
                                         is RingerDrawerState.Closed -> {
                                             drawerContainer.visibility = View.GONE
                                             selectedButtonView.visibility = View.VISIBLE
-                                            volumeDialogView.setBackgroundResource(
+                                            volumeDialogBackgroundView.setBackgroundResource(
                                                 R.drawable.volume_dialog_background
                                             )
                                         }
-
                                         is RingerDrawerState.Open -> {
                                             drawerContainer.visibility = View.VISIBLE
                                             selectedButtonView.visibility = View.GONE
@@ -91,17 +89,16 @@ constructor(private val viewModelFactory: VolumeDialogRingerDrawerViewModel.Fact
                                                 uiModel.currentButtonIndex !=
                                                     uiModel.availableButtons.size - 1
                                             ) {
-                                                volumeDialogView.setBackgroundResource(
+                                                volumeDialogBackgroundView.setBackgroundResource(
                                                     R.drawable.volume_dialog_background_small_radius
                                                 )
                                             }
                                         }
                                     }
                                 }
-
                                 is RingerViewModelState.Unavailable -> {
                                     drawerAndRingerContainer.visibility = View.GONE
-                                    volumeDialogView.setBackgroundResource(
+                                    volumeDialogBackgroundView.setBackgroundResource(
                                         R.drawable.volume_dialog_background
                                     )
                                 }

@@ -3606,6 +3606,13 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--force-verification":
                     sessionParams.setForceVerification();
                     break;
+                case "--disable-auto-install-dependencies":
+                    if (Flags.sdkDependencyInstaller()) {
+                        sessionParams.setEnableAutoInstallDependencies(false);
+                    } else {
+                        throw new IllegalArgumentException("Unknown option " + opt);
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -4894,6 +4901,10 @@ class PackageManagerShellCommand extends ShellCommand {
                 + "#compiler_filters");
         pw.println("          or 'skip'");
         pw.println("      --force-verification: if set, enable the verification for this install");
+        if (Flags.sdkDependencyInstaller()) {
+            pw.println("      --disable-auto-install-dependencies: if set, any missing shared");
+            pw.println("          library dependencies will not be auto-installed");
+        }
         pw.println("");
         pw.println("  install-existing [--user USER_ID|all|current]");
         pw.println("       [--instant] [--full] [--wait] [--restrict-permissions] PACKAGE");

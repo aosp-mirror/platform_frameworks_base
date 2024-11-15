@@ -532,56 +532,14 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
         projection.start(mIMediaProjectionCallback);
 
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
+                RECORD_SENSITIVE_CONTENT, projection.packageName);
         doReturn(true).when(mKeyguardManager).isKeyguardLocked();
         MediaProjectionManagerService.BinderService mediaProjectionBinderService =
                 mService.new BinderService(mContext);
         mediaProjectionBinderService.requestConsentForInvalidProjection(projection);
 
         verify(mContext, never()).startActivityAsUser(any(), any());
-    }
-
-    @EnableFlags(android.companion.virtualdevice.flags
-            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
-    @Test
-    public void testKeyguardLocked_stopsActiveProjection() throws Exception {
-        MediaProjectionManagerService service =
-                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
-        MediaProjectionManagerService.MediaProjection projection =
-                startProjectionPreconditions(service);
-        projection.start(mIMediaProjectionCallback);
-        projection.notifyVirtualDisplayCreated(10);
-
-        assertThat(service.getActiveProjectionInfo()).isNotNull();
-
-        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager)
-                .checkPermission(RECORD_SENSITIVE_CONTENT, projection.packageName);
-        service.onKeyguardLockedStateChanged(true);
-
-        verify(mMediaProjectionMetricsLogger).logStopped(UID, TARGET_UID_UNKNOWN);
-        assertThat(service.getActiveProjectionInfo()).isNull();
-        assertThat(mIMediaProjectionCallback.mLatch.await(5, TimeUnit.SECONDS)).isTrue();
-    }
-
-    @EnableFlags(android.companion.virtualdevice.flags
-            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
-    @Test
-    public void testKeyguardLocked_packageAllowlisted_doesNotStopActiveProjection()
-            throws NameNotFoundException {
-        MediaProjectionManagerService service =
-                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
-        MediaProjectionManagerService.MediaProjection projection =
-                startProjectionPreconditions(service);
-        projection.start(mIMediaProjectionCallback);
-        projection.notifyVirtualDisplayCreated(10);
-
-        assertThat(service.getActiveProjectionInfo()).isNotNull();
-
-        doReturn(PackageManager.PERMISSION_GRANTED).when(mPackageManager).checkPermission(
-                RECORD_SENSITIVE_CONTENT, projection.packageName);
-        service.onKeyguardLockedStateChanged(true);
-
-        verifyZeroInteractions(mMediaProjectionMetricsLogger);
-        assertThat(service.getActiveProjectionInfo()).isNotNull();
     }
 
     @Test

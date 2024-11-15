@@ -267,11 +267,12 @@ internal class MutableSceneTransitionLayoutStateImpl(
         private set
 
     /**
-     * The flattened list of [SharedElementTransformation] within all the transitions in
+     * The flattened list of [SharedElementTransformation.Factory] within all the transitions in
      * [transitionStates].
      */
-    private val transformationsWithElevation: List<SharedElementTransformation> by derivedStateOf {
-        transformationsWithElevation(transitionStates)
+    private val transformationFactoriesWithElevation:
+        List<SharedElementTransformation.Factory> by derivedStateOf {
+        transformationFactoriesWithElevation(transitionStates)
     }
 
     override val currentScene: SceneKey
@@ -355,6 +356,12 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean) {
         checkThread()
 
+        // Prepare the transition before starting it. This is outside of the try/finally block on
+        // purpose because preparing a transition might throw an exception (e.g. if we find multiple
+        // specs matching this transition), in which case we want to throw that exception here
+        // before even starting the transition.
+        prepareTransitionBeforeStarting(transition)
+
         try {
             // Start the transition.
             startTransitionInternal(transition, chain)
@@ -366,7 +373,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         }
     }
 
-    private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {
+    private fun prepareTransitionBeforeStarting(transition: TransitionState.Transition) {
         // Set the current scene and overlays on the transition.
         val currentState = transitionState
         transition.currentSceneWhenTransitionStarted = currentState.currentScene
@@ -394,7 +401,9 @@ internal class MutableSceneTransitionLayoutStateImpl(
         } else {
             transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
         }
+    }
 
+    private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {
         when (val currentState = transitionStates.last()) {
             is TransitionState.Idle -> {
                 // Replace [Idle] by [transition].
@@ -692,22 +701,23 @@ internal class MutableSceneTransitionLayoutStateImpl(
         animate()
     }
 
-    private fun transformationsWithElevation(
+    private fun transformationFactoriesWithElevation(
         transitionStates: List<TransitionState>
-    ): List<SharedElementTransformation> {
+    ): List<SharedElementTransformation.Factory> {
         return buildList {
             transitionStates.fastForEach { state ->
                 if (state !is TransitionState.Transition) {
                     return@fastForEach
                 }
 
-                state.transformationSpec.transformations.fastForEach { transformationWithRange ->
-                    val transformation = transformationWithRange.transformation
+                state.transformationSpec.transformationMatchers.fastForEach { transformationMatcher
+                    ->
+                    val factory = transformationMatcher.factory
                     if (
-                        transformation is SharedElementTransformation &&
-                            transformation.elevateInContent != null
+                        factory is SharedElementTransformation.Factory &&
+                            factory.elevateInContent != null
                     ) {
-                        add(transformation)
+                        add(factory)
                     }
                 }
             }
@@ -722,10 +732,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
      * necessary, for performance.
      */
     internal fun isElevationPossible(content: ContentKey, element: ElementKey?): Boolean {
-        if (transformationsWithElevation.isEmpty()) return false
-        return transformationsWithElevation.fastAny { transformation ->
-            transformation.elevateInContent == content &&
-                (element == null || transformation.matcher.matches(element, content))
+        if (transformationFactoriesWithElevation.isEmpty()) return false
+        return transformationFactoriesWithElevation.fastAny { factory ->
+            factory.elevateInContent == content &&
+                (element == null || factory.matcher.matches(element, content))
         }
     }
 }

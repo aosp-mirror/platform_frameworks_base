@@ -788,7 +788,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 deferResume = false;
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible();
-                mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
+                if (!mService.mRootWindowContainer.resumeFocusedTasksTopActivities()) {
+                    mService.mTaskSupervisor.updateTopResumedActivityIfNeeded("endWCT-effects");
+                }
             } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                 for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
                     haveConfigChanges.valueAt(i).forAllActivities(r -> {
@@ -886,7 +888,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         if (windowingMode > -1) {
             if (mService.isInLockTaskMode()
-                    && WindowConfiguration.inMultiWindowMode(windowingMode)) {
+                    && WindowConfiguration.inMultiWindowMode(windowingMode)
+                    && !container.isEmbedded()) {
                 Slog.w(TAG, "Dropping unsupported request to set multi-window windowing mode"
                         + " during locked task mode.");
                 return effects;

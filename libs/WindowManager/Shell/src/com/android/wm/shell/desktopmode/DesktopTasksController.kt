@@ -89,7 +89,6 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
-import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.DragStartState
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType
 import com.android.wm.shell.desktopmode.DesktopRepository.VisibleTasksListener
@@ -618,25 +617,18 @@ class DesktopTasksController(
     private fun moveBackgroundTaskToFront(taskId: Int, remoteTransition: RemoteTransition?) {
         logV("moveBackgroundTaskToFront taskId=%s", taskId)
         val wct = WindowContainerTransaction()
-        // TODO: b/342378842 - Instead of using default display, support multiple displays
-        val exitResult = desktopImmersiveController.exitImmersiveIfApplicable(
-            wct = wct,
-            displayId = DEFAULT_DISPLAY,
-            excludeTaskId = taskId,
-        )
         wct.startTask(
             taskId,
             ActivityOptions.makeBasic().apply {
                 launchWindowingMode = WINDOWING_MODE_FREEFORM
             }.toBundle(),
         )
-        val transition = startLaunchTransition(
+        startLaunchTransition(
             TRANSIT_OPEN,
             wct,
             taskId,
             remoteTransition = remoteTransition
         )
-        exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
     }
 
     /**
@@ -655,47 +647,53 @@ class DesktopTasksController(
         }
         val wct = WindowContainerTransaction()
         wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
-        val result = desktopImmersiveController.exitImmersiveIfApplicable(
-            wct = wct,
-            displayId = taskInfo.displayId,
-            excludeTaskId = taskInfo.taskId,
-        )
-        val exitResult = if (result is ExitResult.Exit) { result } else { null }
-        val transition = startLaunchTransition(
+        startLaunchTransition(
             transitionType = TRANSIT_TO_FRONT,
             wct = wct,
-            taskId = taskInfo.taskId,
-            exitingImmersiveTask = exitResult?.exitingTask,
+            launchingTaskId = taskInfo.taskId,
             remoteTransition = remoteTransition,
             displayId = taskInfo.displayId,
         )
-        exitResult?.runOnTransitionStart?.invoke(transition)
     }
 
     private fun startLaunchTransition(
         transitionType: Int,
         wct: WindowContainerTransaction,
-        taskId: Int,
-        exitingImmersiveTask: Int? = null,
+        launchingTaskId: Int?,
         remoteTransition: RemoteTransition? = null,
         displayId: Int = DEFAULT_DISPLAY,
     ): IBinder {
-        val taskIdToMinimize = addAndGetMinimizeChanges(displayId, wct, taskId)
+        val taskIdToMinimize = if (launchingTaskId != null) {
+            addAndGetMinimizeChanges(displayId, wct, newTaskId = launchingTaskId)
+        } else {
+            logW("Starting desktop task launch without checking the task-limit")
+            // TODO(b/378920066): This currently does not respect the desktop window limit.
+            //  It's possible that |launchingTaskId| is null when launching using an intent, and
+            //  the task-limit should be respected then too.
+            null
+        }
+        val exitImmersiveResult = desktopImmersiveController.exitImmersiveIfApplicable(
+            wct = wct,
+            displayId = displayId,
+            excludeTaskId = launchingTaskId,
+        )
         if (remoteTransition == null) {
             val t = desktopMixedTransitionHandler.startLaunchTransition(
                 transitionType = transitionType,
                 wct = wct,
-                taskId = taskId,
+                taskId = launchingTaskId,
                 minimizingTaskId = taskIdToMinimize,
-                exitingImmersiveTask = exitingImmersiveTask,
+                exitingImmersiveTask = exitImmersiveResult.asExit()?.exitingTask,
             )
             taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
+            exitImmersiveResult.asExit()?.runOnTransitionStart?.invoke(t)
             return t
         }
         if (taskIdToMinimize == null) {
             val remoteTransitionHandler = OneShotRemoteHandler(mainExecutor, remoteTransition)
             val t = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
             remoteTransitionHandler.setTransition(t)
+            exitImmersiveResult.asExit()?.runOnTransitionStart?.invoke(t)
             return t
         }
         val remoteTransitionHandler =
@@ -704,6 +702,7 @@ class DesktopTasksController(
         val t = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
         remoteTransitionHandler.setTransition(t)
         taskIdToMinimize.let { addPendingMinimizeTransition(t, it) }
+        exitImmersiveResult.asExit()?.runOnTransitionStart?.invoke(t)
         return t
     }
 
@@ -1472,10 +1471,14 @@ class DesktopTasksController(
                 )
             }
             WINDOWING_MODE_FREEFORM -> {
-                // TODO(b/336289597): This currently does not respect the desktop window limit.
                 val wct = WindowContainerTransaction()
                 wct.sendPendingIntent(launchIntent, fillIn, options.toBundle())
-                transitions.startTransition(TRANSIT_OPEN, wct, null)
+                startLaunchTransition(
+                    transitionType = TRANSIT_OPEN,
+                    wct = wct,
+                    launchingTaskId = null,
+                    displayId = callingTaskInfo.displayId
+                )
             }
         }
     }

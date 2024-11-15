@@ -30,7 +30,7 @@ import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.ShadeWindowLayoutParams
-import com.android.systemui.shade.data.repository.ShadePositionRepository
+import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
 import javax.inject.Inject
@@ -38,13 +38,13 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withContext
 
-/** Handles Shade window display change when [ShadePositionRepository.displayId] changes. */
+/** Handles Shade window display change when [ShadeDisplaysRepository.displayId] changes. */
 @SysUISingleton
 class ShadeDisplaysInteractor
 @Inject
 constructor(
     private val shadeRootView: WindowRootView,
-    private val shadePositionRepository: ShadePositionRepository,
+    private val shadePositionRepository: ShadeDisplaysRepository,
     @ShadeDisplayAware private val shadeContext: Context,
     private val displayWindowPropertiesRepository: DisplayWindowPropertiesRepository,
     @Background private val bgScope: CoroutineScope,

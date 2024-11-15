@@ -19,13 +19,10 @@
     android:id="@+id/volume_ringer_and_drawer_container"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:gravity="center"
-    android:paddingLeft="@dimen/volume_dialog_ringer_horizontal_padding"
-    android:paddingRight="@dimen/volume_dialog_ringer_horizontal_padding"
-    android:layoutDirection="ltr"
-    android:clipToPadding="false"
     android:clipChildren="false"
-    android:background="@drawable/volume_background_top">
+    android:clipToPadding="false"
+    android:gravity="center"
+    android:layoutDirection="ltr">
 
     <!-- Drawer view, invisible by default. -->
     <FrameLayout
@@ -37,10 +34,10 @@
         <!-- View that is animated to a tapped ringer selection, so it appears selected. -->
         <FrameLayout
             android:id="@+id/volume_drawer_selection_background"
-            android:alpha="0.0"
             android:layout_width="@dimen/volume_dialog_ringer_drawer_button_size"
             android:layout_height="@dimen/volume_dialog_ringer_drawer_button_size"
             android:layout_gravity="bottom|right"
+            android:alpha="0.0"
             android:background="@drawable/volume_drawer_selection_bg" />
 
         <LinearLayout
@@ -65,7 +62,6 @@
         android:background="@drawable/volume_drawer_selection_bg"
         android:contentDescription="@string/volume_ringer_change"
         android:gravity="center"
-        android:padding="@dimen/volume_dialog_ringer_horizontal_padding"
         android:src="@drawable/ic_volume_media"
         android:tint="?androidprv:attr/materialColorOnPrimary" />
 

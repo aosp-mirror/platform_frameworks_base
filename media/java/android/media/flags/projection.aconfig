@@ -18,3 +18,10 @@ flag {
     bug: "362720120"
     is_exported: true
 }
+
+flag {
+     namespace: "media_projection"
+     name: "stop_media_projection_on_call_end"
+     description: "Stops MediaProjection sessions when a call ends"
+     bug: "368336349"
+}

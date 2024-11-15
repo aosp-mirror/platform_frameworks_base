@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_OPEN
 import android.window.DesktopModeFlags
 import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
@@ -95,7 +96,7 @@ class DesktopMixedTransitionHandler(
     fun startLaunchTransition(
         @WindowManager.TransitionType transitionType: Int,
         wct: WindowContainerTransaction,
-        taskId: Int,
+        taskId: Int?,
         minimizingTaskId: Int? = null,
         exitingImmersiveTask: Int? = null,
     ): IBinder {
@@ -216,12 +217,12 @@ class DesktopMixedTransitionHandler(
     ): Boolean {
         // Check if there's also an immersive change during this launch.
         val immersiveExitChange = pending.exitingImmersiveTask?.let { exitingTask ->
-            findDesktopTaskChange(info, exitingTask)
+            findTaskChange(info, exitingTask)
         }
         val minimizeChange = pending.minimizingTask?.let { minimizingTask ->
-            findDesktopTaskChange(info, minimizingTask)
+            findTaskChange(info, minimizingTask)
         }
-        val launchChange = findDesktopTaskChange(info, pending.launchingTask)
+        val launchChange = findDesktopTaskLaunchChange(info, pending.launchingTask)
         if (launchChange == null) {
             check(minimizeChange == null)
             check(immersiveExitChange == null)
@@ -291,7 +292,7 @@ class DesktopMixedTransitionHandler(
     ): Boolean {
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue) return false
 
-        val minimizeChange = findDesktopTaskChange(info, pending.minimizingTask)
+        val minimizeChange = findTaskChange(info, pending.minimizingTask)
         if (minimizeChange == null) {
             logW("Should have minimizing desktop task")
             return false
@@ -417,8 +418,24 @@ class DesktopMixedTransitionHandler(
         }
     }
 
-    private fun findDesktopTaskChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? {
-        return info.changes.firstOrNull { change -> change.taskInfo?.taskId == taskId }
+    private fun findTaskChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? =
+        info.changes.firstOrNull { change -> change.taskInfo?.taskId == taskId }
+
+    private fun findDesktopTaskLaunchChange(
+        info: TransitionInfo,
+        launchTaskId: Int?
+    ): TransitionInfo.Change? {
+        return if (launchTaskId != null) {
+            // Launching a known task (probably from background or moving to front), so
+            // specifically look for it.
+            findTaskChange(info, launchTaskId)
+        } else {
+            // Launching a new task, so the first opening freeform task.
+            info.changes.firstOrNull { change ->
+                change.mode == TRANSIT_OPEN
+                        && change.taskInfo != null && change.taskInfo!!.isFreeform
+            }
+        }
     }
 
     private fun WindowContainerTransaction?.merge(
@@ -441,7 +458,7 @@ class DesktopMixedTransitionHandler(
         /** A task is opening or moving to front. */
         data class Launch(
             override val transition: IBinder,
-            val launchingTask: Int,
+            val launchingTask: Int?,
             val minimizingTask: Int?,
             val exitingImmersiveTask: Int?,
         ) : PendingMixedTransition()

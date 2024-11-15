@@ -50,6 +50,7 @@ import com.android.systemui.plugins.ToastPlugin;
 public class SystemUIToast implements ToastPlugin.Toast {
     static final String TAG = "SystemUIToast";
     final Context mContext;
+    final Context mDisplayContext;
     final CharSequence mText;
     final ToastPlugin.Toast mPluginToast;
 
@@ -68,17 +69,18 @@ public class SystemUIToast implements ToastPlugin.Toast {
     @Nullable private final Animator mInAnimator;
     @Nullable private final Animator mOutAnimator;
 
-    SystemUIToast(LayoutInflater layoutInflater, Context context, CharSequence text,
-            String packageName, int userId, int orientation) {
-        this(layoutInflater, context, text, null, packageName, userId,
+    SystemUIToast(LayoutInflater layoutInflater, Context applicationContext, Context displayContext,
+            CharSequence text, String packageName, int userId, int orientation) {
+        this(layoutInflater, applicationContext, displayContext, text, null, packageName, userId,
                 orientation);
     }
 
-    SystemUIToast(LayoutInflater layoutInflater, Context context, CharSequence text,
-            ToastPlugin.Toast pluginToast, String packageName, @UserIdInt int userId,
-            int orientation) {
+    SystemUIToast(LayoutInflater layoutInflater, Context applicationContext, Context displayContext,
+            CharSequence text, ToastPlugin.Toast pluginToast, String packageName,
+            @UserIdInt int userId, int orientation) {
         mLayoutInflater = layoutInflater;
-        mContext = context;
+        mContext = applicationContext;
+        mDisplayContext = displayContext;
         mText = text;
         mPluginToast = pluginToast;
         mPackageName = packageName;
@@ -221,9 +223,9 @@ public class SystemUIToast implements ToastPlugin.Toast {
             mPluginToast.onOrientationChange(orientation);
         }
 
-        mDefaultY = mContext.getResources().getDimensionPixelSize(R.dimen.toast_y_offset);
+        mDefaultY = mDisplayContext.getResources().getDimensionPixelSize(R.dimen.toast_y_offset);
         mDefaultGravity =
-                mContext.getResources().getInteger(R.integer.config_toastDefaultGravity);
+                mDisplayContext.getResources().getInteger(R.integer.config_toastDefaultGravity);
     }
 
     private Animator createInAnimator() {

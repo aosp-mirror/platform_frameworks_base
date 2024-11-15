@@ -23,11 +23,11 @@ import static android.nfc.cardemulation.CardEmulation.routeIntToString;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -233,8 +233,7 @@ public final class NfcOemExtension {
          *                  {@link Boolean#TRUE}, otherwise call with {@link Boolean#FALSE}.
          * false if NFC cannot be enabled at this time.
          */
-        @SuppressLint("MethodNameTense")
-        void onEnable(@NonNull Consumer<Boolean> isAllowed);
+        void onEnableRequested(@NonNull Consumer<Boolean> isAllowed);
         /**
          * Method to check if Nfc is allowed to be disabled by OEMs.
          * @param isAllowed The {@link Consumer} to be completed. If disabling NFC is allowed,
@@ -242,7 +241,7 @@ public final class NfcOemExtension {
          *                  {@link Boolean#TRUE}, otherwise call with {@link Boolean#FALSE}.
          * false if NFC cannot be disabled at this time.
          */
-        void onDisable(@NonNull Consumer<Boolean> isAllowed);
+        void onDisableRequested(@NonNull Consumer<Boolean> isAllowed);
 
         /**
          * Callback to indicate that Nfc starts to boot.
@@ -255,7 +254,7 @@ public final class NfcOemExtension {
         void onEnableStarted();
 
         /**
-         * Callback to indicate that Nfc starts to enable.
+         * Callback to indicate that Nfc starts to disable.
          */
         void onDisableStarted();
 
@@ -605,12 +604,12 @@ public final class NfcOemExtension {
     /**
      * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
      * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
-     * use {@link #resumePolling() to resume the polling.
-     * @param timeoutInMs the pause polling duration in millisecond
+     * use {@link #resumePolling()} to resume the polling.
+     * @param timeoutInMs the pause polling duration in millisecond, ranging from 0 to 40000.
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void pausePolling(int timeoutInMs) {
+    public void pausePolling(@DurationMillisLong int timeoutInMs) {
         NfcAdapter.callService(() -> NfcAdapter.sService.pausePolling(timeoutInMs));
     }
 
@@ -799,13 +798,13 @@ public final class NfcOemExtension {
         public void onEnable(ResultReceiver isAllowed) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper<>(isAllowed), cb::onEnable, ex));
+                        new ReceiverWrapper<>(isAllowed), cb::onEnableRequested, ex));
         }
         @Override
         public void onDisable(ResultReceiver isAllowed) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper<>(isAllowed), cb::onDisable, ex));
+                        new ReceiverWrapper<>(isAllowed), cb::onDisableRequested, ex));
         }
         @Override
         public void onBootStarted() throws RemoteException {

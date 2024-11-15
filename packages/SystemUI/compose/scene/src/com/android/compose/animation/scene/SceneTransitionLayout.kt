@@ -637,8 +637,8 @@ sealed class UserActionResult(
 
 fun interface UserActionDistance {
     /**
-     * Return the **absolute** distance of the user action given the size of the scene we are
-     * animating from and the [orientation].
+     * Return the **absolute** distance of the user action when going from [fromContent] to
+     * [toContent] in the given [orientation].
      *
      * Note: This function will be called for each drag event until it returns a value > 0f. This
      * for instance allows you to return 0f or a negative value until the first layout pass of a
@@ -646,7 +646,8 @@ fun interface UserActionDistance {
      * transitioning to when computing this absolute distance.
      */
     fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float
 }
@@ -656,7 +657,8 @@ interface UserActionDistanceScope : Density, ElementStateScope
 /** The user action has a fixed [absoluteDistance]. */
 class FixedDistance(private val distance: Dp) : UserActionDistance {
     override fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float = distance.toPx()
 }

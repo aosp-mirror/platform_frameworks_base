@@ -25,8 +25,8 @@ package android.security.forensic;
          UNKNOWN = 0,
          PERMISSION_DENIED = 1,
          INVALID_STATE_TRANSITION = 2,
-         BACKUP_TRANSPORT_UNAVAILABLE = 3,
-         DATA_SOURCE_UNAVAILABLE = 3,
+         TRANSPORT_UNAVAILABLE = 3,
+         DATA_SOURCE_UNAVAILABLE = 4,
      }
     void onSuccess();
     void onFailure(ErrorCode error);

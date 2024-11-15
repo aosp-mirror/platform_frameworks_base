@@ -676,15 +676,30 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
         return internMap.get(string);
     }
 
+    protected boolean validateGroups(ILogger logger, String[] groups) {
+        for (int i = 0; i < groups.length; i++) {
+            String group = groups[i];
+            IProtoLogGroup g = mLogGroups.get(group);
+            if (g == null) {
+                logger.log("No IProtoLogGroup named " + group);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private int setTextLogging(boolean value, ILogger logger, String... groups) {
+        if (!validateGroups(logger, groups)) {
+            return -1;
+        }
+
         for (int i = 0; i < groups.length; i++) {
             String group = groups[i];
             IProtoLogGroup g = mLogGroups.get(group);
             if (g != null) {
                 g.setLogToLogcat(value);
             } else {
-                logger.log("No IProtoLogGroup named " + group);
-                return -1;
+                throw new RuntimeException("No IProtoLogGroup named " + group);
             }
         }
 

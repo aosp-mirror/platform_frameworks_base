@@ -2380,10 +2380,14 @@ public class VpnTest extends VpnTestBase {
     @Test
     public void doTestMigrateIkeSession_Vcn() throws Exception {
         final int expectedKeepalive = 2097; // Any unlikely number will do
-        final NetworkCapabilities vcnNc = new NetworkCapabilities.Builder()
-                .addTransportType(TRANSPORT_CELLULAR)
-                .setTransportInfo(new VcnTransportInfo(TEST_SUB_ID, expectedKeepalive))
-                .build();
+        final NetworkCapabilities vcnNc =
+                new NetworkCapabilities.Builder()
+                        .addTransportType(TRANSPORT_CELLULAR)
+                        .setTransportInfo(
+                                new VcnTransportInfo.Builder()
+                                        .setMinUdpPort4500NatTimeoutSeconds(expectedKeepalive)
+                                        .build())
+                        .build();
         final Ikev2VpnProfile ikev2VpnProfile = makeIkeV2VpnProfile(
                 true /* isAutomaticIpVersionSelectionEnabled */,
                 true /* isAutomaticNattKeepaliveTimerEnabled */,

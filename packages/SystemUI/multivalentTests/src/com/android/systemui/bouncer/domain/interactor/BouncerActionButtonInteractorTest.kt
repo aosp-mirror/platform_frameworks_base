@@ -35,7 +35,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fake
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -78,7 +79,7 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
+        mobileConnectionsRepository = kosmos.mobileConnectionsRepository.fake
 
         overrideResource(R.string.lockscreen_emergency_call, MESSAGE_EMERGENCY_CALL)
         overrideResource(R.string.lockscreen_return_to_call, MESSAGE_RETURN_TO_CALL)

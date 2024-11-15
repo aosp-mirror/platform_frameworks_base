@@ -69,6 +69,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.mediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -178,6 +179,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             mediaHost,
             logcatLogBuffer("CommunalViewModelTest"),
             metricsLogger,
+            kosmos.mediaCarouselController,
         )
     }
 
@@ -627,10 +629,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Communal),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.DREAMING,
-                        to = KeyguardState.GLANCEABLE_HUB
-                    ),
+                    TransitionStep(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB),
             )
 
             // Then flow is not frozen
@@ -647,10 +646,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.GLANCEABLE_HUB,
-                        to = KeyguardState.OCCLUDED
-                    ),
+                    TransitionStep(from = KeyguardState.GLANCEABLE_HUB, to = KeyguardState.OCCLUDED),
             )
 
             // Then flow is not frozen
@@ -735,10 +731,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Communal),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.DREAMING,
-                        to = KeyguardState.GLANCEABLE_HUB
-                    ),
+                    TransitionStep(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB),
             )
 
             // Widgets available

@@ -20,8 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <dimen name="status_view_margin_horizontal">124dp</dimen>
-
     <dimen name="large_screen_shade_header_left_padding">24dp</dimen>
     <dimen name="qqs_layout_padding_bottom">40dp</dimen>
 

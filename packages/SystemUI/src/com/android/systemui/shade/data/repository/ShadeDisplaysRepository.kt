@@ -25,7 +25,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-interface ShadePositionRepository {
+interface ShadeDisplaysRepository {
     /** ID of the display which currently hosts the shade */
     val displayId: StateFlow<Int>
 
@@ -41,9 +41,9 @@ interface ShadePositionRepository {
 
 /** Source of truth for the display currently holding the shade. */
 @SysUISingleton
-class ShadePositionRepositoryImpl
+class ShadeDisplaysRepositoryImpl
 @Inject
-constructor(private val commandRegistry: CommandRegistry) : ShadePositionRepository, CoreStartable {
+constructor(private val commandRegistry: CommandRegistry) : ShadeDisplaysRepository, CoreStartable {
     private val _displayId = MutableStateFlow(Display.DEFAULT_DISPLAY)
 
     override val displayId: StateFlow<Int>

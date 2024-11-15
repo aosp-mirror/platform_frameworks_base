@@ -67,6 +67,7 @@ constructor(
                             dialogFactory = dialogFactory,
                             widgetSection = widgetSection,
                             modifier = Modifier.element(Communal.Elements.Grid),
+                            sceneScope = this@Content,
                         )
                     }
                     with(lockSection) {

@@ -257,6 +257,16 @@ public class CameraBinderTest extends AndroidTestCase {
         public void onRepeatingRequestError(long lastFrameNumber, int repeatingRequestId) {
             // TODO Auto-generated method stub
         }
+
+        /*
+         * (non-Javadoc)
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onClientSharedAccessPriorityChanged
+         */
+        @Override
+        public void onClientSharedAccessPriorityChanged(boolean primaryClient) {
+            // TODO Auto-generated method stub
+        }
+
     }
 
     @SmallTest
@@ -276,7 +286,7 @@ public class CameraBinderTest extends AndroidTestCase {
                         0 /*oomScoreOffset*/,
                         getContext().getApplicationInfo().targetSdkVersion,
                         ICameraService.ROTATION_OVERRIDE_NONE, clientAttribution,
-                        DEVICE_POLICY_DEFAULT);
+                        DEVICE_POLICY_DEFAULT, false/*sharedMode*/);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));
@@ -319,6 +329,13 @@ public class CameraBinderTest extends AndroidTestCase {
         public void onTorchStrengthLevelChanged(String cameraId, int torchStrength, int deviceId) {
             Log.v(TAG, String.format("Camera " + cameraId + " torch strength level changed to "
                     + torchStrength ));
+        }
+        @Override
+        public void onCameraOpenedInSharedMode(String cameraId, String clientPackageName,
+                int deviceId, boolean primaryClient) {
+            Log.v(TAG, "Camera " + cameraId +  " is opened in shared mode by "
+                    + "client package "  + clientPackageName + " as primary client="
+                    + primaryClient);
         }
     }
 
