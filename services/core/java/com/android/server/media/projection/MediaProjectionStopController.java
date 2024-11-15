@@ -27,6 +27,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyCallback;
@@ -46,6 +47,8 @@ public class MediaProjectionStopController {
 
     private static final String TAG = "MediaProjectionStopController";
     @VisibleForTesting
+    static final int STOP_REASON_UNKNOWN = 0;
+    @VisibleForTesting
     static final int STOP_REASON_KEYGUARD = 1;
     @VisibleForTesting
     static final int STOP_REASON_CALL_END = 2;
@@ -61,6 +64,7 @@ public class MediaProjectionStopController {
     private final ContentResolver mContentResolver;
 
     private boolean mIsInCall;
+    private long mLastCallStartTimeMillis;
 
     public MediaProjectionStopController(Context context, Consumer<Integer> stopReasonConsumer) {
         mStopReasonConsumer = stopReasonConsumer;
@@ -95,8 +99,8 @@ public class MediaProjectionStopController {
      * Checks whether the given projection grant is exempt from stopping restrictions.
      */
     public boolean isExemptFromStopping(
-            MediaProjectionManagerService.MediaProjection projectionGrant) {
-        return isExempt(projectionGrant, false);
+            MediaProjectionManagerService.MediaProjection projectionGrant, int stopReason) {
+        return isExempt(projectionGrant, stopReason, false);
     }
 
     /**
@@ -110,7 +114,8 @@ public class MediaProjectionStopController {
      * MediaProjection session
      */
     private boolean isExempt(
-            MediaProjectionManagerService.MediaProjection projectionGrant, boolean forStart) {
+            MediaProjectionManagerService.MediaProjection projectionGrant, int stopReason,
+            boolean forStart) {
         if (projectionGrant == null || projectionGrant.packageName == null) {
             return true;
         }
@@ -151,6 +156,14 @@ public class MediaProjectionStopController {
             return true;
         }
 
+        if (stopReason == STOP_REASON_CALL_END
+                && projectionGrant.getCreateTimeMillis() < mLastCallStartTimeMillis) {
+            Slog.v(TAG,
+                    "Continuing MediaProjection as (phone) call started after MediaProjection was"
+                            + " created.");
+            return true;
+        }
+
         return false;
     }
 
@@ -167,7 +180,7 @@ public class MediaProjectionStopController {
             return false;
         }
 
-        if (isExempt(projectionGrant, true)) {
+        if (isExempt(projectionGrant, STOP_REASON_UNKNOWN, true)) {
             return false;
         }
         return true;
@@ -188,9 +201,13 @@ public class MediaProjectionStopController {
             return;
         }
         boolean isInCall = mTelecomManager.isInCall();
+        if (isInCall) {
+            mLastCallStartTimeMillis = SystemClock.uptimeMillis();
+        }
         if (isInCall == mIsInCall) {
             return;
         }
+
         if (mIsInCall && !isInCall) {
             mStopReasonConsumer.accept(STOP_REASON_CALL_END);
         }
