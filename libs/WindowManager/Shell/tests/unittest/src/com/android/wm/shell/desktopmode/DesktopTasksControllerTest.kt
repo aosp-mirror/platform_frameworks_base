@@ -100,6 +100,7 @@ import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTasksController.TaskbarDesktopTaskListener
@@ -167,6 +168,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.eq
@@ -294,10 +296,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
     whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)).thenReturn(tda)
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(any(), any<RunningTaskInfo>()))
-      .thenReturn(DesktopImmersiveController.ExitResult.NoExit)
+      .thenReturn(ExitResult.NoExit)
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(any(), anyInt(), anyOrNull()))
-      .thenReturn(DesktopImmersiveController.ExitResult.NoExit)
+      .thenReturn(ExitResult.NoExit)
 
     controller = createController()
     controller.setSplitScreenController(splitScreenController)
@@ -1833,7 +1835,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
       .thenReturn(transition)
     whenever(mMockDesktopImmersiveController.exitImmersiveIfApplicable(any(), eq(task)))
-      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+      .thenReturn(
+        ExitResult.Exit(
         exitingTask = task.taskId,
         runOnTransitionStart = runOnTransit,
       ))
@@ -3214,11 +3217,41 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun newWindow_fromFreeformAddsNewWindow() {
     setUpLandscapeDisplay()
     val task = setUpFreeformTask()
-    val wctCaptor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+    val wctCaptor = argumentCaptor<WindowContainerTransaction>()
+    val transition = Binder()
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(any(), anyInt(), anyOrNull()))
+      .thenReturn(ExitResult.NoExit)
+    whenever(desktopMixedTransitionHandler
+      .startLaunchTransition(anyInt(), any(), anyOrNull(), anyOrNull(), anyOrNull()))
+      .thenReturn(transition)
+
     runOpenNewWindow(task)
-    verify(transitions).startTransition(anyInt(), wctCaptor.capture(), anyOrNull())
-    assertThat(ActivityOptions.fromBundle(wctCaptor.value.hierarchyOps[0].launchOptions)
+
+    verify(desktopMixedTransitionHandler)
+      .startLaunchTransition(anyInt(), wctCaptor.capture(), anyOrNull(), anyOrNull(), anyOrNull())
+    assertThat(ActivityOptions.fromBundle(wctCaptor.firstValue.hierarchyOps[0].launchOptions)
       .launchWindowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MULTI_INSTANCE_FEATURES)
+  fun newWindow_fromFreeform_exitsImmersiveIfNeeded() {
+    setUpLandscapeDisplay()
+    val immersiveTask = setUpFreeformTask()
+    val task = setUpFreeformTask()
+    val runOnStart = RunOnStartTransitionCallback()
+    val transition = Binder()
+    whenever(mMockDesktopImmersiveController
+      .exitImmersiveIfApplicable(any(), anyInt(), anyOrNull()))
+      .thenReturn(ExitResult.Exit(immersiveTask.taskId, runOnStart))
+    whenever(desktopMixedTransitionHandler
+      .startLaunchTransition(anyInt(), any(), anyOrNull(), anyOrNull(), anyOrNull()))
+      .thenReturn(transition)
+
+    runOpenNewWindow(task)
+
+    runOnStart.assertOnlyInvocation(transition)
   }
 
   private fun runOpenNewWindow(task: RunningTaskInfo) {
@@ -3314,7 +3347,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       .thenReturn(transition)
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(any(), eq(immersiveTask.displayId), eq(freeformTask.taskId)))
-      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+      .thenReturn(
+        ExitResult.Exit(
         exitingTask = immersiveTask.taskId,
         runOnTransitionStart = runOnStartTransit,
       ))
@@ -3719,7 +3753,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val transition = Binder()
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(wct, task.displayId, task.taskId))
-      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+      .thenReturn(
+        ExitResult.Exit(
         exitingTask = 5,
         runOnTransitionStart = runOnStartTransit,
       ))
@@ -3740,7 +3775,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val transition = Binder()
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(wct, task.displayId, task.taskId))
-      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+      .thenReturn(
+        ExitResult.Exit(
         exitingTask = 5,
         runOnTransitionStart = runOnStartTransit,
       ))
@@ -3760,7 +3796,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val transition = Binder()
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId)))
-      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+      .thenReturn(
+        ExitResult.Exit(
         exitingTask = 5,
         runOnTransitionStart = runOnStartTransit,
       ))
@@ -3782,7 +3819,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val transition = Binder()
     whenever(mMockDesktopImmersiveController
       .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId)))
-      .thenReturn(DesktopImmersiveController.ExitResult.Exit(
+      .thenReturn(
+        ExitResult.Exit(
         exitingTask = 5,
         runOnTransitionStart = runOnStartTransit,
       ))

@@ -1342,8 +1342,9 @@ static void nativeSetDisplaySize(JNIEnv* env, jclass clazz,
     }
 }
 
-static jobject convertDeviceProductInfoToJavaObject(
-        JNIEnv* env, const std::optional<DeviceProductInfo>& info) {
+static jobject convertDeviceProductInfoToJavaObject(JNIEnv* env,
+                                                    const std::optional<DeviceProductInfo>& info,
+                                                    bool isInternal) {
     using ModelYear = android::DeviceProductInfo::ModelYear;
     using ManufactureYear = android::DeviceProductInfo::ManufactureYear;
     using ManufactureWeekAndYear = android::DeviceProductInfo::ManufactureWeekAndYear;
@@ -1378,7 +1379,8 @@ static jobject convertDeviceProductInfoToJavaObject(
     // Section 8.7 - Physical Address of HDMI Specification Version 1.3a
     using android::hardware::display::IDeviceProductInfoConstants;
     if (info->relativeAddress.size() != 4) {
-        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_UNKNOWN;
+        connectionToSinkType = isInternal ? IDeviceProductInfoConstants::CONNECTION_TO_SINK_BUILT_IN
+                                          : IDeviceProductInfoConstants::CONNECTION_TO_SINK_UNKNOWN;
     } else if (info->relativeAddress[0] == 0) {
         connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_BUILT_IN;
     } else if (info->relativeAddress[1] == 0) {
@@ -1400,12 +1402,14 @@ static jobject nativeGetStaticDisplayInfo(JNIEnv* env, jclass clazz, jlong id) {
 
     jobject object =
             env->NewObject(gStaticDisplayInfoClassInfo.clazz, gStaticDisplayInfoClassInfo.ctor);
-    env->SetBooleanField(object, gStaticDisplayInfoClassInfo.isInternal,
-                         info.connectionType == ui::DisplayConnectionType::Internal);
+
+    const bool isInternal = info.connectionType == ui::DisplayConnectionType::Internal;
+    env->SetBooleanField(object, gStaticDisplayInfoClassInfo.isInternal, isInternal);
     env->SetFloatField(object, gStaticDisplayInfoClassInfo.density, info.density);
     env->SetBooleanField(object, gStaticDisplayInfoClassInfo.secure, info.secure);
     env->SetObjectField(object, gStaticDisplayInfoClassInfo.deviceProductInfo,
-                        convertDeviceProductInfoToJavaObject(env, info.deviceProductInfo));
+                        convertDeviceProductInfoToJavaObject(env, info.deviceProductInfo,
+                                                             isInternal));
     env->SetIntField(object, gStaticDisplayInfoClassInfo.installOrientation,
                      static_cast<uint32_t>(info.installOrientation));
     return object;

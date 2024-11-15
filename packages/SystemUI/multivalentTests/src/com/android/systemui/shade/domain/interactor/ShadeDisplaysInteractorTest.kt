@@ -28,7 +28,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.data.repository.FakeDisplayWindowPropertiesRepository
 import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.scene.ui.view.WindowRootView
-import com.android.systemui.shade.data.repository.FakeShadePositionRepository
+import com.android.systemui.shade.data.repository.FakeShadeDisplayRepository
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -50,7 +50,7 @@ import org.mockito.kotlin.whenever
 class ShadeDisplaysInteractorTest : SysuiTestCase() {
 
     private val shadeRootview = mock<WindowRootView>()
-    private val positionRepository = FakeShadePositionRepository()
+    private val positionRepository = FakeShadeDisplayRepository()
     private val defaultContext = mock<Context>()
     private val secondaryContext = mock<Context>()
     private val contextStore = FakeDisplayWindowPropertiesRepository()

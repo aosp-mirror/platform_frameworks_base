@@ -10285,28 +10285,36 @@
     </declare-styleable>
 
     <!-- @hide -->
+    <attr name="modifierState">
+        <flag name="META" value="0x10000" />
+        <flag name="CTRL" value="0x1000" />
+        <flag name="ALT" value="0x02" />
+        <flag name="SHIFT" value="0x1" />
+        <flag name="SYM" value="0x4" />
+        <flag name="FUNCTION" value="0x8" />
+        <flag name="CAPS_LOCK" value="0x100000" />
+        <flag name="NUM_LOCK" value="0x200000" />
+        <flag name="SCROLL_LOCK" value="0x400000" />
+    </attr>
+
+    <!-- @hide -->
     <declare-styleable name="HardwareDefinedShortcut">
         <attr name="keycode" />
         <!-- The values are taken from public constants for modifier state defined in
              {@see KeyEvent.java}. Here we allow multiple modifier flags as value, since this
              represents the modifier state -->
-        <attr name="modifierState">
-            <flag name="META" value="0x10000" />
-            <flag name="CTRL" value="0x1000" />
-            <flag name="ALT" value="0x02" />
-            <flag name="SHIFT" value="0x1" />
-            <flag name="SYM" value="0x4" />
-            <flag name="FUNCTION" value="0x8" />
-            <flag name="CAPS_LOCK" value="0x100000" />
-            <flag name="NUM_LOCK" value="0x200000" />
-            <flag name="SCROLL_LOCK" value="0x400000" />
-        </attr>
+        <attr name="modifierState" />
         <attr name="outKeycode" />
     </declare-styleable>
 
     <!-- @hide -->
     <declare-styleable name="FunctionRowKey">
         <attr name="keycode" />
+    </declare-styleable>
+
+    <declare-styleable name="Bookmark">
+        <attr name="keycode" />
+        <attr name="modifierState" />
     </declare-styleable>
 
     <declare-styleable name="MediaRouteButton">

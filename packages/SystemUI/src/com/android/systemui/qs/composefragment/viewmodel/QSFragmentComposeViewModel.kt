@@ -62,6 +62,7 @@ import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.domain.interactor.DisableFlagsInteractor
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.kotlin.emitOnStart
@@ -93,7 +94,7 @@ constructor(
     private val footerActionsController: FooterActionsController,
     private val sysuiStatusBarStateController: SysuiStatusBarStateController,
     deviceEntryInteractor: DeviceEntryInteractor,
-    disableFlagsRepository: DisableFlagsRepository,
+    DisableFlagsInteractor: DisableFlagsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val largeScreenShadeInterpolator: LargeScreenShadeInterpolator,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
@@ -182,8 +183,8 @@ constructor(
     val isQsEnabled by
         hydrator.hydratedStateOf(
             traceName = "isQsEnabled",
-            initialValue = disableFlagsRepository.disableFlags.value.isQuickSettingsEnabled(),
-            source = disableFlagsRepository.disableFlags.map { it.isQuickSettingsEnabled() },
+            initialValue = DisableFlagsInteractor.disableFlags.value.isQuickSettingsEnabled(),
+            source = DisableFlagsInteractor.disableFlags.map { it.isQuickSettingsEnabled() },
         )
 
     var isInSplitShade by mutableStateOf(false)

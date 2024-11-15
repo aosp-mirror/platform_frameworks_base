@@ -43,6 +43,7 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.wm.shell.TestSyncExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
@@ -472,27 +473,6 @@ public class UnfoldTransitionHandlerTest {
 
         @Override
         public void release(SurfaceControl.Transaction t) {
-        }
-    }
-
-    private static class TestSyncExecutor implements ShellExecutor {
-        @Override
-        public void execute(Runnable runnable) {
-            runnable.run();
-        }
-
-        @Override
-        public void executeDelayed(Runnable runnable, long delayMillis) {
-            runnable.run();
-        }
-
-        @Override
-        public void removeCallbacks(Runnable runnable) {
-        }
-
-        @Override
-        public boolean hasCallback(Runnable runnable) {
-            return false;
         }
     }
 

@@ -96,6 +96,14 @@ public class DisplayController {
     }
 
     /**
+     * Get all the displays from DisplayManager.
+     */
+    public Display[] getDisplays() {
+        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        return displayManager.getDisplays();
+    }
+
+    /**
      * Gets the DisplayLayout associated with a display.
      */
     public @Nullable DisplayLayout getDisplayLayout(int displayId) {

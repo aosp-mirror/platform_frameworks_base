@@ -56,7 +56,6 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
 import static android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API;
-import static android.view.inputmethod.Flags.FLAG_VERIFY_KEY_EVENT;
 import static android.view.inputmethod.Flags.ctrlShiftShortcut;
 import static android.view.inputmethod.Flags.predictiveBackIme;
 
@@ -3733,23 +3732,6 @@ public class InputMethodService extends AbstractInputMethodService {
         }
 
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
-    }
-
-    /**
-     * Received by the IME before dispatch to {@link #onKeyDown(int, KeyEvent)} to let the system
-     * know if the {@link KeyEvent} needs to be verified that it originated from the system.
-     * {@link KeyEvent}s may originate from outside of the system and any sensitive keys should be
-     * marked for verification. One example of this could be using key shortcuts for switching to
-     * another IME.
-     *
-     * @param keyEvent the event that may need verification.
-     * @return {@code true} if {@link KeyEvent} should have its HMAC verified before dispatch,
-     * {@code false} otherwise.
-     */
-    @FlaggedApi(FLAG_VERIFY_KEY_EVENT)
-    @Override
-    public boolean onShouldVerifyKeyEvent(@NonNull KeyEvent keyEvent) {
-        return false;
     }
 
     /**

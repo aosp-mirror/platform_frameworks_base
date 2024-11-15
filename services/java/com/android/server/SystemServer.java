@@ -251,6 +251,7 @@ import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.adaptiveauthentication.AdaptiveAuthenticationService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
+import com.android.server.security.forensic.ForensicService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
@@ -1760,6 +1761,13 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
 
+            if (!isWatch && !isTv && !isAutomotive
+                    && android.security.Flags.aflApi()) {
+                t.traceBegin("StartForensicService");
+                mSystemServiceManager.startService(ForensicService.class);
+                t.traceEnd();
+            }
+
             if (AppFunctionManagerConfiguration.isSupported(context)) {
                 t.traceBegin("StartAppFunctionManager");
                 mSystemServiceManager.startService(AppFunctionManagerService.class);
@@ -2761,8 +2769,9 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(WEAR_MODE_SERVICE_CLASS);
             t.traceEnd();
 
-            boolean enableWristOrientationService = SystemProperties.getBoolean(
-                    "config.enable_wristorientation", false);
+            boolean enableWristOrientationService =
+                    !android.server.Flags.migrateWristOrientation()
+                    && SystemProperties.getBoolean("config.enable_wristorientation", false);
             if (enableWristOrientationService) {
                 t.traceBegin("StartWristOrientationService");
                 mSystemServiceManager.startService(WRIST_ORIENTATION_SERVICE_CLASS);

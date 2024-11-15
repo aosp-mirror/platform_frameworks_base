@@ -88,15 +88,19 @@ public final class RavenwoodEnvironment {
     /** @hide */
     public static class CompatIdsForTest {
         // Enabled by default
+        /** Used for testing */
         @ChangeId
         public static final long TEST_COMPAT_ID_1 = 368131859L;
 
+        /** Used for testing */
         @Disabled
         @ChangeId public static final long TEST_COMPAT_ID_2 = 368131701L;
 
+        /** Used for testing */
         @EnabledAfter(targetSdkVersion = S)
         @ChangeId public static final long TEST_COMPAT_ID_3 = 368131659L;
 
+        /** Used for testing */
         @EnabledAfter(targetSdkVersion = UPSIDE_DOWN_CAKE)
         @ChangeId public static final long TEST_COMPAT_ID_4 = 368132057L;
     }

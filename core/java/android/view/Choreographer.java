@@ -930,8 +930,8 @@ public final class Choreographer {
             // of the next vsync event.
             int totalFrameDelays = mBufferStuffingData.numberFrameDelays
                     + mBufferStuffingData.numberWaitsForNextVsync + 1;
-            long vsyncsSinceLastCallback =
-                    (frameTimeNanos - mLastNoOffsetFrameTimeNanos) / mLastFrameIntervalNanos;
+            long vsyncsSinceLastCallback = mLastFrameIntervalNanos > 0
+                    ? (frameTimeNanos - mLastNoOffsetFrameTimeNanos) / mLastFrameIntervalNanos : 0;
 
             // Detected idle state due to a longer inactive period since the last vsync callback
             // than the total expected number of vsync frame delays. End buffer stuffing recovery.

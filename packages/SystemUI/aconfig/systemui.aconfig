@@ -1748,6 +1748,13 @@ flag {
 }
 
 flag {
+    name: "notification_shade_blur"
+    namespace: "systemui"
+    description: "Enables the new blur effect on the Notification Shade."
+    bug: "370555223"
+}
+
+flag {
   name: "ensure_enr_views_visibility"
   namespace: "systemui"
   description: "Ensures public and private visibilities"

@@ -193,6 +193,42 @@ public abstract class PackageManager {
             "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
 
     /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
+     * specifying whether the app should be put into the "restricted" backup mode when it's started
+     * for backup and restore operations.
+     *
+     * <p> See <a
+     * href="https://developer.android.com/identity/data/autobackup#ImplementingBackupAgent"> for
+     * information about restricted mode</a>.
+     *
+     * <p> Starting with Android 16 apps may not be started in restricted mode based on this
+     * property.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     *
+     * <p>If this property is set, the operating system will respect it for now (see Note below).
+     * If it's not set, the behavior depends on the SDK level that the app is targeting. For apps
+     * targeting SDK level {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or lower, the
+     * property defaults to {@code true}. For apps targeting SDK level
+     * {@link android.os.Build.VERSION_CODES#BAKLAVA} or higher, the operating system will make a
+     * decision dynamically.
+     *
+     * <p>Note: It's not recommended to set this property to {@code true} unless absolutely
+     * necessary. In a future Android version, this property may be deprecated in favor of removing
+     * restricted mode completely.
+     */
+    @FlaggedApi(com.android.server.backup.Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public static final String PROPERTY_USE_RESTRICTED_BACKUP_MODE =
+            "android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE";
+
+    /**
      * Application level property that an app can specify to opt-out from having private data
      * directories both on the internal and external storages.
      *
@@ -292,6 +328,10 @@ public abstract class PackageManager {
      * <p>
      * The value of a property will only have a single type, as defined by
      * the property itself.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * In android version {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and earlier,
+     * the {@code equals} and {@code hashCode} methods for this class may not function as expected.
      */
     public static final class Property implements Parcelable {
         private static final int TYPE_BOOLEAN = 1;
@@ -523,6 +563,40 @@ public abstract class PackageManager {
                 return new Property[size];
             }
         };
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Property)) {
+                return false;
+            }
+            final Property property = (Property) obj;
+            return mType == property.mType &&
+                    Objects.equals(mName, property.mName) &&
+                    Objects.equals(mClassName, property.mClassName) &&
+                    Objects.equals(mPackageName, property.mPackageName) &&
+                    (mType == TYPE_BOOLEAN ? mBooleanValue == property.mBooleanValue :
+                     mType == TYPE_FLOAT ? Float.compare(mFloatValue, property.mFloatValue) == 0 :
+                     mType == TYPE_INTEGER ? mIntegerValue == property.mIntegerValue :
+                     mType == TYPE_RESOURCE ? mIntegerValue == property.mIntegerValue :
+                     mStringValue.equals(property.mStringValue));
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(mName, mType, mClassName, mPackageName);
+            if (mType == TYPE_BOOLEAN) {
+                result = 31 * result + (mBooleanValue ? 1 : 0);
+            } else if (mType == TYPE_FLOAT) {
+                result = 31 * result + Float.floatToIntBits(mFloatValue);
+            } else if (mType == TYPE_INTEGER) {
+                result = 31 * result + mIntegerValue;
+            } else if (mType == TYPE_RESOURCE) {
+                result = 31 * result + mIntegerValue;
+            } else if (mType == TYPE_STRING) {
+                result = 31 * result + mStringValue.hashCode();
+            }
+            return result;
+        }
     }
 
     /**

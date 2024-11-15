@@ -2121,6 +2121,38 @@ public abstract class CameraMetadata<TKey> {
     public static final int AUTOMOTIVE_LOCATION_EXTRA_RIGHT = 10;
 
     //
+    // Enumeration values for CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+    //
+
+    /**
+     * @see CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SHARED_SESSION_COLOR_SPACE_UNSPECIFIED = -1;
+
+    /**
+     * @see CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SHARED_SESSION_COLOR_SPACE_SRGB = 0;
+
+    /**
+     * @see CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SHARED_SESSION_COLOR_SPACE_DISPLAY_P3 = 7;
+
+    /**
+     * @see CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SHARED_SESSION_COLOR_SPACE_BT2020_HLG = 16;
+
+    //
     // Enumeration values for CaptureRequest#COLOR_CORRECTION_MODE
     //
 

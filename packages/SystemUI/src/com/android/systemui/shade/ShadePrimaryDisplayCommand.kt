@@ -17,11 +17,11 @@
 package com.android.systemui.shade
 
 import android.view.Display
-import com.android.systemui.shade.data.repository.ShadePositionRepository
+import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.statusbar.commandline.Command
 import java.io.PrintWriter
 
-class ShadePrimaryDisplayCommand(private val positionRepository: ShadePositionRepository) :
+class ShadePrimaryDisplayCommand(private val positionRepository: ShadeDisplaysRepository) :
     Command {
 
     override fun execute(pw: PrintWriter, args: List<String>) {

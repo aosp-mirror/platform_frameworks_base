@@ -19,7 +19,6 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.roundToInt
 
@@ -27,11 +26,10 @@ import kotlin.math.roundToInt
  * Scales the size of an element. Note that this makes the element resize every frame and will
  * therefore impact the layout of other elements.
  */
-internal class ScaleSize(
-    override val matcher: ElementMatcher,
-    private val width: Float = 1f,
-    private val height: Float = 1f,
-) : InterpolatedSizeTransformation {
+internal class ScaleSize private constructor(private val width: Float, private val height: Float) :
+    InterpolatedPropertyTransformation<IntSize> {
+    override val property = PropertyTransformation.Property.Size
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
@@ -42,5 +40,10 @@ internal class ScaleSize(
             width = (idleValue.width * width).roundToInt(),
             height = (idleValue.height * height).roundToInt(),
         )
+    }
+
+    class Factory(private val width: Float = 1f, private val height: Float = 1f) :
+        Transformation.Factory {
+        override fun create(): Transformation = ScaleSize(width, height)
     }
 }

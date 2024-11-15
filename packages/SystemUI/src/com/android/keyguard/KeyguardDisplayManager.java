@@ -44,7 +44,7 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.settings.DisplayTracker;
-import com.android.systemui.shade.data.repository.ShadePositionRepository;
+import com.android.systemui.shade.data.repository.ShadeDisplaysRepository;
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -66,7 +66,7 @@ public class KeyguardDisplayManager {
     private final DisplayManager mDisplayService;
     private final DisplayTracker mDisplayTracker;
     private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
-    private final Provider<ShadePositionRepository> mShadePositionRepositoryProvider;
+    private final Provider<ShadeDisplaysRepository> mShadePositionRepositoryProvider;
     private final ConnectedDisplayKeyguardPresentation.Factory
             mConnectedDisplayKeyguardPresentationFactory;
     private final Context mContext;
@@ -112,7 +112,7 @@ public class KeyguardDisplayManager {
             KeyguardStateController keyguardStateController,
             ConnectedDisplayKeyguardPresentation.Factory
                     connectedDisplayKeyguardPresentationFactory,
-            Provider<ShadePositionRepository> shadePositionRepositoryProvider,
+            Provider<ShadeDisplaysRepository> shadePositionRepositoryProvider,
             @Application CoroutineScope appScope) {
         mContext = context;
         mNavigationBarControllerLazy = navigationBarControllerLazy;

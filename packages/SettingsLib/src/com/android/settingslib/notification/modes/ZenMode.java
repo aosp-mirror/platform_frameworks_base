@@ -208,6 +208,11 @@ public class ZenMode implements Parcelable {
     }
 
     @NonNull
+    public Kind getKind() {
+        return mKind;
+    }
+
+    @NonNull
     public Status getStatus() {
         return mStatus;
     }

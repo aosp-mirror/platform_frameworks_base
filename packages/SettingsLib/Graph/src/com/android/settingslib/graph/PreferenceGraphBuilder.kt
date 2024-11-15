@@ -133,7 +133,7 @@ private constructor(private val context: Context, private val request: GetPrefer
             null
         }
 
-    private suspend fun addPreferenceScreenFromRegistry(key: String): Boolean {
+    suspend fun addPreferenceScreenFromRegistry(key: String): Boolean {
         val metadata = PreferenceScreenRegistry[key] ?: return false
         return addPreferenceScreenMetadata(metadata)
     }
@@ -146,7 +146,7 @@ private constructor(private val context: Context, private val request: GetPrefer
             }
         }
 
-    private suspend fun addPreferenceScreenProvider(activityClass: Class<*>) {
+    suspend fun addPreferenceScreenProvider(activityClass: Class<*>) {
         Log.d(TAG, "add $activityClass")
         createPreferenceScreen { activityClass.newInstance() }
             ?.let {

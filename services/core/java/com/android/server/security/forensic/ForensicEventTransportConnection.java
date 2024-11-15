@@ -16,15 +16,19 @@
 
 package com.android.server.security.forensic;
 
+import static android.Manifest.permission.BIND_FORENSIC_EVENT_TRANSPORT_SERVICE;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.security.forensic.ForensicEvent;
-import android.security.forensic.IBackupTransport;
+import android.security.forensic.IForensicEventTransport;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -36,20 +40,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class BackupTransportConnection implements ServiceConnection {
-    private static final String TAG = "BackupTransportConnection";
+public class ForensicEventTransportConnection implements ServiceConnection {
+    private static final String TAG = "ForensicEventTransportConnection";
     private static final long FUTURE_TIMEOUT_MILLIS = 60 * 1000; // 1 mins
     private final Context mContext;
-    private String mForensicBackupTransportConfig;
-    volatile IBackupTransport mService;
+    private String mForensicEventTransportConfig;
+    volatile IForensicEventTransport mService;
 
-    public BackupTransportConnection(Context context) {
+    public ForensicEventTransportConnection(Context context) {
         mContext = context;
         mService = null;
     }
 
     /**
-     * Initialize the BackupTransport binder service.
+     * Initialize the ForensicEventTransport binder service.
      * @return Whether the initialization succeed.
      */
     public boolean initialize() {
@@ -74,7 +78,7 @@ public class BackupTransportConnection implements ServiceConnection {
     }
 
     /**
-     * Add data to the BackupTransport binder service.
+     * Add data to the ForensicEventTransport binder service.
      * @param data List of ForensicEvent.
      * @return Whether the data is added to the binder service.
      */
@@ -109,21 +113,37 @@ public class BackupTransportConnection implements ServiceConnection {
             return future.get(FUTURE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException
                  | CancellationException e) {
-            Slog.w(TAG, "Failed to get result from transport:", e);
+            Slog.e(TAG, "Failed to get result from transport:", e);
             return null;
         }
     }
 
     private boolean bindService() {
-        mForensicBackupTransportConfig = mContext.getString(
-                com.android.internal.R.string.config_forensicBackupTransport);
-        if (TextUtils.isEmpty(mForensicBackupTransportConfig)) {
+        mForensicEventTransportConfig = mContext.getString(
+                com.android.internal.R.string.config_forensicEventTransport);
+        if (TextUtils.isEmpty(mForensicEventTransportConfig)) {
+            Slog.e(TAG, "config_forensicEventTransport is empty");
             return false;
         }
 
         ComponentName serviceComponent =
-                ComponentName.unflattenFromString(mForensicBackupTransportConfig);
+                ComponentName.unflattenFromString(mForensicEventTransportConfig);
         if (serviceComponent == null) {
+            Slog.e(TAG, "Can't get serviceComponent name");
+            return false;
+        }
+
+        try {
+            ServiceInfo serviceInfo = mContext.getPackageManager().getServiceInfo(serviceComponent,
+                    0 /* flags */);
+            if (!BIND_FORENSIC_EVENT_TRANSPORT_SERVICE.equals(serviceInfo.permission)) {
+                Slog.e(TAG, serviceComponent.flattenToShortString()
+                        + " is not declared with the permission "
+                        + "\"" + BIND_FORENSIC_EVENT_TRANSPORT_SERVICE + "\"");
+                return false;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Unable to find serviceComponent");
             return false;
         }
 
@@ -143,7 +163,7 @@ public class BackupTransportConnection implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mService = IBackupTransport.Stub.asInterface(service);
+        mService = IForensicEventTransport.Stub.asInterface(service);
     }
 
     @Override

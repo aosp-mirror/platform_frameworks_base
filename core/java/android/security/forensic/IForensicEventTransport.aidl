@@ -20,7 +20,7 @@ import android.security.forensic.ForensicEvent;
 import com.android.internal.infra.AndroidFuture;
 
 /** {@hide} */
-oneway interface IBackupTransport {
+oneway interface IForensicEventTransport {
     /**
      * Initialize the server side.
      */

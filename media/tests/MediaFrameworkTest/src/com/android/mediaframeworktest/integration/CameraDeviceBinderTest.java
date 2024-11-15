@@ -175,6 +175,15 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         public void onRepeatingRequestError(long lastFrameNumber, int repeatingRequestId) {
             // TODO Auto-generated method stub
         }
+
+        /**
+         * (non-Javadoc)
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onClientSharedAccessPriorityChanged
+         */
+        @Override
+        public void onClientSharedAccessPriorityChanged(boolean primaryClient) {
+            // TODO Auto-generated method stub
+        }
     }
 
     class IsMetadataNotEmpty implements ArgumentMatcher<CameraMetadataNative> {
@@ -250,7 +259,8 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
         mCameraUser = mUtils.getCameraService().connectDevice(mMockCb, mCameraId,
                 /*oomScoreOffset*/0, getContext().getApplicationInfo().targetSdkVersion,
-                ICameraService.ROTATION_OVERRIDE_NONE, clientAttribution, DEVICE_POLICY_DEFAULT);
+                ICameraService.ROTATION_OVERRIDE_NONE, clientAttribution, DEVICE_POLICY_DEFAULT,
+                /*sharedMode*/false);
         assertNotNull(String.format("Camera %s was null", mCameraId), mCameraUser);
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();

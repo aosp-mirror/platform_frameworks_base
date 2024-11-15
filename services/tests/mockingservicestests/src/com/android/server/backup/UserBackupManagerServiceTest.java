@@ -18,9 +18,7 @@ package com.android.server.backup;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -32,20 +30,27 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
+import android.app.ApplicationThreadConstants;
+import android.app.IActivityManager;
 import android.app.backup.BackupAgent;
-import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.util.FeatureFlagUtils;
@@ -68,7 +73,9 @@ import com.google.common.collect.ImmutableSet;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -77,7 +84,11 @@ import org.mockito.quality.Strictness;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.function.IntConsumer;
+
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -87,6 +98,11 @@ public class UserBackupManagerServiceTest {
     private static final String TEST_TRANSPORT = "transport";
     private static final int WORKER_THREAD_TIMEOUT_MILLISECONDS = 100;
     @UserIdInt private static final int USER_ID = 0;
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock IBackupManagerMonitor mBackupManagerMonitor;
     @Mock IBackupObserver mBackupObserver;
@@ -99,10 +115,14 @@ public class UserBackupManagerServiceTest {
     @Mock JobScheduler mJobScheduler;
     @Mock BackupHandler mBackupHandler;
     @Mock BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
+    @Mock IActivityManager mActivityManager;
+    @Mock
+    ActivityManagerInternal mActivityManagerInternal;
 
     private TestableContext mContext;
     private MockitoSession mSession;
     private TestBackupService mService;
+    private ApplicationInfo mTestPackageApplicationInfo;
 
     @Before
     public void setUp() throws Exception {
@@ -120,12 +140,14 @@ public class UserBackupManagerServiceTest {
         mContext.getTestablePermissions().setPermission(android.Manifest.permission.BACKUP,
                 PackageManager.PERMISSION_GRANTED);
 
-        mService = new TestBackupService(mContext, mPackageManager, mOperationStorage,
-                mTransportManager, mBackupHandler);
+        mService = new TestBackupService();
         mService.setEnabled(true);
         mService.setSetupComplete(true);
         mService.enqueueFullBackup("com.test.backup.app", /* lastBackedUp= */ 0);
-        }
+
+        mTestPackageApplicationInfo = new ApplicationInfo();
+        mTestPackageApplicationInfo.packageName = TEST_PACKAGE;
+    }
 
     @After
     public void tearDown() {
@@ -298,9 +320,160 @@ public class UserBackupManagerServiceTest {
                 new DataTypeResult(/* dataType */ "type_2"));
         mService.reportDelayedRestoreResult(TEST_PACKAGE, results);
 
-
         verify(mBackupManagerMonitorEventSender).sendAgentLoggingResults(
-                eq(packageInfo), eq(results), eq(BackupAnnotations.OperationType.RESTORE));
+                eq(packageInfo), eq(results), eq(OperationType.RESTORE));
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public void bindToAgentSynchronous_restrictedModeChangesFlagOff_shouldUseRestrictedMode()
+            throws Exception {
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(true));
+        // Make sure we never hit the code that checks the property.
+        verify(mPackageManager, never()).getPropertyAsUser(any(), any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public void bindToAgentSynchronous_keyValueBackup_shouldNotUseRestrictedMode()
+            throws Exception {
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(false));
+        // Make sure we never hit the code that checks the property.
+        verify(mPackageManager, never()).getPropertyAsUser(any(), any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public void bindToAgentSynchronous_keyValueRestore_shouldNotUseRestrictedMode()
+            throws Exception {
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_RESTORE, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(false));
+        // Make sure we never hit the code that checks the property.
+        verify(mPackageManager, never()).getPropertyAsUser(any(), any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public void bindToAgentSynchronous_packageOptedIn_shouldUseRestrictedMode()
+            throws Exception {
+        when(mPackageManager.getPropertyAsUser(
+                eq(PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE),
+                eq(TEST_PACKAGE), any(), anyInt())).thenReturn(new PackageManager.Property(
+                PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE, /* value= */ true,
+                TEST_PACKAGE, /* className= */ null));
+
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(true));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public void bindToAgentSynchronous_packageOptedOut_shouldNotUseRestrictedMode()
+            throws Exception {
+        when(mPackageManager.getPropertyAsUser(
+                eq(PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE),
+                eq(TEST_PACKAGE), any(), anyInt())).thenReturn(new PackageManager.Property(
+                PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE, /* value= */ false,
+                TEST_PACKAGE, /* className= */ null));
+
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(false));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    @DisableCompatChanges({UserBackupManagerService.OS_DECIDES_BACKUP_RESTRICTED_MODE})
+    public void bindToAgentSynchronous_targetSdkBelowB_shouldUseRestrictedMode()
+            throws Exception {
+        // Mock that the app has not explicitly set the property.
+        when(mPackageManager.getPropertyAsUser(
+                eq(PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE),
+                eq(TEST_PACKAGE), any(), anyInt())).thenThrow(
+                    new PackageManager.NameNotFoundException()
+        );
+
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(true));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    @EnableCompatChanges({UserBackupManagerService.OS_DECIDES_BACKUP_RESTRICTED_MODE})
+    public void bindToAgentSynchronous_targetSdkB_notInList_shouldUseRestrictedMode()
+            throws Exception {
+        // Mock that the app has not explicitly set the property.
+        when(mPackageManager.getPropertyAsUser(
+                eq(PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE),
+                eq(TEST_PACKAGE), any(), anyInt())).thenThrow(
+                    new PackageManager.NameNotFoundException()
+        );
+        mService.clearNoRestrictedModePackages();
+
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(true));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    @EnableCompatChanges({UserBackupManagerService.OS_DECIDES_BACKUP_RESTRICTED_MODE})
+    public void bindToAgentSynchronous_forRestore_targetSdkB_inList_shouldNotUseRestrictedMode()
+            throws Exception {
+        // Mock that the app has not explicitly set the property.
+        when(mPackageManager.getPropertyAsUser(
+                eq(PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE),
+                eq(TEST_PACKAGE), any(), anyInt())).thenThrow(
+                    new PackageManager.NameNotFoundException()
+        );
+        mService.setNoRestrictedModePackages(Set.of(TEST_PACKAGE), OperationType.RESTORE);
+
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(false));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    @EnableCompatChanges({UserBackupManagerService.OS_DECIDES_BACKUP_RESTRICTED_MODE})
+    public void bindToAgentSynchronous_forBackup_targetSdkB_inList_shouldNotUseRestrictedMode()
+            throws Exception {
+        // Mock that the app has not explicitly set the property.
+        when(mPackageManager.getPropertyAsUser(
+                eq(PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE),
+                eq(TEST_PACKAGE), any(), anyInt())).thenThrow(
+                    new PackageManager.NameNotFoundException()
+        );
+        mService.setNoRestrictedModePackages(Set.of(TEST_PACKAGE), OperationType.BACKUP);
+
+        mService.bindToAgentSynchronous(mTestPackageApplicationInfo,
+                ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD);
+
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(false));
     }
 
     private static PackageInfo getPackageInfo(String packageName) {
@@ -316,11 +489,9 @@ public class UserBackupManagerServiceTest {
 
         private volatile Thread mWorkerThread = null;
 
-        TestBackupService(Context context, PackageManager packageManager,
-                LifecycleOperationStorage operationStorage, TransportManager transportManager,
-                BackupHandler backupHandler) {
-            super(context, packageManager, operationStorage, transportManager, backupHandler,
-                    createConstants(context));
+        TestBackupService() {
+            super(mContext, mPackageManager, mOperationStorage, mTransportManager, mBackupHandler,
+                    createConstants(mContext), mActivityManager, mActivityManagerInternal);
         }
 
         private static BackupManagerConstants createConstants(Context context) {
