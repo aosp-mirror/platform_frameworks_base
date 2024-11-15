@@ -32,6 +32,7 @@ import com.android.systemui.log.dagger.SensitiveNotificationProtectionLog
 import com.android.systemui.log.dagger.UnseenNotificationLog
 import com.android.systemui.log.dagger.VisualStabilityLog
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLog
 import com.android.systemui.util.Compile
 import dagger.Module
 import dagger.Provides
@@ -115,6 +116,14 @@ object NotificationsLogModule {
     @NotificationSectionLog
     fun provideNotificationSectionLogBuffer(factory: LogBufferFactory): LogBuffer {
         return factory.create("NotifSectionLog", 1000, /* maxSize */ false /* systrace */)
+    }
+
+    /** Provides a [LogBuffer] for use by promoted notifications. */
+    @Provides
+    @SysUISingleton
+    @PromotedNotificationLog
+    fun providesPromotedNotificationLog(factory: LogBufferFactory): LogBuffer {
+        return factory.create("PromotedNotifLog", 50)
     }
 
     /**  */
