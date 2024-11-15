@@ -194,6 +194,30 @@ public final class NfcOemExtension {
     public @interface StatusCode {}
 
     /**
+     * Routing commit succeeded.
+     */
+    public static final int COMMIT_ROUTING_STATUS_OK = 0;
+    /**
+     * Routing commit failed.
+     */
+    public static final int COMMIT_ROUTING_STATUS_FAILED = 3;
+    /**
+     * Routing commit failed due to the update is in progress.
+     */
+    public static final int COMMIT_ROUTING_STATUS_FAILED_UPDATE_IN_PROGRESS = 6;
+
+    /**
+     * Status codes returned when calling {@link #forceRoutingTableCommit()}
+     * @hide
+     */
+    @IntDef(prefix = "COMMIT_ROUTING_STATUS_", value = {
+            COMMIT_ROUTING_STATUS_OK,
+            COMMIT_ROUTING_STATUS_FAILED,
+            COMMIT_ROUTING_STATUS_FAILED_UPDATE_IN_PROGRESS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CommitRoutingStatusCode {}
+    /**
      * Interface for Oem extensions for NFC.
      */
     public interface Callback {
@@ -286,8 +310,12 @@ public final class NfcOemExtension {
 
         /**
          * Notifies routing configuration is changed.
+         * @param isCommitRoutingSkipped The {@link Consumer} to be
+         * completed. If routing commit should be skipped,
+         * the {@link Consumer#accept(Object)} should be called with
+         * {@link Boolean#TRUE}, otherwise call with {@link Boolean#FALSE}.
          */
-        void onRoutingChanged();
+        void onRoutingChanged(@NonNull Consumer<Boolean> isCommitRoutingSkipped);
 
         /**
          * API to activate start stop cpu boost on hce event.
@@ -404,6 +432,19 @@ public final class NfcOemExtension {
          * @param item the log items that contains log information of NFC event.
          */
         void onLogEventNotified(@NonNull OemLogItems item);
+
+        /**
+         * Callback to to extract OEM defined packages from given NDEF message when
+         * a NFC tag is detected. These are used to handle NFC tags encoded with a
+         * proprietary format for storing app name (Android native app format).
+         *
+         * @param message NDEF message containing OEM package names
+         * @param packageConsumer The {@link Consumer} to be completed.
+         *                        The {@link Consumer#accept(Object)} should be called with
+         *                        the list of package names.
+         */
+        void onExtractOemPackages(@NonNull NdefMessage message,
+                @NonNull Consumer<List<String>> packageConsumer);
     }
 
 
@@ -740,6 +781,18 @@ public final class NfcOemExtension {
         return result;
     }
 
+    /**
+     * API to force a routing table commit.
+     * @return a {@link StatusCode} to indicate if commit routing succeeded or not
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @CommitRoutingStatusCode
+    public int forceRoutingTableCommit() {
+        return NfcAdapter.callServiceReturn(
+                () -> NfcAdapter.sService.commitRouting(), COMMIT_ROUTING_STATUS_FAILED);
+    }
+
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
 
         @Override
@@ -843,9 +896,10 @@ public final class NfcOemExtension {
                         new ReceiverWrapper<>(isSkipped), cb::onTagDispatch, ex));
         }
         @Override
-        public void onRoutingChanged() throws RemoteException {
+        public void onRoutingChanged(ResultReceiver isSkipped) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
-                    handleVoidCallback(null, (Object input) -> cb.onRoutingChanged(), ex));
+                    handleVoidCallback(
+                            new ReceiverWrapper<>(isSkipped), cb::onRoutingChanged, ex));
         }
         @Override
         public void onHceEventReceived(int action) throws RemoteException {
@@ -922,6 +976,15 @@ public final class NfcOemExtension {
         public void onLogEventNotified(OemLogItems item) throws RemoteException  {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(item, cb::onLogEventNotified, ex));
+        }
+
+        @Override
+        public void onExtractOemPackages(NdefMessage message, ResultReceiver packageConsumer)
+                throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoid2ArgCallback(message,
+                            new ReceiverWrapper<>(packageConsumer),
+                            cb::onExtractOemPackages, ex));
         }
 
         private <T> void handleVoidCallback(
@@ -1034,8 +1097,14 @@ public final class NfcOemExtension {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("intent", (Intent) result);
                 mResultReceiver.send(0, bundle);
+            } else if (result instanceof List<?> list) {
+                if (list.stream().allMatch(String.class::isInstance)) {
+                    Bundle bundle = new Bundle();
+                    bundle.putStringArray("packageNames",
+                            list.stream().map(pkg -> (String) pkg).toArray(String[]::new));
+                    mResultReceiver.send(0, bundle);
+                }
             }
-
         }
 
         @Override
