@@ -17,9 +17,9 @@
 package com.android.systemui.shade
 
 import android.content.Context
+import android.content.MutableContextWrapper
 import android.content.res.Resources
 import android.view.LayoutInflater
-import android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.ConfigurationStateImpl
@@ -29,7 +29,6 @@ import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImp
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepositoryImpl
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
@@ -62,9 +61,7 @@ object ShadeDisplayAwareModule {
     @SysUISingleton
     fun provideShadeDisplayAwareContext(context: Context): Context {
         return if (ShadeWindowGoesAround.isEnabled) {
-            context
-                .createWindowContext(context.display, TYPE_APPLICATION_OVERLAY, /* options= */ null)
-                .apply { setTheme(R.style.Theme_SystemUI) }
+            MutableContextWrapper(context)
         } else {
             context
         }
