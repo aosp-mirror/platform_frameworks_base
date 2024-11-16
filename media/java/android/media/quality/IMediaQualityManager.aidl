@@ -42,14 +42,18 @@ interface IMediaQualityManager {
     SoundProfile createSoundProfile(in SoundProfile pp);
     void updateSoundProfile(in String id, in SoundProfile pp);
     void removeSoundProfile(in String id);
-    SoundProfile getSoundProfileById(in String id);
+    SoundProfile getSoundProfile(in int type, in String name);
     List<SoundProfile> getSoundProfilesByPackage(in String packageName);
     List<SoundProfile> getAvailableSoundProfiles();
     List<String> getSoundProfilePackageNames();
+    List<String> getSoundProfileAllowList();
+    void setSoundProfileAllowList(in List<String> packages);
 
     void registerPictureProfileCallback(in IPictureProfileCallback cb);
     void registerSoundProfileCallback(in ISoundProfileCallback cb);
     void registerAmbientBacklightCallback(in IAmbientBacklightCallback cb);
+
+    void unregisterAmbientBacklightCallback(in IAmbientBacklightCallback cb);
 
     List<ParamCapability> getParamCapabilities(in List<String> names);
 

@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 import android.chre.flags.Flags;
 import android.content.Context;
 import android.hardware.location.IContextHubService;
+import android.hardware.location.IContextHubTransactionCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
@@ -46,7 +47,9 @@ public class HubEndpoint {
     private final Object mLock = new Object();
     private final HubEndpointInfo mPendingHubEndpointInfo;
     @Nullable private final IHubEndpointLifecycleCallback mLifecycleCallback;
+    @Nullable private final IHubEndpointMessageCallback mMessageCallback;
     @NonNull private final Executor mLifecycleCallbackExecutor;
+    @NonNull private final Executor mMessageCallbackExecutor;
 
     @GuardedBy("mLock")
     private final SparseArray<HubEndpointSession> mActiveSessions = new SparseArray<>();
@@ -216,6 +219,50 @@ public class HubEndpoint {
                                 });
                     }
                 }
+
+                @Override
+                public void onMessageReceived(int sessionId, HubMessage message)
+                        throws RemoteException {
+                    final HubEndpointSession activeSession;
+
+                    // Retrieve the active session
+                    synchronized (mLock) {
+                        activeSession = mActiveSessions.get(sessionId);
+                    }
+                    if (activeSession == null) {
+                        Log.i(TAG, "onMessageReceived: session not active, id=" + sessionId);
+                    }
+
+                    if (activeSession == null || mMessageCallback == null) {
+                        if (message.getDeliveryParams().isResponseRequired()) {
+                            try {
+                                mServiceToken.sendMessageDeliveryStatus(
+                                        sessionId,
+                                        message.getMessageSequenceNumber(),
+                                        ErrorCode.DESTINATION_NOT_FOUND);
+                            } catch (RemoteException e) {
+                                e.rethrowFromSystemServer();
+                            }
+                        }
+                        return;
+                    }
+
+                    // Execute the callback
+                    mMessageCallbackExecutor.execute(
+                            () -> {
+                                mMessageCallback.onMessageReceived(activeSession, message);
+                                if (message.getDeliveryParams().isResponseRequired()) {
+                                    try {
+                                        mServiceToken.sendMessageDeliveryStatus(
+                                                sessionId,
+                                                message.getMessageSequenceNumber(),
+                                                ErrorCode.OK);
+                                    } catch (RemoteException e) {
+                                        e.rethrowFromSystemServer();
+                                    }
+                                }
+                            });
+                }
             };
 
     /** Binder returned from system service, non-null while registered. */
@@ -227,10 +274,15 @@ public class HubEndpoint {
     private HubEndpoint(
             @NonNull HubEndpointInfo pendingEndpointInfo,
             @Nullable IHubEndpointLifecycleCallback endpointLifecycleCallback,
-            @NonNull Executor lifecycleCallbackExecutor) {
+            @NonNull Executor lifecycleCallbackExecutor,
+            @Nullable IHubEndpointMessageCallback endpointMessageCallback,
+            @NonNull Executor messageCallbackExecutor) {
         mPendingHubEndpointInfo = pendingEndpointInfo;
+
         mLifecycleCallback = endpointLifecycleCallback;
         mLifecycleCallbackExecutor = lifecycleCallbackExecutor;
+        mMessageCallback = endpointMessageCallback;
+        mMessageCallbackExecutor = messageCallbackExecutor;
     }
 
     /** @hide */
@@ -337,6 +389,24 @@ public class HubEndpoint {
         }
     }
 
+    void sendMessage(
+            HubEndpointSession session,
+            HubMessage message,
+            @Nullable IContextHubTransactionCallback transactionCallback) {
+        IContextHubEndpoint serviceToken = mServiceToken;
+        if (serviceToken == null) {
+            // Not registered
+            return;
+        }
+
+        try {
+            serviceToken.sendMessage(session.getId(), message, transactionCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "sendMessage: failed to send message session=" + session, e);
+            e.rethrowFromSystemServer();
+        }
+    }
+
     @Nullable
     public String getTag() {
         return mPendingHubEndpointInfo.getTag();
@@ -347,6 +417,11 @@ public class HubEndpoint {
         return mLifecycleCallback;
     }
 
+    @Nullable
+    public IHubEndpointMessageCallback getMessageCallback() {
+        return mMessageCallback;
+    }
+
     /** Builder for a {@link HubEndpoint} object. */
     public static final class Builder {
         private final String mPackageName;
@@ -355,12 +430,16 @@ public class HubEndpoint {
 
         @NonNull private Executor mLifecycleCallbackExecutor;
 
+        @Nullable private IHubEndpointMessageCallback mMessageCallback;
+        @NonNull private Executor mMessageCallbackExecutor;
+
         @Nullable private String mTag;
 
         /** Create a builder for {@link HubEndpoint} */
         public Builder(@NonNull Context context) {
             mPackageName = context.getPackageName();
             mLifecycleCallbackExecutor = context.getMainExecutor();
+            mMessageCallbackExecutor = context.getMainExecutor();
         }
 
         /**
@@ -394,13 +473,35 @@ public class HubEndpoint {
             return this;
         }
 
+        /** Attach a callback interface for message events for this Endpoint */
+        @NonNull
+        public Builder setMessageCallback(@NonNull IHubEndpointMessageCallback messageCallback) {
+            mMessageCallback = messageCallback;
+            return this;
+        }
+
+        /**
+         * Attach a callback interface for message events for this Endpoint with a specified
+         * executor
+         */
+        @NonNull
+        public Builder setMessageCallback(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull IHubEndpointMessageCallback messageCallback) {
+            mMessageCallbackExecutor = executor;
+            mMessageCallback = messageCallback;
+            return this;
+        }
+
         /** Build the {@link HubEndpoint} object. */
         @NonNull
         public HubEndpoint build() {
             return new HubEndpoint(
                     new HubEndpointInfo(mPackageName, mTag),
                     mLifecycleCallback,
-                    mLifecycleCallbackExecutor);
+                    mLifecycleCallbackExecutor,
+                    mMessageCallback,
+                    mMessageCallbackExecutor);
         }
     }
 }

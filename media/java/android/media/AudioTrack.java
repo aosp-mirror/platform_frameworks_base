@@ -3023,7 +3023,7 @@ public class AudioTrack extends PlayerBase
             }
         }
         synchronized(mPlayStateLock) {
-            baseStart(0); // unknown device at this point
+            baseStart(new int[0]); // unknown device at this point
             native_start();
             // FIXME see b/179218630
             //baseStart(native_getRoutedDeviceId());
@@ -3784,6 +3784,26 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
+     * Internal API of getRoutedDevices(). We should not call flag APIs internally.
+     */
+    private @NonNull List<AudioDeviceInfo> getRoutedDevicesInternal() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        final int[] deviceIds = native_getRoutedDeviceIds();
+        if (deviceIds == null || deviceIds.length == 0) {
+            return audioDeviceInfos;
+        }
+
+        for (int i = 0; i < deviceIds.length; i++) {
+            AudioDeviceInfo audioDeviceInfo = AudioManager.getDeviceForPortId(deviceIds[i],
+                    AudioManager.GET_DEVICES_OUTPUTS);
+            if (audioDeviceInfo != null) {
+                audioDeviceInfos.add(audioDeviceInfo);
+            }
+        }
+        return audioDeviceInfos;
+    }
+
+    /**
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioTrack.
      * Note: The query is only valid if the AudioTrack is currently playing. If it is not,
      * <code>getRoutedDevice()</code> will return null.
@@ -3792,11 +3812,11 @@ public class AudioTrack extends PlayerBase
      */
     @Override
     public AudioDeviceInfo getRoutedDevice() {
-        int deviceId = native_getRoutedDeviceId();
-        if (deviceId == 0) {
+        final List<AudioDeviceInfo> audioDeviceInfos = getRoutedDevicesInternal();
+        if (audioDeviceInfos.isEmpty()) {
             return null;
         }
-        return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_OUTPUTS);
+        return audioDeviceInfos.get(0);
     }
 
     /**
@@ -3808,12 +3828,7 @@ public class AudioTrack extends PlayerBase
     @Override
     @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
     public @NonNull List<AudioDeviceInfo> getRoutedDevices() {
-        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
-        AudioDeviceInfo audioDeviceInfo = getRoutedDevice();
-        if (audioDeviceInfo != null) {
-            audioDeviceInfos.add(audioDeviceInfo);
-        }
-        return audioDeviceInfos;
+        return getRoutedDevicesInternal();
     }
 
     private void tryToDisableNativeRoutingCallback() {
@@ -3973,7 +3988,7 @@ public class AudioTrack extends PlayerBase
      */
     private void broadcastRoutingChange() {
         AudioManager.resetAudioPortGeneration();
-        baseUpdateDeviceId(getRoutedDevice());
+        baseUpdateDeviceIds(getRoutedDevicesInternal());
         synchronized (mRoutingChangeListeners) {
             for (NativeRoutingEventHandlerDelegate delegate : mRoutingChangeListeners.values()) {
                 delegate.notifyClient();
@@ -4530,7 +4545,7 @@ public class AudioTrack extends PlayerBase
     private native final int native_setAuxEffectSendLevel(float level);
 
     private native final boolean native_setOutputDevice(int deviceId);
-    private native final int native_getRoutedDeviceId();
+    private native int[] native_getRoutedDeviceIds();
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
 

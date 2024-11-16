@@ -13,6 +13,13 @@ flag {
 }
 
 flag {
+  name: "notifications_redesign_templates"
+  namespace: "systemui"
+  description: "Notifications Redesign: Update notification templates"
+  bug: "378660052"
+}
+
+flag {
   name: "modes_api"
   is_exported: true
   namespace: "systemui"

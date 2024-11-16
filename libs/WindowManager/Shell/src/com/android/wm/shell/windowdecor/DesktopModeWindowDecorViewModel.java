@@ -78,7 +78,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.Toast;
 import android.window.DesktopModeFlags;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
@@ -572,9 +571,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         if (decoration == null) {
             return;
         }
-        mDesktopModeEventLogger.logTaskResizingStarted(resizeTrigger, motionEvent,
-                decoration.mTaskInfo,
-                mDisplayController, /* displayLayoutSize= */ null);
         mInteractionJankMonitor.begin(
                 decoration.mTaskSurface, mContext, mMainHandler,
                 Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
@@ -593,33 +589,20 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         decoration.closeMaximizeMenu();
     }
 
-    private void onSnapResize(int taskId, boolean left, MotionEvent motionEvent) {
+    public void onSnapResize(int taskId, boolean left, @Nullable MotionEvent motionEvent) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
         if (decoration == null) {
             return;
         }
 
-        if (!decoration.mTaskInfo.isResizeable
-                && DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE.isTrue()) {
-            Toast.makeText(mContext,
-                    R.string.desktop_mode_non_resizable_snap_text, Toast.LENGTH_SHORT).show();
-        } else {
-            ResizeTrigger resizeTrigger =
-                    left ? ResizeTrigger.SNAP_LEFT_MENU : ResizeTrigger.SNAP_RIGHT_MENU;
-            mDesktopModeEventLogger.logTaskResizingStarted(resizeTrigger, motionEvent,
-                    decoration.mTaskInfo,
-                    mDisplayController, /* displayLayoutSize= */ null);
-            mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext, mMainHandler,
-                    Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE, "maximize_menu_resizable");
-            mDesktopTasksController.snapToHalfScreen(
-                    decoration.mTaskInfo,
-                    decoration.mTaskSurface,
-                    decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
-                    left ? SnapPosition.LEFT : SnapPosition.RIGHT,
-                    resizeTrigger,
-                    motionEvent,
-                    mWindowDecorByTaskId.get(taskId));
-        }
+        mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext, mMainHandler,
+                Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE, "maximize_menu_resizable");
+        mDesktopTasksController.handleInstantSnapResizingTask(
+                decoration.mTaskInfo,
+                left ? SnapPosition.LEFT : SnapPosition.RIGHT,
+                left ? ResizeTrigger.SNAP_LEFT_MENU : ResizeTrigger.SNAP_RIGHT_MENU,
+                motionEvent,
+                decoration);
 
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();

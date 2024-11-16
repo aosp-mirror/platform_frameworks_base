@@ -1,0 +1,10 @@
+package: "android.app"
+container: "system"
+
+flag {
+     namespace: "wallet_integration"
+     name: "device_unlock_listener"
+     is_exported: true
+     description: "Enable listener API for device unlock."
+     bug: "296195355"
+}

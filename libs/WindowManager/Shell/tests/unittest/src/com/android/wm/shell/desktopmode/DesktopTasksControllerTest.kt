@@ -36,12 +36,10 @@ import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.content.res.Resources
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
-import android.hardware.input.InputManager
-import android.hardware.input.InputManager.KeyGestureEventHandler
-import android.hardware.input.KeyGestureEvent
 import android.os.Binder
 import android.os.Bundle
 import android.os.Handler
@@ -53,7 +51,6 @@ import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.Gravity
-import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.WindowInsets
@@ -63,6 +60,7 @@ import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.widget.Toast
 import android.window.DisplayAreaInfo
 import android.window.IWindowContainerToken
 import android.window.RemoteTransition
@@ -75,18 +73,14 @@ import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_R
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
 import android.window.WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID
 import androidx.test.filters.SmallTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
-import com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
-import com.android.window.flags.Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS
 import com.android.window.flags.Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP
-import com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -96,7 +90,6 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
-import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
@@ -124,7 +117,6 @@ import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
-import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.TestRemoteTransition
 import com.android.wm.shell.transition.Transitions
@@ -208,12 +200,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var dragToDesktopTransitionHandler: DragToDesktopTransitionHandler
   @Mock
   lateinit var mMockDesktopImmersiveController: DesktopImmersiveController
-  @Mock lateinit var launchAdjacentController: LaunchAdjacentController
   @Mock lateinit var splitScreenController: SplitScreenController
   @Mock lateinit var recentsTransitionHandler: RecentsTransitionHandler
   @Mock lateinit var dragAndDropController: DragAndDropController
   @Mock lateinit var multiInstanceHelper: MultiInstanceHelper
-  @Mock lateinit var desktopModeLoggerTransitionObserver: DesktopModeLoggerTransitionObserver
   @Mock lateinit var desktopModeVisualIndicator: DesktopModeVisualIndicator
   @Mock lateinit var recentTasksController: RecentTasksController
   @Mock
@@ -224,23 +214,21 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock private lateinit var mockHandler: Handler
   @Mock private lateinit var desktopModeEventLogger: DesktopModeEventLogger
   @Mock lateinit var persistentRepository: DesktopPersistentRepository
-  @Mock private lateinit var mockInputManager: InputManager
-  @Mock private lateinit var mockFocusTransitionObserver: FocusTransitionObserver
   @Mock lateinit var motionEvent: MotionEvent
   @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
-
+  @Mock private lateinit var mockToast: Toast
   private lateinit var mockitoSession: StaticMockitoSession
   @Mock
   private lateinit var desktopTilingDecorViewModel: DesktopTilingDecorViewModel
   @Mock
   private lateinit var desktopWindowDecoration: DesktopModeWindowDecoration
+  @Mock private lateinit var resources: Resources
   private lateinit var controller: DesktopTasksController
   private lateinit var shellInit: ShellInit
   private lateinit var taskRepository: DesktopRepository
   private lateinit var desktopTasksLimiter: DesktopTasksLimiter
   private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
   private lateinit var testScope: CoroutineScope
-  private lateinit var keyGestureEventHandler: KeyGestureEventHandler
 
   private val shellExecutor = TestShellExecutor()
 
@@ -263,6 +251,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         mockitoSession()
             .strictness(Strictness.LENIENT)
             .spyStatic(DesktopModeStatus::class.java)
+            .spyStatic(Toast::class.java)
             .startMocking()
     doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
@@ -290,6 +279,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
       Desktop.getDefaultInstance()
     )
+    doReturn(mockToast).`when` { Toast.makeText(any(), anyInt(), anyInt()) }
 
     val tda = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
     tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
@@ -304,11 +294,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller = createController()
     controller.setSplitScreenController(splitScreenController)
     controller.freeformTaskTransitionStarter = freeformTaskTransitionStarter
-
-    doAnswer {
-      keyGestureEventHandler = (it.arguments[0] as KeyGestureEventHandler)
-      null
-    }.whenever(mockInputManager).registerKeyGestureEventHandler(any())
 
     shellInit.init()
 
@@ -343,8 +328,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         dragToDesktopTransitionHandler,
         mMockDesktopImmersiveController,
         taskRepository,
-        desktopModeLoggerTransitionObserver,
-        launchAdjacentController,
         recentsTransitionHandler,
         multiInstanceHelper,
         shellExecutor,
@@ -352,8 +335,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         recentTasksController,
         mockInteractionJankMonitor,
         mockHandler,
-        mockInputManager,
-        mockFocusTransitionObserver,
         desktopModeEventLogger,
         desktopTilingDecorViewModel,
       )
@@ -1548,44 +1529,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val task = setUpFreeformTask(displayId = SECOND_DISPLAY)
     controller.moveToNextDisplay(task.taskId)
 
-    with(getLatestWct(type = TRANSIT_CHANGE)) {
-      assertThat(hierarchyOps).hasSize(1)
-      assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
-      assertThat(hierarchyOps[0].isReparent).isTrue()
-      assertThat(hierarchyOps[0].newParent).isEqualTo(defaultDisplayArea.token.asBinder())
-      assertThat(hierarchyOps[0].toTop).isTrue()
-    }
-  }
-
-  @Test
-  @EnableFlags(
-    FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS,
-    FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
-    FLAG_USE_KEY_GESTURE_EVENT_HANDLER
-  )
-  fun moveToNextDisplay_withKeyGesture() {
-    // Set up two display ids
-    whenever(rootTaskDisplayAreaOrganizer.displayIds)
-      .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
-    // Create a mock for the target display area: default display
-    val defaultDisplayArea = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
-    whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY))
-      .thenReturn(defaultDisplayArea)
-    // Setup a focused task on secondary display, which is expected to move to default display
-    val task = setUpFreeformTask(displayId = SECOND_DISPLAY)
-    task.isFocused = true
-    whenever(shellTaskOrganizer.getRunningTasks()).thenReturn(arrayListOf(task))
-    whenever(mockFocusTransitionObserver.hasGlobalFocus(eq(task))).thenReturn(true)
-
-    val event = KeyGestureEvent.Builder()
-        .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY)
-        .setDisplayId(SECOND_DISPLAY)
-        .setKeycodes(intArrayOf(KeyEvent.KEYCODE_D))
-        .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON)
-        .build()
-    val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
-
-    assertThat(result).isTrue()
     with(getLatestWct(type = TRANSIT_CHANGE)) {
       assertThat(hierarchyOps).hasSize(1)
       assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
@@ -3465,7 +3408,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING, Flags.FLAG_ENABLE_TILE_RESIZING)
-  fun handleSnapResizingTask_nonResizable_snapsToHalfScreen() {
+  fun handleSnapResizingTaskOnDrag_nonResizable_snapsToHalfScreen() {
     val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
       isResizeable = false
     }
@@ -3474,7 +3417,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val expectedBounds =
       Rect(STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom)
 
-    controller.handleSnapResizingTask(
+    controller.handleSnapResizingTaskOnDrag(
 
       task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds, motionEvent,
       desktopWindowDecoration
@@ -3493,14 +3436,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
-  fun handleSnapResizingTask_nonResizable_startsRepositionAnimation() {
+  fun handleSnapResizingTaskOnDrag_nonResizable_startsRepositionAnimation() {
     val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
       isResizeable = false
     }
     val preDragBounds = Rect(100, 100, 400, 500)
     val currentDragBounds = Rect(0, 100, 300, 500)
 
-    controller.handleSnapResizingTask(
+    controller.handleSnapResizingTaskOnDrag(
       task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds, motionEvent,
       desktopWindowDecoration)
     verify(mReturnToDragStartAnimator).start(
@@ -3516,6 +3459,59 @@ class DesktopTasksControllerTest : ShellTestCase() {
       any(),
       any(),
       any()
+    )
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING
+  )
+  fun handleInstantSnapResizingTask_nonResizable_animatorNotStartedAndShowsToast() {
+    val taskBounds = Rect(0, 0, 200, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, taskBounds).apply {
+      isResizeable = false
+    }
+
+    controller.handleInstantSnapResizingTask(
+      task, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
+
+    // Assert that task is NOT updated via WCT
+    verify(toggleResizeDesktopTaskTransitionHandler, never()).startTransition(any(), any())
+    verify(mockToast).show()
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+  @DisableFlags(Flags.FLAG_ENABLE_TILE_RESIZING)
+  fun handleInstantSnapResizingTask_resizable_snapsToHalfScreenAndNotShowToast() {
+    val taskBounds = Rect(0, 0, 200, 100)
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, taskBounds).apply {
+      isResizeable = true
+    }
+    val expectedBounds = Rect(
+      STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
+    )
+
+    controller.handleInstantSnapResizingTask(
+      task, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
+
+    // Assert bounds set to half of the stable bounds
+    val wct = getLatestToggleResizeDesktopTaskWct(taskBounds)
+    assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
+    verify(mockToast, never()).show()
+    verify(desktopModeEventLogger, times(1)).logTaskResizingStarted(
+      ResizeTrigger.SNAP_LEFT_MENU,
+      motionEvent,
+      task,
+      displayController
+    )
+    verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
+      ResizeTrigger.SNAP_LEFT_MENU,
+      motionEvent,
+      task,
+      expectedBounds.height(),
+      expectedBounds.width(),
+      displayController
     )
   }
 

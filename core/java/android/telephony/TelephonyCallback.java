@@ -705,6 +705,28 @@ public class TelephonyCallback {
     public static final int EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED = 45;
 
     /**
+     * Event for changes to mobile network ciphering algorithms.
+     * See {@link SecurityAlgorithmsListener#onSecurityAlgorithmsChanged}
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public static final int EVENT_SECURITY_ALGORITHMS_CHANGED = 46;
+
+     /**
+      * Event for updates to sensitive device identifier disclosures (IMSI, IMEI, unciphered SUCI).
+      * See {@link CellularIdentifierDisclosedListener#onCellularIdentifierDisclosedChanged}
+      *
+      * @hide
+      */
+    @FlaggedApi(Flags.FLAG_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public static final int EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED = 47;
+
+    /**
      * @hide
      */
     @IntDef(prefix = {"EVENT_"}, value = {
@@ -752,7 +774,9 @@ public class TelephonyCallback {
             EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED,
             EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED,
             EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED,
-            EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED
+            EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED,
+            EVENT_SECURITY_ALGORITHMS_CHANGED,
+            EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1827,6 +1851,41 @@ public class TelephonyCallback {
     }
 
     /**
+     * Interface for CellularIdentifierDisclosedListener
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    public interface CellularIdentifierDisclosedListener {
+        /**
+         * Callback invoked when a device identifier (IMSI, IMEI, or unciphered SUCI)
+         * is disclosed over the network before a security context is established
+         * ("pre-authentication").
+         *
+         * @param disclosure details of the identifier disclosure
+         * See {@link CellularIdentifierDisclosure} for more details
+         */
+        void onCellularIdentifierDisclosedChanged(@NonNull CellularIdentifierDisclosure disclosure);
+    }
+
+    /**
+     * Interface for SecurityAlgorithmsListener
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SECURITY_ALGORITHMS_UPDATE_INDICATIONS)
+    public interface SecurityAlgorithmsListener {
+        /**
+         * Callback invoked when the most recently reported security algorithms has changed,
+         * per a specified connection event.
+         *
+         * @param securityAlgorithmUpdate details of the security algorithm update
+         * See {@link SecurityAlgorithmUpdate} for more details
+         */
+        void onSecurityAlgorithmsChanged(@NonNull SecurityAlgorithmUpdate securityAlgorithmUpdate);
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      * <p>
@@ -2301,6 +2360,28 @@ public class TelephonyCallback {
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
                     () -> listener.onCarrierRoamingNtnSignalStrengthChanged(ntnSignalStrength)));
 
+        }
+
+        public void onSecurityAlgorithmsChanged(SecurityAlgorithmUpdate update) {
+            if (!Flags.securityAlgorithmsUpdateIndications()) return;
+
+            SecurityAlgorithmsListener listener =
+                    (SecurityAlgorithmsListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onSecurityAlgorithmsChanged(update)));
+        }
+
+        public void onCellularIdentifierDisclosedChanged(CellularIdentifierDisclosure disclosure) {
+            if (!Flags.cellularIdentifierDisclosureIndications()) return;
+
+            CellularIdentifierDisclosedListener listener =
+                    (CellularIdentifierDisclosedListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onCellularIdentifierDisclosedChanged(disclosure)));
         }
     }
 }

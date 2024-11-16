@@ -33,6 +33,7 @@ import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.ArraySet;
 import android.util.PackageUtils;
 
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Set;
 
 @Presubmit
+@RequiresFlagsEnabled(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
 public class ApkLiteParseUtilsTest {
 
     @Rule

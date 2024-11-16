@@ -2087,8 +2087,9 @@ public class BubbleController implements ConfigurationChangeListener,
 
             BubbleLogger.Event event = isExpanded ? BubbleLogger.Event.BUBBLE_BAR_EXPANDED
                     : BubbleLogger.Event.BUBBLE_BAR_COLLAPSED;
-            if (mBubbleData.getSelectedBubble() instanceof Bubble bubble) {
-                mLogger.log(bubble, event);
+            BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
+            if (selectedBubble instanceof Bubble) {
+                mLogger.log((Bubble) selectedBubble, event);
             } else {
                 mLogger.log(event);
             }
@@ -2099,8 +2100,9 @@ public class BubbleController implements ConfigurationChangeListener,
             // Only need to update the layer view if we're currently expanded for selection changes.
             if (mLayerView != null && mLayerView.isExpanded()) {
                 mLayerView.showExpandedView(selectedBubble);
-                if (selectedBubble instanceof Bubble bubble) {
-                    mLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
+                if (selectedBubble instanceof Bubble) {
+                    mLogger.log((Bubble) selectedBubble,
+                            BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
                 }
             }
         }
