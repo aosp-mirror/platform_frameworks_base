@@ -4,6 +4,14 @@ container: "system"
 # Important: Flags must be accessed through DisplayManagerFlags.
 
 flag {
+    name: "is_always_on_available_api"
+    namespace: "display_manager"
+    description: "Allows querying of AOD availability"
+    bug: "324046664"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_port_in_display_layout"
     namespace: "display_manager"
     description: "Allows refering to displays by port in display layout"

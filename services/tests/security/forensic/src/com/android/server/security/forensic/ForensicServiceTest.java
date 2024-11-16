@@ -31,6 +31,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.SuppressLint;
+import android.app.admin.ConnectEvent;
+import android.app.admin.DnsEvent;
+import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.Context;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
@@ -40,7 +43,6 @@ import android.os.test.TestLooper;
 import android.security.forensic.ForensicEvent;
 import android.security.forensic.IForensicServiceCommandCallback;
 import android.security.forensic.IForensicServiceStateCallback;
-import android.util.ArrayMap;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -53,7 +55,6 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ForensicServiceTest {
     private static final int STATE_UNKNOWN = IForensicServiceStateCallback.State.UNKNOWN;
@@ -300,23 +301,19 @@ public class ForensicServiceTest {
         ServiceThread mockThread = spy(ServiceThread.class);
         mDataAggregator.setHandler(mLooperOfDataAggregator, mockThread);
 
-        String eventOneType = "event_one_type";
-        String eventOneMapKey = "event_one_map_key";
-        String eventOneMapVal = "event_one_map_val";
-        Map<String, String> eventOneMap = new ArrayMap<String, String>();
-        eventOneMap.put(eventOneMapKey, eventOneMapVal);
-        ForensicEvent eventOne = new ForensicEvent(eventOneType, eventOneMap);
+        SecurityEvent securityEvent = new SecurityEvent(0, new byte[0]);
+        ForensicEvent eventOne = new ForensicEvent(securityEvent);
 
-        String eventTwoType = "event_two_type";
-        String eventTwoMapKey = "event_two_map_key";
-        String eventTwoMapVal = "event_two_map_val";
-        Map<String, String> eventTwoMap = new ArrayMap<String, String>();
-        eventTwoMap.put(eventTwoMapKey, eventTwoMapVal);
-        ForensicEvent eventTwo = new ForensicEvent(eventTwoType, eventTwoMap);
+        ConnectEvent connectEvent = new ConnectEvent("127.0.0.1", 80, null, 0);
+        ForensicEvent eventTwo = new ForensicEvent(connectEvent);
+
+        DnsEvent dnsEvent = new DnsEvent(null, new String[] {"127.0.0.1"}, 1, null, 0);
+        ForensicEvent eventThree = new ForensicEvent(dnsEvent);
 
         List<ForensicEvent> events = new ArrayList<>();
         events.add(eventOne);
         events.add(eventTwo);
+        events.add(eventThree);
 
         doReturn(true).when(mForensicEventTransportConnection).addData(any());
 
@@ -327,18 +324,16 @@ public class ForensicServiceTest {
         ArgumentCaptor<List<ForensicEvent>> captor = ArgumentCaptor.forClass(List.class);
         verify(mForensicEventTransportConnection).addData(captor.capture());
         List<ForensicEvent> receivedEvents = captor.getValue();
-        assertEquals(receivedEvents.size(), 2);
+        assertEquals(receivedEvents.size(), 3);
 
-        assertEquals(receivedEvents.getFirst().getType(), eventOneType);
-        assertEquals(receivedEvents.getFirst().getKeyValuePairs().size(), 1);
-        assertEquals(receivedEvents.getFirst().getKeyValuePairs().get(eventOneMapKey),
-                eventOneMapVal);
+        assertEquals(receivedEvents.get(0).getType(), ForensicEvent.SECURITY_EVENT);
+        assertNotNull(receivedEvents.get(0).getSecurityEvent());
 
-        assertEquals(receivedEvents.getLast().getType(), eventTwoType);
-        assertEquals(receivedEvents.getLast().getKeyValuePairs().size(), 1);
-        assertEquals(receivedEvents.getLast().getKeyValuePairs().get(eventTwoMapKey),
-                eventTwoMapVal);
+        assertEquals(receivedEvents.get(1).getType(), ForensicEvent.NETWORK_EVENT_CONNECT);
+        assertNotNull(receivedEvents.get(1).getConnectEvent());
 
+        assertEquals(receivedEvents.get(2).getType(), ForensicEvent.NETWORK_EVENT_DNS);
+        assertNotNull(receivedEvents.get(2).getDnsEvent());
     }
 
     private class MockInjector implements ForensicService.Injector {

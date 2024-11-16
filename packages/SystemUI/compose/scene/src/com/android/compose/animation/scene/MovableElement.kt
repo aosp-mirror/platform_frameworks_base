@@ -188,7 +188,9 @@ private fun shouldComposeMovableElement(
     return when (
         val elementState = movableElementState(element, layoutImpl.state.transitionStates)
     ) {
-        null -> false
+        null ->
+            movableElementContentWhenIdle(layoutImpl, element, layoutImpl.state.transitionState) ==
+                content
         is TransitionState.Idle ->
             movableElementContentWhenIdle(layoutImpl, element, elementState) == content
         is TransitionState.Transition -> {
@@ -217,7 +219,7 @@ private fun movableElementState(
 private fun movableElementContentWhenIdle(
     layoutImpl: SceneTransitionLayoutImpl,
     element: MovableElementKey,
-    elementState: TransitionState.Idle,
+    elementState: TransitionState,
 ): ContentKey {
     val contents = element.contentPicker.contents
     return elementContentWhenIdle(layoutImpl, elementState, isInContent = { contents.contains(it) })

@@ -676,47 +676,47 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "ALT + [ -> Resizes a task to fit the left half of the screen",
+                "META + [ -> Resizes a task to fit the left half of the screen",
                 intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_LEFT_BRACKET
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
                 intArrayOf(KeyEvent.KEYCODE_LEFT_BRACKET),
-                KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "ALT + ] -> Resizes a task to fit the right half of the screen",
+                "META + ] -> Resizes a task to fit the right half of the screen",
                 intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_RIGHT_BRACKET
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
                 intArrayOf(KeyEvent.KEYCODE_RIGHT_BRACKET),
-                KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "ALT + '=' -> Maximizes a task to fit the screen",
+                "META + '=' -> Toggles maximization of a task to maximized and restore its bounds",
                 intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_EQUALS
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW,
                 intArrayOf(KeyEvent.KEYCODE_EQUALS),
-                KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "ALT + '-' -> Restores a task size to its previous bounds",
+                "META + '-' -> Minimizes a freeform task",
                 intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_MINUS
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW,
                 intArrayOf(KeyEvent.KEYCODE_MINUS),
-                KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(

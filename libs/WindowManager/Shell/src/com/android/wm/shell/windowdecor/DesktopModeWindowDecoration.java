@@ -206,7 +206,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final DesktopRepository mDesktopRepository;
 
-    DesktopModeWindowDecoration(
+    public DesktopModeWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,

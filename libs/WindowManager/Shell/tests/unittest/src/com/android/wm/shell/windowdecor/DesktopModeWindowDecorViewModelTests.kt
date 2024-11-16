@@ -63,7 +63,6 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.ViewRootImpl
 import android.view.WindowInsets.Type.statusBars
-import android.widget.Toast
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.HierarchyOp
 import androidx.test.filters.SmallTest
@@ -186,7 +185,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockGenericLinksParser: AppToWebGenericLinksParser
     @Mock private lateinit var mockUserHandle: UserHandle
     @Mock private lateinit var mockAssistContentRequester: AssistContentRequester
-    @Mock private lateinit var mockToast: Toast
     private val bgExecutor = TestShellExecutor()
     @Mock private lateinit var mockMultiInstanceHelper: MultiInstanceHelper
     @Mock private lateinit var mockTasksLimiter: DesktopTasksLimiter
@@ -226,7 +224,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 .strictness(Strictness.LENIENT)
                 .spyStatic(DesktopModeStatus::class.java)
                 .spyStatic(DragPositioningCallbackUtility::class.java)
-                .spyStatic(Toast::class.java)
                 .startMocking()
         doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(Mockito.any()) }
 
@@ -289,8 +286,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             )
         )
             .thenReturn(mockTaskPositioner)
-
-        doReturn(mockToast).`when` { Toast.makeText(any(), anyInt(), anyInt()) }
 
         // InputChannel cannot be mocked because it passes to InputEventReceiver.
         val inputChannels = InputChannel.openInputChannelPair(TAG)
@@ -640,7 +635,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     fun testOnDecorSnappedLeft_snapResizes() {
-        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onLeftSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -648,19 +642,15 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onLeftSnapClickListenerCaptor = onLeftSnapClickListenerCaptor
         )
 
-        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onLeftSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController).snapToHalfScreen(
+        verify(mockDesktopTasksController).handleInstantSnapResizingTask(
             eq(decor.mTaskInfo),
-            taskSurfaceCaptor.capture(),
-            eq(currentBounds),
             eq(SnapPosition.LEFT),
             eq(ResizeTrigger.SNAP_LEFT_MENU),
             eq(null),
             eq(decor)
         )
-        assertEquals(taskSurfaceCaptor.firstValue, decor.mTaskSurface)
     }
 
     @Test
@@ -681,7 +671,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
     fun testOnSnapResizeLeft_nonResizable_decorSnappedLeft() {
-        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onLeftSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -689,19 +678,15 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onLeftSnapClickListenerCaptor = onLeftSnapClickListenerCaptor
         ).also { it.mTaskInfo.isResizeable = false }
 
-        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onLeftSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController).snapToHalfScreen(
+        verify(mockDesktopTasksController).handleInstantSnapResizingTask(
             eq(decor.mTaskInfo),
-            taskSurfaceCaptor.capture(),
-            eq(currentBounds),
             eq(SnapPosition.LEFT),
             eq(ResizeTrigger.SNAP_LEFT_MENU),
             eq(null),
             eq(decor),
         )
-        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
 
     @Test
@@ -723,12 +708,10 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 eq(null),
                 eq(decor),
             )
-        verify(mockToast).show()
     }
 
     @Test
     fun testOnDecorSnappedRight_snapResizes() {
-        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onRightSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -736,19 +719,15 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onRightSnapClickListenerCaptor = onRightSnapClickListenerCaptor
         )
 
-        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onRightSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController).snapToHalfScreen(
+        verify(mockDesktopTasksController).handleInstantSnapResizingTask(
             eq(decor.mTaskInfo),
-            taskSurfaceCaptor.capture(),
-            eq(currentBounds),
             eq(SnapPosition.RIGHT),
             eq(ResizeTrigger.SNAP_RIGHT_MENU),
             eq(null),
             eq(decor),
         )
-        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
 
     @Test
@@ -769,7 +748,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
     fun testOnSnapResizeRight_nonResizable_decorSnappedRight() {
-        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onRightSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -777,19 +755,15 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             onRightSnapClickListenerCaptor = onRightSnapClickListenerCaptor
         ).also { it.mTaskInfo.isResizeable = false }
 
-        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onRightSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController).snapToHalfScreen(
+        verify(mockDesktopTasksController).handleInstantSnapResizingTask(
             eq(decor.mTaskInfo),
-            taskSurfaceCaptor.capture(),
-            eq(currentBounds),
             eq(SnapPosition.RIGHT),
             eq(ResizeTrigger.SNAP_RIGHT_MENU),
             eq(null),
             eq(decor),
         )
-        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
 
     @Test
@@ -811,7 +785,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 eq(null),
                 eq(decor),
         )
-        verify(mockToast).show()
     }
 
     @Test

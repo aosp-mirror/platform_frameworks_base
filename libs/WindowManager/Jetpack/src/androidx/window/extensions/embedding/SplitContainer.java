@@ -98,10 +98,20 @@ class SplitContainer {
         mCurrentSplitAttributes = mDefaultSplitAttributes;
 
         if (shouldFinishPrimaryWithSecondary(splitRule)) {
-            mSecondaryContainer.addContainerToFinishOnExit(mPrimaryContainer);
+            addContainerToFinishOnExitWhenRestore(mSecondaryContainer, mPrimaryContainer);
         }
         if (shouldFinishSecondaryWithPrimary(splitRule)) {
-            mPrimaryContainer.addContainerToFinishOnExit(mSecondaryContainer);
+            addContainerToFinishOnExitWhenRestore(mPrimaryContainer, mSecondaryContainer);
+        }
+    }
+
+    private void addContainerToFinishOnExitWhenRestore(
+            @NonNull TaskFragmentContainer containerToAdd,
+            @NonNull TaskFragmentContainer containerToFinish) {
+        // If an activity was already added to be finished after the restoration, then that's it.
+        // Otherwise, add the container to finish on exit.
+        if (!containerToAdd.hasActivityToFinishOnExit(containerToFinish)) {
+            containerToAdd.addContainerToFinishOnExit(containerToFinish);
         }
     }
 

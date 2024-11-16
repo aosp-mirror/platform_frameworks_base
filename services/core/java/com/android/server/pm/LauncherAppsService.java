@@ -96,7 +96,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IInterface;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -2667,6 +2666,7 @@ public class LauncherAppsService extends SystemService {
                 }
                 final String[] packagesNullExtras = packagesWithoutExtras.toArray(
                         new String[packagesWithoutExtras.size()]);
+
                 final int n = mListeners.beginBroadcast();
                 try {
                     for (int i = 0; i < n; i++) {
@@ -2852,7 +2852,7 @@ public class LauncherAppsService extends SystemService {
         class SecureSettingsObserver extends ContentObserver {
 
             SecureSettingsObserver() {
-                super(new Handler(Looper.getMainLooper()));
+                super(mCallbackHandler);
             }
 
             @Override
@@ -2866,32 +2866,29 @@ public class LauncherAppsService extends SystemService {
                     if (privateProfile.getIdentifier() == UserHandle.USER_NULL) {
                         return;
                     }
-
                     final int n = mListeners.beginBroadcast();
                     try {
                         for (int i = 0; i < n; i++) {
-                            final IOnAppsChangedListener listener =
-                                    mListeners.getBroadcastItem(i);
+                            final IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                             final BroadcastCookie cookie =
-                                    (BroadcastCookie) mListeners.getBroadcastCookie(
-                                            i);
+                                    (BroadcastCookie) mListeners.getBroadcastCookie(i);
                             if (!isEnabledProfileOf(cookie, privateProfile,
                                     "onSecureSettingsChange")) {
                                 Log.d(TAG, "onSecureSettingsChange: Skipping - profile not enabled"
                                         + " or not accessible for package=" + cookie.packageName
                                         + ", packageUid=" + cookie.callingUid);
-                            } else {
-                                try {
-                                    Log.d(TAG,
-                                            "onUserConfigChanged: triggering onUserConfigChanged");
-                                    listener.onUserConfigChanged(
-                                            mUserManagerInternal.getLauncherUserInfo(
-                                                    privateProfile.getIdentifier()));
-                                } catch (RemoteException re) {
-                                    Slog.d(TAG, "onUserConfigChanged: Callback failed ", re);
-                                }
+                                continue;
+                            }
+                            try {
+                                Log.d(TAG, "onUserConfigChanged: triggering onUserConfigChanged");
+                                listener.onUserConfigChanged(
+                                        mUserManagerInternal.getLauncherUserInfo(
+                                                privateProfile.getIdentifier()));
+                            } catch (RemoteException re) {
+                                Slog.d(TAG, "onUserConfigChanged: Callback failed ", re);
                             }
                         }
+
                     } finally {
                         mListeners.finishBroadcast();
                     }

@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +61,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @AppModeFull
 @AppModeNonSdkSandbox
@@ -124,7 +126,8 @@ public class BroadcastHelperTest {
     @Test
     public void changeNonExportedComponent_sendPackageChangedBroadcastToSystem_withPermission()
             throws Exception {
-        changeComponentAndSendPackageChangedBroadcast(false /* changeExportedComponent */);
+        changeComponentAndSendPackageChangedBroadcast(false /* changeExportedComponent */,
+                new String[0] /* sharedPackages */);
 
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mMockActivityManagerInternal).broadcastIntentWithCallback(
@@ -140,7 +143,8 @@ public class BroadcastHelperTest {
     @Test
     public void changeNonExportedComponent_sendPackageChangedBroadcastToApplicationItself()
             throws Exception {
-        changeComponentAndSendPackageChangedBroadcast(false /* changeExportedComponent */);
+        changeComponentAndSendPackageChangedBroadcast(false /* changeExportedComponent */,
+                new String[0] /* sharedPackages */);
 
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mMockActivityManagerInternal).broadcastIntentWithCallback(captor.capture(), eq(null),
@@ -150,9 +154,45 @@ public class BroadcastHelperTest {
         assertThat(intent.getPackage()).isEqualTo(PACKAGE_CHANGED_TEST_PACKAGE_NAME);
     }
 
+    @RequiresFlagsEnabled(FLAG_REDUCE_BROADCASTS_FOR_COMPONENT_STATE_CHANGES)
+    @Test
+    public void changeNonExportedComponent_sendPackageChangedBroadcastToSharedUserIdApplications()
+            throws Exception {
+        changeComponentAndSendPackageChangedBroadcast(false /* changeExportedComponent */,
+                new String[]{"shared.package"} /* sharedPackages */);
+
+        ArgumentCaptor<Intent> captorIntent = ArgumentCaptor.forClass(Intent.class);
+        ArgumentCaptor<String[]> captorRequiredPermissions = ArgumentCaptor.forClass(
+                String[].class);
+        verify(mMockActivityManagerInternal, times(3)).broadcastIntentWithCallback(
+                captorIntent.capture(), eq(null), captorRequiredPermissions.capture(), anyInt(),
+                eq(null), eq(null), eq(null));
+        List<Intent> intents = captorIntent.getAllValues();
+        List<String[]> requiredPermissions = captorRequiredPermissions.getAllValues();
+        assertNotNull(intents);
+        assertThat(intents.size()).isEqualTo(3);
+
+        final Intent intent1 = intents.get(0);
+        final String[] requiredPermission1 = requiredPermissions.get(0);
+        assertThat(intent1.getPackage()).isEqualTo("android");
+        assertThat(requiredPermission1).isEqualTo(
+                new String[]{PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED});
+
+        final Intent intent2 = intents.get(1);
+        final String[] requiredPermission2 = requiredPermissions.get(1);
+        assertThat(intent2.getPackage()).isEqualTo(PACKAGE_CHANGED_TEST_PACKAGE_NAME);
+        assertThat(requiredPermission2).isNull();
+
+        final Intent intent3 = intents.get(2);
+        final String[] requiredPermission3 = requiredPermissions.get(2);
+        assertThat(intent3.getPackage()).isEqualTo("shared.package");
+        assertThat(requiredPermission3).isNull();
+    }
+
     @Test
     public void changeExportedComponent_sendPackageChangedBroadcastToAll() throws Exception {
-        changeComponentAndSendPackageChangedBroadcast(true /* changeExportedComponent */);
+        changeComponentAndSendPackageChangedBroadcast(true /* changeExportedComponent */,
+                new String[0] /* sharedPackages */);
 
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mMockActivityManagerInternal).broadcastIntentWithCallback(captor.capture(), eq(null),
@@ -162,11 +202,14 @@ public class BroadcastHelperTest {
         assertNull(intent.getPackage());
     }
 
-    private void changeComponentAndSendPackageChangedBroadcast(boolean changeExportedComponent) {
+    private void changeComponentAndSendPackageChangedBroadcast(boolean changeExportedComponent,
+            String[] sharedPackages) {
         when(mMockSnapshot.getPackageStateInternal(eq(PACKAGE_CHANGED_TEST_PACKAGE_NAME),
                 anyInt())).thenReturn(mMockPackageStateInternal);
         when(mMockSnapshot.isInstantAppInternal(any(), anyInt(), anyInt())).thenReturn(false);
         when(mMockSnapshot.getVisibilityAllowLists(any(), any())).thenReturn(null);
+        when(mMockSnapshot.getSharedUserPackagesForPackage(eq(PACKAGE_CHANGED_TEST_PACKAGE_NAME),
+                anyInt())).thenReturn(sharedPackages);
         when(mMockPackageStateInternal.getPkg()).thenReturn(mMockAndroidPackageInternal);
 
         when(mMockParsedActivity.getClassName()).thenReturn(

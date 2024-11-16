@@ -228,6 +228,28 @@ final class InputGestureManager {
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                     KeyGestureEvent.KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK));
         }
+        if (enableTaskResizingKeyboardShortcuts()) {
+            systemShortcuts.add(createKeyGesture(
+                    KeyEvent.KEYCODE_LEFT_BRACKET,
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW
+            ));
+            systemShortcuts.add(createKeyGesture(
+                    KeyEvent.KEYCODE_RIGHT_BRACKET,
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW
+            ));
+            systemShortcuts.add(createKeyGesture(
+                    KeyEvent.KEYCODE_EQUALS,
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW
+            ));
+            systemShortcuts.add(createKeyGesture(
+                    KeyEvent.KEYCODE_MINUS,
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW
+            ));
+        }
         if (keyboardA11yShortcutControl()) {
             if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()) {
                 systemShortcuts.add(createKeyGesture(
@@ -255,28 +277,6 @@ final class InputGestureManager {
                         KeyEvent.KEYCODE_6,
                         KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                         KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS
-                ));
-            }
-            if (enableTaskResizingKeyboardShortcuts()) {
-                systemShortcuts.add(createKeyGesture(
-                        KeyEvent.KEYCODE_LEFT_BRACKET,
-                        KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW
-                ));
-                systemShortcuts.add(createKeyGesture(
-                        KeyEvent.KEYCODE_RIGHT_BRACKET,
-                        KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW
-                ));
-                systemShortcuts.add(createKeyGesture(
-                        KeyEvent.KEYCODE_EQUALS,
-                        KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW
-                ));
-                systemShortcuts.add(createKeyGesture(
-                        KeyEvent.KEYCODE_MINUS,
-                        KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE
                 ));
             }
         }

@@ -1826,52 +1826,6 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
-     * Start building a waveform vibration.
-     *
-     * <p>The waveform envelope builder offers more flexibility for creating waveform effects,
-     * allowing control over vibration amplitude and frequency via smooth transitions between
-     * values. The waveform will start the first transition from the vibrator off state, using
-     * the same frequency of the first control point. To provide a different initial vibration
-     * frequency, use {@link #startWaveformEnvelope(float)}.
-     *
-     * <p>Note: To check whether waveform envelope effects are supported, use
-     * {@link Vibrator#areEnvelopeEffectsSupported()}.
-     *
-     * @see VibrationEffect.WaveformEnvelopeBuilder
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    @NonNull
-    public static VibrationEffect.WaveformEnvelopeBuilder startWaveformEnvelope() {
-        return new WaveformEnvelopeBuilder();
-    }
-
-    /**
-     * Start building a waveform vibration with an initial frequency.
-     *
-     * <p>The waveform envelope builder offers more flexibility for creating waveform effects,
-     * allowing control over vibration amplitude and frequency via smooth transitions between
-     * values.
-     *
-     * <p>This is the same as {@link #startWaveformEnvelope()}, but the waveform will start
-     * vibrating at given frequency, in hertz, while it transitions to the new amplitude and
-     * frequency of the first control point.
-     *
-     * <p>Note: To check whether waveform envelope effects are supported, use
-     * {@link Vibrator#areEnvelopeEffectsSupported()}.
-     *
-     * @param initialFrequencyHz The starting frequency of the vibration, in hertz. Must be greater
-     *                           than zero.
-     *
-     * @see VibrationEffect.WaveformEnvelopeBuilder
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    @NonNull
-    public static VibrationEffect.WaveformEnvelopeBuilder startWaveformEnvelope(
-            @FloatRange(from = 0) float initialFrequencyHz) {
-        return new WaveformEnvelopeBuilder(initialFrequencyHz);
-    }
-
-    /**
      * A builder for waveform effects described by its envelope.
      *
      * <p>Waveform effect envelopes are defined by one or more control points describing a target
@@ -1882,7 +1836,7 @@ public abstract class VibrationEffect implements Parcelable {
      * 100ms, holds that state for 200ms, and then ramps back down over 100ms:
      *
      * <pre>{@code
-     * VibrationEffect effect = VibrationEffect.startWaveformEnvelope()
+     * VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
      *     .addControlPoint(1.0f, 120f, 100)
      *     .addControlPoint(1.0f, 120f, 200)
      *     .addControlPoint(0.0f, 120f, 100)
@@ -1916,20 +1870,48 @@ public abstract class VibrationEffect implements Parcelable {
      * {@link VibratorEnvelopeEffectInfo#getMaxControlPointDurationMillis()}
      * <li>Maximum total effect duration: {@link VibratorEnvelopeEffectInfo#getMaxDurationMillis()}
      * </ul>
-     *
-     * @see VibrationEffect#startWaveformEnvelope()
      */
     @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public static final class WaveformEnvelopeBuilder {
 
         private ArrayList<PwleSegment> mSegments = new ArrayList<>();
         private float mLastAmplitude = 0f;
-        private float mLastFrequencyHz = 0f;
+        private float mLastFrequencyHz = Float.NaN;
 
-        private WaveformEnvelopeBuilder() {}
+        public WaveformEnvelopeBuilder() {}
 
-        private WaveformEnvelopeBuilder(float initialFrequency) {
-            mLastFrequencyHz = initialFrequency;
+        /**
+         * Sets the initial frequency for the waveform in Hertz.
+         *
+         * <p>The effect will start vibrating at this frequency when it transitions to the
+         * amplitude and frequency defined by the first control point.
+         *
+         * <p>The frequency must be greater than zero and within the supported range. To determine
+         * the supported range, use {@link Vibrator#getFrequencyProfile()}. Creating
+         * effects using frequencies outside this range will result in the vibration not playing.
+         *
+         * @param initialFrequencyHz The starting frequency of the vibration, in Hz. Must be
+         *                           greater than zero.
+         */
+        @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+        @SuppressWarnings("MissingGetterMatchingBuilder")// No getter to initial frequency once set.
+        @NonNull
+        public WaveformEnvelopeBuilder setInitialFrequencyHz(
+                @FloatRange(from = 0) float initialFrequencyHz) {
+
+            if (mSegments.isEmpty()) {
+                mLastFrequencyHz = initialFrequencyHz;
+            } else {
+                PwleSegment firstSegment = mSegments.getFirst();
+                mSegments.set(0, new PwleSegment(
+                        firstSegment.getStartAmplitude(),
+                        firstSegment.getEndAmplitude(),
+                        initialFrequencyHz, // Update start frequency
+                        firstSegment.getEndFrequencyHz(),
+                        (int) firstSegment.getDuration()));
+            }
+
+            return this;
         }
 
         /**
@@ -1940,15 +1922,13 @@ public abstract class VibrationEffect implements Parcelable {
          * perceived intensity. It's determined by the actuator response curve.
          *
          * <p>Frequency must be greater than zero and within the supported range. To determine
-         * the supported range, use {@link Vibrator#getFrequencyProfile()}. This method returns a
-         * {@link android.os.vibrator.VibratorFrequencyProfile} object, which contains the
-         * minimum and maximum frequencies, among other frequency-related information. Creating
+         * the supported range, use {@link Vibrator#getFrequencyProfile()}. Creating
          * effects using frequencies outside this range will result in the vibration not playing.
          *
          * <p>Time specifies the duration (in milliseconds) for the vibrator to smoothly transition
          * from the previous control point to this new one. It must be greater than zero. To
          * transition as quickly as possible, use
-         * {@link Vibrator#getMinEnvelopeEffectControlPointDurationMillis()}.
+         * {@link VibratorEnvelopeEffectInfo#getMinControlPointDurationMillis()}.
          *
          * @param amplitude   The amplitude value between 0 and 1, inclusive. 0 represents the
          *                    vibrator being off, and 1 represents the maximum achievable amplitude
@@ -1963,7 +1943,7 @@ public abstract class VibrationEffect implements Parcelable {
                 @FloatRange(from = 0, to = 1) float amplitude,
                 @FloatRange(from = 0) float frequencyHz, int timeMillis) {
 
-            if (mLastFrequencyHz == 0) {
+            if (Float.isNaN(mLastFrequencyHz)) {
                 mLastFrequencyHz = frequencyHz;
             }
 
@@ -1984,6 +1964,7 @@ public abstract class VibrationEffect implements Parcelable {
          * calling this method again.
          *
          * @return The {@link VibrationEffect} resulting from the list of control points.
+         * @throws IllegalStateException if no control points were added to the builder.
          */
         @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
         @NonNull
