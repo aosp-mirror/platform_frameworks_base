@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +39,7 @@ constructor(
     smartspaceController: LockscreenSmartspaceController,
     keyguardClockViewModel: KeyguardClockViewModel,
     smartspaceInteractor: KeyguardSmartspaceInteractor,
+    shadeInteractor: ShadeInteractor,
 ) {
     /** Whether the smartspace section is available in the build. */
     val isSmartspaceEnabled: Boolean = smartspaceController.isEnabled
@@ -59,10 +61,9 @@ constructor(
 
     /** Whether the weather area should be visible. */
     val isWeatherVisible: StateFlow<Boolean> =
-        combine(
+        combine(isWeatherEnabled, keyguardClockViewModel.hasCustomWeatherDataDisplay) {
                 isWeatherEnabled,
-                keyguardClockViewModel.hasCustomWeatherDataDisplay,
-            ) { isWeatherEnabled, clockIncludesCustomWeatherDisplay ->
+                clockIncludesCustomWeatherDisplay ->
                 isWeatherVisible(
                     clockIncludesCustomWeatherDisplay = clockIncludesCustomWeatherDisplay,
                     isWeatherEnabled = isWeatherEnabled,
@@ -76,7 +77,7 @@ constructor(
                         clockIncludesCustomWeatherDisplay =
                             keyguardClockViewModel.hasCustomWeatherDataDisplay.value,
                         isWeatherEnabled = smartspaceInteractor.isWeatherEnabled.value,
-                    )
+                    ),
             )
 
     private fun isWeatherVisible(
@@ -88,6 +89,8 @@ constructor(
 
     /* trigger clock and smartspace constraints change when smartspace appears */
     val bcSmartspaceVisibility: StateFlow<Int> = smartspaceInteractor.bcSmartspaceVisibility
+
+    val isShadeLayoutWide: StateFlow<Boolean> = shadeInteractor.isShadeLayoutWide
 
     companion object {
         fun getSmartspaceStartMargin(context: Context): Int {
