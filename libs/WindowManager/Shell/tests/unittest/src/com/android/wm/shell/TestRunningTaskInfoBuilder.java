@@ -45,6 +45,7 @@ public final class TestRunningTaskInfoBuilder {
     private Intent mBaseIntent = new Intent();
     private @WindowConfiguration.ActivityType int mActivityType = ACTIVITY_TYPE_STANDARD;
     private @WindowConfiguration.WindowingMode int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+    private @WindowConfiguration.ActivityType int mTopActivityType = ACTIVITY_TYPE_STANDARD;
     private int mDisplayId = Display.DEFAULT_DISPLAY;
     private ActivityManager.TaskDescription.Builder mTaskDescriptionBuilder = null;
     private final Point mPositionInParent = new Point();
@@ -102,6 +103,12 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    public TestRunningTaskInfoBuilder setTopActivityType(
+            @WindowConfiguration.ActivityType int activityType) {
+        mTopActivityType = activityType;
+        return this;
+    }
+
     public TestRunningTaskInfoBuilder setWindowingMode(
             @WindowConfiguration.WindowingMode int windowingMode) {
         mWindowingMode = windowingMode;
@@ -154,6 +161,7 @@ public final class TestRunningTaskInfoBuilder {
         info.configuration.windowConfiguration.setBounds(mBounds);
         info.configuration.windowConfiguration.setActivityType(mActivityType);
         info.configuration.windowConfiguration.setWindowingMode(mWindowingMode);
+        info.topActivityType = mTopActivityType;
         info.token = mToken;
         info.isResizeable = true;
         info.supportsMultiWindow = true;

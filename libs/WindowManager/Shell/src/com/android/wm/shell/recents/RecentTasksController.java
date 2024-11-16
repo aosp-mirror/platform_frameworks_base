@@ -665,8 +665,10 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 }
                 mTransitionHandler.addTransitionStateListener(new RecentsTransitionStateListener() {
                     @Override
-                    public void onAnimationStateChanged(boolean running) {
-                        executor.execute(() -> listener.accept(running));
+                    public void onTransitionStateChanged(@RecentsTransitionState int state) {
+                        executor.execute(() -> {
+                            listener.accept(RecentsTransitionStateListener.isAnimating(state));
+                        });
                     }
                 });
             });
