@@ -462,5 +462,7 @@ public class GlobalSettingsValidators {
                 Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_NONE,
                 Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_COMPANION
         ));
+        VALIDATORS.put(Global.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Global.HEARING_DEVICE_LOCAL_NOTIFICATION, ANY_STRING_VALIDATOR);
     }
 }
