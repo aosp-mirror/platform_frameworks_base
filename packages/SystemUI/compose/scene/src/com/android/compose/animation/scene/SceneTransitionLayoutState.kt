@@ -354,6 +354,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
     }
 
     override suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean) {
+        Log.i(TAG, "startTransition(transition=$transition, chain=$chain)")
         checkThread()
 
         // Prepare the transition before starting it. This is outside of the try/finally block on
@@ -486,6 +487,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
             return
         }
 
+        Log.i(TAG, "finishTransition(transition=$transition)")
         check(transitionStates.fastAll { it is TransitionState.Transition })
 
         // Mark this transition as finished.
@@ -513,13 +515,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // If all transitions are finished, we are idle.
         if (i == nStates) {
             check(finishedTransitions.isEmpty())
-            this.transitionStates =
-                listOf(
-                    TransitionState.Idle(
-                        lastTransition.currentScene,
-                        lastTransition.currentOverlays,
-                    )
-                )
+            val idle =
+                TransitionState.Idle(lastTransition.currentScene, lastTransition.currentOverlays)
+            Log.i(TAG, "all transitions finished. idle=$idle")
+            this.transitionStates = listOf(idle)
         } else if (i > 0) {
             this.transitionStates = transitionStates.subList(fromIndex = i, toIndex = nStates)
         }
