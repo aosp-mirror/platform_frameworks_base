@@ -95,12 +95,15 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
+import com.android.wm.shell.desktopmode.DesktopTasksController.DesktopModeEntryExitTransitionListener
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTasksController.TaskbarDesktopTaskListener
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createSplitScreenTask
+import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION
+import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler.FULLSCREEN_ANIMATION_DURATION
 import com.android.wm.shell.desktopmode.minimize.DesktopWindowLimitRemoteHandler
 import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
@@ -223,6 +226,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock
   private lateinit var desktopWindowDecoration: DesktopModeWindowDecoration
   @Mock private lateinit var resources: Resources
+  @Mock
+  lateinit var desktopModeEnterExitTransitionListener: DesktopModeEntryExitTransitionListener
   private lateinit var controller: DesktopTasksController
   private lateinit var shellInit: ShellInit
   private lateinit var taskRepository: DesktopRepository
@@ -294,6 +299,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller = createController()
     controller.setSplitScreenController(splitScreenController)
     controller.freeformTaskTransitionStarter = freeformTaskTransitionStarter
+    controller.desktopModeEnterExitTransitionListener = desktopModeEnterExitTransitionListener
 
     shellInit.init()
 
@@ -1054,6 +1060,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
     val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
   }
 
   @Test
@@ -1065,12 +1072,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_UNDEFINED)
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
   }
 
   @Test
   fun moveTaskToDesktop_nonExistentTask_doesNothing() {
     controller.moveTaskToDesktop(999, transitionSource = UNKNOWN)
     verifyEnterDesktopWCTNotExecuted()
+    verify(desktopModeEnterExitTransitionListener, times(0)).onEnterDesktopModeTransitionStarted(anyInt())
   }
 
   @Test
@@ -1115,9 +1124,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
       }
 
     controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
-
     val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
   }
 
   @Test
@@ -1132,6 +1141,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
     verifyEnterDesktopWCTNotExecuted()
+    verify(desktopModeEnterExitTransitionListener, times(0)).onEnterDesktopModeTransitionStarted(
+      FREEFORM_ANIMATION_DURATION
+    )
   }
 
   @Test
@@ -1178,6 +1190,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
   }
 
   @Test
@@ -1197,6 +1210,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       assertThat(changes[fullscreenTask.token.asBinder()]?.windowingMode)
           .isEqualTo(WINDOWING_MODE_FREEFORM)
     }
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
   }
 
   @Test
@@ -1217,6 +1231,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       assertThat(changes[fullscreenTask.token.asBinder()]?.windowingMode)
           .isEqualTo(WINDOWING_MODE_FREEFORM)
     }
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
   }
 
   @Test
@@ -1238,6 +1253,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       assertThat(hierarchyOps.map { it.container })
           .doesNotContain(freeformTaskSecond.token.asBinder())
     }
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
   }
 
   @Test
@@ -1246,6 +1262,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
     val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
     verify(splitScreenController)
         .prepareExitSplitScreen(any(), anyInt(), eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE))
   }
@@ -1256,6 +1273,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
     val wct = getLatestEnterDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
     verify(splitScreenController, never())
         .prepareExitSplitScreen(any(), anyInt(), eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE))
   }
@@ -1270,6 +1288,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.moveRunningTaskToDesktop(newTask, transitionSource = UNKNOWN)
 
     val wct = getLatestEnterDesktopWct()
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
     assertThat(wct.hierarchyOps.size).isEqualTo(MAX_TASK_LIMIT + 1) // visible tasks + home
     wct.assertReorderAt(0, homeTask)
     wct.assertReorderSequenceInRange(
@@ -1288,6 +1307,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.moveRunningTaskToDesktop(newTask, transitionSource = UNKNOWN)
 
     val wct = getLatestEnterDesktopWct()
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
     assertThat(wct.hierarchyOps.size).isEqualTo(MAX_TASK_LIMIT + 2) // tasks + home + wallpaper
     // Move home to front
     wct.assertReorderAt(0, homeTask)
@@ -1307,6 +1327,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
     controller.moveToFullscreen(task.taskId, transitionSource = UNKNOWN)
     val wct = getLatestExitDesktopWct()
+    verify(desktopModeEnterExitTransitionListener, times(1)).onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_UNDEFINED)
   }
@@ -1324,6 +1345,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     val wct = getLatestExitDesktopWct()
     val taskChange = assertNotNull(wct.changes[task.token.asBinder()])
+    verify(desktopModeEnterExitTransitionListener).onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
     assertThat(taskChange.windowingMode).isEqualTo(WINDOWING_MODE_UNDEFINED)
     // Removes wallpaper activity when leaving desktop
     wct.assertRemoveAt(index = 0, wallpaperToken)
@@ -1338,6 +1360,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val wct = getLatestExitDesktopWct()
     assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    verify(desktopModeEnterExitTransitionListener).onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
   }
 
   @Test
@@ -1354,6 +1377,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val wct = getLatestExitDesktopWct()
     val taskChange = assertNotNull(wct.changes[task.token.asBinder()])
     assertThat(taskChange.windowingMode).isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    verify(desktopModeEnterExitTransitionListener).onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
     // Removes wallpaper activity when leaving desktop
     wct.assertRemoveAt(index = 0, wallpaperToken)
   }
@@ -1374,6 +1398,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val wct = getLatestExitDesktopWct()
     val task1Change = assertNotNull(wct.changes[task1.token.asBinder()])
     assertThat(task1Change.windowingMode).isEqualTo(WINDOWING_MODE_UNDEFINED)
+    verify(desktopModeEnterExitTransitionListener).onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
     // Does not remove wallpaper activity, as desktop still has a visible desktop task
     assertThat(wct.hierarchyOps).isEmpty()
   }
@@ -1388,13 +1413,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun moveToFullscreen_secondDisplayTaskHasFreeform_secondDisplayNotAffected() {
     val taskDefaultDisplay = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
     val taskSecondDisplay = setUpFreeformTask(displayId = SECOND_DISPLAY)
-
     controller.moveToFullscreen(taskDefaultDisplay.taskId, transitionSource = UNKNOWN)
 
     with(getLatestExitDesktopWct()) {
       assertThat(changes.keys).contains(taskDefaultDisplay.token.asBinder())
       assertThat(changes.keys).doesNotContain(taskSecondDisplay.token.asBinder())
     }
+    verify(desktopModeEnterExitTransitionListener).onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
   }
 
   @Test
