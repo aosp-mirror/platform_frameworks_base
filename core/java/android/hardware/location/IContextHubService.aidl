@@ -126,9 +126,13 @@ interface IContextHubService {
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     boolean setTestMode(in boolean enable);
 
-    // Finds all endpoints that havea specific ID
+    // Finds all endpoints that has a specific ID
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     List<HubEndpointInfo> findEndpoints(long endpointId);
+
+    // Finds all endpoints that has a specific service
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    List<HubEndpointInfo> findEndpointsWithService(String service);
 
     // Register an endpoint with the context hub
     @EnforcePermission("ACCESS_CONTEXT_HUB")
