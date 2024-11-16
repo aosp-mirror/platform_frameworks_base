@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package android.hardware.display
+package com.android.systemui
 
-import android.view.Display
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.reardisplay.RearDisplayInnerDialogDelegate
 import org.mockito.kotlin.mock
 
-val Kosmos.displayManager by Kosmos.Fixture { mock<DisplayManager>() }
-
-val Kosmos.defaultDisplay: Display by Kosmos.Fixture { mock<Display>() }
-
-val Kosmos.rearDisplay: Display by Kosmos.Fixture { mock<Display>() }
+val Kosmos.rearDisplayInnerDialogDelegateFactory by
+    Kosmos.Fixture { mock<RearDisplayInnerDialogDelegate.Factory>() }
