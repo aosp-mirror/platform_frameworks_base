@@ -25,7 +25,7 @@ import android.provider.Settings;
 
 import com.android.systemui.util.settings.SettingsSingleThreadBackground;
 
-import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.CoroutineScope;
 
 import javax.inject.Inject;
 
@@ -33,13 +33,13 @@ import javax.inject.Inject;
 @SuppressLint("StaticSettingsProvider")
 class GlobalSettingsImpl implements GlobalSettings {
     private final ContentResolver mContentResolver;
-    private final CoroutineDispatcher mBgDispatcher;
+    private final CoroutineScope mSettingsScope;
 
     @Inject
     GlobalSettingsImpl(ContentResolver contentResolver,
-            @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
+            @SettingsSingleThreadBackground CoroutineScope settingsScope) {
         mContentResolver = contentResolver;
-        mBgDispatcher = bgDispatcher;
+        mSettingsScope = settingsScope;
     }
 
     @NonNull
@@ -56,8 +56,8 @@ class GlobalSettingsImpl implements GlobalSettings {
 
     @NonNull
     @Override
-    public CoroutineDispatcher getBackgroundDispatcher() {
-        return mBgDispatcher;
+    public CoroutineScope getSettingsScope() {
+        return mSettingsScope;
     }
 
     @Override
