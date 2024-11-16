@@ -11527,11 +11527,9 @@ public class Notification implements Parcelable
             contentView.setBundle(R.id.progress,
                     "setProgressModel", model.toBundle());
 
-            if (mTrackerIcon != null) {
-                contentView.setIcon(R.id.progress,
-                        "setProgressTrackerIcon",
-                        mTrackerIcon);
-            }
+            contentView.setIcon(R.id.progress,
+                    "setProgressTrackerIcon",
+                    mTrackerIcon);
 
             return contentView;
         }
