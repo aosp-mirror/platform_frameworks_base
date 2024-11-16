@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.shared.desktopmode
+package com.android.wm.shell.shared.multiinstance
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
@@ -34,6 +34,7 @@ import android.view.View.SCALE_Y
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.LinearLayout
 import android.window.TaskSnapshot
+import com.android.wm.shell.shared.R
 
 /**
  * View for the All Windows menu option, used by both Desktop Windowing and Taskbar.
@@ -167,6 +168,9 @@ abstract class ManageWindowsViewContainer(
                 val appSnapshotButton = SurfaceView(context)
                 appSnapshotButton.cornerRadius = iconRadius
                 appSnapshotButton.setZOrderOnTop(true)
+                appSnapshotButton.contentDescription = context.resources.getString(
+                    R.string.manage_windows_icon_text, iconCount + 1
+                )
                 appSnapshotButton.setOnClickListener {
                     onIconClickListener?.invoke(taskId)
                 }
@@ -230,10 +234,12 @@ abstract class ManageWindowsViewContainer(
         /** Play the animation for opening the menu. */
         fun animateOpen() {
             animateView(rootView, MENU_BOUNDS_SHRUNK_SCALE, MENU_BOUNDS_FULL_SCALE,
-                MENU_START_ALPHA, MENU_FULL_ALPHA)
+                MENU_START_ALPHA, MENU_FULL_ALPHA
+            )
             for (view in iconViews) {
                 animateView(view, MENU_BOUNDS_SHRUNK_SCALE, MENU_BOUNDS_FULL_SCALE,
-                    MENU_START_ALPHA, MENU_FULL_ALPHA)
+                    MENU_START_ALPHA, MENU_FULL_ALPHA
+                )
             }
             createAnimatorSet().start()
         }
@@ -241,10 +247,12 @@ abstract class ManageWindowsViewContainer(
         /** Play the animation for closing the menu. */
         fun animateClose(callback: () -> Unit) {
             animateView(rootView, MENU_BOUNDS_FULL_SCALE, MENU_BOUNDS_SHRUNK_SCALE,
-                MENU_FULL_ALPHA, MENU_START_ALPHA)
+                MENU_FULL_ALPHA, MENU_START_ALPHA
+            )
             for (view in iconViews) {
                 animateView(view, MENU_BOUNDS_FULL_SCALE, MENU_BOUNDS_SHRUNK_SCALE,
-                    MENU_FULL_ALPHA, MENU_START_ALPHA)
+                    MENU_FULL_ALPHA, MENU_START_ALPHA
+                )
             }
             createAnimatorSet().apply {
                 addListener(
