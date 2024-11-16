@@ -60,8 +60,7 @@ import java.util.function.Supplier;
  * entering and exiting freeform.
  */
 public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionHandler {
-    @VisibleForTesting
-    static final int FULLSCREEN_ANIMATION_DURATION = 336;
+    public static final int FULLSCREEN_ANIMATION_DURATION = 336;
 
     private final Context mContext;
     private final Transitions mTransitions;

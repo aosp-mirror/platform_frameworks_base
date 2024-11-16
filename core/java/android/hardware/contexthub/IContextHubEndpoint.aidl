@@ -18,6 +18,7 @@ package android.hardware.contexthub;
 
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubMessage;
+import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.location.IContextHubTransactionCallback;
 
 /**
@@ -37,7 +38,7 @@ interface IContextHubEndpoint {
      * @throws IllegalArgumentException If the HubEndpointInfo is not valid.
      * @throws IllegalStateException If there are too many opened sessions.
      */
-    int openSession(in HubEndpointInfo destination);
+    int openSession(in HubEndpointInfo destination, in @nullable HubServiceInfo serviceInfo);
 
     /**
      * Request system service to close a specific session

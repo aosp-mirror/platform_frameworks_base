@@ -19,6 +19,7 @@ package android.hardware.contexthub;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.chre.flags.Flags;
 
@@ -55,9 +56,12 @@ public interface IHubEndpointLifecycleCallback {
      * Called when an endpoint is requesting a session be opened with another endpoint.
      *
      * @param requester The {@link HubEndpointInfo} object representing the requester
+     * @param serviceInfo The {@link HubServiceInfo} object representing the service associated with
+     *     this session. Null indicates that there is no service associated with this session.
      */
     @NonNull
-    HubEndpointSessionResult onSessionOpenRequest(@NonNull HubEndpointInfo requester);
+    HubEndpointSessionResult onSessionOpenRequest(
+            @NonNull HubEndpointInfo requester, @Nullable HubServiceInfo serviceInfo);
 
     /**
      * Called when a communication session is opened and ready to be used.

@@ -18,6 +18,7 @@ package android.hardware.contexthub;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.chre.flags.Flags;
 import android.hardware.location.ContextHubTransaction;
@@ -42,6 +43,7 @@ public class HubEndpointSession implements AutoCloseable {
     @NonNull private final HubEndpoint mHubEndpoint;
     @NonNull private final HubEndpointInfo mInitiator;
     @NonNull private final HubEndpointInfo mDestination;
+    @Nullable private final HubServiceInfo mServiceInfo;
 
     private final AtomicBoolean mIsClosed = new AtomicBoolean(true);
 
@@ -50,11 +52,13 @@ public class HubEndpointSession implements AutoCloseable {
             int id,
             @NonNull HubEndpoint hubEndpoint,
             @NonNull HubEndpointInfo destination,
-            @NonNull HubEndpointInfo initiator) {
+            @NonNull HubEndpointInfo initiator,
+            @Nullable HubServiceInfo serviceInfo) {
         mId = id;
         mHubEndpoint = hubEndpoint;
         mDestination = destination;
         mInitiator = initiator;
+        mServiceInfo = serviceInfo;
     }
 
     /**
@@ -121,6 +125,21 @@ public class HubEndpointSession implements AutoCloseable {
             mCloseGuard.close();
             mHubEndpoint.closeSession(this);
         }
+    }
+
+    /**
+     * Get the {@link HubServiceInfo} associated with this session. Null value indicates that there
+     * is no service associated to this session.
+     *
+     * <p>For hub initiated sessions, the object was previously used in as an argument for open
+     * request in {@link IHubEndpointLifecycleCallback#onSessionOpenRequest}.
+     *
+     * <p>For app initiated sessions, the object was previously used in an open request in {@link
+     * android.hardware.location.ContextHubManager#openSession}
+     */
+    @Nullable
+    public HubServiceInfo getServiceInfo() {
+        return mServiceInfo;
     }
 
     @Override

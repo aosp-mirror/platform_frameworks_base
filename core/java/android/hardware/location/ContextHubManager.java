@@ -37,6 +37,7 @@ import android.hardware.contexthub.ErrorCode;
 import android.hardware.contexthub.HubDiscoveryInfo;
 import android.hardware.contexthub.HubEndpoint;
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IHubEndpointLifecycleCallback;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -693,12 +694,48 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull
     public List<HubDiscoveryInfo> findEndpoints(long endpointId) {
+        // TODO(b/379323274): Consider improving these getters to avoid racing with nano app load
+        //  timing.
         try {
             List<HubEndpointInfo> endpointInfos = mService.findEndpoints(endpointId);
             List<HubDiscoveryInfo> results = new ArrayList<>(endpointInfos.size());
             // Wrap with result type
             for (HubEndpointInfo endpointInfo : endpointInfos) {
                 results.add(new HubDiscoveryInfo(endpointInfo));
+            }
+            return results;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Find a list of endpoints that provides a specific service.
+     *
+     * @param serviceDescriptor Statically generated ID for an endpoint.
+     * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
+     * @throws IllegalArgumentException if the serviceDescriptor is empty/null.
+     */
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull
+    public List<HubDiscoveryInfo> findEndpoints(@NonNull String serviceDescriptor) {
+        // TODO(b/379323274): Consider improving these getters to avoid racing with nano app load
+        //  timing.
+        if (serviceDescriptor.isBlank()) {
+            throw new IllegalArgumentException("Invalid service descriptor: " + serviceDescriptor);
+        }
+        try {
+            List<HubEndpointInfo> endpointInfos =
+                    mService.findEndpointsWithService(serviceDescriptor);
+            List<HubDiscoveryInfo> results = new ArrayList<>(endpointInfos.size());
+            // Wrap with result type
+            for (HubEndpointInfo endpointInfo : endpointInfos) {
+                for (HubServiceInfo serviceInfo : endpointInfo.getServiceInfoCollection()) {
+                    if (serviceInfo.getServiceDescriptor().equals(serviceDescriptor)) {
+                        results.add(new HubDiscoveryInfo(endpointInfo, serviceInfo));
+                    }
+                }
             }
             return results;
         } catch (RemoteException e) {
@@ -1052,11 +1089,12 @@ public final class ContextHubManager {
     }
 
     /**
-     * Use a registered endpoint to connect to another endpoint (destination).
+     * Use a registered endpoint to connect to another endpoint (destination) without specifying a
+     * service.
      *
      * <p>Context Hub Service will create the endpoint session and notify the registered endpoint.
      * The registered endpoint will receive callbacks on its {@link IHubEndpointLifecycleCallback}
-     * object regarding the lifecycle events of the session
+     * object regarding the lifecycle events of the session.
      *
      * @param hubEndpoint {@link HubEndpoint} object previously registered via {@link
      *     ContextHubManager#registerEndpoint(HubEndpoint)}.
@@ -1067,7 +1105,31 @@ public final class ContextHubManager {
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void openSession(
             @NonNull HubEndpoint hubEndpoint, @NonNull HubEndpointInfo destination) {
-        hubEndpoint.openSession(destination);
+        hubEndpoint.openSession(destination, null);
+    }
+
+    /**
+     * Use a registered endpoint to connect to another endpoint (destination) for a service
+     * described by a {@link HubServiceInfo} object.
+     *
+     * <p>Context Hub Service will create the endpoint session and notify the registered endpoint.
+     * The registered endpoint will receive callbacks on its {@link IHubEndpointLifecycleCallback}
+     * object regarding the lifecycle events of the session.
+     *
+     * @param hubEndpoint {@link HubEndpoint} object previously registered via {@link
+     *     ContextHubManager#registerEndpoint(HubEndpoint)}.
+     * @param destination {@link HubEndpointInfo} object that represents an endpoint from previous
+     *     endpoint discovery results (e.g. from {@link ContextHubManager#findEndpoints(long)}).
+     * @param serviceInfo {@link HubServiceInfo} object that describes the service associated with
+     *     this session. The information will be sent to the destination as part of open request.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void openSession(
+            @NonNull HubEndpoint hubEndpoint,
+            @NonNull HubEndpointInfo destination,
+            @NonNull HubServiceInfo serviceInfo) {
+        hubEndpoint.openSession(destination, serviceInfo);
     }
 
     /**

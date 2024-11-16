@@ -5283,6 +5283,23 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public void setScreenBrightnessOverrideFromWindowManager(
+                SparseArray<DisplayBrightnessOverrideRequest> brightnessOverrides) {
+            SparseArray<DisplayPowerController> dpcs = new SparseArray<>();
+            synchronized (mSyncRoot) {
+                for (int i = 0; i < mDisplayPowerControllers.size(); i++) {
+                    dpcs.put(mDisplayPowerControllers.keyAt(i),
+                            mDisplayPowerControllers.valueAt(i));
+                }
+            }
+            for (int i = 0; i < dpcs.size(); ++i) {
+                final int displayId = dpcs.keyAt(i);
+                final DisplayPowerController dpc = dpcs.valueAt(i);
+                dpc.setBrightnessOverrideRequest(brightnessOverrides.get(displayId));
+            }
+        }
+
+        @Override
         public boolean requestPowerState(int groupId, DisplayPowerRequest request,
                 boolean waitForNegativeProximity) {
             synchronized (mSyncRoot) {

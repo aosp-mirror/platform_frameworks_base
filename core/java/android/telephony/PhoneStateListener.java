@@ -1712,6 +1712,15 @@ public class PhoneStateListener {
                 @NonNull NtnSignalStrength ntnSignalStrength) {
             // not supported on the deprecated interface - Use TelephonyCallback instead
         }
+
+        public final void onSecurityAlgorithmsChanged(SecurityAlgorithmUpdate update) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
+
+        public final void onCellularIdentifierDisclosedChanged(
+                CellularIdentifierDisclosure disclosure) {
+            // not supported on the deprecated interface - Use TelephonyCallback instead
+        }
     }
 
     private void log(String s) {

@@ -3018,6 +3018,17 @@ interface ITelephony {
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void requestTimeForNextSatelliteVisibility(in ResultReceiver receiver);
 
+
+     /**
+     * Request to get the currently selected satellite subscription id.
+     *
+     * @param receiver Result receiver to get the error code of the request and the currently
+     *                 selected satellite subscription id.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestSelectedNbIotSatelliteSubscriptionId(in ResultReceiver receiver);
+
     /**
      * Inform whether the device is aligned with the satellite in both real and demo mode.
      *

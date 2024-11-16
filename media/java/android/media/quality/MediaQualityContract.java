@@ -23,7 +23,6 @@ import android.media.tv.flags.Flags;
 /**
  * The contract between the media quality service and applications. Contains definitions for the
  * commonly used parameter names.
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public class MediaQualityContract {
@@ -42,9 +41,8 @@ public class MediaQualityContract {
 
     /**
      * Parameters picture quality.
-     * @hide
      */
-    public static final class PictureQuality implements BaseParameters {
+    public static final class PictureQuality {
         /**
          * The brightness.
          *
