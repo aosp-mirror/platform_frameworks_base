@@ -113,34 +113,38 @@ constructor(
         }
 
     private val showIcon =
-        canShowIcon
-            .flatMapLatest { canShow ->
-                if (!canShow) {
-                    flowOf(false)
-                } else {
-                    combine(
-                        shouldShowIconForOosAfterHysteresis,
-                        interactor.connectionState,
-                        interactor.isWifiActive,
-                        airplaneModeRepository.isAirplaneMode,
-                    ) { showForOos, connectionState, isWifiActive, isAirplaneMode ->
-                        if (isWifiActive || isAirplaneMode) {
-                            false
-                        } else {
-                            showForOos ||
-                                connectionState == SatelliteConnectionState.On ||
-                                connectionState == SatelliteConnectionState.Connected
+        if (interactor.isOpportunisticSatelliteIconEnabled) {
+            canShowIcon
+                .flatMapLatest { canShow ->
+                    if (!canShow) {
+                        flowOf(false)
+                    } else {
+                        combine(
+                            shouldShowIconForOosAfterHysteresis,
+                            interactor.connectionState,
+                            interactor.isWifiActive,
+                            airplaneModeRepository.isAirplaneMode,
+                        ) { showForOos, connectionState, isWifiActive, isAirplaneMode ->
+                            if (isWifiActive || isAirplaneMode) {
+                                false
+                            } else {
+                                showForOos ||
+                                    connectionState == SatelliteConnectionState.On ||
+                                    connectionState == SatelliteConnectionState.Connected
+                            }
                         }
                     }
                 }
+                .distinctUntilChanged()
+                .logDiffsForTable(
+                    tableLog,
+                    columnPrefix = "vm",
+                    columnName = COL_VISIBLE,
+                    initialValue = false,
+                )
+            } else {
+                flowOf(false)
             }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLog,
-                columnPrefix = "vm",
-                columnName = COL_VISIBLE,
-                initialValue = false,
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val icon: StateFlow<Icon?> =

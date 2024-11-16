@@ -317,7 +317,7 @@ public class SoundPool extends PlayerBase {
         // FIXME: b/174876164 implement device id for soundpool
         try {
             Trace.traceBegin(Trace.TRACE_TAG_AUDIO, "SoundPool.play");
-            baseStart(0);
+            baseStart(new int[0]);
             return _play(soundID, leftVolume, rightVolume, priority, loop, rate, getPlayerIId());
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_AUDIO);

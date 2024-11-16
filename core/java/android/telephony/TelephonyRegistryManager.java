@@ -1154,6 +1154,40 @@ public class TelephonyRegistryManager {
         }
     }
 
+   /**
+     * Notify external listeners that the radio security algorithms have changed.
+     * @param slotIndex for the phone object that got updated
+     * @param subId for which the security algorithm changed
+     * @param update details of the security algorithm update
+     * @hide
+     */
+    public void notifySecurityAlgorithmsChanged(
+            int slotIndex, int subId, SecurityAlgorithmUpdate update) {
+        try {
+            sRegistry.notifySecurityAlgorithmsChanged(slotIndex, subId, update);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify external listeners of a new cellular identifier disclosure change.
+     * @param slotIndex for the phone object that the disclosure applies to
+     * @param subId for which the disclosure applies to
+     * @param disclosure details of the identifier disclosure
+     * @hide
+     */
+    public void notifyCellularIdentifierDisclosedChanged(
+            int slotIndex, int subId, CellularIdentifierDisclosure disclosure) {
+        try {
+            sRegistry.notifyCellularIdentifierDisclosedChanged(slotIndex, subId, disclosure);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Processes potential event changes from the provided {@link TelephonyCallback}.
      *
@@ -1313,6 +1347,15 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED);
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED);
         }
+
+        if (telephonyCallback instanceof TelephonyCallback.CellularIdentifierDisclosedListener) {
+            eventList.add(TelephonyCallback.EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED);
+        }
+
+        if (telephonyCallback instanceof TelephonyCallback.SecurityAlgorithmsListener) {
+            eventList.add(TelephonyCallback.EVENT_SECURITY_ALGORITHMS_CHANGED);
+        }
+
         return eventList;
     }
 

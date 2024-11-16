@@ -347,7 +347,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mVerificationPolicyPerUser) {
             mVerificationPolicyPerUser.put(USER_SYSTEM, DEFAULT_VERIFICATION_POLICY);
         }
-        mInstallDependencyHelper = new InstallDependencyHelper(
+        mInstallDependencyHelper = new InstallDependencyHelper(mContext,
                 mPm.mInjector.getSharedLibrariesImpl());
 
         LocalServices.getService(SystemServiceManager.class).startService(

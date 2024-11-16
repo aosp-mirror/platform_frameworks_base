@@ -2201,29 +2201,9 @@ public:
             return false;
         }
 
-        // Compute the count of data items we'll actually forward to Java.
-        size_t count = 0;
-        if (mRemovedVsyncId <= 0) {
-            count = jankData.size();
-        } else {
-            for (const gui::JankData& frame : jankData) {
-                if (frame.frameVsyncId <= mRemovedVsyncId) {
-                    count++;
-                }
-            }
-        }
-
-        if (count == 0) {
-            return false;
-        }
-
-        jobjectArray jJankDataArray = env->NewObjectArray(count, gJankDataClassInfo.clazz, nullptr);
-        for (size_t i = 0, j = 0; i < jankData.size() && j < count; i++) {
-            // Filter any data for frames past our removal vsync.
-            if (mRemovedVsyncId > 0 && jankData[i].frameVsyncId > mRemovedVsyncId) {
-                continue;
-            }
-
+        jobjectArray jJankDataArray =
+                env->NewObjectArray(jankData.size(), gJankDataClassInfo.clazz, nullptr);
+        for (size_t i = 0; i < jankData.size(); i++) {
             // The exposed constants in SurfaceControl are simplified, so we need to translate the
             // jank type we get from SF to what is exposed in Java.
             int sfJankType = jankData[i].jankType;
@@ -2250,7 +2230,7 @@ public:
                                    jankData[i].frameVsyncId, javaJankType,
                                    jankData[i].frameIntervalNs, jankData[i].scheduledAppFrameTimeNs,
                                    jankData[i].actualAppFrameTimeNs);
-            env->SetObjectArrayElement(jJankDataArray, j++, jJankData);
+            env->SetObjectArrayElement(jJankDataArray, i, jJankData);
             env->DeleteLocalRef(jJankData);
         }
 
