@@ -1310,7 +1310,6 @@ public class PackageWatchdog {
      * Check if we're currently attempting to reboot during mitigation. This method must return
      * true if triggered reboot early during a boot loop, since the device will not be fully booted
      * at this time.
-     * @hide
      */
     public static boolean isRecoveryTriggeredReboot() {
         return isFactoryResetPropertySet() || isRebootPropertySet();
