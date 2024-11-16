@@ -1297,13 +1297,31 @@ public class PackageWatchdog {
 
     /** Dump status of every observer in mAllObservers. */
     public void dump(@NonNull PrintWriter pw) {
-        if (Flags.synchronousRebootInRescueParty() && RescueParty.isRecoveryTriggeredReboot()) {
+        if (Flags.synchronousRebootInRescueParty() && isRecoveryTriggeredReboot()) {
             dumpInternal(pw);
         } else {
             synchronized (mLock) {
                 dumpInternal(pw);
             }
         }
+    }
+
+    /**
+     * Check if we're currently attempting to reboot during mitigation. This method must return
+     * true if triggered reboot early during a boot loop, since the device will not be fully booted
+     * at this time.
+     * @hide
+     */
+    public static boolean isRecoveryTriggeredReboot() {
+        return isFactoryResetPropertySet() || isRebootPropertySet();
+    }
+
+    private static boolean isFactoryResetPropertySet() {
+        return CrashRecoveryProperties.attemptingFactoryReset().orElse(false);
+    }
+
+    private static boolean isRebootPropertySet() {
+        return CrashRecoveryProperties.attemptingReboot().orElse(false);
     }
 
     private void dumpInternal(@NonNull PrintWriter pw) {
