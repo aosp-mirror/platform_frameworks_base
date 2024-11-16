@@ -30,6 +30,7 @@ import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -138,6 +139,8 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
      * Returns the top visible child task's id.
      */
     int getTopVisibleChildTaskId() {
+        // TODO(b/378601156): This doesn't get the top task (translucent tasks are also
+        //  visible-requested)
         final ActivityManager.RunningTaskInfo taskInfo = getChildTaskInfo(t -> t.isVisible
                 && t.isVisibleRequested);
         return taskInfo != null ? taskInfo.taskId : INVALID_TASK_ID;
@@ -147,6 +150,7 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
      * Returns the top activity uid for the top child task.
      */
     int getTopChildTaskUid() {
+        // TODO(b/378601156): This doesn't get the top task
         final ActivityManager.RunningTaskInfo taskInfo =
                 getChildTaskInfo(t -> t.topActivityInfo != null);
         return taskInfo != null ? taskInfo.topActivityInfo.applicationInfo.uid : 0;
@@ -379,10 +383,9 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     /** Collects all the current child tasks and prepares transaction to evict them to display. */
     void evictAllChildren(WindowContainerTransaction wct) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evicting all children");
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
-            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+            evictChild(wct, taskInfo, "all");
         }
     }
 
@@ -390,13 +393,11 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
             if (taskId == taskInfo.taskId) continue;
-            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict other child: task=%d", taskId);
-            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+            evictChild(wct, taskInfo, "other");
         }
     }
 
     void evictNonOpeningChildren(RemoteAnimationTarget[] apps, WindowContainerTransaction wct) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "evictNonOpeningChildren");
         final SparseArray<ActivityManager.RunningTaskInfo> toBeEvict = mChildrenTaskInfo.clone();
         for (int i = 0; i < apps.length; i++) {
             if (apps[i].mode == MODE_OPENING) {
@@ -405,8 +406,7 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
         for (int i = toBeEvict.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = toBeEvict.valueAt(i);
-            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict non-opening child: task=%d", taskInfo.taskId);
-            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+            evictChild(wct, taskInfo, "non-opening");
         }
     }
 
@@ -414,19 +414,28 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
             if (!taskInfo.isVisible) {
-                ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict invisible child: task=%d",
-                        taskInfo.taskId);
-                wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+                evictChild(wct, taskInfo, "invisible");
             }
         }
     }
 
-    void evictChildren(WindowContainerTransaction wct, int taskId) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict child: task=%d", taskId);
+    void evictChild(WindowContainerTransaction wct, int taskId, String reason) {
         final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.get(taskId);
         if (taskInfo != null) {
-            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+            evictChild(wct, taskInfo, reason);
         }
+    }
+
+    private void evictChild(@NonNull WindowContainerTransaction wct, @NonNull TaskInfo taskInfo,
+            @NonNull String reason) {
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Evict child: task=%d reason=%s", taskInfo.taskId,
+                reason);
+        // We are reparenting the task, but not removing the task from mChildrenTaskInfo, so to
+        // prevent this task from being considered as a top task for the roots, we need to override
+        // the visibility of the soon-to-be-hidden task
+        taskInfo.isVisible = false;
+        taskInfo.isVisibleRequested = false;
+        wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
     }
 
     void reparentTopTask(WindowContainerTransaction wct) {
