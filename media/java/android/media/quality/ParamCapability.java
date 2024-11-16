@@ -31,7 +31,6 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Capability info of media quality parameters
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class ParamCapability implements Parcelable {
