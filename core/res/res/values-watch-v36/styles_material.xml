@@ -57,6 +57,10 @@
     </style>
 
     <!--  AlertDialog Styles  -->
+    <style name="AlertDialog.DeviceDefault.WearMaterial3">
+        <item name="layout">@layout/alert_dialog_wear_material3</item>
+    </style>
+
     <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3" parent="Widget.DeviceDefault.Button">
         <item name="android:textSize">0sp</item>
         <item name="android:gravity">center</item>

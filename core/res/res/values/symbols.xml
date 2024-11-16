@@ -5824,5 +5824,8 @@
   <!-- Style for Wear Material3 Button. Will only be used for sdk 36 or above. -->
   <java-symbol type="style" name="Widget.DeviceDefault.Button.WearMaterial3" />
 
+  <!-- Style for Wear Material3 AlertDialog. Will only be used for sdk 36 or above. -->
+  <java-symbol type="style" name="AlertDialog.DeviceDefault.WearMaterial3" />
+
   <java-symbol type="bool" name="config_allowNormalBrightnessForDozePolicy" />
 </resources>
