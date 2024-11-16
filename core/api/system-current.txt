@@ -8154,7 +8154,9 @@ package android.media.quality {
     method @NonNull public java.util.List<java.lang.String> getPictureProfileAllowList();
     method @NonNull public java.util.List<java.lang.String> getPictureProfilePackageNames();
     method @NonNull public java.util.List<android.media.quality.PictureProfile> getPictureProfilesByPackage(@NonNull String);
+    method public void setAutoPictureQualityEnabled(boolean);
     method public void setPictureProfileAllowList(@NonNull java.util.List<java.lang.String>);
+    method public void setSuperResolutionEnabled(boolean);
   }
 
   public static final class PictureProfile.Builder {
