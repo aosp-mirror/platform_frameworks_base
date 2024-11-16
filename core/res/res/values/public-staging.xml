@@ -142,12 +142,39 @@
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01b40000">
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+         @hide @SystemApi -->
+    <public name="config_systemDependencyInstaller" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b20000">
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_on_surface_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_primary_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_surface_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_scrim_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_shadow_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_surface_tint_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_on_surface_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_primary_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_surface_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_scrim_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_shadow_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_surface_tint_dark"/>
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01b10000">

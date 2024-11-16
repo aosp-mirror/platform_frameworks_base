@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+import static android.provider.flags.Flags.stageFlagsForBuild;
 import static android.server.Flags.removeGameManagerServiceFromWear;
 
 import android.accounts.AccountManager;
@@ -216,6 +217,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.os.flagging.ConfigInfrastructureFrameworkInitializer;
 import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
@@ -1836,6 +1838,10 @@ public final class SystemServiceRegistry {
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
             ConnectivityFrameworkInitializerBaklava.registerServiceWrappers();
+
+            if (stageFlagsForBuild()) {
+                ConfigInfrastructureFrameworkInitializer.registerServiceWrappers();
+            }
 
             if (com.android.server.telecom.flags.Flags.telecomMainlineBlockedNumbersManager()) {
                 ProviderFrameworkInitializer.registerServiceWrappers();

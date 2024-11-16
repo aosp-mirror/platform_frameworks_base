@@ -111,7 +111,7 @@ public final class MediaQualityManager {
         };
         ISoundProfileCallback spCallback = new ISoundProfileCallback.Stub() {
             @Override
-            public void onSoundProfileAdded(long profileId, SoundProfile profile) {
+            public void onSoundProfileAdded(String profileId, SoundProfile profile) {
                 synchronized (mLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
@@ -120,7 +120,7 @@ public final class MediaQualityManager {
                 }
             }
             @Override
-            public void onSoundProfileUpdated(long profileId, SoundProfile profile) {
+            public void onSoundProfileUpdated(String profileId, SoundProfile profile) {
                 synchronized (mLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
@@ -129,11 +129,29 @@ public final class MediaQualityManager {
                 }
             }
             @Override
-            public void onSoundProfileRemoved(long profileId, SoundProfile profile) {
+            public void onSoundProfileRemoved(String profileId, SoundProfile profile) {
                 synchronized (mLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
                         record.postSoundProfileRemoved(profileId, profile);
+                    }
+                }
+            }
+            @Override
+            public void onParamCapabilitiesChanged(String profileId, List<ParamCapability> caps) {
+                synchronized (mLock) {
+                    for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
+                        // TODO: filter callback record
+                        record.postParamCapabilitiesChanged(profileId, caps);
+                    }
+                }
+            }
+            @Override
+            public void onError(int err) {
+                synchronized (mLock) {
+                    for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
+                        // TODO: filter callback record
+                        record.postError(err);
                     }
                 }
             }
@@ -331,14 +349,17 @@ public final class MediaQualityManager {
 
 
     /**
-     * Gets sound profile by given profile ID.
-     * @return the corresponding sound profile if available; {@code null} if the ID doesn't
-     *         exist or the profile is not accessible to the caller.
+     * Gets sound profile by given profile type and name.
+     *
+     * @return the corresponding sound profile if available; {@code null} if the name doesn't
+     *         exist.
      * @hide
      */
-    public SoundProfile getSoundProfileById(String profileId) {
+    @Nullable
+    public SoundProfile getSoundProfile(
+            @SoundProfile.ProfileType int type, @NonNull String name) {
         try {
-            return mService.getSoundProfileById(profileId);
+            return mService.getSoundProfile(type, name);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -349,8 +370,9 @@ public final class MediaQualityManager {
      * @SystemApi gets profiles that available to the given package
      * @hide
      */
+    @NonNull
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
-    public List<SoundProfile> getSoundProfilesByPackage(String packageName) {
+    public List<SoundProfile> getSoundProfilesByPackage(@NonNull String packageName) {
         try {
             return mService.getSoundProfilesByPackage(packageName);
         } catch (RemoteException e) {
@@ -362,6 +384,7 @@ public final class MediaQualityManager {
      * Gets profiles that available to the caller package
      * @hide
      */
+    @NonNull
     public List<SoundProfile> getAvailableSoundProfiles() {
         try {
             return mService.getAvailableSoundProfiles();
@@ -371,9 +394,12 @@ public final class MediaQualityManager {
     }
 
     /**
-     * @SystemApi all stored sound profiles of all packages
+     * @SystemApi Gets all package names whose sound profiles are available.
+     *
+     * @see #getSoundProfilesByPackage(String)
      * @hide
      */
+    @NonNull
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<String> getSoundProfilePackageNames() {
         try {
@@ -387,12 +413,13 @@ public final class MediaQualityManager {
     /**
      * Creates a sound profile and store it in the system.
      *
-     * @return the stored profile with an assigned profile ID.
+     * <p>If the profile is created successfully,
+     * {@link SoundProfileCallback#onSoundProfileAdded(long, SoundProfile)} is invoked.
      * @hide
      */
-    public SoundProfile createSoundProfile(SoundProfile sp) {
+    public void createSoundProfile(@NonNull SoundProfile sp) {
         try {
-            return mService.createSoundProfile(sp);
+            mService.createSoundProfile(sp);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -403,7 +430,7 @@ public final class MediaQualityManager {
      * Updates an existing sound profile and store it in the system.
      * @hide
      */
-    public void updateSoundProfile(String profileId, SoundProfile sp) {
+    public void updateSoundProfile(@NonNull String profileId, @NonNull SoundProfile sp) {
         try {
             mService.updateSoundProfile(profileId, sp);
         } catch (RemoteException e) {
@@ -416,7 +443,7 @@ public final class MediaQualityManager {
      * Removes a sound profile from the system.
      * @hide
      */
-    public void removeSoundProfile(String profileId) {
+    public void removeSoundProfile(@NonNull String profileId) {
         try {
             mService.removeSoundProfile(profileId);
         } catch (RemoteException e) {
@@ -462,6 +489,36 @@ public final class MediaQualityManager {
     public void setPictureProfileAllowList(@NonNull List<String> packageNames) {
         try {
             mService.setPictureProfileAllowList(packageNames);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the allowlist of packages that can create and removed sound profiles
+     *
+     * @see #createSoundProfile(SoundProfile)
+     * @see #removeSoundProfile(String)
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
+    @NonNull
+    public List<String> getSoundProfileAllowList() {
+        try {
+            return mService.getSoundProfileAllowList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the allowlist of packages that can create and removed sound profiles
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
+    public void setSoundProfileAllowList(@NonNull List<String> packageNames) {
+        try {
+            mService.setSoundProfileAllowList(packageNames);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -567,6 +624,7 @@ public final class MediaQualityManager {
 
     /**
      * Registers a {@link AmbientBacklightCallback}.
+     * @hide
      */
     public void registerAmbientBacklightCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -580,6 +638,7 @@ public final class MediaQualityManager {
 
     /**
      * Unregisters the existing {@link AmbientBacklightCallback}.
+     * @hide
      */
     public void unregisterAmbientBacklightCallback(
             @NonNull final AmbientBacklightCallback callback) {
@@ -600,6 +659,7 @@ public final class MediaQualityManager {
      * Set the ambient backlight settings.
      *
      * @param settings The settings to use for the backlight detector.
+     * @hide
      */
     public void setAmbientBacklightSettings(
             @NonNull AmbientBacklightSettings settings) {
@@ -615,6 +675,7 @@ public final class MediaQualityManager {
      * Enables or disables the ambient backlight detection.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
+     * @hide
      */
     public void setAmbientBacklightEnabled(boolean enabled) {
         try {
@@ -698,7 +759,7 @@ public final class MediaQualityManager {
             return mCallback;
         }
 
-        public void postSoundProfileAdded(final long id, SoundProfile profile) {
+        public void postSoundProfileAdded(final String id, SoundProfile profile) {
 
             mExecutor.execute(new Runnable() {
                 @Override
@@ -708,7 +769,7 @@ public final class MediaQualityManager {
             });
         }
 
-        public void postSoundProfileUpdated(final long id, SoundProfile profile) {
+        public void postSoundProfileUpdated(final String id, SoundProfile profile) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -717,11 +778,29 @@ public final class MediaQualityManager {
             });
         }
 
-        public void postSoundProfileRemoved(final long id, SoundProfile profile) {
+        public void postSoundProfileRemoved(final String id, SoundProfile profile) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     mCallback.onSoundProfileRemoved(id, profile);
+                }
+            });
+        }
+
+        public void postParamCapabilitiesChanged(final String id, List<ParamCapability> caps) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onParamCapabilitiesChanged(id, caps);
+                }
+            });
+        }
+
+        public void postError(int error) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onError(error);
                 }
             });
         }
@@ -801,12 +880,13 @@ public final class MediaQualityManager {
          * This is invoked when parameter capabilities has been changed due to status changes of the
          * content.
          *
-         * @param profileId the ID of the profile used by the media content.
+         * @param profileId the ID of the profile used by the media content. {@code null} if there
+         *                  is no associated profile
          * @param updatedCaps the updated capabilities.
          * @hide
          */
         public void onParamCapabilitiesChanged(
-                @NonNull String profileId, @NonNull List<ParamCapability> updatedCaps) {
+                @Nullable String profileId, @NonNull List<ParamCapability> updatedCaps) {
         }
     }
 
@@ -816,29 +896,64 @@ public final class MediaQualityManager {
      */
     public abstract static class SoundProfileCallback {
         /**
+         * This is invoked when a sound profile has been added.
+         *
+         * @param profileId the ID of the profile.
+         * @param profile the newly added profile.
          * @hide
          */
-        public void onSoundProfileAdded(long id, SoundProfile profile) {
+        public void onSoundProfileAdded(
+                @NonNull String profileId, @NonNull SoundProfile profile) {
         }
+
         /**
+         * This is invoked when a sound profile has been updated.
+         *
+         * @param profileId the ID of the profile.
+         * @param profile the profile with updated info.
          * @hide
          */
-        public void onSoundProfileUpdated(long id, SoundProfile profile) {
+        public void onSoundProfileUpdated(
+                @NonNull String profileId, @NonNull SoundProfile profile) {
         }
+
         /**
+         * This is invoked when a sound profile has been removed.
+         *
+         * @param profileId the ID of the profile.
+         * @param profile the removed profile.
          * @hide
          */
-        public void onSoundProfileRemoved(long id, SoundProfile profile) {
+        public void onSoundProfileRemoved(
+                @NonNull String profileId, @NonNull SoundProfile profile) {
         }
+
         /**
+         * This is invoked when an issue has occurred.
+         *
+         * @param errorCode the error code
          * @hide
          */
-        public void onError(int errorCode) {
+        public void onError(@SoundProfile.ErrorCode int errorCode) {
+        }
+
+        /**
+         * This is invoked when parameter capabilities has been changed due to status changes of the
+         * content.
+         *
+         * @param profileId the ID of the profile used by the media content. {@code null} if there
+         *                  is no associated profile
+         * @param updatedCaps the updated capabilities.
+         * @hide
+         */
+        public void onParamCapabilitiesChanged(
+                @Nullable String profileId, @NonNull List<ParamCapability> updatedCaps) {
         }
     }
 
     /**
      * Callback used to monitor status of ambient backlight.
+     * @hide
      */
     public abstract static class AmbientBacklightCallback {
         /**

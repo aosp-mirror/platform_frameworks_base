@@ -34,11 +34,11 @@ import java.util.Objects;
  * </ul>
  *
  * <p>This information can be used to help construct waveform envelope effects with
- * {@link VibrationEffect#startWaveformEnvelope()}. When designing these effects, it is also
+ * {@link VibrationEffect.WaveformEnvelopeBuilder}. When designing these effects, it is also
  * recommended to check the {@link VibratorFrequencyProfile} for information about the supported
  * frequency range and the vibrator's output response.
  *
- * @see VibrationEffect#startWaveformEnvelope()
+ * @see VibrationEffect.WaveformEnvelopeBuilder
  * @see VibratorFrequencyProfile
  */
 @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)

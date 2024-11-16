@@ -194,12 +194,14 @@ public class MediaProjectionStopControllerTest {
 
     @Test
     public void testExemptFromStoppingNullProjection() throws Exception {
-        assertThat(mStopController.isExemptFromStopping(null)).isTrue();
+        assertThat(mStopController.isExemptFromStopping(null,
+                MediaProjectionStopController.STOP_REASON_UNKNOWN)).isTrue();
     }
 
     @Test
     public void testExemptFromStoppingInvalidProjection() throws Exception {
-        assertThat(mStopController.isExemptFromStopping(createMediaProjection(null))).isTrue();
+        assertThat(mStopController.isExemptFromStopping(createMediaProjection(null),
+                MediaProjectionStopController.STOP_REASON_UNKNOWN)).isTrue();
     }
 
     @Test
@@ -213,7 +215,8 @@ public class MediaProjectionStopControllerTest {
             Settings.Global.putInt(mContext.getContentResolver(),
                     DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1);
 
-            assertThat(mStopController.isExemptFromStopping(mediaProjection)).isTrue();
+            assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                    MediaProjectionStopController.STOP_REASON_UNKNOWN)).isTrue();
         } finally {
             Settings.Global.putInt(mContext.getContentResolver(),
                     DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, value);
@@ -230,7 +233,8 @@ public class MediaProjectionStopControllerTest {
                         eq(mediaProjection.uid), eq(mediaProjection.packageName),
                         nullable(String.class),
                         nullable(String.class));
-        assertThat(mStopController.isExemptFromStopping(mediaProjection)).isTrue();
+        assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                MediaProjectionStopController.STOP_REASON_UNKNOWN)).isTrue();
     }
 
     @Test
@@ -244,7 +248,8 @@ public class MediaProjectionStopControllerTest {
                         doReturn(PackageManager.PERMISSION_DENIED).when(
                                 mPackageManager).checkPermission(
                                 RECORD_SENSITIVE_CONTENT, mediaProjection.packageName);
-                        assertThat(mStopController.isExemptFromStopping(mediaProjection)).isTrue();
+                        assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                                MediaProjectionStopController.STOP_REASON_UNKNOWN)).isTrue();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -261,7 +266,8 @@ public class MediaProjectionStopControllerTest {
                 packages.valueAt(0));
         doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
                 RECORD_SENSITIVE_CONTENT, mediaProjection.packageName);
-        assertThat(mStopController.isExemptFromStopping(mediaProjection)).isTrue();
+        assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                MediaProjectionStopController.STOP_REASON_UNKNOWN)).isTrue();
     }
 
     @Test
@@ -270,7 +276,8 @@ public class MediaProjectionStopControllerTest {
                 PACKAGE_NAME);
         doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
                 RECORD_SENSITIVE_CONTENT, mediaProjection.packageName);
-        assertThat(mStopController.isExemptFromStopping(mediaProjection)).isTrue();
+        assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                MediaProjectionStopController.STOP_REASON_UNKNOWN)).isTrue();
     }
 
     @Test
@@ -278,7 +285,8 @@ public class MediaProjectionStopControllerTest {
         MediaProjectionManagerService.MediaProjection mediaProjection = createMediaProjection();
         doReturn(PackageManager.PERMISSION_GRANTED).when(mPackageManager).checkPermission(
                 RECORD_SENSITIVE_CONTENT, mediaProjection.packageName);
-        assertThat(mStopController.isExemptFromStopping(mediaProjection)).isTrue();
+        assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                MediaProjectionStopController.STOP_REASON_UNKNOWN)).isTrue();
     }
 
     @Test
@@ -287,7 +295,8 @@ public class MediaProjectionStopControllerTest {
         mediaProjection.notifyVirtualDisplayCreated(1);
         doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
                 RECORD_SENSITIVE_CONTENT, mediaProjection.packageName);
-        assertThat(mStopController.isExemptFromStopping(mediaProjection)).isFalse();
+        assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                MediaProjectionStopController.STOP_REASON_UNKNOWN)).isFalse();
     }
 
     @Test
@@ -366,6 +375,36 @@ public class MediaProjectionStopControllerTest {
         mStopController.callStateChanged();
 
         verify(mStopConsumer).accept(MediaProjectionStopController.STOP_REASON_CALL_END);
+    }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_STOP_MEDIA_PROJECTION_ON_CALL_END)
+    public void testExemptFromStopping_callEnd_callBeforeMediaProjection() throws Exception {
+        when(mTelecomManager.isInCall()).thenReturn(true);
+        mStopController.callStateChanged();
+
+        MediaProjectionManagerService.MediaProjection mediaProjection = createMediaProjection();
+        mediaProjection.notifyVirtualDisplayCreated(1);
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
+                RECORD_SENSITIVE_CONTENT, mediaProjection.packageName);
+
+        assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                MediaProjectionStopController.STOP_REASON_CALL_END)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_STOP_MEDIA_PROJECTION_ON_CALL_END)
+    public void testExemptFromStopping_callEnd_callAfterMediaProjection() throws Exception {
+        MediaProjectionManagerService.MediaProjection mediaProjection = createMediaProjection();
+        mediaProjection.notifyVirtualDisplayCreated(1);
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
+                RECORD_SENSITIVE_CONTENT, mediaProjection.packageName);
+
+        when(mTelecomManager.isInCall()).thenReturn(true);
+        mStopController.callStateChanged();
+
+        assertThat(mStopController.isExemptFromStopping(mediaProjection,
+                MediaProjectionStopController.STOP_REASON_CALL_END)).isTrue();
     }
 
     private MediaProjectionManagerService.MediaProjection createMediaProjection()

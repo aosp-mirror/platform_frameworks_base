@@ -144,6 +144,10 @@ public final class ProfcollectForwardingService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             UsbManager usbManager = getContext().getSystemService(UsbManager.class);
+            if (usbManager == null) {
+                mAdbActive = false;
+                return;
+            }
             mAdbActive = ((usbManager.getCurrentFunctions() & UsbManager.FUNCTION_ADB) == 1);
             Log.d(LOG_TAG, "ADB is " + mAdbActive + " on system startup");
         }

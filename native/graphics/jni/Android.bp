@@ -45,8 +45,10 @@ cc_library_shared {
 
     header_libs: [
         "jni_headers",
+        "native_headers",
         "libhwui_internal_headers",
     ],
+    export_header_lib_headers: ["native_headers"],
 
     static_libs: [
         "libarect",

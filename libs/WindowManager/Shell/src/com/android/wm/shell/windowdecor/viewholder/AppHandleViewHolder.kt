@@ -114,7 +114,7 @@ internal class AppHandleViewHolder(
         // If handle is not in status bar region(i.e., bottom stage in vertical split),
         // do not create an input layer
         if (position.y >= SystemBarUtils.getStatusBarHeight(context)) return
-        if (!isCaptionVisible && statusBarInputLayerExists) {
+        if (!isCaptionVisible) {
             disposeStatusBarInputLayer()
             return
         }
@@ -227,6 +227,7 @@ internal class AppHandleViewHolder(
      * is not visible.
      */
     fun disposeStatusBarInputLayer() {
+        if (!statusBarInputLayerExists) return
         statusBarInputLayerExists = false
         handler.post {
             statusBarInputLayer?.releaseView()

@@ -262,7 +262,7 @@ public class MediaQualityService extends SystemService {
             // TODO: implement
         }
         @Override
-        public SoundProfile getSoundProfileById(String id) {
+        public SoundProfile getSoundProfile(int type, String id) {
             return null;
         }
         @Override
@@ -310,6 +310,15 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public void setPictureProfileAllowList(List<String> packages) {
+        }
+
+        @Override
+        public List<String> getSoundProfileAllowList() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public void setSoundProfileAllowList(List<String> packages) {
         }
 
         @Override

@@ -1015,7 +1015,13 @@ public class ZenModeHelper {
     private static void applyConditionAndReconsiderOverride(ZenRule rule, Condition condition,
             int origin) {
         if (Flags.modesApi() && Flags.modesUi()) {
-            if (origin == ORIGIN_USER_IN_SYSTEMUI && condition != null
+            if (isImplicitRuleId(rule.id)) {
+                // Implicit rules do not use overrides, and always apply conditions directly.
+                // This is compatible with the previous behavior (where the package set the
+                // interruption filter, and no "snoozing" took place if the user changed it later).
+                rule.condition = condition;
+                rule.resetConditionOverride();
+            } else if (origin == ORIGIN_USER_IN_SYSTEMUI && condition != null
                     && condition.source == SOURCE_USER_ACTION) {
                 // Apply as override, instead of actual condition.
                 // If the new override is the reverse of a previous (still active) override, try

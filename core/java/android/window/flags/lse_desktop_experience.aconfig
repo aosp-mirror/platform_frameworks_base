@@ -403,3 +403,10 @@ flag {
     description: "Enables HSUM on desktop mode."
     bug: "366397912"
 }
+
+flag {
+    name: "enable_multiple_desktops"
+    namespace: "lse_desktop_experience"
+    description: "Enable multiple desktop sessions for desktop windowing."
+    bug: "379158791"
+}

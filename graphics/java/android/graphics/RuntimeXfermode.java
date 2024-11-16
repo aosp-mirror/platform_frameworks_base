@@ -288,6 +288,23 @@ public class RuntimeXfermode extends Xfermode {
         nativeUpdateChild(mBuilderNativeInstance, filterName, colorFilter.getNativeInstance());
     }
 
+    /**
+     * Assigns the uniform xfermode to the provided xfermode parameter.  If the shader program does
+     * not have a uniform xfermode with that name then an IllegalArgumentException is thrown.
+     *
+     * @param xfermodeName name matching the uniform declared in the AGSL program
+     * @param xfermode xfermode function passed into the AGSL program for sampling
+     */
+    public void setInputXfermode(@NonNull String xfermodeName, @NonNull RuntimeXfermode xfermode) {
+        if (xfermodeName == null) {
+            throw new NullPointerException("The xfermodeName parameter must not be null");
+        }
+        if (xfermode == null) {
+            throw new NullPointerException("The xfermode parameter must not be null");
+        }
+        nativeUpdateChild(mBuilderNativeInstance, xfermodeName, xfermode.createNativeInstance());
+    }
+
     /** @hide */
     public long createNativeInstance() {
         return nativeCreateNativeInstance(mBuilderNativeInstance);

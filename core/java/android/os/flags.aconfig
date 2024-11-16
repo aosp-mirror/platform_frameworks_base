@@ -4,6 +4,15 @@ container: "system"
 
 # keep-sorted start block=yes newline_separated=yes
 flag {
+     # Holdback study for concurrent MessageQueue.
+     # Do not promote beyond trunkfood.
+     namespace: "system_performance"
+     name: "message_queue_force_legacy"
+     description: "Whether to holdback concurrent MessageQueue (force legacy)."
+     bug: "336880969"
+}
+
+flag {
     name: "adpf_gpu_report_actual_work_duration"
     is_exported: true
     namespace: "game"
@@ -191,6 +200,17 @@ flag {
      description: "Expose platform APIs to mainline VCN"
      is_exported: true
      bug: "366598445"
+}
+
+flag {
+    name: "material_colors_10_2024"
+    namespace: "systemui"
+    description: "Adding new Material Tokens as of October 2024"
+    bug: "376195115"
+    is_exported: true
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
 }
 
 flag {

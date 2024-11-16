@@ -30,7 +30,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Settings for ambient backlight.
+ * Settings to configure ambient backlight hardware.
  * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
@@ -124,8 +124,13 @@ public final class AmbientBacklightSettings implements Parcelable {
     /**
      * Constructs AmbientBacklightSettings.
      */
-    public AmbientBacklightSettings(int source, int maxFps, int colorFormat,
-            int horizontalZonesNumber, int verticalZonesNumber, boolean isLetterboxOmitted,
+    public AmbientBacklightSettings(
+            @Source int source,
+            int maxFps,
+            @PixelFormat.Format int colorFormat,
+            int horizontalZonesNumber,
+            int verticalZonesNumber,
+            boolean isLetterboxOmitted,
             int threshold) {
         mSource = source;
         mMaxFps = maxFps;
@@ -171,7 +176,9 @@ public final class AmbientBacklightSettings implements Parcelable {
     }
 
     /**
-     * Gets the number of lights in each horizontal zone.
+     * Gets the number of horizontal color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
      */
     @IntRange(from = 0)
     public int getHorizontalZonesNumber() {
@@ -179,7 +186,9 @@ public final class AmbientBacklightSettings implements Parcelable {
     }
 
     /**
-     * Gets the number of lights in each vertical zone.
+     * Gets the number of vertical color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
      */
     @IntRange(from = 0)
     public int getVerticalZonesNumber() {
@@ -187,7 +196,11 @@ public final class AmbientBacklightSettings implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if letter box is omitted; {@code false} otherwise.
+     * Returns {@code true} if the black portion of the screen in letter box mode is omitted;
+     * {@code false} otherwise.
+     *
+     * <p>Letter-box is a technique to keep the original aspect ratio when displayed on a screen
+     * with different aspect ratio. Black bars are added to the top and bottom.
      * @hide
      */
     public boolean isLetterboxOmitted() {
@@ -195,6 +208,10 @@ public final class AmbientBacklightSettings implements Parcelable {
     }
 
     /**
+     * Gets the detection threshold of the ambient light.
+     *
+     * <p>If the color of a color zone is changed by the difference is smaller than the threshold,
+     * the change is ignored.
      * @hide
      */
     public int getThreshold() {

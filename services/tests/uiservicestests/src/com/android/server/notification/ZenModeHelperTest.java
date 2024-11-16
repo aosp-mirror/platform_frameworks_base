@@ -72,6 +72,7 @@ import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_ACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_NONE;
+import static android.service.notification.ZenModeConfig.implicitRuleId;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_CONTACTS;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_NONE;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_STARRED;
@@ -201,9 +202,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.xmlpull.v1.XmlPullParserException;
 
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -222,6 +220,9 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
@@ -7065,6 +7066,50 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         SOURCE_SCHEDULE), ORIGIN_APP, CUSTOM_PKG_UID);
         assertThat(getZenRule(ruleId).isActive()).isFalse();
         assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_implicitRuleManualActivation_doesNotUseOverride() {
+        mContext.getTestablePermissions().setPermission(Manifest.permission.MANAGE_NOTIFICATIONS,
+                PERMISSION_GRANTED); // So that canManageAZR succeeds.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT, CUSTOM_PKG_NAME,
+                CUSTOM_PKG_UID, ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT, CUSTOM_PKG_NAME,
+                CUSTOM_PKG_UID, ZEN_MODE_OFF);
+        ZenRule implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
+        assertThat(implicitRule.isActive()).isFalse();
+
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id,
+                new Condition(implicitRule.conditionId, "on!", STATE_TRUE, SOURCE_USER_ACTION),
+                ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+
+        implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id))
+                .isEqualTo(STATE_TRUE);
+        assertThat(implicitRule.isActive()).isTrue();
+        assertThat(implicitRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_implicitRuleManualDeactivation_doesNotUseOverride() {
+        mContext.getTestablePermissions().setPermission(Manifest.permission.MANAGE_NOTIFICATIONS,
+                PERMISSION_GRANTED); // So that canManageAZR succeeds.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT, CUSTOM_PKG_NAME,
+                CUSTOM_PKG_UID, ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        ZenRule implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
+        assertThat(implicitRule.isActive()).isTrue();
+
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id,
+                new Condition(implicitRule.conditionId, "off!", STATE_FALSE, SOURCE_USER_ACTION),
+                ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+
+        implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id))
+                .isEqualTo(STATE_FALSE);
+        assertThat(implicitRule.isActive()).isFalse();
+        assertThat(implicitRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
     }
 
     private ZenRule getZenRule(String ruleId) {
