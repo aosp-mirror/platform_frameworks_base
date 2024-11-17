@@ -112,20 +112,18 @@ public final class RavenwoodRule implements TestRule {
         }
 
         /**
-         * Configure the identity of this process to be the system UID for the duration of the
-         * test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. We always use an app UID.
          */
+        @Deprecated
         public Builder setProcessSystem() {
-            mBuilder.setProcessSystem();
             return this;
         }
 
         /**
-         * Configure the identity of this process to be an app UID for the duration of the
-         * test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. We always use an app UID.
          */
+        @Deprecated
         public Builder setProcessApp() {
-            mBuilder.setProcessApp();
             return this;
         }
 
@@ -139,14 +137,10 @@ public final class RavenwoodRule implements TestRule {
         }
 
         /**
-         * Configure a "main" thread to be available for the duration of the test, as defined
-         * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
-         *
-         * @deprecated
+         * @deprecated no longer used. Main thread is always available.
          */
         @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
-            mBuilder.setProvideMainThread(provideMainThread);
             return this;
         }
 
