@@ -238,8 +238,12 @@ class HandleMenu(
         val taskBounds = taskInfo.getConfiguration().windowConfiguration.bounds
         updateGlobalMenuPosition(taskBounds, captionX, captionY)
         if (layoutResId == R.layout.desktop_mode_app_header) {
-            // Align the handle menu to the left side of the caption.
-            menuX = marginMenuStart
+            // Align the handle menu to the start of the header.
+            menuX = if (context.isRtl()) {
+                taskBounds.width() - menuWidth - marginMenuStart
+            } else {
+                marginMenuStart
+            }
             menuY = captionY + marginMenuTop
         } else {
             if (DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
@@ -261,10 +265,17 @@ class HandleMenu(
         val nonFreeformX = captionX + (captionWidth / 2) - (menuWidth / 2)
         when {
             taskInfo.isFreeform -> {
-                globalMenuPosition.set(
-                    /* x = */ taskBounds.left + marginMenuStart,
-                    /* y = */ taskBounds.top + captionY + marginMenuTop
-                )
+                if (context.isRtl()) {
+                    globalMenuPosition.set(
+                        /* x= */ taskBounds.right - menuWidth - marginMenuStart,
+                        /* y= */ taskBounds.top + captionY + marginMenuTop
+                    )
+                } else {
+                    globalMenuPosition.set(
+                        /* x= */ taskBounds.left + marginMenuStart,
+                        /* y= */ taskBounds.top + captionY + marginMenuTop
+                    )
+                }
             }
             taskInfo.isFullscreen -> {
                 globalMenuPosition.set(
@@ -429,6 +440,9 @@ class HandleMenu(
         }
         return context.resources.getDimensionPixelSize(resourceId)
     }
+
+    private fun Context.isRtl() =
+        resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
 
     fun close() {
         handleMenuView?.animateCloseMenu {

@@ -2053,9 +2053,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         if (mQsController.getExpanded()) {
             mQsController.flingQs(0, FLING_COLLAPSE);
-        } else if (mBarState == KEYGUARD) {
-            mLockscreenShadeTransitionController.goToLockedShade(
-                    /* expandedView= */null, /* needsQSAnimation= */false);
         } else {
             expand(true /* animate */);
         }
@@ -3116,8 +3113,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mShadeLog.d("Status Bar was long pressed. Expanding to QS.");
             expandToQs();
         } else {
-            mShadeLog.d("Status Bar was long pressed. Expanding to Notifications.");
-            expandToNotifications();
+            if (mBarState == KEYGUARD) {
+                mShadeLog.d("Lockscreen Status Bar was long pressed. Expanding to Notifications.");
+                mLockscreenShadeTransitionController.goToLockedShade(
+                        /* expandedView= */null, /* needsQSAnimation= */false);
+            } else {
+                mShadeLog.d("Status Bar was long pressed. Expanding to Notifications.");
+                expandToNotifications();
+            }
         }
     }
 

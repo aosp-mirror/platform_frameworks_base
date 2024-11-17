@@ -78,7 +78,7 @@ android_test {
         "am_flags_lib",
         "device_policy_aconfig_flags_lib",
     ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
-        "true": ["service-crashrecovery.impl"],
+        "true": ["service-crashrecovery-pre-jarjar"],
         default: [],
     }),
 
@@ -109,6 +109,10 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    data: [
+        ":HelloWorldUsingSdk1And2",
+    ],
 }
 
 java_library {
@@ -123,23 +127,6 @@ java_library {
     libs: [
         "android.test.runner.stubs.system",
     ],
-}
-
-android_ravenwood_test {
-    name: "FrameworksMockingServicesTestsRavenwood",
-    libs: [
-        "android.test.mock.stubs.system",
-    ],
-    static_libs: [
-        "androidx.annotation_annotation",
-        "androidx.test.rules",
-        "services.core",
-        "servicestests-utils-mockito-extended",
-    ],
-    srcs: [
-        "src/com/android/server/am/BroadcastRecordTest.java",
-    ],
-    auto_gen_config: true,
 }
 
 test_module_config {

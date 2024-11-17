@@ -1122,7 +1122,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         final BackMotionEvent backFinish = mCurrentTracker
                 .createProgressEvent();
         dispatchOnBackProgressed(mActiveCallback, backFinish);
-        if (!mBackGestureStarted) {
+        if (mCurrentTracker.isFinished()) {
             // if the down -> up gesture happened before animation
             // start, we have to trigger the uninterruptible transition
             // to finish the back animation.

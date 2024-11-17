@@ -37,13 +37,17 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 fun rememberEditListState(
     tiles: List<SizedTile<EditTileViewModel>>,
     columns: Int,
+    largeTilesSpan: Int,
 ): EditTileListState {
-    return remember(tiles, columns) { EditTileListState(tiles, columns) }
+    return remember(tiles, columns) { EditTileListState(tiles, columns, largeTilesSpan) }
 }
 
 /** Holds the temporary state of the tile list during a drag movement where we move tiles around. */
-class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val columns: Int) :
-    DragAndDropState {
+class EditTileListState(
+    tiles: List<SizedTile<EditTileViewModel>>,
+    private val columns: Int,
+    private val largeTilesSpan: Int,
+) : DragAndDropState {
     private val _draggedCell = mutableStateOf<SizedTile<EditTileViewModel>?>(null)
     override val draggedCell
         get() = _draggedCell.value
@@ -86,7 +90,7 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
         if (fromIndex != -1) {
             val cell = _tiles.removeAt(fromIndex)
             cell as TileGridCell
-            _tiles.add(fromIndex, cell.copy(width = if (cell.isIcon) 2 else 1))
+            _tiles.add(fromIndex, cell.copy(width = if (cell.isIcon) largeTilesSpan else 1))
             regenerateGrid(fromIndex)
         }
     }

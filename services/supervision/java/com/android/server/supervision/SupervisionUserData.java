@@ -19,7 +19,7 @@ package com.android.server.supervision;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.IndentingPrintWriter;
 
 /** User specific data, used internally by the {@link SupervisionService}. */
@@ -27,7 +27,7 @@ public class SupervisionUserData {
     public final @UserIdInt int userId;
     public boolean supervisionEnabled;
     public boolean supervisionLockScreenEnabled;
-    @Nullable public Bundle supervisionLockScreenOptions;
+    @Nullable public PersistableBundle supervisionLockScreenOptions;
 
     public SupervisionUserData(@UserIdInt int userId) {
         this.userId = userId;

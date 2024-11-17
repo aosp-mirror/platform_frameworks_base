@@ -19,28 +19,31 @@ package com.android.server.supervision;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.supervision.ISupervisionManager;
+import android.app.supervision.SupervisionManagerInternal;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.UserManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-/**
- * Service for handling system supervision.
- */
+/** Service for handling system supervision. */
 public class SupervisionService extends ISupervisionManager.Stub {
     private static final String LOG_TAG = "SupervisionService";
 
@@ -52,12 +55,23 @@ public class SupervisionService extends ISupervisionManager.Stub {
     @GuardedBy("getLockObject()")
     private final SparseArray<SupervisionUserData> mUserData = new SparseArray<>();
 
+    private final DevicePolicyManagerInternal mDpmInternal;
     private final UserManagerInternal mUserManagerInternal;
 
     public SupervisionService(Context context) {
         mContext = context.createAttributionContext(LOG_TAG);
+        mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
+    }
+
+    void syncStateWithDevicePolicyManager(TargetUser user) {
+        if (user.isPreCreated()) return;
+
+        // Ensure that supervision is enabled when supervision app is the profile owner.
+        if (android.app.admin.flags.Flags.enableSupervisionServiceSync() && isProfileOwner(user)) {
+            setSupervisionEnabledForUser(user.getUserIdentifier(), true);
+        }
     }
 
     @Override
@@ -74,14 +88,15 @@ public class SupervisionService extends ISupervisionManager.Stub {
             @Nullable FileDescriptor err,
             @NonNull String[] args,
             @Nullable ShellCallback callback,
-            @NonNull ResultReceiver resultReceiver) throws RemoteException {
+            @NonNull ResultReceiver resultReceiver)
+            throws RemoteException {
         new SupervisionServiceShellCommand(this)
                 .exec(this, in, out, err, args, callback, resultReceiver);
     }
 
     @Override
-    protected void dump(@NonNull FileDescriptor fd,
-            @NonNull PrintWriter printWriter, @Nullable String[] args) {
+    protected void dump(
+            @NonNull FileDescriptor fd, @NonNull PrintWriter printWriter, @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, printWriter)) return;
 
         try (var pw = new IndentingPrintWriter(printWriter, "  ")) {
@@ -120,6 +135,17 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
     }
 
+    /** Returns whether the supervision app has profile owner status. */
+    private boolean isProfileOwner(TargetUser user) {
+        ComponentName profileOwner = mDpmInternal.getProfileOwnerAsUser(user.getUserIdentifier());
+        if (profileOwner == null) {
+            return false;
+        }
+
+        String configPackage = mContext.getResources().getString(R.string.config_systemSupervision);
+        return profileOwner.getPackageName().equals(configPackage);
+    }
+
     public static class Lifecycle extends SystemService {
         private final SupervisionService mSupervisionService;
 
@@ -133,25 +159,43 @@ public class SupervisionService extends ISupervisionManager.Stub {
             publishLocalService(SupervisionManagerInternal.class, mSupervisionService.mInternal);
             publishBinderService(Context.SUPERVISION_SERVICE, mSupervisionService);
         }
+
+        @Override
+        public void onUserStarting(@NonNull TargetUser user) {
+            mSupervisionService.syncStateWithDevicePolicyManager(user);
+        }
     }
 
-    final SupervisionManagerInternal mInternal = new SupervisionManagerInternal() {
+    final SupervisionManagerInternal mInternal = new SupervisionManagerInternalImpl();
+
+    private final class SupervisionManagerInternalImpl extends SupervisionManagerInternal {
+        @Override
         public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
+            return SupervisionService.this.isSupervisionEnabledForUser(userId);
+        }
+
+        @Override
+        public void setSupervisionEnabledForUser(@UserIdInt int userId, boolean enabled) {
+            SupervisionService.this.setSupervisionEnabledForUser(userId, enabled);
+        }
+
+        @Override
+        public boolean isSupervisionLockscreenEnabledForUser(@UserIdInt int userId) {
             synchronized (getLockObject()) {
-                return getUserDataLocked(userId).supervisionEnabled;
+                return getUserDataLocked(userId).supervisionLockScreenEnabled;
             }
         }
 
         @Override
         public void setSupervisionLockscreenEnabledForUser(
-                @UserIdInt int userId, boolean enabled, @Nullable Bundle options) {
+                @UserIdInt int userId, boolean enabled, @Nullable PersistableBundle options) {
             synchronized (getLockObject()) {
                 SupervisionUserData data = getUserDataLocked(userId);
                 data.supervisionLockScreenEnabled = enabled;
                 data.supervisionLockScreenOptions = options;
             }
         }
-    };
+    }
 
     private final class UserLifecycleListener implements UserManagerInternal.UserLifecycleListener {
         @Override

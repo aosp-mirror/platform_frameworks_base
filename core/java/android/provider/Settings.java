@@ -1217,6 +1217,69 @@ public final class Settings {
             "android.settings.REGIONAL_PREFERENCES_SETTINGS";
 
     /**
+     * Activity Action: Show screen for allowing the region configuration.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REGION_SETTINGS =
+            "android.settings.REGION_SETTINGS";
+
+    /**
+     * Activity Action: Show first day of week configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_FIRST_DAY_OF_WEEK_SETTINGS =
+            "android.settings.FIRST_DAY_OF_WEEK_SETTINGS";
+
+    /**
+     * Activity Action: Show temperature unit configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TEMPERATURE_UNIT_SETTINGS =
+            "android.settings.TEMPERATURE_UNIT_SETTINGS";
+
+    /**
+     * Activity Action: Show numbering system configuration settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NUMBERING_SYSTEM_SETTINGS =
+            "android.settings.NUMBERING_SYSTEM_SETTINGS";
+
+    /**
+     * Activity Action: Show measurement system configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MEASUREMENT_SYSTEM_SETTINGS =
+            "android.settings.MEASUREMENT_SYSTEM_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of lockscreen.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -6332,27 +6395,6 @@ public final class Settings {
         public static final String SCREEN_FLASH_NOTIFICATION_COLOR =
                 "screen_flash_notification_color_global";
 
-
-        /**
-         * A semi-colon separated list of Bluetooth hearing devices' local ambient volume.
-         * Each entry is encoded as a key=value list, separated by commas. Ex:
-         *
-         * "addr=XX:XX:XX:00:11,ambient=20,group_ambient=30;addr=XX:XX:XX:00:22,ambient=50"
-         *
-         * The following keys are supported:
-         * <pre>
-         * addr                 (String)
-         * ambient              (int)
-         * group_ambient        (int)
-         * control_expanded     (boolean)
-         * </pre>
-         *
-         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
-         * @hide
-         */
-        public static final String HEARING_DEVICE_LOCAL_AMBIENT_VOLUME =
-                "hearing_device_local_ambient_volume";
-
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
@@ -6497,7 +6539,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
             PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
             PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
-            PRIVATE_SETTINGS.add(HEARING_DEVICE_LOCAL_AMBIENT_VOLUME);
         }
 
         /**
@@ -18073,6 +18114,44 @@ public final class Settings {
          * @hide
          */
         public static final String ONE_HANDED_KEYGUARD_SIDE = "one_handed_keyguard_side";
+
+        /**
+         * A semi-colon separated list of Bluetooth hearing devices' local ambient volume data.
+         * Each entry is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "addr=XX:XX:XX:00:11,ambient=20,group_ambient=30;addr=XX:XX:XX:00:22,ambient=50"
+         *
+         * The following keys are supported:
+         * <pre>
+         * addr                 (String)
+         * ambient              (int)
+         * group_ambient        (int)
+         * control_expanded     (boolean)
+         * </pre>
+         *
+         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
+         * @hide
+         */
+        public static final String HEARING_DEVICE_LOCAL_AMBIENT_VOLUME =
+                "hearing_device_local_ambient_volume";
+
+        /**
+         * A semi-colon separated list of Bluetooth hearing devices' notification data.
+         * Each entry is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "addr=XX:XX:XX:00:11,input_changes=1"
+         *
+         * The following keys are supported:
+         * <pre>
+         * addr                 (String)
+         * input_changes        (boolean)
+         * </pre>
+         *
+         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
+         * @hide
+         */
+        public static final String HEARING_DEVICE_LOCAL_NOTIFICATION =
+                "hearing_device_local_notification";
 
         /**
          * Global settings that shouldn't be persisted.

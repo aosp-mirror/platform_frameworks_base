@@ -1029,12 +1029,14 @@ final class InstallPackageHelper {
                 if (reconciledPackages == null) {
                     return;
                 }
-                if (Flags.improveInstallFreeze()) {
-                    prepPerformDexoptIfNeeded(reconciledPackages);
-                }
-                if (renameAndUpdatePaths(requests)
-                        && commitInstallPackages(reconciledPackages)) {
-                    success = true;
+                if (renameAndUpdatePaths(requests)) {
+                    // rename before dexopt because art will encoded the path in the odex/vdex file
+                    if (Flags.improveInstallFreeze()) {
+                        prepPerformDexoptIfNeeded(reconciledPackages);
+                    }
+                    if (commitInstallPackages(reconciledPackages)) {
+                        success = true;
+                    }
                 }
             }
         } finally {

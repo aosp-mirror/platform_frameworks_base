@@ -535,9 +535,13 @@ package android.app {
   public class WallpaperManager {
     method @Nullable public android.graphics.Bitmap getBitmap();
     method @Nullable public android.graphics.Bitmap getBitmapAsUser(int, boolean, int);
+    method @FlaggedApi("com.android.window.flags.multi_crop") @NonNull @RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL) public java.util.List<android.graphics.Rect> getBitmapCrops(@NonNull java.util.List<android.graphics.Point>, int, boolean);
+    method @FlaggedApi("com.android.window.flags.multi_crop") @NonNull public java.util.List<android.graphics.Rect> getBitmapCrops(@NonNull android.graphics.Point, @NonNull java.util.List<android.graphics.Point>, @Nullable java.util.Map<android.graphics.Point,android.graphics.Rect>);
     method public boolean isLockscreenLiveWallpaperEnabled();
     method @Nullable public android.graphics.Rect peekBitmapDimensions();
     method @Nullable public android.graphics.Rect peekBitmapDimensions(int);
+    method @FlaggedApi("com.android.window.flags.multi_crop") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setBitmapWithCrops(@Nullable android.graphics.Bitmap, @NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>, boolean, int) throws java.io.IOException;
+    method @FlaggedApi("com.android.window.flags.multi_crop") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setStreamWithCrops(@NonNull java.io.InputStream, @NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>, boolean, int) throws java.io.IOException;
     method public void setWallpaperZoomOut(@NonNull android.os.IBinder, float);
     method public boolean shouldEnableWideColorGamut();
     method public boolean wallpaperSupportsWcg(int);
@@ -2061,6 +2065,29 @@ package android.media {
     method public boolean isAidlHal();
   }
 
+  public final class MediaCodec {
+    method @FlaggedApi("android.media.codec.codec_availability") @NonNull public static java.util.List<android.media.MediaCodec.GlobalResourceInfo> getGloballyAvailableResources();
+    method @FlaggedApi("android.media.codec.codec_availability") @NonNull public java.util.List<android.media.MediaCodec.InstanceResourceInfo> getRequiredResources();
+  }
+
+  public abstract static class MediaCodec.Callback {
+    method @FlaggedApi("android.media.codec.codec_availability") public void onRequiredResourcesChanged(@NonNull android.media.MediaCodec);
+  }
+
+  @FlaggedApi("android.media.codec.codec_availability") public static final class MediaCodec.GlobalResourceInfo {
+    ctor public MediaCodec.GlobalResourceInfo();
+    method public long getAvailable();
+    method public long getCapacity();
+    method @NonNull public String getName();
+  }
+
+  @FlaggedApi("android.media.codec.codec_availability") public static final class MediaCodec.InstanceResourceInfo {
+    ctor public MediaCodec.InstanceResourceInfo();
+    method @NonNull public String getName();
+    method public long getPerFrameCount();
+    method public long getStaticCount();
+  }
+
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);
@@ -2291,7 +2318,7 @@ package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
     method @Nullable public static android.net.wifi.sharedconnectivity.app.SharedConnectivityManager create(@NonNull android.content.Context, @NonNull String, @NonNull String);
-    method @FlaggedApi("com.android.wifi.flags.shared_connectivity_broadcast_receiver_test_api") @NonNull public android.content.BroadcastReceiver getBroadcastReceiver();
+    method @NonNull public android.content.BroadcastReceiver getBroadcastReceiver();
     method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
   }
@@ -3213,6 +3240,7 @@ package android.service.quickaccesswallet {
     method @Nullable public android.content.Intent createWalletIntent();
     method @Nullable public android.content.Intent createWalletSettingsIntent();
     method public void disconnect();
+    method @FlaggedApi("android.service.quickaccesswallet.launch_wallet_option_on_power_double_tap") public void getGestureTargetActivityPendingIntent(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.GesturePendingIntentCallback);
     method public void getWalletCards(@NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
     method public void getWalletCards(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
     method public void getWalletPendingIntent(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletPendingIntentCallback);
@@ -3222,6 +3250,10 @@ package android.service.quickaccesswallet {
     method public void notifyWalletDismissed();
     method public void removeWalletServiceEventListener(@NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
     method public void selectWalletCard(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
+  }
+
+  @FlaggedApi("android.service.quickaccesswallet.launch_wallet_option_on_power_double_tap") public static interface QuickAccessWalletClient.GesturePendingIntentCallback {
+    method @FlaggedApi("android.service.quickaccesswallet.launch_wallet_option_on_power_double_tap") public void onGesturePendingIntentRetrieved(@Nullable android.app.PendingIntent);
   }
 
   public static interface QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
@@ -3366,6 +3398,10 @@ package android.telephony {
     ctor public BarringInfo.BarringServiceInfo(int, boolean, int, int);
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.cellular_identifier_disclosure_indications") public final class CellularIdentifierDisclosure implements android.os.Parcelable {
+    ctor public CellularIdentifierDisclosure(int, int, @NonNull String, boolean);
+  }
+
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
     field public static final String MBMS_DOWNLOAD_SERVICE_OVERRIDE_METADATA = "mbms-download-service-override";
   }
@@ -3391,6 +3427,10 @@ package android.telephony {
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {
     ctor @Deprecated public PreciseDataConnectionState(int, int, int, @NonNull String, @Nullable android.net.LinkProperties, int);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.security_algorithms_update_indications") public final class SecurityAlgorithmUpdate implements android.os.Parcelable {
+    ctor public SecurityAlgorithmUpdate(int, int, int, boolean);
   }
 
   public class ServiceState implements android.os.Parcelable {

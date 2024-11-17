@@ -232,6 +232,8 @@ aidl_interface {
         "android.hardware.power-aidl",
     ],
     srcs: [
+        "android/os/CpuHeadroomParamsInternal.aidl",
+        "android/os/GpuHeadroomParamsInternal.aidl",
         "android/os/IHintManager.aidl",
         "android/os/IHintSession.aidl",
     ],

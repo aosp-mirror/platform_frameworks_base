@@ -284,7 +284,7 @@ flag {
     is_fixed_read_only: true
     is_exported: true
     namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable replacing permission BODY_SENSORS (and BODY_SENSORS_BACKGROUND) with granular health permission READ_HEART_RATE (and READ_HEALTH_DATA_IN_BACKGROUND)"
+    description: "Enables replacement of BODY_SENSORS/BODY_SENSORS_BACKGROUND permissions with granular health permissions READ_HEART_RATE, READ_SKIN_TEMPERATURE, READ_OXYGEN_SATURATION, and READ_HEALTH_DATA_IN_BACKGROUND"
     bug: "364638912"
 }
 
@@ -297,24 +297,6 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
-}
-
-flag {
-    name: "platform_skin_temperature_enabled"
-    is_fixed_read_only: true
-    is_exported: true
-    namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable platform support for Skin Temperature."
-    bug: "369872443"
-}
-
-flag {
-    name: "platform_oxygen_saturation_enabled"
-    is_fixed_read_only: true
-    is_exported: true
-    namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable platform support for Oxygen Saturation (SpO2)."
-    bug: "369873227"
 }
 
 flag {
@@ -385,4 +367,54 @@ flag {
     namespace: "uwb"
     description: "This fixed read-only flag is used to enable new ranging permission for all ranging use cases."
     bug: "370977414"
+}
+
+flag {
+    name: "system_selection_toolbar_enabled"
+    namespace: "permissions"
+    description: "Enables the system selection toolbar feature."
+    bug: "363318732"
+}
+
+flag {
+    name: "use_system_selection_toolbar_in_sysui"
+    namespace: "permissions"
+    description: "Uses the SysUi process to host the SelectionToolbarRenderService."
+    bug: "363318732"
+}
+
+flag {
+    name: "note_op_batching_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Batch noteOperations on the client to reduce binder call volume"
+    bug: "366013082"
+}
+
+flag {
+    name: "supervision_role_permission_update_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "supervision"
+    description: "This flag is used to enable all the remaining permissions required to the supervision role"
+    bug: "367333883"
+}
+
+flag {
+    name: "permission_request_short_circuit_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "This flag is used to short circuit the request for permananently denied permissions"
+    bug: "378923900"
+}
+
+flag {
+    name: "check_op_overload_api_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Add new checkOp APIs that accept attributionTag"
+    bug: "240617242"
 }

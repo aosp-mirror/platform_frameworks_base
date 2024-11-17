@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.domain.interactor.TrustInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepository
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
@@ -363,6 +364,9 @@ constructor(
         private val interactor: DeviceUnlockedInteractor,
     ) : CoreStartable {
         override fun start() {
+            if (!SceneContainerFlag.isEnabled)
+                return
+
             applicationScope.launch { interactor.activate() }
         }
     }

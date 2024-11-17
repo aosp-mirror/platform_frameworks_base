@@ -163,10 +163,12 @@ flag {
 }
 
 flag {
-  name: "typeface_redesign"
+  name: "typeface_redesign_readonly"
   namespace: "text"
   description: "Decouple variation settings, weight and style information from Typeface class"
   bug: "361260253"
+  # This feature does not support runtime flag switch which leads crash in System UI.
+  is_fixed_read_only: true
 }
 
 flag {

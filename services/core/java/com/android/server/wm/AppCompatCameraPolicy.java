@@ -234,7 +234,7 @@ class AppCompatCameraPolicy {
     }
 
     // TODO(b/369070416): have policies implement the same interface.
-    static float getCameraCompatAspectRatio(@NonNull ActivityRecord activity) {
+    static float getCameraCompatMinAspectRatio(@NonNull ActivityRecord activity) {
         final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
         if (cameraPolicy == null) {
             return 1.0f;

@@ -23,7 +23,6 @@ import android.media.tv.flags.Flags;
 /**
  * The contract between the media quality service and applications. Contains definitions for the
  * commonly used parameter names.
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public class MediaQualityContract {
@@ -33,6 +32,7 @@ public class MediaQualityContract {
      */
     public interface BaseParameters {
         String PARAMETER_ID = "_id";
+        String PARAMETER_TYPE = "_type";
         String PARAMETER_NAME = "_name";
         String PARAMETER_PACKAGE = "_package";
         String PARAMETER_INPUT_ID = "_input_id";
@@ -41,7 +41,6 @@ public class MediaQualityContract {
 
     /**
      * Parameters picture quality.
-     * @hide
      */
     public static final class PictureQuality {
         /**

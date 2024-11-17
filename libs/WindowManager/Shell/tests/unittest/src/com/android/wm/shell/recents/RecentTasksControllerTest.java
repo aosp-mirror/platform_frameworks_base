@@ -610,7 +610,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mRecentTasksControllerReal.onTaskMovedToFrontThroughTransition(taskInfo);
 
         GroupedTaskInfo runningTask = GroupedTaskInfo.forFullscreenTasks(taskInfo);
-        verify(mRecentTasksListener).onTaskMovedToFront(eq(new GroupedTaskInfo[] { runningTask }));
+        verify(mRecentTasksListener).onTaskMovedToFront(eq(runningTask));
     }
 
     @Test
@@ -654,6 +654,35 @@ public class RecentTasksControllerTest extends ShellTestCase {
         SplitBounds splitBounds4 = mRecentTasksController.getSplitBoundsForTaskId(4);
         assertEquals("Different splitBounds for same pair", splitBounds3, splitBounds4);
         assertEquals(splitBounds4, pair2Bounds);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    @EnableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    public void shellTopTaskTracker_onTaskStackChanged_expectNoRecentsChanged() throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        mRecentTasksControllerReal.onTaskStackChanged();
+        verify(mRecentTasksListener, never()).onRecentTasksChanged();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    @EnableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    public void shellTopTaskTracker_onTaskRemoved_expectNoRecentsChanged() throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        mRecentTasksControllerReal.onTaskRemoved(taskInfo);
+        verify(mRecentTasksListener, never()).onRecentTasksChanged();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    @EnableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    public void shellTopTaskTracker_onVisibleTasksChanged() throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        mRecentTasksControllerReal.onVisibleTasksChanged(List.of(taskInfo));
+        verify(mRecentTasksListener, never()).onVisibleTasksChanged(any());
     }
 
     /**

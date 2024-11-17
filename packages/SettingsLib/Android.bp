@@ -61,9 +61,11 @@ android_library {
         "SettingsLibUtils",
         "SettingsLibZeroStatePreference",
         "settingslib_media_flags_lib",
+    ],
+    libs:[
+        // This flag library has been added in frameworks jar
         "aconfig_settingslib_flags_java_lib",
     ],
-
     plugins: ["androidx.room_room-compiler-plugin"],
     use_resource_processor: true,
     resource_dirs: ["res"],

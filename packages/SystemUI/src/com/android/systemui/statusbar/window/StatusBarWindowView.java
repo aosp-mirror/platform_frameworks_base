@@ -39,7 +39,7 @@ import com.android.systemui.statusbar.core.StatusBarRootModernization;
 import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
 
 /**
- * Status bar view.
+ * Status bar view
  * We now extend WindowRootView so that we can host Compose views
  */
 public class StatusBarWindowView extends FrameLayout {

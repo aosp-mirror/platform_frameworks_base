@@ -1120,8 +1120,8 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public String toString() {
         return "WindowContainerTransaction {"
-                + " changes = " + mChanges
-                + " hops = " + mHierarchyOps
+                + " changes= " + mChanges
+                + " hops= " + mHierarchyOps
                 + " errorCallbackToken=" + mErrorCallbackToken
                 + " taskFragmentOrganizer=" + mTaskFragmentOrganizer
                 + " }";

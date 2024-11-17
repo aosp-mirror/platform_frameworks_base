@@ -411,6 +411,12 @@ class DesktopRepository (
             desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString())
         // Remove task from unminimized task if it is minimized.
         unminimizeTask(displayId, taskId)
+        // Mark task as not in immersive if it was immersive.
+        setTaskInFullImmersiveState(
+            displayId = displayId,
+            taskId = taskId,
+            immersive = false
+        )
         removeActiveTask(taskId)
         removeVisibleTask(taskId)
         if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
@@ -487,6 +493,9 @@ class DesktopRepository (
             mainCoroutineScope.launch {
                 try {
                     persistentRepository.addOrUpdateDesktop(
+                        // Use display id as desktop id for now since only once desktop per display
+                        // is supported.
+                        desktopId = displayId,
                         visibleTasks = desktopTaskDataByDisplayIdCopy.visibleTasks,
                         minimizedTasks = desktopTaskDataByDisplayIdCopy.minimizedTasks,
                         freeformTasksInZOrder = desktopTaskDataByDisplayIdCopy.freeformTasksInZOrder

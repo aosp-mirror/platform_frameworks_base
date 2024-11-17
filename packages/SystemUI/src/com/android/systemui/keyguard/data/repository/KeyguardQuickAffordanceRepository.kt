@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerR
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -57,7 +58,7 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardQuickAffordanceRepository
 @Inject
 constructor(
-    @Application private val appContext: Context,
+    @ShadeDisplayAware private val appContext: Context,
     @Application private val scope: CoroutineScope,
     private val localUserSelectionManager: KeyguardQuickAffordanceLocalUserSelectionManager,
     private val remoteUserSelectionManager: KeyguardQuickAffordanceRemoteUserSelectionManager,

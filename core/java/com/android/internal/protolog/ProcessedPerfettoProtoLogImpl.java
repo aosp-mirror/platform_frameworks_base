@@ -113,6 +113,10 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
      */
     @Override
     public int startLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
+        if (!validateGroups(logger, groups)) {
+            return -1;
+        }
+
         mViewerConfigReader.loadViewerConfig(groups, logger);
         return super.startLoggingToLogcat(groups, logger);
     }
@@ -125,8 +129,19 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
      */
     @Override
     public int stopLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
+        if (!validateGroups(logger, groups)) {
+            return -1;
+        }
+
+        var status = super.stopLoggingToLogcat(groups, logger);
+
+        if (status != 0) {
+            throw new RuntimeException("Failed to stop logging to logcat");
+        }
+
+        // If we successfully disabled logging, unload the viewer config.
         mViewerConfigReader.unloadViewerConfig(groups, logger);
-        return super.stopLoggingToLogcat(groups, logger);
+        return status;
     }
 
     @Deprecated

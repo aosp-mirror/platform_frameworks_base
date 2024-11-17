@@ -97,7 +97,7 @@ android_test {
         "com_android_server_accessibility_flags_lib",
         "locksettings_flags_lib",
     ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
-        "true": ["service-crashrecovery.impl"],
+        "true": ["service-crashrecovery-pre-jarjar"],
         default: [],
     }),
 

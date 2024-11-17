@@ -45,9 +45,15 @@ oneway interface IRecentTasksListener {
      */
     void onRunningTaskChanged(in RunningTaskInfo taskInfo);
 
-    /** A task has moved to front. */
-    void onTaskMovedToFront(in GroupedTaskInfo[] visibleTasks);
+    /** A task has moved to front. Only used if enableShellTopTaskTracking() is disabled. */
+    void onTaskMovedToFront(in GroupedTaskInfo taskToFront);
 
-    /** A task info has changed. */
+    /** A task info has changed. Only used if enableShellTopTaskTracking() is disabled. */
     void onTaskInfoChanged(in RunningTaskInfo taskInfo);
+
+    /**
+     * If enableShellTopTaskTracking() is enabled, this reports the set of all visible tasks.
+     * Otherwise, this reports only the new top most visible task.
+     */
+    void onVisibleTasksChanged(in GroupedTaskInfo[] visibleTasks);
 }

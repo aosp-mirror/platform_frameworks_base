@@ -2989,15 +2989,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
     }
 
-    @Override
-    void resolveOverrideConfiguration(Configuration newParentConfig) {
-        super.resolveOverrideConfiguration(newParentConfig);
-        if (mActivityRecord != null) {
-            // Let the activity decide whether to apply the size override.
-            return;
-        }
-        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
-        resolvedConfig.seq = newParentConfig.seq;
+    void applySizeOverride(Configuration newParentConfig, Configuration resolvedConfig) {
         applySizeOverrideIfNeeded(
                 getDisplayContent(),
                 mSession.mProcess.mInfo,
@@ -3380,8 +3372,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (cleanupOnResume) {
                 requestUpdateWallpaperIfNeeded();
             }
-            mDestroying = false;
-            destroyedSomething = true;
+            if (!mHasSurface) {
+                mDestroying = false;
+                destroyedSomething = true;
+            }
 
             // Since mDestroying will affect ActivityRecord#allDrawn, we need to perform another
             // traversal in case we are waiting on this window to start the transition.

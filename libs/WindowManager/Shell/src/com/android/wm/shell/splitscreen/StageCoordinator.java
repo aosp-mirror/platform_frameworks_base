@@ -1193,7 +1193,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (!isSplitActive()) return;
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
         applyExitSplitScreen(childrenToTop, wct, exitReason);
     }
 
@@ -1270,6 +1269,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         prepareExitSplitScreen(stage, wct);
         mSplitTransitions.startDismissTransition(wct, this, stage, exitReason);
+        // reset stages to their default sides.
+        setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, null);
         logExit(exitReason);
     }
 
@@ -1357,7 +1358,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void clearSplitPairedInRecents(@ExitReason int exitReason) {
-        if (!shouldBreakPairedTaskInRecents(exitReason) || !mShouldUpdateRecents) return;
+        if (!shouldBreakPairedTaskInRecents(exitReason) || !mShouldUpdateRecents) {
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "clearSplitPairedInRecents: skipping reason=%s",
+                    !mShouldUpdateRecents ? "shouldn't update" : exitReasonToString(exitReason));
+            return;
+        }
 
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "clearSplitPairedInRecents: reason=%s",
                 exitReasonToString(exitReason));
@@ -1599,7 +1604,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 // to splits in the recents until we enter split again.
                 recentTasks.removeSplitPair(taskId);
             });
-            exitSplitScreen(mMainStage, EXIT_REASON_ROOT_TASK_VANISHED);
+            dismissSplitScreen(-1, EXIT_REASON_ROOT_TASK_VANISHED);
         }
 
         for (int i = mListeners.size() - 1; i >= 0; --i) {
@@ -1610,6 +1615,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void updateRecentTasksSplitPair() {
         // Preventing from single task update while processing recents.
         if (!mShouldUpdateRecents || !mPausingTasks.isEmpty()) {
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "updateRecentTasksSplitPair: skipping reason=%s",
+                    !mShouldUpdateRecents ? "shouldn't update" : "no pausing tasks");
             return;
         }
         mRecentTasks.ifPresent(recentTasks -> {
@@ -3184,9 +3191,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
             final int taskId = mPausingTasks.get(i);
             if (mMainStage.containsTask(taskId)) {
-                mMainStage.evictChildren(finishWct, taskId);
+                mMainStage.evictChild(finishWct, taskId, "recentsPairToPair");
             } else if (mSideStage.containsTask(taskId)) {
-                mSideStage.evictChildren(finishWct, taskId);
+                mSideStage.evictChild(finishWct, taskId, "recentsPairToPair");
             }
         }
         // If pending enter hasn't consumed, the mix handler will invoke start pending

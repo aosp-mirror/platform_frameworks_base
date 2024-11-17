@@ -815,8 +815,7 @@
     <dimen name="keyguard_clock_top_margin">18dp</dimen>
     <!-- The amount to shift the clocks during a small/large transition -->
     <dimen name="keyguard_clock_switch_y_shift">14dp</dimen>
-    <!-- When large clock is showing, offset the smartspace by this amount -->
-    <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
+
     <!-- The amount to translate lockscreen elements on the GONE->AOD transition -->
     <dimen name="keyguard_enter_from_top_translation_y">-100dp</dimen>
     <!-- The amount to translate lockscreen elements on the GONE->AOD transition, on device fold -->
@@ -1750,6 +1749,7 @@
     <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
     <!-- The end padding for the timer text view. Only used if an embedded padding icon is used. -->
     <dimen name="ongoing_activity_chip_text_end_padding_for_embedded_padding_icon">6dp</dimen>
+    <dimen name="ongoing_activity_chip_text_fading_edge_length">12dp</dimen>
     <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
@@ -1806,10 +1806,9 @@
 
     <!-- Hearing devices dialog related dimensions -->
     <dimen name="hearing_devices_layout_margin">12dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_height">72dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_text_padding_start">20dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_text_padding_vertical">15dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_arrow_size">24dp</dimen>
+    <dimen name="hearing_devices_small_title_padding_horizontal">16dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_padding">22dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_icon_size">24dp</dimen>
     <dimen name="hearing_devices_preset_spinner_background_radius">28dp</dimen>
     <dimen name="hearing_devices_tool_icon_size">28dp</dimen>
 
@@ -1957,8 +1956,6 @@
     <dimen name="dream_overlay_entry_y_offset">40dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
 
-    <dimen name="status_view_margin_horizontal">0dp</dimen>
-
     <!-- Media output broadcast dialog QR code picture size -->
     <dimen name="media_output_qrcode_size">216dp</dimen>
     <dimen name="media_output_broadcast_info">21dp</dimen>
@@ -2062,26 +2059,29 @@
     <dimen name="contextual_edu_dialog_elevation">2dp</dimen>
 
     <!-- Volume start -->
-    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
     <dimen name="volume_dialog_width">60dp</dimen>
-    <dimen name="volume_dialog_vertical_padding">10dp</dimen>
+
+    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
+    <dimen name="volume_dialog_background_vertical_margin">-10dp</dimen>
+
     <dimen name="volume_dialog_components_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_vertical_padding">10dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_vertical_padding_negative">-10dp</dimen>
     <dimen name="volume_dialog_floating_sliders_horizontal_padding">4dp</dimen>
-    <dimen name="volume_dialog_spacing">4dp</dimen>
     <dimen name="volume_dialog_button_size">48dp</dimen>
-    <dimen name="volume_dialog_floating_sliders_bottom_padding">48dp</dimen>
     <dimen name="volume_dialog_slider_width">52dp</dimen>
     <dimen name="volume_dialog_slider_height">254dp</dimen>
 
-    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
-    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
+    <fraction name="volume_dialog_half_opened_bias">0.2</fraction>
 
-    <dimen name="volume_dialog_ringer_horizontal_padding">10dp</dimen>
+    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
+
     <dimen name="volume_dialog_ringer_drawer_button_size">40dp</dimen>
     <dimen name="volume_dialog_ringer_drawer_button_icon_radius">10dp</dimen>
-    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
     <dimen name="volume_dialog_ringer_selected_button_background_radius">20dp</dimen>
+
+    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
+    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
     <!-- Volume end -->
 </resources>

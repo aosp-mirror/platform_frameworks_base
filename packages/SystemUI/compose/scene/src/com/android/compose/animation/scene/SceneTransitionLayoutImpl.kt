@@ -125,8 +125,8 @@ internal class SceneTransitionLayoutImpl(
                 }
 
     // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
-    private val horizontalDraggableHandler: DraggableHandlerImpl
-    private val verticalDraggableHandler: DraggableHandlerImpl
+    internal val horizontalDraggableHandler: DraggableHandlerImpl
+    internal val verticalDraggableHandler: DraggableHandlerImpl
 
     internal val elementStateScope = ElementStateScopeImpl(this)
     internal val propertyTransformationScope = PropertyTransformationScopeImpl(this)
@@ -162,12 +162,6 @@ internal class SceneTransitionLayoutImpl(
         // than this STLImpl.
         state.checkThread()
     }
-
-    internal fun draggableHandler(orientation: Orientation): DraggableHandlerImpl =
-        when (orientation) {
-            Orientation.Vertical -> verticalDraggableHandler
-            Orientation.Horizontal -> horizontalDraggableHandler
-        }
 
     internal fun scene(key: SceneKey): Scene {
         return scenes[key] ?: error("Scene $key is not configured")

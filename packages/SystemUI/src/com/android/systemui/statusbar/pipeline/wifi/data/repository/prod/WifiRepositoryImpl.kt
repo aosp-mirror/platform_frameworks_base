@@ -92,8 +92,7 @@ constructor(
 
     private var wifiPickerTracker: WifiPickerTracker? = null
 
-    @VisibleForTesting
-    val selectedUserContext: Flow<Context> =
+    private val selectedUserContext: Flow<Context> =
         userRepository.selectedUserInfo.map {
             applicationContext.createContextAsUser(UserHandle.of(it.id), /* flags= */ 0)
         }
@@ -112,8 +111,7 @@ constructor(
             selectedUserContext
                 .flatMapLatest { currentContext
                     -> // flatMapLatest because when selectedUserContext emits a new value, we want
-                    // to
-                    // re-create a whole flow
+                    // to re-create a whole flow
                     callbackFlow {
                             val callback =
                                 object : WifiPickerTracker.WifiPickerTrackerCallback {
@@ -132,20 +130,16 @@ constructor(
                                                 .map { it.toWifiNetworkModel() }
 
                                         // [WifiPickerTracker.connectedWifiEntry] will return the
-                                        // same
-                                        // instance but with updated internals. For example, when
-                                        // its
-                                        // validation status changes from false to true, the same
-                                        // instance is re-used but with the validated field updated.
+                                        // same instance but with updated internals. For example,
+                                        // when its validation status changes from false to true,
+                                        // the same instance is re-used but with the validated
+                                        // field updated.
                                         //
                                         // Because it's the same instance, the flow won't re-emit
-                                        // the
-                                        // value (even though the internals have changed). So, we
-                                        // need
-                                        // to transform it into our internal model immediately.
-                                        // [toWifiNetworkModel] always returns a new instance, so
-                                        // the
-                                        // flow is guaranteed to emit.
+                                        // the value (even though the internals have changed). So,
+                                        // we need to transform it into our internal model
+                                        // immediately. [toWifiNetworkModel] always returns a new
+                                        // instance, so the flow is guaranteed to emit.
                                         send(
                                             newPrimaryNetwork =
                                                 connectedEntry?.toPrimaryWifiNetworkModel()
@@ -235,20 +229,15 @@ constructor(
                                             .map { it.toWifiNetworkModel() }
 
                                     // [WifiPickerTracker.connectedWifiEntry] will return the same
-                                    // instance
-                                    // but with updated internals. For example, when its validation
-                                    // status
-                                    // changes from false to true, the same instance is re-used but
-                                    // with the
-                                    // validated field updated.
+                                    // instance but with updated internals. For example, when its
+                                    // validation status changes from false to true, the same
+                                    // instance is re-used but with the validated field updated.
                                     //
                                     // Because it's the same instance, the flow won't re-emit the
-                                    // value
-                                    // (even though the internals have changed). So, we need to
-                                    // transform it
-                                    // into our internal model immediately. [toWifiNetworkModel]
-                                    // always
-                                    // returns a new instance, so the flow is guaranteed to emit.
+                                    // value (even though the internals have changed). So, we need
+                                    // to transform it into our internal model immediately.
+                                    // [toWifiNetworkModel] always returns a new instance, so the
+                                    // flow is guaranteed to emit.
                                     send(
                                         newPrimaryNetwork =
                                             connectedEntry?.toPrimaryWifiNetworkModel()
@@ -292,12 +281,10 @@ constructor(
                                 .create(applicationContext, lifecycle, callback, "WifiRepository")
                                 .apply {
                                     // By default, [WifiPickerTracker] will scan to see all
-                                    // available wifi
-                                    // networks in the area. Because SysUI only needs to display the
-                                    // **connected** network, we don't need scans to be running (and
-                                    // in fact,
-                                    // running scans is costly and should be avoided whenever
-                                    // possible).
+                                    // available wifi networks in the area. Because SysUI only
+                                    // needs to display the **connected** network, we don't
+                                    // need scans to be running (and in fact, running scans is
+                                    // costly and should be avoided whenever possible).
                                     this?.disableScanning()
                                 }
                         // The lifecycle must be STARTED in order for the callback to receive
@@ -382,16 +369,11 @@ constructor(
 
     private fun MergedCarrierEntry.convertCarrierMergedToModel(): WifiNetworkModel {
         // WifiEntry instance values aren't guaranteed to be stable between method calls
-        // because
-        // WifiPickerTracker is continuously updating the same object. Save the level in a
-        // local
-        // variable so that checking the level validity here guarantees that the level will
-        // still be
-        // valid when we create the `WifiNetworkModel.Active` instance later. Otherwise, the
-        // level
-        // could be valid here but become invalid later, and `WifiNetworkModel.Active` will
-        // throw
-        // an exception. See b/362384551.
+        // because WifiPickerTracker is continuously updating the same object. Save the
+        // level in a local variable so that checking the level validity here guarantees
+        // that the level will still be valid when we create the `WifiNetworkModel.Active`
+        // instance later. Otherwise, the level could be valid here but become invalid
+        // later, and `WifiNetworkModel.Active` will throw an exception. See b/362384551.
 
         return WifiNetworkModel.CarrierMerged.of(
             subscriptionId = this.subscriptionId,

@@ -30,6 +30,7 @@ import com.android.systemui.power.data.repository.PowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakeSleepReason.TAP
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
@@ -77,7 +78,7 @@ class LightRevealScrimRepositoryImpl
 @Inject
 constructor(
     keyguardRepository: KeyguardRepository,
-    val context: Context,
+    @ShadeDisplayAware val context: Context,
     powerRepository: PowerRepository,
     private val scrimLogger: ScrimLogger,
 ) : LightRevealScrimRepository {

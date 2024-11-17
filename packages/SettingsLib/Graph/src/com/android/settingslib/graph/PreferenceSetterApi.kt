@@ -22,6 +22,7 @@ import androidx.annotation.IntDef
 import com.android.settingslib.graph.proto.PreferenceValueProto
 import com.android.settingslib.ipc.ApiDescriptor
 import com.android.settingslib.ipc.ApiHandler
+import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.ipc.IntMessageCodec
 import com.android.settingslib.ipc.MessageCodec
 import com.android.settingslib.metadata.BooleanValue
@@ -45,7 +46,11 @@ data class PreferenceSetterRequest(
     PreferenceSetterResult.OK,
     PreferenceSetterResult.UNSUPPORTED,
     PreferenceSetterResult.DISABLED,
+    PreferenceSetterResult.RESTRICTED,
     PreferenceSetterResult.UNAVAILABLE,
+    PreferenceSetterResult.REQUIRE_APP_PERMISSION,
+    PreferenceSetterResult.REQUIRE_USER_AGREEMENT,
+    PreferenceSetterResult.DISALLOW,
     PreferenceSetterResult.INVALID_REQUEST,
     PreferenceSetterResult.INTERNAL_ERROR,
 )
@@ -87,14 +92,17 @@ class PreferenceSetterApiDescriptor(override val id: Int) :
 }
 
 /** Preference setter API implementation. */
-class PreferenceSetterApiHandler(override val id: Int) : ApiHandler<PreferenceSetterRequest, Int> {
+class PreferenceSetterApiHandler(
+    override val id: Int,
+    private val permissionChecker: ApiPermissionChecker<PreferenceSetterRequest>,
+) : ApiHandler<PreferenceSetterRequest, Int> {
 
     override fun hasPermission(
         application: Application,
         myUid: Int,
         callingUid: Int,
         request: PreferenceSetterRequest,
-    ): Boolean = true
+    ) = permissionChecker.hasPermission(application, myUid, callingUid, request)
 
     override suspend fun invoke(
         application: Application,

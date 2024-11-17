@@ -353,6 +353,16 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_system_dialogs_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for system dialogs in Desktop Mode."
+    bug: "335638193"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_move_to_next_display_shortcut"
     namespace: "lse_desktop_experience"
     description: "Add new keyboard shortcut of moving a task into next display"
@@ -392,4 +402,11 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables HSUM on desktop mode."
     bug: "366397912"
+}
+
+flag {
+    name: "enable_multiple_desktops"
+    namespace: "lse_desktop_experience"
+    description: "Enable multiple desktop sessions for desktop windowing."
+    bug: "379158791"
 }

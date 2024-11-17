@@ -57,7 +57,6 @@ abstract class DeviceItemFactory {
     companion object {
         @JvmStatic
         fun createDeviceItem(
-            context: Context,
             cachedDevice: CachedBluetoothDevice,
             type: DeviceItemType,
             connectionSummary: String,
@@ -71,9 +70,7 @@ abstract class DeviceItemFactory {
                 deviceName = cachedDevice.name,
                 connectionSummary = connectionSummary,
                 iconWithDescription =
-                    BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice).let {
-                        Pair(it.first, it.second)
-                    },
+                    cachedDevice.drawableWithDescription.let { Pair(it.first, it.second) },
                 background = background,
                 isEnabled = !cachedDevice.isBusy,
                 actionAccessibilityLabel = actionAccessibilityLabel,
@@ -96,7 +93,6 @@ internal open class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
         return createDeviceItem(
-            context,
             cachedDevice,
             DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
             cachedDevice.connectionSummary ?: "",
@@ -122,7 +118,6 @@ internal class AudioSharingMediaDeviceItemFactory(
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
         return createDeviceItem(
-            context,
             cachedDevice,
             DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
@@ -153,7 +148,6 @@ internal class AvailableAudioSharingMediaDeviceItemFactory(
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
         return createDeviceItem(
-            context,
             cachedDevice,
             DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
             context.getString(
@@ -191,7 +185,6 @@ open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
         return createDeviceItem(
-            context,
             cachedDevice,
             DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
@@ -232,7 +225,6 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
         return createDeviceItem(
-            context,
             cachedDevice,
             DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
@@ -262,7 +254,6 @@ internal open class SavedDeviceItemFactory : DeviceItemFactory() {
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
         return createDeviceItem(
-            context,
             cachedDevice,
             DeviceItemType.SAVED_BLUETOOTH_DEVICE,
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }

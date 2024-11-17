@@ -99,9 +99,10 @@ import java.util.concurrent.CompletableFuture;
 final class DevicePolicyEngine {
     static final String TAG = "DevicePolicyEngine";
 
-    // TODO(b/281701062): reference role name from role manager once its exposed.
     static final String DEVICE_LOCK_CONTROLLER_ROLE =
             "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER";
+
+    static final String SYSTEM_SUPERVISION_ROLE = "android.app.role.SYSTEM_SUPERVISION";
 
     private static final String CELLULAR_2G_USER_RESTRICTION_ID =
             DevicePolicyIdentifiers.getIdentifierForUserRestriction(
@@ -1235,6 +1236,8 @@ final class DevicePolicyEngine {
                 }
             }
             for (EnforcingAdmin admin : admins) {
+                // No need to make changes to system enforcing admins.
+                if (admin.isSystemAuthority()) break;
                 if (updatedPackage == null || updatedPackage.equals(admin.getPackageName())) {
                     if (!isPackageInstalled(admin.getPackageName(), userId)) {
                         Slogf.i(TAG, String.format(

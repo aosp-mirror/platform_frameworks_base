@@ -65,7 +65,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0,
         tapl.setExpectedRotation(rotation.value)
         // Set string extra to ensure the app is on PiP mode at launch
         pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = mapOf("enter_pip" to "true"))
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
         mailApp.launchViaIntent(wmHelper)
         newTasksApp.launchViaIntent(wmHelper)
         imeApp.launchViaIntent(wmHelper)

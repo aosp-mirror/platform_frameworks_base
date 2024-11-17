@@ -38,6 +38,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.Companion.device
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.settings.SecureSettings
@@ -75,7 +76,7 @@ class KeyguardWakeDirectlyToGoneInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val repository: KeyguardRepository,
     private val systemClock: SystemClock,
     private val alarmManager: AlarmManager,

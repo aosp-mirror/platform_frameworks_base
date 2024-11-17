@@ -47,10 +47,8 @@ import static com.android.server.am.Flags.FLAG_AVOID_RESOLVING_TYPE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
 import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_UNBLOCK;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -80,6 +78,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.ApplicationThreadConstants;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.ForegroundServiceDelegationOptions;
@@ -87,6 +86,7 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.SyncNotedAppOp;
+import android.app.backup.BackupAnnotations;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -111,6 +111,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -133,6 +134,7 @@ import com.android.server.am.ProcessList.IsolatedUidRange;
 import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
 import com.android.server.am.UidObserverController.ChangeRecord;
 import com.android.server.appop.AppOpsService;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService;
@@ -228,6 +230,7 @@ public class ActivityManagerServiceTest {
     @Mock private PackageManagerInternal mPackageManagerInternal;
     @Mock private ActivityTaskManagerInternal mActivityTaskManagerInternal;
     @Mock private NotificationManagerInternal mNotificationManagerInternal;
+    @Mock private JobSchedulerInternal mJobSchedulerInternal;
     @Mock private ContentResolver mContentResolver;
 
     private TestInjector mInjector;
@@ -249,6 +252,7 @@ public class ActivityManagerServiceTest {
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
         LocalServices.addService(ActivityTaskManagerInternal.class, mActivityTaskManagerInternal);
         LocalServices.addService(NotificationManagerInternal.class, mNotificationManagerInternal);
+        LocalServices.addService(JobSchedulerInternal.class, mJobSchedulerInternal);
 
         doReturn(new ComponentName("", "")).when(mPackageManagerInternal)
                 .getSystemUiServiceComponent();
@@ -308,6 +312,7 @@ public class ActivityManagerServiceTest {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
         LocalServices.removeServiceForTest(NotificationManagerInternal.class);
+        LocalServices.removeServiceForTest(JobSchedulerInternal.class);
 
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
@@ -1308,12 +1313,19 @@ public class ActivityManagerServiceTest {
         Intent intent = new Intent();
         Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
         intent.putExtra("EXTRA_INTENT0", extraIntent);
+        Intent nestedIntent = new Intent("NESTED_INTENT_ACTION");
+        extraIntent.putExtra("NESTED_INTENT", nestedIntent);
 
         intent.collectExtraIntentKeys();
         mAms.addCreatorToken(intent, TEST_PACKAGE);
 
         ActivityManagerService.IntentCreatorToken token =
                 (ActivityManagerService.IntentCreatorToken) extraIntent.getCreatorToken();
+        assertThat(token).isNotNull();
+        assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
+        assertThat(token.getCreatorPackage()).isEqualTo(TEST_PACKAGE);
+
+        token = (ActivityManagerService.IntentCreatorToken) nestedIntent.getCreatorToken();
         assertThat(token).isNotNull();
         assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
         assertThat(token.getCreatorPackage()).isEqualTo(TEST_PACKAGE);
@@ -1349,6 +1361,8 @@ public class ActivityManagerServiceTest {
         Intent intent = new Intent();
         Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
         intent.putExtra("EXTRA_INTENT", extraIntent);
+        Intent nestedIntent = new Intent("NESTED_INTENT_ACTION");
+        extraIntent.putExtra("NESTED_INTENT", nestedIntent);
 
         intent.collectExtraIntentKeys();
 
@@ -1374,8 +1388,11 @@ public class ActivityManagerServiceTest {
         extraIntent = intent.getParcelableExtra("EXTRA_INTENT", Intent.class);
         extraIntent2 = intent.getParcelableExtra("EXTRA_INTENT2", Intent.class);
         extraIntent3 = intent.getParcelableExtra("EXTRA_INTENT3", Intent.class);
+        nestedIntent = extraIntent.getParcelableExtra("NESTED_INTENT", Intent.class);
 
         assertThat(extraIntent.getExtendedFlags()
+                & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
+        assertThat(nestedIntent.getExtendedFlags()
                 & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
         // sneaked in intent should have EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN set.
         assertThat(extraIntent2.getExtendedFlags()
@@ -1534,6 +1551,50 @@ public class ActivityManagerServiceTest {
                 .cancelNotification(eq(app.info.packageName), eq(app.info.packageName),
                         eq(app.info.uid), eq(app.mPid), eq(null),
                         eq(notificationId), anyInt());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void bindBackupAgent_fullBackup_shouldUseRestrictedMode_setsInFullBackup()
+            throws Exception {
+        ActivityManagerService spyAms = spy(mAms);
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.packageName = TEST_PACKAGE;
+        applicationInfo.processName = TEST_PACKAGE;
+        applicationInfo.uid = TEST_UID;
+        doReturn(applicationInfo).when(mPackageManager).getApplicationInfo(eq(TEST_PACKAGE),
+                anyLong(), anyInt());
+        ProcessRecord appRec = new ProcessRecord(mAms, applicationInfo, TAG, TEST_UID);
+        doReturn(appRec).when(spyAms).getProcessRecordLocked(eq(TEST_PACKAGE), eq(TEST_UID));
+
+        spyAms.bindBackupAgent(TEST_PACKAGE, ApplicationThreadConstants.BACKUP_MODE_FULL,
+                UserHandle.USER_SYSTEM,
+                BackupAnnotations.BackupDestination.CLOUD, /* shouldUseRestrictedMode= */
+                true);
+
+        assertThat(appRec.isInFullBackup()).isTrue();
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void bindBackupAgent_fullBackup_shouldNotUseRestrictedMode_doesNotSetInFullBackup()
+            throws Exception {
+        ActivityManagerService spyAms = spy(mAms);
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.packageName = TEST_PACKAGE;
+        applicationInfo.processName = TEST_PACKAGE;
+        applicationInfo.uid = TEST_UID;
+        doReturn(applicationInfo).when(mPackageManager).getApplicationInfo(eq(TEST_PACKAGE),
+                anyLong(), anyInt());
+        ProcessRecord appRec = new ProcessRecord(mAms, applicationInfo, TAG, TEST_UID);
+        doReturn(appRec).when(spyAms).getProcessRecordLocked(eq(TEST_PACKAGE), eq(TEST_UID));
+
+        spyAms.bindBackupAgent(TEST_PACKAGE, ApplicationThreadConstants.BACKUP_MODE_FULL,
+                UserHandle.USER_SYSTEM,
+                BackupAnnotations.BackupDestination.CLOUD, /* shouldUseRestrictedMode= */
+                false);
+
+        assertThat(appRec.isInFullBackup()).isFalse();
     }
 
     private static class TestHandler extends Handler {

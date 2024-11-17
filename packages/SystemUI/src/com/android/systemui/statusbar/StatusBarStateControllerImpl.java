@@ -705,6 +705,7 @@ public class StatusBarStateControllerImpl implements
         final boolean onBouncer = currentScene.equals(Scenes.Bouncer);
         final boolean onCommunal = currentScene.equals(Scenes.Communal);
         final boolean onGone = currentScene.equals(Scenes.Gone);
+        final boolean onDream = currentScene.equals(Scenes.Dream);
         final boolean onLockscreen = currentScene.equals(Scenes.Lockscreen);
         final boolean onQuickSettings = currentScene.equals(Scenes.QuickSettings);
         final boolean onShade = currentScene.equals(Scenes.Shade);
@@ -764,6 +765,8 @@ public class StatusBarStateControllerImpl implements
         } else if (onShade || onQuickSettings) {
             // We get here if deviceUnlockStatus.isUnlocked is false but we are no longer on or over
             // a keyguardish scene; we want to return SHADE_LOCKED until isUnlocked is also true.
+            newState = StatusBarState.SHADE_LOCKED;
+        } else if (onDream) {
             newState = StatusBarState.SHADE_LOCKED;
         } else {
             throw new IllegalArgumentException(

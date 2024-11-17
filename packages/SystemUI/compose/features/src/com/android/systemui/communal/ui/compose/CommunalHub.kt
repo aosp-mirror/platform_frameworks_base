@@ -163,6 +163,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
@@ -186,7 +187,9 @@ import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlin.math.max
 import kotlin.math.min
@@ -205,6 +208,7 @@ fun CommunalHub(
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
     onEditDone: (() -> Unit)? = null,
+    sceneScope: SceneScope? = null,
 ) {
     val communalContent by
         viewModel.communalContent.collectAsStateWithLifecycle(initialValue = emptyList())
@@ -414,6 +418,7 @@ fun CommunalHub(
                             widgetConfigurator = widgetConfigurator,
                             interactionHandler = interactionHandler,
                             widgetSection = widgetSection,
+                            sceneScope = sceneScope,
                         )
                     }
                 }
@@ -735,6 +740,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
+    sceneScope: SceneScope?,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -807,7 +813,6 @@ private fun BoxScope.CommunalHubLazyGrid(
                 ) {
                     ResizeableItemFrameViewModel()
                 }
-
             if (viewModel.isEditMode && dragDropState != null) {
                 val isItemDragging = dragDropState.draggingItemKey == item.key
                 val outlineAlpha by
@@ -872,6 +877,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                     interactionHandler = interactionHandler,
                     widgetSection = widgetSection,
                     resizeableItemFrameViewModel = resizeableItemFrameViewModel,
+                    sceneScope = sceneScope,
                 )
             }
         }
@@ -1096,6 +1102,7 @@ private fun CommunalContent(
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
     resizeableItemFrameViewModel: ResizeableItemFrameViewModel,
+    sceneScope: SceneScope? = null,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -1119,7 +1126,7 @@ private fun CommunalContent(
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
-        is CommunalContentModel.Umo -> Umo(viewModel, modifier)
+        is CommunalContentModel.Umo -> Umo(viewModel, sceneScope, modifier)
     }
 }
 
@@ -1530,7 +1537,25 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
+private fun Umo(
+    viewModel: BaseCommunalViewModel,
+    sceneScope: SceneScope?,
+    modifier: Modifier = Modifier,
+) {
+    if (SceneContainerFlag.isEnabled && sceneScope != null) {
+        sceneScope.MediaCarousel(
+            modifier = modifier.fillMaxSize(),
+            isVisible = true,
+            mediaHost = viewModel.mediaHost,
+            carouselController = viewModel.mediaCarouselController,
+        )
+    } else {
+        UmoLegacy(viewModel, modifier)
+    }
+}
+
+@Composable
+private fun UmoLegacy(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
         modifier =
             modifier.pointerInput(Unit) {

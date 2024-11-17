@@ -77,11 +77,7 @@ class FakeMobileConnectionsRepository(
 
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
         return subIdRepos[subId]
-            ?: FakeMobileConnectionRepository(
-                    subId,
-                    tableLogBuffer,
-                )
-                .also { subIdRepos[subId] = it }
+            ?: FakeMobileConnectionRepository(subId, tableLogBuffer).also { subIdRepos[subId] = it }
     }
 
     override val defaultDataSubRatConfig = MutableStateFlow(MobileMappings.Config())
@@ -135,3 +131,6 @@ class FakeMobileConnectionsRepository(
         const val LTE_ADVANCED_PRO = TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO
     }
 }
+
+val MobileConnectionsRepository.fake
+    get() = this as FakeMobileConnectionsRepository

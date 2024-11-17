@@ -2121,6 +2121,38 @@ public abstract class CameraMetadata<TKey> {
     public static final int AUTOMOTIVE_LOCATION_EXTRA_RIGHT = 10;
 
     //
+    // Enumeration values for CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+    //
+
+    /**
+     * @see CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SHARED_SESSION_COLOR_SPACE_UNSPECIFIED = -1;
+
+    /**
+     * @see CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SHARED_SESSION_COLOR_SPACE_SRGB = 0;
+
+    /**
+     * @see CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SHARED_SESSION_COLOR_SPACE_DISPLAY_P3 = 7;
+
+    /**
+     * @see CameraCharacteristics#SHARED_SESSION_COLOR_SPACE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SHARED_SESSION_COLOR_SPACE_BT2020_HLG = 16;
+
+    //
     // Enumeration values for CaptureRequest#COLOR_CORRECTION_MODE
     //
 
@@ -3395,6 +3427,48 @@ public abstract class CameraMetadata<TKey> {
      */
     @FlaggedApi(Flags.FLAG_ZOOM_METHOD)
     public static final int CONTROL_ZOOM_METHOD_ZOOM_RATIO = 1;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_AE_PRIORITY_MODE
+    //
+
+    /**
+     * <p>Disable AE priority mode. This is the default value.</p>
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
+     */
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final int CONTROL_AE_PRIORITY_MODE_OFF = 0;
+
+    /**
+     * <p>The camera device's auto-exposure routine is active and
+     * prioritizes the application-selected ISO ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}).</p>
+     * <p>The application has control over {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} while
+     * the application's values for {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime} and
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are ignored.</p>
+     *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
+     */
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final int CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY = 1;
+
+    /**
+     * <p>The camera device's auto-exposure routine is active and
+     * prioritizes the application-selected exposure time
+     * ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}).</p>
+     * <p>The application has control over {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime} while
+     * the application's values for {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} and
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are ignored.</p>
+     *
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
+     */
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final int CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY = 2;
 
     //
     // Enumeration values for CaptureRequest#EDGE_MODE

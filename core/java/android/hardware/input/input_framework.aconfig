@@ -153,8 +153,8 @@ flag {
 
 flag {
   name: "override_power_key_behavior_in_focused_window"
-  namespace: "input_native"
-  description: "Allows privileged focused windows to capture power key events."
+  namespace: "wallet_integration"
+  description: "Allows privileged focused windows to override the power key double tap behavior."
   bug: "357144512"
 }
 
@@ -171,3 +171,10 @@ flag {
   description: "Adds key gestures for talkback and magnifier"
   bug: "375277034"
 }
+
+flag {
+  name: "can_window_override_power_gesture_api"
+  namespace: "wallet_integration"
+  description: "Adds new API in WindowManager class to check if the window can override the power key double tap behavior."
+  bug: "378736024"
+  }

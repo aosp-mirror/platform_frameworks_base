@@ -47,6 +47,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
@@ -184,7 +185,10 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     }
 
     private static BroadcastFilter makeMockRegisteredReceiver() {
-        return mock(BroadcastFilter.class);
+        final BroadcastFilter filter = mock(BroadcastFilter.class);
+        final ApplicationInfo info = makeApplicationInfo(PACKAGE_ORANGE);
+        doReturn(info).when(filter).getApplicationInfo();
+        return filter;
     }
 
     private BroadcastRecord makeBroadcastRecord(Intent intent) {
@@ -716,9 +720,9 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     @EnableFlags(Flags.FLAG_LIMIT_PRIORITY_SCOPE)
     @Test
     public void testRunnableAt_Cached_Prioritized_NonDeferrable_changeIdDisabled() {
-        doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE),
-                eq(getUidForPackage(PACKAGE_GREEN)));
+        doReturn(false).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE),
+                argThat(appInfoEquals(getUidForPackage(PACKAGE_GREEN))));
         final List receivers = List.of(
                 withPriority(makeManifestReceiver(PACKAGE_RED, PACKAGE_RED), 10),
                 withPriority(makeManifestReceiver(PACKAGE_GREEN, PACKAGE_GREEN), -10));
@@ -1288,9 +1292,9 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     @SuppressWarnings("GuardedBy")
     @Test
     public void testDeliveryGroupPolicy_prioritized_diffReceivers_changeIdDisabled() {
-        doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE),
-                eq(getUidForPackage(PACKAGE_GREEN)));
+        doReturn(false).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE),
+                argThat(appInfoEquals(getUidForPackage(PACKAGE_GREEN))));
 
         final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
         final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
@@ -1823,9 +1827,9 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     @SuppressWarnings("GuardedBy")
     @Test
     public void testDeliveryDeferredForCached_changeIdDisabled() throws Exception {
-        doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE),
-                eq(getUidForPackage(PACKAGE_GREEN)));
+        doReturn(false).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE),
+                argThat(appInfoEquals(getUidForPackage(PACKAGE_GREEN))));
 
         final ProcessRecord greenProcess = makeProcessRecord(makeApplicationInfo(PACKAGE_GREEN));
         final ProcessRecord redProcess = makeProcessRecord(makeApplicationInfo(PACKAGE_RED));
@@ -2027,9 +2031,9 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     @Test
     public void testDeliveryDeferredForCached_withInfiniteDeferred_changeIdDisabled()
             throws Exception {
-        doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastRecord.CHANGE_LIMIT_PRIORITY_SCOPE),
-                eq(getUidForPackage(PACKAGE_GREEN)));
+        doReturn(false).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastRecord.LIMIT_PRIORITY_SCOPE),
+                argThat(appInfoEquals(getUidForPackage(PACKAGE_GREEN))));
         final ProcessRecord greenProcess = makeProcessRecord(makeApplicationInfo(PACKAGE_GREEN));
         final ProcessRecord redProcess = makeProcessRecord(makeApplicationInfo(PACKAGE_RED));
 

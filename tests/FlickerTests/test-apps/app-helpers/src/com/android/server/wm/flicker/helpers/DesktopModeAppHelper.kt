@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.helpers
 
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.graphics.Insets
 import android.graphics.Rect
@@ -28,6 +29,7 @@ import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.window.DesktopModeFlags
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
@@ -35,7 +37,6 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.MotionEventHelper.InputMethod.TOUCH
-import com.android.window.flags.Flags
 import java.time.Duration
 
 /**
@@ -74,13 +75,28 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .waitForAndVerify()
     }
 
+    /** Launch an app and ensure it's moved to Desktop if it has not. */
+    fun enterDesktopMode(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH),
+    ) {
+        innerHelper.launchViaIntent(wmHelper)
+        if (!isInDesktopWindowingMode(wmHelper)) {
+            enterDesktopModeWithDrag(
+                wmHelper = wmHelper,
+                device = device,
+                motionEventHelper = motionEventHelper
+            )
+        }
+    }
+
     /** Move an app to Desktop by dragging the app handle at the top. */
-    fun enterDesktopWithDrag(
+    fun enterDesktopModeWithDrag(
         wmHelper: WindowManagerStateHelper,
         device: UiDevice,
         motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH)
     ) {
-        innerHelper.launchViaIntent(wmHelper)
         dragToDesktop(
             wmHelper = wmHelper,
             device = device,
@@ -107,7 +123,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
         // drag the window to move to desktop
         if (motionEventHelper.inputMethod == TOUCH
-            && Flags.enableHoldToDragAppHandle()) {
+            && DesktopModeFlags.ENABLE_HOLD_TO_DRAG_APP_HANDLE.isTrue) {
             // Touch requires hold-to-drag.
             motionEventHelper.holdToDrag(startX, startY, startX, endY, steps = 100)
         } else {
@@ -147,6 +163,25 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .StateSyncBuilder()
             .withAppTransitionIdle()
             .withWindowSurfaceDisappeared(innerHelper)
+            .waitForAndVerify()
+    }
+
+    private fun getHeaderEmptyView(caption: UiObject2?): UiObject2 {
+        return caption
+            ?.children
+            ?.find { it.resourceName.endsWith(HEADER_EMPTY_VIEW) }
+            ?: error("Unable to find resource $HEADER_EMPTY_VIEW\n")
+    }
+
+    /** Click on an existing window's header to bring it to the front. */
+    fun bringToFront(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+        val caption = getCaptionForTheApp(wmHelper, device)
+        val openHeaderView = getHeaderEmptyView(caption)
+        openHeaderView.click()
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withTopVisibleApp(innerHelper)
             .waitForAndVerify()
     }
 
@@ -347,6 +382,14 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         waitForTransitionToFullscreen(wmHelper)
     }
 
+    /** Maximize an app by dragging the app handle to the top drag zone. */
+    fun maximizeAppWithDragToTopDragZone(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+    ) {
+        dragAppWindowToTopDragZone(wmHelper, device)
+    }
+
     private fun dragAppWindowToTopDragZone(wmHelper: WindowManagerStateHelper, device: UiDevice) {
         val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
         val displayRect = getDisplayRect(wmHelper)
@@ -407,6 +450,10 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         return metricInsets.getInsetsIgnoringVisibility(typeMask)
     }
 
+    // Requirement of DesktopWindowingMode is having a minimum of 1 app in WINDOWING_MODE_FREEFORM.
+    private fun isInDesktopWindowingMode(wmHelper: WindowManagerStateHelper) =
+        wmHelper.getWindow(innerHelper)?.windowingMode == WINDOWING_MODE_FREEFORM
+
     private companion object {
         val TIMEOUT: Duration = Duration.ofSeconds(3)
         const val SNAP_RESIZE_DRAG_INSET: Int = 5 // inset to avoid dragging to display edge
@@ -419,6 +466,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         const val SNAP_LEFT_BUTTON: String = "maximize_menu_snap_left_button"
         const val SNAP_RIGHT_BUTTON: String = "maximize_menu_snap_right_button"
         const val MINIMIZE_BUTTON_VIEW: String = "minimize_window"
+        const val HEADER_EMPTY_VIEW: String = "caption_handle"
         val caption: BySelector
             get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
     }

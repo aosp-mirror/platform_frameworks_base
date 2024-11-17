@@ -28,9 +28,9 @@ import javax.inject.Inject
 /**
  * Implementation of [NotificationsController] that's used when notifications rendering is disabled.
  */
-class NotificationsControllerStub @Inject constructor(
-    private val notificationListener: NotificationListener
-) : NotificationsController {
+class NotificationsControllerStub
+@Inject
+constructor(private val notificationListener: NotificationListener) : NotificationsController {
 
     override fun initialize(
         presenter: NotificationPresenter,
@@ -43,11 +43,9 @@ class NotificationsControllerStub @Inject constructor(
         notificationListener.registerAsSystemService()
     }
 
-    override fun resetUserExpandedStates() {
-    }
+    override fun resetUserExpandedStates() {}
 
-    override fun setNotificationSnoozed(sbn: StatusBarNotification, snoozeOption: SnoozeOption) {
-    }
+    override fun setNotificationSnoozed(sbn: StatusBarNotification, snoozeOption: SnoozeOption) {}
 
     override fun getActiveNotificationsCount(): Int {
         return 0

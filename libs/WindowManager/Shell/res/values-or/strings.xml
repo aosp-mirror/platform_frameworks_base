@@ -127,8 +127,7 @@
     <string name="open_in_browser_text" msgid="9181692926376072904">"ବ୍ରାଉଜରରେ ଖୋଲନ୍ତୁ"</string>
     <string name="new_window_text" msgid="6318648868380652280">"ନୂଆ ୱିଣ୍ଡୋ"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ପରିଚାଳନା କରନ୍ତୁ"</string>
-    <!-- no translation found for change_aspect_ratio_text (9104456064548212806) -->
-    <skip />
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"ଚଉଡ଼ା ଓ ଉଚ୍ଚତାର ଅନୁପାତ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="close_text" msgid="4986518933445178928">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ମେନୁ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"ମେନୁ ଖୋଲନ୍ତୁ"</string>
@@ -146,6 +145,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"ଆପରେ"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"ଆପଣଙ୍କ ବ୍ରାଉଜରରେ"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"ଠିକ ଅଛି"</string>
-    <!-- no translation found for desktop_windowing_app_to_web_education_text (1599668769538703570) -->
-    <skip />
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"ଏଠାରେ ଆପଣଙ୍କ ବ୍ରାଉଜରରେ ଥିବା ଆପ୍ସକୁ ଶୀଘ୍ର ଖୋଲନ୍ତୁ"</string>
 </resources>

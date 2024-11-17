@@ -2876,7 +2876,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public int checkOperationForDevice(int code, int uid, String packageName, int virtualDeviceId) {
+    public int checkOperationForDevice(int code, int uid, String packageName,
+            @Nullable String attributionTag, int virtualDeviceId) {
         if (Binder.getCallingPid() != Process.myPid()
                 && Flags.appopAccessTrackingLoggingEnabled()) {
             FrameworkStatsLog.write(
@@ -2884,7 +2885,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION,
                     false);
         }
-        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
+        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
                 virtualDeviceId, false /*raw*/);
     }
 

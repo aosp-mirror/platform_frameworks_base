@@ -18,9 +18,13 @@
 
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
+import android.app.AutomaticZenRule
 import android.content.Intent
 import android.content.applicationContext
 import android.provider.Settings
+import android.service.notification.SystemZenRules
+import android.service.notification.ZenModeConfig
+import android.service.notification.ZenModeConfig.ScheduleInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
@@ -35,6 +39,7 @@ import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
 import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogEventLogger
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import java.util.Calendar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
@@ -60,6 +65,9 @@ class ModesDialogViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: ModesDialogViewModel
 
+    private lateinit var timeScheduleMode: ZenMode
+    private lateinit var timeScheduleInfo: ScheduleInfo
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -71,6 +79,21 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 kosmos.mockModesDialogDelegate,
                 kosmos.mockModesDialogEventLogger,
             )
+
+        timeScheduleInfo = ZenModeConfig.ScheduleInfo()
+        timeScheduleInfo.days = intArrayOf(Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY)
+        timeScheduleInfo.startHour = 11
+        timeScheduleInfo.endHour = 15
+        timeScheduleMode =
+            TestModeBuilder()
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_SCHEDULE_TIME)
+                .setManualInvocationAllowed(true)
+                .setConditionId(ZenModeConfig.toScheduleConditionId(timeScheduleInfo))
+                .setTriggerDescription(
+                    SystemZenRules.getTriggerDescriptionForScheduleTime(mContext, timeScheduleInfo)
+                )
+                .build()
     }
 
     @Test
@@ -325,17 +348,19 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setTriggerDescription(null)
                         .setEnabled(false, /* byUser= */ false)
                         .build(),
+                    timeScheduleMode,
                 )
             )
             runCurrent()
 
-            assertThat(tiles!!).hasSize(6)
+            assertThat(tiles!!).hasSize(7)
             assertThat(tiles!![0].subtext).isEqualTo("When the going gets tough")
             assertThat(tiles!![1].subtext).isEqualTo("On • When in Rome")
             assertThat(tiles!![2].subtext).isEqualTo("Not set")
             assertThat(tiles!![3].subtext).isEqualTo("Off")
             assertThat(tiles!![4].subtext).isEqualTo("On")
             assertThat(tiles!![5].subtext).isEqualTo("Not set")
+            assertThat(tiles!![6].subtext).isEqualTo(timeScheduleMode.triggerDescription)
         }
 
     @Test
@@ -381,11 +406,12 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setTriggerDescription(null)
                         .setEnabled(false, /* byUser= */ false)
                         .build(),
+                    timeScheduleMode,
                 )
             )
             runCurrent()
 
-            assertThat(tiles!!).hasSize(6)
+            assertThat(tiles!!).hasSize(7)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription).isEqualTo("When the going gets tough")
@@ -409,6 +435,12 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             with(tiles?.elementAt(5)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription).isEqualTo("Not set")
+            }
+            with(tiles?.elementAt(6)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription)
+                    .isEqualTo(SystemZenRules.getDaysOfWeekFull(context, timeScheduleInfo)
+                    + ", " + SystemZenRules.getTimeSummary(context, timeScheduleInfo))
             }
 
             // All tiles have the same long click info

@@ -326,6 +326,8 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Invoer"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Hoortoestellen"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Aanzetten…"</string>
+    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
+    <skip />
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatisch draaien"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Scherm automatisch draaien"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Locatie"</string>
@@ -414,6 +416,8 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Kan voorinstelling niet updaten"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Voorinstelling"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Live ondertiteling"</string>
+    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
+    <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Microfoon van apparaat niet meer blokkeren?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Apparaatcamera niet meer blokkeren?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Blokkeren van apparaatcamera en -microfoon opheffen?"</string>
@@ -589,8 +593,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Nu starten"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Geen meldingen"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Geen nieuwe meldingen"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"Afkoelperiode van meldingen staat nu aan"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Als je te veel meldingen tegelijk krijgt, worden het volume op je apparaat en meldingen automatisch maximaal 2 minuten beperkt."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Uitzetten"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ontgrendel om oudere meldingen te zien"</string>
@@ -868,6 +871,8 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Naar de app rechts of onderaan gaan als je een gesplitst scherm gebruikt"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Naar de app links of bovenaan gaan als je een gesplitst scherm gebruikt"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Tijdens gesplitst scherm: een app vervangen door een andere"</string>
+    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Invoer"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Overschakelen naar volgende taal"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Overschakelen naar vorige taal"</string>
@@ -1410,15 +1415,29 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Toegankelijkheid"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Sneltoetsen"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Sneltoetsen aanpassen"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Sneltoetsen zoeken"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Geen zoekresultaten"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icoon voor samenvouwen"</string>
+    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
+    <skip />
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Aanpassen"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Klaar"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icoon voor uitvouwen"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"of"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Handgreep voor slepen"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Toetsenbordinstellingen"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigeren met je toetsenbord"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Leer sneltoetsen die je kunt gebruiken"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigeren met je touchpad"</string>
@@ -1435,11 +1454,11 @@
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Je weet nu hoe je het gebaar voor terug maakt."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Naar startscherm"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Swipe met 3 vingers omhoog op de touchpad"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Goed werk!"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Goed gedaan!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Je weet nu hoe je het gebaar Naar startscherm maakt"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Recente apps bekijken"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Swipe met 3 vingers omhoog en houd vast op de touchpad"</string>
-    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Goed werk!"</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Goed gedaan!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Je weet nu hoe je het gebaar Recente apps bekijken maakt."</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Alle apps bekijken"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Druk op de actietoets op het toetsenbord"</string>

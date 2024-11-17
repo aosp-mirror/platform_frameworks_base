@@ -16,8 +16,6 @@
 
 package com.android.systemui.shared.clocks
 
-import android.content.Context
-import android.content.res.Resources
 import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +23,6 @@ import android.widget.RelativeLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.Logger
-import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockAnimations
 import com.android.systemui.plugins.clocks.ClockEvents
@@ -42,14 +39,11 @@ import java.util.TimeZone
 private val TAG = SimpleDigitalHandLayerController::class.simpleName!!
 
 open class SimpleDigitalHandLayerController<T>(
-    private val ctx: Context,
-    private val resources: Resources,
-    private val assets: AssetLoader, // TODO(b/364680879): Remove and replace w/ resources
+    private val clockCtx: ClockContext,
     private val layer: DigitalHandLayer,
     override val view: T,
-    messageBuffer: MessageBuffer,
 ) : SimpleClockLayerController where T : View, T : SimpleDigitalClockView {
-    private val logger = Logger(messageBuffer, TAG)
+    private val logger = Logger(clockCtx.messageBuffer, TAG)
     val timespec = DigitalTimespecHandler(layer.timespec, layer.dateTimeFormat)
 
     @VisibleForTesting
@@ -75,12 +69,12 @@ open class SimpleDigitalHandLayerController<T>(
             layer.alignment.verticalAlignment?.let { view.verticalAlignment = it }
             layer.alignment.horizontalAlignment?.let { view.horizontalAlignment = it }
         }
-        view.applyStyles(assets, layer.style, layer.aodStyle)
+        view.applyStyles(layer.style, layer.aodStyle)
         view.id =
-            ctx.resources.getIdentifier(
+            clockCtx.resources.getIdentifier(
                 generateDigitalLayerIdString(layer),
                 "id",
-                ctx.getPackageName(),
+                clockCtx.context.getPackageName(),
             )
     }
 
@@ -306,8 +300,9 @@ open class SimpleDigitalHandLayerController<T>(
                 val color =
                     when {
                         theme.seedColor != null -> theme.seedColor!!
-                        theme.isDarkTheme -> resources.getColor(android.R.color.system_accent1_100)
-                        else -> resources.getColor(android.R.color.system_accent2_600)
+                        theme.isDarkTheme ->
+                            clockCtx.resources.getColor(android.R.color.system_accent1_100)
+                        else -> clockCtx.resources.getColor(android.R.color.system_accent2_600)
                     }
 
                 view.updateColor(color)

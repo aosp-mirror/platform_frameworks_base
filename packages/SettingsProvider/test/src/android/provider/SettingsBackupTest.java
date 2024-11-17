@@ -564,6 +564,8 @@ public class SettingsBackupTest {
                     Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                     Settings.Global.ENABLE_BACK_ANIMATION, // Temporary for T, dev option only
+                    Settings.Global.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME, // cache per hearing device
+                    Settings.Global.HEARING_DEVICE_LOCAL_NOTIFICATION, // cache per hearing device
                     Settings.Global.Wearable.COMBINED_LOCATION_ENABLE,
                     Settings.Global.Wearable.HAS_PAY_TOKENS,
                     Settings.Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN,
@@ -944,8 +946,7 @@ public class SettingsBackupTest {
                         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                         Settings.System.WEAR_TTS_PREWARM_ENABLED,
                         Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED, // form-factor/OEM specific
-                        Settings.System.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME // internal cache
+                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
                 );
         if (!Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
             settings.add(Settings.System.MIN_REFRESH_RATE);

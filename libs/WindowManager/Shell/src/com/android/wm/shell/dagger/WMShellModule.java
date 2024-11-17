@@ -20,6 +20,10 @@ import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRA
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 import static android.window.DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS;
 
+import static com.android.hardware.input.Flags.manageKeyGestures;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -62,16 +66,21 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.compatui.letterbox.LetterboxCommandHandler;
+import com.android.wm.shell.compatui.letterbox.LetterboxController;
+import com.android.wm.shell.compatui.letterbox.LetterboxTransitionObserver;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
+import com.android.wm.shell.desktopmode.DesktopBackNavigationTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopDisplayEventHandler;
 import com.android.wm.shell.desktopmode.DesktopImmersiveController;
 import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
+import com.android.wm.shell.desktopmode.DesktopModeKeyGestureHandler;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTaskChangeListener;
@@ -754,8 +763,6 @@ public abstract class WMShellModule {
                 dragToDesktopTransitionHandler,
                 desktopImmersiveController.get(),
                 desktopRepository,
-                desktopModeLoggerTransitionObserver,
-                launchAdjacentController,
                 recentsTransitionHandler,
                 multiInstanceHelper,
                 mainExecutor,
@@ -763,8 +770,6 @@ public abstract class WMShellModule {
                 recentTasksController.orElse(null),
                 interactionJankMonitor,
                 mainHandler,
-                inputManager,
-                focusTransitionObserver,
                 desktopModeEventLogger,
                 desktopTilingDecorViewModel);
     }
@@ -879,6 +884,72 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static Optional<DesktopModeKeyGestureHandler> provideDesktopModeKeyGestureHandler(
+            Context context,
+            Optional<DesktopModeWindowDecorViewModel> desktopModeWindowDecorViewModel,
+            Optional<DesktopTasksController> desktopTasksController,
+            InputManager inputManager,
+            ShellTaskOrganizer shellTaskOrganizer,
+            FocusTransitionObserver focusTransitionObserver) {
+        if (DesktopModeStatus.canEnterDesktopMode(context) && useKeyGestureEventHandler()
+                && manageKeyGestures()
+                && (Flags.enableMoveToNextDisplayShortcut()
+                || Flags.enableTaskResizingKeyboardShortcuts())) {
+            return Optional.of(new DesktopModeKeyGestureHandler(context,
+                    desktopModeWindowDecorViewModel, desktopTasksController,
+                    inputManager, shellTaskOrganizer, focusTransitionObserver));
+        }
+        return Optional.empty();
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopModeWindowDecorViewModel> provideDesktopModeWindowDecorViewModel(
+            Context context,
+            @ShellMainThread ShellExecutor shellExecutor,
+            @ShellMainThread Handler mainHandler,
+            Choreographer mainChoreographer,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            IWindowManager windowManager,
+            ShellTaskOrganizer taskOrganizer,
+            @DynamicOverride DesktopRepository desktopRepository,
+            DisplayController displayController,
+            ShellController shellController,
+            DisplayInsetsController displayInsetsController,
+            SyncTransactionQueue syncQueue,
+            Transitions transitions,
+            Optional<DesktopTasksController> desktopTasksController,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            InteractionJankMonitor interactionJankMonitor,
+            AppToWebGenericLinksParser genericLinksParser,
+            AssistContentRequester assistContentRequester,
+            MultiInstanceHelper multiInstanceHelper,
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            AppHandleEducationController appHandleEducationController,
+            AppToWebEducationController appToWebEducationController,
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
+            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
+            FocusTransitionObserver focusTransitionObserver,
+            DesktopModeEventLogger desktopModeEventLogger
+    ) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
+            return Optional.empty();
+        }
+        return Optional.of(new DesktopModeWindowDecorViewModel(context, shellExecutor, mainHandler,
+                mainChoreographer, bgExecutor, shellInit, shellCommandHandler, windowManager,
+                taskOrganizer, desktopRepository, displayController, shellController,
+                displayInsetsController, syncQueue, transitions, desktopTasksController,
+                rootTaskDisplayAreaOrganizer, interactionJankMonitor, genericLinksParser,
+                assistContentRequester, multiInstanceHelper, desktopTasksLimiter,
+                appHandleEducationController, appToWebEducationController,
+                windowDecorCaptionHandleRepository, activityOrientationChangeHandler,
+                focusTransitionObserver, desktopModeEventLogger));
+    }
+
+    @WMSingleton
+    @Provides
     static EnterDesktopTaskTransitionHandler provideEnterDesktopModeTaskTransitionHandler(
             Transitions transitions,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
@@ -911,6 +982,16 @@ public abstract class WMShellModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellAnimationThread ShellExecutor animExecutor) {
         return new CloseDesktopTaskTransitionHandler(context, mainExecutor, animExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopBackNavigationTransitionHandler provideDesktopBackNavigationTransitionHandler(
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellAnimationThread ShellExecutor animExecutor,
+            DisplayController displayController) {
+        return new DesktopBackNavigationTransitionHandler(mainExecutor, animExecutor,
+                displayController);
     }
 
     @WMSingleton
@@ -964,6 +1045,7 @@ public abstract class WMShellModule {
             Optional<DesktopRepository> desktopRepository,
             Transitions transitions,
             ShellTaskOrganizer shellTaskOrganizer,
+            Optional<DesktopMixedTransitionHandler> desktopMixedTransitionHandler,
             ShellInit shellInit) {
         return desktopRepository.flatMap(
                 repository ->
@@ -973,6 +1055,7 @@ public abstract class WMShellModule {
                                         repository,
                                         transitions,
                                         shellTaskOrganizer,
+                                        desktopMixedTransitionHandler.get(),
                                         shellInit)));
     }
 
@@ -985,6 +1068,7 @@ public abstract class WMShellModule {
             FreeformTaskTransitionHandler freeformTaskTransitionHandler,
             CloseDesktopTaskTransitionHandler closeDesktopTaskTransitionHandler,
             Optional<DesktopImmersiveController> desktopImmersiveController,
+            DesktopBackNavigationTransitionHandler desktopBackNavigationTransitionHandler,
             InteractionJankMonitor interactionJankMonitor,
             @ShellMainThread Handler handler,
             ShellInit shellInit,
@@ -1001,6 +1085,7 @@ public abstract class WMShellModule {
                         freeformTaskTransitionHandler,
                         closeDesktopTaskTransitionHandler,
                         desktopImmersiveController.get(),
+                        desktopBackNavigationTransitionHandler,
                         interactionJankMonitor,
                         handler,
                         shellInit,
@@ -1214,8 +1299,25 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
+            @NonNull LetterboxTransitionObserver letterboxTransitionObserver,
+            @NonNull LetterboxCommandHandler letterboxCommandHandler,
             Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
-            Optional<DesktopDisplayEventHandler> desktopDisplayEventHandler) {
+            Optional<DesktopDisplayEventHandler> desktopDisplayEventHandler,
+            Optional<DesktopModeKeyGestureHandler> desktopModeKeyGestureHandler) {
         return new Object();
+    }
+
+    //
+    // App Compat
+    //
+
+    @WMSingleton
+    @Provides
+    static LetterboxTransitionObserver provideLetterboxTransitionObserver(
+            @NonNull ShellInit shellInit,
+            @NonNull Transitions transitions,
+            @NonNull LetterboxController letterboxController
+    ) {
+        return new LetterboxTransitionObserver(shellInit, transitions, letterboxController);
     }
 }

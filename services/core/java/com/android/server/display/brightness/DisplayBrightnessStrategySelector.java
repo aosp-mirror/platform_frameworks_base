@@ -180,8 +180,10 @@ public class DisplayBrightnessStrategySelector {
             displayBrightnessStrategy = mFollowerBrightnessStrategy;
         } else if (displayPowerRequest.boostScreenBrightness) {
             displayBrightnessStrategy = mBoostBrightnessStrategy;
-        } else if (BrightnessUtils
-                .isValidBrightnessValue(displayPowerRequest.screenBrightnessOverride)) {
+        } else if (BrightnessUtils.isValidBrightnessValue(
+                displayPowerRequest.screenBrightnessOverride)
+                || BrightnessUtils.isValidBrightnessValue(
+                        mOverrideBrightnessStrategy.getWindowManagerBrightnessOverride())) {
             displayBrightnessStrategy = mOverrideBrightnessStrategy;
         } else if (BrightnessUtils.isValidBrightnessValue(
                 mTemporaryBrightnessStrategy.getTemporaryScreenBrightness())) {
@@ -254,6 +256,10 @@ public class DisplayBrightnessStrategySelector {
     @Nullable
     public AutoBrightnessFallbackStrategy getAutoBrightnessFallbackStrategy() {
         return mAutoBrightnessFallbackStrategy;
+    }
+
+    public OverrideBrightnessStrategy getOverrideBrightnessStrategy() {
+        return mOverrideBrightnessStrategy;
     }
 
     /**

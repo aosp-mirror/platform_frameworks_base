@@ -811,9 +811,18 @@ public class Notification implements Parcelable
     }
 
     private static boolean isStandardLayout(int layoutId) {
+        // TODO: b/359128724 - Add to static list when inlining the flag.
         if (Flags.apiRichOngoing()) {
             if (layoutId == R.layout.notification_template_material_progress) {
                 return true;
+            }
+        }
+        // TODO: b/378660052 - Add to static list when inlining the flag.
+        if (Flags.notificationsRedesignTemplates()) {
+            switch(layoutId) {
+                case R.layout.notification_2025_template_collapsed_base:
+                case R.layout.notification_2025_template_header:
+                    return true;
             }
         }
         return STANDARD_LAYOUTS.contains(layoutId);
@@ -5003,7 +5012,7 @@ public class Notification implements Parcelable
 
         /**
          * Sets a very short string summarizing the most critical information contained in the
-         * notification. Suggested max length is 5 characters, and there is no guarantee how much or
+         * notification. Suggested max length is 7 characters, and there is no guarantee how much or
          * how little of this text will be shown.
          */
         @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
@@ -6718,7 +6727,7 @@ public class Notification implements Parcelable
             // Headers on their own are never colorized
             p.disallowColorization();
             RemoteViews header = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    R.layout.notification_template_header);
+                    getHeaderLayoutResource());
             resetNotificationHeader(header);
             bindNotificationHeader(header, p);
             return header;
@@ -7478,9 +7487,21 @@ public class Notification implements Parcelable
             return clone;
         }
 
+        private int getHeaderLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_header;
+            } else {
+                return R.layout.notification_template_header;
+            }
+        }
+
         @UnsupportedAppUsage
         private int getBaseLayoutResource() {
-            return R.layout.notification_template_material_base;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_base;
+            } else {
+                return R.layout.notification_template_material_base;
+            }
         }
 
         private int getHeadsUpBaseLayoutResource() {
@@ -9499,7 +9520,6 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.icon, View.GONE);
                 contentView.setViewVisibility(R.id.conversation_face_pile, View.GONE);
                 contentView.setViewVisibility(R.id.conversation_icon, View.VISIBLE);
-                contentView.setBoolean(R.id.conversation_icon, "setApplyCircularCrop", true);
                 contentView.setImageViewIcon(R.id.conversation_icon, conversationIcon);
             } else if (mIsGroupConversation) {
                 contentView.setViewVisibility(R.id.icon, View.GONE);

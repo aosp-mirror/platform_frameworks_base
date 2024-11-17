@@ -220,6 +220,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     private AppOpsManager mAppOps;
     private final VerifierController mVerifierController;
+    private final InstallDependencyHelper mInstallDependencyHelper;
 
     private final HandlerThread mInstallThread;
     private final Handler mInstallHandler;
@@ -346,6 +347,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mVerificationPolicyPerUser) {
             mVerificationPolicyPerUser.put(USER_SYSTEM, DEFAULT_VERIFICATION_POLICY);
         }
+        mInstallDependencyHelper = new InstallDependencyHelper(mContext,
+                mPm.mInjector.getSharedLibrariesImpl());
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -543,7 +546,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             session = PackageInstallerSession.readFromXml(in, mInternalCallback,
                                     mContext, mPm, mInstallThread.getLooper(), mStagingManager,
                                     mSessionsDir, this, mSilentUpdatePolicy,
-                                    mVerifierController);
+                                    mVerifierController, mInstallDependencyHelper);
                         } catch (Exception e) {
                             Slog.e(TAG, "Could not read session", e);
                             continue;
@@ -1065,7 +1068,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,
                 null, null, false, false, false, false, null, SessionInfo.INVALID_ID,
                 false, false, false, PackageManager.INSTALL_UNKNOWN, "", null,
-                mVerifierController, verificationPolicy, verificationPolicy);
+                mVerifierController, verificationPolicy, verificationPolicy,
+                mInstallDependencyHelper);
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);

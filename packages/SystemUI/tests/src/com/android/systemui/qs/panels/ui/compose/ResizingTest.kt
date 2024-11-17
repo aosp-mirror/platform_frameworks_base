@@ -62,6 +62,7 @@ class ResizingTest : SysuiTestCase() {
             listState = listState,
             otherTiles = listOf(),
             columns = 4,
+            largeTilesSpan = 4,
             modifier = Modifier.fillMaxSize(),
             onRemoveTile = {},
             onSetTiles = {},
@@ -74,7 +75,7 @@ class ResizingTest : SysuiTestCase() {
     @Test
     fun toggleIconTile_shouldBeLarge() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
         }
@@ -90,7 +91,7 @@ class ResizingTest : SysuiTestCase() {
     @Test
     fun toggleLargeTile_shouldBeIcon() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
         }
@@ -106,7 +107,7 @@ class ResizingTest : SysuiTestCase() {
     @Test
     fun resizedLarge_shouldBeIcon() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
         }
@@ -126,7 +127,7 @@ class ResizingTest : SysuiTestCase() {
     @Test
     fun resizedIcon_shouldBeLarge() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
         }

@@ -1,6 +1,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast.UNKNOWN_VALUE_PLACEHOLDER;
+import static com.android.settingslib.flags.Flags.audioSharingHysteresisModeFix;
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
 import android.annotation.SuppressLint;
@@ -651,6 +652,13 @@ public class BluetoothUtils {
                 context.getContentResolver()));
     }
 
+    /** Returns if the le audio sharing hysteresis mode fix is available. */
+    @WorkerThread
+    public static boolean isAudioSharingHysteresisModeFixAvailable(@Nullable Context context) {
+        return (audioSharingHysteresisModeFix() && Flags.enableLeAudioSharing())
+                || (context != null && isAudioSharingPreviewEnabled(context.getContentResolver()));
+    }
+
     /** Returns if the le audio sharing is enabled. */
     public static boolean isAudioSharingEnabled() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -733,13 +741,15 @@ public class BluetoothUtils {
     @WorkerThread
     public static boolean hasConnectedBroadcastSourceForBtDevice(
             @Nullable BluetoothDevice device, @Nullable LocalBluetoothManager localBtManager) {
-        if (Flags.audioSharingHysteresisModeFix()) {
+        if (localBtManager == null) {
+            Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
+            return false;
+        }
+        if (isAudioSharingHysteresisModeFixAvailable(localBtManager.getContext())) {
             return hasActiveLocalBroadcastSourceForBtDevice(device, localBtManager);
         }
         LocalBluetoothLeBroadcastAssistant assistant =
-                localBtManager == null
-                        ? null
-                        : localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+                localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
         if (device == null || assistant == null) {
             Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
             return false;

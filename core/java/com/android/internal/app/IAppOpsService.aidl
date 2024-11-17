@@ -152,7 +152,7 @@ interface IAppOpsService {
             in AttributionSourceState attributionSourceStateState, boolean skipProxyOperation);
     int checkOperationRawForDevice(int code, int uid, String packageName,
             @nullable String attributionTag, int virtualDeviceId);
-    int checkOperationForDevice(int code, int uid, String packageName, int virtualDeviceId);
+    int checkOperationForDevice(int code, int uid, String packageName, @nullable String attributionTag, int virtualDeviceId);
     SyncNotedAppOp noteOperationForDevice(int code, int uid, String packageName,
             @nullable String attributionTag, int virtualDeviceId,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);

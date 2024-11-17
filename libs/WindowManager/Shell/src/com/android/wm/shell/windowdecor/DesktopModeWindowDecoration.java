@@ -81,7 +81,6 @@ import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
 import com.android.window.flags.Flags;
@@ -207,7 +206,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final DesktopRepository mDesktopRepository;
 
-    DesktopModeWindowDecoration(
+    public DesktopModeWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
@@ -1008,8 +1007,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mWindowDecorConfig = windowDecorConfig;
 
         if (DesktopModeStatus.useRoundedCorners()) {
-            relayoutParams.mCornerRadius =
-                    (int) ScreenDecorationsUtils.getWindowCornerRadius(context);
+            relayoutParams.mCornerRadius = taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    ? loadDimensionPixelSize(context.getResources(),
+                    R.dimen.desktop_windowing_freeform_rounded_corner_radius)
+                    : INVALID_CORNER_RADIUS;
         }
     }
 

@@ -29,6 +29,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -47,7 +48,7 @@ import kotlinx.coroutines.DisposableHandle
 class AodNotificationIconsSection
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @ShadeDisplayAware private val configurationState: ConfigurationState,
     private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
@@ -114,14 +115,14 @@ constructor(
                 START,
                 PARENT_ID,
                 START,
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal),
+                context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal),
             )
             connect(
                 nicId,
                 END,
                 PARENT_ID,
                 END,
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal),
+                context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal),
             )
             constrainHeight(
                 nicId,

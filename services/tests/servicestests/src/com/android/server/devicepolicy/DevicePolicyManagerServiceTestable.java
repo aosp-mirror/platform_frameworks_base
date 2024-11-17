@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.app.backup.IBackupManager;
+import android.app.supervision.SupervisionManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -487,6 +488,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         public Context createContextAsUser(UserHandle user) {
             return context;
+        }
+
+        @Override
+        SupervisionManagerInternal getSupervisionManager() {
+            return services.supervisionManagerInternal;
         }
     }
 
