@@ -321,8 +321,10 @@ final class EnforcingAdmin {
             authority = DpcAuthority.DPC_AUTHORITY;
         } else if (mAuthorities.contains(DEVICE_ADMIN_AUTHORITY)) {
             authority = DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY;
+        } else if (mIsSystemAuthority) {
+            // For now, System Authority returns UnknownAuthority.
+            authority = new UnknownAuthority(mSystemEntity);
         } else {
-            // For now, System Authority returns UNKNOWN_AUTHORITY.
             authority = UnknownAuthority.UNKNOWN_AUTHORITY;
         }
         return new android.app.admin.EnforcingAdmin(

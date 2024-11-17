@@ -16,7 +16,10 @@
 
 package android.security.advancedprotection;
 
+import static android.app.admin.DevicePolicyIdentifiers.MEMORY_TAGGING_POLICY;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.os.UserManager.DISALLOW_CELLULAR_2G;
+import static android.os.UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -341,6 +344,28 @@ public final class AdvancedProtectionManager {
             intent.putExtra(EXTRA_SUPPORT_DIALOG_TYPE, type);
         }
         return intent;
+    }
+
+    /** @hide */
+    public @NonNull Intent createSupportIntentForPolicyIdentifierOrRestriction(
+            @NonNull String identifier, @Nullable @SupportDialogType String type) {
+        Objects.requireNonNull(identifier);
+        if (type != null && !ALL_SUPPORT_DIALOG_TYPES.contains(type)) {
+            throw new IllegalArgumentException(type + " is not a valid type. See"
+                    + " SUPPORT_DIALOG_TYPE_* APIs.");
+        }
+        final String featureId;
+        if (DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY.equals(identifier)) {
+            featureId = FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES;
+        } else if (DISALLOW_CELLULAR_2G.equals(identifier)) {
+            featureId = FEATURE_ID_DISALLOW_CELLULAR_2G;
+        } else if (android.app.admin.flags.Flags.setMtePolicyCoexistence() && MEMORY_TAGGING_POLICY
+                .equals(identifier)) {
+            featureId = FEATURE_ID_ENABLE_MTE;
+        } else {
+            throw new UnsupportedOperationException("Unsupported identifier: " + identifier);
+        }
+        return createSupportIntent(featureId, type);
     }
 
     /**
