@@ -30,7 +30,6 @@ import java.util.Objects;
 
 /**
  * Ambient backlight event
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class AmbientBacklightEvent implements Parcelable {
