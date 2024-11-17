@@ -363,6 +363,7 @@ LIBANDROID {
     APerformanceHint_reportActualWorkDuration2; # introduced=VanillaIceCream
     APerformanceHint_notifyWorkloadIncrease; # introduced=36
     APerformanceHint_notifyWorkloadReset; # introduced=36
+    APerformanceHint_borrowSessionFromJava; # introduced=36
     AWorkDuration_create; # introduced=VanillaIceCream
     AWorkDuration_release; # introduced=VanillaIceCream
     AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
@@ -383,6 +384,8 @@ LIBANDROID_PLATFORM {
     APerformanceHint_setUseFMQForTesting;
     APerformanceHint_getRateLimiterPropertiesForTesting;
     APerformanceHint_setUseNewLoadHintBehaviorForTesting;
+    APerformanceHint_closeSessionFromJava;
+    APerformanceHint_createSessionFromJava;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;
