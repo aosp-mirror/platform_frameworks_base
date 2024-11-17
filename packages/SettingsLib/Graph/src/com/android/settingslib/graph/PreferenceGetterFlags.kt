@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.service
+package com.android.settingslib.graph
 
-const val PREFERENCE_SERVICE_ACTION = "com.android.settingslib.PREFERENCE_SERVICE"
+/** Flags for preference getter operation. */
+object PreferenceGetterFlags {
+    const val VALUE = 1 shl 0
+    const val VALUE_DESCRIPTOR = 1 shl 1
+    const val METADATA = 1 shl 2
+    const val ALL = (1 shl 3) - 1
 
-/** API id for retrieving preference graph. */
-internal const val API_GET_PREFERENCE_GRAPH = 1
+    fun Int.includeValue() = (this and VALUE) != 0
 
-/** API id for preference value setter. */
-internal const val API_PREFERENCE_SETTER = 2
+    fun Int.includeValueDescriptor() = (this and VALUE_DESCRIPTOR) != 0
 
-/** API id for preference getter. */
-internal const val API_PREFERENCE_GETTER = 3
-
-/**
- * The max API id reserved for internal preference service usages. Custom API id should start with
- * **1000** to avoid conflict.
- */
-internal const val API_MAX_RESERVED = 999
+    fun Int.includeMetadata() = (this and METADATA) != 0
+}

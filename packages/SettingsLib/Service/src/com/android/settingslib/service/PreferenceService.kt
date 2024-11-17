@@ -17,6 +17,8 @@
 package com.android.settingslib.service
 
 import com.android.settingslib.graph.GetPreferenceGraphRequest
+import com.android.settingslib.graph.PreferenceGetterApiHandler
+import com.android.settingslib.graph.PreferenceGetterRequest
 import com.android.settingslib.graph.PreferenceSetterApiHandler
 import com.android.settingslib.graph.PreferenceSetterRequest
 import com.android.settingslib.ipc.ApiHandler
@@ -37,6 +39,7 @@ open class PreferenceService(
     preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>> = setOf(),
     graphPermissionChecker: ApiPermissionChecker<GetPreferenceGraphRequest>? = null,
     setterPermissionChecker: ApiPermissionChecker<PreferenceSetterRequest>? = null,
+    getterPermissionChecker: ApiPermissionChecker<PreferenceGetterRequest>? = null,
     vararg apiHandlers: ApiHandler<*, *>,
 ) :
     MessengerService(
@@ -44,6 +47,9 @@ open class PreferenceService(
             graphPermissionChecker?.let { add(PreferenceGraphApi(preferenceScreenProviders, it)) }
             setterPermissionChecker?.let {
                 add(PreferenceSetterApiHandler(API_PREFERENCE_SETTER, it))
+            }
+            getterPermissionChecker?.let {
+                add(PreferenceGetterApiHandler(API_PREFERENCE_GETTER, it))
             }
             addAll(apiHandlers)
         },
