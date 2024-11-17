@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.forensic;
+package android.security.intrusiondetection;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -30,12 +30,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * A class that represents a forensic event.
+ * A class that represents a intrusiondetection event.
  * @hide
  */
 @FlaggedApi(Flags.FLAG_AFL_API)
-public final class ForensicEvent implements Parcelable {
-    private static final String TAG = "ForensicEvent";
+public final class IntrusionDetectionEvent implements Parcelable {
+    private static final String TAG = "IntrusionDetectionEvent";
 
     public static final int SECURITY_EVENT = 0;
     public static final int NETWORK_EVENT_DNS = 1;
@@ -44,9 +44,9 @@ public final class ForensicEvent implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-        ForensicEvent.SECURITY_EVENT,
-        ForensicEvent.NETWORK_EVENT_DNS,
-        ForensicEvent.NETWORK_EVENT_CONNECT,
+        IntrusionDetectionEvent.SECURITY_EVENT,
+        IntrusionDetectionEvent.NETWORK_EVENT_DNS,
+        IntrusionDetectionEvent.NETWORK_EVENT_CONNECT,
     })
     public @interface EventType {}
 
@@ -56,39 +56,39 @@ public final class ForensicEvent implements Parcelable {
     private final DnsEvent mNetworkEventDns;
     private final ConnectEvent mNetworkEventConnect;
 
-    public static final @NonNull Parcelable.Creator<ForensicEvent> CREATOR =
+    public static final @NonNull Parcelable.Creator<IntrusionDetectionEvent> CREATOR =
             new Parcelable.Creator<>() {
-                public ForensicEvent createFromParcel(Parcel in) {
-                    return new ForensicEvent(in);
+                public IntrusionDetectionEvent createFromParcel(Parcel in) {
+                    return new IntrusionDetectionEvent(in);
                 }
 
-                public ForensicEvent[] newArray(int size) {
-                    return new ForensicEvent[size];
+                public IntrusionDetectionEvent[] newArray(int size) {
+                    return new IntrusionDetectionEvent[size];
                 }
             };
 
-    public ForensicEvent(@NonNull SecurityEvent securityEvent) {
+    public IntrusionDetectionEvent(@NonNull SecurityEvent securityEvent) {
         mType = SECURITY_EVENT;
         mSecurityEvent = securityEvent;
         mNetworkEventDns = null;
         mNetworkEventConnect = null;
     }
 
-    public ForensicEvent(@NonNull DnsEvent dnsEvent) {
+    public IntrusionDetectionEvent(@NonNull DnsEvent dnsEvent) {
         mType = NETWORK_EVENT_DNS;
         mNetworkEventDns = dnsEvent;
         mSecurityEvent = null;
         mNetworkEventConnect = null;
     }
 
-    public ForensicEvent(@NonNull ConnectEvent connectEvent) {
+    public IntrusionDetectionEvent(@NonNull ConnectEvent connectEvent) {
         mType = NETWORK_EVENT_CONNECT;
         mNetworkEventConnect = connectEvent;
         mSecurityEvent = null;
         mNetworkEventDns = null;
     }
 
-    private ForensicEvent(@NonNull Parcel in) {
+    private IntrusionDetectionEvent(@NonNull Parcel in) {
         mType = in.readInt();
         switch (mType) {
             case SECURITY_EVENT:
@@ -111,7 +111,7 @@ public final class ForensicEvent implements Parcelable {
         }
     }
 
-    /** Returns the type of the forensic event. */
+    /** Returns the type of the IntrusionDetectionEvent. */
     @NonNull
     public @EventType int getType() {
         return mType;
@@ -170,7 +170,7 @@ public final class ForensicEvent implements Parcelable {
 
     @Override
     public String toString() {
-        return "ForensicEvent{"
+        return "IntrusionDetectionEvent{"
                 + "mType=" + mType
                 + '}';
     }

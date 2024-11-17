@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package android.security.forensic;
+package android.security.intrusiondetection;
 
-import static android.Manifest.permission.MANAGE_FORENSIC_STATE;
-import static android.Manifest.permission.READ_FORENSIC_STATE;
+import static android.Manifest.permission.MANAGE_INTRUSION_DETECTION_STATE;
+import static android.Manifest.permission.READ_INTRUSION_DETECTION_STATE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -41,23 +41,23 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * ForensicManager manages the forensic logging on Android devices.
- * Upon user consent, forensic logging collects various device events for
+ * IntrusionDetectionManager manages the intrusion detection on Android devices.
+ * Upon user consent, intrusion detection collects various device events for
  * off-device investigation of potential device compromise.
  * <p>
- * Forensic logging can either be enabled ({@link #STATE_ENABLED}
+ * Intrusion detection logging can either be enabled ({@link #STATE_ENABLED}
  * or disabled ({@link #STATE_DISABLED}).
  * <p>
- * The Forensic logs will be transferred to
- * {@link android.security.forensic.ForensicEventTransport}.
+ * The intrusion detection logs will be transferred to
+ * {@link android.security.intrusiondetection.IntrusionDetectionEventTransport}.
  *
  * @hide
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_AFL_API)
-@SystemService(Context.FORENSIC_SERVICE)
-public class ForensicManager {
-    private static final String TAG = "ForensicManager";
+@SystemService(Context.INTRUSION_DETECTION_SERVICE)
+public class IntrusionDetectionManager {
+    private static final String TAG = "IntrusionDetectionManager";
 
     /** @hide */
     @Target(ElementType.TYPE_USE)
@@ -67,7 +67,7 @@ public class ForensicManager {
             STATE_DISABLED,
             STATE_ENABLED
     })
-    public @interface ForensicState {}
+    public @interface IntrusionDetectionState {}
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -77,64 +77,65 @@ public class ForensicManager {
             ERROR_TRANSPORT_UNAVAILABLE,
             ERROR_DATA_SOURCE_UNAVAILABLE
     })
-    public @interface ForensicError {}
+    public @interface IntrusionDetectionError {}
 
     /**
      * Indicates an unknown state
      */
-    public static final int STATE_UNKNOWN = IForensicServiceStateCallback.State.UNKNOWN;
+    public static final int STATE_UNKNOWN = IIntrusionDetectionServiceStateCallback.State.UNKNOWN;
 
     /**
-     * Indicates an state that the forensic is turned off.
+     * Indicates an state that the intrusion detection is turned off.
      */
-    public static final int STATE_DISABLED = IForensicServiceStateCallback.State.DISABLED;
+    public static final int STATE_DISABLED = IIntrusionDetectionServiceStateCallback.State.DISABLED;
 
     /**
-     * Indicates an state that the forensic is turned on.
+     * Indicates an state that the intrusion detection is turned on.
      */
-    public static final int STATE_ENABLED = IForensicServiceStateCallback.State.ENABLED;
+    public static final int STATE_ENABLED = IIntrusionDetectionServiceStateCallback.State.ENABLED;
 
     /**
      * Indicates an unknown error
      */
-    public static final int ERROR_UNKNOWN = IForensicServiceCommandCallback.ErrorCode.UNKNOWN;
+    public static final int ERROR_UNKNOWN =
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.UNKNOWN;
 
     /**
      * Indicates an error due to insufficient access rights.
      */
     public static final int ERROR_PERMISSION_DENIED =
-            IForensicServiceCommandCallback.ErrorCode.PERMISSION_DENIED;
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.PERMISSION_DENIED;
 
     /**
-     * Indicates an error due to unavailability of the forensic event transport.
+     * Indicates an error due to unavailability of the intrusion detection event transport.
      */
     public static final int ERROR_TRANSPORT_UNAVAILABLE =
-            IForensicServiceCommandCallback.ErrorCode.TRANSPORT_UNAVAILABLE;
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.TRANSPORT_UNAVAILABLE;
 
     /**
      * Indicates an error due to unavailability of the data source.
      */
     public static final int ERROR_DATA_SOURCE_UNAVAILABLE =
-            IForensicServiceCommandCallback.ErrorCode.DATA_SOURCE_UNAVAILABLE;
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.DATA_SOURCE_UNAVAILABLE;
 
 
-    private final IForensicService mService;
+    private final IIntrusionDetectionService mService;
 
-    private final ConcurrentHashMap<Consumer<Integer>, IForensicServiceStateCallback>
+    private final ConcurrentHashMap<Consumer<Integer>, IIntrusionDetectionServiceStateCallback>
             mStateCallbacks = new ConcurrentHashMap<>();
 
     /**
      * Constructor
      *
-     * @param service A valid instance of IForensicService.
+     * @param service A valid instance of IIntrusionDetectionService.
      * @hide
      */
-    public ForensicManager(IForensicService service) {
+    public IntrusionDetectionManager(IIntrusionDetectionService service) {
         mService = service;
     }
 
     /**
-     * Add a callback to monitor the state of the ForensicService.
+     * Add a callback to monitor the state of the IntrusionDetectionService.
      *
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback for state change.
@@ -142,9 +143,9 @@ public class ForensicManager {
      *                 to reflect the init state.
      *                 The callback can be registered only once.
      */
-    @RequiresPermission(READ_FORENSIC_STATE)
+    @RequiresPermission(READ_INTRUSION_DETECTION_STATE)
     public void addStateCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull @ForensicState Consumer<Integer> callback) {
+            @NonNull @IntrusionDetectionState Consumer<Integer> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -153,8 +154,8 @@ public class ForensicManager {
             return;
         }
 
-        final IForensicServiceStateCallback wrappedCallback =
-                new IForensicServiceStateCallback.Stub() {
+        final IIntrusionDetectionServiceStateCallback wrappedCallback =
+                new IIntrusionDetectionServiceStateCallback.Stub() {
                     @Override
                     public void onStateChange(int state) {
                         executor.execute(() -> callback.accept(state));
@@ -170,19 +171,19 @@ public class ForensicManager {
     }
 
     /**
-     * Remove a callback to monitor the state of the ForensicService.
+     * Remove a callback to monitor the state of the IntrusionDetectionService.
      *
      * @param callback The callback to remove.
      */
-    @RequiresPermission(READ_FORENSIC_STATE)
-    public void removeStateCallback(@NonNull Consumer<@ForensicState Integer> callback) {
+    @RequiresPermission(READ_INTRUSION_DETECTION_STATE)
+    public void removeStateCallback(@NonNull Consumer<@IntrusionDetectionState Integer> callback) {
         Objects.requireNonNull(callback);
         if (!mStateCallbacks.containsKey(callback)) {
             Log.d(TAG, "removeStateCallback callback not present");
             return;
         }
 
-        IForensicServiceStateCallback wrappedCallback = mStateCallbacks.get(callback);
+        IIntrusionDetectionServiceStateCallback wrappedCallback = mStateCallbacks.get(callback);
 
         try {
             mService.removeStateCallback(wrappedCallback);
@@ -194,22 +195,23 @@ public class ForensicManager {
     }
 
     /**
-     * Enable forensic logging.
-     * If successful, ForensicService will transition to {@link #STATE_ENABLED} state.
+     * Enable intrusion detection.
+     * If successful, IntrusionDetectionService will transition to {@link #STATE_ENABLED} state.
      * <p>
-     * When forensic logging is enabled, various device events will be collected and
-     * sent over to the registered {@link android.security.forensic.ForensicEventTransport}.
+     * When intrusion detection is enabled, various device events will be collected and
+     * sent over to the registered
+     * {@link android.security.intrusiondetection.IntrusionDetectionEventTransport}.
      *
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback for the command result.
      */
-    @RequiresPermission(MANAGE_FORENSIC_STATE)
+    @RequiresPermission(MANAGE_INTRUSION_DETECTION_STATE)
     public void enable(@NonNull @CallbackExecutor Executor executor,
             @NonNull CommandCallback callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         try {
-            mService.enable(new IForensicServiceCommandCallback.Stub() {
+            mService.enable(new IIntrusionDetectionServiceCommandCallback.Stub() {
                 @Override
                 public void onSuccess() {
                     executor.execute(callback::onSuccess);
@@ -226,23 +228,23 @@ public class ForensicManager {
     }
 
     /**
-     * Disable forensic logging.
-     * If successful, ForensicService will transition to {@link #STATE_DISABLED}.
+     * Disable intrusion detection.
+     * If successful, IntrusionDetectionService will transition to {@link #STATE_DISABLED}.
      * <p>
-     * When forensic logging is disabled, device events will no longer be collected.
-     * Any events that have been collected but not yet sent to ForensicEventTransport
+     * When intrusion detection is disabled, device events will no longer be collected.
+     * Any events that have been collected but not yet sent to IntrusionDetectionEventTransport
      * will be transferred as a final batch.
      *
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback for the command result.
      */
-    @RequiresPermission(MANAGE_FORENSIC_STATE)
+    @RequiresPermission(MANAGE_INTRUSION_DETECTION_STATE)
     public void disable(@NonNull @CallbackExecutor Executor executor,
             @NonNull CommandCallback callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         try {
-            mService.disable(new IForensicServiceCommandCallback.Stub() {
+            mService.disable(new IIntrusionDetectionServiceCommandCallback.Stub() {
                 @Override
                 public void onSuccess() {
                     executor.execute(callback::onSuccess);
@@ -271,6 +273,6 @@ public class ForensicManager {
          * Called when command fails.
          * @param error The error number.
          */
-        void onFailure(@ForensicError int error);
+        void onFailure(@IntrusionDetectionError int error);
     }
 }

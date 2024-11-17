@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package android.security.forensic;
+package com.android.server.security.intrusiondetection;
 
-/**
- * @hide
- */
- oneway interface IForensicServiceStateCallback {
-    @Backing(type="int")
-    enum State{
-        UNKNOWN = 0,
-        DISABLED = 1,
-        ENABLED = 2,
-    }
-    void onStateChange(State state);
- }
+public interface DataSource {
+    /**
+     * Enable the data collection.
+     */
+    void enable();
+
+    /**
+     * Disable the data collection.
+     */
+    void disable();
+}

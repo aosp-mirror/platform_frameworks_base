@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.security.forensic;
+package com.android.server.security.intrusiondetection;
 
-import static android.Manifest.permission.BIND_FORENSIC_EVENT_TRANSPORT_SERVICE;
+import static android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,8 +27,8 @@ import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.security.forensic.ForensicEvent;
-import android.security.forensic.IForensicEventTransport;
+import android.security.intrusiondetection.IIntrusionDetectionEventTransport;
+import android.security.intrusiondetection.IntrusionDetectionEvent;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -40,20 +40,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class ForensicEventTransportConnection implements ServiceConnection {
-    private static final String TAG = "ForensicEventTransportConnection";
+public class IntrusionDetectionEventTransportConnection implements ServiceConnection {
+    private static final String TAG = "IntrusionDetectionEventTransportConnection";
     private static final long FUTURE_TIMEOUT_MILLIS = 60 * 1000; // 1 mins
     private final Context mContext;
-    private String mForensicEventTransportConfig;
-    volatile IForensicEventTransport mService;
+    private String mIntrusionDetectionEventTransportConfig;
+    volatile IIntrusionDetectionEventTransport mService;
 
-    public ForensicEventTransportConnection(Context context) {
+    public IntrusionDetectionEventTransportConnection(Context context) {
         mContext = context;
         mService = null;
     }
 
     /**
-     * Initialize the ForensicEventTransport binder service.
+     * Initialize the IntrusionDetectionEventTransport binder service.
      * @return Whether the initialization succeed.
      */
     public boolean initialize() {
@@ -78,11 +78,11 @@ public class ForensicEventTransportConnection implements ServiceConnection {
     }
 
     /**
-     * Add data to the ForensicEventTransport binder service.
-     * @param data List of ForensicEvent.
+     * Add data to the IntrusionDetectionEventTransport binder service.
+     * @param data List of IntrusionDetectionEvent.
      * @return Whether the data is added to the binder service.
      */
-    public boolean addData(List<ForensicEvent> data) {
+    public boolean addData(List<IntrusionDetectionEvent> data) {
         AndroidFuture<Integer> resultFuture = new AndroidFuture<>();
         try {
             mService.addData(data, resultFuture);
@@ -119,15 +119,15 @@ public class ForensicEventTransportConnection implements ServiceConnection {
     }
 
     private boolean bindService() {
-        mForensicEventTransportConfig = mContext.getString(
-                com.android.internal.R.string.config_forensicEventTransport);
-        if (TextUtils.isEmpty(mForensicEventTransportConfig)) {
-            Slog.e(TAG, "config_forensicEventTransport is empty");
+        mIntrusionDetectionEventTransportConfig = mContext.getString(
+                com.android.internal.R.string.config_intrusionDetectionEventTransport);
+        if (TextUtils.isEmpty(mIntrusionDetectionEventTransportConfig)) {
+            Slog.e(TAG, "config_intrusionDetectionEventTransport is empty");
             return false;
         }
 
         ComponentName serviceComponent =
-                ComponentName.unflattenFromString(mForensicEventTransportConfig);
+                ComponentName.unflattenFromString(mIntrusionDetectionEventTransportConfig);
         if (serviceComponent == null) {
             Slog.e(TAG, "Can't get serviceComponent name");
             return false;
@@ -136,10 +136,10 @@ public class ForensicEventTransportConnection implements ServiceConnection {
         try {
             ServiceInfo serviceInfo = mContext.getPackageManager().getServiceInfo(serviceComponent,
                     0 /* flags */);
-            if (!BIND_FORENSIC_EVENT_TRANSPORT_SERVICE.equals(serviceInfo.permission)) {
+            if (!BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE.equals(serviceInfo.permission)) {
                 Slog.e(TAG, serviceComponent.flattenToShortString()
                         + " is not declared with the permission "
-                        + "\"" + BIND_FORENSIC_EVENT_TRANSPORT_SERVICE + "\"");
+                        + "\"" + BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE + "\"");
                 return false;
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -163,7 +163,7 @@ public class ForensicEventTransportConnection implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mService = IForensicEventTransport.Stub.asInterface(service);
+        mService = IIntrusionDetectionEventTransport.Stub.asInterface(service);
     }
 
     @Override

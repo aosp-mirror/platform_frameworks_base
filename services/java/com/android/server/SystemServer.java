@@ -252,7 +252,7 @@ import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
 import com.android.server.security.authenticationpolicy.AuthenticationPolicyService;
 import com.android.server.security.authenticationpolicy.SecureLockDeviceService;
-import com.android.server.security.forensic.ForensicService;
+import com.android.server.security.intrusiondetection.IntrusionDetectionService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
@@ -1764,8 +1764,8 @@ public final class SystemServer implements Dumpable {
 
             if (!isWatch && !isTv && !isAutomotive
                     && android.security.Flags.aflApi()) {
-                t.traceBegin("StartForensicService");
-                mSystemServiceManager.startService(ForensicService.class);
+                t.traceBegin("StartIntrusionDetectionService");
+                mSystemServiceManager.startService(IntrusionDetectionService.class);
                 t.traceEnd();
             }
 

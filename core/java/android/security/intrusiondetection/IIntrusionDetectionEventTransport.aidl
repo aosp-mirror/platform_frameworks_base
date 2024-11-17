@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package android.security.forensic;
-import android.security.forensic.ForensicEvent;
+package android.security.intrusiondetection;
+import android.security.intrusiondetection.IntrusionDetectionEvent;
 
 import com.android.internal.infra.AndroidFuture;
 
 /** {@hide} */
-oneway interface IForensicEventTransport {
+oneway interface IIntrusionDetectionEventTransport {
     /**
      * Initialize the server side.
      */
     void initialize(in AndroidFuture<int> resultFuture);
 
     /**
-     * Send forensic logging data to the backup destination.
-     * The data is a list of ForensicEvent.
-     * The ForensicEvent is an abstract class that represents
+     * Send intrusiondetection logging data to the backup destination.
+     * The data is a list of IntrusionDetectionEvent.
+     * The IntrusionDetectionEvent is an abstract class that represents
      * different type of events.
      */
-    void addData(in List<ForensicEvent> events, in AndroidFuture<int> resultFuture);
+    void addData(in List<IntrusionDetectionEvent> events, in AndroidFuture<int> resultFuture);
 
     /**
      * Release the binder to the server.

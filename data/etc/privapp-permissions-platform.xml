@@ -605,9 +605,9 @@ applications that come with the platform
         <!-- Permissions required for CTS test - SettingsPreferenceServiceClientTest -->
         <permission name="android.permission.READ_SYSTEM_PREFERENCES" />
         <permission name="android.permission.WRITE_SYSTEM_PREFERENCES" />
-        <!-- Permission required for CTS test - ForensicManagerTest -->
-        <permission name="android.permission.READ_FORENSIC_STATE" />
-        <permission name="android.permission.MANAGE_FORENSIC_STATE" />
+        <!-- Permission required for CTS test - IntrusionDetectionManagerTest -->
+        <permission name="android.permission.READ_INTRUSION_DETECTION_STATE" />
+        <permission name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

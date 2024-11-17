@@ -13,19 +13,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Runs Frameworks Forensic Service tests.">
+<configuration description="Runs Frameworks IntrusionDetection Service tests.">
     <option name="test-suite-tag" value="apct" />
     <option name="test-suite-tag" value="apct-instrumentation" />
 
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>
-        <option name="test-file-name" value="ForensicServiceTests.apk"/>
+        <option name="test-file-name" value="IntrusionDetectionServiceTests.apk"/>
         <option name="install-arg" value="-t" />
     </target_preparer>
 
-    <option name="test-tag" value="ForensicServiceTests" />
+    <option name="test-tag" value="IntrusionDetectionServiceTests" />
     <test class="com.android.tradefed.testtype.InstrumentationTest" >
-        <option name="package" value="com.android.server.security.forensic.tests" />
+        <option name="package" value="com.android.server.security.intrusiondetection.tests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
         <option name="hidden-api-checks" value="false"/>
     </test>

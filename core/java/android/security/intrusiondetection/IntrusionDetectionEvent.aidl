@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.forensic;
+package android.security.intrusiondetection;
 
-/**
- * @hide
- */
- oneway interface IForensicServiceCommandCallback {
-     @Backing(type="int")
-     enum ErrorCode{
-         UNKNOWN = 0,
-         PERMISSION_DENIED = 1,
-         INVALID_STATE_TRANSITION = 2,
-         TRANSPORT_UNAVAILABLE = 3,
-         DATA_SOURCE_UNAVAILABLE = 4,
-     }
-    void onSuccess();
-    void onFailure(ErrorCode error);
- }
+/** {@hide} */
+parcelable IntrusionDetectionEvent;
