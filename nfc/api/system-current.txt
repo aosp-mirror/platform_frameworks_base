@@ -100,12 +100,14 @@ package android.nfc {
     method public void onHceEventReceived(int);
     method public void onLaunchHceAppChooserActivity(@NonNull String, @NonNull java.util.List<android.nfc.cardemulation.ApduServiceInfo>, @NonNull android.content.ComponentName, @NonNull String);
     method public void onLaunchHceTapAgainDialog(@NonNull android.nfc.cardemulation.ApduServiceInfo, @NonNull String);
+    method public void onLogEventNotified(@NonNull android.nfc.OemLogItems);
     method public void onNdefMessage(@NonNull android.nfc.Tag, @NonNull android.nfc.NdefMessage, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onNdefRead(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onReaderOptionChanged(boolean);
     method public void onRfDiscoveryStarted(boolean);
     method public void onRfFieldActivated(boolean);
     method public void onRoutingChanged();
+    method public void onRoutingTableFull();
     method public void onStateUpdated(int);
     method public void onTagConnected(boolean);
     method public void onTagDispatch(@NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -113,6 +115,27 @@ package android.nfc {
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public abstract class NfcRoutingTableEntry {
     method public int getNfceeId();
+  }
+
+  @FlaggedApi("android.nfc.nfc_oem_extension") public final class OemLogItems implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public int getCallingPid();
+    method @Nullable public byte[] getCommandApdu();
+    method public int getEvent();
+    method @Nullable public byte[] getResponseApdu();
+    method @Nullable public java.time.Instant getRfFieldEventTimeMillis();
+    method @Nullable public android.nfc.Tag getTag();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.OemLogItems> CREATOR;
+    field public static final int EVENT_DISABLE = 2; // 0x2
+    field public static final int EVENT_ENABLE = 1; // 0x1
+    field public static final int EVENT_UNSET = 0; // 0x0
+    field public static final int LOG_ACTION_HCE_DATA = 516; // 0x204
+    field public static final int LOG_ACTION_NFC_TOGGLE = 513; // 0x201
+    field public static final int LOG_ACTION_RF_FIELD_STATE_CHANGED = 1; // 0x1
+    field public static final int LOG_ACTION_SCREEN_STATE_CHANGED = 518; // 0x206
+    field public static final int LOG_ACTION_TAG_DETECTED = 3; // 0x3
   }
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public class RoutingStatus {
@@ -160,6 +183,12 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
     method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void overrideRoutingTable(@NonNull android.app.Activity, int, int);
     method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void recoverRoutingTable(@NonNull android.app.Activity);
+    method @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int setServiceEnabledForCategoryOther(@NonNull android.content.ComponentName, boolean);
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_ALREADY_SET = 3; // 0x3
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_FEATURE_UNSUPPORTED = 1; // 0x1
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_INVALID_SERVICE = 2; // 0x2
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_UNKNOWN_ERROR = 4; // 0x4
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_OK = 0; // 0x0
   }
 
 }

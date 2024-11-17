@@ -45,7 +45,7 @@ import dalvik.system.CloseGuard;
  * </p>
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("CursorWindow_host")
+@RavenwoodRedirectionClass("CursorWindow_ravenwood")
 public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static final String STATS_TAG = "CursorWindowStats";
 

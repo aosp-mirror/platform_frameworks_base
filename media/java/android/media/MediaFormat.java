@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
+import static android.media.codec.Flags.FLAG_NUM_INPUT_SLOTS;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
 import static android.media.codec.Flags.FLAG_APV_SUPPORT;
 
@@ -1775,6 +1776,17 @@ public final class MediaFormat {
      */
     @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
     public static final String KEY_SECURITY_MODEL = "security-model";
+
+    /**
+     * A key describing the number of slots used in the codec. When present in input format,
+     * the associated value indicates the number of input slots. The entry is set by the codec
+     * if configured with (@link MediaCodec#CONFIGURE_FLAG_BLOCK_MODEL), and will be ignored if set
+     * by the application.
+     * <p>
+     * The associated value is an integer.
+     */
+    @FlaggedApi(FLAG_NUM_INPUT_SLOTS)
+    public static final String KEY_NUM_SLOTS = "num-slots";
 
     /**
      * QpOffsetRect constitutes the metadata required for encoding a region of interest in an
