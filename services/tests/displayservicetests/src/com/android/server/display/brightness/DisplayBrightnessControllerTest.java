@@ -52,6 +52,7 @@ import com.android.server.display.brightness.strategy.AutoBrightnessFallbackStra
 import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.OffloadBrightnessStrategy;
+import com.android.server.display.brightness.strategy.OverrideBrightnessStrategy;
 import com.android.server.display.brightness.strategy.TemporaryBrightnessStrategy;
 import com.android.server.display.feature.DisplayManagerFlags;
 
@@ -152,6 +153,27 @@ public final class DisplayBrightnessControllerTest {
                 temporaryBrightnessStrategy);
         mDisplayBrightnessController.setTemporaryBrightness(temporaryBrightness);
         verify(temporaryBrightnessStrategy).setTemporaryScreenBrightness(temporaryBrightness);
+    }
+
+    @Test
+    public void updateWindowManagerBrightnessOverride() {
+        var request = new DisplayManagerInternal.DisplayBrightnessOverrideRequest();
+        request.brightness = 0.4f;
+        request.tag = "cts";
+        OverrideBrightnessStrategy overrideBrightnessStrategy = mock(
+                OverrideBrightnessStrategy.class);
+        when(mDisplayBrightnessStrategySelector.getOverrideBrightnessStrategy()).thenReturn(
+                overrideBrightnessStrategy);
+
+        when(overrideBrightnessStrategy.updateWindowManagerBrightnessOverride(any()))
+                .thenReturn(false);
+        assertFalse(mDisplayBrightnessController.updateWindowManagerBrightnessOverride(request));
+        verify(overrideBrightnessStrategy).updateWindowManagerBrightnessOverride(request);
+
+        when(overrideBrightnessStrategy.updateWindowManagerBrightnessOverride(any()))
+                .thenReturn(true);
+        assertTrue(mDisplayBrightnessController.updateWindowManagerBrightnessOverride(request));
+        verify(overrideBrightnessStrategy, times(2)).updateWindowManagerBrightnessOverride(request);
     }
 
     @Test

@@ -383,7 +383,7 @@ flag {
     bug: "363318732"
 }
 
-flag{
+flag {
     name: "note_op_batching_enabled"
     is_fixed_read_only: true
     is_exported: true
@@ -408,4 +408,13 @@ flag {
     namespace: "permissions"
     description: "This flag is used to short circuit the request for permananently denied permissions"
     bug: "378923900"
+}
+
+flag {
+    name: "check_op_overload_api_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Add new checkOp APIs that accept attributionTag"
+    bug: "240617242"
 }

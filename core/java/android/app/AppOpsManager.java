@@ -8934,12 +8934,21 @@ public class AppOpsManager {
     }
 
     /**
-     * Do a quick check for whether an application might be able to perform an operation.
-     * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String,
-     * String, String)} or {@link #startOp(String, int, String, String, String)} for your actual
-     * security checks. This function can just be used for a quick check to see if an operation has
-     * been disabled for the application, as an early reject of some work.  This does not modify the
-     * time stamp or other data about the operation.
+     * Check whether an application might be able to perform an operation.
+     * <p>
+     * For platform versions before {@link android.os.Build.VERSION_CODES#BAKLAVA}, this is
+     * <em>not</em> a security check; you must use {@link #noteOp(String, int, String, String,
+     * String)} or {@link #startOp(String, int, String, String, String)} for your actual security
+     * checks. This function can just be used for a quick check to see if an operation has been
+     * disabled for the application, as an early reject of some work.
+     * <p>
+     * For platform versions equal to or after {@link android.os.Build.VERSION_CODES#BAKLAVA}, this
+     * is no longer an unsafe check, and it does the same security check as {@link #noteOp(String,
+     * int, String, String, String)} and {@link #startOp(String, int, String, String, String)}.
+     * However, it's preferred to use {@link #checkOp(String, int, String)}, since the word "unsafe"
+     * in the name of this API is no longer accurate.
+     * <p>
+     * This API does not modify the time stamp or other data about the operation.
      *
      * @param op The operation to check.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
@@ -8948,31 +8957,108 @@ public class AppOpsManager {
      * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
      * causing the app to crash).
      * @throws SecurityException If the app has been configured to crash on this op.
+     *
+     * @deprecated Use {@link #checkOp(String, int, String)}
      */
+    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int unsafeCheckOp(@NonNull String op, int uid, @NonNull String packageName) {
         return checkOp(strOpToOp(op), uid, packageName);
     }
 
     /**
-     * @deprecated Renamed to {@link #unsafeCheckOp(String, int, String)}.
+     * Check whether an application can perform an operation.
+     * <p>
+     * For platform versions before {@link android.os.Build.VERSION_CODES#BAKLAVA}, this is
+     * <em>not</em> a security check; you must use {@link #noteOp(String, int, String, String,
+     * String)} or {@link #startOp(String, int, String, String, String)} for your actual security
+     * checks. This function can just be used for a quick check to see if an operation has been
+     * disabled for the application, as an early reject of some work.
+     * <p>
+     * For platform versions equal to or after {@link android.os.Build.VERSION_CODES#BAKLAVA}, it
+     * does the same security check as {@link #noteOp(String, int, String, String, String)} and
+     * {@link #startOp(String, int, String, String, String)}, and should be preferred to use.
+     * <p>
+     * This API does not modify the time stamp or other data about the operation.
+     *
+     * @param op The operation to check. One of the OPSTR_* constants.
+     * @param uid The uid of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
      */
-    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int checkOp(@NonNull String op, int uid, @NonNull String packageName) {
         return checkOp(strOpToOp(op), uid, packageName);
     }
 
     /**
-     * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
-     * returns {@link #MODE_ERRORED}.
+     * Like {@link #unsafeCheckOp(String, int, String)} but instead of throwing a
+     * {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     *
+     * @deprecated Use {@link #checkOpNoThrow(String, int, String)}
      */
+    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int unsafeCheckOpNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
         return checkOpNoThrow(strOpToOp(op), uid, packageName);
     }
 
     /**
-     * @deprecated Renamed to {@link #unsafeCheckOpNoThrow(String, int, String)}.
+     * Check whether an application can perform an operation. It does the same security check as
+     * {@link #noteOp(String, int, String, String, String)} and {@link #startOp(String, int, String,
+     * String, String)}, but does not modify the time stamp or other data about the operation.
+     *
+     * @param op The operation to check. One of the OPSTR_* constants.
+     * @param uid The uid of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} of the
+     *                      calling context or {@code null} for default attribution
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
+     * if it is not allowed and should be silently ignored (without causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
      */
-    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
+    public int checkOp(@NonNull String op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
+        int mode = checkOpNoThrow(strOpToOp(op), uid, packageName, attributionTag,
+                Context.DEVICE_ID_DEFAULT);
+        if (mode == MODE_ERRORED) {
+            throw new SecurityException(buildSecurityExceptionMsg(strOpToOp(op), uid, packageName));
+        }
+        return mode;
+    }
+
+    /**
+     * Like {@link #checkOp(String, int, String, String)} but instead of throwing a
+     * {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
+    public int checkOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
+        return checkOpNoThrow(strOpToOp(op), uid, packageName, attributionTag,
+                Context.DEVICE_ID_DEFAULT);
+    }
+
+    /**
+     * Like {@link #checkOp(String, int, String, String)} but returns the <em>raw</em> mode
+     * associated with the op. Does not throw a security exception, does not translate
+     * {@link #MODE_FOREGROUND}.
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
+    public int checkOpRawNoThrow(@NonNull String op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
+        return checkOpRawNoThrow(strOpToOp(op), uid, packageName, attributionTag,
+                Context.DEVICE_ID_DEFAULT);
+    }
+
+    /**
+     * Like {@link #checkOp(String, int, String)} but instead of throwing a
+     * {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int checkOpNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
         return checkOpNoThrow(strOpToOp(op), uid, packageName);
     }
@@ -8980,16 +9066,23 @@ public class AppOpsManager {
     /**
      * Like {@link #checkOp} but returns the <em>raw</em> mode associated with the op.
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     *
+     * @deprecated Use {@link #checkOpRawNoThrow(String, int, String, String)} instead
      */
+    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int unsafeCheckOpRaw(@NonNull String op, int uid, @NonNull String packageName) {
         return unsafeCheckOpRawNoThrow(op, uid, packageName);
     }
 
     /**
-     * Like {@link #unsafeCheckOpNoThrow(String, int, String)} but returns the <em>raw</em>
-     * mode associated with the op. Does not throw a security exception, does not translate
-     * {@link #MODE_FOREGROUND}.
+     * Like {@link #checkOp} but returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     *
+     * @deprecated Use {@link #checkOpRawNoThrow(String, int, String, String)} instead
      */
+    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int unsafeCheckOpRawNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
         return unsafeCheckOpRawNoThrow(strOpToOp(op), uid, packageName);
     }
@@ -9000,8 +9093,9 @@ public class AppOpsManager {
      * @hide
      */
     public int unsafeCheckOpRawNoThrow(int op, @NonNull AttributionSource attributionSource) {
-        return unsafeCheckOpRawNoThrow(op, attributionSource.getUid(),
-                attributionSource.getPackageName(), attributionSource.getDeviceId());
+        return checkOpRawNoThrow(op, attributionSource.getUid(),
+                attributionSource.getPackageName(), attributionSource.getAttributionTag(),
+                attributionSource.getDeviceId());
     }
 
     /**
@@ -9022,20 +9116,20 @@ public class AppOpsManager {
      * @hide
      */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
-        return unsafeCheckOpRawNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
+        return checkOpRawNoThrow(op, uid, packageName, null, Context.DEVICE_ID_DEFAULT);
     }
 
-    private int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName,
-            int virtualDeviceId) {
+    private int checkOpRawNoThrow(int op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag, int virtualDeviceId) {
         try {
             int mode;
             if (isAppOpModeCachingEnabled(op)) {
                 mode = sAppOpModeCache.query(
-                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, null,
+                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, attributionTag,
                                 "unsafeCheckOpRawNoThrow"));
             } else {
                 mode = mService.checkOperationRawForDevice(
-                        op, uid, packageName, null, virtualDeviceId);
+                        op, uid, packageName, attributionTag, virtualDeviceId);
             }
             return mode;
         } catch (RemoteException e) {
@@ -9434,10 +9528,12 @@ public class AppOpsManager {
     }
 
     /**
-     * Do a quick check for whether an application might be able to perform an operation.
-     * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String,
-     * String, String)} or {@link #startOp(int, int, String, boolean, String, String)} for your
-     * actual security checks, which also ensure that the given uid and package name are consistent.
+     * Check whether an application can perform an operation.
+     * <p>
+     * For platform versions before {@link android.os.Build.VERSION_CODES#BAKLAVA}, this is
+     * <em>not</em> a security check; you must use {@link #noteOp(String, int, String, String,
+     * String)} or {@link #startOp(int, int, String, boolean, String, String)} for your actual
+     * security checks, which also ensure that the given uid and package name are consistent.
      * This function can just be used for a quick check to see if an operation has been disabled for
      * the application, as an early reject of some work.  This does not modify the time stamp or
      * other data about the operation.
@@ -9453,6 +9549,13 @@ public class AppOpsManager {
      *     as {@link #MODE_ALLOWED}.</li>
      * </ul>
      *
+     * <p>
+     * For platform versions equal to or after {@link android.os.Build.VERSION_CODES#BAKLAVA}, it
+     * does the same security check as {@link #noteOp(String, int, String, String, String)} and
+     * {@link #startOp(String, int, String, String, String)}.
+     * <p>
+     * This API does not modify the time stamp or other data about the operation.
+     *
      * @param op The operation to check.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
@@ -9464,29 +9567,11 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int checkOp(int op, int uid, String packageName) {
-        try {
-            int mode;
-            if (isAppOpModeCachingEnabled(op)) {
-                mode = sAppOpModeCache.query(
-                        new AppOpModeQuery(op, uid, packageName, Context.DEVICE_ID_DEFAULT, null,
-                                "checkOp"));
-                if (mode == MODE_FOREGROUND) {
-                    // We only cache raw mode. If the mode is FOREGROUND, we need another binder
-                    // call to fetch translated value based on the process state.
-                    mode = mService.checkOperationForDevice(op, uid, packageName,
-                            Context.DEVICE_ID_DEFAULT);
-                }
-            } else {
-                mode = mService.checkOperationForDevice(op, uid, packageName,
-                        Context.DEVICE_ID_DEFAULT);
-            }
-            if (mode == MODE_ERRORED) {
-                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
-            }
-            return mode;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        int mode = checkOpNoThrow(op, uid, packageName, null, Context.DEVICE_ID_DEFAULT);
+        if (mode == MODE_ERRORED) {
+            throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
         }
+        return mode;
     }
 
     /**
@@ -9499,7 +9584,7 @@ public class AppOpsManager {
      */
     public int checkOpNoThrow(int op, AttributionSource attributionSource) {
         return checkOpNoThrow(op, attributionSource.getUid(), attributionSource.getPackageName(),
-                attributionSource.getDeviceId());
+                attributionSource.getAttributionTag(), attributionSource.getDeviceId());
     }
 
     /**
@@ -9512,23 +9597,26 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int checkOpNoThrow(int op, int uid, String packageName) {
-        return checkOpNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
+        return checkOpNoThrow(op, uid, packageName, null, Context.DEVICE_ID_DEFAULT);
     }
 
-    private int checkOpNoThrow(int op, int uid, String packageName, int virtualDeviceId) {
+    private int checkOpNoThrow(int op, int uid, String packageName, @Nullable String attributionTag,
+            int virtualDeviceId) {
         try {
             int mode;
             if (isAppOpModeCachingEnabled(op)) {
                 mode = sAppOpModeCache.query(
-                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, null,
+                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, attributionTag,
                                 "checkOpNoThrow"));
                 if (mode == MODE_FOREGROUND) {
                     // We only cache raw mode. If the mode is FOREGROUND, we need another binder
                     // call to fetch translated value based on the process state.
-                    mode = mService.checkOperationForDevice(op, uid, packageName, virtualDeviceId);
+                    mode = mService.checkOperationForDevice(op, uid, packageName, attributionTag,
+                            virtualDeviceId);
                 }
             } else {
-                mode = mService.checkOperationForDevice(op, uid, packageName, virtualDeviceId);
+                mode = mService.checkOperationForDevice(op, uid, packageName, attributionTag,
+                        virtualDeviceId);
             }
             return mode;
         } catch (RemoteException e) {

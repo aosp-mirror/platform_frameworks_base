@@ -768,6 +768,16 @@ public class ContextHubService extends IContextHubService.Stub {
 
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
+    public List<HubEndpointInfo> findEndpointsWithService(String serviceDescriptor) {
+        super.findEndpointsWithService_enforcePermission();
+        if (mHubInfoRegistry == null) {
+            return Collections.emptyList();
+        }
+        return mHubInfoRegistry.findEndpointsWithService(serviceDescriptor);
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
     public IContextHubEndpoint registerEndpoint(
             HubEndpointInfo pendingHubEndpointInfo, IContextHubEndpointCallback callback)
             throws RemoteException {

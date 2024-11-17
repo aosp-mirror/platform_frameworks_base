@@ -23,10 +23,12 @@ import android.provider.Settings.SettingNotFoundException
 import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
 import com.android.app.tracing.TraceUtils.trace
-import com.android.systemui.coroutines.newTracingContext
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.app.tracing.coroutines.nameCoroutine
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -47,11 +49,14 @@ interface SettingsProxy {
     /** Returns the [ContentResolver] this instance was constructed with. */
     fun getContentResolver(): ContentResolver
 
-    /**
-     * Returns the background [CoroutineDispatcher] that the async APIs will use for a specific
-     * implementation.
-     */
-    val backgroundDispatcher: CoroutineDispatcher
+    /** Returns the [CoroutineScope] that the async APIs will use. */
+    val settingsScope: CoroutineScope
+
+    @OptIn(ExperimentalStdlibApi::class)
+    fun settingsDispatcherContext(name: String): CoroutineContext {
+        return (settingsScope.coroutineContext[CoroutineDispatcher] ?: EmptyCoroutineContext) +
+            nameCoroutine(name)
+    }
 
     /**
      * Construct the content URI for a particular name/value pair, useful for monitoring changes
@@ -82,7 +87,7 @@ interface SettingsProxy {
      * wish to synchronize execution.
      */
     suspend fun registerContentObserver(name: String, settingsObserver: ContentObserver) {
-        withContext(backgroundDispatcher) {
+        withContext(settingsDispatcherContext("registerContentObserver-A")) {
             registerContentObserverSync(getUriFor(name), settingsObserver)
         }
     }
@@ -94,7 +99,7 @@ interface SettingsProxy {
      */
     @AnyThread
     fun registerContentObserverAsync(name: String, settingsObserver: ContentObserver) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-A")).launch {
+        settingsScope.launch("registerContentObserverAsync-A") {
             registerContentObserverSync(getUriFor(name), settingsObserver)
         }
 
@@ -111,7 +116,7 @@ interface SettingsProxy {
         settingsObserver: ContentObserver,
         @WorkerThread registered: Runnable,
     ) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-B")).launch {
+        settingsScope.launch("registerContentObserverAsync-B") {
             registerContentObserverSync(getUriFor(name), settingsObserver)
             registered.run()
         }
@@ -134,7 +139,9 @@ interface SettingsProxy {
      * wish to synchronize execution.
      */
     suspend fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) {
-        withContext(backgroundDispatcher) { registerContentObserverSync(uri, settingsObserver) }
+        withContext(settingsDispatcherContext("registerContentObserver-B")) {
+            registerContentObserverSync(uri, settingsObserver)
+        }
     }
 
     /**
@@ -144,7 +151,7 @@ interface SettingsProxy {
      */
     @AnyThread
     fun registerContentObserverAsync(uri: Uri, settingsObserver: ContentObserver) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-C")).launch {
+        settingsScope.launch("registerContentObserverAsync-C") {
             registerContentObserverSync(uri, settingsObserver)
         }
 
@@ -161,7 +168,7 @@ interface SettingsProxy {
         settingsObserver: ContentObserver,
         @WorkerThread registered: Runnable,
     ) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-D")).launch {
+        settingsScope.launch("registerContentObserverAsync-D") {
             registerContentObserverSync(uri, settingsObserver)
             registered.run()
         }
@@ -188,9 +195,9 @@ interface SettingsProxy {
     suspend fun registerContentObserver(
         name: String,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) {
-        withContext(backgroundDispatcher) {
+        withContext(settingsDispatcherContext("registerContentObserver-C")) {
             registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
         }
     }
@@ -206,7 +213,7 @@ interface SettingsProxy {
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
     ) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-E")).launch {
+        settingsScope.launch("registerContentObserverAsync-E") {
             registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
         }
 
@@ -224,7 +231,7 @@ interface SettingsProxy {
         settingsObserver: ContentObserver,
         @WorkerThread registered: Runnable,
     ) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-F")).launch {
+        settingsScope.launch("registerContentObserverAsync-F") {
             registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
             registered.run()
         }
@@ -239,7 +246,7 @@ interface SettingsProxy {
     fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) {
         trace({ "SP#registerObserver#[$uri]" }) {
             getContentResolver()
@@ -257,9 +264,9 @@ interface SettingsProxy {
     suspend fun registerContentObserver(
         uri: Uri,
         notifyForDescendants: Boolean,
-        settingsObserver: ContentObserver
+        settingsObserver: ContentObserver,
     ) {
-        withContext(backgroundDispatcher) {
+        withContext(settingsDispatcherContext("registerContentObserver-D")) {
             registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
         }
     }
@@ -275,7 +282,7 @@ interface SettingsProxy {
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver,
     ) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-G")).launch {
+        settingsScope.launch("registerContentObserverAsync-G") {
             registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
         }
 
@@ -293,7 +300,7 @@ interface SettingsProxy {
         settingsObserver: ContentObserver,
         @WorkerThread registered: Runnable,
     ) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-H")).launch {
+        settingsScope.launch("registerContentObserverAsync-H") {
             registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
             registered.run()
         }
@@ -319,7 +326,9 @@ interface SettingsProxy {
      * async block if they wish to synchronize execution.
      */
     suspend fun unregisterContentObserver(settingsObserver: ContentObserver) {
-        withContext(backgroundDispatcher) { unregisterContentObserverSync(settingsObserver) }
+        withContext(settingsDispatcherContext("unregisterContentObserver")) {
+            unregisterContentObserverSync(settingsObserver)
+        }
     }
 
     /**
@@ -330,7 +339,7 @@ interface SettingsProxy {
      */
     @AnyThread
     fun unregisterContentObserverAsync(settingsObserver: ContentObserver) =
-        CoroutineScope(backgroundDispatcher + newTracingContext("SettingsProxy-I")).launch {
+        settingsScope.launch("unregisterContentObserverAsync") {
             unregisterContentObserver(settingsObserver)
         }
 

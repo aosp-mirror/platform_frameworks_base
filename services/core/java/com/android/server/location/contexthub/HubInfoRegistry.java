@@ -17,6 +17,7 @@
 package com.android.server.location.contexthub;
 
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.location.HubInfo;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -127,6 +128,23 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
         return searchResult;
     }
 
+    /**
+     * Return a list of {@link HubEndpointInfo} that represents endpoints with the matching service.
+     */
+    public List<HubEndpointInfo> findEndpointsWithService(String serviceDescriptor) {
+        List<HubEndpointInfo> searchResult = new ArrayList<>();
+        synchronized (mLock) {
+            for (HubEndpointInfo endpointInfo : mHubEndpointInfos.values()) {
+                for (HubServiceInfo serviceInfo : endpointInfo.getServiceInfoCollection()) {
+                    if (serviceDescriptor.equals(serviceInfo.getServiceDescriptor())) {
+                        searchResult.add(endpointInfo);
+                    }
+                }
+            }
+        }
+        return searchResult;
+    }
+
     void dump(IndentingPrintWriter ipw) {
         synchronized (mLock) {
             dumpLocked(ipw);
@@ -155,5 +173,4 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
 
         ipw.println();
     }
-
 }

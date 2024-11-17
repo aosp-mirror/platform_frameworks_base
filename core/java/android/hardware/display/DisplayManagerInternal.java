@@ -470,6 +470,31 @@ public abstract class DisplayManagerInternal {
      */
     public abstract boolean isDisplayReadyForMirroring(int displayId);
 
+
+    /**
+     * Used by the window manager to override the per-display screen brightness based on the
+     * current foreground activity.
+     *
+     * The key of the array is the displayId. If a displayId is missing from the array, this is
+     * equivalent to clearing any existing brightness overrides for that display.
+     *
+     * This method must only be called by the window manager.
+     */
+    public abstract void setScreenBrightnessOverrideFromWindowManager(
+            SparseArray<DisplayBrightnessOverrideRequest> brightnessOverrides);
+
+    /**
+     * Describes a request for overriding the brightness of a single display.
+     */
+    public static class DisplayBrightnessOverrideRequest {
+        // An override of the screen brightness.
+        // Set to PowerManager.BRIGHTNESS_INVALID if there's no override.
+        public float brightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+
+        // Tag used to identify the app window requesting the brightness override.
+        public CharSequence tag;
+    }
+
     /**
      * Describes the requested power state of the display.
      *
@@ -505,11 +530,11 @@ public abstract class DisplayManagerInternal {
         // nearby, turning it off temporarily until the object is moved away.
         public boolean useProximitySensor;
 
-        // An override of the screen brightness.
+        // A global override of the screen brightness, applied to all displays.
         // Set to PowerManager.BRIGHTNESS_INVALID if there's no override.
         public float screenBrightnessOverride;
 
-        // Tag used to identify the app window requesting the brightness override.
+        // Tag used to identify the reason for the global brightness override.
         public CharSequence screenBrightnessOverrideTag;
 
         // An override of the screen auto-brightness adjustment factor in the range -1 (dimmer) to
