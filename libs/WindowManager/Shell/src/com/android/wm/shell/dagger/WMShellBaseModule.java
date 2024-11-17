@@ -112,6 +112,8 @@ import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.appzoomout.AppZoomOut;
+import com.android.wm.shell.appzoomout.AppZoomOutController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -1040,6 +1042,20 @@ public abstract class WMShellBaseModule {
     }
 
     //
+    // App zoom out (optional feature)
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<AppZoomOut> provideAppZoomOut(
+            Optional<AppZoomOutController> appZoomOutController) {
+        return appZoomOutController.map((controller) -> controller.asAppZoomOut());
+    }
+
+    @BindsOptionalOf
+    abstract AppZoomOutController optionalAppZoomOutController();
+
+    //
     // Task Stack
     //
 
@@ -1083,6 +1099,7 @@ public abstract class WMShellBaseModule {
             Optional<RecentTasksController> recentTasksOptional,
             Optional<RecentsTransitionHandler> recentsTransitionHandlerOptional,
             Optional<OneHandedController> oneHandedControllerOptional,
+            Optional<AppZoomOutController> appZoomOutControllerOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutoutControllerOptional,
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,
             Optional<MixedTransitionHandler> mixedTransitionHandler,

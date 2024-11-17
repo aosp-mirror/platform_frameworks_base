@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.NotificationInsetsModule;
 import com.android.systemui.statusbar.QsFrameTranslateModule;
 import com.android.systemui.statusbar.phone.ConfigurationForwarder;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.appzoomout.AppZoomOut;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.desktopmode.DesktopMode;
@@ -114,6 +115,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setDesktopMode(Optional<DesktopMode> d);
+
+        @BindsInstance
+        Builder setAppZoomOut(Optional<AppZoomOut> a);
 
         SysUIComponent build();
     }

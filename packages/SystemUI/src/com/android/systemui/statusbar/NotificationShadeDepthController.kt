@@ -34,6 +34,7 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags.spatialModelAppPushback
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -52,7 +53,9 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.window.domain.interactor.WindowRootViewBlurInteractor
 import com.android.systemui.window.flag.WindowBlurFlag
+import com.android.wm.shell.appzoomout.AppZoomOut
 import java.io.PrintWriter
+import java.util.Optional
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.sign
@@ -79,6 +82,7 @@ constructor(
     private val splitShadeStateController: SplitShadeStateController,
     private val windowRootViewBlurInteractor: WindowRootViewBlurInteractor,
     @Application private val applicationScope: CoroutineScope,
+    private val appZoomOutOptional: Optional<AppZoomOut>,
     dumpManager: DumpManager,
     configurationController: ConfigurationController,
 ) : ShadeExpansionListener, Dumpable {
@@ -271,6 +275,13 @@ constructor(
     private fun onBlurApplied(appliedBlurRadius: Int, zoomOutFromShadeRadius: Float) {
         lastAppliedBlur = appliedBlurRadius
         wallpaperController.setNotificationShadeZoom(zoomOutFromShadeRadius)
+        if (spatialModelAppPushback()) {
+            appZoomOutOptional.ifPresent { appZoomOut ->
+                appZoomOut.setProgress(
+                    zoomOutFromShadeRadius
+                )
+            }
+        }
         listeners.forEach {
             it.onWallpaperZoomOutChanged(zoomOutFromShadeRadius)
             it.onBlurRadiusChanged(appliedBlurRadius)

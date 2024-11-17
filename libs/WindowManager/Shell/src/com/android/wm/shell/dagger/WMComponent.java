@@ -20,6 +20,7 @@ import android.os.HandlerThread;
 
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.appzoomout.AppZoomOut;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.desktopmode.DesktopMode;
@@ -112,4 +113,7 @@ public interface WMComponent {
      */
     @WMSingleton
     Optional<DesktopMode> getDesktopMode();
+
+    @WMSingleton
+    Optional<AppZoomOut> getAppZoomOut();
 }
