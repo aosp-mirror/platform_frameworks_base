@@ -61,21 +61,20 @@ JNIDeviceCallback::~JNIDeviceCallback()
 }
 
 void JNIDeviceCallback::onAudioDeviceUpdate(audio_io_handle_t audioIo,
-                                            audio_port_handle_t deviceId)
-{
+                                            const DeviceIdVector& deviceIds) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (env == NULL) {
         return;
     }
 
-    ALOGV("%s audioIo %d deviceId %d", __FUNCTION__, audioIo, deviceId);
-    env->CallStaticVoidMethod(mClass,
-                              mPostEventFromNative,
-                              mObject,
-                              AUDIO_NATIVE_EVENT_ROUTING_CHANGE, deviceId, 0, NULL);
+    ALOGV("%s audioIo %d deviceIds %s", __FUNCTION__, audioIo, toString(deviceIds).c_str());
+    // Java should query the new device ids once it gets the event.
+    // TODO(b/378505346): Pass the deviceIds to Java to avoid race conditions.
+    env->CallStaticVoidMethod(mClass, mPostEventFromNative, mObject,
+                              AUDIO_NATIVE_EVENT_ROUTING_CHANGE, 0 /*arg1*/, 0 /*arg2*/,
+                              NULL /*obj*/);
     if (env->ExceptionCheck()) {
         ALOGW("An exception occurred while notifying an event.");
         env->ExceptionClear();
     }
 }
-

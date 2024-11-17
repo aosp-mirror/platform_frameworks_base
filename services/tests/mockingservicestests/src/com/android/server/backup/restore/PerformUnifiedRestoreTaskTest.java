@@ -23,8 +23,10 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupTransport;
@@ -91,6 +93,8 @@ public class PerformUnifiedRestoreTaskTest {
     private UserBackupManagerService mBackupManagerService;
     @Mock
     private TransportConnection mTransportConnection;
+    @Mock
+    private BackupTransportClient mBackupTransportClient;
 
     private Set<String> mExcludedkeys = new HashSet<>();
     private Map<String, String> mBackupData = new HashMap<>();
@@ -148,6 +152,23 @@ public class PerformUnifiedRestoreTaskTest {
         mExcludedkeys = new HashSet<>();
         mExcludedkeys.add(EXCLUDED_KEY_1);
         mExcludedkeys.add(EXCLUDED_KEY_2);
+    }
+
+    @Test
+    public void setNoRestrictedModePackages_callsTransportAndSetsValue() throws Exception {
+        PackageInfo packageInfo1 = new PackageInfo();
+        packageInfo1.packageName = "package1";
+        PackageInfo packageInfo2 = new PackageInfo();
+        packageInfo2.packageName = "package2";
+        when(mBackupTransportClient.getPackagesThatShouldNotUseRestrictedMode(any(),
+                anyInt())).thenReturn(Set.of("package1"));
+
+        mRestoreTask.setNoRestrictedModePackages(mBackupTransportClient,
+                new PackageInfo[]{packageInfo1, packageInfo2});
+
+        verify(mBackupManagerService).setNoRestrictedModePackages(
+                eq(Set.of("package1")),
+                eq(BackupAnnotations.OperationType.RESTORE));
     }
 
     @Test

@@ -625,14 +625,6 @@ public final class PowerManagerService extends SystemService
     boolean mIsFaceDown = false;
     private long mLastFlipTime = 0L;
 
-    // The screen brightness setting override from the window manager
-    // to allow the current foreground activity to override the brightness.
-    private float mScreenBrightnessOverrideFromWindowManager =
-            PowerManager.BRIGHTNESS_INVALID_FLOAT;
-
-    // Tag identifying the window/activity that requested the brightness override.
-    private CharSequence mScreenBrightnessOverrideFromWmTag = null;
-
     // The window manager has determined the user to be inactive via other means.
     // Set this to false to disable.
     private boolean mUserInactiveOverrideFromWindowManager;
@@ -2332,6 +2324,8 @@ public final class PowerManagerService extends SystemService
         Trace.traceBegin(Trace.TRACE_TAG_POWER, traceMethodName);
         try {
             // Phase 2: Handle wakefulness change and bookkeeping.
+            // Under lock, invalidate before set ensures caches won't return stale values.
+            mInjector.invalidateIsInteractiveCaches();
             mWakefulnessRaw = newWakefulness;
             mWakefulnessChanging = true;
             mDirty |= DIRTY_WAKEFULNESS;
@@ -2429,7 +2423,6 @@ public final class PowerManagerService extends SystemService
     void onPowerGroupEventLocked(int event, PowerGroup powerGroup) {
         mWakefulnessChanging = true;
         mDirty |= DIRTY_WAKEFULNESS;
-        mInjector.invalidateIsInteractiveCaches();
         final int groupId = powerGroup.getGroupId();
         if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
             mPowerGroups.delete(groupId);
@@ -3662,9 +3655,7 @@ public final class PowerManagerService extends SystemService
                     // Keep the brightness steady during boot. This requires the
                     // bootloader brightness and the default brightness to be identical.
                     screenBrightnessOverride = mScreenBrightnessDefault;
-                } else if (isValidBrightness(mScreenBrightnessOverrideFromWindowManager)) {
-                    screenBrightnessOverride = mScreenBrightnessOverrideFromWindowManager;
-                    overrideTag = mScreenBrightnessOverrideFromWmTag;
+                    overrideTag = "boot";
                 } else {
                     screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
                 }
@@ -4448,19 +4439,6 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private void setScreenBrightnessOverrideFromWindowManagerInternal(
-            float brightness, CharSequence tag) {
-        synchronized (mLock) {
-            if (!BrightnessSynchronizer.floatEquals(mScreenBrightnessOverrideFromWindowManager,
-                    brightness)) {
-                mScreenBrightnessOverrideFromWindowManager = brightness;
-                mScreenBrightnessOverrideFromWmTag = tag;
-                mDirty |= DIRTY_SETTINGS;
-                updatePowerStateLocked();
-            }
-        }
-    }
-
     private void setUserInactiveOverrideFromWindowManagerInternal() {
         synchronized (mLock) {
             mUserInactiveOverrideFromWindowManager = true;
@@ -4799,10 +4777,6 @@ public final class PowerManagerService extends SystemService
                     + mMaximumScreenOffTimeoutFromDeviceAdmin + " (enforced="
                     + isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked() + ")");
             pw.println("  mStayOnWhilePluggedInSetting=" + mStayOnWhilePluggedInSetting);
-            pw.println("  mScreenBrightnessOverrideFromWindowManager="
-                    + mScreenBrightnessOverrideFromWindowManager);
-            pw.println("  mScreenBrightnessOverrideFromWmTag="
-                    + mScreenBrightnessOverrideFromWmTag);
             pw.println("  mUserActivityTimeoutOverrideFromWindowManager="
                     + mUserActivityTimeoutOverrideFromWindowManager);
             pw.println("  mUserInactiveOverrideFromWindowManager="
@@ -5190,10 +5164,6 @@ public final class PowerManagerService extends SystemService
                             != 0));
             proto.end(stayOnWhilePluggedInToken);
 
-            proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto
-                            .SCREEN_BRIGHTNESS_OVERRIDE_FROM_WINDOW_MANAGER,
-                    mScreenBrightnessOverrideFromWindowManager);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .USER_ACTIVITY_TIMEOUT_OVERRIDE_FROM_WINDOW_MANAGER_MS,
@@ -7134,17 +7104,6 @@ public final class PowerManagerService extends SystemService
 
     @VisibleForTesting
     final class LocalService extends PowerManagerInternal {
-        @Override
-        public void setScreenBrightnessOverrideFromWindowManager(
-                float screenBrightness, CharSequence tag) {
-            if (screenBrightness < PowerManager.BRIGHTNESS_MIN
-                    || screenBrightness > PowerManager.BRIGHTNESS_MAX) {
-                screenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-                tag = null;
-            }
-            setScreenBrightnessOverrideFromWindowManagerInternal(screenBrightness, tag);
-        }
-
         @Override
         public void setDozeOverrideFromDreamManager(
                 int screenState, int reason, float screenBrightnessFloat, int screenBrightnessInt,

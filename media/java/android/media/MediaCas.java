@@ -16,9 +16,8 @@
 
 package android.media;
 
+import static android.media.tv.flags.Flags.FLAG_MEDIACAS_UPDATE_CLIENT_PROFILE_PRIORITY;
 import static android.media.tv.flags.Flags.FLAG_SET_RESOURCE_HOLDER_RETAIN;
-
-import static com.android.media.flags.Flags.FLAG_UPDATE_CLIENT_PROFILE_PRIORITY;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -996,7 +995,7 @@ public final class MediaCas implements AutoCloseable {
      * @param niceValue the nice value.
      * @hide
      */
-    @FlaggedApi(FLAG_UPDATE_CLIENT_PROFILE_PRIORITY)
+    @FlaggedApi(FLAG_MEDIACAS_UPDATE_CLIENT_PROFILE_PRIORITY)
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public boolean updateResourcePriority(int priority, int niceValue) {

@@ -79,6 +79,9 @@
     <!-- The number of columns in the infinite grid QuickSettings -->
     <integer name="quick_settings_infinite_grid_num_columns">4</integer>
 
+    <!-- The maximum width of large tiles in the infinite grid QuickSettings -->
+    <integer name="quick_settings_infinite_grid_tile_max_width">4</integer>
+
     <!-- The number of columns in the Dual Shade QuickSettings -->
     <integer name="quick_settings_dual_shade_num_columns">4</integer>
 

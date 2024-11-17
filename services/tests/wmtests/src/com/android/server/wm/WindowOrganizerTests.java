@@ -82,6 +82,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
@@ -122,6 +123,8 @@ import java.util.function.BiConsumer;
  * Build/Install/Run:
  *  atest WmTests:WindowOrganizerTests
  */
+
+// TODO revert parts of this set to set the flag to test the behavior
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
@@ -1299,6 +1302,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    @DisableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testEnterPipParams() {
         final StubOrganizer o = new StubOrganizer();
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o);
@@ -1314,6 +1318,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    @DisableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testChangePipParams() {
         class ChangeSavingOrganizer extends StubOrganizer {
             RunningTaskInfo mChangedInfo;

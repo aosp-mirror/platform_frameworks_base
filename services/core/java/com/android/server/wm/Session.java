@@ -706,6 +706,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 win.setRequestedVisibleTypes(requestedVisibleTypes);
                 win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win,
                         imeStatsToken);
+                final Task task = win.getTask();
+                if (task != null) {
+                    task.dispatchTaskInfoChangedIfNeeded(/* forced= */ true);
+                }
             } else {
                 EmbeddedWindowController.EmbeddedWindow embeddedWindow = null;
                 if (android.view.inputmethod.Flags.refactorInsetsController()) {

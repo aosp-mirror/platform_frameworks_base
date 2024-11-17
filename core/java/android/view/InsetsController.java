@@ -1910,7 +1910,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         mImeSourceConsumer.onWindowFocusLost();
     }
 
-    @VisibleForTesting
+    /** Returns the current {@link AnimationType} of an {@link InsetsType}. */
+    @VisibleForTesting(visibility = PACKAGE)
     public @AnimationType int getAnimationType(@InsetsType int type) {
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
             InsetsAnimationControlRunner control = mRunningAnimations.get(i).runner;

@@ -267,7 +267,7 @@ flag {
 flag {
     name: "dual_shade"
     namespace: "systemui"
-    description: "Enables the BC25 Dual Shade (go/bc25-dual-shade-design)."
+    description: "Enables Dual Shade (go/dual-shade-design-doc)."
     bug: "337259436"
 }
 
@@ -558,6 +558,13 @@ flag {
 }
 
 flag {
+   name: "lockscreen_custom_clocks"
+   namespace: "systemui"
+   description: "Enable lockscreen custom clocks"
+   bug: "378486437"
+}
+
+flag {
    name: "faster_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
@@ -625,9 +632,9 @@ flag {
 
 flag {
   name: "status_bar_connected_displays"
-  namespace: "systemui"
+  namespace: "lse_desktop_experience"
   description: "Shows the status bar on connected displays"
-  bug: "362720336"
+  bug: "379264862"
 }
 
 flag {
@@ -1360,16 +1367,6 @@ flag {
 }
 
 flag {
-  name: "notification_pulsing_fix"
-  namespace: "systemui"
-  description: "Allow showing new pulsing notifications when the device is already pulsing."
-  bug: "335560575"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "media_lockscreen_launch_animation"
     namespace : "systemui"
     description : "Enable the origin launch animation for UMO when opening on top of lockscreen."
@@ -1751,6 +1748,13 @@ flag {
 }
 
 flag {
+    name: "notification_shade_blur"
+    namespace: "systemui"
+    description: "Enables the new blur effect on the Notification Shade."
+    bug: "370555223"
+}
+
+flag {
   name: "ensure_enr_views_visibility"
   namespace: "systemui"
   description: "Ensures public and private visibilities"
@@ -1780,6 +1784,16 @@ flag {
     namespace: "systemui"
     description: "System app with foreground service can opt in to be stoppable."
     bug: "376564917"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "keyguard_transition_force_finish_on_screen_off"
+    namespace: "systemui"
+    description: "Forces KTF transitions to finish if the screen turns all the way off."
+    bug: "331636736"
     metadata {
       purpose: PURPOSE_BUGFIX
     }

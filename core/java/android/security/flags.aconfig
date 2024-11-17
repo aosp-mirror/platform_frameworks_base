@@ -109,9 +109,17 @@ flag {
 
 flag {
     name: "afl_api"
-    namespace: "platform_security"
+    namespace: "hardware_backed_security"
     description: "AFL feature"
     bug: "365994454"
+}
+
+flag {
+    name: "protect_device_config_flags"
+    namespace: "psap_ai"
+    description: "Feature flag to limit adb shell to allowlisted flags"
+    bug: "364083026"
+    is_fixed_read_only: true
 }
 
 flag {

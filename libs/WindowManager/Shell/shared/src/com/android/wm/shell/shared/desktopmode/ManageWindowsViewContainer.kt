@@ -50,6 +50,22 @@ abstract class ManageWindowsViewContainer(
     fun createMenu(snapshotList: List<Pair<Int, TaskSnapshot>>,
              onIconClickListener: ((Int) -> Unit),
              onOutsideClickListener: (() -> Unit)): ManageWindowsView {
+        val bitmapList = snapshotList.map { (index, snapshot) ->
+            index to Bitmap.wrapHardwareBuffer(snapshot.hardwareBuffer, snapshot.colorSpace)
+        }
+        return createAndShowMenuView(
+            bitmapList,
+            onIconClickListener,
+            onOutsideClickListener
+        )
+    }
+
+    /** Creates the menu view with the given bitmaps, and displays it. */
+    fun createAndShowMenuView(
+        snapshotList: List<Pair<Int, Bitmap?>>,
+        onIconClickListener: ((Int) -> Unit),
+        onOutsideClickListener: (() -> Unit)
+    ): ManageWindowsView {
         menuView = ManageWindowsView(context, menuBackgroundColor).apply {
             this.onOutsideClickListener = onOutsideClickListener
             this.onIconClickListener = onIconClickListener
@@ -120,7 +136,7 @@ abstract class ManageWindowsViewContainer(
         }
 
         fun generateIconViews(
-            snapshotList: List<Pair<Int, TaskSnapshot>>
+            snapshotList: List<Pair<Int, Bitmap?>>
         ) {
             menuWidth = 0
             menuHeight = 0
@@ -133,7 +149,7 @@ abstract class ManageWindowsViewContainer(
             // Add each icon to the menu, adding a new row when needed.
             for ((iconCount, taskInfoSnapshotPair) in snapshotList.withIndex()) {
                 val taskId = taskInfoSnapshotPair.first
-                val snapshot = taskInfoSnapshotPair.second
+                val snapshotBitmap = taskInfoSnapshotPair.second
                 // Once a row is filled, make a new row and increase the menu height.
                 if (iconCount % MENU_MAX_ICONS_PER_ROW == 0) {
                     rowLayout = LinearLayout(context)
@@ -141,10 +157,7 @@ abstract class ManageWindowsViewContainer(
                     rootView.addView(rowLayout)
                     menuHeight += (instanceIconHeight + iconMargin).toInt()
                 }
-                val snapshotBitmap = Bitmap.wrapHardwareBuffer(
-                    snapshot.hardwareBuffer,
-                    snapshot.colorSpace
-                )
+
                 val croppedBitmap = snapshotBitmap?.let { cropBitmap(it) }
                 val scaledSnapshotBitmap = croppedBitmap?.let {
                     Bitmap.createScaledBitmap(

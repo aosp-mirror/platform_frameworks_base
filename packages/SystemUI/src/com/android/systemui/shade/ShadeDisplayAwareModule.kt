@@ -30,8 +30,8 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
-import com.android.systemui.shade.data.repository.ShadePositionRepository
-import com.android.systemui.shade.data.repository.ShadePositionRepositoryImpl
+import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
+import com.android.systemui.shade.data.repository.ShadeDisplaysRepositoryImpl
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
@@ -157,17 +157,16 @@ object ShadeDisplayAwareModule {
 
     @SysUISingleton
     @Provides
-    @ShadeDisplayAware
-    fun provideShadePositionRepository(impl: ShadePositionRepositoryImpl): ShadePositionRepository {
+    fun provideShadePositionRepository(impl: ShadeDisplaysRepositoryImpl): ShadeDisplaysRepository {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
         return impl
     }
 
     @Provides
     @IntoMap
-    @ClassKey(ShadePositionRepositoryImpl::class)
+    @ClassKey(ShadeDisplaysRepositoryImpl::class)
     fun provideShadePositionRepositoryAsCoreStartable(
-        impl: ShadePositionRepositoryImpl
+        impl: ShadeDisplaysRepositoryImpl
     ): CoreStartable {
         return if (ShadeWindowGoesAround.isEnabled) {
             impl

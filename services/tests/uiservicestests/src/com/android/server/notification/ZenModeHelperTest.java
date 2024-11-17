@@ -49,6 +49,8 @@ import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_CONTACTS;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_STARRED;
 import static android.app.NotificationManager.Policy.STATE_PRIORITY_CHANNELS_BLOCKED;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
@@ -70,6 +72,7 @@ import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_ACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_NONE;
+import static android.service.notification.ZenModeConfig.implicitRuleId;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_CONTACTS;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_NONE;
 import static android.service.notification.ZenPolicy.PEOPLE_TYPE_STARRED;
@@ -84,8 +87,6 @@ import static com.android.os.dnd.DNDProtoEnums.PEOPLE_STARRED;
 import static com.android.os.dnd.DNDProtoEnums.ROOT_CONFIG;
 import static com.android.os.dnd.DNDProtoEnums.STATE_ALLOW;
 import static com.android.os.dnd.DNDProtoEnums.STATE_DISALLOW;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static com.android.server.notification.ZenModeEventLogger.ACTIVE_RULE_TYPE_MANUAL;
 import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
@@ -102,6 +103,7 @@ import static junit.framework.TestCase.fail;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -5348,6 +5350,22 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mDeviceEffectsApplier).apply(eq(effects), eq(ORIGIN_APP));
+        assertTrue(mZenModeHelper.hasDeviceEffectsApplier());
+    }
+
+    @Test
+    public void testHasDeviceEffectsApplier_returnsFalseIfNotSet() {
+        assertFalse(mZenModeHelper.hasDeviceEffectsApplier());
+    }
+
+    @Test
+    @EnableFlags(FLAG_MODES_API)
+    public void testSettingDeviceEffects_throwsExceptionIfAlreadySet() {
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier));
     }
 
     @Test
@@ -7048,6 +7066,50 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         SOURCE_SCHEDULE), ORIGIN_APP, CUSTOM_PKG_UID);
         assertThat(getZenRule(ruleId).isActive()).isFalse();
         assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_implicitRuleManualActivation_doesNotUseOverride() {
+        mContext.getTestablePermissions().setPermission(Manifest.permission.MANAGE_NOTIFICATIONS,
+                PERMISSION_GRANTED); // So that canManageAZR succeeds.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT, CUSTOM_PKG_NAME,
+                CUSTOM_PKG_UID, ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT, CUSTOM_PKG_NAME,
+                CUSTOM_PKG_UID, ZEN_MODE_OFF);
+        ZenRule implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
+        assertThat(implicitRule.isActive()).isFalse();
+
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id,
+                new Condition(implicitRule.conditionId, "on!", STATE_TRUE, SOURCE_USER_ACTION),
+                ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+
+        implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id))
+                .isEqualTo(STATE_TRUE);
+        assertThat(implicitRule.isActive()).isTrue();
+        assertThat(implicitRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_implicitRuleManualDeactivation_doesNotUseOverride() {
+        mContext.getTestablePermissions().setPermission(Manifest.permission.MANAGE_NOTIFICATIONS,
+                PERMISSION_GRANTED); // So that canManageAZR succeeds.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(UserHandle.CURRENT, CUSTOM_PKG_NAME,
+                CUSTOM_PKG_UID, ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        ZenRule implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
+        assertThat(implicitRule.isActive()).isTrue();
+
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id,
+                new Condition(implicitRule.conditionId, "off!", STATE_FALSE, SOURCE_USER_ACTION),
+                ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+
+        implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id))
+                .isEqualTo(STATE_FALSE);
+        assertThat(implicitRule.isActive()).isFalse();
+        assertThat(implicitRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
     }
 
     private ZenRule getZenRule(String ruleId) {

@@ -124,7 +124,7 @@ interface INotificationManager
     boolean onlyHasDefaultChannel(String pkg, int uid);
     boolean areChannelsBypassingDnd();
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
-    List<String> getPackagesBypassingDnd(int userId, boolean includeConversationChannels);
+    ParceledListSlice getPackagesBypassingDnd(int userId);
     boolean isPackagePaused(String pkg);
     void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
     boolean isPermissionFixed(String pkg, int userId);

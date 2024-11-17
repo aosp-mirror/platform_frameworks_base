@@ -1002,6 +1002,10 @@
     <string name="hearing_devices_presets_error">Couldn\'t update preset</string>
     <!-- QuickSettings: Title for hearing aids presets. Preset is a set of hearing aid settings. User can apply different settings in different environments (e.g. Outdoor, Restaurant, Home) [CHAR LIMIT=40]-->
     <string name="hearing_devices_preset_label">Preset</string>
+    <!-- QuickSettings: Content description for the icon that indicates the item is selected [CHAR LIMIT=NONE]-->
+    <string name="hearing_devices_spinner_item_selected">Selected</string>
+    <!-- QuickSettings: Title for related tools of hearing. [CHAR LIMIT=40]-->
+    <string name="hearing_devices_tools_label">Tools</string>
     <!-- QuickSettings: Tool name for hearing devices dialog related tools [CHAR LIMIT=40] [BACKUP_MESSAGE_ID=8916875614623730005]-->
     <string name="quick_settings_hearing_devices_live_caption_title">Live Caption</string>
 
@@ -3564,6 +3568,8 @@
     <string name="rear_display_accessibility_folded_animation">Foldable device being unfolded</string>
     <!-- Text for education page content description for unfolded animation. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
+    <!-- Text for a dialog telling the user that the front screen is turned on. [CHAR_LIMIT=NONE] -->
+    <string name="rear_display_unfolded_front_screen_on">Front screen turned on</string>
 
     <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the folded posture for a foldable device [CHAR LIMIT=32] -->
     <string name="quick_settings_rotation_posture_folded">folded</string>

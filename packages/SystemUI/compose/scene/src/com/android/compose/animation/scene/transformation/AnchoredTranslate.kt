@@ -19,14 +19,13 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.geometry.Offset
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the translation of an element to another element. */
-internal class AnchoredTranslate(
-    override val matcher: ElementMatcher,
-    private val anchor: ElementKey,
-) : PropertyTransformation<Offset> {
+internal class AnchoredTranslate private constructor(private val anchor: ElementKey) :
+    InterpolatedPropertyTransformation<Offset> {
+    override val property = PropertyTransformation.Property.Offset
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
@@ -55,6 +54,10 @@ internal class AnchoredTranslate(
         } else {
             Offset(idleValue.x + offset.x, idleValue.y + offset.y)
         }
+    }
+
+    class Factory(private val anchor: ElementKey) : Transformation.Factory {
+        override fun create(): Transformation = AnchoredTranslate(anchor)
     }
 }
 

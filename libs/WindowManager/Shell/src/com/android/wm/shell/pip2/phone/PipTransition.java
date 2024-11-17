@@ -241,7 +241,7 @@ public class PipTransition extends PipTransitionController implements
             extra.putParcelable(PIP_TASK_LEASH, pipChange.getLeash());
             mPipTransitionState.setState(PipTransitionState.ENTERING_PIP, extra);
 
-            if (mPipTransitionState.isInSwipePipToHomeTransition()) {
+            if (isInSwipePipToHomeTransition()) {
                 // If this is the second transition as a part of swipe PiP to home cuj,
                 // handle this transition as a special case with no-op animation.
                 return handleSwipePipToHomeTransition(info, startTransaction, finishTransaction,
@@ -420,7 +420,8 @@ public class PipTransition extends PipTransitionController implements
         }
 
         // Update the src-rect-hint in params in place, to set up initial animator transform.
-        params.getSourceRectHint().set(adjustedSourceRectHint);
+        params.copyOnlySet(new PictureInPictureParams.Builder()
+                .setSourceRectHint(adjustedSourceRectHint).build());
 
         // Config-at-end transitions need to have their activities transformed before starting
         // the animation; this makes the buffer seem like it's been updated to final size.
@@ -543,7 +544,7 @@ public class PipTransition extends PipTransitionController implements
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        WindowContainerToken pipToken = mPipTransitionState.mPipTaskToken;
+        WindowContainerToken pipToken = mPipTransitionState.getPipTaskToken();
 
         TransitionInfo.Change pipChange = getChangeByToken(info, pipToken);
         if (pipChange == null) {
@@ -701,6 +702,13 @@ public class PipTransition extends PipTransitionController implements
             @NonNull TransitionInfo.Change pipChange) {
         TransitionInfo.Change fixedRotationChange = findFixedRotationChange(info);
         int startRotation = pipChange.getStartRotation();
+        if (pipChange.getEndRotation() != ROTATION_UNDEFINED
+                && startRotation != pipChange.getEndRotation()) {
+            // If PiP change was collected along with the display change and the orientation change
+            // happened in sync with the PiP change, then do not treat this as fixed-rotation case.
+            return ROTATION_0;
+        }
+
         int endRotation = fixedRotationChange != null
                 ? fixedRotationChange.getEndFixedRotation() : mPipDisplayLayoutState.getRotation();
         int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0
@@ -773,11 +781,11 @@ public class PipTransition extends PipTransitionController implements
     }
 
     private boolean isRemovePipTransition(@NonNull TransitionInfo info) {
-        if (mPipTransitionState.mPipTaskToken == null) {
+        if (mPipTransitionState.getPipTaskToken() == null) {
             // PiP removal makes sense if enter-PiP has cached a valid pinned task token.
             return false;
         }
-        TransitionInfo.Change pipChange = info.getChange(mPipTransitionState.mPipTaskToken);
+        TransitionInfo.Change pipChange = info.getChange(mPipTransitionState.getPipTaskToken());
         if (pipChange == null) {
             // Search for the PiP change by token since the windowing mode might be FULLSCREEN now.
             return false;
@@ -859,18 +867,18 @@ public class PipTransition extends PipTransitionController implements
                 Preconditions.checkState(extra != null,
                         "No extra bundle for " + mPipTransitionState);
 
-                mPipTransitionState.mPipTaskToken = extra.getParcelable(
-                        PIP_TASK_TOKEN, WindowContainerToken.class);
+                mPipTransitionState.setPipTaskToken(extra.getParcelable(
+                        PIP_TASK_TOKEN, WindowContainerToken.class));
                 mPipTransitionState.setPinnedTaskLeash(extra.getParcelable(
                         PIP_TASK_LEASH, SurfaceControl.class));
-                boolean hasValidTokenAndLeash = mPipTransitionState.mPipTaskToken != null
+                boolean hasValidTokenAndLeash = mPipTransitionState.getPipTaskToken() != null
                         && mPipTransitionState.getPinnedTaskLeash() != null;
 
                 Preconditions.checkState(hasValidTokenAndLeash,
                         "Unexpected bundle for " + mPipTransitionState);
                 break;
             case PipTransitionState.EXITED_PIP:
-                mPipTransitionState.mPipTaskToken = null;
+                mPipTransitionState.setPipTaskToken(null);
                 mPipTransitionState.setPinnedTaskLeash(null);
                 break;
         }

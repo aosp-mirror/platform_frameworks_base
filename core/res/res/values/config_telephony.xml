@@ -318,6 +318,12 @@
     <bool name="config_oem_enabled_satellite_access_allow">true</bool>
     <java-symbol type="bool" name="config_oem_enabled_satellite_access_allow" />
 
+    <!-- Whether the satellite modem support concurrent TN scanning while device is in
+         NTN mode.
+         -->
+    <bool name="config_satellite_modem_support_concurrent_tn_scanning">true</bool>
+    <java-symbol type="bool" name="config_satellite_modem_support_concurrent_tn_scanning" />
+
     <!-- The time duration in seconds which is used to decide whether the Location returned from
          LocationManager#getLastKnownLocation is fresh.
 

@@ -2538,6 +2538,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 }
             }
             if (!activityAllDrawn && !isActivityHome) {
+                // Only check the special case of a fragment host task because the starting window
+                // may not be visible if the client organizer delays the transition ready.
+                if (task.mTaskFragmentHostProcessName != null) {
+                    // It may be launched from a task trampoline that already has a starting window.
+                    // Return NONE because 2 consecutive splashes may not look smooth in visual.
+                    final Task prevTask = task.getParent().getTaskBelow(task);
+                    if (prevTask != null) {
+                        final ActivityRecord prevTaskTop = prevTask.getTopMostActivity();
+                        if (prevTaskTop != null && prevTaskTop.hasStartingWindow()) {
+                            return STARTING_WINDOW_TYPE_NONE;
+                        }
+                    }
+                }
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
         }
@@ -5550,8 +5563,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!visible) {
                 if (mTransitionController.inPlayingTransition(this)) {
                     mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
-                } else if (mTransitionController.inFinishingTransition(this)) {
-                    mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
+                    if (mTransitionController.mFinishingTransition != null
+                            && mTransitionController.mFinishingTransition.isTransientLaunch(this)) {
+                        mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
+                    }
                 }
             } else {
                 mTransitionChangeFlags &= ~FLAG_IS_OCCLUDED;
@@ -8894,6 +8909,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAppCompatController.getAppCompatSizeCompatModePolicy();
 
         if (scmPolicy.hasAppCompatDisplayInsetsWithoutInheritance()
+                && mAppCompatDisplayInsets != null
                 && !mAppCompatDisplayInsets.mIsInFixedOrientationOrAspectRatioLetterbox) {
             // App prefers to keep its original size.
             // If the size compat is from previous fixed orientation letterboxing, we may want to

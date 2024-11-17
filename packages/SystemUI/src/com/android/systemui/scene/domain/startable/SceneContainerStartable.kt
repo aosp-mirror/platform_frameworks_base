@@ -62,6 +62,7 @@ import com.android.systemui.scene.session.shared.SessionStorage
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -217,7 +218,9 @@ constructor(
                                 sceneInteractor.transitionState.mapNotNull { state ->
                                     when (state) {
                                         is ObservableTransitionState.Idle -> {
-                                            if (state.currentScene != Scenes.Gone) {
+                                            if (state.currentScene == Scenes.Dream) {
+                                                false to "dream is showing"
+                                            } else if (state.currentScene != Scenes.Gone) {
                                                 true to "scene is not Gone"
                                             } else if (state.currentOverlays.isNotEmpty()) {
                                                 true to "overlay is shown"
@@ -228,21 +231,30 @@ constructor(
                                         is ObservableTransitionState.Transition -> {
                                             if (state.fromContent == Scenes.Gone) {
                                                 true to "scene transitioning away from Gone"
+                                            } else if (state.fromContent == Scenes.Dream) {
+                                                true to "scene transitioning away from dream"
                                             } else {
                                                 null
                                             }
                                         }
                                     }
                                 },
+                                sceneInteractor.transitionState.map { state ->
+                                    state.isTransitioningFromOrTo(Scenes.Communal) ||
+                                        state.isIdle(Scenes.Communal)
+                                },
                                 headsUpInteractor.isHeadsUpOrAnimatingAway,
                                 occlusionInteractor.invisibleDueToOcclusion,
                                 alternateBouncerInteractor.isVisible,
                             ) {
                                 visibilityForTransitionState,
+                                isCommunalShowing,
                                 isHeadsUpOrAnimatingAway,
                                 invisibleDueToOcclusion,
                                 isAlternateBouncerVisible ->
                                 when {
+                                    isCommunalShowing ->
+                                        true to "on or transitioning to/from communal"
                                     isHeadsUpOrAnimatingAway -> true to "showing a HUN"
                                     isAlternateBouncerVisible -> true to "showing alternate bouncer"
                                     invisibleDueToOcclusion -> false to "invisible due to occlusion"
@@ -266,6 +278,7 @@ constructor(
         handleSimUnlock()
         handleDeviceUnlockStatus()
         handlePowerState()
+        handleDreamState()
         handleShadeTouchability()
     }
 
@@ -373,6 +386,7 @@ constructor(
                                     "device was unlocked with alternate bouncer showing" +
                                         " and shade didn't need to be left open"
                             } else {
+                                replaceLockscreenSceneOnBackStack()
                                 null
                             }
                         }
@@ -391,16 +405,7 @@ constructor(
                                 val prevScene = previousScene.value
                                 val targetScene = prevScene ?: Scenes.Gone
                                 if (targetScene != Scenes.Gone) {
-                                    sceneBackInteractor.updateBackStack { stack ->
-                                        val list = stack.asIterable().toMutableList()
-                                        check(list.last() == Scenes.Lockscreen) {
-                                            "The bottommost/last SceneKey of the back stack isn't" +
-                                                " the Lockscreen scene like expected. The back" +
-                                                " stack is $stack."
-                                        }
-                                        list[list.size - 1] = Scenes.Gone
-                                        sceneStackOf(*list.toTypedArray())
-                                    }
+                                    replaceLockscreenSceneOnBackStack()
                                 }
                                 targetScene to
                                     "device was unlocked with primary bouncer showing," +
@@ -432,6 +437,20 @@ constructor(
                 .collect { (targetSceneKey, loggingReason) ->
                     switchToScene(targetSceneKey = targetSceneKey, loggingReason = loggingReason)
                 }
+        }
+    }
+
+    /** If the [Scenes.Lockscreen] is on the backstack, replaces it with [Scenes.Gone]. */
+    private fun replaceLockscreenSceneOnBackStack() {
+        sceneBackInteractor.updateBackStack { stack ->
+            val list = stack.asIterable().toMutableList()
+            check(list.last() == Scenes.Lockscreen) {
+                "The bottommost/last SceneKey of the back stack isn't" +
+                    " the Lockscreen scene like expected. The back" +
+                    " stack is $stack."
+            }
+            list[list.size - 1] = Scenes.Gone
+            sceneStackOf(*list.toTypedArray())
         }
     }
 
@@ -497,6 +516,31 @@ constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun handleDreamState() {
+        applicationScope.launch {
+            keyguardInteractor.isAbleToDream
+                .sample(sceneInteractor.transitionState, ::Pair)
+                .collect { (isAbleToDream, transitionState) ->
+                    if (transitionState.isIdle(Scenes.Communal)) {
+                        // The dream is automatically started underneath the hub, don't transition
+                        // to dream when this is happening as communal is still visible on top.
+                        return@collect
+                    }
+                    if (isAbleToDream) {
+                        switchToScene(
+                            targetSceneKey = Scenes.Dream,
+                            loggingReason = "dream started",
+                        )
+                    } else {
+                        switchToScene(
+                            targetSceneKey = SceneFamilies.Home,
+                            loggingReason = "dream stopped",
+                        )
+                    }
+                }
         }
     }
 

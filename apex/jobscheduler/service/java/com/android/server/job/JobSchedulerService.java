@@ -44,6 +44,7 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
+import android.app.job.PendingJobReasonsInfo;
 import android.app.job.UserVisibleJobSummary;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -2138,6 +2139,20 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         return new int[] { JobScheduler.PENDING_JOB_REASON_UNDEFINED };
+    }
+
+    @NonNull
+    private List<PendingJobReasonsInfo> getPendingJobReasonsHistory(
+            int uid, String namespace, int jobId) {
+        synchronized (mLock) {
+            final JobStatus job = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+            if (job == null) {
+                // Job doesn't exist.
+                throw new IllegalArgumentException("Invalid job id");
+            }
+
+            return job.getPendingJobReasonsHistory();
+        }
     }
 
     private JobInfo getPendingJob(int uid, @Nullable String namespace, int jobId) {
@@ -5122,6 +5137,19 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public List<PendingJobReasonsInfo> getPendingJobReasonsHistory(String namespace, int jobId)
+                throws RemoteException {
+            final int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return JobSchedulerService.this.getPendingJobReasonsHistory(
+                        uid, validateNamespace(namespace), jobId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
         public void cancelAll() throws RemoteException {
             final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
@@ -5856,6 +5884,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API,
                     android.app.job.Flags.getPendingJobReasonsApi());
+            pw.println();
+            pw.print(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_HISTORY_API,
+                    android.app.job.Flags.getPendingJobReasonsHistoryApi());
             pw.println();
             pw.decreaseIndent();
             pw.println();

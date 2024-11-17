@@ -1,0 +1,13 @@
+aconfig_declarations {
+    name: "wear_aconfig_declarations",
+    package: "com.android.shell.flags",
+    container: "system",
+    srcs: [
+        "wear.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "wear_aconfig_declarations_flags_java_lib",
+    aconfig_declarations: "wear_aconfig_declarations",
+}

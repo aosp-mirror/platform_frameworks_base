@@ -13,6 +13,13 @@ flag {
 }
 
 flag {
+  name: "notifications_redesign_templates"
+  namespace: "systemui"
+  description: "Notifications Redesign: Update notification templates"
+  bug: "378660052"
+}
+
+flag {
   name: "modes_api"
   is_exported: true
   namespace: "systemui"
@@ -97,16 +104,6 @@ flag {
   namespace: "systemui"
   description: "Does a check to see if notification should be autogrouped before posting, and if so groups before post."
   bug: "330214226"
-}
-
-flag {
-  name: "visit_person_uri"
-  namespace: "systemui"
-  description: "Guards the security fix that ensures all URIs Person.java are valid"
-  bug: "281044385"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
@@ -277,4 +274,11 @@ flag {
   namespace: "systemui"
   description: "Adds UI for NAS classification of notifications"
   bug: "367996732"
+}
+
+flag {
+  name: "no_sbnholder"
+  namespace: "systemui"
+  description: "removes sbnholder from NLS"
+  bug: "362981561"
 }

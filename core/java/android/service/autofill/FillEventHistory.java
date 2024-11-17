@@ -16,8 +16,10 @@
 
 package android.service.autofill;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_W_METRICS;
 import static android.view.autofill.Helper.sVerbose;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,14 +65,21 @@ public final class FillEventHistory implements Parcelable {
     private static final String TAG = "FillEventHistory";
 
     /**
-     * Not in parcel. The ID of the autofill session that created the {@link FillResponse}.
+     * The ID of the autofill session that created the {@link FillResponse}.
+     *
+     * TODO: add this to the parcel.
      */
     private final int mSessionId;
 
     @Nullable private final Bundle mClientState;
     @Nullable List<Event> mEvents;
 
-    /** @hide */
+    /**
+     * Returns the unique identifier of this FillEventHistory.
+     *
+     * <p>This is used to differentiate individual FillEventHistory.
+     */
+    @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
     public int getSessionId() {
         return mSessionId;
     }
@@ -283,6 +292,13 @@ public final class FillEventHistory implements Parcelable {
         /** All fields matched contents of datasets. */
         public static final int NO_SAVE_UI_REASON_DATASET_MATCH = 6;
 
+        /**
+         * Credential Manager is invoked instead of Autofill. When that happens, Save Dialog cannot
+         * be shown, and this will be populated in
+         */
+        @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+        public static final int NO_SAVE_UI_REASON_USING_CREDMAN = 7;
+
         /** @hide */
         @IntDef(prefix = { "NO_SAVE_UI_REASON_" }, value = {
                 NO_SAVE_UI_REASON_NONE,
@@ -310,10 +326,19 @@ public final class FillEventHistory implements Parcelable {
         public static final int UI_TYPE_DIALOG = 3;
 
         /**
-         *  The autofill suggestion is shown os a credman bottom sheet
-         *  @hide
+         * The autofill suggestion is shown os a credman bottom sheet
+         *
+         * <p>Note, this was introduced as bottom sheet even though it applies to all credman UI
+         * types. Instead of exposing this directly to the public, the generic UI_TYPE_CREDMAN is
+         * introduced with the same number.
+         *
+         * @hide
          */
         public static final int UI_TYPE_CREDMAN_BOTTOM_SHEET = 4;
+
+        /** Credential Manager suggestions are shown instead of Autofill suggestion */
+        @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+        public static final int UI_TYPE_CREDMAN = 4;
 
         /** @hide */
         @IntDef(prefix = { "UI_TYPE_" }, value = {
@@ -359,6 +384,13 @@ public final class FillEventHistory implements Parcelable {
             return mEventType;
         }
 
+        /** Gets the {@code AutofillId} that's focused at the time of action */
+        @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+        @Nullable
+        public AutofillId getFocusedId() {
+            return null;
+        }
+
         /**
          * Returns the id of dataset the id was on.
          *
@@ -388,6 +420,17 @@ public final class FillEventHistory implements Parcelable {
         @NonNull public Set<String> getSelectedDatasetIds() {
             return mSelectedDatasetIds == null ? Collections.emptySet()
                     : new ArraySet<>(mSelectedDatasetIds);
+        }
+
+        /**
+         * Returns which datasets were shown to the user.
+         *
+         * <p><b>Note: </b>Only set on events of type {@link #TYPE_DATASETS_SHOWN}.
+         */
+        @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+        @NonNull
+        public Set<String> getShownDatasetIds() {
+            return Collections.emptySet();
         }
 
         /**

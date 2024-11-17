@@ -3018,6 +3018,17 @@ interface ITelephony {
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void requestTimeForNextSatelliteVisibility(in ResultReceiver receiver);
 
+
+     /**
+     * Request to get the currently selected satellite subscription id.
+     *
+     * @param receiver Result receiver to get the error code of the request and the currently
+     *                 selected satellite subscription id.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestSelectedNbIotSatelliteSubscriptionId(in ResultReceiver receiver);
+
     /**
      * Inform whether the device is aligned with the satellite in both real and demo mode.
      *
@@ -3497,4 +3508,15 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void deprovisionSatellite(in List<SatelliteSubscriberInfo> list, in ResultReceiver result);
+
+   /**
+    * Inform whether application supports NTN SMS in satellite mode.
+    *
+    * This method is used by default messaging application to inform framework whether it supports
+    * NTN SMS or not.
+    *
+    * @param ntnSmsSupported {@code true} If application supports NTN SMS, else {@code false}.
+    * @hide
+    */
+    void setNtnSmsSupported(boolean ntnSmsSupported);
 }

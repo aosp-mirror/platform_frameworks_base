@@ -55,7 +55,6 @@ import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.swipeWithVelocity
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -574,7 +573,7 @@ class SwipeToSceneTest {
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
             SceneTransitionLayout(layoutState, Modifier.size(LayoutWidth, LayoutHeight)) {
-                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                scene(SceneA, userActions = mapOf(Swipe.Up to SceneB, Swipe.Down to SceneB)) {
                     Box(
                         Modifier.fillMaxSize()
                             // A scrollable that does not consume the scroll gesture
@@ -672,12 +671,12 @@ class SwipeToSceneTest {
         }
 
         assertThat(state.isTransitioning(from = SceneA, to = SceneB)).isTrue()
-        assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(1)
+        assertThat(state.currentTransition?.transformationSpec?.transformationMatchers).hasSize(1)
 
         // Move the pointer up to swipe to scene B using the new transition.
         rule.onRoot().performTouchInput { moveBy(Offset(0f, -1.dp.toPx()), delayMillis = 1_000) }
         assertThat(state.isTransitioning(from = SceneA, to = SceneB)).isTrue()
-        assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(2)
+        assertThat(state.currentTransition?.transformationSpec?.transformationMatchers).hasSize(2)
     }
 
     @Test
@@ -685,7 +684,8 @@ class SwipeToSceneTest {
         val swipeDistance =
             object : UserActionDistance {
                 override fun UserActionDistanceScope.absoluteDistance(
-                    fromSceneSize: IntSize,
+                    fromContent: ContentKey,
+                    toContent: ContentKey,
                     orientation: Orientation,
                 ): Float {
                     // Foo is going to have a vertical offset of 50dp. Let's make the swipe distance

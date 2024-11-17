@@ -105,8 +105,7 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     private val mainExecutor = ImmediateExecutor()
     private lateinit var repository: FakeKeyguardRepository
-    private val messageBuffer = LogcatOnlyMessageBuffer(LogLevel.DEBUG)
-    private val clockBuffers = ClockMessageBuffers(messageBuffer, messageBuffer, messageBuffer)
+    private val clockBuffers = ClockMessageBuffers(LogcatOnlyMessageBuffer(LogLevel.DEBUG))
     private lateinit var underTest: ClockEventController
 
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher

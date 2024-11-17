@@ -1406,7 +1406,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * application's selected exposure time, sensor sensitivity,
      * and frame duration ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
      * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
-     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). If one of the FLASH modes
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). If {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is
+     * enabled, the relevant priority CaptureRequest settings will not be overridden.
+     * See {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} for more details. If one of the FLASH modes
      * is selected, the camera device's flash unit controls are
      * also overridden.</p>
      * <p>The FLASH modes are only available if the camera device
@@ -1440,6 +1442,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#FLASH_MODE
@@ -2706,6 +2709,46 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.control.zoomMethod", int.class);
 
     /**
+     * <p>Turn on AE priority mode.</p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is
+     * AUTO and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to one of its
+     * ON modes, with the exception of ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY.</p>
+     * <p>When a priority mode is enabled, the camera device's
+     * auto-exposure routine will maintain the application's
+     * selected parameters relevant to the priority mode while overriding
+     * the remaining exposure parameters
+     * ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}, {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). For example, if
+     * SENSOR_SENSITIVITY_PRIORITY mode is enabled, the camera device will
+     * maintain the application-selected {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}
+     * while adjusting {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}
+     * and {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}. The overridden fields for a
+     * given capture will be available in its CaptureResult.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_OFF OFF}</li>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY SENSOR_SENSITIVITY_PRIORITY}</li>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY SENSOR_EXPOSURE_TIME_PRIORITY}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see #CONTROL_AE_PRIORITY_MODE_OFF
+     * @see #CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY
+     * @see #CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final Key<Integer> CONTROL_AE_PRIORITY_MODE =
+            new Key<Integer>("android.control.aePriorityMode", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
@@ -3527,7 +3570,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * duration exposed to the nearest possible value (rather than expose longer).
      * The final exposure time used will be available in the output capture result.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
-     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * OFF; otherwise the auto-exposure algorithm will override this value. However, in the
+     * case that {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is set to SENSOR_EXPOSURE_TIME_PRIORITY, this
+     * control will be effective and not controlled by the auto-exposure algorithm.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</p>
@@ -3537,6 +3582,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
@@ -3645,7 +3691,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * value. The final sensitivity used will be available in the
      * output capture result.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
-     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * OFF; otherwise the auto-exposure algorithm will override this value. However, in the
+     * case that {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is set to SENSOR_SENSITIVITY_PRIORITY, this
+     * control will be effective and not controlled by the auto-exposure algorithm.</p>
      * <p>Note that for devices supporting postRawSensitivityBoost, the total sensitivity applied
      * to the final processed image is the combination of {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} and
      * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost}. In case the application uses the sensor
@@ -3661,6 +3709,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL

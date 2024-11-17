@@ -58,13 +58,18 @@ import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsVie
 import com.android.systemui.statusbar.data.model.StatusBarMode
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository.Companion.DISPLAY_ID
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
-import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
+import com.android.systemui.statusbar.events.data.repository.systemStatusEventAnimationRepository
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimatingIn
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimatingOut
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
@@ -90,6 +95,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val disableFlagsRepository = kosmos.fakeDisableFlagsRepository
+    private val systemStatusEventAnimationRepository = kosmos.systemStatusEventAnimationRepository
 
     private lateinit var underTest: HomeStatusBarViewModel
 
@@ -546,25 +552,50 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     fun isSystemInfoVisible_allowedByDisableFlags_visible() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.isSystemInfoVisible)
+            val latest by collectLastValue(underTest.systemInfoCombinedVis)
             transitionKeyguardToGone()
 
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
 
-            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+            assertThat(latest!!.baseVisibility.visibility).isEqualTo(View.VISIBLE)
         }
 
     @Test
     fun isSystemInfoVisible_notAllowedByDisableFlags_gone() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.isSystemInfoVisible)
+            val latest by collectLastValue(underTest.systemInfoCombinedVis)
             transitionKeyguardToGone()
 
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_SYSTEM_INFO, DISABLE2_NONE)
 
-            assertThat(latest!!.visibility).isEqualTo(View.GONE)
+            assertThat(latest!!.baseVisibility.visibility).isEqualTo(View.GONE)
+        }
+
+    @Test
+    fun systemInfoCombineVis_animationsPassThrough() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.systemInfoCombinedVis)
+            transitionKeyguardToGone()
+
+            assertThat(latest!!.baseVisibility)
+                .isEqualTo(VisibilityModel(visibility = View.VISIBLE, shouldAnimateChange = false))
+            assertThat(latest!!.animationState).isEqualTo(Idle)
+
+            // WHEN the animation state changes, but the visibility state doesn't change
+            systemStatusEventAnimationRepository.animationState.value = AnimatingIn
+
+            // THEN the visibility is the same
+            assertThat(latest!!.baseVisibility)
+                .isEqualTo(VisibilityModel(visibility = View.VISIBLE, shouldAnimateChange = false))
+            // THEN the animation state updates
+            assertThat(latest!!.animationState).isEqualTo(AnimatingIn)
+
+            systemStatusEventAnimationRepository.animationState.value = AnimatingOut
+            assertThat(latest!!.baseVisibility)
+                .isEqualTo(VisibilityModel(visibility = View.VISIBLE, shouldAnimateChange = false))
+            assertThat(latest!!.animationState).isEqualTo(AnimatingOut)
         }
 
     @Test
@@ -573,7 +604,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GONE,
@@ -583,7 +614,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
 
     @Test
@@ -592,13 +623,13 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
 
     @Test
@@ -607,7 +638,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
@@ -617,7 +648,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
 
     @Test
@@ -626,13 +657,13 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Bouncer)
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
 
     @Test
@@ -641,7 +672,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
@@ -651,7 +682,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.VISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.VISIBLE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.VISIBLE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.VISIBLE)
         }
 
     @Test
@@ -660,14 +691,14 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, taskInfo = null)
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.VISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.VISIBLE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.VISIBLE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.VISIBLE)
         }
 
     @Test
@@ -676,13 +707,13 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             transitionKeyguardToGone()
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.VISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.VISIBLE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.VISIBLE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.VISIBLE)
         }
 
     @Test
@@ -691,14 +722,14 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
             transitionKeyguardToGone()
 
             kosmos.shadeTestUtil.setShadeExpansion(0f)
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.VISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.VISIBLE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.VISIBLE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.VISIBLE)
         }
 
     @Test
@@ -707,13 +738,13 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Gone)
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.VISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.VISIBLE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.VISIBLE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.VISIBLE)
         }
 
     @Test
@@ -722,14 +753,14 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
             transitionKeyguardToGone()
 
             kosmos.shadeTestUtil.setShadeExpansion(1f)
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
 
     @Test
@@ -738,14 +769,14 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
             transitionKeyguardToGone()
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Shade)
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
 
     @Test
@@ -754,7 +785,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             // Secure camera is an occluding activity
             keyguardTransitionRepository.sendTransitionSteps(
@@ -766,7 +797,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
 
     @Test
@@ -775,7 +806,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         testScope.runTest {
             val clockVisible by collectLastValue(underTest.isClockVisible)
             val notifIconsVisible by collectLastValue(underTest.isNotificationIconContainerVisible)
-            val systemInfoVisible by collectLastValue(underTest.isSystemInfoVisible)
+            val systemInfoVisible by collectLastValue(underTest.systemInfoCombinedVis)
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
             // Secure camera is an occluding activity
@@ -784,7 +815,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
-            assertThat(systemInfoVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =

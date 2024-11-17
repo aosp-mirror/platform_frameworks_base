@@ -19,7 +19,9 @@ import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Intent
 import android.os.RemoteException
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.service.dreams.Flags
 import android.service.dreams.IDreamOverlay
 import android.service.dreams.IDreamOverlayCallback
@@ -33,7 +35,6 @@ import android.view.WindowManagerImpl
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.app.viewcapture.ViewCapture
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
@@ -43,6 +44,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
@@ -62,12 +64,16 @@ import com.android.systemui.complication.ComplicationLayoutEngine
 import com.android.systemui.complication.dagger.ComplicationComponent
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler
 import com.android.systemui.dreams.dagger.DreamOverlayComponent
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.gesture.domain.gestureInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor
 import com.android.systemui.navigationbar.gestural.domain.TaskInfo
 import com.android.systemui.navigationbar.gestural.domain.TaskMatcher
+import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -98,12 +104,14 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidJUnit4::class)
-class DreamOverlayServiceTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val mFakeSystemClock = FakeSystemClock()
     private val mMainExecutor = FakeExecutor(mFakeSystemClock)
     private val kosmos = testKosmos()
@@ -245,6 +253,10 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         )
     }
 
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -287,6 +299,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 mKeyguardUpdateMonitor,
                 mScrimManager,
                 mCommunalInteractor,
+                kosmos.sceneInteractor,
                 mSystemDialogsCloser,
                 mUiEventLogger,
                 mTouchInsetManager,
@@ -768,6 +781,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @kotlin.Throws(RemoteException::class)
     fun testTransitionToGlanceableHub() =
         testScope.runTest {
@@ -789,6 +803,35 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             verify(mDreamOverlayCallback).onRedirectWake(true)
             client.onWakeRequested()
             verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), any(), isNull())
+            verify(mUiEventLogger).log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_SCENE_CONTAINER, FLAG_COMMUNAL_HUB)
+    @kotlin.Throws(RemoteException::class)
+    fun testTransitionToGlanceableHub_sceneContainer() =
+        testScope.runTest {
+            // Inform the overlay service of dream starting. Do not show dream complications.
+            client.startDream(
+                mWindowParams,
+                mDreamOverlayCallback,
+                DREAM_COMPONENT,
+                false /*isPreview*/,
+                false, /*shouldShowComplication*/
+            )
+            mMainExecutor.runAllReady()
+
+            verify(mDreamOverlayCallback).onRedirectWake(false)
+            clearInvocations(mDreamOverlayCallback)
+            kosmos.setCommunalAvailable(true)
+            mMainExecutor.runAllReady()
+            runCurrent()
+            verify(mDreamOverlayCallback).onRedirectWake(true)
+            client.onWakeRequested()
+            mMainExecutor.runAllReady()
+            runCurrent()
+            assertThat(kosmos.sceneContainerRepository.currentScene.value)
+                .isEqualTo(Scenes.Communal)
             verify(mUiEventLogger).log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START)
         }
 
@@ -911,6 +954,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     // Verifies that the touch handling lifecycle is STARTED even if the dream starts while not
     // focused.
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun testLifecycle_dreamNotFocusedOnStart_isStarted() {
         val transitionState: MutableStateFlow<ObservableTransitionState> =
             MutableStateFlow(ObservableTransitionState.Idle(CommunalScenes.Blank))
@@ -1024,6 +1068,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun testCommunalVisible_setsLifecycleState() {
         val client = client
 
@@ -1060,6 +1105,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     // Verifies the dream's lifecycle
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun testLifecycleStarted_whenAnyOcclusion() {
         val client = client
 
@@ -1256,5 +1302,11 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             ComponentName("package", "homeControlPanel")
         private const val DREAM_COMPONENT = "package/dream"
         private const val WINDOW_NAME = "test"
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_HUB).andSceneContainer()
+        }
     }
 }

@@ -115,13 +115,11 @@ class KeyGestureControllerTests {
     private lateinit var iInputManager: IInputManager
 
     @Mock
-    private lateinit var resources: Resources
-
-    @Mock
     private lateinit var packageManager: PackageManager
 
     private var currentPid = 0
     private lateinit var context: Context
+    private lateinit var resources: Resources
     private lateinit var keyGestureController: KeyGestureController
     private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
     private lateinit var testLooper: TestLooper
@@ -130,6 +128,7 @@ class KeyGestureControllerTests {
     @Before
     fun setup() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
+        resources = Mockito.spy(context.resources)
         setupInputDevices()
         setupBehaviors()
         testLooper = TestLooper()
@@ -146,16 +145,17 @@ class KeyGestureControllerTests {
     private fun setupBehaviors() {
         Mockito.`when`(SystemProperties.get("ro.debuggable")).thenReturn("1")
         Mockito.`when`(resources.getBoolean(R.bool.config_enableScreenshotChord)).thenReturn(true)
-        val testBookmarks: XmlResourceParser = context.resources.getXml(
-            com.android.test.input.R.xml.bookmarks
-        )
-        Mockito.`when`(resources.getXml(R.xml.bookmarks)).thenReturn(testBookmarks)
         Mockito.`when`(context.resources).thenReturn(resources)
         Mockito.`when`(packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH))
             .thenReturn(true)
         Mockito.`when`(packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
             .thenReturn(true)
         Mockito.`when`(context.packageManager).thenReturn(packageManager)
+    }
+
+    private fun setupBookmarks(bookmarkRes: Int) {
+        val testBookmarks: XmlResourceParser = context.resources.getXml(bookmarkRes)
+        Mockito.`when`(resources.getXml(R.xml.bookmarks)).thenReturn(testBookmarks)
     }
 
     private fun setupInputDevices() {
@@ -604,45 +604,6 @@ class KeyGestureControllerTests {
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALCULATOR)
             ),
             TestData(
-                "META + SHIFT + B -> Launch Default Browser",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_SHIFT_LEFT,
-                    KeyEvent.KEYCODE_B
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_B),
-                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
-                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
-            ),
-            TestData(
-                "META + SHIFT + C -> Launch Default Contacts",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_SHIFT_LEFT,
-                    KeyEvent.KEYCODE_C
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_C),
-                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
-                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
-            ),
-            TestData(
-                "META + SHIFT + J -> Launch Target Activity",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_SHIFT_LEFT,
-                    KeyEvent.KEYCODE_J
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_J),
-                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
-                AppLaunchData.createLaunchDataForComponent("com.test", "com.test.BookmarkTest")
-            ),
-            TestData(
                 "META + CTRL + DEL -> Trigger Bug Report",
                 intArrayOf(
                     KeyEvent.KEYCODE_META_LEFT,
@@ -715,47 +676,47 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "ALT + [ -> Resizes a task to fit the left half of the screen",
+                "META + [ -> Resizes a task to fit the left half of the screen",
                 intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_LEFT_BRACKET
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
                 intArrayOf(KeyEvent.KEYCODE_LEFT_BRACKET),
-                KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "ALT + ] -> Resizes a task to fit the right half of the screen",
+                "META + ] -> Resizes a task to fit the right half of the screen",
                 intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_RIGHT_BRACKET
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
                 intArrayOf(KeyEvent.KEYCODE_RIGHT_BRACKET),
-                KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "ALT + '=' -> Maximizes a task to fit the screen",
+                "META + '=' -> Toggles maximization of a task to maximized and restore its bounds",
                 intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_EQUALS
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW,
                 intArrayOf(KeyEvent.KEYCODE_EQUALS),
-                KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "ALT + '-' -> Restores a task size to its previous bounds",
+                "META + '-' -> Minimizes a freeform task",
                 intArrayOf(
-                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_MINUS
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW,
                 intArrayOf(KeyEvent.KEYCODE_MINUS),
-                KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
@@ -863,6 +824,139 @@ class KeyGestureControllerTests {
             InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE,
             keyGestureController.addCustomInputGesture(0, builder.build().aidlData)
         )
+    }
+
+    @Keep
+    private fun bookmarkArguments(): Array<TestData> {
+        return arrayOf(
+            TestData(
+                "META + B -> Launch Default Browser",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_B),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_B),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
+            ),
+            TestData(
+                "META + C -> Launch Default Contacts",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_C),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
+            ),
+            TestData(
+                "META + E -> Launch Default Email",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_E),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_E),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_EMAIL)
+            ),
+            TestData(
+                "META + K -> Launch Default Calendar",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_K),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_K),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALENDAR)
+            ),
+            TestData(
+                "META + M -> Launch Default Maps",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_M),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_M),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MAPS)
+            ),
+            TestData(
+                "META + P -> Launch Default Music",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_P),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MUSIC)
+            ),
+            TestData(
+                "META + S -> Launch Default SMS",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_S),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_S),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_SMS)
+            ),
+            TestData(
+                "META + U -> Launch Default Calculator",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_U),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_U),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALCULATOR)
+            ),
+            TestData(
+                "META + SHIFT + B -> Launch Default Browser",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_SHIFT_LEFT,
+                    KeyEvent.KEYCODE_B
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_B),
+                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
+            ),
+            TestData(
+                "META + SHIFT + C -> Launch Default Contacts",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_SHIFT_LEFT,
+                    KeyEvent.KEYCODE_C
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_C),
+                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
+            ),
+            TestData(
+                "META + SHIFT + J -> Launch Target Activity",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_SHIFT_LEFT,
+                    KeyEvent.KEYCODE_J
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_J),
+                KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForComponent("com.test", "com.test.BookmarkTest")
+            )
+        )
+    }
+
+    @Test
+    @Parameters(method = "bookmarkArguments")
+    fun testBookmarks(test: TestData) {
+        setupBookmarks(com.android.test.input.R.xml.bookmarks)
+        setupKeyGestureController()
+        testKeyGestureInternal(test)
+    }
+
+    @Test
+    @Parameters(method = "bookmarkArguments")
+    fun testBookmarksLegacy(test: TestData) {
+        setupBookmarks(com.android.test.input.R.xml.bookmarks_legacy)
+        setupKeyGestureController()
+        testKeyGestureInternal(test)
     }
 
     @Keep

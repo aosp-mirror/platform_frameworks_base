@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 
+import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
 import static android.hardware.display.DisplayManager.EventFlag;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.view.Display.HdrCapabilities.HdrType;
@@ -62,6 +63,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.feature.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -108,6 +110,8 @@ public final class DisplayManagerGlobal {
             EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED,
             EVENT_DISPLAY_CONNECTED,
             EVENT_DISPLAY_DISCONNECTED,
+            EVENT_DISPLAY_REFRESH_RATE_CHANGED,
+            EVENT_DISPLAY_STATE_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisplayEvent {}
@@ -119,6 +123,8 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED = 5;
     public static final int EVENT_DISPLAY_CONNECTED = 6;
     public static final int EVENT_DISPLAY_DISCONNECTED = 7;
+    public static final int EVENT_DISPLAY_REFRESH_RATE_CHANGED = 8;
+    public static final int EVENT_DISPLAY_STATE_CHANGED = 9;
 
     @LongDef(prefix = {"INTERNAL_EVENT_DISPLAY"}, flag = true, value = {
             INTERNAL_EVENT_FLAG_DISPLAY_ADDED,
@@ -127,6 +133,8 @@ public final class DisplayManagerGlobal {
             INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+            INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE,
+            INTERNAL_EVENT_FLAG_DISPLAY_STATE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InternalEventFlag {}
@@ -137,6 +145,8 @@ public final class DisplayManagerGlobal {
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED = 1L << 3;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED = 1L << 4;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED = 1L << 5;
+    public static final long INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE = 1L << 6;
+    public static final long INTERNAL_EVENT_FLAG_DISPLAY_STATE = 1L << 7;
 
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
@@ -179,9 +189,11 @@ public final class DisplayManagerGlobal {
     }
 
     private PropertyInvalidatedCache<Integer, DisplayInfo> mDisplayCache =
-            new PropertyInvalidatedCache<Integer, DisplayInfo>(
-                8, // size of display cache
-                CACHE_KEY_DISPLAY_INFO_PROPERTY) {
+            new PropertyInvalidatedCache<>(
+                new PropertyInvalidatedCache.Args(MODULE_SYSTEM)
+                .maxEntries(8).api(CACHE_KEY_DISPLAY_INFO_API).isolateUids(false),
+                CACHE_KEY_DISPLAY_INFO_API, null) {
+
                 @Override
                 public DisplayInfo recompute(Integer id) {
                     try {
@@ -1427,6 +1439,18 @@ public final class DisplayManagerGlobal {
                         mListener.onDisplayDisconnected(displayId);
                     }
                     break;
+                case EVENT_DISPLAY_REFRESH_RATE_CHANGED:
+                    if ((mInternalEventFlagsMask
+                            & INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE) != 0) {
+                        mListener.onDisplayChanged(displayId);
+                    }
+                    break;
+                case EVENT_DISPLAY_STATE_CHANGED:
+                    if ((mInternalEventFlagsMask
+                            & INTERNAL_EVENT_FLAG_DISPLAY_STATE) != 0) {
+                        mListener.onDisplayChanged(displayId);
+                    }
+                    break;
             }
             if (DEBUG) {
                 Trace.endSection();
@@ -1493,18 +1517,17 @@ public final class DisplayManagerGlobal {
     }
 
     /**
-     * Name of the property containing a unique token which changes every time we update the
-     * system's display configuration.
+     * The API portion of the key that identifies the unique PropertyInvalidatedCache token which
+     * changes every time we update the system's display configuration.
      */
-    public static final String CACHE_KEY_DISPLAY_INFO_PROPERTY =
-            PropertyInvalidatedCache.createSystemCacheKey("display_info");
+    private static final String CACHE_KEY_DISPLAY_INFO_API = "display_info";
 
     /**
      * Invalidates the contents of the display info cache for all applications. Can only
      * be called by system_server.
      */
     public static void invalidateLocalDisplayInfoCaches() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DISPLAY_INFO_PROPERTY);
+        PropertyInvalidatedCache.invalidateCache(MODULE_SYSTEM, CACHE_KEY_DISPLAY_INFO_API);
     }
 
     /**
@@ -1566,6 +1589,10 @@ public final class DisplayManagerGlobal {
                 return "EVENT_DISPLAY_CONNECTED";
             case EVENT_DISPLAY_DISCONNECTED:
                 return "EVENT_DISPLAY_DISCONNECTED";
+            case EVENT_DISPLAY_REFRESH_RATE_CHANGED:
+                return "EVENT_DISPLAY_REFRESH_RATE_CHANGED";
+            case EVENT_DISPLAY_STATE_CHANGED:
+                return "EVENT_DISPLAY_STATE_CHANGED";
         }
         return "UNKNOWN";
     }
@@ -1629,6 +1656,17 @@ public final class DisplayManagerGlobal {
                 & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0) {
             baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         }
+
+        if (Flags.displayListenerPerformanceImprovements()) {
+            if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_REFRESH_RATE) != 0) {
+                baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
+            }
+
+            if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_STATE) != 0) {
+                baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_STATE;
+            }
+        }
+
 
         return baseEventMask;
     }

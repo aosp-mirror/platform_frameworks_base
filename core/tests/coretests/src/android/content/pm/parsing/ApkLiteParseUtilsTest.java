@@ -33,6 +33,7 @@ import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.ArraySet;
 import android.util.PackageUtils;
 
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Set;
 
 @Presubmit
+@RequiresFlagsEnabled(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
 public class ApkLiteParseUtilsTest {
 
     @Rule
@@ -72,6 +74,12 @@ public class ApkLiteParseUtilsTest {
     private static final String TEST_APP_USING_SDK_MALFORMED_VERSION =
             "HelloWorldUsingSdkMalformedNegativeVersion.apk";
     private static final String TEST_APP_USING_STATIC_LIB = "CtsStaticSharedLibConsumerApp1.apk";
+    private static final String TEST_APP_USING_STATIC_LIB_TWO_CERTS =
+            "CtsStaticSharedLibConsumerApp3.apk";
+    private static final String STATIC_LIB_CERT_1 =
+            "70fbd440503ec0bf41f3f21fcc83ffd39880133c27deb0945ed677c6f31d72fb";
+    private static final String STATIC_LIB_CERT_2 =
+            "e49582ff3a0aa4c5589fc5feaac6b7d6e757199dd0c6742df7bf37c2ffef95f5";
     private static final String TEST_SDK1 = "HelloWorldSdk1.apk";
     private static final String TEST_SDK1_PACKAGE = "com.test.sdk1_1";
     private static final String TEST_SDK1_NAME = "com.test.sdk1";
@@ -86,7 +94,7 @@ public class ApkLiteParseUtilsTest {
 
     @Before
     public void setUp() throws IOException {
-        mTmpDir = mTemporaryFolder.newFolder("DexMetadataHelperTest");
+        mTmpDir = mTemporaryFolder.newFolder("ApkLiteParseUtilsTest");
     }
 
     @After
@@ -108,9 +116,8 @@ public class ApkLiteParseUtilsTest {
         assertThat(baseApk.getUsesSdkLibrariesVersionsMajor()).asList().containsExactly(
                 TEST_SDK1_VERSION, TEST_SDK2_VERSION
         );
-        for (String[] certDigests: baseApk.getUsesSdkLibrariesCertDigests()) {
-            assertThat(certDigests).asList().containsExactly("");
-        }
+        String[][] expectedCerts = {{""}, {""}};
+        assertThat(baseApk.getUsesSdkLibrariesCertDigests()).isEqualTo(expectedCerts);
     }
 
     @SuppressLint("CheckResult")
@@ -126,18 +133,13 @@ public class ApkLiteParseUtilsTest {
         ApkLite baseApk = result.getResult();
 
         String[][] liteCerts = baseApk.getUsesSdkLibrariesCertDigests();
-        assertThat(liteCerts).isNotNull();
-        for (String[] certDigests: liteCerts) {
-            assertThat(certDigests).asList().containsExactly(certDigest);
-        }
+        String[][] expectedCerts = {{certDigest}, {certDigest}};
+        assertThat(liteCerts).isEqualTo(expectedCerts);
 
         // Same for package parser
         AndroidPackage pkg = mPackageParser2.parsePackage(apkFile, 0, true).hideAsFinal();
         String[][] pkgCerts = pkg.getUsesSdkLibrariesCertDigests();
-        assertThat(pkgCerts).isNotNull();
-        for (int i = 0; i < liteCerts.length; i++) {
-            assertThat(liteCerts[i]).isEqualTo(pkgCerts[i]);
-        }
+        assertThat(liteCerts).isEqualTo(pkgCerts);
     }
 
 
@@ -160,9 +162,7 @@ public class ApkLiteParseUtilsTest {
 
         String[][] liteCerts = baseApk.getUsesSdkLibrariesCertDigests();
         String[][] pkgCerts = pkg.getUsesSdkLibrariesCertDigests();
-        for (int i = 0; i < liteCerts.length; i++) {
-            assertThat(liteCerts[i]).isEqualTo(pkgCerts[i]);
-        }
+        assertThat(liteCerts).isEqualTo(pkgCerts);
     }
 
     @SuppressLint("CheckResult")
@@ -184,9 +184,27 @@ public class ApkLiteParseUtilsTest {
 
         String[][] liteCerts = baseApk.getUsesStaticLibrariesCertDigests();
         String[][] pkgCerts = pkg.getUsesStaticLibrariesCertDigests();
-        for (int i = 0; i < liteCerts.length; i++) {
-            assertThat(liteCerts[i]).isEqualTo(pkgCerts[i]);
-        }
+        assertThat(liteCerts).isEqualTo(pkgCerts);
+    }
+
+    @Test
+    public void testParseApkLite_getUsesStaticLibrary_twoCerts()
+            throws Exception {
+        File apkFile = copyApkToTmpDir(TEST_APP_USING_STATIC_LIB_TWO_CERTS);
+        ParseResult<ApkLite> result = ApkLiteParseUtils
+                .parseApkLite(ParseTypeImpl.forDefaultParsing().reset(), apkFile, 0);
+        assertThat(result.isError()).isFalse();
+        ApkLite baseApk = result.getResult();
+
+        // There are two certs.
+        String[][] expectedCerts = {{STATIC_LIB_CERT_1, STATIC_LIB_CERT_2}};
+        String[][] liteCerts = baseApk.getUsesStaticLibrariesCertDigests();
+        assertThat(liteCerts).isEqualTo(expectedCerts);
+
+        // And they are same as package parser.
+        AndroidPackage pkg = mPackageParser2.parsePackage(apkFile, 0, true).hideAsFinal();
+        String[][] pkgCerts = pkg.getUsesStaticLibrariesCertDigests();
+        assertThat(liteCerts).isEqualTo(pkgCerts);
     }
 
     @SuppressLint("CheckResult")

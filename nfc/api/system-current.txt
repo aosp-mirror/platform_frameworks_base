@@ -57,6 +57,7 @@ package android.nfc {
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public final class NfcOemExtension {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearPreference();
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int forceRoutingTableCommit();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public java.util.List<java.lang.String> getActiveNfceeList();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.nfc.RoutingStatus getRoutingStatus();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public java.util.List<android.nfc.NfcRoutingTableEntry> getRoutingTable();
@@ -73,6 +74,9 @@ package android.nfc {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void synchronizeScreenState();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void triggerInitialization();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterCallback(@NonNull android.nfc.NfcOemExtension.Callback);
+    field public static final int COMMIT_ROUTING_STATUS_FAILED = 3; // 0x3
+    field public static final int COMMIT_ROUTING_STATUS_FAILED_UPDATE_IN_PROGRESS = 6; // 0x6
+    field public static final int COMMIT_ROUTING_STATUS_OK = 0; // 0x0
     field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int DISABLE = 0; // 0x0
     field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int ENABLE_DEFAULT = 1; // 0x1
     field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int ENABLE_EE = 3; // 0x3
@@ -89,13 +93,14 @@ package android.nfc {
     method public void onBootFinished(int);
     method public void onBootStarted();
     method public void onCardEmulationActivated(boolean);
-    method public void onDisable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisableFinished(int);
+    method public void onDisableRequested(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisableStarted();
     method public void onEeListenActivated(boolean);
-    method public void onEnable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onEnableFinished(int);
+    method public void onEnableRequested(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onEnableStarted();
+    method public void onExtractOemPackages(@NonNull android.nfc.NdefMessage, @NonNull java.util.function.Consumer<java.util.List<java.lang.String>>);
     method public void onGetOemAppSearchIntent(@NonNull java.util.List<java.lang.String>, @NonNull java.util.function.Consumer<android.content.Intent>);
     method public void onHceEventReceived(int);
     method public void onLaunchHceAppChooserActivity(@NonNull String, @NonNull java.util.List<android.nfc.cardemulation.ApduServiceInfo>, @NonNull android.content.ComponentName, @NonNull String);
@@ -106,7 +111,8 @@ package android.nfc {
     method public void onReaderOptionChanged(boolean);
     method public void onRfDiscoveryStarted(boolean);
     method public void onRfFieldActivated(boolean);
-    method public void onRoutingChanged();
+    method public void onRoutingChanged(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onRoutingTableFull();
     method public void onStateUpdated(int);
     method public void onTagConnected(boolean);
     method public void onTagDispatch(@NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -182,6 +188,12 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
     method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void overrideRoutingTable(@NonNull android.app.Activity, int, int);
     method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void recoverRoutingTable(@NonNull android.app.Activity);
+    method @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int setServiceEnabledForCategoryOther(@NonNull android.content.ComponentName, boolean);
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_ALREADY_SET = 3; // 0x3
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_FEATURE_UNSUPPORTED = 1; // 0x1
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_INVALID_SERVICE = 2; // 0x2
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_FAILURE_UNKNOWN_ERROR = 4; // 0x4
+    field @FlaggedApi("android.nfc.nfc_set_service_enabled_for_category_other") public static final int SET_SERVICE_ENABLED_STATUS_OK = 0; // 0x0
   }
 
 }

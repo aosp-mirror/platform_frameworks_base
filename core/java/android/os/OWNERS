@@ -78,6 +78,9 @@ per-file PatternMatcher* = file:/PACKAGE_MANAGER_OWNERS
 # PermissionEnforcer
 per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com
 
+# RemoteCallbackList
+per-file RemoteCallbackList.java = shayba@google.com
+
 # ART
 per-file ArtModuleServiceManager.java = file:platform/art:/OWNERS
 
@@ -125,3 +128,6 @@ per-file StatsServiceManager.java = file:/services/core/java/com/android/server/
 
 # Dropbox
 per-file DropBoxManager* = mwachens@google.com
+
+# Flags
+per-file flags.aconfig = file:/FF_LEADS_OWNERS

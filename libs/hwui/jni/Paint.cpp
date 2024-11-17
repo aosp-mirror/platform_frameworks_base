@@ -906,6 +906,13 @@ namespace PaintGlue {
         paint->setBlendMode(mode);
     }
 
+    static void setRuntimeXfermode(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle,
+                                   jlong xfermodeHandle) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        SkBlender* blender = reinterpret_cast<SkBlender*>(xfermodeHandle);
+        paint->setBlender(sk_ref_sp(blender));
+    }
+
     static jlong setPathEffect(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong effectHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkPathEffect* effect  = reinterpret_cast<SkPathEffect*>(effectHandle);
@@ -1233,6 +1240,7 @@ static const JNINativeMethod methods[] = {
         {"nSetShader", "(JJ)J", (void*)PaintGlue::setShader},
         {"nSetColorFilter", "(JJ)J", (void*)PaintGlue::setColorFilter},
         {"nSetXfermode", "(JI)V", (void*)PaintGlue::setXfermode},
+        {"nSetXfermode", "(JJ)V", (void*)PaintGlue::setRuntimeXfermode},
         {"nSetPathEffect", "(JJ)J", (void*)PaintGlue::setPathEffect},
         {"nSetMaskFilter", "(JJ)J", (void*)PaintGlue::setMaskFilter},
         {"nSetTypeface", "(JJ)V", (void*)PaintGlue::setTypeface},

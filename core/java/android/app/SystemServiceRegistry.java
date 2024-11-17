@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+import static android.provider.flags.Flags.stageFlagsForBuild;
 import static android.server.Flags.removeGameManagerServiceFromWear;
 
 import android.accounts.AccountManager;
@@ -163,6 +164,7 @@ import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.nearby.NearbyFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializer;
+import android.net.ConnectivityFrameworkInitializerBaklava;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.INetworkPolicyManager;
 import android.net.IPacProxyManager;
@@ -173,7 +175,6 @@ import android.net.NetworkWatchlistManager;
 import android.net.PacProxyManager;
 import android.net.TetheringManager;
 import android.net.VpnManager;
-import android.net.vcn.VcnFrameworkInitializer;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
@@ -190,6 +191,7 @@ import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
+import android.os.IHintManager;
 import android.os.IPowerManager;
 import android.os.IPowerStatsService;
 import android.os.IRecoverySystem;
@@ -215,6 +217,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.os.flagging.ConfigInfrastructureFrameworkInitializer;
 import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
@@ -238,6 +241,8 @@ import android.security.advancedprotection.AdvancedProtectionManager;
 import android.security.advancedprotection.IAdvancedProtectionService;
 import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
+import android.security.forensic.ForensicManager;
+import android.security.forensic.IForensicService;
 import android.security.keystore.KeyStoreManager;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
@@ -1195,8 +1200,10 @@ public final class SystemServiceRegistry {
             public SystemHealthManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder batteryStats = ServiceManager.getServiceOrThrow(BatteryStats.SERVICE_NAME);
                 IBinder powerStats = ServiceManager.getService(Context.POWER_STATS_SERVICE);
+                IBinder perfHint = ServiceManager.getService(Context.PERFORMANCE_HINT_SERVICE);
                 return new SystemHealthManager(IBatteryStats.Stub.asInterface(batteryStats),
-                        IPowerStatsService.Stub.asInterface(powerStats));
+                        IPowerStatsService.Stub.asInterface(powerStats),
+                        IHintManager.Stub.asInterface(perfHint));
             }});
 
         registerService(Context.CONTEXTHUB_SERVICE, ContextHubManager.class,
@@ -1790,6 +1797,18 @@ public final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.FORENSIC_SERVICE, ForensicManager.class,
+                new CachedServiceFetcher<ForensicManager>() {
+                    @Override
+                    public ForensicManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.FORENSIC_SERVICE);
+                        IForensicService service = IForensicService.Stub.asInterface(b);
+                        return new ForensicManager(service);
+                    }
+                });
+
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
@@ -1818,7 +1837,11 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
-            VcnFrameworkInitializer.registerServiceWrappers();
+            ConnectivityFrameworkInitializerBaklava.registerServiceWrappers();
+
+            if (stageFlagsForBuild()) {
+                ConfigInfrastructureFrameworkInitializer.registerServiceWrappers();
+            }
 
             if (com.android.server.telecom.flags.Flags.telecomMainlineBlockedNumbersManager()) {
                 ProviderFrameworkInitializer.registerServiceWrappers();

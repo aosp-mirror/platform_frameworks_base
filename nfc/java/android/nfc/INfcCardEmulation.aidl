@@ -47,7 +47,7 @@ interface INfcCardEmulation
     boolean unsetPreferredService();
     boolean supportsAidPrefixRegistration();
     ApduServiceInfo getPreferredPaymentService(int userHandle);
-    boolean setServiceEnabledForCategoryOther(int userHandle, in ComponentName app, boolean status);
+    int setServiceEnabledForCategoryOther(int userHandle, in ComponentName app, boolean status);
     boolean isDefaultPaymentRegistered();
 
     void overrideRoutingTable(int userHandle, String protocol, String technology, in String pkg);

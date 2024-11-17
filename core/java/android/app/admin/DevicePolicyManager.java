@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.LOCK_DEVICE;
@@ -55,8 +56,10 @@ import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_REMOVE_MANAGED_PROFILE_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
+import static android.app.admin.flags.Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -8918,12 +8921,9 @@ public class DevicePolicyManager {
     /**
      * Called by a device owner, a profile owner for the primary user or a profile
      * owner of an organization-owned managed profile to turn auto time on and off.
-     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
-     * to prevent the user from changing this setting.
      * <p>
-     * If user restriction {@link UserManager#DISALLOW_CONFIG_DATE_TIME} is used,
-     * no user will be able set the date and time. Instead, the network date
-     * and time will be used.
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to prevent the
+     * user from changing this setting, that way no user will be able set the date and time zone.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *              caller is not a device admin.
@@ -8936,7 +8936,13 @@ public class DevicePolicyManager {
         throwIfParentInstance("setAutoTimeEnabled");
         if (mService != null) {
             try {
-                mService.setAutoTimeEnabled(admin, mContext.getPackageName(), enabled);
+                if (Flags.setAutoTimeEnabledCoexistence()) {
+                    mService.setAutoTimePolicy(mContext.getPackageName(),
+                            enabled ? DevicePolicyManager.AUTO_TIME_ENABLED
+                                    : DevicePolicyManager.AUTO_TIME_DISABLED);
+                } else {
+                    mService.setAutoTimeEnabled(admin, mContext.getPackageName(), enabled);
+                }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8966,14 +8972,102 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Specifies that the auto time state is not controlled by device policy.
+     *
+     * @see #setAutoTimePolicy(ComponentName, int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_NOT_CONTROLLED_BY_POLICY = 0;
+
+    /**
+     * Specifies the "disabled" auto time state.
+     *
+     * @see #setAutoTimePolicy(ComponentName, int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_DISABLED = 1;
+
+    /**
+     * Specifies the "enabled" auto time state.
+     *
+     * @see #setAutoTimePolicy(ComponentName, int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_ENABLED = 2;
+
+    /**
+     * Flags supplied to {@link #setAutoTimePolicy}(ComponentName, int)}.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "AUTO_TIME_" }, value = {
+            AUTO_TIME_NOT_CONTROLLED_BY_POLICY,
+            AUTO_TIME_DISABLED,
+            AUTO_TIME_ENABLED
+    })
+    public @interface AutoTimePolicy {}
+
+    /**
+     * Called by a device owner, a profile owner for the primary user or a profile owner of an
+     * organization-owned managed profile to turn auto time on and off i.e. Whether time should be
+     * obtained automatically from the network or not.
+     * <p>
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to prevent the
+     * user from changing this setting, that way no user will be able set the date and time zone.
+     *
+     * @param policy The desired state among {@link #AUTO_TIME_ENABLED} to enable,
+     *              {@link #AUTO_TIME_DISABLED} to disable and
+     *              {@link #AUTO_TIME_NOT_CONTROLLED_BY_POLICY} to unset the policy.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile, or if the caller
+     * does not hold the required permission.
+     */
+    @SupportsCoexistence
+    @RequiresPermission(value = SET_TIME, conditional = true)
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public void setAutoTimePolicy(@AutoTimePolicy int policy) {
+        throwIfParentInstance("setAutoTimePolicy");
+        if (mService != null) {
+            try {
+                mService.setAutoTimePolicy(mContext.getPackageName(), policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns current auto time policy's state.
+     *
+     * @return One of {@link #AUTO_TIME_ENABLED} if enabled, {@link #AUTO_TIME_DISABLED} if disabled
+     *              and {@link #AUTO_TIME_NOT_CONTROLLED_BY_POLICY} if it's not controlled by
+     *              policy.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile, or if the caller
+     * does not hold the required permission.
+     */
+    @SupportsCoexistence
+    @RequiresPermission(anyOf = {SET_TIME, QUERY_ADMIN_POLICY}, conditional = true)
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ENABLED_COEXISTENCE)
+    public @AutoTimePolicy int getAutoTimePolicy() {
+        throwIfParentInstance("getAutoTimePolicy");
+        if (mService != null) {
+            try {
+                return mService.getAutoTimePolicy(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return DevicePolicyManager.AUTO_TIME_NOT_CONTROLLED_BY_POLICY;
+    }
+
+    /**
      * Called by a device owner, a profile owner for the primary user or a profile
      * owner of an organization-owned managed profile to turn auto time zone on and off.
-     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
-     * to prevent the user from changing this setting.
      * <p>
-     * If user restriction {@link UserManager#DISALLOW_CONFIG_DATE_TIME} is used,
-     * no user will be able set the date and time zone. Instead, the network date
-     * and time zone will be used.
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to prevent the
+     * user from changing this setting, that way no user will be able set the date and time zone.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with or Null if the
      *              caller is not a device admin.
@@ -8981,13 +9075,17 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner, a profile owner for the
      * primary user, or a profile owner of an organization-owned managed profile.
      */
-    @SupportsCoexistence
     @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
     public void setAutoTimeZoneEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setAutoTimeZone");
         if (mService != null) {
             try {
-                mService.setAutoTimeZoneEnabled(admin, mContext.getPackageName(), enabled);
+                if (Flags.setAutoTimeZoneEnabledCoexistence()) {
+                    mService.setAutoTimeZonePolicy(mContext.getPackageName(),
+                            enabled ? AUTO_TIME_ZONE_ENABLED : AUTO_TIME_ZONE_DISABLED );
+                } else {
+                    mService.setAutoTimeZoneEnabled(admin, mContext.getPackageName(), enabled);
+                }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9014,6 +9112,96 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Specifies that the auto time zone state is not controlled by device policy.
+     *
+     * @see #setAutoTimeZonePolicy(int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY = 0;
+
+    /**
+     * Specifies the "disabled" auto time zone state.
+     *
+     * @see #setAutoTimeZonePolicy(int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_ZONE_DISABLED = 1;
+
+    /**
+     * Specifies the "enabled" auto time zone state.
+     *
+     * @see #setAutoTimeZonePolicy(int)
+     */
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public static final int AUTO_TIME_ZONE_ENABLED = 2;
+
+    /**
+     * Flags supplied to {@link #setAutoTimeZonePolicy}(int)}.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "AUTO_TIME_ZONE_" }, value = {
+            AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY,
+            AUTO_TIME_ZONE_DISABLED,
+            AUTO_TIME_ZONE_ENABLED
+    })
+    public @interface AutoTimeZonePolicy {}
+
+    /**
+     * Called by a device owner, a profile owner for the primary user or a profile owner of an
+     * organization-owned managed profile to turn auto time zone on and off.
+     * <p>
+     * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME} to prevent the
+     * user from changing this setting, that way no user will be able set the date and time zone.
+     *
+     * @param policy The desired state among {@link #AUTO_TIME_ZONE_ENABLED} to enable it,
+     * {@link #AUTO_TIME_ZONE_DISABLED} to disable it or
+     * {@link #AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY} to unset the policy.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the primary
+     * user, or a profile owner of an organization-owned managed profile, or if the caller does not
+     * hold the required permission.
+     */
+    @SupportsCoexistence
+    @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public void setAutoTimeZonePolicy(@AutoTimeZonePolicy int policy) {
+        throwIfParentInstance("setAutoTimeZonePolicy");
+        if (mService != null) {
+            try {
+                mService.setAutoTimeZonePolicy(mContext.getPackageName(), policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns auto time zone policy's current state.
+     *
+     * @return One of {@link #AUTO_TIME_ZONE_ENABLED} if enabled, {@link #AUTO_TIME_ZONE_DISABLED}
+     *         if disabled and {@link #AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY} if the state is not
+     *         controlled by policy.
+     * @throws SecurityException if caller is not a device owner, a profile owner for the
+     * primary user, or a profile owner of an organization-owned managed profile, or if the caller
+     * does not hold the required permission.
+     */
+    @SupportsCoexistence
+    @RequiresPermission(anyOf = {SET_TIME_ZONE, QUERY_ADMIN_POLICY}, conditional = true)
+    @FlaggedApi(Flags.FLAG_SET_AUTO_TIME_ZONE_ENABLED_COEXISTENCE)
+    public @AutoTimeZonePolicy int getAutoTimeZonePolicy() {
+        throwIfParentInstance("getAutoTimeZonePolicy");
+        if (mService != null) {
+            try {
+                return mService.getAutoTimeZonePolicy(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return DevicePolicyManager.AUTO_TIME_ZONE_NOT_CONTROLLED_BY_POLICY;
     }
 
     /**
@@ -12009,6 +12197,33 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Adds a user restriction globally, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity The service entity that adds the restriction. A user restriction set by
+     *                     a service entity can only be cleared by the same entity. This can be
+     *                     just the calling package name, or any string of the caller's choice
+     *                     can be used.
+     * @param key The key of the restriction.
+     * @throws SecurityException if the caller is not a system service.
+     *
+     * @hide
+     */
+    public void addUserRestrictionGlobally(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionGloballyFromSystem(systemEntity, key,
+                        /* enable= */ true);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Called by a profile owner, device owner or a holder of any permission that is associated with
      * a user restriction to clear a user restriction specified by the key.
      * <p>
@@ -12087,6 +12302,33 @@ public class DevicePolicyManager {
             try {
                 mService.setUserRestrictionForUser(
                         systemEntity, key, /* enable= */ false, targetUser);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clears a user restriction globally, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity The system entity that clears the restriction. A user restriction
+     *                     set by a system entity can only be cleared by the same entity. This
+     *                     can be just the calling package name, or any string of the caller's
+     *                     choice can be used.
+     * @param key The key of the restriction.
+     * @throws SecurityException if the caller is not a system service.
+     *
+     * @hide
+     */
+    public void clearUserRestrictionGlobally(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionGloballyFromSystem(systemEntity, key,
+                        /* enable= */ false);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -12550,28 +12792,43 @@ public class DevicePolicyManager {
      * @param enabled Whether or not the lockscreen needs to be shown.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      * @see #isSecondaryLockscreenEnabled
+     * @deprecated Use {@link #setSecondaryLockscreenEnabled(boolean,PersistableBundle)} instead.
      * @hide
-     **/
+     */
+    @Deprecated
     @SystemApi
+    @FlaggedApi(FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
     public void setSecondaryLockscreenEnabled(@NonNull ComponentName admin, boolean enabled) {
-        setSecondaryLockscreenEnabled(admin, enabled, null);
+        throwIfParentInstance("setSecondaryLockscreenEnabled");
+        if (mService != null) {
+            try {
+                mService.setSecondaryLockscreenEnabled(admin, enabled, null);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
      * Called by the system supervision app to set whether a secondary lockscreen needs to be shown.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
-     *              caller is not a device admin.
+     * <p>The secondary lockscreen will by displayed after the primary keyguard security screen
+     * requirements are met.
+     *
+     * <p>This API, and associated APIs, can only be called by the default supervision app.
+     *
      * @param enabled Whether or not the lockscreen needs to be shown.
      * @param options A {@link PersistableBundle} to supply options to the lock screen.
      * @hide
      */
-    public void setSecondaryLockscreenEnabled(@Nullable ComponentName admin, boolean enabled,
+    @SystemApi
+    @FlaggedApi(FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
+    public void setSecondaryLockscreenEnabled(boolean enabled,
             @Nullable PersistableBundle options) {
         throwIfParentInstance("setSecondaryLockscreenEnabled");
         if (mService != null) {
             try {
-                mService.setSecondaryLockscreenEnabled(admin, enabled, options);
+                mService.setSecondaryLockscreenEnabled(null, enabled, options);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -16940,11 +17197,14 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller does not hold
      * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
      * @throws ProvisioningException if an error occurred during provisioning.
+     * @deprecated Use {@link #createManagedProfile} and {@link #finalizeCreateManagedProfile}
      * @hide
      */
     @Nullable
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @FlaggedApi(FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
     public UserHandle createAndProvisionManagedProfile(
             @NonNull ManagedProfileProvisioningParams provisioningParams)
             throws ProvisioningException {
@@ -16956,6 +17216,93 @@ public class DevicePolicyManager {
                     provisioningParams, mContext.getPackageName());
         } catch (ServiceSpecificException e) {
             throw new ProvisioningException(e, e.errorCode, getErrorMessage(e));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a managed profile and sets the
+     * {@link ManagedProfileProvisioningParams#getProfileAdminComponentName()} as the profile
+     * owner. The method {@link #finalizeCreateManagedProfile} must be called after to finalize the
+     * creation of the managed profile.
+     *
+     * <p>The method {@link #checkProvisioningPrecondition} must return {@link #STATUS_OK}
+     * before calling this method. If it doesn't, a ProvisioningException will be thrown.
+     *
+     * @param provisioningParams Params required to provision a managed profile,
+     * see {@link ManagedProfileProvisioningParams}.
+     * @return The {@link UserHandle} of the created profile or {@code null} if the service is
+     * not available.
+     * @throws ProvisioningException if an error occurred during provisioning.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @FlaggedApi(FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
+    public UserHandle createManagedProfile(
+            @NonNull ManagedProfileProvisioningParams provisioningParams)
+            throws ProvisioningException {
+        if (mService == null) {
+            return null;
+        }
+        try {
+            return mService.createManagedProfile(provisioningParams, mContext.getPackageName());
+        } catch (ServiceSpecificException e) {
+            throw new ProvisioningException(e, e.errorCode, getErrorMessage(e));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Finalizes the creation of a managed profile by informing the necessary components that
+     * the managed profile is ready.
+     *
+     * @param provisioningParams Params required to provision a managed profile,
+     * see {@link ManagedProfileProvisioningParams}.
+     * @param managedProfileUser The recently created managed profile.
+     * @throws ProvisioningException if an error occurred during provisioning.
+     * @hide
+     */
+    @SuppressLint("UserHandle")
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @FlaggedApi(FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
+    public void finalizeCreateManagedProfile(
+            @NonNull ManagedProfileProvisioningParams provisioningParams,
+            @NonNull UserHandle managedProfileUser)
+            throws ProvisioningException {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.finalizeCreateManagedProfile(provisioningParams, managedProfileUser);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a manged profile from the device only when called from a managed profile's context
+     *
+     * @param user UserHandle of the profile to be removed
+     * @return {@code true} when removal of managed profile was successful, {@code false} when
+     * removal was unsuccessful or throws IllegalArgumentException when provided user was not a
+     * managed profile
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @FlaggedApi(FLAG_REMOVE_MANAGED_PROFILE_ENABLED)
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean removeManagedProfile() {
+        if (mService == null) {
+            throw new IllegalStateException("Could not find DevicePolicyManagerService");
+        }
+        try {
+            return mService.removeManagedProfile(myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
