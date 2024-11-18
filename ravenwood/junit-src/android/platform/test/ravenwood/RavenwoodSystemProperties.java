@@ -52,7 +52,7 @@ public class RavenwoodSystemProperties {
             "vendor_dlkm",
     };
 
-    private static Map<String, String> readProperties(String propFile) {
+    static Map<String, String> readProperties(String propFile) {
         // Use an ordered map just for cleaner dump log.
         final Map<String, String> ret = new LinkedHashMap<>();
         try {
@@ -60,7 +60,7 @@ public class RavenwoodSystemProperties {
                     .map(String::trim)
                     .filter(s -> !s.startsWith("#"))
                     .map(s -> s.split("\\s*=\\s*", 2))
-                    .filter(a -> a.length == 2)
+                    .filter(a -> a.length == 2 && a[1].length() > 0)
                     .forEach(a -> ret.put(a[0], a[1]));
         } catch (IOException e) {
             throw new RuntimeException(e);

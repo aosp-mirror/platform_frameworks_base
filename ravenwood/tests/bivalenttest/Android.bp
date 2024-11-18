@@ -84,6 +84,8 @@ java_defaults {
 android_ravenwood_test {
     name: "RavenwoodBivalentTest",
     defaults: ["ravenwood-bivalent-defaults"],
+    target_sdk_version: "34",
+    package_name: "com.android.ravenwoodtest.bivalenttest",
     auto_gen_config: true,
 }
 

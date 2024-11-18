@@ -36,10 +36,8 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * @deprecated Use {@link RavenwoodConfig} to configure the ravenwood environment instead.
- * A {@link RavenwoodRule} is no longer needed for {@link DisabledOnRavenwood}. To get the
- * {@link Context} and {@link Instrumentation}, use
- * {@link androidx.test.platform.app.InstrumentationRegistry} instead.
+ * @deprecated This class is undergoing a major change. Reach out to g/ravenwood if you need
+ * any featues in it.
  */
 @Deprecated
 public final class RavenwoodRule implements TestRule {
@@ -128,11 +126,10 @@ public final class RavenwoodRule implements TestRule {
         }
 
         /**
-         * Configure the identity of this process to be the given package name for the duration
-         * of the test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used.
          */
+        @Deprecated
         public Builder setPackageName(@NonNull String packageName) {
-            mBuilder.setPackageName(packageName);
             return this;
         }
 
