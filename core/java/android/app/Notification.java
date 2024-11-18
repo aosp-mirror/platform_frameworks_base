@@ -5964,7 +5964,7 @@ public class Notification implements Parcelable
 
         private static void setHeaderlessVerticalMargins(RemoteViews contentView,
                 StandardTemplateParams p, boolean hasSecondLine) {
-            if (!p.mHeaderless) {
+            if (Flags.notificationsRedesignTemplates() || !p.mHeaderless) {
                 return;
             }
             int marginDimen = hasSecondLine

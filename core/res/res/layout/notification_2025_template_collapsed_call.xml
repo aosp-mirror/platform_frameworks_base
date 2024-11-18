@@ -44,7 +44,7 @@
             android:layout_marginStart="@dimen/conversation_content_start"
             android:orientation="vertical"
             android:minHeight="68dp"
-            android:paddingBottom="@dimen/notification_headerless_margin_twoline"
+            android:paddingBottom="@dimen/notification_2025_margin"
             >
 
             <include

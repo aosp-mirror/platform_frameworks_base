@@ -390,6 +390,9 @@
     <!-- the size of the notification close button -->
     <dimen name="notification_close_button_size">16dp</dimen>
 
+    <!-- Margin for all notification content -->
+    <dimen name="notification_2025_margin">16dp</dimen>
+
     <!-- Vertical margin for the headerless notification content, when content has 1 line -->
     <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
     <dimen name="notification_headerless_margin_oneline">16dp</dimen>
