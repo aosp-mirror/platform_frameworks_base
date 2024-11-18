@@ -24,6 +24,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
@@ -82,13 +85,24 @@ constructor(
 @Composable
 fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> Unit) {
     val activeScreen by vm.screen.collectAsStateWithLifecycle(STARTED)
+    var lastSelectedScreen by remember { mutableStateOf(TUTORIAL_SELECTION) }
     when (activeScreen) {
         TUTORIAL_SELECTION ->
             TutorialSelectionScreen(
-                onBackTutorialClicked = { vm.goTo(BACK_GESTURE) },
-                onHomeTutorialClicked = { vm.goTo(HOME_GESTURE) },
-                onRecentAppsTutorialClicked = { vm.goTo(RECENT_APPS_GESTURE) },
+                onBackTutorialClicked = {
+                    lastSelectedScreen = BACK_GESTURE
+                    vm.goTo(BACK_GESTURE)
+                },
+                onHomeTutorialClicked = {
+                    lastSelectedScreen = HOME_GESTURE
+                    vm.goTo(HOME_GESTURE)
+                },
+                onRecentAppsTutorialClicked = {
+                    lastSelectedScreen = RECENT_APPS_GESTURE
+                    vm.goTo(RECENT_APPS_GESTURE)
+                },
                 onDoneButtonClicked = closeTutorial,
+                lastSelectedScreen,
             )
         BACK_GESTURE ->
             BackGestureTutorialScreen(
