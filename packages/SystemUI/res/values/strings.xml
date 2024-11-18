@@ -3818,6 +3818,10 @@
          assigning a new custom key combination to a shortcut in shortcut helper. The helper is a
          component that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_customize_dialog_error_message">Key combination already in use. Try another key.</string>
+    <!-- Plus sign, used in keyboard shortcut helper to combine keys for shortcut. E.g. Ctrl + A
+         The helper is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_plus_symbol">+</string>
 
 
     <!-- Keyboard touchpad tutorial scheduler-->

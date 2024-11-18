@@ -16,6 +16,15 @@
 
 package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
+import android.content.Context
+import android.content.Context.INPUT_SERVICE
+import android.hardware.input.fakeInputManager
+import android.os.SystemClock
+import android.view.KeyEvent.ACTION_DOWN
+import android.view.KeyEvent.KEYCODE_A
+import android.view.KeyEvent.META_CTRL_ON
+import android.view.KeyEvent.META_META_ON
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -24,23 +33,42 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutCustomizationViewModelFactory
+import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.settings.userTracker
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ShortcutCustomizationViewModelTest : SysuiTestCase() {
 
-    private val kosmos = Kosmos().also { it.testCase = this }
+    private val mockUserContext: Context = mock()
+    private val kosmos =
+        Kosmos().also {
+            it.testCase = this
+            it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
+        }
     private val testScope = kosmos.testScope
+    private val inputManager = kosmos.fakeInputManager.inputManager
+    private val helper = kosmos.shortcutHelperTestHelper
     private val viewModel = kosmos.shortcutCustomizationViewModelFactory.create()
+
+    @Before
+    fun setup() {
+        helper.showFromActivity()
+        whenever(mockUserContext.getSystemService(INPUT_SERVICE)).thenReturn(inputManager)
+    }
 
     @Test
     fun uiState_inactiveByDefault() {
@@ -79,10 +107,110 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
             viewModel.onAddShortcutDialogShown()
-            viewModel.onAddShortcutDialogDismissed()
+            viewModel.onDialogDismissed()
             assertThat(uiState).isEqualTo(ShortcutCustomizationUiState.Inactive)
         }
     }
+
+    @Test
+    fun uiState_pressedKeys_emptyByDefault() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
+            assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).pressedKeys)
+                .isEmpty()
+        }
+    }
+
+    @Test
+    fun onKeyPressed_handlesKeyEvents_whereActionKeyIsAlsoPressed() {
+        testScope.runTest {
+            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
+            val isHandled = viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
+
+            assertThat(isHandled).isTrue()
+        }
+    }
+
+    @Test
+    fun onKeyPressed_doesNotHandleKeyEvents_whenActionKeyIsNotAlsoPressed() {
+        testScope.runTest {
+            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
+            val isHandled = viewModel.onKeyPressed(keyDownEventWithoutActionKeyPressed)
+
+            assertThat(isHandled).isFalse()
+        }
+    }
+
+    @Test
+    fun onKeyPressed_convertsKeyEventsAndUpdatesUiStatesPressedKey() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
+            viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
+            viewModel.onKeyPressed(keyUpEventWithActionKeyPressed)
+
+            // Note that Action Key is excluded as it's already displayed on the UI
+            assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).pressedKeys)
+                .containsExactly(ShortcutKey.Text("Ctrl"), ShortcutKey.Text("A"))
+        }
+    }
+
+    @Test
+    fun uiState_pressedKeys_resetsToEmptyListAfterDialogIsDismissedAndReopened() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
+            viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
+            viewModel.onKeyPressed(keyUpEventWithActionKeyPressed)
+
+            // Note that Action Key is excluded as it's already displayed on the UI
+            assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).pressedKeys)
+                .containsExactly(ShortcutKey.Text("Ctrl"), ShortcutKey.Text("A"))
+
+            // Close the dialog and show it again
+            viewModel.onDialogDismissed()
+            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
+            assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).pressedKeys)
+                .isEmpty()
+        }
+    }
+
+    private val keyDownEventWithoutActionKeyPressed =
+        KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ META_CTRL_ON,
+            )
+        )
+
+    private val keyDownEventWithActionKeyPressed =
+        KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ META_CTRL_ON or META_META_ON,
+            )
+        )
+
+    private val keyUpEventWithActionKeyPressed =
+        KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ 0,
+            )
+        )
 
     private val standardAddShortcutRequest =
         ShortcutCustomizationRequestInfo.Add(

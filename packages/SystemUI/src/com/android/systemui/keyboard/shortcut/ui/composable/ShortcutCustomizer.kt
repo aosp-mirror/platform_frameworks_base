@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -45,12 +46,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.res.R
@@ -81,6 +83,7 @@ fun AssignNewShortcutDialog(
             SelectedKeyCombinationContainer(
                 shouldShowErrorMessage = uiState.shouldShowErrorMessage,
                 onKeyPress = onKeyPress,
+                pressedKeys = uiState.pressedKeys,
             )
             KeyCombinationAlreadyInUseErrorMessage(uiState.shouldShowErrorMessage)
             DialogButtons(onCancel, isValidKeyCombination = uiState.isValidKeyCombination)
@@ -137,10 +140,9 @@ fun KeyCombinationAlreadyInUseErrorMessage(shouldShowErrorMessage: Boolean) {
 
 @Composable
 fun SelectedKeyCombinationContainer(
-    keyCombination: String =
-        stringResource(R.string.shortcut_helper_add_shortcut_dialog_placeholder),
     shouldShowErrorMessage: Boolean,
     onKeyPress: (KeyEvent) -> Boolean,
+    pressedKeys: List<ShortcutKey>,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -157,22 +159,18 @@ fun SelectedKeyCombinationContainer(
             Modifier.padding(all = 16.dp)
                 .sizeIn(minWidth = 332.dp, minHeight = 56.dp)
                 .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(50.dp))
-                .onPreviewKeyEvent { onKeyPress(it) },
+                .onKeyEvent { onKeyPress(it) },
         interactionSource = interactionSource,
     ) {
         Row(
             modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 16.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = keyCombination,
-                style = MaterialTheme.typography.headlineSmall,
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                fontWeight = FontWeight.W500,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.width(252.dp),
-            )
+            if (pressedKeys.isEmpty()) {
+                PressKeyPrompt()
+            } else {
+                PressedKeysTextContainer(pressedKeys)
+            }
             Spacer(modifier = Modifier.weight(1f))
             if (shouldShowErrorMessage) {
                 Icon(
@@ -184,6 +182,67 @@ fun SelectedKeyCombinationContainer(
             }
         }
     }
+}
+
+@Composable
+private fun RowScope.PressedKeysTextContainer(pressedKeys: List<ShortcutKey>) {
+    pressedKeys.forEachIndexed { keyIndex, key ->
+        if (keyIndex > 0) {
+            ShortcutKeySeparator()
+        }
+        if (key is ShortcutKey.Text) {
+            ShortcutTextKey(key)
+        } else if (key is ShortcutKey.Icon) {
+            ShortcutIconKey(key)
+        }
+    }
+}
+
+@Composable
+private fun ShortcutKeySeparator() {
+    Text(
+        text = stringResource(id = R.string.shortcut_helper_plus_symbol),
+        style = MaterialTheme.typography.titleSmall,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun RowScope.ShortcutIconKey(key: ShortcutKey.Icon) {
+    Icon(
+        painter =
+            when (key) {
+                is ShortcutKey.Icon.ResIdIcon -> painterResource(key.drawableResId)
+                is ShortcutKey.Icon.DrawableIcon -> rememberDrawablePainter(drawable = key.drawable)
+            },
+        contentDescription = null,
+        modifier = Modifier.align(Alignment.CenterVertically).height(24.dp),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun PressKeyPrompt() {
+    Text(
+        text = stringResource(id = R.string.shortcut_helper_add_shortcut_dialog_placeholder),
+        style = MaterialTheme.typography.titleSmall,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun ShortcutTextKey(key: ShortcutKey.Text) {
+    Text(
+        text = key.value,
+        style = MaterialTheme.typography.titleSmall,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
@@ -203,8 +262,6 @@ private fun Description(modifier: Modifier = Modifier) {
     Text(
         text = stringResource(id = R.string.shortcut_helper_customize_mode_sub_title),
         style = MaterialTheme.typography.bodyMedium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
         modifier = modifier.wrapContentSize(Alignment.Center),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
