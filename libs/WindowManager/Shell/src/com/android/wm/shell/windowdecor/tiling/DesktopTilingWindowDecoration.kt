@@ -230,6 +230,8 @@ class DesktopTilingWindowDecoration(
             ResizeTrigger.TILING_DIVIDER,
             motionEvent,
             leftTiledTask.taskInfo,
+            leftTiledTask.bounds.width(),
+            leftTiledTask.bounds.height(),
             displayController,
         )
 
@@ -237,6 +239,8 @@ class DesktopTilingWindowDecoration(
             ResizeTrigger.TILING_DIVIDER,
             motionEvent,
             rightTiledTask.taskInfo,
+            rightTiledTask.bounds.width(),
+            rightTiledTask.bounds.height(),
             displayController,
         )
     }
@@ -301,8 +305,8 @@ class DesktopTilingWindowDecoration(
             ResizeTrigger.TILING_DIVIDER,
             motionEvent,
             leftTiledTask.taskInfo,
-            leftTiledTask.newBounds.height(),
             leftTiledTask.newBounds.width(),
+            leftTiledTask.newBounds.height(),
             displayController,
         )
 
@@ -310,8 +314,8 @@ class DesktopTilingWindowDecoration(
             ResizeTrigger.TILING_DIVIDER,
             motionEvent,
             rightTiledTask.taskInfo,
-            rightTiledTask.newBounds.height(),
             rightTiledTask.newBounds.width(),
+            rightTiledTask.newBounds.height(),
             displayController,
         )
 

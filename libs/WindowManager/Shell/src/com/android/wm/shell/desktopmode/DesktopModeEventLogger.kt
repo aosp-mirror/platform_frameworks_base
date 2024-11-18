@@ -189,6 +189,8 @@ class DesktopModeEventLogger {
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
         taskInfo: RunningTaskInfo,
+        taskWidth: Int? = null,
+        taskHeight: Int? = null,
         displayController: DisplayController? = null,
         displayLayoutSize: Size? = null,
     ) {
@@ -207,6 +209,8 @@ class DesktopModeEventLogger {
             resizeTrigger,
             motionEvent,
             taskInfo,
+            taskWidth,
+            taskHeight,
             displayController = displayController,
             displayLayoutSize = displayLayoutSize,
         )
@@ -230,8 +234,8 @@ class DesktopModeEventLogger {
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
         taskInfo: RunningTaskInfo,
-        taskHeight: Int? = null,
         taskWidth: Int? = null,
+        taskHeight: Int? = null,
         displayController: DisplayController? = null,
         displayLayoutSize: Size? = null,
     ) {
@@ -250,8 +254,8 @@ class DesktopModeEventLogger {
             resizeTrigger,
             motionEvent,
             taskInfo,
-            taskHeight,
             taskWidth,
+            taskHeight,
             displayController,
             displayLayoutSize,
         )
@@ -273,8 +277,8 @@ class DesktopModeEventLogger {
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
         taskInfo: RunningTaskInfo,
-        taskHeight: Int? = null,
         taskWidth: Int? = null,
+        taskHeight: Int? = null,
         displayController: DisplayController? = null,
         displayLayoutSize: Size? = null,
     ): TaskSizeUpdate {

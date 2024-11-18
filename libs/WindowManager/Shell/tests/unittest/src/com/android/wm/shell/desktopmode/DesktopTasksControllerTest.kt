@@ -379,8 +379,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.MAXIMIZE_BUTTON,
       motionEvent,
       task1,
-      STABLE_BOUNDS.height(),
       STABLE_BOUNDS.width(),
+      STABLE_BOUNDS.height(),
       displayController
     )
     assertThat(argumentCaptor.value).isTrue()
@@ -3015,14 +3015,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
       motionEvent,
       task,
+      task.configuration.windowConfiguration.bounds.width(),
+      task.configuration.windowConfiguration.bounds.height(),
       displayController
     )
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
       motionEvent,
       task,
-      STABLE_BOUNDS.height(),
       STABLE_BOUNDS.width(),
+      STABLE_BOUNDS.height(),
       displayController
     )
   }
@@ -3071,7 +3073,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     )
     // Assert no event is logged
     verify(desktopModeEventLogger, never()).logTaskResizingStarted(
-      any(), any(), any(), any(), any()
+      any(), any(), any(), any(), any(), any(), any()
     )
     verify(desktopModeEventLogger, never()).logTaskResizingEnded(
       any(), any(), any(), any(), any(), any(), any()
@@ -3354,8 +3356,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.MAXIMIZE_BUTTON,
       motionEvent,
       task,
-      STABLE_BOUNDS.height(),
       STABLE_BOUNDS.width(),
+      STABLE_BOUNDS.height(),
       displayController
     )
   }
@@ -3386,8 +3388,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.SNAP_LEFT_MENU,
       motionEvent,
       task,
-      expectedBounds.height(),
       expectedBounds.width(),
+      expectedBounds.height(),
       displayController
     )
   }
@@ -3426,8 +3428,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.SNAP_LEFT_MENU,
       motionEvent,
       task,
-      bounds.height(),
       bounds.width(),
+      bounds.height(),
       displayController
     )
   }
@@ -3456,6 +3458,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.DRAG_LEFT,
       motionEvent,
       task,
+      preDragBounds.width(),
+      preDragBounds.height(),
       displayController
     )
   }
@@ -3480,6 +3484,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       any(),
     )
     verify(desktopModeEventLogger, never()).logTaskResizingStarted(
+      any(),
+      any(),
       any(),
       any(),
       any(),
@@ -3529,14 +3535,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.SNAP_LEFT_MENU,
       motionEvent,
       task,
+      taskBounds.width(),
+      taskBounds.height(),
       displayController
     )
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.SNAP_LEFT_MENU,
       motionEvent,
       task,
-      expectedBounds.height(),
       expectedBounds.width(),
+      expectedBounds.height(),
       displayController
     )
   }
@@ -3566,8 +3574,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.MAXIMIZE_BUTTON,
       motionEvent,
       task,
-      expectedBounds.height(),
       expectedBounds.width(),
+      expectedBounds.height(),
       displayController
     )
   }
@@ -3604,8 +3612,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.MAXIMIZE_BUTTON,
       motionEvent,
       task,
-      boundsBeforeMaximize.height(),
       boundsBeforeMaximize.width(),
+      boundsBeforeMaximize.height(),
       displayController
     )
   }
@@ -3632,8 +3640,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.MAXIMIZE_BUTTON,
       motionEvent,
       task,
-      boundsBeforeMaximize.height(),
       boundsBeforeMaximize.width(),
+      boundsBeforeMaximize.height(),
       displayController
     )
   }
@@ -3660,8 +3668,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.MAXIMIZE_BUTTON,
       motionEvent,
       task,
-      boundsBeforeMaximize.height(),
       boundsBeforeMaximize.width(),
+      boundsBeforeMaximize.height(),
       displayController
     )
   }
@@ -3684,8 +3692,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       ResizeTrigger.MAXIMIZE_BUTTON,
       motionEvent,
       task,
-      boundsBeforeMaximize.height(),
       boundsBeforeMaximize.width(),
+      boundsBeforeMaximize.height(),
       displayController
     )
   }

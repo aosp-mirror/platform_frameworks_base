@@ -466,6 +466,8 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
             ResizeTrigger.TILING_DIVIDER,
             motionEvent,
             task1,
+            BOUNDS.width() / 2,
+            BOUNDS.height(),
             displayController,
         )
 
@@ -477,8 +479,8 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
             ResizeTrigger.TILING_DIVIDER,
             motionEvent,
             task1,
-            BOUNDS.height(),
             BOUNDS.width(),
+            BOUNDS.height(),
             displayController,
         )
     }

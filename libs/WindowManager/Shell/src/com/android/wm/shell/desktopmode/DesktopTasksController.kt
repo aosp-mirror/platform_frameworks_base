@@ -792,14 +792,19 @@ class DesktopTasksController(
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
     ) {
+        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         desktopModeEventLogger.logTaskResizingStarted(
-            resizeTrigger, motionEvent, taskInfo, displayController
+            resizeTrigger,
+            motionEvent,
+            taskInfo,
+            currentTaskBounds.width(),
+            currentTaskBounds.height(),
+            displayController
         )
 
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
 
         val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
-        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         val destinationBounds = Rect()
 
         val isMaximized = isTaskMaximized(taskInfo, stableBounds)
@@ -843,8 +848,8 @@ class DesktopTasksController(
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
         desktopModeEventLogger.logTaskResizingEnded(
-            resizeTrigger, motionEvent, taskInfo, destinationBounds.height(),
-            destinationBounds.width(), displayController
+            resizeTrigger, motionEvent, taskInfo, destinationBounds.width(),
+            destinationBounds.height(), displayController
         )
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
     }
@@ -969,7 +974,22 @@ class DesktopTasksController(
         desktopWindowDecoration: DesktopModeWindowDecoration,
     ) {
         desktopModeEventLogger.logTaskResizingStarted(
-            resizeTrigger, motionEvent, taskInfo, displayController
+            resizeTrigger,
+            motionEvent,
+            taskInfo,
+            currentDragBounds.width(),
+            currentDragBounds.height(),
+            displayController
+        )
+
+        val destinationBounds = getSnapBounds(taskInfo, position)
+        desktopModeEventLogger.logTaskResizingEnded(
+            resizeTrigger,
+            motionEvent,
+            taskInfo,
+            destinationBounds.width(),
+            destinationBounds.height(),
+            displayController,
         )
 
         if (DesktopModeFlags.ENABLE_TILE_RESIZING.isTrue()) {
@@ -984,15 +1004,7 @@ class DesktopTasksController(
             }
             return
         }
-        val destinationBounds = getSnapBounds(taskInfo, position)
-        desktopModeEventLogger.logTaskResizingEnded(
-            resizeTrigger,
-            motionEvent,
-            taskInfo,
-            destinationBounds.height(),
-            destinationBounds.width(),
-            displayController,
-        )
+
         if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) {
             // Handle the case where we attempt to snap resize when already snap resized: the task
             // position won't need to change but we want to animate the surface going back to the
