@@ -44,6 +44,7 @@ public final class SettingsPreferenceValue implements Parcelable {
     @Type
     private final int mType;
     private final boolean mBooleanValue;
+    private final int mIntValue;
     private final long mLongValue;
     private final double mDoubleValue;
     @Nullable
@@ -62,6 +63,13 @@ public final class SettingsPreferenceValue implements Parcelable {
      */
     public boolean getBooleanValue() {
         return mBooleanValue;
+    }
+
+    /**
+     * Returns the int value for Preference if type is {@link #TYPE_INT}.
+     */
+    public int getIntValue() {
+        return mIntValue;
     }
 
     /**
@@ -92,6 +100,7 @@ public final class SettingsPreferenceValue implements Parcelable {
             TYPE_LONG,
             TYPE_DOUBLE,
             TYPE_STRING,
+            TYPE_INT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
@@ -104,6 +113,8 @@ public final class SettingsPreferenceValue implements Parcelable {
     public static final int TYPE_DOUBLE = 2;
     /** Value is of type string. Access via {@link #getStringValue}. */
     public static final int TYPE_STRING = 3;
+    /** Value is of type int. Access via {@link #getIntValue}. */
+    public static final int TYPE_INT = 4;
 
     private SettingsPreferenceValue(@NonNull Builder builder) {
         mType = builder.mType;
@@ -111,6 +122,7 @@ public final class SettingsPreferenceValue implements Parcelable {
         mLongValue = builder.mLongValue;
         mDoubleValue = builder.mDoubleValue;
         mStringValue = builder.mStringValue;
+        mIntValue = builder.mIntValue;
     }
 
     private SettingsPreferenceValue(@NonNull Parcel in) {
@@ -119,6 +131,7 @@ public final class SettingsPreferenceValue implements Parcelable {
         mLongValue = in.readLong();
         mDoubleValue = in.readDouble();
         mStringValue = in.readString8();
+        mIntValue = in.readInt();
     }
 
     /** @hide */
@@ -129,6 +142,7 @@ public final class SettingsPreferenceValue implements Parcelable {
         dest.writeLong(mLongValue);
         dest.writeDouble(mDoubleValue);
         dest.writeString8(mStringValue);
+        dest.writeInt(mIntValue);
     }
 
     /** @hide */
@@ -163,6 +177,7 @@ public final class SettingsPreferenceValue implements Parcelable {
         private long mLongValue;
         private double mDoubleValue;
         private String mStringValue;
+        private int mIntValue;
 
         /**
          * Create Builder instance.
@@ -179,6 +194,15 @@ public final class SettingsPreferenceValue implements Parcelable {
         @NonNull
         public Builder setBooleanValue(boolean booleanValue) {
             mBooleanValue = booleanValue;
+            return this;
+        }
+
+        /**
+         * Sets the int value for Preference.
+         */
+        @NonNull
+        public Builder setIntValue(int intValue) {
+            mIntValue = intValue;
             return this;
         }
 

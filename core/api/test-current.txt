@@ -3283,7 +3283,7 @@ package android.service.quicksettings {
 package android.service.settings.preferences {
 
   @FlaggedApi("com.android.settingslib.flags.settings_catalyst") public class SettingsPreferenceServiceClient implements java.lang.AutoCloseable {
-    ctor public SettingsPreferenceServiceClient(@NonNull android.content.Context, @NonNull String, boolean, @Nullable android.content.ServiceConnection);
+    ctor public SettingsPreferenceServiceClient(@NonNull android.content.Context, @NonNull String, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.service.settings.preferences.SettingsPreferenceServiceClient,java.lang.Exception>);
   }
 
 }
