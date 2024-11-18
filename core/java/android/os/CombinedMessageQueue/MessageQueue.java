@@ -126,11 +126,6 @@ public final class MessageQueue {
         // We can lift this restriction in the future after we've made it possible for test authors
         // to test Looper and MessageQueue without resorting to reflection.
 
-        // Holdback study.
-        if (mUseConcurrent && Flags.messageQueueForceLegacy()) {
-            mUseConcurrent = false;
-        }
-
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
     }

@@ -4,15 +4,6 @@ container: "system"
 
 # keep-sorted start block=yes newline_separated=yes
 flag {
-     # Holdback study for concurrent MessageQueue.
-     # Do not promote beyond trunkfood.
-     namespace: "system_performance"
-     name: "message_queue_force_legacy"
-     description: "Whether to holdback concurrent MessageQueue (force legacy)."
-     bug: "336880969"
-}
-
-flag {
     name: "adpf_gpu_report_actual_work_duration"
     is_exported: true
     namespace: "game"
