@@ -51,6 +51,9 @@ interface AutoHideController {
     /** Hides system bars on user touch if the interaction requires them to be hidden. */
     fun checkUserAutoHide(event: MotionEvent)
 
+    /** Called when work should stop and resources should be released. */
+    fun stop()
+
     /** Dumps the current state of the [AutoHideController] */
     fun dump(pw: PrintWriter)
 

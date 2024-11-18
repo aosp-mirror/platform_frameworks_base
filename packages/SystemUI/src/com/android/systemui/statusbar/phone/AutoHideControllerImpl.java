@@ -191,6 +191,11 @@ public class AutoHideControllerImpl implements AutoHideController {
     }
 
     @Override
+    public void stop() {
+        mHandler.removeCallbacks(mAutoHide);
+    }
+
+    @Override
     public void dump(@NonNull PrintWriter pw) {
         pw.println("AutoHideController:");
         pw.println("\tmAutoHideSuspended=" + mAutoHideSuspended);
