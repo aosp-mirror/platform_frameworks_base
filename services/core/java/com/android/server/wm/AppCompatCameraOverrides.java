@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
@@ -33,7 +32,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
-import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
 
 import com.android.server.wm.utils.OptPropFactory;
 import com.android.window.flags.Flags;
@@ -202,22 +200,10 @@ class AppCompatCameraOverrides {
                 && !mActivityRecord.shouldCreateAppCompatDisplayInsets();
     }
 
-    @FreeformCameraCompatMode
-    int getFreeformCameraCompatMode() {
-        return mAppCompatCameraOverridesState.mFreeformCameraCompatMode;
-    }
-
-    void setFreeformCameraCompatMode(@FreeformCameraCompatMode int freeformCameraCompatMode) {
-        mAppCompatCameraOverridesState.mFreeformCameraCompatMode = freeformCameraCompatMode;
-    }
-
     static class AppCompatCameraOverridesState {
         // Whether activity "refresh" was requested but not finished in
         // ActivityRecord#activityResumedLocked following the camera compat force rotation in
         // DisplayRotationCompatPolicy.
         private boolean mIsRefreshRequested;
-
-        @FreeformCameraCompatMode
-        private int mFreeformCameraCompatMode = CAMERA_COMPAT_FREEFORM_NONE;
     }
 }

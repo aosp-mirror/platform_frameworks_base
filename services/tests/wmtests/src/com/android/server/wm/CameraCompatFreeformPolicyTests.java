@@ -429,13 +429,11 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     private void assertInCameraCompatMode(@CameraCompatTaskInfo.FreeformCameraCompatMode int mode) {
-        assertEquals(mode, mActivity.mAppCompatController.getAppCompatCameraOverrides()
-                        .getFreeformCameraCompatMode());
+        assertEquals(mode, mCameraCompatFreeformPolicy.getCameraCompatMode(mActivity));
     }
 
     private void assertNotInCameraCompatMode() {
-        assertEquals(CAMERA_COMPAT_FREEFORM_NONE, mActivity.mAppCompatController
-                .getAppCompatCameraOverrides().getFreeformCameraCompatMode());
+        assertInCameraCompatMode(CAMERA_COMPAT_FREEFORM_NONE);
     }
 
     private void assertActivityRefreshRequested(boolean refreshRequested) throws Exception {

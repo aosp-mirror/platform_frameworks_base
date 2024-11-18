@@ -159,14 +159,8 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         }
 
         cameraActivity.recomputeConfiguration();
-        updateCameraCompatMode(cameraActivity);
         cameraActivity.getTask().dispatchTaskInfoChangedIfNeeded(/* force= */ true);
         cameraActivity.ensureActivityConfiguration(/* ignoreVisibility= */ false);
-    }
-
-    private void updateCameraCompatMode(@NonNull ActivityRecord cameraActivity) {
-        cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
-                .setFreeformCameraCompatMode(getCameraCompatMode(cameraActivity));
     }
 
     @Override
