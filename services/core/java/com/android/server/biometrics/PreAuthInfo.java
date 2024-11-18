@@ -174,10 +174,6 @@ class PreAuthInfo {
             return BIOMETRIC_NO_HARDWARE;
         }
 
-        if (sensor.modality == TYPE_FACE && biometricCameraManager.isAnyCameraUnavailable()) {
-            return BIOMETRIC_HARDWARE_NOT_DETECTED;
-        }
-
         final boolean wasStrongEnough =
                 Utils.isAtLeastStrength(sensor.oemStrength, requestedStrength);
         final boolean isStrongEnough =
@@ -187,6 +183,10 @@ class PreAuthInfo {
             return BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE;
         } else if (!wasStrongEnough) {
             return BIOMETRIC_INSUFFICIENT_STRENGTH;
+        }
+
+        if (sensor.modality == TYPE_FACE && biometricCameraManager.isAnyCameraUnavailable()) {
+            return BIOMETRIC_HARDWARE_NOT_DETECTED;
         }
 
         try {
