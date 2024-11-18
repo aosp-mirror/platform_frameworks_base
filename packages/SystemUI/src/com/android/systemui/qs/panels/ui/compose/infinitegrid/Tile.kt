@@ -126,7 +126,7 @@ fun Tile(
     val currentBounceableInfo by rememberUpdatedState(bounceableInfo)
     val resources = resources()
     val uiState = remember(state, resources) { state.toUiState(resources) }
-    val colors = TileDefaults.getColorForState(uiState)
+    val colors = TileDefaults.getColorForState(uiState, iconOnly)
     val hapticsViewModel: TileHapticsViewModel? =
         rememberViewModel(traceName = "TileHapticsViewModel") {
             tileHapticsViewModelFactoryProvider.getHapticsViewModelFactory()?.create(tile)
@@ -365,22 +365,24 @@ private object TileDefaults {
         )
 
     @Composable
-    fun getColorForState(uiState: TileUiState): TileColors {
+    fun getColorForState(uiState: TileUiState, iconOnly: Boolean): TileColors {
         return when (uiState.state) {
             STATE_ACTIVE -> {
-                if (uiState.handlesSecondaryClick) {
+                if (uiState.handlesSecondaryClick && !iconOnly) {
                     activeDualTargetTileColors()
                 } else {
                     activeTileColors()
                 }
             }
+
             STATE_INACTIVE -> {
-                if (uiState.handlesSecondaryClick) {
+                if (uiState.handlesSecondaryClick && !iconOnly) {
                     inactiveDualTargetTileColors()
                 } else {
                     inactiveTileColors()
                 }
             }
+
             else -> unavailableTileColors()
         }
     }
