@@ -42,6 +42,7 @@ import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataMod
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.settings.DisplayTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -51,7 +52,7 @@ import kotlinx.coroutines.withContext
 class CustomTileUserActionInteractor
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val tileSpec: TileSpec,
     private val qsTileLogger: QSTileLogger,
     private val windowManager: IWindowManager,
