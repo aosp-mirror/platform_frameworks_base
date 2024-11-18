@@ -3915,12 +3915,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void setLimitSystemEducationDialogs(
-            IBinder appToken, boolean limitSystemEducationDialogs) {
+    public void requestOpenInBrowserEducation(IBinder appToken) {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(appToken);
             if (r != null) {
-                r.setLimitSystemEducationDialogs(limitSystemEducationDialogs);
+                r.requestOpenInBrowserEducation();
             }
         }
     }

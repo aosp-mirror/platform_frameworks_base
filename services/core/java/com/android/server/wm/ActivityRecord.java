@@ -630,8 +630,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // The locusId associated with this activity, if set.
     private LocusId mLocusId;
 
-    // Whether the activity is requesting to limit the system's educational dialogs
-    public boolean mShouldLimitSystemEducationDialogs;
+    // The timestamp of the last request to show the "Open in browser" education
+    public long mRequestOpenInBrowserEducationTimestamp;
 
     // Whether the activity was launched from a bubble.
     private boolean mLaunchedFromBubble;
@@ -7342,9 +7342,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mLocusId;
     }
 
-    void setLimitSystemEducationDialogs(boolean limitSystemEducationDialogs) {
-        if (mShouldLimitSystemEducationDialogs == limitSystemEducationDialogs) return;
-        mShouldLimitSystemEducationDialogs = limitSystemEducationDialogs;
+    void requestOpenInBrowserEducation() {
+        mRequestOpenInBrowserEducationTimestamp = System.currentTimeMillis();
         final Task task = getTask();
         if (task != null) {
             final boolean force = isVisibleRequested() && this == task.getTopNonFinishingActivity();
