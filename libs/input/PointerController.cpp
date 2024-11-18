@@ -138,15 +138,18 @@ std::mutex& PointerController::getLock() const {
     return mDisplayInfoListener->mLock;
 }
 
-void PointerController::move(float deltaX, float deltaY) {
+vec2 PointerController::move(float deltaX, float deltaY) {
     const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
-    vec2 transformed;
+    ui::Transform transform;
     {
         std::scoped_lock lock(getLock());
-        const auto& transform = getTransformForDisplayLocked(displayId);
-        transformed = transformWithoutTranslation(transform, {deltaX, deltaY});
+        transform = getTransformForDisplayLocked(displayId);
     }
-    mCursorController.move(transformed.x, transformed.y);
+
+    vec2 transformed = transformWithoutTranslation(transform, {deltaX, deltaY});
+
+    vec2 unconsumedDelta = mCursorController.move(transformed.x, transformed.y);
+    return transformWithoutTranslation(transform.inverse(), unconsumedDelta);
 }
 
 void PointerController::setPosition(float x, float y) {
