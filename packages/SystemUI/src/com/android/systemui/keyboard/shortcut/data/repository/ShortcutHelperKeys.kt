@@ -140,6 +140,7 @@ object ShortcutHelperKeys {
         mapOf<Int, (Context) -> String>(
             KEYCODE_HOME to { context -> context.getString(R.string.keyboard_key_home) },
             KEYCODE_BACK to { context -> context.getString(R.string.keyboard_key_back) },
+            KEYCODE_RECENT_APPS to { context -> context.getString(R.string.accessibility_recent) },
             KEYCODE_DPAD_UP to { context -> context.getString(R.string.keyboard_key_dpad_up) },
             KEYCODE_DPAD_DOWN to { context -> context.getString(R.string.keyboard_key_dpad_down) },
             KEYCODE_DPAD_LEFT to { context -> context.getString(R.string.keyboard_key_dpad_left) },

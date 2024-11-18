@@ -3816,6 +3816,14 @@
          [CHAR LIMIT=NONE]
           -->
     <string name="shortcut_helper_key_combinations_or_separator">or</string>
+    <!-- Word that combines different possible key combinations of a shortcut. For example the
+         "Go to home screen" shortcut could be triggered using "ctrl" plus "h".
+         This is only used for accessibility content descriptions of the key combinations.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_key_combinations_and_conjunction">plus</string>
+    <!-- Word that represents the forward slash character "/". To be used only in accessibility
+         content descriptions. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_key_combinations_forward_slash">forward slash</string>
     <!-- Content description of the drag handle that allows to swipe to dismiss the shortcut helper.
          The helper is a  component that shows the  user which keyboard shortcuts they can
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.

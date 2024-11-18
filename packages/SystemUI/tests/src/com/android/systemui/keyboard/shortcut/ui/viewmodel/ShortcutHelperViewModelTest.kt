@@ -413,6 +413,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
                 key("Ctrl")
                 key("A")
             }
+            contentDescription { "$label, Press key Ctrl plus A" }
         }
 
     companion object {
