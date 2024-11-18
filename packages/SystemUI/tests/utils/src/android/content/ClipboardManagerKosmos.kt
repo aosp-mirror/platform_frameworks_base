@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package android.content
 
-import com.android.systemui.development.ui.viewmodel.buildNumberViewModelFactory
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
+import org.mockito.kotlin.mock
 
-val Kosmos.paginatedGridViewModel by
-    Kosmos.Fixture {
-        PaginatedGridViewModel(
-            iconTilesViewModel,
-            qsColumnsViewModelFactory,
-            paginatedGridInteractor,
-            inFirstPageViewModel,
-            buildNumberViewModelFactory,
-        )
-    }
+val Kosmos.clipboardManager by Kosmos.Fixture { mock<ClipboardManager>() }
