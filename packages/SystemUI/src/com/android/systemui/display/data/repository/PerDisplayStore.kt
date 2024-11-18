@@ -18,11 +18,11 @@ package com.android.systemui.display.data.repository
 
 import android.view.Display
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.CoreStartable
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.qualifiers.Background
-import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 
 /** Provides per display instances of [T]. */
 interface PerDisplayStore<T> {
@@ -47,9 +47,16 @@ interface PerDisplayStore<T> {
 abstract class PerDisplayStoreImpl<T>(
     @Background private val backgroundApplicationScope: CoroutineScope,
     private val displayRepository: DisplayRepository,
-) : PerDisplayStore<T>, CoreStartable {
+) : PerDisplayStore<T> {
 
     private val perDisplayInstances = ConcurrentHashMap<Int, T>()
+
+    private val coroutineScope by lazy {
+        CoroutineScope(
+            backgroundApplicationScope.coroutineContext +
+                newTracingContext("PerDisplayStore<${instanceClass.simpleName}>")
+        )
+    }
 
     /**
      * The instance for the default/main display of the device. For example, on a phone or a tablet,
@@ -71,19 +78,18 @@ abstract class PerDisplayStoreImpl<T>(
             throw IllegalArgumentException("Display with id $displayId doesn't exist.")
         }
         return perDisplayInstances.computeIfAbsent(displayId) {
+            listenForDisplayRemoval(displayId)
             createInstanceForDisplay(displayId)
         }
     }
 
     protected abstract fun createInstanceForDisplay(displayId: Int): T
 
-    override fun start() {
-        val instanceType = instanceClass.simpleName
-        backgroundApplicationScope.launch("PerDisplayStore#<$instanceType>start") {
-            displayRepository.displayRemovalEvent.collect { removedDisplayId ->
-                val removedInstance = perDisplayInstances.remove(removedDisplayId)
-                removedInstance?.let { onDisplayRemovalAction(it) }
-            }
+    private fun listenForDisplayRemoval(displayId: Int) {
+        coroutineScope.launch("listenForDisplayRemoval($displayId)") {
+            displayRepository.displayRemovalEvent.first { it == displayId }
+            val removedInstance = perDisplayInstances.remove(displayId)
+            removedInstance?.let { onDisplayRemovalAction(it) }
         }
     }
 
@@ -94,10 +100,6 @@ abstract class PerDisplayStoreImpl<T>(
      * any clean up if needed.
      */
     open suspend fun onDisplayRemovalAction(instance: T) {}
-
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println(perDisplayInstances)
-    }
 }
 
 class SingleDisplayStore<T>(defaultInstance: T) : PerDisplayStore<T> {

@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.runBlocking
@@ -37,16 +38,11 @@ import org.mockito.kotlin.verify
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
 class MultiDisplayStatusBarWindowControllerStoreTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val fakeDisplayRepository = kosmos.displayRepository
     private val testScope = kosmos.testScope
 
     private val underTest by lazy { kosmos.multiDisplayStatusBarWindowControllerStore }
-
-    @Before
-    fun start() {
-        underTest.start()
-    }
 
     @Before fun addDisplays() = runBlocking { fakeDisplayRepository.addDisplay(DEFAULT_DISPLAY) }
 

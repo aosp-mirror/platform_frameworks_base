@@ -41,11 +41,6 @@ class MultiDisplayStatusBarContentInsetsProviderStoreTest : SysuiTestCase() {
     private val fakeDisplayRepository = kosmos.displayRepository
     private val underTest = kosmos.multiDisplayStatusBarContentInsetsProviderStore
 
-    @Before
-    fun start() {
-        underTest.start()
-    }
-
     @Before fun addDisplays() = runBlocking { fakeDisplayRepository.addDisplay(DEFAULT_DISPLAY) }
 
     @Test
