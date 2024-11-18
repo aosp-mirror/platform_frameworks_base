@@ -417,8 +417,13 @@ constructor(
                                             "mechanism: ${deviceUnlockStatus.deviceUnlockSource}"
                                 else -> null
                             }
-                        // Not on lockscreen or bouncer, so remain in the current scene.
-                        else -> null
+                        // Not on lockscreen or bouncer, so remain in the current scene but since
+                        // unlocked, replace the Lockscreen scene from the bottom of the navigation
+                        // back stack with the Gone scene.
+                        else -> {
+                            replaceLockscreenSceneOnBackStack()
+                            null
+                        }
                     }
                 }
                 .collect { (targetSceneKey, loggingReason) ->
@@ -427,17 +432,19 @@ constructor(
         }
     }
 
-    /** If the [Scenes.Lockscreen] is on the backstack, replaces it with [Scenes.Gone]. */
+    /**
+     * If the [Scenes.Lockscreen] is on the bottom of the navigation backstack, replaces it with
+     * [Scenes.Gone].
+     */
     private fun replaceLockscreenSceneOnBackStack() {
         sceneBackInteractor.updateBackStack { stack ->
             val list = stack.asIterable().toMutableList()
-            check(list.last() == Scenes.Lockscreen) {
-                "The bottommost/last SceneKey of the back stack isn't" +
-                    " the Lockscreen scene like expected. The back" +
-                    " stack is $stack."
+            if (list.lastOrNull() == Scenes.Lockscreen) {
+                list[list.size - 1] = Scenes.Gone
+                sceneStackOf(*list.toTypedArray())
+            } else {
+                stack
             }
-            list[list.size - 1] = Scenes.Gone
-            sceneStackOf(*list.toTypedArray())
         }
     }
 
