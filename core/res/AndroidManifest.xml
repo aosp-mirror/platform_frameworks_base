@@ -6492,6 +6492,15 @@
     <permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT"
         android:protectionLevel="signature|privileged|role" />
 
+    <!-- @SystemApi Allows an application to bypass concurrency restrictions while
+        recording audio. For example, apps with this permission can continue to record
+        while a voice call is active.</p>
+     @FlaggedApi(android.media.audio.Flags.FLAG_CONCURRENT_AUDIO_RECORD_BYPASS_PERMISSION)
+     @hide -->
+    <permission android:name="android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION"
+        android:featureFlag="android.media.audio.concurrent_audio_record_bypass_permission"
+        android:protectionLevel="signature|privileged|role" />
+
     <!-- @SystemApi Allows an application to capture audio for hotword detection.
          <p>Not for use by third-party applications.</p>
          @hide -->

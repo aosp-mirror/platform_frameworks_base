@@ -161,6 +161,7 @@ android_app {
         "android.app.flags-aconfig",
         "android.appwidget.flags-aconfig",
         "android.content.pm.flags-aconfig",
+        "android.media.audio-aconfig",
         "android.provider.flags-aconfig",
         "camera_platform_flags",
         "android.net.platform.flags-aconfig",
