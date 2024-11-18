@@ -135,6 +135,8 @@
     <public name="pageSizeCompat" />
     <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
     <public name="shareRolePriority"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SUPPORT_MINOR_VERSIONS_IN_MINSDKVERSION) -->
+    <public name="minSdkVersionFull"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
