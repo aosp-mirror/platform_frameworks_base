@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NO
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE;
 
 import static com.android.server.biometrics.sensors.LockoutTracker.LOCKOUT_NONE;
 
@@ -55,6 +56,7 @@ public class PreAuthInfoTest {
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
 
+    private static final int USER_ID = 0;
     private static final int SENSOR_ID_FINGERPRINT = 0;
     private static final int SENSOR_ID_FACE = 1;
     private static final String TEST_PACKAGE_NAME = "PreAuthInfoTestPackage";
@@ -184,6 +186,20 @@ public class PreAuthInfoTest {
         assertThat(preAuthInfo.eligibleSensors.get(0).modality).isEqualTo(TYPE_FINGERPRINT);
     }
 
+    @Test
+    public void prioritizeStrengthErrorBeforeCameraUnavailableError() throws Exception {
+        final BiometricSensor sensor = getFaceSensorWithStrength(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK);
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        promptInfo.setNegativeButtonText(TEST_PACKAGE_NAME);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor), USER_ID , promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+
+        assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(BIOMETRIC_ERROR_NO_HARDWARE);
+    }
+
     private BiometricSensor getFingerprintSensor() {
         BiometricSensor sensor = new BiometricSensor(mContext, SENSOR_ID_FINGERPRINT,
                 TYPE_FINGERPRINT, BiometricManager.Authenticators.BIOMETRIC_STRONG,
@@ -202,9 +218,10 @@ public class PreAuthInfoTest {
         return sensor;
     }
 
-    private BiometricSensor getFaceSensor() {
+    private BiometricSensor getFaceSensorWithStrength(
+            @BiometricManager.Authenticators.Types int sensorStrength) {
         BiometricSensor sensor = new BiometricSensor(mContext, SENSOR_ID_FACE, TYPE_FACE,
-                BiometricManager.Authenticators.BIOMETRIC_STRONG, mFaceAuthenticator) {
+                sensorStrength, mFaceAuthenticator) {
             @Override
             boolean confirmationAlwaysRequired(int userId) {
                 return false;
@@ -217,5 +234,9 @@ public class PreAuthInfoTest {
         };
 
         return sensor;
+    }
+
+    private BiometricSensor getFaceSensor() {
+        return getFaceSensorWithStrength(BiometricManager.Authenticators.BIOMETRIC_STRONG);
     }
 }
