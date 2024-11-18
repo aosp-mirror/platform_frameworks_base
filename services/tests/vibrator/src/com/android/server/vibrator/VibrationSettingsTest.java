@@ -202,6 +202,7 @@ public class VibrationSettingsTest {
         removeServicesForTest();
         LocalServices.addService(PowerManagerInternal.class, mPowerManagerInternalMock);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
+        when(mContextSpy.getSystemService(eq(Context.AUDIO_SERVICE))).thenReturn(null);
 
         VibrationSettings minimalVibrationSettings = new VibrationSettings(mContextSpy,
                 new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
@@ -455,6 +456,16 @@ public class VibrationSettingsTest {
     @Test
     public void shouldIgnoreVibration_withRingerModeNormal_allowsAllVibrations() {
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+
+        for (int usage : ALL_USAGES) {
+            assertVibrationNotIgnoredForUsage(usage);
+        }
+    }
+
+    @Test
+    public void shouldIgnoreVibration_withoutAudioManager_allowsAllVibrations() {
+        when(mContextSpy.getSystemService(eq(Context.AUDIO_SERVICE))).thenReturn(null);
+        createSystemReadyVibrationSettings();
 
         for (int usage : ALL_USAGES) {
             assertVibrationNotIgnoredForUsage(usage);
