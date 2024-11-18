@@ -242,6 +242,8 @@
     <uses-permission android:name="android.permission.READ_LOWPAN_CREDENTIAL" />
     <uses-permission android:name="android.permission.BLUETOOTH_STACK" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.COPY_ACCOUNTS" />
+    <uses-permission android:name="android.permission.REMOVE_ACCOUNTS" />
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_TOKEN" />
     <uses-permission android:name="android.permission.FRAME_STATS" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
