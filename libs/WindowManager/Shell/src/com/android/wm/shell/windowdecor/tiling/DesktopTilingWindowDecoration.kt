@@ -225,10 +225,11 @@ class DesktopTilingWindowDecoration(
     fun onDividerHandleDragStart(motionEvent: MotionEvent) {
         val leftTiledTask = leftTaskResizingHelper ?: return
         val rightTiledTask = rightTaskResizingHelper ?: return
+        val inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
 
         desktopModeEventLogger.logTaskResizingStarted(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             leftTiledTask.taskInfo,
             leftTiledTask.bounds.width(),
             leftTiledTask.bounds.height(),
@@ -237,7 +238,7 @@ class DesktopTilingWindowDecoration(
 
         desktopModeEventLogger.logTaskResizingStarted(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             rightTiledTask.taskInfo,
             rightTiledTask.bounds.width(),
             rightTiledTask.bounds.height(),
@@ -300,10 +301,11 @@ class DesktopTilingWindowDecoration(
     ) {
         val leftTiledTask = leftTaskResizingHelper ?: return
         val rightTiledTask = rightTaskResizingHelper ?: return
+        val inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
 
         desktopModeEventLogger.logTaskResizingEnded(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             leftTiledTask.taskInfo,
             leftTiledTask.newBounds.width(),
             leftTiledTask.newBounds.height(),
@@ -312,7 +314,7 @@ class DesktopTilingWindowDecoration(
 
         desktopModeEventLogger.logTaskResizingEnded(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             rightTiledTask.taskInfo,
             rightTiledTask.newBounds.width(),
             rightTiledTask.newBounds.height(),

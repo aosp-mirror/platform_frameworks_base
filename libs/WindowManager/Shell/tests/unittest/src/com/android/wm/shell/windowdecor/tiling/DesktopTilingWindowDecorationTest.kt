@@ -464,7 +464,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         // this test, so we verify the same log twice.
         verify(desktopModeEventLogger, times(2)).logTaskResizingStarted(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            DesktopModeEventLogger.Companion.InputMethod.UNKNOWN_INPUT_METHOD,
             task1,
             BOUNDS.width() / 2,
             BOUNDS.height(),
@@ -477,7 +477,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         // this test, so we verify the same log twice.
         verify(desktopModeEventLogger, times(2)).logTaskResizingEnded(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            DesktopModeEventLogger.Companion.InputMethod.UNKNOWN_INPUT_METHOD,
             task1,
             BOUNDS.width(),
             BOUNDS.height(),

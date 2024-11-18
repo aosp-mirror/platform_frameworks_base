@@ -187,7 +187,7 @@ class DesktopModeEventLogger {
      */
     fun logTaskResizingStarted(
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
         taskInfo: RunningTaskInfo,
         taskWidth: Int? = null,
         taskHeight: Int? = null,
@@ -207,7 +207,7 @@ class DesktopModeEventLogger {
 
         val taskSizeUpdate = createTaskSizeUpdate(
             resizeTrigger,
-            motionEvent,
+            inputMethod,
             taskInfo,
             taskWidth,
             taskHeight,
@@ -232,7 +232,7 @@ class DesktopModeEventLogger {
      */
     fun logTaskResizingEnded(
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
         taskInfo: RunningTaskInfo,
         taskWidth: Int? = null,
         taskHeight: Int? = null,
@@ -252,7 +252,7 @@ class DesktopModeEventLogger {
 
         val taskSizeUpdate = createTaskSizeUpdate(
             resizeTrigger,
-            motionEvent,
+            inputMethod,
             taskInfo,
             taskWidth,
             taskHeight,
@@ -275,7 +275,7 @@ class DesktopModeEventLogger {
 
     private fun createTaskSizeUpdate(
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
         taskInfo: RunningTaskInfo,
         taskWidth: Int? = null,
         taskHeight: Int? = null,
@@ -296,7 +296,7 @@ class DesktopModeEventLogger {
 
         return TaskSizeUpdate(
             resizeTrigger,
-            getInputMethodFromMotionEvent(motionEvent),
+            inputMethod,
             taskInfo.taskId,
             taskInfo.effectiveUid,
             height,
@@ -446,7 +446,7 @@ class DesktopModeEventLogger {
             val displayArea: Int?,
         )
 
-        private fun getInputMethodFromMotionEvent(e: MotionEvent?): InputMethod {
+        fun getInputMethodFromMotionEvent(e: MotionEvent?): InputMethod {
             if (e == null) return InputMethod.UNKNOWN_INPUT_METHOD
 
             val toolType = e.getToolType(

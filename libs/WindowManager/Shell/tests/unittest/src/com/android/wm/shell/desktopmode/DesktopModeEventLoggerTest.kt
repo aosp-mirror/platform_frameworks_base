@@ -487,7 +487,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     @Test
     fun logTaskResizingStarted_noOngoingSession_doesNotLog() {
         desktopModeEventLogger.logTaskResizingStarted(ResizeTrigger.CORNER,
-            null, createTaskInfo())
+            InputMethod.UNKNOWN_INPUT_METHOD, createTaskInfo())
 
         verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -499,7 +499,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         val sessionId = startDesktopModeSession()
 
         desktopModeEventLogger.logTaskResizingStarted(ResizeTrigger.CORNER,
-            null, createTaskInfo(), TASK_SIZE_UPDATE.taskWidth,
+            InputMethod.UNKNOWN_INPUT_METHOD, createTaskInfo(), TASK_SIZE_UPDATE.taskWidth,
             TASK_SIZE_UPDATE.taskHeight, displayController)
 
         verify {
@@ -531,7 +531,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
     @Test
     fun logTaskResizingEnded_noOngoingSession_doesNotLog() {
         desktopModeEventLogger.logTaskResizingEnded(ResizeTrigger.CORNER,
-            null, createTaskInfo())
+            InputMethod.UNKNOWN_INPUT_METHOD, createTaskInfo())
 
         verifyZeroInteractions(staticMockMarker(FrameworkStatsLog::class.java))
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -543,7 +543,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         val sessionId = startDesktopModeSession()
 
         desktopModeEventLogger.logTaskResizingEnded(ResizeTrigger.CORNER,
-            null, createTaskInfo(), displayController = displayController)
+            InputMethod.UNKNOWN_INPUT_METHOD, createTaskInfo(), displayController = displayController)
 
         verify {
             FrameworkStatsLog.write(

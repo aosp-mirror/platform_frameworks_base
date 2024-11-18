@@ -205,7 +205,9 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
 
         assertThat(result).isTrue()
-        verify(desktopModeWindowDecorViewModel).onSnapResize(task.taskId, true, null)
+        verify(desktopModeWindowDecorViewModel).onSnapResize(
+            task.taskId, true, DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
+        )
     }
 
     @Test
@@ -232,7 +234,9 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
 
         assertThat(result).isTrue()
-        verify(desktopModeWindowDecorViewModel).onSnapResize(task.taskId, false, null)
+        verify(desktopModeWindowDecorViewModel).onSnapResize(
+            task.taskId, false, DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
+        )
     }
 
     @Test

@@ -129,6 +129,7 @@ import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
 import java.util.function.Consumer
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.Companion.DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION
@@ -795,7 +796,7 @@ class DesktopTasksController(
         val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         desktopModeEventLogger.logTaskResizingStarted(
             resizeTrigger,
-            motionEvent,
+            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
             taskInfo,
             currentTaskBounds.width(),
             currentTaskBounds.height(),
@@ -848,7 +849,8 @@ class DesktopTasksController(
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
         desktopModeEventLogger.logTaskResizingEnded(
-            resizeTrigger, motionEvent, taskInfo, destinationBounds.width(),
+            resizeTrigger, DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            taskInfo, destinationBounds.width(),
             destinationBounds.height(), displayController
         )
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
@@ -970,12 +972,12 @@ class DesktopTasksController(
         currentDragBounds: Rect,
         position: SnapPosition,
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
         desktopWindowDecoration: DesktopModeWindowDecoration,
     ) {
         desktopModeEventLogger.logTaskResizingStarted(
             resizeTrigger,
-            motionEvent,
+            inputMethod,
             taskInfo,
             currentDragBounds.width(),
             currentDragBounds.height(),
@@ -985,7 +987,7 @@ class DesktopTasksController(
         val destinationBounds = getSnapBounds(taskInfo, position)
         desktopModeEventLogger.logTaskResizingEnded(
             resizeTrigger,
-            motionEvent,
+            inputMethod,
             taskInfo,
             destinationBounds.width(),
             destinationBounds.height(),
@@ -1034,7 +1036,7 @@ class DesktopTasksController(
         taskInfo: RunningTaskInfo,
         position: SnapPosition,
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent? = null,
+        inputMethod: InputMethod,
         desktopModeWindowDecoration: DesktopModeWindowDecoration,
     ) {
         if (!isSnapResizingAllowed(taskInfo)) {
@@ -1052,7 +1054,7 @@ class DesktopTasksController(
             taskInfo.configuration.windowConfiguration.bounds,
             position,
             resizeTrigger,
-            motionEvent,
+            inputMethod,
             desktopModeWindowDecoration
         )
     }
@@ -1103,7 +1105,7 @@ class DesktopTasksController(
                 currentDragBounds,
                 position,
                 resizeTrigger,
-                motionEvent,
+                DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
                 desktopModeWindowDecoration,
             )
         }

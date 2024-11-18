@@ -94,6 +94,7 @@ import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopTasksController.DesktopModeEntryExitTransitionListener
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
@@ -377,7 +378,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     verify(taskbarDesktopTaskListener).onTaskbarCornerRoundingUpdate(argumentCaptor.capture())
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.MAXIMIZE_BUTTON,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task1,
       STABLE_BOUNDS.width(),
       STABLE_BOUNDS.height(),
@@ -404,7 +405,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     verify(taskbarDesktopTaskListener).onTaskbarCornerRoundingUpdate(argumentCaptor.capture())
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.MAXIMIZE_BUTTON,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task1,
       0,
       0,
@@ -3013,7 +3014,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     // Assert event is properly logged
     verify(desktopModeEventLogger, times(1)).logTaskResizingStarted(
       ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       task.configuration.windowConfiguration.bounds.width(),
       task.configuration.windowConfiguration.bounds.height(),
@@ -3021,7 +3022,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     )
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       STABLE_BOUNDS.width(),
       STABLE_BOUNDS.height(),
@@ -3354,7 +3355,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(findBoundsChange(wct, task)).isEqualTo(STABLE_BOUNDS)
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.MAXIMIZE_BUTTON,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       STABLE_BOUNDS.width(),
       STABLE_BOUNDS.height(),
@@ -3380,13 +3381,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
     )
 
     controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT,
-      ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
+      ResizeTrigger.SNAP_LEFT_MENU, InputMethod.TOUCH, desktopWindowDecoration)
     // Assert bounds set to stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
     assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.SNAP_LEFT_MENU,
-      motionEvent,
+      InputMethod.TOUCH,
       task,
       expectedBounds.width(),
       expectedBounds.height(),
@@ -3412,7 +3413,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     // Attempt to snap left again
     val currentDragBounds = Rect(bounds).apply { offset(-100, 0) }
     controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT,
-      ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
+      ResizeTrigger.SNAP_LEFT_MENU, InputMethod.TOUCH, desktopWindowDecoration)
     // Assert that task is NOT updated via WCT
     verify(toggleResizeDesktopTaskTransitionHandler, never()).startTransition(any(), any())
 
@@ -3426,7 +3427,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     )
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.SNAP_LEFT_MENU,
-      motionEvent,
+      InputMethod.TOUCH,
       task,
       bounds.width(),
       bounds.height(),
@@ -3456,7 +3457,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     )
     verify(desktopModeEventLogger, times(1)).logTaskResizingStarted(
       ResizeTrigger.DRAG_LEFT,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       preDragBounds.width(),
       preDragBounds.height(),
@@ -3505,7 +3506,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     controller.handleInstantSnapResizingTask(
-      task, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
+      task,
+      SnapPosition.LEFT,
+      ResizeTrigger.SNAP_LEFT_MENU,
+      InputMethod.MOUSE,
+      desktopWindowDecoration
+    )
 
     // Assert that task is NOT updated via WCT
     verify(toggleResizeDesktopTaskTransitionHandler, never()).startTransition(any(), any())
@@ -3525,7 +3531,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
     )
 
     controller.handleInstantSnapResizingTask(
-      task, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, motionEvent, desktopWindowDecoration)
+      task, SnapPosition.LEFT, ResizeTrigger.SNAP_LEFT_MENU, InputMethod.MOUSE,
+      desktopWindowDecoration
+    )
 
     // Assert bounds set to half of the stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct(taskBounds)
@@ -3533,7 +3541,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     verify(mockToast, never()).show()
     verify(desktopModeEventLogger, times(1)).logTaskResizingStarted(
       ResizeTrigger.SNAP_LEFT_MENU,
-      motionEvent,
+      InputMethod.MOUSE,
       task,
       taskBounds.width(),
       taskBounds.height(),
@@ -3541,7 +3549,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     )
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.SNAP_LEFT_MENU,
-      motionEvent,
+      InputMethod.MOUSE,
       task,
       expectedBounds.width(),
       expectedBounds.height(),
@@ -3572,7 +3580,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.MAXIMIZE_BUTTON,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       expectedBounds.width(),
       expectedBounds.height(),
@@ -3610,7 +3618,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(findBoundsChange(wct, task)).isEqualTo(boundsBeforeMaximize)
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.MAXIMIZE_BUTTON,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       boundsBeforeMaximize.width(),
       boundsBeforeMaximize.height(),
@@ -3638,7 +3646,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(findBoundsChange(wct, task)).isEqualTo(boundsBeforeMaximize)
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.MAXIMIZE_BUTTON,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       boundsBeforeMaximize.width(),
       boundsBeforeMaximize.height(),
@@ -3666,7 +3674,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(findBoundsChange(wct, task)).isEqualTo(boundsBeforeMaximize)
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.MAXIMIZE_BUTTON,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       boundsBeforeMaximize.width(),
       boundsBeforeMaximize.height(),
@@ -3690,7 +3698,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(taskRepository.removeBoundsBeforeMaximize(task.taskId)).isNull()
     verify(desktopModeEventLogger, times(1)).logTaskResizingEnded(
       ResizeTrigger.MAXIMIZE_BUTTON,
-      motionEvent,
+      InputMethod.UNKNOWN_INPUT_METHOD,
       task,
       boundsBeforeMaximize.width(),
       boundsBeforeMaximize.height(),

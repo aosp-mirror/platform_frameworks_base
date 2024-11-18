@@ -460,7 +460,8 @@ class DragResizeInputListener implements AutoCloseable {
                                 || ctrlType == CTRL_TYPE_RIGHT || ctrlType == CTRL_TYPE_LEFT)
                                 ? ResizeTrigger.EDGE : ResizeTrigger.CORNER;
                         mDesktopModeEventLogger.logTaskResizingStarted(mResizeTrigger,
-                                e, mTaskInfo, mDragStartTaskBounds.width(),
+                                DesktopModeEventLogger.Companion.getInputMethodFromMotionEvent(e),
+                                mTaskInfo, mDragStartTaskBounds.width(),
                                 mDragStartTaskBounds.height(), /* displayController= */ null,
                                 /* displayLayoutSize= */ mDisplayLayoutSizeSupplier.get());
                         // Increase the input sink region to cover the whole screen; this is to
@@ -513,7 +514,8 @@ class DragResizeInputListener implements AutoCloseable {
                         }
 
                         mDesktopModeEventLogger.logTaskResizingEnded(mResizeTrigger,
-                                mLastMotionEventOnDown, mTaskInfo, taskBounds.width(),
+                                DesktopModeEventLogger.Companion.getInputMethodFromMotionEvent(
+                                        mLastMotionEventOnDown), mTaskInfo, taskBounds.width(),
                                 taskBounds.height(),
                                 /* displayController= */ null,
                                 /* displayLayoutSize= */ mDisplayLayoutSizeSupplier.get());
