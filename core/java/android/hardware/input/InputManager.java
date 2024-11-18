@@ -1590,6 +1590,21 @@ public final class InputManager {
     }
 
     /**
+     * Resets locked modifier state (i.e.. Caps Lock, Num Lock, Scroll Lock state)
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public void resetLockedModifierState() {
+        try {
+            mIm.resetLockedModifierState();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
