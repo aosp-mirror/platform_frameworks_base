@@ -299,6 +299,11 @@ void PointerController::clearSkipScreenshotFlags() {
     mCursorController.setSkipScreenshot(false);
 }
 
+ui::Transform PointerController::getDisplayTransform() const {
+    std::scoped_lock lock(getLock());
+    return getTransformForDisplayLocked(mLocked.pointerDisplayId);
+}
+
 void PointerController::doInactivityTimeout() {
     fade(Transition::GRADUAL);
 }
