@@ -96,53 +96,46 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     private static final String TEST_PACKAGE_1 = "com.android.frameworks.wmtests";
     private static final String TEST_PACKAGE_2 = "com.test.package.two";
     private static final String CAMERA_ID_1 = "camera-1";
-    private static final String CAMERA_ID_2 = "camera-2";
-    private CameraManager mMockCameraManager;
-    private Handler mMockHandler;
     private AppCompatConfiguration mAppCompatConfiguration;
 
     private CameraManager.AvailabilityCallback mCameraAvailabilityCallback;
     private CameraCompatFreeformPolicy mCameraCompatFreeformPolicy;
     private ActivityRecord mActivity;
-    private Task mTask;
     private ActivityRefresher mActivityRefresher;
 
     @Before
     public void setUp() throws Exception {
         mAppCompatConfiguration = mDisplayContent.mWmService.mAppCompatConfiguration;
         spyOn(mAppCompatConfiguration);
-        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled())
-                .thenReturn(true);
-        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled())
-                .thenReturn(true);
+        when(mAppCompatConfiguration.isCameraCompatTreatmentEnabled()).thenReturn(true);
+        when(mAppCompatConfiguration.isCameraCompatRefreshEnabled()).thenReturn(true);
         when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(true);
 
-        mMockCameraManager = mock(CameraManager.class);
+        final CameraManager mockCameraManager = mock(CameraManager.class);
         doAnswer(invocation -> {
             mCameraAvailabilityCallback = invocation.getArgument(1);
             return null;
-        }).when(mMockCameraManager).registerAvailabilityCallback(
+        }).when(mockCameraManager).registerAvailabilityCallback(
                 any(Executor.class), any(CameraManager.AvailabilityCallback.class));
 
-        when(mContext.getSystemService(CameraManager.class)).thenReturn(mMockCameraManager);
+        when(mContext.getSystemService(CameraManager.class)).thenReturn(mockCameraManager);
 
         mDisplayContent.setIgnoreOrientationRequest(true);
 
-        mMockHandler = mock(Handler.class);
+        final Handler mockHandler = mock(Handler.class);
 
-        when(mMockHandler.postDelayed(any(Runnable.class), anyLong())).thenAnswer(
+        when(mockHandler.postDelayed(any(Runnable.class), anyLong())).thenAnswer(
                 invocation -> {
                     ((Runnable) invocation.getArgument(0)).run();
                     return null;
                 });
 
-        mActivityRefresher = new ActivityRefresher(mDisplayContent.mWmService, mMockHandler);
-        CameraStateMonitor cameraStateMonitor =
-                new CameraStateMonitor(mDisplayContent, mMockHandler);
-        mCameraCompatFreeformPolicy =
-                new CameraCompatFreeformPolicy(mDisplayContent, cameraStateMonitor,
-                        mActivityRefresher);
+        mActivityRefresher = new ActivityRefresher(mDisplayContent.mWmService, mockHandler);
+        final CameraStateMonitor cameraStateMonitor = new CameraStateMonitor(mDisplayContent,
+                mockHandler);
+        mCameraCompatFreeformPolicy = new CameraCompatFreeformPolicy(mDisplayContent,
+                cameraStateMonitor, mActivityRefresher);
 
         setDisplayRotation(Surface.ROTATION_90);
         mCameraCompatFreeformPolicy.start();
@@ -250,10 +243,12 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     public void testShouldApplyCameraCompatFreeformTreatment_overrideEnabled_returnsFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
         assertTrue(mActivity.info
                 .isChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT));
-        assertFalse(mCameraCompatFreeformPolicy.isCameraCompatForFreeformEnabledForActivity(
-                mActivity));
+        assertFalse(mCameraCompatFreeformPolicy.isTreatmentEnabledForActivity(
+                mActivity, /*  checkOrientation= */ true));
     }
 
     @Test
@@ -261,8 +256,10 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     public void testShouldApplyCameraCompatFreeformTreatment_notDisabledByOverride_returnsTrue() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertTrue(mCameraCompatFreeformPolicy.isCameraCompatForFreeformEnabledForActivity(
-                mActivity));
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertTrue(mCameraCompatFreeformPolicy.isTreatmentEnabledForActivity(
+                mActivity, /*  checkOrientation= */ true));
     }
 
     @Test
@@ -406,7 +403,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     private void configureActivityAndDisplay(@ScreenOrientation int activityOrientation,
             @Orientation int naturalOrientation, @WindowingMode int windowingMode) {
-        mTask = new TaskBuilder(mSupervisor)
+        final Task task = new TaskBuilder(mSupervisor)
                 .setDisplay(mDisplayContent)
                 .setWindowingMode(windowingMode)
                 .build();
@@ -416,7 +413,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 .setComponent(ComponentName.createRelative(mContext,
                         com.android.server.wm.CameraCompatFreeformPolicyTests.class.getName()))
                 .setScreenOrientation(activityOrientation)
-                .setTask(mTask)
+                .setTask(task)
                 .build();
 
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
@@ -469,7 +466,8 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     private Configuration createConfiguration(boolean letterbox) {
         final Configuration configuration = new Configuration();
-        Rect bounds = letterbox ? new Rect(300, 0, 700, 600) : new Rect(0, 0, 1000, 600);
+        Rect bounds = letterbox ? new Rect(/*left*/ 300, /*top*/ 0, /*right*/ 700, /*bottom*/ 600)
+                : new Rect(/*left*/ 0, /*top*/ 0, /*right*/ 1000, /*bottom*/ 600);
         configuration.windowConfiguration.setAppBounds(bounds);
         return configuration;
     }

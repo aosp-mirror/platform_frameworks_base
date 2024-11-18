@@ -163,7 +163,7 @@ class AppCompatCameraOverrides {
      *
      * <p>The treatment is enabled when the following conditions are met:
      * <ul>
-     * <li>Property gating the camera compatibility free-form treatment is enabled.
+     * <li>Feature flag gating the camera compatibility free-form treatment is enabled.
      * <li>Activity isn't opted out by the device manufacturer with override.
      * </ul>
      */
