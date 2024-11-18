@@ -353,7 +353,10 @@ public final class Helper {
     private static void addAutofillableIds(@NonNull ViewNode node,
             @NonNull ArrayList<AutofillId> ids, boolean autofillableOnly) {
         if (!autofillableOnly || node.getAutofillType() != View.AUTOFILL_TYPE_NONE) {
-            ids.add(node.getAutofillId());
+            AutofillId id = node.getAutofillId();
+            if (id != null) {
+                ids.add(id);
+            }
         }
         final int size = node.getChildCount();
         for (int i = 0; i < size; i++) {
