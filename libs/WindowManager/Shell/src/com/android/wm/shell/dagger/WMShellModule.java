@@ -68,6 +68,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.common.transition.TransitionStateHolder;
 import com.android.wm.shell.compatui.letterbox.LetterboxCommandHandler;
 import com.android.wm.shell.compatui.letterbox.LetterboxController;
 import com.android.wm.shell.compatui.letterbox.LetterboxTransitionObserver;
@@ -1316,9 +1317,11 @@ public abstract class WMShellModule {
     static LetterboxTransitionObserver provideLetterboxTransitionObserver(
             @NonNull ShellInit shellInit,
             @NonNull Transitions transitions,
-            @NonNull LetterboxController letterboxController
+            @NonNull LetterboxController letterboxController,
+            @NonNull TransitionStateHolder transitionStateHolder
     ) {
-        return new LetterboxTransitionObserver(shellInit, transitions, letterboxController);
+        return new LetterboxTransitionObserver(shellInit, transitions, letterboxController,
+                transitionStateHolder);
     }
 
     @WMSingleton

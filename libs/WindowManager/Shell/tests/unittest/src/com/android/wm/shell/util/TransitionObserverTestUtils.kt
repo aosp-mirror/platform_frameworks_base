@@ -77,6 +77,30 @@ class TransitionObserverTestContext : TransitionObserverTestStep {
         validateObj.validate()
     }
 
+    fun validateOnMerged(
+        validate:
+        TransitionObserverOnTransitionMergedValidation.() -> Unit
+    ) {
+        val validateObj = TransitionObserverOnTransitionMergedValidation()
+        transitionObserver.onTransitionMerged(
+            validateObj.playing,
+            validateObj.merged
+        )
+        validateObj.validate()
+    }
+
+    fun validateOnFinished(
+        validate:
+        TransitionObserverOnTransitionFinishedValidation.() -> Unit
+    ) {
+        val validateObj = TransitionObserverOnTransitionFinishedValidation()
+        transitionObserver.onTransitionFinished(
+            transitionReadyInput.transition,
+            validateObj.aborted
+        )
+        validateObj.validate()
+    }
+
     fun invokeObservable() {
         transitionObserver.onTransitionReady(
             transitionReadyInput.transition,
@@ -160,6 +184,28 @@ class TransitionObserverInputBuilder : TransitionObserverTestStep {
  * Phase responsible for the execution of validation methods.
  */
 class TransitionObserverResultValidation : TransitionObserverTestStep
+
+/**
+ * Phase responsible for the execution of validation methods after the
+ * [TransitionObservable#onTransitionMerged] has been executed.
+ */
+class TransitionObserverOnTransitionMergedValidation : TransitionObserverTestStep {
+    val merged = mock<IBinder>()
+    val playing = mock<IBinder>()
+
+    init {
+        spyOn(merged)
+        spyOn(playing)
+    }
+}
+
+/**
+ * Phase responsible for the execution of validation methods after the
+ * [TransitionObservable#onTransitionFinished] has been executed.
+ */
+class TransitionObserverOnTransitionFinishedValidation : TransitionObserverTestStep {
+    var aborted: Boolean = false
+}
 
 /**
  * Allows to run a test about a specific [TransitionObserver] passing the specific
