@@ -11,7 +11,6 @@ package android.nfc {
     method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public java.util.Map<java.lang.String,java.lang.Boolean> getTagIntentAppPreferenceForUser(int);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean isControllerAlwaysOn();
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean isControllerAlwaysOnSupported();
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean isTagIntentAppPreferenceSupported();
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void registerControllerAlwaysOnListener(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
     method @FlaggedApi("android.nfc.nfc_vendor_cmd") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void registerNfcVendorNciCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.NfcVendorNciCallback);
     method @FlaggedApi("android.nfc.enable_nfc_charging") public void registerWlcStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.WlcStateListener);
