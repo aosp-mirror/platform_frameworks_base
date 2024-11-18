@@ -650,6 +650,8 @@ class HandleMenu(
         }
 
         private fun bindMoreActionsPill(style: MenuStyle) {
+            moreActionsPill.background.setTint(style.backgroundColor)
+
             arrayOf(
                 screenshotBtn to SHOULD_SHOW_SCREENSHOT_BUTTON,
                 newWindowBtn to shouldShowNewWindowButton,
@@ -660,7 +662,6 @@ class HandleMenu(
                 val shouldShow = it.second
                 button.apply {
                     isGone = !shouldShow
-                    background.setTint(style.backgroundColor)
                     setTextColor(style.textColor)
                     compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
                 }
