@@ -36,6 +36,7 @@
 #include <cutils/trace.h>
 #include <fmq/AidlMessageQueue.h>
 #include <inttypes.h>
+#include <jni_wrappers.h>
 #include <performance_hint_private.h>
 #include <utils/SystemClock.h>
 
@@ -137,10 +138,14 @@ public:
 
     APerformanceHintSession* createSession(const int32_t* threadIds, size_t size,
                                            int64_t initialTargetWorkDurationNanos,
-                                           hal::SessionTag tag = hal::SessionTag::APP);
+                                           hal::SessionTag tag = hal::SessionTag::APP,
+                                           bool isJava = false);
+    APerformanceHintSession* getSessionFromJava(JNIEnv* _Nonnull env, jobject _Nonnull sessionObj);
+
     int64_t getPreferredRateNanos() const;
     FMQWrapper& getFMQWrapper();
     bool canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) REQUIRES(sHintMutex);
+    void initJava(JNIEnv* _Nonnull env);
 
 private:
     // Necessary to create an empty binder object
@@ -161,13 +166,16 @@ private:
     FMQWrapper mFMQWrapper;
     double mHintBudget = kMaxLoadHintsPerInterval;
     int64_t mLastBudgetReplenish = 0;
+    bool mJavaInitialized = false;
+    jclass mJavaSessionClazz;
+    jfieldID mJavaSessionNativePtr;
 };
 
 struct APerformanceHintSession {
 public:
     APerformanceHintSession(std::shared_ptr<IHintManager> hintManager,
                             std::shared_ptr<IHintSession> session, int64_t preferredRateNanos,
-                            int64_t targetDurationNanos,
+                            int64_t targetDurationNanos, bool isJava,
                             std::optional<hal::SessionConfig> sessionConfig);
     APerformanceHintSession() = delete;
     ~APerformanceHintSession();
@@ -181,6 +189,7 @@ public:
     int getThreadIds(int32_t* const threadIds, size_t* size);
     int setPreferPowerEfficiency(bool enabled);
     int reportActualWorkDuration(AWorkDuration* workDuration);
+    bool isJava();
 
 private:
     friend struct APerformanceHintManager;
@@ -203,6 +212,8 @@ private:
     std::vector<int64_t> mLastHintSentTimestamp GUARDED_BY(sHintMutex);
     // Cached samples
     std::vector<hal::WorkDuration> mActualWorkDurations GUARDED_BY(sHintMutex);
+    // Is this session backing an SDK wrapper object
+    const bool mIsJava;
     std::string mSessionName;
     static int64_t sIDCounter GUARDED_BY(sHintMutex);
     // The most recent set of thread IDs
@@ -299,7 +310,7 @@ bool APerformanceHintManager::canSendLoadHints(std::vector<hal::SessionHint>& hi
 
 APerformanceHintSession* APerformanceHintManager::createSession(
         const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos,
-        hal::SessionTag tag) {
+        hal::SessionTag tag, bool isJava) {
     std::vector<int32_t> tids(threadIds, threadIds + size);
     std::shared_ptr<IHintSession> session;
     ndk::ScopedAStatus ret;
@@ -312,7 +323,7 @@ APerformanceHintSession* APerformanceHintManager::createSession(
         return nullptr;
     }
     auto out = new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
-                                           initialTargetWorkDurationNanos,
+                                           initialTargetWorkDurationNanos, isJava,
                                            sessionConfig.id == -1
                                                    ? std::nullopt
                                                    : std::make_optional<hal::SessionConfig>(
@@ -324,6 +335,18 @@ APerformanceHintSession* APerformanceHintManager::createSession(
     return out;
 }
 
+APerformanceHintSession* APerformanceHintManager::getSessionFromJava(JNIEnv* env,
+                                                                     jobject sessionObj) {
+    initJava(env);
+    LOG_ALWAYS_FATAL_IF(!env->IsInstanceOf(sessionObj, mJavaSessionClazz),
+                        "Wrong java type passed to APerformanceHint_getSessionFromJava");
+    APerformanceHintSession* out = reinterpret_cast<APerformanceHintSession*>(
+            env->GetLongField(sessionObj, mJavaSessionNativePtr));
+    LOG_ALWAYS_FATAL_IF(out == nullptr, "Java-wrapped native hint session is nullptr");
+    LOG_ALWAYS_FATAL_IF(!out->isJava(), "Unmanaged native hint session returned from Java SDK");
+    return out;
+}
+
 int64_t APerformanceHintManager::getPreferredRateNanos() const {
     return mPreferredRateNanos;
 }
@@ -332,13 +355,23 @@ FMQWrapper& APerformanceHintManager::getFMQWrapper() {
     return mFMQWrapper;
 }
 
+void APerformanceHintManager::initJava(JNIEnv* _Nonnull env) {
+    if (mJavaInitialized) {
+        return;
+    }
+    jclass sessionClazz = FindClassOrDie(env, "android/os/PerformanceHintManager$Session");
+    mJavaSessionClazz = MakeGlobalRefOrDie(env, sessionClazz);
+    mJavaSessionNativePtr = GetFieldIDOrDie(env, mJavaSessionClazz, "mNativeSessionPtr", "J");
+    mJavaInitialized = true;
+}
+
 // ===================================== APerformanceHintSession implementation
 
 constexpr int kNumEnums = enum_size<hal::SessionHint>();
 APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> hintManager,
                                                  std::shared_ptr<IHintSession> session,
                                                  int64_t preferredRateNanos,
-                                                 int64_t targetDurationNanos,
+                                                 int64_t targetDurationNanos, bool isJava,
                                                  std::optional<hal::SessionConfig> sessionConfig)
       : mHintManager(hintManager),
         mHintSession(std::move(session)),
@@ -347,6 +380,7 @@ APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> h
         mFirstTargetMetTimestamp(0),
         mLastTargetMetTimestamp(0),
         mLastHintSentTimestamp(std::vector<int64_t>(kNumEnums, 0)),
+        mIsJava(isJava),
         mSessionConfig(sessionConfig) {
     if (sessionConfig->id > INT32_MAX) {
         ALOGE("Session ID too large, must fit 32-bit integer");
@@ -399,6 +433,10 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
                                    .gpuDurationNanos = 0};
 
     return reportActualWorkDurationInternal(static_cast<AWorkDuration*>(&workDuration));
+}
+
+bool APerformanceHintSession::isJava() {
+    return mIsJava;
 }
 
 int APerformanceHintSession::sendHints(std::vector<hal::SessionHint>& hints, int64_t now,
@@ -826,6 +864,22 @@ APerformanceHintSession* APerformanceHint_createSessionInternal(
                                   static_cast<hal::SessionTag>(tag));
 }
 
+APerformanceHintSession* APerformanceHint_createSessionFromJava(
+        APerformanceHintManager* manager, const int32_t* threadIds, size_t size,
+        int64_t initialTargetWorkDurationNanos) {
+    VALIDATE_PTR(manager)
+    VALIDATE_PTR(threadIds)
+    return manager->createSession(threadIds, size, initialTargetWorkDurationNanos,
+                                  hal::SessionTag::APP, true);
+}
+
+APerformanceHintSession* APerformanceHint_borrowSessionFromJava(JNIEnv* env,
+                                                                    jobject sessionObj) {
+    VALIDATE_PTR(env)
+    VALIDATE_PTR(sessionObj)
+    return APerformanceHintManager::getInstance()->getSessionFromJava(env, sessionObj);
+}
+
 int64_t APerformanceHint_getPreferredUpdateRateNanos(APerformanceHintManager* manager) {
     VALIDATE_PTR(manager)
     return manager->getPreferredRateNanos();
@@ -845,6 +899,16 @@ int APerformanceHint_reportActualWorkDuration(APerformanceHintSession* session,
 }
 
 void APerformanceHint_closeSession(APerformanceHintSession* session) {
+    VALIDATE_PTR(session)
+    if (session->isJava()) {
+        LOG_ALWAYS_FATAL("%s: Java-owned PerformanceHintSession cannot be closed in native",
+                         __FUNCTION__);
+        return;
+    }
+    delete session;
+}
+
+void APerformanceHint_closeSessionFromJava(APerformanceHintSession* session) {
     VALIDATE_PTR(session)
     delete session;
 }
