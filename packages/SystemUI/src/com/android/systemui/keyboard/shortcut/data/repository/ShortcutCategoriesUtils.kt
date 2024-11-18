@@ -24,6 +24,7 @@ import android.util.Log
 import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
+import android.view.KeyEvent.META_META_ON
 import com.android.systemui.Flags.shortcutHelperKeyGlyph
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.data.model.InternalKeyboardShortcutGroup
@@ -35,9 +36,9 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.withContext
 
 class ShortcutCategoriesUtils
 @Inject
@@ -161,7 +162,7 @@ constructor(
         }
         if (remainingModifiers != 0) {
             // There is a remaining modifier we don't support
-            Log.wtf(TAG, "Unsupported modifiers remaining: $remainingModifiers")
+            Log.w(TAG, "Unsupported modifiers remaining: $remainingModifiers")
             return null
         }
         if (info.keycode != 0 || info.baseCharacter > Char.MIN_VALUE) {
@@ -170,10 +171,22 @@ constructor(
                     ?: return null
         }
         if (keys.isEmpty()) {
-            Log.wtf(TAG, "No keys for $info")
+            Log.w(TAG, "No keys for $info")
             return null
         }
         return ShortcutCommand(keys = keys, isCustom = info.isCustomShortcut)
+    }
+
+    fun toShortcutModifierKeys(modifiers: Int, keyGlyphMap: KeyGlyphMap?): List<ShortcutKey>? {
+        val keys: MutableList<ShortcutKey> = mutableListOf()
+        var remainingModifiers = modifiers
+        SUPPORTED_MODIFIERS.forEach { supportedModifier ->
+            if ((supportedModifier and remainingModifiers) != 0) {
+                keys += toShortcutModifierKey(keyGlyphMap, supportedModifier) ?: return null
+                remainingModifiers = remainingModifiers and supportedModifier.inv()
+            }
+        }
+        return keys
     }
 
     private fun toShortcutModifierKey(keyGlyphMap: KeyGlyphMap?, modifierMask: Int): ShortcutKey? {
@@ -182,9 +195,8 @@ constructor(
             return ShortcutKey.Icon.DrawableIcon(drawable = modifierDrawable)
         }
 
-        val iconResId = ShortcutHelperKeys.keyIcons[modifierMask]
-        if (iconResId != null) {
-            return ShortcutKey.Icon.ResIdIcon(iconResId)
+        if (modifierMask == META_META_ON) {
+            return ShortcutKey.Icon.ResIdIcon(ShortcutHelperKeys.metaModifierIconResId)
         }
 
         val modifierLabel = ShortcutHelperKeys.modifierLabels[modifierMask]
@@ -195,7 +207,7 @@ constructor(
         return null
     }
 
-    private fun toShortcutKey(
+    fun toShortcutKey(
         keyGlyphMap: KeyGlyphMap?,
         keyCharacterMap: KeyCharacterMap,
         keyCode: Int,
@@ -222,7 +234,7 @@ constructor(
         if (displayLabelCharacter.code != 0) {
             return ShortcutKey.Text(displayLabelCharacter.toString())
         }
-        Log.wtf(TAG, "Couldn't find label or icon for key: $keyCode")
+        Log.w(TAG, "Couldn't find label or icon for key: $keyCode")
         return null
     }
 

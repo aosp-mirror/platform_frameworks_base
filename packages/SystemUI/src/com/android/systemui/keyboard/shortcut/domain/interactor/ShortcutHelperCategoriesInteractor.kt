@@ -25,10 +25,10 @@ import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
-import javax.inject.Inject
 
 @SysUISingleton
 class ShortcutHelperCategoriesInteractor

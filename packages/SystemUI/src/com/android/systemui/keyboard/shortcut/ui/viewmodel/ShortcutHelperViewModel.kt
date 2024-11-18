@@ -40,6 +40,7 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,7 +51,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class ShortcutHelperViewModel
 @Inject
