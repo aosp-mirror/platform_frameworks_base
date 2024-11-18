@@ -3817,17 +3817,16 @@
     <!-- Error message displayed when the user select a key combination that is already in use while
          assigning a new custom key combination to a shortcut in shortcut helper. The helper is a
          component that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
-    <string name="shortcut_helper_customize_dialog_error_message">Key combination already in use. Try another key.</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message">Key combination already in use. Try another key.</string>
     <!-- Generic error message displayed when the user selected key combination cannot be used as
          custom keyboard shortcut in shortcut helper. The helper is a component that shows the user
          which keyboard shortcuts they can use and allows users to customize their keyboard
          shortcuts. [CHAR LIMIT=NONE] -->
-    <string name="shortcut_helper_customize_generic_error_message">Shortcut cannot be set.</string>
+    <string name="shortcut_customizer_generic_error_message">Shortcut cannot be set.</string>
     <!-- Plus sign, used in keyboard shortcut helper to combine keys for shortcut. E.g. Ctrl + A
          The helper is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_plus_symbol">+</string>
-
 
     <!-- Keyboard touchpad tutorial scheduler-->
     <!-- Notification title for launching keyboard tutorial [CHAR_LIMIT=100] -->

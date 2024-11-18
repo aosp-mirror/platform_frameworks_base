@@ -24,12 +24,12 @@ import android.hardware.input.InputGestureData.KeyTrigger
 import android.hardware.input.InputGestureData.createKeyTrigger
 import android.hardware.input.InputManager
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS
-import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.InputSettings
 import android.hardware.input.KeyGestureEvent
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.mutableStateOf
 import com.android.systemui.Flags.shortcutHelperKeyGlyph
 import com.android.systemui.dagger.SysUISingleton
@@ -166,40 +166,44 @@ constructor(
         _shortcutBeingCustomized.value = requestInfo
     }
 
+    @VisibleForTesting
+    fun buildInputGestureDataForShortcutBeingCustomized(): InputGestureData? {
+        try {
+            return Builder()
+                .addKeyGestureTypeFromShortcutLabel()
+                .addTriggerFromSelectedKeyCombination()
+                .build()
+            // TODO(b/379648200) add app launch data for application categories shortcut after
+            // dynamic
+            // label/icon mapping implementation
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "could not add custom shortcut: $e")
+            return null
+        }
+    }
+
     suspend fun confirmAndSetShortcutCurrentlyBeingCustomized(): ShortcutCustomizationRequestResult {
         return withContext(bgCoroutineContext) {
-            val builder =
-                Builder().addKeyGestureTypeFromShortcutLabel()
-                    .addTriggerFromSelectedKeyCombination()
+            val inputGestureData =
+                buildInputGestureDataForShortcutBeingCustomized()
+                    ?: return@withContext ShortcutCustomizationRequestResult.ERROR_OTHER
 
-            // TODO(b/379648200) add app launch data for application categories shortcut after dynamic
-            // label mapping implementation
-            try {
-                val inputGestureData = builder.build()
-                val result = inputManager.addCustomInputGesture(inputGestureData)
-                return@withContext when (result) {
-                    CUSTOM_INPUT_GESTURE_RESULT_SUCCESS -> ShortcutCustomizationRequestResult.SUCCESS
-                    CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS ->
-                        ShortcutCustomizationRequestResult.ERROR_ALREADY_EXISTS
+            return@withContext when (inputManager.addCustomInputGesture(inputGestureData)) {
+                CUSTOM_INPUT_GESTURE_RESULT_SUCCESS -> ShortcutCustomizationRequestResult.SUCCESS
+                CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS ->
+                    ShortcutCustomizationRequestResult.ERROR_RESERVED_COMBINATION
 
-                    CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST ->
-                        ShortcutCustomizationRequestResult.ERROR_DOES_NOT_EXIST
+                CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE ->
+                    ShortcutCustomizationRequestResult.ERROR_RESERVED_COMBINATION
 
-                    CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE ->
-                        ShortcutCustomizationRequestResult.ERROR_RESERVED_SHORTCUT
-
-                    else -> ShortcutCustomizationRequestResult.ERROR_OTHER
-                }
-            } catch (e: IllegalArgumentException) {
-                Log.w(TAG, "could not add custom shortcut: $e")
-                return@withContext ShortcutCustomizationRequestResult.ERROR_OTHER
+                else -> ShortcutCustomizationRequestResult.ERROR_OTHER
             }
         }
     }
 
     private fun Builder.addKeyGestureTypeFromShortcutLabel(): Builder {
         val shortcutBeingCustomized =
-            _shortcutBeingCustomized.value as? ShortcutCustomizationRequestInfo.Add
+            getShortcutBeingCustomized() as? ShortcutCustomizationRequestInfo.Add
 
         if (shortcutBeingCustomized == null) {
             Log.w(TAG, "User requested to set shortcut but shortcut being customized is null")
@@ -237,6 +241,11 @@ constructor(
                 ),
             )
         )
+    }
+
+    @VisibleForTesting
+    fun getShortcutBeingCustomized(): ShortcutCustomizationRequestInfo? {
+        return _shortcutBeingCustomized.value
     }
 
     private fun toInternalGroupSources(

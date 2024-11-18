@@ -18,8 +18,6 @@ package com.android.systemui.keyboard.shared.model
 
 enum class ShortcutCustomizationRequestResult {
     SUCCESS,
-    ERROR_ALREADY_EXISTS,
-    ERROR_DOES_NOT_EXIST,
-    ERROR_RESERVED_SHORTCUT,
+    ERROR_RESERVED_COMBINATION,
     ERROR_OTHER,
 }

@@ -106,38 +106,20 @@ constructor(
         _shortcutCustomizationUiState.update { uiState ->
             when (result) {
                 ShortcutCustomizationRequestResult.SUCCESS -> ShortcutCustomizationUiState.Inactive
-                ShortcutCustomizationRequestResult.ERROR_ALREADY_EXISTS -> {
+                ShortcutCustomizationRequestResult.ERROR_RESERVED_COMBINATION -> {
                     getUiStateWithErrorMessage(
                         uiState = uiState,
                         errorMessage =
                             context.getString(
-                                R.string.shortcut_helper_customize_dialog_error_message
+                                R.string.shortcut_customizer_key_combination_in_use_error_message
                             ),
                     )
                 }
-                ShortcutCustomizationRequestResult.ERROR_DOES_NOT_EXIST ->
-                    getUiStateWithErrorMessage(
-                        uiState = uiState,
-                        errorMessage =
-                            context.getString(
-                                R.string.shortcut_helper_customize_generic_error_message
-                            ),
-                    )
-                ShortcutCustomizationRequestResult.ERROR_RESERVED_SHORTCUT ->
-                    getUiStateWithErrorMessage(
-                        uiState = uiState,
-                        errorMessage =
-                            context.getString(
-                                R.string.shortcut_helper_customize_dialog_error_message
-                            ),
-                    )
                 ShortcutCustomizationRequestResult.ERROR_OTHER ->
                     getUiStateWithErrorMessage(
                         uiState = uiState,
                         errorMessage =
-                            context.getString(
-                                R.string.shortcut_helper_customize_generic_error_message
-                            ),
+                            context.getString(R.string.shortcut_customizer_generic_error_message),
                     )
             }
         }
