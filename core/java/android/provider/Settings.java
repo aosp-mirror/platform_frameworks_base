@@ -20454,6 +20454,29 @@ public final class Settings {
              * @hide
              */
             public static final String AUTO_BEDTIME_MODE = "auto_bedtime_mode";
+
+            /**
+             * Indicates that all elements of the system status tray on wear should be rendered
+             * by default wear system.
+             *
+             * @hide
+             */
+            public static final int STATUS_TRAY_CONFIGURATION_DEFAULT = 0;
+
+            /**
+             * Indicates that all elements of the system status tray on wear should be hidden.
+             *
+             * @hide
+             */
+            public static final int STATUS_TRAY_CONFIGURATION_SYSTEM_HIDDEN = 1;
+
+            /**
+             * Configuration of system status tray in wear.
+             *
+             * @hide
+             */
+            public static final String WEAR_SYSTEM_STATUS_TRAY_CONFIGURATION =
+                    "wear_system_status_tray_configuration";
         }
     }
 
