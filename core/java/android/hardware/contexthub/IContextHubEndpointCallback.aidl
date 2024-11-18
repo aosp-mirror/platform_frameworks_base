@@ -18,6 +18,7 @@ package android.hardware.contexthub;
 
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubMessage;
+import android.hardware.contexthub.HubServiceInfo;
 
 /**
   * @hide
@@ -28,8 +29,9 @@ oneway interface IContextHubEndpointCallback {
      *
      * @param sessionId An integer identifying the session, assigned by the initiator
      * @param initiator HubEndpointInfo representing the requester
+     * @param serviceInfo Nullable HubServiceInfo representing the service associated with this session
      */
-    void onSessionOpenRequest(int sessionId, in HubEndpointInfo initiator);
+    void onSessionOpenRequest(int sessionId, in HubEndpointInfo initiator, in @nullable HubServiceInfo serviceInfo);
 
     /**
      * Request from system service to close a specific session

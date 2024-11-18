@@ -30,6 +30,8 @@ import com.android.systemui.display.data.repository.FocusedDisplayRepository
 import com.android.systemui.display.data.repository.FocusedDisplayRepositoryImpl
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractorImpl
+import com.android.systemui.display.domain.interactor.RearDisplayStateInteractor
+import com.android.systemui.display.domain.interactor.RearDisplayStateInteractorImpl
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import dagger.Binds
 import dagger.Lazy
@@ -45,6 +47,11 @@ interface DisplayModule {
     fun bindConnectedDisplayInteractor(
         provider: ConnectedDisplayInteractorImpl
     ): ConnectedDisplayInteractor
+
+    @Binds
+    fun bindRearDisplayStateInteractor(
+        provider: RearDisplayStateInteractorImpl
+    ): RearDisplayStateInteractor
 
     @Binds fun bindsDisplayRepository(displayRepository: DisplayRepositoryImpl): DisplayRepository
 

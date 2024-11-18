@@ -90,6 +90,10 @@ sealed interface TransitionState {
                     // The set of overlays does not change in a [ChangeCurrentScene] transition.
                     return currentOverlaysWhenTransitionStarted
                 }
+
+            override fun toString(): String {
+                return "ChangeScene(fromScene=$fromScene, toScene=$toScene)"
+            }
         }
 
         /**
@@ -146,6 +150,12 @@ sealed interface TransitionState {
                     currentOverlaysWhenTransitionStarted - overlay
                 }
             }
+
+            override fun toString(): String {
+                val isShowing = overlay == toContent
+                return "ShowOrHideOverlay(overlay=$overlay, fromOrToScene=$fromOrToScene, " +
+                    "isShowing=$isShowing)"
+            }
         }
 
         /** We are transitioning from [fromOverlay] to [toOverlay]. */
@@ -193,6 +203,10 @@ sealed interface TransitionState {
                     remove(exclude)
                     add(include)
                 }
+            }
+
+            override fun toString(): String {
+                return "ReplaceOverlay(fromOverlay=$fromOverlay, toOverlay=$toOverlay)"
             }
         }
 

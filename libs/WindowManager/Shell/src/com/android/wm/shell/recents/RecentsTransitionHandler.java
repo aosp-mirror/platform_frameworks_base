@@ -1308,6 +1308,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                 // otherwise a new transition will notify the relevant observers
                 if (returningToApp && allAppsAreTranslucent(mPausingTasks)) {
                     mHomeTransitionObserver.notifyHomeVisibilityChanged(true);
+                } else if (!toHome && mState == STATE_NEW_TASK
+                        && allAppsAreTranslucent(mOpeningTasks)) {
+                    // We are opening a translucent app. Launcher is still visible so we do nothing.
                 } else if (!toHome) {
                     // For some transitions, we may have notified home activity that it became
                     // visible. We need to notify the observer that we are no longer going home.

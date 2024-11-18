@@ -24,6 +24,9 @@ internal const val API_GET_PREFERENCE_GRAPH = 1
 /** API id for preference value setter. */
 internal const val API_PREFERENCE_SETTER = 2
 
+/** API id for preference getter. */
+internal const val API_PREFERENCE_GETTER = 3
+
 /**
  * The max API id reserved for internal preference service usages. Custom API id should start with
  * **1000** to avoid conflict.

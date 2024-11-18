@@ -21,7 +21,7 @@ import com.android.systemui.brightness.domain.interactor.screenBrightnessInterac
 import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
-import com.android.systemui.kosmos.brightnessWarningToast
+import com.android.systemui.settings.brightness.ui.brightnessWarningToast
 
 val Kosmos.brightnessSliderViewModelFactory: BrightnessSliderViewModel.Factory by
     Kosmos.Fixture {
