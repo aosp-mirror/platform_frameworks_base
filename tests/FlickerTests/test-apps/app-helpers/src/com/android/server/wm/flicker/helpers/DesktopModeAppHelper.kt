@@ -92,7 +92,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     }
 
     /** Move an app to Desktop by dragging the app handle at the top. */
-    fun enterDesktopModeWithDrag(
+    private fun enterDesktopModeWithDrag(
         wmHelper: WindowManagerStateHelper,
         device: UiDevice,
         motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH)
