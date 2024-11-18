@@ -3818,6 +3818,11 @@
          assigning a new custom key combination to a shortcut in shortcut helper. The helper is a
          component that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_customize_dialog_error_message">Key combination already in use. Try another key.</string>
+    <!-- Generic error message displayed when the user selected key combination cannot be used as
+         custom keyboard shortcut in shortcut helper. The helper is a component that shows the user
+         which keyboard shortcuts they can use and allows users to customize their keyboard
+         shortcuts. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_generic_error_message">Shortcut cannot be set.</string>
     <!-- Plus sign, used in keyboard shortcut helper to combine keys for shortcut. E.g. Ctrl + A
          The helper is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->

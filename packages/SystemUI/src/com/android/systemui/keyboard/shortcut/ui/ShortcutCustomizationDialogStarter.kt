@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.phone.create
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
 
 class ShortcutCustomizationDialogStarter
 @AssistedInject
@@ -70,14 +72,21 @@ constructor(
         return dialogFactory.create(dialogDelegate = ShortcutCustomizationDialogDelegate()) { dialog
             ->
             val uiState by
-                viewModel.shortcutCustomizationUiState.collectAsStateWithLifecycle(
-                    initialValue = ShortcutCustomizationUiState.Inactive
-                )
+            viewModel.shortcutCustomizationUiState.collectAsStateWithLifecycle(
+                initialValue = ShortcutCustomizationUiState.Inactive
+            )
+            val coroutineScope = rememberCoroutineScope()
             AssignNewShortcutDialog(
                 uiState = uiState,
-                modifier = Modifier.width(364.dp).wrapContentHeight().padding(vertical = 24.dp),
+                modifier = Modifier
+                    .width(364.dp)
+                    .wrapContentHeight()
+                    .padding(vertical = 24.dp),
                 onKeyPress = { viewModel.onKeyPressed(it) },
                 onCancel = { dialog.dismiss() },
+                onConfirmSetShortcut = {
+                    coroutineScope.launch { viewModel.onSetShortcut() }
+                },
             )
             dialog.setOnDismissListener { viewModel.onDialogDismissed() }
 

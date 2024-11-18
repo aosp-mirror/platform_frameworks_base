@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyboard.shortcut.ui.model
+package com.android.systemui.keyboard.shared.model
 
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
-
-sealed interface ShortcutCustomizationUiState {
-    data class AddShortcutDialog(
-        val shortcutLabel: String,
-        val errorMessage: String = "",
-        val defaultCustomShortcutModifierKey: ShortcutKey.Icon.ResIdIcon,
-        val isDialogShowing: Boolean,
-        val pressedKeys: List<ShortcutKey> = emptyList(),
-    ) : ShortcutCustomizationUiState
-
-    data object Inactive : ShortcutCustomizationUiState
+enum class ShortcutCustomizationRequestResult {
+    SUCCESS,
+    ERROR_ALREADY_EXISTS,
+    ERROR_DOES_NOT_EXIST,
+    ERROR_RESERVED_SHORTCUT,
+    ERROR_OTHER,
 }

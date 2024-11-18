@@ -222,7 +222,6 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     private val expectedStandardAddShortcutUiState =
         ShortcutCustomizationUiState.AddShortcutDialog(
             shortcutLabel = "Standard shortcut",
-            shouldShowErrorMessage = false,
             defaultCustomShortcutModifierKey =
                 ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
             isDialogShowing = false,
