@@ -11698,8 +11698,10 @@ public class Notification implements Parcelable
             return points;
         }
 
-        @NonNull
-        private NotificationProgressModel createProgressModel(int defaultProgressColor,
+        /**
+         * @hide
+         */
+        public @NonNull NotificationProgressModel createProgressModel(int defaultProgressColor,
                 int backgroundColor) {
             final NotificationProgressModel model;
             if (mIndeterminate) {
