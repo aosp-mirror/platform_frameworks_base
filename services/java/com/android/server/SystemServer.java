@@ -251,6 +251,7 @@ import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
 import com.android.server.security.authenticationpolicy.AuthenticationPolicyService;
+import com.android.server.security.authenticationpolicy.SecureLockDeviceService;
 import com.android.server.security.forensic.ForensicService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
@@ -2658,6 +2659,12 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartAuthService");
             mSystemServiceManager.startService(AuthService.class);
             t.traceEnd();
+
+            if (android.security.Flags.secureLockdown()) {
+                t.traceBegin("StartSecureLockDeviceService.Lifecycle");
+                mSystemServiceManager.startService(SecureLockDeviceService.Lifecycle.class);
+                t.traceEnd();
+            }
 
             if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
                 t.traceBegin("StartAuthenticationPolicyService");
