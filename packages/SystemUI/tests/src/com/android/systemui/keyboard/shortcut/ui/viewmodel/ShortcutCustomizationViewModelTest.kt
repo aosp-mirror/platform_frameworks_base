@@ -223,7 +223,6 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         ShortcutCustomizationUiState.AddShortcutDialog(
             shortcutLabel = "Standard shortcut",
             shouldShowErrorMessage = false,
-            isValidKeyCombination = false,
             defaultCustomShortcutModifierKey =
                 ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
             isDialogShowing = false,

@@ -40,10 +40,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.onKeyEvent
@@ -86,13 +89,13 @@ fun AssignNewShortcutDialog(
                 pressedKeys = uiState.pressedKeys,
             )
             KeyCombinationAlreadyInUseErrorMessage(uiState.shouldShowErrorMessage)
-            DialogButtons(onCancel, isValidKeyCombination = uiState.isValidKeyCombination)
+            DialogButtons(onCancel, isSetShortcutButtonEnabled = uiState.pressedKeys.isNotEmpty())
         }
     }
 }
 
 @Composable
-fun DialogButtons(onCancel: () -> Unit, isValidKeyCombination: Boolean) {
+fun DialogButtons(onCancel: () -> Unit, isSetShortcutButtonEnabled: Boolean) {
     Row(
         modifier =
             Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
@@ -116,7 +119,7 @@ fun DialogButtons(onCancel: () -> Unit, isValidKeyCombination: Boolean) {
             contentColor = MaterialTheme.colorScheme.onPrimary,
             text =
                 stringResource(R.string.shortcut_helper_customize_dialog_set_shortcut_button_label),
-            enabled = isValidKeyCombination,
+            enabled = isSetShortcutButtonEnabled,
         )
     }
 }
@@ -150,6 +153,9 @@ fun SelectedKeyCombinationContainer(
         if (!isFocused) MaterialTheme.colorScheme.outline
         else if (shouldShowErrorMessage) MaterialTheme.colorScheme.error
         else MaterialTheme.colorScheme.primary
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     ClickableShortcutSurface(
         onClick = {},
@@ -159,7 +165,8 @@ fun SelectedKeyCombinationContainer(
             Modifier.padding(all = 16.dp)
                 .sizeIn(minWidth = 332.dp, minHeight = 56.dp)
                 .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(50.dp))
-                .onKeyEvent { onKeyPress(it) },
+                .onKeyEvent { onKeyPress(it) }
+                .focusRequester(focusRequester),
         interactionSource = interactionSource,
     ) {
         Row(

@@ -66,7 +66,6 @@ constructor(private val shortcutCustomizationInteractor: ShortcutCustomizationIn
                     ShortcutCustomizationUiState.AddShortcutDialog(
                         shortcutLabel = requestInfo.label,
                         shouldShowErrorMessage = false,
-                        isValidKeyCombination = false,
                         defaultCustomShortcutModifierKey =
                             shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey(),
                         isDialogShowing = false,
