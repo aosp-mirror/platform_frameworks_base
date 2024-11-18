@@ -662,7 +662,9 @@ public class KeyguardService extends Service {
             trace("doKeyguardTimeout");
             checkPermission();
 
-            if (KeyguardWmStateRefactor.isEnabled()) {
+            if (SceneContainerFlag.isEnabled()) {
+                mDeviceEntryInteractorLazy.get().lockNow();
+            } else if (KeyguardWmStateRefactor.isEnabled()) {
                 mKeyguardLockWhileAwakeInteractor.onKeyguardServiceDoKeyguardTimeout(options);
             }
 
