@@ -63,6 +63,7 @@ constructor(
     @Composable
     fun SceneScope.DefaultClockLayout(
         smartSpacePaddingTop: (Resources) -> Int,
+        isShadeLayoutWide: Boolean,
         modifier: Modifier = Modifier,
     ) {
         val currentClockLayout by clockViewModel.currentClockLayout.collectAsStateWithLifecycle()
@@ -128,7 +129,7 @@ constructor(
                     )
                 }
             }
-            with(mediaCarouselSection) { KeyguardMediaCarousel() }
+            with(mediaCarouselSection) { KeyguardMediaCarousel(isShadeLayoutWide) }
         }
     }
 
