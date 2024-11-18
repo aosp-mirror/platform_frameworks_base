@@ -24,6 +24,7 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_UNDEFINED;
 import static com.android.wm.shell.draganddrop.DragTestUtils.createAppClipData;
 import static com.android.wm.shell.draganddrop.DragTestUtils.createIntentClipData;
 import static com.android.wm.shell.draganddrop.DragTestUtils.createTaskInfo;
@@ -226,7 +227,7 @@ public class SplitDragPolicyTest extends ShellTestCase {
 
         mPolicy.onDropped(filterTargetByType(targets, TYPE_FULLSCREEN), null /* hideTaskToken */);
         verify(mFullscreenStarter).startIntent(any(), anyInt(), any(),
-                eq(SPLIT_POSITION_UNDEFINED), any(), any());
+                eq(SPLIT_POSITION_UNDEFINED), any(), any(), eq(SPLIT_INDEX_UNDEFINED));
     }
 
     private void dragOverFullscreenApp_expectSplitScreenTargets(ClipData data) {
@@ -241,12 +242,12 @@ public class SplitDragPolicyTest extends ShellTestCase {
 
         mPolicy.onDropped(filterTargetByType(targets, TYPE_SPLIT_LEFT), null /* hideTaskToken */);
         verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
-                eq(SPLIT_POSITION_TOP_OR_LEFT), any(), any());
+                eq(SPLIT_POSITION_TOP_OR_LEFT), any(), any(), eq(SPLIT_INDEX_UNDEFINED));
         reset(mSplitScreenStarter);
 
         mPolicy.onDropped(filterTargetByType(targets, TYPE_SPLIT_RIGHT), null /* hideTaskToken */);
         verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), any(), any());
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), any(), any(), eq(SPLIT_INDEX_UNDEFINED));
     }
 
     private void dragOverFullscreenAppPhone_expectVerticalSplitScreenTargets(ClipData data) {
@@ -261,13 +262,13 @@ public class SplitDragPolicyTest extends ShellTestCase {
 
         mPolicy.onDropped(filterTargetByType(targets, TYPE_SPLIT_TOP), null /* hideTaskToken */);
         verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
-                eq(SPLIT_POSITION_TOP_OR_LEFT), any(), any());
+                eq(SPLIT_POSITION_TOP_OR_LEFT), any(), any(), eq(SPLIT_INDEX_UNDEFINED));
         reset(mSplitScreenStarter);
 
         mPolicy.onDropped(filterTargetByType(targets, TYPE_SPLIT_BOTTOM),
                 null /* hideTaskToken */);
         verify(mSplitScreenStarter).startIntent(any(), anyInt(), any(),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), any(), any());
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT), any(), any(), eq(SPLIT_INDEX_UNDEFINED));
     }
 
     @Test
