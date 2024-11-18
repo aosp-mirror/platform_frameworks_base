@@ -81,7 +81,7 @@ constructor(
                             // additional
                             // guidance on how to auto add your tile
                             throw UnsupportedOperationException(
-                                "Turning on tile is not supported now"
+                                "Turning on tile is not supported now. Tile spec: $tileSpec"
                             )
                         }
                     }
