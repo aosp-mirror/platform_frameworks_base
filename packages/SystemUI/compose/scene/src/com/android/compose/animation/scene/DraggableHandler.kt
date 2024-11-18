@@ -408,17 +408,16 @@ private class DragControllerImpl(
         }
 
         val fromContent = swipeAnimation.fromContent
-        val consumedVelocity: Float
-        if (canChangeContent) {
-            // If we are halfway between two contents, we check what the target will be based on the
-            // velocity and offset of the transition, then we launch the animation.
+        val targetContent =
+            if (canChangeContent) {
+                // If we are halfway between two contents, we check what the target will be based on
+                // the velocity and offset of the transition, then we launch the animation.
 
-            val toContent = swipeAnimation.toContent
+                val toContent = swipeAnimation.toContent
 
-            // Compute the destination content (and therefore offset) to settle in.
-            val offset = swipeAnimation.dragOffset
-            val distance = swipeAnimation.distance()
-            val targetContent =
+                // Compute the destination content (and therefore offset) to settle in.
+                val offset = swipeAnimation.dragOffset
+                val distance = swipeAnimation.distance()
                 if (
                     distance != DistanceUnspecified &&
                         shouldCommitSwipe(
@@ -433,16 +432,15 @@ private class DragControllerImpl(
                 } else {
                     fromContent
                 }
-            consumedVelocity = swipeAnimation.animateOffset(velocity, targetContent = targetContent)
-        } else {
-            // We are doing an overscroll preview animation between scenes.
-            check(fromContent == swipeAnimation.currentContent) {
-                "canChangeContent is false but currentContent != fromContent"
+            } else {
+                // We are doing an overscroll preview animation between scenes.
+                check(fromContent == swipeAnimation.currentContent) {
+                    "canChangeContent is false but currentContent != fromContent"
+                }
+                fromContent
             }
-            consumedVelocity = swipeAnimation.animateOffset(velocity, targetContent = fromContent)
-        }
 
-        return consumedVelocity
+        return swipeAnimation.animateOffset(velocity, targetContent)
     }
 
     /**
