@@ -1578,6 +1578,25 @@ public class Build {
     }
 
     /**
+     * Convert an int representing a major.minor version like SDK_INT_FULL to a
+     * human readable string. The returned string is only intended for debug
+     * and error messages.
+     *
+     * @param version the int to convert to a string
+     * @return a String representing the same major.minor version as the int passed in
+     * @throws IllegalArgumentException if {@code version} is negative
+     *
+     * @hide
+     */
+    public static String fullVersionToString(@SdkIntFull int version) {
+        if (version < 0) {
+            throw new IllegalArgumentException("failed to convert '" + version
+                    + "' to string: not a valid major.minor version code");
+        }
+        return String.format("%d.%d", getMajorSdkVersion(version), getMinorSdkVersion(version));
+    }
+
+    /**
      * The vendor API for 2024 Q2
      *
      * <p>For Android 14-QPR3 and later, the vendor API level is completely decoupled from the SDK

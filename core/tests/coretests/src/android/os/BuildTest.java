@@ -176,4 +176,28 @@ public class BuildTest {
             Build.parseFullVersion("12.-34");
         });
     }
+
+    @Test
+    public void testFullVersionToStringCorrectInput() throws Exception {
+        assertEquals("0.0", Build.fullVersionToString(0));
+        assertEquals("1.0", Build.fullVersionToString(1 * 100000 + 0));
+        assertEquals("1.1", Build.fullVersionToString(1 * 100000 + 1));
+        assertEquals("12.34", Build.fullVersionToString(12 * 100000 + 34));
+    }
+
+    @Test
+    public void testFullVersionToStringSameStringAfterRoundTripViaParseFullVersion()
+            throws Exception {
+        String s = "12.34";
+        int major = Build.getMajorSdkVersion(Build.parseFullVersion(s));
+        int minor = Build.getMinorSdkVersion(Build.parseFullVersion(s));
+        assertEquals(s, Build.fullVersionToString(major * 100000 + minor));
+    }
+
+    @Test
+    public void testFullVersionToStringIncorrectInputNegativeVersion() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Build.fullVersionToString(-1);
+        });
+    }
 }
