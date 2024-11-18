@@ -28,6 +28,7 @@ import android.media.quality.ISoundProfileCallback;
 import android.media.quality.MediaQualityContract;
 import android.media.quality.ParamCapability;
 import android.media.quality.PictureProfile;
+import android.media.quality.PictureProfileHandle;
 import android.media.quality.SoundProfile;
 import android.os.PersistableBundle;
 import android.util.Log;
@@ -246,6 +247,11 @@ public class MediaQualityService extends SystemService {
                 }
                 return pictureProfiles;
             }
+        }
+
+        @Override
+        public PictureProfileHandle getPictureProfileHandle(String id) {
+            return null;
         }
 
         @Override
