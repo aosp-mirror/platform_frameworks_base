@@ -947,7 +947,7 @@ public final class CardEmulation {
      *
      * @param service The ComponentName of the service
      * @param status  true to enable, false to disable
-     * @return true if preferred service is successfully set or unset, otherwise return false.
+     * @return status code defined in {@link SetServiceEnabledStatusCode}
      *
      * @hide
      */
