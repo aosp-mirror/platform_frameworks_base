@@ -260,7 +260,7 @@ public final class InputManager {
     }
 
     /**
-     * Custom input gesture error: Input gesture already exists
+     * Custom input gesture result success
      *
      * @hide
      */
