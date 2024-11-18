@@ -20,6 +20,9 @@
 #include <gui/DisplayEventReceiver.h>
 #include <input/DisplayViewport.h>
 #include <input/Input.h>
+#include <utils/BitSet.h>
+#include <utils/Looper.h>
+#include <utils/RefBase.h>
 
 #include <functional>
 #include <map>
@@ -40,8 +43,7 @@ public:
     MouseCursorController(PointerControllerContext& context);
     ~MouseCursorController();
 
-    // Move the pointer and return unconsumed delta
-    vec2 move(float deltaX, float deltaY);
+    void move(float deltaX, float deltaY);
     void setPosition(float x, float y);
     FloatPoint getPosition() const;
     ui::LogicalDisplayId getDisplayId() const;
@@ -111,7 +113,6 @@ private:
     bool doFadingAnimationLocked(nsecs_t timestamp);
 
     void startAnimationLocked();
-    FloatRect getBoundsLocked();
 };
 
 } // namespace android
