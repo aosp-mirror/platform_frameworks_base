@@ -35,9 +35,9 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.withContext
 
 class ShortcutCategoriesUtils
 @Inject
@@ -92,7 +92,7 @@ constructor(
                 }
                 .filter { it.shortcuts.isNotEmpty() }
         return if (subCategories.isEmpty()) {
-            Log.wtf(TAG, "Empty sub categories after converting $shortcutGroups")
+            Log.w(TAG, "Empty sub categories after converting $shortcutGroups")
             null
         } else {
             ShortcutCategory(type, subCategories)

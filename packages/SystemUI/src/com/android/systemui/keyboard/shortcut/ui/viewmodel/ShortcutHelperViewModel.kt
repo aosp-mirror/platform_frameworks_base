@@ -40,7 +40,6 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +50,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class ShortcutHelperViewModel
 @Inject
@@ -123,7 +123,7 @@ constructor(
                         userContext.packageManager.getApplicationIcon(type.packageName)
                     IconSource(painter = DrawablePainter(drawable = iconDrawable))
                 } catch (e: NameNotFoundException) {
-                    Log.wtf(
+                    Log.w(
                         "ShortcutHelperViewModel",
                         "Package not found when retrieving icon for ${type.packageName}",
                     )
@@ -153,7 +153,7 @@ constructor(
                 packageManagerForUser.getApplicationInfo(type.packageName, /* flags= */ 0)
             return packageManagerForUser.getApplicationLabel(currentAppInfo).toString()
         } catch (e: NameNotFoundException) {
-            Log.wtf(
+            Log.w(
                 "ShortcutHelperViewModel",
                 "Package Not found when retrieving Label for ${type.packageName}",
             )
