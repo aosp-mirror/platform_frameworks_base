@@ -253,6 +253,9 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables enter desktop windowing transition & motion polish changes"
     bug: "369763947"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -260,6 +263,9 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables exit desktop windowing transition & motion polish changes"
     bug: "353650462"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -343,6 +349,9 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables custom transitions for alt-tab app launches in Desktop Mode."
     bug: "370735595"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -350,6 +359,9 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables custom transitions for app launches in Desktop Mode."
     bug: "375992828"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
