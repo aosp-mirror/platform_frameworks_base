@@ -51,7 +51,7 @@ ADynamicInstrumentationManager_TargetProcess* _Nonnull
  * @param instance returned from ADynamicInstrumentationManager_TargetProcess_create.
  */
 void ADynamicInstrumentationManager_TargetProcess_destroy(
-        ADynamicInstrumentationManager_TargetProcess* _Nonnull instance) __INTRODUCED_IN(36);
+        const ADynamicInstrumentationManager_TargetProcess* _Nonnull instance) __INTRODUCED_IN(36);
 
 /**
  * Initializes an ADynamicInstrumentationManager_MethodDescriptor. Caller must clean up when they
@@ -74,7 +74,8 @@ ADynamicInstrumentationManager_MethodDescriptor* _Nonnull
  * @param instance returned from ADynamicInstrumentationManager_MethodDescriptor_create.
  */
 void ADynamicInstrumentationManager_MethodDescriptor_destroy(
-        ADynamicInstrumentationManager_MethodDescriptor* _Nonnull instance) __INTRODUCED_IN(36);
+        const ADynamicInstrumentationManager_MethodDescriptor* _Nonnull instance)
+        __INTRODUCED_IN(36);
 
 /**
  * Get the containerPath calculated by
@@ -83,7 +84,7 @@ void ADynamicInstrumentationManager_MethodDescriptor_destroy(
  * @return The OS path of the containing file.
  */
 const char* _Nullable ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerPath(
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
         __INTRODUCED_IN(36);
 /**
  * Get the containerOffset calculated by
@@ -92,7 +93,7 @@ const char* _Nullable ADynamicInstrumentationManager_ExecutableMethodFileOffsets
  * @return The offset of the containing file within the process' memory.
  */
 uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerOffset(
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
         __INTRODUCED_IN(36);
 /**
  * Get the methodOffset calculated by ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
@@ -100,7 +101,7 @@ uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainer
  * @return The offset of the method within the containing file.
  */
 uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getMethodOffset(
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
         __INTRODUCED_IN(36);
 /**
  * Clean up an ADynamicInstrumentationManager_ExecutableMethodFileOffsets.
@@ -108,7 +109,7 @@ uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getMethodOff
  * @param instance returned from ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
  */
 void ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy(
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
         __INTRODUCED_IN(36);
 /**
  * Provides ART metadata about the described java method within the target process.
@@ -124,7 +125,7 @@ void ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy(
 int32_t ADynamicInstrumentationManager_getExecutableMethodFileOffsets(
         const ADynamicInstrumentationManager_TargetProcess* _Nonnull targetProcess,
         const ADynamicInstrumentationManager_MethodDescriptor* _Nonnull methodDescriptor,
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull* _Nullable out)
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nullable* _Nonnull out)
         __INTRODUCED_IN(36);
 
 __END_DECLS
