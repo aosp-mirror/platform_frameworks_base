@@ -121,4 +121,5 @@ interface INfcAdapter
     List<Entry> getRoutingTableEntryList();
     void indicateDataMigration(boolean inProgress, String pkg);
     int commitRouting();
+    boolean isTagIntentAllowed(in String pkg, in int Userid);
 }
