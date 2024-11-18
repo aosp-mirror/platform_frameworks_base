@@ -834,6 +834,15 @@ constructor(
             public?.let {
                 it.layoutInflaterFactory = provider.provide(row, FLAG_CONTENT_VIEW_PUBLIC)
             }
+            if (android.app.Flags.notificationsRedesignAppIcons()) {
+                normalGroupHeader?.let {
+                    it.layoutInflaterFactory = provider.provide(row, FLAG_GROUP_SUMMARY_HEADER)
+                }
+                minimizedGroupHeader?.let {
+                    it.layoutInflaterFactory =
+                        provider.provide(row, FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER)
+                }
+            }
             return this
         }
 
