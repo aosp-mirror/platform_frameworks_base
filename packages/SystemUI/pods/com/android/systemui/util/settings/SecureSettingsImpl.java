@@ -23,23 +23,23 @@ import android.provider.Settings;
 
 import com.android.systemui.util.settings.SettingsSingleThreadBackground;
 
-import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.CoroutineScope;
 
 import javax.inject.Inject;
 
 class SecureSettingsImpl implements SecureSettings {
     private final ContentResolver mContentResolver;
     private final CurrentUserIdProvider mCurrentUserProvider;
-    private final CoroutineDispatcher mBgDispatcher;
+    private final CoroutineScope mSettingsScope;
 
     @Inject
     SecureSettingsImpl(
             ContentResolver contentResolver,
             CurrentUserIdProvider currentUserProvider,
-            @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
+            @SettingsSingleThreadBackground CoroutineScope settingsScope) {
         mContentResolver = contentResolver;
         mCurrentUserProvider = currentUserProvider;
-        mBgDispatcher = bgDispatcher;
+        mSettingsScope = settingsScope;
     }
 
     @NonNull
@@ -62,8 +62,8 @@ class SecureSettingsImpl implements SecureSettings {
 
     @NonNull
     @Override
-    public CoroutineDispatcher getBackgroundDispatcher() {
-        return mBgDispatcher;
+    public CoroutineScope getSettingsScope() {
+        return mSettingsScope;
     }
 
     @Override

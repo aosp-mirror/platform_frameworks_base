@@ -18,6 +18,7 @@ package android.hardware.contexthub;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.chre.flags.Flags;
 import android.hardware.location.ContextHubManager;
@@ -26,31 +27,47 @@ import android.hardware.location.ContextHubManager;
  * Class that represents the result of from an hub endpoint discovery.
  *
  * <p>The type is returned from an endpoint discovery query via {@link
- * ContextHubManager#findEndpoints}. Application may use the values {@link #getHubEndpointInfo} to
- * retrieve the {@link HubEndpointInfo} that describes the endpoint that matches the query. The
- * class provides flexibility in returning more information (e.g. service provided by the endpoint)
- * in addition to the information about the endpoint.
+ * ContextHubManager#findEndpoints}.
+ *
+ * <p>Application may use the values {@link #getHubEndpointInfo} to retrieve the {@link
+ * HubEndpointInfo} that describes the endpoint that matches the query.
+ *
+ * <p>Application may use the values {@link #getHubServiceInfo()} to retrieve the {@link
+ * HubServiceInfo} that describes the service that matches the query.
  *
  * @hide
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_OFFLOAD_API)
 public class HubDiscoveryInfo {
-    // TODO(b/375487784): Add ServiceInfo to the result.
-    android.hardware.contexthub.HubEndpointInfo mEndpointInfo;
+    @NonNull private final HubEndpointInfo mEndpointInfo;
+    @Nullable private final HubServiceInfo mServiceInfo;
 
-    /**
-     * Constructor for internal use.
-     *
-     * @hide
-     */
-    public HubDiscoveryInfo(android.hardware.contexthub.HubEndpointInfo endpointInfo) {
+    /** @hide */
+    public HubDiscoveryInfo(@NonNull HubEndpointInfo endpointInfo) {
         mEndpointInfo = endpointInfo;
+        mServiceInfo = null;
     }
 
-    /** Get the {@link android.hardware.contexthub.HubEndpointInfo} for the endpoint found. */
+    /** @hide */
+    public HubDiscoveryInfo(
+            @NonNull HubEndpointInfo endpointInfo, @NonNull HubServiceInfo serviceInfo) {
+        mEndpointInfo = endpointInfo;
+        mServiceInfo = serviceInfo;
+    }
+
+    /** Get the {@link HubEndpointInfo} for the endpoint found. */
     @NonNull
     public HubEndpointInfo getHubEndpointInfo() {
         return mEndpointInfo;
+    }
+
+    /**
+     * Get the {@link HubServiceInfo} for the endpoint found. The value will be null if there is no
+     * service info specified in the query.
+     */
+    @Nullable
+    public HubServiceInfo getHubServiceInfo() {
+        return mServiceInfo;
     }
 }

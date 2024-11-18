@@ -18,6 +18,7 @@ package com.android.systemui
 
 import android.hardware.devicestate.DeviceState
 import android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY
+import android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT
 import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY
 import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY
 import android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED
@@ -44,7 +45,7 @@ val Kosmos.foldedDeviceStateList by
                     .setSystemProperties(
                         setOf(
                             PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
-                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
+                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP,
                         )
                     )
                     .setPhysicalProperties(
@@ -57,7 +58,7 @@ val Kosmos.foldedDeviceStateList by
                     .setSystemProperties(
                         setOf(
                             PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
-                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
+                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP,
                         )
                     )
                     .setPhysicalProperties(
@@ -70,14 +71,14 @@ val Kosmos.foldedDeviceStateList by
                     .setSystemProperties(
                         setOf(
                             PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
-                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP
+                            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP,
                         )
                     )
                     .setPhysicalProperties(
                         setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)
                     )
                     .build()
-            )
+            ),
         )
     }
 
@@ -88,7 +89,7 @@ val Kosmos.halfFoldedDeviceState by
                 .setSystemProperties(
                     setOf(
                         PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
-                        PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE
+                        PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE,
                     )
                 )
                 .setPhysicalProperties(
@@ -105,7 +106,7 @@ val Kosmos.unfoldedDeviceState by
                 .setSystemProperties(
                     setOf(
                         PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
-                        PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE
+                        PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE,
                     )
                 )
                 .setPhysicalProperties(setOf(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN))
@@ -120,7 +121,22 @@ val Kosmos.rearDisplayDeviceState by
                 .setSystemProperties(
                     setOf(
                         PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
-                        PROPERTY_FEATURE_REAR_DISPLAY
+                        PROPERTY_FEATURE_REAR_DISPLAY,
+                    )
+                )
+                .build()
+        )
+    }
+
+val Kosmos.rearDisplayOuterDefaultDeviceState by
+    Kosmos.Fixture {
+        DeviceState(
+            DeviceState.Configuration.Builder(5 /* identifier */, "REAR_DISPLAY")
+                .setSystemProperties(
+                    setOf(
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                        PROPERTY_FEATURE_REAR_DISPLAY,
+                        PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT,
                     )
                 )
                 .build()

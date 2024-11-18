@@ -788,6 +788,18 @@
     <!-- Size of an avatar shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_avatar_size">24dp</dimen>
 
+    <!-- Size of the face pile shown on one-line (children of a group) conversation notifications
+         (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_face_pile_size">16dp</dimen>
+
+    <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation
+         notifications (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_face_pile_avatar_size">11dp</dimen>
+
+    <!-- Size of an avatar shown on one-line (children of a group) conversation notifications
+         (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_avatar_size">16dp</dimen>
+
     <!-- Border width for avatars in the face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_protection_width">1dp</dimen>
 
@@ -1749,6 +1761,7 @@
     <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
     <!-- The end padding for the timer text view. Only used if an embedded padding icon is used. -->
     <dimen name="ongoing_activity_chip_text_end_padding_for_embedded_padding_icon">6dp</dimen>
+    <dimen name="ongoing_activity_chip_text_fading_edge_length">12dp</dimen>
     <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
