@@ -1876,6 +1876,8 @@ public final class MediaCodecInfo {
      * Codecs with this security model is not included in
      * {@link MediaCodecList#REGULAR_CODECS}, but included in
      * {@link MediaCodecList#ALL_CODECS}.
+     *
+     * @hide
      */
     @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
     public static final int SECURITY_MODEL_TRUSTED_CONTENT_ONLY = 2;
