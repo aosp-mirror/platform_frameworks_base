@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.AutoHideUiElement;
 
@@ -36,9 +35,7 @@ import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
-/** A controller to control all auto-hide things. Also see {@link AutoHideUiElement}. */
-@SysUISingleton
-public class AutoHideController {
+public class AutoHideControllerImpl implements AutoHideController {
     private static final String TAG = "AutoHideController";
     private static final int AUTO_HIDE_TIMEOUT_MS = 2250;
     private static final int USER_AUTO_HIDE_TIMEOUT_MS = 350;
@@ -61,7 +58,7 @@ public class AutoHideController {
     };
 
     @Inject
-    public AutoHideController(Context context,
+    public AutoHideControllerImpl(Context context,
             @Main Handler handler,
             IWindowManager iWindowManager) {
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -70,18 +67,12 @@ public class AutoHideController {
         mDisplayId = context.getDisplayId();
     }
 
-    /**
-     * Sets a {@link AutoHideUiElement} status bar that should be controlled by the
-     * {@link AutoHideController}.
-     */
+    @Override
     public void setStatusBar(AutoHideUiElement element) {
         mStatusBar = element;
     }
 
-    /**
-     * Sets a {@link AutoHideUiElement} navigation bar that should be controlled by the
-     * {@link AutoHideController}.
-     */
+    @Override
     public void setNavigationBar(AutoHideUiElement element) {
         mNavigationBar = element;
     }
@@ -102,6 +93,7 @@ public class AutoHideController {
         }
     }
 
+    @Override
     public void resumeSuspendedAutoHide() {
         if (mAutoHideSuspended) {
             scheduleAutoHide();
@@ -112,6 +104,7 @@ public class AutoHideController {
         }
     }
 
+    @Override
     public void suspendAutoHide() {
         mHandler.removeCallbacks(mAutoHide);
         Runnable checkBarModesRunnable = getCheckBarModesRunnable();
@@ -121,7 +114,7 @@ public class AutoHideController {
         mAutoHideSuspended = isAnyTransientBarShown();
     }
 
-    /** Schedules or cancels auto hide behavior based on current system bar state. */
+    @Override
     public void touchAutoHide() {
         // update transient bar auto hide
         if (isAnyTransientBarShown()) {
@@ -156,6 +149,7 @@ public class AutoHideController {
                 FLAG_CONTENT_CONTROLS);
     }
 
+    @Override
     public void checkUserAutoHide(MotionEvent event) {
         boolean shouldHide = isAnyTransientBarShown()
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar.
@@ -196,6 +190,7 @@ public class AutoHideController {
         return false;
     }
 
+    @Override
     public void dump(@NonNull PrintWriter pw) {
         pw.println("AutoHideController:");
         pw.println("\tmAutoHideSuspended=" + mAutoHideSuspended);
@@ -205,10 +200,7 @@ public class AutoHideController {
         pw.println("\tgetUserAutoHideTimeout=" + getUserAutoHideTimeout());
     }
 
-    /**
-     * Injectable factory for creating a {@link AutoHideController}.
-     */
-    public static class Factory {
+    public static class Factory implements AutoHideController.Factory {
         private final Handler mHandler;
         private final IWindowManager mIWindowManager;
 
@@ -219,8 +211,9 @@ public class AutoHideController {
         }
 
         /** Create an {@link AutoHideController} */
+        @Override
         public AutoHideController create(Context context) {
-            return new AutoHideController(context, mHandler, mIWindowManager);
+            return new AutoHideControllerImpl(context, mHandler, mIWindowManager);
         }
     }
 }
