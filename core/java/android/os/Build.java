@@ -41,6 +41,8 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
+import com.android.internal.util.FrameworkStatsLog;
+
 import dalvik.system.VMRuntime;
 
 import java.lang.annotation.Retention;
@@ -1666,11 +1668,14 @@ public class Build {
      */
     @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
     public static @BackportedFixStatus int getBackportedFixStatus(long id) {
-        if (id <= 0 || id > 1023) {
-            return BACKPORTED_FIX_STATUS_UNKNOWN;
+        @BackportedFixStatus int status = BACKPORTED_FIX_STATUS_UNKNOWN;
+        int uid = Binder.getCallingUid();
+        if (id > 0 && id <= 1023) {
+            status = isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
+                    ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
         }
-        return isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
-                ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
+        FrameworkStatsLog.write(FrameworkStatsLog.BACKPORTED_FIX_STATUS_REPORTED, uid, id, status);
+        return status;
     }
 
     private static boolean isBitSet(List<Long> bitsetLongArray, int bitIndex) {
