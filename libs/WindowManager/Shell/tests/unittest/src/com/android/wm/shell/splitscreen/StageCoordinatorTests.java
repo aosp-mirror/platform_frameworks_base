@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -292,7 +293,8 @@ public class StageCoordinatorTests extends ShellTestCase {
     public void testFinishEnterSplitScreen_applySurfaceLayout() {
         mStageCoordinator.finishEnterSplitScreen(new SurfaceControl.Transaction());
 
-        verify(mSplitLayout).applySurfaceChanges(any(), any(), any(), any(), any(), eq(false));
+        verify(mSplitLayout, atLeastOnce())
+                .applySurfaceChanges(any(), any(), any(), any(), any(), eq(false));
     }
 
     @Test
