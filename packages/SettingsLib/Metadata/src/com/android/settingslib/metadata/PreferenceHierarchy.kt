@@ -58,6 +58,9 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     /** Specifies preference order in the hierarchy. */
     infix fun PreferenceHierarchyNode.order(order: Int) = apply { this.order = order }
 
+    /** Specifies preference order in the hierarchy for group. */
+    infix fun PreferenceHierarchy.order(order: Int) = apply { this.order = order }
+
     /** Adds a preference to the hierarchy. */
     @JvmOverloads
     fun add(metadata: PreferenceMetadata, order: Int? = null) {
