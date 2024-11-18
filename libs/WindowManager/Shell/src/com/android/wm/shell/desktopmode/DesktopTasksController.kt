@@ -50,6 +50,7 @@ import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
+import android.view.WindowManager.TRANSIT_PIP
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.widget.Toast
 import android.window.DesktopModeFlags
@@ -223,6 +224,7 @@ class DesktopTasksController(
     // Launch cookie used to identify a drag and drop transition to fullscreen after it has begun.
     // Used to prevent handleRequest from moving the new fullscreen task to freeform.
     private var dragAndDropFullscreenCookie: Binder? = null
+    private var pendingPipTransitionAndTask: Pair<IBinder, Int>? = null
 
     init {
         desktopMode = DesktopModeImpl()
@@ -536,6 +538,26 @@ class DesktopTasksController(
     }
 
     fun minimizeTask(taskInfo: RunningTaskInfo) {
+        val wct = WindowContainerTransaction()
+
+        val isMinimizingToPip = taskInfo.pictureInPictureParams?.isAutoEnterEnabled() ?: false
+        // If task is going to PiP, start a PiP transition instead of a minimize transition
+        if (isMinimizingToPip) {
+            val requestInfo = TransitionRequestInfo(
+                TRANSIT_PIP, /* triggerTask= */ null, taskInfo, /* remoteTransition= */ null,
+                /* displayChange= */ null, /* flags= */ 0
+            )
+            val requestRes = transitions.dispatchRequest(Binder(), requestInfo, /* skip= */ null)
+            wct.merge(requestRes.second, true)
+            pendingPipTransitionAndTask =
+                freeformTaskTransitionStarter.startPipTransition(wct) to taskInfo.taskId
+            return
+        }
+
+        minimizeTaskInner(taskInfo)
+    }
+
+    private fun minimizeTaskInner(taskInfo: RunningTaskInfo) {
         val taskId = taskInfo.taskId
         val displayId = taskInfo.displayId
         val wct = WindowContainerTransaction()
@@ -1296,6 +1318,21 @@ class DesktopTasksController(
     ): Boolean {
         // This handler should never be the sole handler, so should not animate anything.
         return false
+    }
+
+    override fun onTransitionConsumed(
+        transition: IBinder,
+        aborted: Boolean,
+        finishT: Transaction?
+    ) {
+        pendingPipTransitionAndTask?.let { (pipTransition, taskId) ->
+            if (transition == pipTransition) {
+                if (aborted) {
+                    shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { minimizeTaskInner(it) }
+                }
+                pendingPipTransitionAndTask = null
+            }
+        }
     }
 
     override fun handleRequest(
