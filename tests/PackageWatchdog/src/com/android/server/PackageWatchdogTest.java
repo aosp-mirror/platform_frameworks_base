@@ -152,7 +152,8 @@ public class PackageWatchdogTest {
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
         adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG,
-                Manifest.permission.WRITE_DEVICE_CONFIG);
+                Manifest.permission.WRITE_DEVICE_CONFIG,
+                Manifest.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
         mTestLooper = new TestLooper();
         mSpyContext = spy(InstrumentationRegistry.getContext());
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
