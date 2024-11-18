@@ -1212,20 +1212,23 @@ class Task extends TaskFragment {
     @Override
     void onResize() {
         super.onResize();
-        updateTaskLayerForFreeform();
+        onTaskBoundsChangedForFreeform();
     }
 
     @Override
     void onMovedByResize() {
         super.onMovedByResize();
-        updateTaskLayerForFreeform();
+        onTaskBoundsChangedForFreeform();
     }
 
-    private void updateTaskLayerForFreeform() {
-        if (!com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()) {
+    private void onTaskBoundsChangedForFreeform() {
+        if (!isVisibleRequested() || !inFreeformWindowingMode()) {
             return;
         }
-        if (!isVisibleRequested() || !inFreeformWindowingMode()) {
+
+        mAtmService.notifyTaskPersisterLocked(this, false /* flush */);
+
+        if (!com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()) {
             return;
         }
         mRootWindowContainer.invalidateTaskLayersAndUpdateOomAdjIfNeeded();
