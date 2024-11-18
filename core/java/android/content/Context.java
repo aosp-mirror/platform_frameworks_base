@@ -4529,7 +4529,6 @@ public abstract class Context {
      * @see #AUTHENTICATION_POLICY_SERVICE
      * @see android.security.authenticationpolicy.AuthenticationPolicyManager
      */
-    // TODO(b/347269120): Re-add @Nullable
     public abstract Object getSystemService(@ServiceName @NonNull String name);
 
     /**
@@ -4576,7 +4575,6 @@ public abstract class Context {
      */
     @SuppressWarnings("unchecked")
     @RavenwoodKeep
-    // TODO(b/347269120): Re-add @Nullable
     public final <T> T getSystemService(@NonNull Class<T> serviceClass) {
         // Because subclasses may override getSystemService(String) we cannot
         // perform a lookup by class alone.  We must first map the class to its
