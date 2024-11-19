@@ -40,7 +40,7 @@ import org.junit.runner.RunWith;
  */
 @MediumTest
 @RunWith(AndroidJUnit4.class)
-@DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER_MULTI_PRESS_GESTURES)
+@DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER_MULTI_KEY_GESTURES)
 public class CombinationKeyTests extends ShortcutKeyTestBase {
     private static final long A11Y_KEY_HOLD_MILLIS = 3500;
 

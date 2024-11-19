@@ -1361,7 +1361,7 @@ class KeyGestureControllerTests {
     @Parameters(method = "systemGesturesTestArguments_forKeyCombinations")
     @EnableFlags(
         com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER,
-        com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER_MULTI_PRESS_GESTURES
+        com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER_MULTI_KEY_GESTURES
     )
     fun testKeyCombinationGestures(test: TestData) {
         setupKeyGestureController()
