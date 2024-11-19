@@ -793,6 +793,11 @@ final class KeyGestureController {
                 return true;
         }
 
+        // Handle shortcuts through shortcut services
+        if (mAppLaunchShortcutManager.handleShortcutService(event)) {
+            return true;
+        }
+
         // Handle custom shortcuts
         if (firstDown) {
             InputGestureData customGesture;
