@@ -2783,6 +2783,17 @@ package android.os.storage {
 
 package android.os.vibrator {
 
+  @FlaggedApi("android.os.vibrator.normalized_pwle_effects") public final class BasicPwleSegment extends android.os.vibrator.VibrationEffectSegment {
+    method public int describeContents();
+    method public long getDuration();
+    method public float getEndIntensity();
+    method public float getEndSharpness();
+    method public float getStartIntensity();
+    method public float getStartSharpness();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.BasicPwleSegment> CREATOR;
+  }
+
   public final class PrebakedSegment extends android.os.vibrator.VibrationEffectSegment {
     method public int describeContents();
     method public long getDuration();
