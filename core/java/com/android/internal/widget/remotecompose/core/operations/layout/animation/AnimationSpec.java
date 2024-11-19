@@ -18,7 +18,6 @@ package com.android.internal.widget.remotecompose.core.operations.layout.animati
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -36,8 +35,8 @@ public class AnimationSpec implements Operation {
     int mMotionEasingType = GeneralEasing.CUBIC_STANDARD;
     int mVisibilityDuration = 300;
     int mVisibilityEasingType = GeneralEasing.CUBIC_STANDARD;
-    ANIMATION mEnterAnimation = ANIMATION.FADE_IN;
-    ANIMATION mExitAnimation = ANIMATION.FADE_OUT;
+    @NonNull ANIMATION mEnterAnimation = ANIMATION.FADE_IN;
+    @NonNull ANIMATION mExitAnimation = ANIMATION.FADE_OUT;
 
     public AnimationSpec(
             int animationId,
@@ -45,8 +44,8 @@ public class AnimationSpec implements Operation {
             int motionEasingType,
             int visibilityDuration,
             int visibilityEasingType,
-            ANIMATION enterAnimation,
-            ANIMATION exitAnimation) {
+            @NonNull ANIMATION enterAnimation,
+            @NonNull ANIMATION exitAnimation) {
         this.mAnimationId = animationId;
         this.mMotionDuration = motionDuration;
         this.mMotionEasingType = motionEasingType;
@@ -87,10 +86,12 @@ public class AnimationSpec implements Operation {
         return mVisibilityEasingType;
     }
 
+    @NonNull
     public ANIMATION getEnterAnimation() {
         return mEnterAnimation;
     }
 
+    @NonNull
     public ANIMATION getExitAnimation() {
         return mExitAnimation;
     }
@@ -126,13 +127,13 @@ public class AnimationSpec implements Operation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         // nothing here
     }
 
     @NonNull
     @Override
-    public String deepToString(@Nullable String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 

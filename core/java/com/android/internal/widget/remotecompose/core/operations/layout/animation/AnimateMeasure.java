@@ -33,40 +33,40 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.easin
  * <p>Handles position, size and visibility
  */
 public class AnimateMeasure {
-    long mStartTime = System.currentTimeMillis();
-    Component mComponent;
-    ComponentMeasure mOriginal;
-    ComponentMeasure mTarget;
-    int mDuration;
-    int mDurationVisibilityChange = mDuration;
-    AnimationSpec.ANIMATION mEnterAnimation = AnimationSpec.ANIMATION.FADE_IN;
-    AnimationSpec.ANIMATION mExitAnimation = AnimationSpec.ANIMATION.FADE_OUT;
-    int mMotionEasingType = GeneralEasing.CUBIC_STANDARD;
-    int mVisibilityEasingType = GeneralEasing.CUBIC_ACCELERATE;
+    private long mStartTime = System.currentTimeMillis();
+    private final @NonNull Component mComponent;
+    private final @NonNull ComponentMeasure mOriginal;
+    private final @NonNull ComponentMeasure mTarget;
+    private int mDuration;
+    private int mDurationVisibilityChange = mDuration;
+    private @NonNull AnimationSpec.ANIMATION mEnterAnimation = AnimationSpec.ANIMATION.FADE_IN;
+    private @NonNull AnimationSpec.ANIMATION mExitAnimation = AnimationSpec.ANIMATION.FADE_OUT;
+    private int mMotionEasingType = GeneralEasing.CUBIC_STANDARD;
+    private int mVisibilityEasingType = GeneralEasing.CUBIC_ACCELERATE;
 
-    float mP = 0f;
-    float mVp = 0f;
+    private float mP = 0f;
+    private float mVp = 0f;
 
     @NonNull
-    FloatAnimation mMotionEasing =
+    private FloatAnimation mMotionEasing =
             new FloatAnimation(mMotionEasingType, mDuration / 1000f, null, 0f, Float.NaN);
 
     @NonNull
-    FloatAnimation mVisibilityEasing =
+    private FloatAnimation mVisibilityEasing =
             new FloatAnimation(
                     mVisibilityEasingType, mDurationVisibilityChange / 1000f, null, 0f, Float.NaN);
 
-    ParticleAnimation mParticleAnimation;
+    private ParticleAnimation mParticleAnimation;
 
     public AnimateMeasure(
             long startTime,
             @NonNull Component component,
-            ComponentMeasure original,
+            @NonNull ComponentMeasure original,
             @NonNull ComponentMeasure target,
             int duration,
             int durationVisibilityChange,
-            AnimationSpec.ANIMATION enterAnimation,
-            AnimationSpec.ANIMATION exitAnimation,
+            @NonNull AnimationSpec.ANIMATION enterAnimation,
+            @NonNull AnimationSpec.ANIMATION exitAnimation,
             int motionEasingType,
             int visibilityEasingType) {
         this.mStartTime = startTime;

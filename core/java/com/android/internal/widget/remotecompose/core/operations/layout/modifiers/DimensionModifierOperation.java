@@ -16,7 +16,6 @@
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
@@ -57,16 +56,16 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
         }
     }
 
-    Type mType = Type.EXACT;
+    @NonNull Type mType = Type.EXACT;
     float mValue = Float.NaN;
     float mOutValue = Float.NaN;
 
-    public DimensionModifierOperation(Type type, float value) {
+    public DimensionModifierOperation(@NonNull Type type, float value) {
         mType = type;
         mOutValue = mValue = value;
     }
 
-    public DimensionModifierOperation(Type type) {
+    public DimensionModifierOperation(@NonNull Type type) {
         this(type, Float.NaN);
     }
 
@@ -115,7 +114,15 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
         return mType == Type.FILL;
     }
 
-    public Type getType() {
+    public boolean isIntrinsicMin() {
+        return mType == Type.INTRINSIC_MIN;
+    }
+
+    public boolean isIntrinsicMax() {
+        return mType == Type.INTRINSIC_MAX;
+    }
+
+    public @NonNull Type getType() {
         return mType;
     }
 
@@ -143,11 +150,11 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
     }
 
     @Override
-    public void apply(RemoteContext context) {}
+    public void apply(@NonNull RemoteContext context) {}
 
     @NonNull
     @Override
-    public String deepToString(@Nullable String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 

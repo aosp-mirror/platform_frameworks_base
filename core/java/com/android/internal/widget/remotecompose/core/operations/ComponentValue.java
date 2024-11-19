@@ -18,7 +18,6 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -75,7 +74,7 @@ public class ComponentValue implements Operation, SerializableToString {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         // Nothing
     }
 
@@ -123,9 +122,9 @@ public class ComponentValue implements Operation, SerializableToString {
         buffer.writeInt(valueId);
     }
 
-    @Nullable
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return null;
     }
 

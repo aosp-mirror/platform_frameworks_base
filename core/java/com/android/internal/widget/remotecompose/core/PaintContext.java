@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 
 /** Specify an abstract paint context used by RemoteCompose commands to draw */
@@ -22,9 +24,10 @@ public abstract class PaintContext {
     public static final int TEXT_MEASURE_MONOSPACE_WIDTH = 0x01;
     public static final int TEXT_MEASURE_FONT_HEIGHT = 0x02;
 
-    protected RemoteContext mContext;
+    protected @NonNull RemoteContext mContext;
     private boolean mNeedsRepaint = false;
 
+    @NonNull
     public RemoteContext getContext() {
         return mContext;
     }
@@ -37,11 +40,11 @@ public abstract class PaintContext {
         mNeedsRepaint = false;
     }
 
-    public PaintContext(RemoteContext context) {
+    public PaintContext(@NonNull RemoteContext context) {
         this.mContext = context;
     }
 
-    public void setContext(RemoteContext context) {
+    public void setContext(@NonNull RemoteContext context) {
         this.mContext = context;
     }
 
@@ -117,7 +120,8 @@ public abstract class PaintContext {
      *     descent of the font (not just of the measured text)
      * @param bounds the bounds (left, top, right, bottom)
      */
-    public abstract void getTextBounds(int textId, int start, int end, int flags, float[] bounds);
+    public abstract void getTextBounds(
+            int textId, int start, int end, int flags, @NonNull float[] bounds);
 
     /**
      * Draw a text starting ast x,y
@@ -158,7 +162,7 @@ public abstract class PaintContext {
      *
      * @param mPaintData the list of changes
      */
-    public abstract void applyPaint(PaintBundle mPaintData);
+    public abstract void applyPaint(@NonNull PaintBundle mPaintData);
 
     /**
      * Scale the rendering by scaleX and saleY (1.0 = no scale). Scaling is done about
@@ -264,7 +268,7 @@ public abstract class PaintContext {
      *
      * @param content the content to log
      */
-    public void log(String content) {
+    public void log(@NonNull String content) {
         System.out.println("[LOG] " + content);
     }
 

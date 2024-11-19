@@ -31,40 +31,37 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/** Apply a value change on a string variable. */
-public class ValueStringChangeActionOperation implements ActionOperation {
-    private static final int OP_CODE = Operations.VALUE_STRING_CHANGE_ACTION;
+/** Apply a value change on an integer variable. */
+public class ValueFloatExpressionChangeActionOperation implements ActionOperation {
+    private static final int OP_CODE = Operations.VALUE_FLOAT_EXPRESSION_CHANGE_ACTION;
 
     int mTargetValueId = -1;
-    int mValueId = -1;
+    int mValueExpressionId = -1;
 
-    public ValueStringChangeActionOperation(int id, int value) {
+    public ValueFloatExpressionChangeActionOperation(int id, int valueId) {
         mTargetValueId = id;
-        mValueId = value;
+        mValueExpressionId = valueId;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "ValueChangeActionOperation(" + mTargetValueId + ")";
-    }
-
-    public int getActionId() {
-        return mTargetValueId;
+        return "ValueFloatExpressionChangeActionOperation(" + mTargetValueId + ")";
     }
 
     @NonNull
     public String serializedName() {
-        return "VALUE_CHANGE";
+        return "VALUE_FLOAT_EXPRESSION_CHANGE";
     }
 
     @Override
     public void serializeToString(int indent, @NonNull StringSerializer serializer) {
-        serializer.append(indent, serializedName() + " = " + mTargetValueId + " -> " + mValueId);
+        serializer.append(
+                indent, serializedName() + " = " + mTargetValueId + " -> " + mValueExpressionId);
     }
 
     @Override
-    public void apply(@NonNull RemoteContext context) {}
+    public void apply(RemoteContext context) {}
 
     @NonNull
     @Override
@@ -73,16 +70,16 @@ public class ValueStringChangeActionOperation implements ActionOperation {
     }
 
     @Override
-    public void write(@NonNull WireBuffer buffer) {}
+    public void write(WireBuffer buffer) {}
 
     @Override
     public void runAction(
             @NonNull RemoteContext context,
             @NonNull CoreDocument document,
-            @NonNull Component component,
+            Component component,
             float x,
             float y) {
-        context.overrideText(mTargetValueId, mValueId);
+        document.evaluateFloatExpression(mValueExpressionId, mTargetValueId, context);
     }
 
     public static void apply(@NonNull WireBuffer buffer, int valueId, int value) {
@@ -94,19 +91,15 @@ public class ValueStringChangeActionOperation implements ActionOperation {
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int valueId = buffer.readInt();
         int value = buffer.readInt();
-        operations.add(new ValueStringChangeActionOperation(valueId, value));
+        operations.add(new ValueFloatExpressionChangeActionOperation(valueId, value));
     }
 
     public static void documentation(@NonNull DocumentationBuilder doc) {
-        doc.operation("Layout Operations", OP_CODE, "ValueStringChangeActionOperation")
+        doc.operation("Layout Operations", OP_CODE, "ValueIntegerExpressionChangeActionOperation")
                 .description(
-                        "ValueStrin gChange action. "
-                                + " This operation represents a String change (referenced by id) "
-                                + "for the given string id")
-                .field(INT, "TARGET_ID", "Target Value ID")
-                .field(
-                        INT,
-                        "VALUE_ID",
-                        "Value ID to be assigned to the target " + "value as a string");
+                        "ValueIntegerExpressionChange action. "
+                                + " This operation represents a value change for the given id")
+                .field(INT, "TARGET_VALUE_ID", "Value ID")
+                .field(INT, "VALUE_ID", "id of the value to be assigned to the target");
     }
 }

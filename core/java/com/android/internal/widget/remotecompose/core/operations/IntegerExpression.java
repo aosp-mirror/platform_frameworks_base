@@ -19,6 +19,7 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -43,13 +44,13 @@ public class IntegerExpression implements Operation, VariableSupport {
     public int mId;
     private int mMask;
     private int mPreMask;
-    public int[] mSrcValue;
-    public int[] mPreCalcValue;
+    @NonNull public final int[] mSrcValue;
+    @Nullable public int[] mPreCalcValue;
     private float mLastChange = Float.NaN;
     public static final int MAX_SIZE = 320;
     @NonNull IntegerExpressionEvaluator mExp = new IntegerExpressionEvaluator();
 
-    public IntegerExpression(int id, int mask, int[] value) {
+    public IntegerExpression(int id, int mask, @NonNull int[] value) {
         this.mId = id;
         this.mMask = mask;
         this.mSrcValue = value;
@@ -188,7 +189,7 @@ public class IntegerExpression implements Operation, VariableSupport {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 

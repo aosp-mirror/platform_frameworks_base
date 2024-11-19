@@ -54,13 +54,13 @@ public class LongConstant implements Operation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.putObject(mId, this);
     }
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return toString();
     }
 

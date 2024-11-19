@@ -70,6 +70,12 @@ public class TouchUpModifierOperation extends ListActionsOperation implements To
         // nothing
     }
 
+    @Override
+    public void onTouchDrag(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        // nothing
+    }
+
     public static String name() {
         return "TouchUpModifier";
     }

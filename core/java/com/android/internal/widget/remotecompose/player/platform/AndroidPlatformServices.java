@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.player.platform;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.Path;
 import android.graphics.PathIterator;
@@ -31,7 +33,7 @@ public class AndroidPlatformServices implements Platform {
     private static final String LOG_TAG = "RemoteCompose";
 
     @Override
-    public byte[] imageToByteArray(Object image) {
+    public byte[] imageToByteArray(@NonNull Object image) {
         if (image instanceof Bitmap) {
             // let's create a bitmap
             ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
@@ -42,7 +44,7 @@ public class AndroidPlatformServices implements Platform {
     }
 
     @Override
-    public int getImageWidth(Object image) {
+    public int getImageWidth(@NonNull Object image) {
         if (image instanceof Bitmap) {
             return ((Bitmap) image).getWidth();
         }
@@ -50,7 +52,7 @@ public class AndroidPlatformServices implements Platform {
     }
 
     @Override
-    public int getImageHeight(Object image) {
+    public int getImageHeight(@NonNull Object image) {
         if (image instanceof Bitmap) {
             return ((Bitmap) image).getHeight();
         }
@@ -58,7 +60,8 @@ public class AndroidPlatformServices implements Platform {
     }
 
     @Override
-    public float[] pathToFloatArray(Object path) {
+    @Nullable
+    public float[] pathToFloatArray(@NonNull Object path) {
         //        if (path is RemotePath) {
         //            return path.createFloatArray()
         //        }
@@ -88,7 +91,7 @@ public class AndroidPlatformServices implements Platform {
         }
     }
 
-    private float[] androidPathToFloatArray(Path path) {
+    private @NonNull float[] androidPathToFloatArray(@NonNull Path path) {
         PathIterator i = path.getPathIterator();
         int estimatedSize = 0;
 

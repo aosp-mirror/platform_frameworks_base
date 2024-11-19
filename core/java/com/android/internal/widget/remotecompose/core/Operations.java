@@ -98,7 +98,9 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.OffsetModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ScrollModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueFloatChangeActionOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueFloatExpressionChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerExpressionChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueStringChangeActionOperation;
@@ -214,6 +216,7 @@ public class Operations {
     public static final int MODIFIER_OFFSET = 221;
     public static final int MODIFIER_ZINDEX = 223;
     public static final int MODIFIER_GRAPHICS_LAYER = 224;
+    public static final int MODIFIER_SCROLL = 226;
 
     public static final int LOOP_START = 215;
     public static final int LOOP_END = 216;
@@ -226,6 +229,7 @@ public class Operations {
     public static final int VALUE_STRING_CHANGE_ACTION = 213;
     public static final int VALUE_INTEGER_EXPRESSION_CHANGE_ACTION = 218;
     public static final int VALUE_FLOAT_CHANGE_ACTION = 222;
+    public static final int VALUE_FLOAT_EXPRESSION_CHANGE_ACTION = 227;
 
     public static final int ANIMATION_SPEC = 14;
 
@@ -235,7 +239,7 @@ public class Operations {
 
     static class UniqueIntMap<T> extends IntMap<T> {
         @Override
-        public T put(int key, T value) {
+        public T put(int key, @NonNull T value) {
             assert null == get(key) : "Opcode " + key + " already used in Operations !";
             return super.put(key, value);
         }
@@ -316,6 +320,7 @@ public class Operations {
         map.put(MODIFIER_OFFSET, OffsetModifierOperation::read);
         map.put(MODIFIER_ZINDEX, ZIndexModifierOperation::read);
         map.put(MODIFIER_GRAPHICS_LAYER, GraphicsLayerModifierOperation::read);
+        map.put(MODIFIER_SCROLL, ScrollModifierOperation::read);
 
         map.put(OPERATIONS_LIST_END, OperationsListEnd::read);
 
@@ -327,6 +332,9 @@ public class Operations {
                 ValueIntegerExpressionChangeActionOperation::read);
         map.put(VALUE_STRING_CHANGE_ACTION, ValueStringChangeActionOperation::read);
         map.put(VALUE_FLOAT_CHANGE_ACTION, ValueFloatChangeActionOperation::read);
+        map.put(
+                VALUE_FLOAT_EXPRESSION_CHANGE_ACTION,
+                ValueFloatExpressionChangeActionOperation::read);
 
         map.put(LAYOUT_ROOT, RootLayoutComponent::read);
         map.put(LAYOUT_CONTENT, LayoutComponentContent::read);

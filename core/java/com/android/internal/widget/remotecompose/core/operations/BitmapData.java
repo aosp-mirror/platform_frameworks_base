@@ -17,6 +17,7 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 
 import android.annotation.NonNull;
 
@@ -41,10 +42,19 @@ public class BitmapData implements Operation, SerializableToString {
     int mImageId;
     int mImageWidth;
     int mImageHeight;
-    byte[] mBitmap;
+    short mType;
+    short mEncoding;
+    @NonNull final byte[] mBitmap;
     public static final int MAX_IMAGE_DIMENSION = 8000;
+    public static final short ENCODING_INLINE = 0;
+    public static final short ENCODING_URL = 1;
+    public static final short ENCODING_FILE = 2;
+    public static final short TYPE_PNG_8888 = 0;
+    public static final short TYPE_PNG = 1;
+    public static final short TYPE_RAW8 = 2;
+    public static final short TYPE_RAW8888 = 3;
 
-    public BitmapData(int imageId, int width, int height, byte[] bitmap) {
+    public BitmapData(int imageId, int width, int height, @NonNull byte[] bitmap) {
         this.mImageId = imageId;
         this.mImageWidth = width;
         this.mImageHeight = height;
@@ -92,6 +102,23 @@ public class BitmapData implements Operation, SerializableToString {
         buffer.writeBuffer(bitmap);
     }
 
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            int imageId,
+            short type,
+            short width,
+            short encoding,
+            short height,
+            @NonNull byte[] bitmap) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(imageId);
+        int w = (((int) type) << 16) | width;
+        int h = (((int) encoding) << 16) | height;
+        buffer.writeInt(w);
+        buffer.writeInt(h);
+        buffer.writeBuffer(bitmap);
+    }
+
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int imageId = buffer.readInt();
         int width = buffer.readInt();
@@ -110,19 +137,22 @@ public class BitmapData implements Operation, SerializableToString {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Bitmap data")
                 .field(DocumentedOperation.INT, "id", "id of bitmap data")
+                .field(SHORT, "type", "width of the image")
+                .field(SHORT, "width", "width of the image")
+                .field(SHORT, "encoding", "height of the image")
                 .field(INT, "width", "width of the image")
-                .field(INT, "height", "height of the image")
+                .field(SHORT, "height", "height of the image")
                 .field(INT_ARRAY, "values", "length", "Array of ints");
     }
 
     @Override
     public void apply(@NonNull RemoteContext context) {
-        context.loadBitmap(mImageId, mImageWidth, mImageHeight, mBitmap);
+        context.loadBitmap(mImageId, mEncoding, mType, mImageWidth, mImageHeight, mBitmap);
     }
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 
