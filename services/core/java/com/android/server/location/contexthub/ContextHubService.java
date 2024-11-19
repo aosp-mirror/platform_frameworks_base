@@ -527,8 +527,8 @@ public class ContextHubService extends IContextHubService.Stub {
         try {
             mContextHubWrapper.registerEndpointCallback(
                     new ContextHubHalEndpointCallback(mHubInfoRegistry));
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while registering IEndpointCallback", e);
+        } catch (RemoteException | UnsupportedOperationException e) {
+            Log.e(TAG, "Exception while registering IEndpointCallback", e);
         }
     }
 
