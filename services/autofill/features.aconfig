@@ -37,3 +37,10 @@ flag {
     description: "Improvements for Fill Dialog, including deprecation of pre-trigger API's"
     bug: "336223371"
 }
+
+flag {
+  name: "add_last_focused_id_to_fill_event_history"
+  namespace: "autofill"
+  description: "Adds focused id to each event that's part of the fill event history"
+  bug: "334141398"
+}
