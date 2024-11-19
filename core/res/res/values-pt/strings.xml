@@ -323,7 +323,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"Localização"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"acesse o local do dispositivo"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Agenda"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acesse sua agenda"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acessar sua agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envie e veja mensagens SMS"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Arquivos"</string>
@@ -613,10 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permitir que o app determine o posicionamento relativo entre dispositivos de banda ultralarga por perto"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagir com dispositivos Wi-Fi por perto"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite que o app divulgue, faça conexão e determine a posição relativa de dispositivos Wi-Fi por perto."</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"determinar o posicionamento relativo entre dispositivos por perto"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Permitir que o app determine o posicionamento relativo entre dispositivos por perto"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informações preferidas de serviço de pagamento por NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que o app acesse as informações preferidas de serviço de pagamento por NFC, como auxílios registrados ou destinos de trajetos."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar a comunicação a curta distância"</string>

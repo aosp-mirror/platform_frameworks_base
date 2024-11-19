@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允許應用程式判斷附近超寬頻裝置之間的相對位置"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"與附近的 Wi‑Fi 裝置互動"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式向附近的 Wi-Fi 裝置顯示此裝置、連接這些裝置並判斷其相對位置"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"判斷附近裝置之間的相對位置"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"允許應用程式判斷附近裝置之間的相對位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"由用戶允許授權的 NFC 付款服務資訊"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得由用戶允許授權的 NFC 付款服務資訊 (如已註冊的付款輔助功能和最終付款對象)。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"開啟"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"返回"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待處理…"</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"「緊急衛星連接」現已推出"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"在沒有流動網絡或 Wi-Fi 網絡的情況下，你可向緊急服務收發訊息，但你必須將「Google 訊息」設定為預設訊息應用程式。"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"不支援「緊急衛星連接」"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"此裝置不支援「緊急衛星連接」"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"未設定「緊急衛星連接」"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"請確保已連接互聯網，然後再試一次"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"無法使用「緊急衛星連接」"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"此國家或地區不支援「緊急衛星連接」"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"未設定「緊急衛星連接」"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"你必須將「Google 訊息」設定為預設訊息應用程式，才能透過衛星收發訊息"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"無法使用「緊急衛星連接」"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"如要查看此國家或地區是否可以使用緊急衛星連接功能，請開啟位置設定"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"可以使用衛星訊息功能"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"在沒有流動網絡或 Wi-Fi 網絡的情況下，你可透過衛星收發訊息，但你必須將「Google 訊息」設定為預設訊息應用程式。"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"無法使用衛星訊息功能"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"此裝置不支援衛星訊息功能"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"未設定衛星訊息功能"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"請確保已連接互聯網，然後再試一次"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"無法使用衛星訊息功能"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"此國家或地區不支援衛星訊息功能"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"未設定衛星訊息功能"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"你必須將「Google 訊息」設定為預設訊息應用程式，才能透過衛星收發訊息"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"無法使用衛星訊息功能"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"如要查看此國家或地區是否支援衛星訊息功能，請開啟位置設定"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"重新設定「指紋解鎖」功能"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"無法再辨識<xliff:g id="FINGERPRINT">%s</xliff:g>。"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"無法再辨識<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>和<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>。"</string>

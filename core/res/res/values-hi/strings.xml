@@ -322,7 +322,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"जगह की जानकारी"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"इस डिवाइस की जगह तक पहुंचने दें"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"कैलेंडर"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करें"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"आपके कैलेंडर को ऐक्सेस करने की अनुमति"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"फ़ाइल"</string>
@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ऐप्लिकेशन को आस-पास मौजूद Ultra-Wideband डिवाइसों के बीच की दूरी का पता लगाने की अनुमति दें"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"आस-पास मौजूद वाई-फ़ाई डिवाइसों से इंटरैक्ट करें"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"इससे, ऐप्लिकेशन आस-पास मौजूद वाई-फ़ाई डिवाइसों की जानकारी दिखा पाएगा, उनसे कनेक्ट कर पाएगा, और उनकी दूरी पता लगा पाएगा"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"आस-पास मौजूद डिवाइसों के बीच की दूरी का पता लगाएं"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ऐप्लिकेशन को, आस-पास मौजूद डिवाइसों के बीच की दूरी का पता लगाने की अनुमति दें"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC का इस्तेमाल करने वाली पैसे चुकाने की पसंदीदा सेवा की जानकारी"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"अगर ऐप्लिकेशन को अनुमति दी जाती है, तो वह पैसे चुकाने की आपकी उस पसंदीदा सेवा के बारे में जानकारी पा सकता है जो NFC का इस्तेमाल करती है. इसमें रजिस्टर किए गए डिवाइस और उनके आउटपुट के रूट जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नियर फ़ील्‍ड कम्‍यूनिकेशन नियंत्रित करें"</string>

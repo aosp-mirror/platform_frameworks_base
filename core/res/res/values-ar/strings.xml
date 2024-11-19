@@ -616,10 +616,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"يسمح هذا الإذن للتطبيق بتحديد الموضع النسبي بين الأجهزة المجاورة التي تستخدم النطاق الواسع جدًا."</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏التفاعل مع أجهزة Wi‑Fi المجاورة"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏للسماح للتطبيق بعرض الإعلانات والاتصال بالأجهزة الأخرى وتحديد الموقع النسبي لأجهزة Wi-Fi المجاورة."</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"تحديد الموضع النسبي بين الأجهزة المجاورة"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"يسمح هذا الإذن للتطبيق بتحديد الموضع النسبي بين الأجهزة المجاورة"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>

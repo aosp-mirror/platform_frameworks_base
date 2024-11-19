@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tillad, at appen fastlægger den relative position mellem UWB-enheder (Ultra-Wideband) i nærheden"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagere med Wi‑Fi-enheder i nærheden"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Giver appen tilladelse til at informere om, oprette forbindelse til og fastslå den relative placering af Wi‑Fi-enheder i nærheden"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"fastlægge relativ position mellem enheder i nærheden"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Tillad, at appen fastlægger den relative position mellem enheder i nærheden"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Foretrukne oplysninger vedrørende NFC-betalingstjeneste"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillader, at appen får foretrukne oplysninger vedrørende NFC-betalingstjeneste, f.eks. registrerede hjælpemidler og rutedestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"administrere Near Field Communication"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Aktivér"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Gå tilbage"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Afventer…"</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS-meldinger via satellit er nu tilgængelig"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Du kan sende beskeder til nødtjenester, hvis du ikke har forbindelse til et mobil- eller Wi-Fi-netværk. Google Beskeder skal være din standardapp til beskeder."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"SOS-meldinger via satellit understøttes ikke"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"SOS-meldinger via satellit understøttes ikke på denne enhed"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"SOS-meldinger via satellit er ikke konfigureret"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Sørg for, at du har forbindelse til internettet, og prøv at konfigurere igen"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS-meldinger via satellit er ikke tilgængelig"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS-meldinger via satellit er ikke tilgængelig i dette land eller denne region"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"SOS-meldinger via satellit er ikke konfigureret"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Hvis du vil sende beskeder via satellit, skal du angive Google Beskeder som din standardapp til beskeder"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS-meldinger via satellit er ikke tilgængelig"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Hvis du vil tjekke, om SOS-meldinger via satellit er tilgængelig i dette land eller denne region, skal du aktivere lokationsindstillinger"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Satellitbeskeder er tilgængelige"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Du kan sende beskeder via satellit, hvis du ikke har forbindelse til et mobil- eller Wi-Fi-netværk. Google Beskeder skal være din standardapp til beskeder."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Satellitbeskeder understøttes ikke"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Satellitbeskeder understøttes ikke på denne enhed"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Satellitbeskeder er ikke konfigureret"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Sørg for, at du har forbindelse til internettet, og prøv at konfigurere igen"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Satellitbeskeder er ikke tilgængelige"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Satellitbeskeder er ikke tilgængelige i dette land eller denne region"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Satellitbeskeder er ikke konfigureret"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Hvis du vil sende beskeder via satellit, skal du angive Google Beskeder som din standardapp til beskeder"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Satellitbeskeder er ikke tilgængelige"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Hvis du vil tjekke, om satellitbeskeder er tilgængelige i dette land eller denne region, skal du aktivere lokationsindstillinger"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfigurer fingeroplåsning igen"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> kan ikke længere genkendes."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> og <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> kan ikke længere genkendes."</string>

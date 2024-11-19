@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ઍપને નજીકના અલ્ટ્રા-વાઇડબૅન્ડ ડિવાઇસની વચ્ચેનું સંબંધિત અંતર નક્કી કરવાની મંજૂરી આપો"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"નજીકના વાઇ-ફાઇ ડિવાઇસ સાથે ક્રિયાપ્રતિક્રિયા કરો"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ઍપને નજીકના વાઇ-ફાઇ ડિવાઇસની માહિતી બતાવવાની, તેની સાથે કનેક્ટ કરવાની અને તેની સંબંધિત સ્થિતિ નક્કી કરવાની મંજૂરી આપો"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"ડિવાઇસની વચ્ચેનું સાપેક્ષ અંતર નક્કી કરો"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ઍપને નજીકના ડિવાઇસની વચ્ચેનું સાપેક્ષ અંતર નક્કી કરવાની મંજૂરી આપો"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"આ મંજૂરીને આપવાથી, ઍપ તમારી પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી મેળવી શકે છે, જેમ કે રજિસ્ટર થયેલી સહાય અને નિર્ધારિત સ્થાન."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"નિઅર ફીલ્ડ કમ્યુનિકેશન નિયંત્રિત કરો"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ચાલુ કરો"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"પાછા જાઓ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"બાકી..."</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ઇમર્જન્સી સૅટલાઇટ સહાય હવે ઉપલબ્ધ છે"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"જો મોબાઇલ કે વાઇ-ફાઇ નેટવર્ક ન હોય, તો તમે ઇમર્જન્સી સર્વિસને મેસેજ કરી શકો છો. Google Messages તમારી ડિફૉલ્ટ મેસેજિંગ ઍપ હોવી આવશ્યક છે."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ઇમર્જન્સી સૅટલાઇટ સહાયને સપોર્ટ કરવામાં આવતો નથી"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"આ ડિવાઇસ પર ઇમર્જન્સી સૅટલાઇટ સહાયને સપોર્ટ કરવામાં આવતો નથી"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ઇમર્જન્સી સૅટલાઇટ સહાયનું સેટઅપ કર્યું નથી"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"તમે ઇન્ટરનેટથી કનેક્ટેડ હોવાની ખાતરી કરો અને ફરી સેટઅપ કરવાનો પ્રયાસ કરો"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ઇમર્જન્સી સૅટલાઇટ સહાય ઉપલબ્ધ નથી"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"આ દેશ કે પ્રદેશમાં ઇમર્જન્સી સૅટલાઇટ સહાય ઉપલબ્ધ નથી"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ઇમર્જન્સી સૅટલાઇટ સહાયનું સેટઅપ કરેલું નથી"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"સૅટલાઇટ દ્વારા મેસેજ મોકલવા માટે, Google Messagesને તમારી ડિફૉલ્ટ મેસેજિંગ ઍપ તરીકે સેટ કરો"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ઇમર્જન્સી સૅટલાઇટ સહાય ઉપલબ્ધ નથી"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"આ દેશ કે પ્રદેશમાં ઇમર્જન્સી સૅટલાઇટ સહાય ઉપલબ્ધ છે કે કેમ તે ચેક કરવા માટે, લોકેશન સેટિંગ ચાલુ કરો"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"સૅટલાઇટ મેસેજિંગ ઉપલબ્ધ છે"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"જો કોઈ મોબાઇલ કે વાઇ-ફાઇ નેટવર્ક ઉપલબ્ધ ન હોય, તો તમે સૅટલાઇટ દ્વારા મેસેજ મોકલી શકો છો. Google Messages તમારી ડિફૉલ્ટ મેસેજિંગ ઍપ હોવી આવશ્યક છે."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"સૅટલાઇટ મેસેજિંગને સપોર્ટ કરવામાં આવતો નથી"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"આ ડિવાઇસ પર સૅટલાઇટ મેસેજિંગને સપોર્ટ કરવામાં આવતો નથી"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"સૅટલાઇટ મેસેજિંગનું સેટઅપ કર્યું નથી"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"તમે ઇન્ટરનેટથી કનેક્ટેડ હોવાની ખાતરી કરો અને ફરી સેટઅપ કરવાનો પ્રયાસ કરો"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"સૅટલાઇટ મેસેજિંગ ઉપલબ્ધ નથી"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"આ દેશ કે પ્રદેશમાં સૅટલાઇટ મેસેજિંગ ઉપલબ્ધ નથી"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"સૅટલાઇટ મેસેજિંગનું સેટઅપ કર્યું નથી"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"સૅટલાઇટ દ્વારા મેસેજ મોકલવા માટે, Google Messagesને તમારી ડિફૉલ્ટ મેસેજિંગ ઍપ તરીકે સેટ કરો"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"સૅટલાઇટ મેસેજિંગ ઉપલબ્ધ નથી"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"આ દેશ કે પ્રદેશમાં સૅટલાઇટ મેસેજિંગ ઉપલબ્ધ છે કે કેમ તે ચેક કરવા માટે, લોકેશન સેટિંગ ચાલુ કરો"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"હવે <xliff:g id="FINGERPRINT">%s</xliff:g> ઓળખી શકાતી નથી."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"હવે <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ઓળખી શકાતી નથી."</string>

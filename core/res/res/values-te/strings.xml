@@ -354,7 +354,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"మీరు టైప్ చేస్తున్న వచనాన్ని పరిశీలిస్తుంది"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"క్రెడిట్ కార్డు నంబర్‌లు మరియు పాస్‌వర్డ్‌ల వంటి వ్యక్తిగత డేటాను కలిగి ఉంటుంది."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"డిస్‌ప్లే మ్యాగ్నిఫికేషన్‌ను నియంత్రించండి"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"డిస్‌ప్లే జూమ్ స్థాయి మరియు స్థానాన్ని నియంత్రిస్తుంది."</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"డిస్‌ప్లే జూమ్ స్థాయి మరియు లొకేషన్‌ని నియంత్రిస్తుంది."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"సంజ్ఞలను చేయడం"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"నొక్కగలరు, స్వైప్ చేయగలరు, స్క్రీన్‌పై రెండు వేళ్లను ఉంచి ఆ వేళ్లను దగ్గరకు లేదా దూరానికి లాగగలరు మరియు ఇతర సంజ్ఞలను చేయగలరు."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"వేలిముద్ర సంజ్ఞలు"</string>
@@ -608,14 +608,12 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"పెయిర్ చేసిన బ్లూటూత్ పరికరాలకు కనెక్ట్ అవ్వడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"సమీపంలోని బ్లూటూత్ పరికరాలలో అడ్వర్టయిజ్ చేయండి"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"సమీపంలోని బ్లూటూత్ పరికరాలలో అడ్వర్టయిజ్ చేయడానికి యాప్‌కు అనుమతిని ఇస్తుంది"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించండి"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించడానికి యాప్‌ను అనుమతించండి"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సంబంధిత పొజిషన్‌ను నిర్ణయించండి"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సంబంధిత పొజిషన్‌ను నిర్ణయించడానికి యాప్‌ను అనుమతించండి"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"సమీపంలోని Wi-Fi పరికరాలతో ఇంటరాక్ట్ చేస్తుంది"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"అడ్వర్టయిజ్, కనెక్ట్ చేయడానికి, సమీపంలోని Wi-Fi పరికరాల సంబంధిత పొజిషన్‌ను నిర్ణయించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"సమీపంలో పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించండి"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"సమీపంలోని పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించడానికి యాప్‌ను అనుమతించండి"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారం"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారాన్ని, అంటే రిజిస్టర్ చేయబడిన సహాయక సాధనాలు, మార్గం, గమ్యస్థానం వంటి వాటిని పొందేందుకు యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"సమీప క్షేత్ర కమ్యూనికేషన్‌ను నియంత్రించడం"</string>
@@ -724,7 +722,7 @@
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
     <string name="face_acquired_too_different" msgid="4505278456634706967">"ముఖం గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"మీ తల స్థానాన్ని కొద్దిగా మార్చండి"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"మీ తల లొకేషన్‌ను కొద్దిగా మార్చండి"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ఆన్ చేయండి"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"వెనుకకు వెళ్లండి"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"పెండింగ్‌లో ఉంది..."</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ఎమర్జెన్సీ శాటిలైట్ సహాయం ఇప్పుడు అందుబాటులో ఉంది"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ ఏదీ లేనట్లయితే మీరు ఎమర్జెన్సీ సర్వీసులకు మెసేజ్ చేయవచ్చు. Google Messages అనేది తప్పనిసరిగా మీ ఆటోమేటిక్ మెసేజింగ్ యాప్‌గా సెట్ చేసి ఉండాలి."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ఎమర్జెన్సీ శాటిలైట్ సహాయం సపోర్ట్ చేయదు"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"ఈ పరికరంలో ఎమర్జెన్సీ శాటిలైట్ సహాయం సపోర్ట్ చేయదు"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ఎమర్జెన్సీ శాటిలైట్ సహాయం సెటప్ కాలేదు"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"మీరు ఇంటర్నెట్‌కు కనెక్ట్ అయి ఉన్నారని నిర్ధారించుకుని, మళ్లీ సెటప్‌ను ట్రై చేయండి"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"ఈ దేశంలో లేదా ప్రాంతంలో ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ఎమర్జెన్సీ శాటిలైట్ సహాయం సెటప్ చేయలేదు"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"శాటిలైట్ ద్వారా మెసేజ్ చేయడానికి, Google Messagesను మీ ఆటోమేటిక్ సెట్టింగ్ మెసేజింగ్ యాప్‌గా సెట్ చేయండి"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ఈ దేశంలో లేదా ప్రాంతంలో ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో ఉందో లేదో చెక్ చేయడానికి, లొకేషన్ సెట్టింగ్‌లను ఆన్ చేయండి"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"శాటిలైట్ మెసేజింగ్ అందుబాటులో ఉంది"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుంటే మీరు శాటిలైట్ ద్వారా మెసేజ్‌ను పంపవచ్చు. Google Messages అనేది తప్పనిసరిగా మీ ఆటోమేటిక్ మెసేజింగ్ యాప్‌గా సెట్ చేసి ఉండాలి."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"శాటిలైట్ మెసేజింగ్ సపోర్ట్ చేయదు"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ఈ పరికరంలో శాటిలైట్ మెసేజింగ్ సపోర్ట్ చేయదు"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"శాటిలైట్ మెసేజింగ్‌ను సెటప్ చేయలేదు"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"మీరు ఇంటర్నెట్‌కు కనెక్ట్ అయి ఉన్నారని నిర్ధారించుకుని, మళ్లీ సెటప్‌ను ట్రై చేయండి"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ఈ దేశంలో లేదా ప్రాంతంలో శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"శాటిలైట్ మెసేజింగ్‌ను సెటప్ చేయలేదు"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"శాటిలైట్ ద్వారా మెసేజ్ చేయడానికి, Google Messagesను మీ ఆటోమేటిక్ సెట్టింగ్ మెసేజింగ్ యాప్‌గా సెట్ చేయండి"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ఈ దేశంలో లేదా ప్రాంతంలో శాటిలైట్ మెసేజింగ్ అందుబాటులో ఉందో లేదో చెక్ చేయడానికి, లొకేషన్ సెట్టింగ్‌లను ఆన్ చేయండి"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>‌ను ఇకపై గుర్తించడం సాధ్యం కాదు."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>‌లను ఇకపై గుర్తించడం సాధ్యం కాదు."</string>
