@@ -28,7 +28,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 
@@ -85,9 +84,7 @@ class LetterboxSurfaceBuilderTest : ShellTestCase() {
         init {
             letterboxConfiguration = LetterboxConfiguration(ctx)
             letterboxSurfaceBuilder = LetterboxSurfaceBuilder(letterboxConfiguration)
-            tx = org.mockito.kotlin.mock<SurfaceControl.Transaction>()
-            doReturn(tx).`when`(tx).setLayer(anyOrNull(), anyOrNull())
-            doReturn(tx).`when`(tx).setColorSpaceAgnostic(anyOrNull(), anyOrNull())
+            tx = getTransactionMock()
             parentLeash = org.mockito.kotlin.mock<SurfaceControl>()
             surfaceBuilder = SurfaceControl.Builder()
             spyOn(surfaceBuilder)
