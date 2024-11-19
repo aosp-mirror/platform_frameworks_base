@@ -17923,6 +17923,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void notifyActiveMediaForegroundService(@NonNull String packageName,
+                @UserIdInt int userId, int notificationId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.notifyActiveMediaForegroundServiceLocked(packageName, userId,
+                        notificationId);
+            }
+        }
+
+        @Override
         public void notifyInactiveMediaForegroundService(@NonNull String packageName,
                 @UserIdInt int userId, int notificationId) {
             synchronized (ActivityManagerService.this) {
