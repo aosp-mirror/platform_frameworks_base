@@ -373,6 +373,11 @@ java_aconfig_library {
     name: "android.security.flags-aconfig-java-export",
     aconfig_declarations: "android.security.flags-aconfig",
     mode: "exported",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.wifi",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
