@@ -235,9 +235,9 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Profila izvēlēšanās"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Privāts"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personīgais"</string>
     <string name="category_work" msgid="4014193632325996115">"Darba"</string>
-    <string name="category_private" msgid="4244892185452788977">"Privāti"</string>
+    <string name="category_private" msgid="4244892185452788977">"Privāts"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klons"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Izstrādātāju opcijas"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Izstrādātāju opciju iespējošana"</string>
@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Vietējā beigu lietotne"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Iespējot beigu lietotni, kurā piedāvāta vietējā čaulas piekļuve"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux izstrādes vide"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Palaist Linux termināli Android ierīcē"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Eksperimentāls) Palaist Linux termināli Android ierīcē"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ja atspējosiet, Linux termināļa dati tiks notīrīti"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP pārbaude"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP pārb. iestatīšana"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Atkļūdošana"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ārēja ierīce"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pievienotā ierīce"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Šis tālrunis"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analogā"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nevar atskaņot šajā ierīcē."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Lai pārslēgtu, jauniniet kontu"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Šeit nevar atskaņot lejupielādes"</string>

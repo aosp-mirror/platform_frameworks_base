@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"មជ្ឈដ្ឋាន​អភិវឌ្ឍន៍ Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"ដំណើរការទែមីណាល់ Linux នៅលើ Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ពិសោធន៍) ដំណើរការទែមីណាល់ Linux នៅលើ Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ប្រសិនបើអ្នកបិទ ទិន្នន័យទែមីណាល់ Linux នឹងត្រូវបានសម្អាត"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ពិនិត្យ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"កំណត់​ឥរិយាបថ​ពិនិត្យ HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ការជួសជុល"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ឧបករណ៍ខាងក្រៅ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"​ឧបករណ៍ដែលបាន​ភ្ជាប់"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ទូរសព្ទនេះ"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"អាណាឡូក"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"មិនអាចចាក់នៅលើ​ឧបករណ៍នេះបានទេ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ដំឡើងកម្រិតគណនី ដើម្បីប្ដូរ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"មិនអាចចាក់ខ្លឹមសារដែលបានទាញយកនៅទីនេះបានទេ"</string>
