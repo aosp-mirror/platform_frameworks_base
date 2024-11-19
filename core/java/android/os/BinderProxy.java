@@ -36,7 +36,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -652,39 +651,28 @@ public final class BinderProxy implements IBinder {
     private native boolean unlinkToDeathNative(DeathRecipient recipient, int flags);
 
     /**
-     * This map is to hold strong reference to the frozen state callbacks.
-     *
-     * The callbacks are only weakly referenced by JNI so the strong references here are needed to
-     * keep the callbacks around until the proxy is GC'ed.
-     *
-     * The key is the original callback passed into {@link #addFrozenStateChangeCallback}. The value
-     * is the wrapped callback created in {@link #addFrozenStateChangeCallback} to dispatch the
-     * calls on the desired executor.
+     * This list is to hold strong reference to the frozen state callbacks. The callbacks are only
+     * weakly referenced by JNI so the strong references here are needed to keep the callbacks
+     * around until the proxy is GC'ed.
      */
-    private Map<FrozenStateChangeCallback, FrozenStateChangeCallback> mFrozenStateChangeCallbacks =
-            Collections.synchronizedMap(new HashMap<>());
+    private List<FrozenStateChangeCallback> mFrozenStateChangeCallbacks =
+            Collections.synchronizedList(new ArrayList<>());
 
     /**
      * See {@link IBinder#addFrozenStateChangeCallback(FrozenStateChangeCallback)}
      */
-    public void addFrozenStateChangeCallback(Executor executor, FrozenStateChangeCallback callback)
+    public void addFrozenStateChangeCallback(FrozenStateChangeCallback callback)
             throws RemoteException {
-        FrozenStateChangeCallback wrappedCallback = (who, state) ->
-                executor.execute(() -> callback.onFrozenStateChanged(who, state));
-        addFrozenStateChangeCallbackNative(wrappedCallback);
-        mFrozenStateChangeCallbacks.put(callback, wrappedCallback);
+        addFrozenStateChangeCallbackNative(callback);
+        mFrozenStateChangeCallbacks.add(callback);
     }
 
     /**
      * See {@link IBinder#removeFrozenStateChangeCallback}
      */
-    public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback)
-            throws IllegalArgumentException {
-        FrozenStateChangeCallback wrappedCallback = mFrozenStateChangeCallbacks.remove(callback);
-        if (wrappedCallback == null) {
-            throw new IllegalArgumentException("callback not found");
-        }
-        return removeFrozenStateChangeCallbackNative(wrappedCallback);
+    public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback) {
+        mFrozenStateChangeCallbacks.remove(callback);
+        return removeFrozenStateChangeCallbackNative(callback);
     }
 
     private native void addFrozenStateChangeCallbackNative(FrozenStateChangeCallback callback)
