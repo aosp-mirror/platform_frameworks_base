@@ -18,6 +18,8 @@ package com.android.frameworks.coretests.bfscctestapp;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -36,6 +38,7 @@ public class BfsccTestAppCmdService extends Service {
         @Override
         public void listenTo(IBinder binder) throws RemoteException {
             binder.addFrozenStateChangeCallback(
+                    new HandlerExecutor(Handler.getMain()),
                     (IBinder who, int state) -> mNotifications.offer(state));
         }
 
