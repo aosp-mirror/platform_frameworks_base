@@ -4575,10 +4575,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // at #postWindowRemoveCleanupLocked
                 return false;
             }
+
+            // Link the fixed rotation transform to this activity since we are transferring the
+            // starting window.
+            if (fromActivity.hasFixedRotationTransform()) {
+                mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(this,
+                        false /* checkOpening */);
+            }
             // Do not transfer if the orientation doesn't match, redraw starting window while it is
             // on top will cause flicker.
-            if (fromActivity.getRequestedConfigurationOrientation()
-                    != getRequestedConfigurationOrientation()) {
+            final int fromOrientation = fromActivity.getConfiguration().orientation;
+            final int requestedOrientation = getRequestedConfigurationOrientation();
+            if (requestedOrientation == ORIENTATION_UNDEFINED) {
+                if (fromOrientation != getConfiguration().orientation) {
+                    return false;
+                }
+            } else if (fromOrientation != requestedOrientation) {
                 return false;
             }
             // In this case, the starting icon has already been displayed, so start
@@ -4592,13 +4604,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final long origId = Binder.clearCallingIdentity();
             try {
-                // Link the fixed rotation transform to this activity since we are transferring the
-                // starting window.
-                if (fromActivity.hasFixedRotationTransform()) {
-                    mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(this,
-                            false /* checkOpening */);
-                }
-
                 // Transfer the starting window over to the new token.
                 mStartingData = fromActivity.mStartingData;
                 mStartingSurface = fromActivity.mStartingSurface;
