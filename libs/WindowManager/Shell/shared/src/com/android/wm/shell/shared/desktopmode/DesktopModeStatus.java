@@ -191,6 +191,23 @@ public class DesktopModeStatus {
     }
 
     /**
+     * @return {@code true} if this device is requesting to show the app handle despite non
+     * necessarily enabling desktop mode
+     */
+    public static boolean overridesShowAppHandle(@NonNull Context context) {
+        return Flags.showAppHandleLargeScreens()
+                && context.getResources().getBoolean(R.bool.config_enableAppHandle);
+    }
+
+    /**
+     * @return {@code true} if the app handle should be shown because desktop mode is enabled or
+     * the device is overriding {@code R.bool.config_enableAppHandle}
+     */
+    public static boolean canEnterDesktopModeOrShowAppHandle(@NonNull Context context) {
+        return canEnterDesktopMode(context) || overridesShowAppHandle(context);
+    }
+
+    /**
      * Return {@code true} if the override desktop density is enabled and valid.
      */
     public static boolean useDesktopOverrideDensity() {
