@@ -1546,6 +1546,38 @@ public class Build {
     }
 
     /**
+     * Convert a major.minor version String like "36.1" to an int that
+     * represents both major and minor version.
+     *
+     * @param version the String to parse
+     * @return an int encoding the major and minor version
+     * @throws IllegalArgumentException if the string could not be converted into an int
+     *
+     * @hide
+     */
+    @SuppressWarnings("FlaggedApi") // SDK_INT_MULTIPLIER is defined in this file
+    public static @SdkIntFull int parseFullVersion(@NonNull String version) {
+        int index = version.indexOf('.');
+        int major;
+        int minor = 0;
+        try {
+            if (index == -1) {
+                major = Integer.parseInt(version);
+            } else {
+                major = Integer.parseInt(version.substring(0, index));
+                minor = Integer.parseInt(version.substring(index + 1));
+            }
+            if (major < 0 || minor < 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("failed to parse '" + version
+                    + "' as a major.minor version code");
+        }
+        return major * VERSION_CODES_FULL.SDK_INT_MULTIPLIER + minor;
+    }
+
+    /**
      * The vendor API for 2024 Q2
      *
      * <p>For Android 14-QPR3 and later, the vendor API level is completely decoupled from the SDK
