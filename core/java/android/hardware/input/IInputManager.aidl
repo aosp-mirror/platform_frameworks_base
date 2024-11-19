@@ -281,4 +281,6 @@ interface IInputManager {
     AidlInputGestureData[] getCustomInputGestures(int userId, int tag);
 
     AidlInputGestureData[] getAppLaunchBookmarks();
+
+    void resetLockedModifierState();
 }

@@ -56,7 +56,7 @@ constructor(
     private val tilesAvailabilityInteractor: TilesAvailabilityInteractor,
     private val minTilesInteractor: MinimumTilesInteractor,
     @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
-    @Application private val applicationContext: Context,
+    @ShadeDisplayAware  private val context: Context,
     @Named("Default") private val defaultGridLayout: GridLayout,
     @Application private val applicationScope: CoroutineScope,
     gridLayoutTypeInteractor: GridLayoutTypeInteractor,
@@ -140,7 +140,7 @@ constructor(
                     .combine(configurationInteractor.onAnyConfigurationChange.emitOnStart()) {
                         tiles,
                         _ ->
-                        tiles.fastMap { it.load(applicationContext) }
+                        tiles.fastMap { it.load(context) }
                     }
             } else {
                 emptyFlow()

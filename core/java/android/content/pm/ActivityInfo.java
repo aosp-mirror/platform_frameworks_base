@@ -1320,23 +1320,23 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             264301586L; // buganizer id
 
     /**
-     * Excludes the packages the override is applied to from the camera compatibility treatment
-     * in free-form windowing mode for fixed-orientation apps.
+     * Includes the packages the override is applied to in the camera compatibility treatment in
+     * free-form windowing mode for fixed-orientation apps.
      *
      * <p>In free-form windowing mode, the compatibility treatment emulates running on a portrait
      * device by letterboxing the app window and changing the camera characteristics to what apps
      * commonly expect in a portrait device: 90 and 270 degree sensor rotation for back and front
      * cameras, respectively, and setting display rotation to 0.
      *
-     * <p>Use this flag to disable the compatibility treatment for apps that do not respond well to
-     * the treatment.
+     * <p>Use this flag to enable the compatibility treatment for apps in which camera doesn't work
+     * well in freeform windowing.
      *
      * @hide
      */
     @ChangeId
     @Overridable
     @Disabled
-    public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT =
+    public static final long OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT =
             314961188L;
 
     /**

@@ -948,7 +948,6 @@
     <dimen name="keyguard_translate_distance_on_swipe_up">-200dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
-    <dimen name="lock_icon_margin_bottom">74dp</dimen>
     <dimen name="ambient_indication_margin_bottom">71dp</dimen>
 
 
@@ -2057,6 +2056,9 @@
     <!-- UDFPS view attributes -->
     <!-- UDFPS icon size in microns/um -->
     <dimen name="udfps_icon_size" format="float">6000</dimen>
+    <!-- Limits the updates to at most one update per debounce duration to avoid too many
+         updates due to quick changes to padding.   -->
+    <integer name="udfps_padding_debounce_duration">100</integer>
     <!-- Microns/ums (1000 um = 1mm) per pixel for the given device. If unspecified, UI that
          relies on this value will not be sized correctly. -->
     <item name="pixel_pitch" format="float" type="dimen">-1</item>

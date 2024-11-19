@@ -3423,8 +3423,8 @@ class Task extends TaskFragment {
                 ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
         info.shouldDockBigOverlays = top != null && top.shouldDockBigOverlays;
         info.mTopActivityLocusId = top != null ? top.getLocusId() : null;
-        info.isTopActivityLimitSystemEducationDialogs = top != null
-              ? top.mShouldLimitSystemEducationDialogs : false;
+        info.topActivityRequestOpenInBrowserEducationTimestamp = top != null
+              ? top.mRequestOpenInBrowserEducationTimestamp : 0;
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
                 ? parentTask.mTaskId
@@ -3523,6 +3523,7 @@ class Task extends TaskFragment {
 
         info.capturedLink = null;
         info.capturedLinkTimestamp = 0;
+        info.topActivityRequestOpenInBrowserEducationTimestamp = 0;
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {

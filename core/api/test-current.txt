@@ -1805,6 +1805,7 @@ package android.hardware.input {
     method @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public void remapModifierKey(int, int);
     method @FlaggedApi("com.android.input.flags.device_associations") @RequiresPermission("android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY") public void removeUniqueIdAssociationByDescriptor(@NonNull String);
     method @RequiresPermission("android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY") public void removeUniqueIdAssociationByPort(@NonNull String);
+    method public void resetLockedModifierState();
     field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
   }
 

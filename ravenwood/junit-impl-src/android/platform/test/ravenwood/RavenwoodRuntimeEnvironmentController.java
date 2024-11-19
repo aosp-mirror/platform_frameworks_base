@@ -22,6 +22,8 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_INST_R
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.parseNullableInt;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.withDefault;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +41,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -154,6 +157,13 @@ public class RavenwoodRuntimeEnvironmentController {
     private static RavenwoodAwareTestRunner sRunner;
     private static RavenwoodSystemProperties sProps;
 
+    private static final int DEFAULT_TARGET_SDK_LEVEL = VERSION_CODES.CUR_DEVELOPMENT;
+    private static final String DEFAULT_PACKAGE_NAME = "com.android.ravenwoodtests.defaultname";
+
+    private static int sTargetSdkLevel;
+    private static String sTestPackageName;
+    private static String sTargetPackageName;
+
     /**
      * Initialize the global environment.
      */
@@ -235,7 +245,20 @@ public class RavenwoodRuntimeEnvironmentController {
         System.setProperty("android.junit.runner",
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
 
+        loadRavenwoodProperties();
+
         assertMockitoVersion();
+    }
+
+    private static void loadRavenwoodProperties() {
+        var props = RavenwoodSystemProperties.readProperties("ravenwood.properties");
+
+        sTargetSdkLevel = withDefault(
+                parseNullableInt(props.get("targetSdkVersionInt")), DEFAULT_TARGET_SDK_LEVEL);
+        sTargetPackageName = withDefault(props.get("packageName"), DEFAULT_PACKAGE_NAME);
+        sTestPackageName = withDefault(props.get("instPackageName"), sTargetPackageName);
+
+        // TODO(b/377765941) Read them from the manifest too?
     }
 
     /**
@@ -256,7 +279,9 @@ public class RavenwoodRuntimeEnvironmentController {
             initInner(runner.mState.getConfig());
         } catch (Exception th) {
             Log.e(TAG, "init() failed", th);
-            reset();
+
+            RavenwoodCommonUtils.runIgnoringException(()-> reset());
+
             SneakyThrow.sneakyThrow(th);
         }
     }
@@ -266,6 +291,14 @@ public class RavenwoodRuntimeEnvironmentController {
             maybeThrowPendingUncaughtException(false);
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
         }
+
+        config.mTargetPackageName = sTargetPackageName;
+        config.mTestPackageName = sTestPackageName;
+        config.mTargetSdkLevel = sTargetSdkLevel;
+
+        Log.i(TAG, "TargetPackageName=" + sTargetPackageName);
+        Log.i(TAG, "TestPackageName=" + sTestPackageName);
+        Log.i(TAG, "TargetSdkLevel=" + sTargetSdkLevel);
 
         RavenwoodRuntimeState.sUid = config.mUid;
         RavenwoodRuntimeState.sPid = config.mPid;
@@ -349,8 +382,11 @@ public class RavenwoodRuntimeEnvironmentController {
      * Partially re-initialize after each test method invocation
      */
     public static void reinit() {
-        var config = sRunner.mState.getConfig();
-        Binder.restoreCallingIdentity(packBinderIdentityToken(false, config.mUid, config.mPid));
+        // sRunner could be null, if there was a failure in the initialization.
+        if (sRunner != null) {
+            var config = sRunner.mState.getConfig();
+            Binder.restoreCallingIdentity(packBinderIdentityToken(false, config.mUid, config.mPid));
+        }
     }
 
     private static void initializeCompatIds(RavenwoodConfig config) {
@@ -380,6 +416,9 @@ public class RavenwoodRuntimeEnvironmentController {
 
     /**
      * De-initialize.
+     *
+     * Note, we call this method when init() fails too, so this method should deal with
+     * any partially-initialized states.
      */
     public static void reset() {
         if (RAVENWOOD_VERBOSE_LOGGING) {
@@ -411,7 +450,9 @@ public class RavenwoodRuntimeEnvironmentController {
             config.mState.mSystemServerContext.cleanUp();
         }
 
-        Looper.getMainLooper().quit();
+        if (Looper.getMainLooper() != null) {
+            Looper.getMainLooper().quit();
+        }
         Looper.clearMainLooperForTest();
 
         ActivityManager.reset$ravenwood();

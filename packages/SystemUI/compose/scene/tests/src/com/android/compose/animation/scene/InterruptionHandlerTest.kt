@@ -132,6 +132,9 @@ class InterruptionHandlerTest {
         assertThat(state.currentTransitions)
             .comparingElementsUsing(FromToCurrentTriple)
             .containsExactly(
+                // Initial transition, A => B.
+                Triple(SceneA, SceneB, SceneB),
+
                 // Initial transition reversed, B back to A.
                 Triple(SceneA, SceneB, SceneA),
 

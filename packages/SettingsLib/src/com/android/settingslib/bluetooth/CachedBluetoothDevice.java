@@ -133,8 +133,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * If an ACTION_UUID intent comes in within
      * MAX_UUID_DELAY_FOR_AUTO_CONNECT milliseconds, we will try auto-connect
      * again with the new UUIDs
+     * The value is reset if a manual disconnection happens.
      */
-    private long mConnectAttempted;
+    private long mConnectAttempted = -1;
 
     // Active device state
     private boolean mIsActiveDeviceA2dp = false;
@@ -369,6 +370,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public void disconnect() {
+        mConnectAttempted = -1;
         synchronized (mProfileLock) {
             if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
                 for (CachedBluetoothDevice member : getMemberDevice()) {
@@ -983,15 +985,19 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         if (BluetoothUtils.D) {
-            Log.d(TAG, "onUuidChanged: Time since last connect="
-                    + (SystemClock.elapsedRealtime() - mConnectAttempted));
+            long lastConnectAttempted = mConnectAttempted == -1 ? 0 : mConnectAttempted;
+            Log.d(
+                    TAG,
+                    "onUuidChanged: Time since last connect/manual disconnect="
+                            + (SystemClock.elapsedRealtime() - lastConnectAttempted));
         }
 
         /*
          * If a connect was attempted earlier without any UUID, we will do the connect now.
          * Otherwise, allow the connect on UUID change.
          */
-        if ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
+        if (mConnectAttempted != -1
+                && (mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
             Log.d(TAG, "onUuidChanged: triggering connectDevice");
             connectDevice();
         }

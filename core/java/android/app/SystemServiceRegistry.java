@@ -241,6 +241,8 @@ import android.security.advancedprotection.AdvancedProtectionManager;
 import android.security.advancedprotection.IAdvancedProtectionService;
 import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
+import android.security.authenticationpolicy.AuthenticationPolicyManager;
+import android.security.authenticationpolicy.IAuthenticationPolicyService;
 import android.security.forensic.ForensicManager;
 import android.security.forensic.IForensicService;
 import android.security.keystore.KeyStoreManager;
@@ -1022,6 +1024,25 @@ public final class SystemServiceRegistry {
                         final IAuthService service =
                                 IAuthService.Stub.asInterface(binder);
                         return new BiometricManager(ctx.getOuterContext(), service);
+                    }
+                });
+
+        registerService(Context.AUTHENTICATION_POLICY_SERVICE,
+                AuthenticationPolicyManager.class,
+                new CachedServiceFetcher<AuthenticationPolicyManager>() {
+                    @Override
+                    public AuthenticationPolicyManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.security.Flags.secureLockdown()) {
+                            throw new ServiceNotFoundException(
+                                    Context.AUTHENTICATION_POLICY_SERVICE);
+                        }
+
+                        final IBinder binder = ServiceManager.getServiceOrThrow(
+                                Context.AUTHENTICATION_POLICY_SERVICE);
+                        final IAuthenticationPolicyService service =
+                                IAuthenticationPolicyService.Stub.asInterface(binder);
+                        return new AuthenticationPolicyManager(ctx.getOuterContext(), service);
                     }
                 });
 

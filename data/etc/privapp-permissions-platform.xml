@@ -533,6 +533,8 @@ applications that come with the platform
         <permission name="com.android.cellbroadcastservice.FULL_ACCESS_CELL_BROADCAST_HISTORY" />
         <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
         <permission name="android.permission.LOCK_DEVICE" />
+        <!-- Permission required for AuthenticationPolicyManagerTest -->
+        <permission name="android.permission.MANAGE_SECURE_LOCK_DEVICE" />
         <!-- Permissions required for CTS test - CtsSafetyCenterTestCases -->
         <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />

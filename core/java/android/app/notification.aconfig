@@ -277,6 +277,13 @@ flag {
 }
 
 flag {
+  name: "nm_binder_perf_permission_check"
+  namespace: "systemui"
+  description: "Use PermissionManager for areNotificationsEnabled() instead of NMS"
+  bug: "362981561"
+}
+
+flag {
   name: "no_sbnholder"
   namespace: "systemui"
   description: "removes sbnholder from NLS"

@@ -22,10 +22,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
+import static com.android.wm.shell.Flags.enableFlexibleSplit;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
+import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
 
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
@@ -72,6 +74,8 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     // No current way to enforce this but if enableFlexibleSplit() is enabled, then only 1 of the
     // stages should have this be set/being used
     private boolean mIsActive;
+    /** Unique identifier for this state, > 0 */
+    @StageType private final int mId;
     /** Callback interface for listening to changes in a split-screen stage. */
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
@@ -110,13 +114,14 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     StageTaskListener(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
             IconProvider iconProvider,
-            Optional<WindowDecorViewModel> windowDecorViewModel) {
+            Optional<WindowDecorViewModel> windowDecorViewModel, int id) {
         mContext = context;
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
         mIconProvider = iconProvider;
         mWindowDecorViewModel = windowDecorViewModel;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
+        mId = id;
     }
 
     int getChildCount() {
@@ -161,6 +166,11 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         return contains(t -> t.isFocused);
     }
 
+    @StageType
+    int getId() {
+        return mId;
+    }
+
     private boolean contains(Predicate<ActivityManager.RunningTaskInfo> predicate) {
         if (mRootTaskInfo != null && predicate.test(mRootTaskInfo)) {
             return true;
@@ -197,10 +207,10 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskAppeared: taskId=%d taskParent=%d rootTask=%d "
-                        + "taskActivity=%s",
+                        + "stageId=%s taskActivity=%s",
                 taskInfo.taskId, taskInfo.parentTaskId,
                 mRootTaskInfo != null ? mRootTaskInfo.taskId : -1,
-                taskInfo.baseActivity);
+                stageTypeToString(mId), taskInfo.baseActivity);
         if (mRootTaskInfo == null) {
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
@@ -230,8 +240,9 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskInfoChanged: taskId=%d taskAct=%s",
-                taskInfo.taskId, taskInfo.baseActivity);
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskInfoChanged: taskId=%d taskAct=%s "
+                        + "stageId=%s",
+                taskInfo.taskId, taskInfo.baseActivity, stageTypeToString(mId));
         mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             mRootTaskInfo = taskInfo;
@@ -261,7 +272,8 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskVanished: task=%d", taskInfo.taskId);
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskVanished: task=%d stageId=%s",
+                taskInfo.taskId, stageTypeToString(mId));
         final int taskId = taskInfo.taskId;
         mWindowDecorViewModel.ifPresent(vm -> vm.onTaskVanished(taskInfo));
         if (mRootTaskInfo.taskId == taskId) {
@@ -466,14 +478,17 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     void activate(WindowContainerTransaction wct, boolean includingTopTask) {
-        if (mIsActive) return;
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "activate: includingTopTask=%b",
-                includingTopTask);
+        if (mIsActive && !enableFlexibleSplit()) return;
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "activate: includingTopTask=%b stage=%s",
+                includingTopTask, stageTypeToString(mId));
 
         if (includingTopTask) {
             reparentTopTask(wct);
         }
 
+        if (enableFlexibleSplit()) {
+            return;
+        }
         mIsActive = true;
     }
 
@@ -481,11 +496,14 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         deactivate(wct, false /* toTop */);
     }
 
-    void deactivate(WindowContainerTransaction wct, boolean toTop) {
-        if (!mIsActive) return;
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "deactivate: toTop=%b rootTaskInfo=%s",
-                toTop, mRootTaskInfo);
-        mIsActive = false;
+    void deactivate(WindowContainerTransaction wct, boolean reparentTasksToTop) {
+        if (!mIsActive && !enableFlexibleSplit()) return;
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "deactivate: reparentTasksToTop=%b "
+                        + "rootTaskInfo=%s stage=%s",
+                reparentTasksToTop, mRootTaskInfo, stageTypeToString(mId));
+        if (!enableFlexibleSplit()) {
+            mIsActive = false;
+        }
 
         if (mRootTaskInfo == null) return;
         final WindowContainerToken rootToken = mRootTaskInfo.token;
@@ -494,14 +512,15 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 null /* newParent */,
                 null /* windowingModes */,
                 null /* activityTypes */,
-                toTop);
+                reparentTasksToTop);
     }
 
     // --------
-    // Previously only used in SideStage
+    // Previously only used in SideStage. With flexible split this is called for all stages
     boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "remove all side stage tasks: childCount=%d toTop=%b",
-                mChildrenTaskInfo.size(), toTop);
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "remove all side stage tasks: childCount=%d toTop=%b "
+                        + " stageI=%s",
+                mChildrenTaskInfo.size(), toTop, stageTypeToString(mId));
         if (mChildrenTaskInfo.size() == 0) return false;
         wct.reparentTasks(
                 mRootTaskInfo.token,
@@ -519,6 +538,15 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         if (task == null) return false;
         wct.reparent(task.token, newParent, false /* onTop */);
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "mId: " + stageTypeToString(mId)
+                + " mVisible: " + mVisible
+                + " mActive: " + mIsActive
+                + " mHasRootTask: " + mHasRootTask
+                + " childSize: " + mChildrenTaskInfo.size();
     }
 
     @Override
