@@ -70,7 +70,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Uri;
-import android.net.vcn.Flags;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
@@ -293,8 +292,6 @@ public class VcnManagementServiceTest {
         doReturn(Collections.singleton(TRANSPORT_WIFI))
                 .when(mMockDeps)
                 .getRestrictedTransports(any(), any(), any());
-
-        mSetFlagsRule.enableFlags(Flags.FLAG_FIX_CONFIG_GARBAGE_COLLECTION);
     }
 
 
