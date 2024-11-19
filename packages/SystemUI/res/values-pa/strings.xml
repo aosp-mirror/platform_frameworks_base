@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"ਇਨਪੁੱਟ"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"ਸੁਣਨ ਦੇ ਸਾਧਨ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"ਚਮਕ ਨੂੰ ਵਿਵਸਥਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ ਕਿਉਂਕਿ ਇਹ ਪਹਿਲਾਂ ਚੱਲ ਰਹੀ ਐਪ ਵੱਲੋਂ ਕੰਟਰੋਲ ਕਰਨ ਕਰਕੇ \n ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ਸਵੈ-ਘੁਮਾਓ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ਸਕ੍ਰੀਨ ਨੂੰ ਆਪਣੇ ਆਪ ਘੁੰਮਾਓ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ਟਿਕਾਣਾ"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"\'ਨਵਾਂ ਡੀਵਾਈਸ ਜੋੜਾਬੱਧ ਕਰੋ\' \'ਤੇ ਕਲਿੱਕ ਕਰੋ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ਪ੍ਰੀਸੈੱਟ ਨੂੰ ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ਪ੍ਰੀਸੈੱਟ"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"ਚੁਣਿਆ ਗਿਆ"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ਟੂਲ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"ਲਾਈਵ ਸੁਰਖੀਆਂ"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"ਨੋਟ-ਕਥਨ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ਕੀ ਡੀਵਾਈਸ ਦੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਨੂੰ ਅਣਬਲਾਕ ਕਰਨਾ ਹੈ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ਕੀ ਡੀਵਾਈਸ ਦੇ ਕੈਮਰੇ ਨੂੰ ਅਣਬਲਾਕ ਕਰਨਾ ਹੈ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ਕੀ ਡੀਵਾਈਸ ਦੇ ਕੈਮਰੇ ਅਤੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਨੂੰ ਅਣਬਲਾਕ ਕਰਨਾ ਹੈ?"</string>
@@ -593,8 +593,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ਹੁਣੇ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ਕੋਈ ਸੂਚਨਾ ਨਹੀਂ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ਕੋਈ ਨਵੀਂ ਸੂਚਨਾ ਨਹੀਂ ਹੈ"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"ਨੋਟੀਫ਼ਿਕੇਸ਼ਨ ਕੂਲਡਾਊਨ ਹੁਣ ਚਾਲੂ ਹੈ"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"ਇੱਕ ਵਾਰ \'ਚ ਕਈ ਸੂਚਨਾਵਾਂ ਮਿਲਣ \'ਤੇ, ਡੀਵਾਈਸ ਦੀ ਅਵਾਜ਼ ਅਤੇ ਅਲਰਟ ਵੱਧੋ-ਵੱਧ 2 ਮਿੰਟਾਂ ਲਈ ਆਪਣੇ-ਆਪ ਘੱਟ ਜਾਂਦੇ ਹਨ।"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ਬੰਦ ਕਰੋ"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ਪੁਰਾਣੀਆਂ ਸੂਚਨਾਵਾਂ ਦੇਖਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
@@ -872,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦੀ ਵਰਤੋਂ ਕਰਨ ਵੇਲੇ ਸੱਜੇ ਜਾਂ ਹੇਠਾਂ ਮੌਜੂਦ ਐਪ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦੀ ਵਰਤੋਂ ਕਰਨ ਵੇਲੇ ਖੱਬੇ ਜਾਂ ਉੱਪਰ ਮੌਜੂਦ ਐਪ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦੌਰਾਨ: ਇੱਕ ਐਪ ਨਾਲ ਦੂਜੀ ਐਪ ਨੂੰ ਬਦਲੋ"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"ਕਿਰਿਆਸ਼ੀਲ ਵਿੰਡੋ ਨੂੰ ਇੱਕ ਤੋਂ ਦੂਜੇ ਡਿਸਪਲੇ \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ਇਨਪੁੱਟ"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ਅਗਲੀ ਭਾਸ਼ਾ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"ਪਿਛਲੀ ਭਾਸ਼ਾ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
@@ -1222,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g> ਤੋਂ ਘੱਟ ਅੱਖਰ-ਚਿੰਨ੍ਹ ਵਰਤੋ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ਬਿਲਡ ਨੰਬਰ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ਬਿਲਡ ਨੰਬਰ ਨੂੰ ਕਲਿੱਪਬੋਰਡ \'ਤੇ ਕਾਪੀ ਕੀਤਾ ਗਿਆ।"</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"ਗੱਲਬਾਤ ਖੋਲ੍ਹੋ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ਗੱਲਬਾਤ ਵਿਜੇਟ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਕਿਸੇ ਗੱਲਬਾਤ \'ਤੇ ਟੈਪ ਕਰੋ"</string>
@@ -1357,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ਉੱਚ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਲਈ, ਫ਼ੋਨ ਨੂੰ ਫਲਿੱਪ ਕਰੋ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ਮੋੜਨਯੋਗ ਡੀਵਾਈਸ ਨੂੰ ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ਮੋੜਨਯੋਗ ਡੀਵਾਈਸ ਨੂੰ ਆਲੇ-ਦੁਆਲੇ ਫਲਿੱਪ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ਫੋਲਡਯੋਗ ਡੀਵਾਈਸ"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ਅਣਫੋਲਡਯੋਗ ਡੀਵਾਈਸ"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1416,31 +1418,24 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ਪਹੁੰਚਯੋਗਤਾ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"ਸ਼ਾਰਟਕੱਟ ਨਿਰਧਾਰਿਤ ਕਰਨ ਲਈ ਕੁੰਜੀ ਦਬਾਓ"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ਸ਼ਾਰਟਕੱਟ ਖੋਜੋ"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ਕੋਈ ਖੋਜ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ਪ੍ਰਤੀਕ ਨੂੰ ਸਮੇਟੋ"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"ਕਾਰਵਾਈ ਜਾਂ Meta ਕੁੰਜੀ ਪ੍ਰਤੀਕ"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"ਜੋੜ-ਚਿੰਨ੍ਹ ਦਾ ਪ੍ਰਤੀਕ"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"ਹੋ ਗਿਆ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ਪ੍ਰਤੀਕ ਦਾ ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ਜਾਂ"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ਘਸੀਟਣ ਵਾਲਾ ਹੈਂਡਲ"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"ਕੀ-ਬੋਰਡ ਸੈਟਿੰਗਾਂ"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ਸ਼ਾਰਟਕੱਟ ਸੈੱਟ ਕਰੋ"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ਰੱਦ ਕਰੋ"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"ਕੁੰਜੀ ਦਬਾਓ"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"ਕੁੰਜੀ ਸੁਮੇਲ ਪਹਿਲਾਂ ਹੀ ਵਰਤੋਂ ਵਿੱਚ ਹੈ। ਕੋਈ ਹੋਰ ਕੁੰਜੀ ਨੂੰ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ਆਪਣੇ ਕੀ-ਬੋਰਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨੈਵੀਗੇਟ ਕਰੋ"</string>
-    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ ਬਾਰੇ ਜਾਣੋ"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ਕੀ-ਬੋਰਡ ਦੇ ਸ਼ਾਰਟਕੱਟਾਂ ਬਾਰੇ ਜਾਣੋ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ਆਪਣੇ ਟੱਚਪੈਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨੈਵੀਗੇਟ ਕਰੋ"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ਟੱਚਪੈਡ ਇਸ਼ਾਰਿਆਂ ਬਾਰੇ ਜਾਣੋ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ਆਪਣੇ ਕੀ-ਬੋਰਡ ਅਤੇ ਟੱਚਪੈਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨੈਵੀਗੇਟ ਕਰੋ"</string>

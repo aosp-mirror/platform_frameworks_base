@@ -414,6 +414,8 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Click to pair new device"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Couldn\'t update preset"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Preset"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Selected"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Tools"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Live Caption"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Note"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Unblock device microphone?"</string>
@@ -1218,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Use fewer than <xliff:g id="LENGTH">%1$d</xliff:g> characters"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build number"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build number copied to clipboard."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"Open conversation"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Conversation widgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tap a conversation to add it to your Home screen"</string>
@@ -1353,6 +1357,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"For higher resolution, flip the phone"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldable device being unfolded"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldable device being flipped around"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Front screen turned on"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"folded"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"unfolded"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
