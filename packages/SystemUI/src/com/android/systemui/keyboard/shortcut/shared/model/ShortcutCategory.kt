@@ -18,25 +18,31 @@ package com.android.systemui.keyboard.shortcut.shared.model
 
 sealed interface ShortcutCategoryType {
     val isTrusted: Boolean
+    val includeInCustomization: Boolean
 
     data object System : ShortcutCategoryType {
         override val isTrusted: Boolean = true
+        override val includeInCustomization: Boolean = true
     }
 
     data object MultiTasking : ShortcutCategoryType {
         override val isTrusted: Boolean = true
+        override val includeInCustomization: Boolean = true
     }
 
     data object InputMethodEditor : ShortcutCategoryType {
         override val isTrusted: Boolean = false
+        override val includeInCustomization: Boolean = false
     }
 
     data object AppCategories : ShortcutCategoryType {
         override val isTrusted: Boolean = true
+        override val includeInCustomization: Boolean = true
     }
 
     data class CurrentApp(val packageName: String) : ShortcutCategoryType {
         override val isTrusted: Boolean = false
+        override val includeInCustomization: Boolean = false
     }
 }
 

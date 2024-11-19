@@ -102,10 +102,7 @@ val Kosmos.defaultShortcutCategoriesRepository by
         )
     }
 
-val Kosmos.inputGestureMaps by
-        Kosmos.Fixture {
-            InputGestureMaps(applicationContext)
-        }
+val Kosmos.inputGestureMaps by Kosmos.Fixture { InputGestureMaps(applicationContext) }
 
 val Kosmos.customShortcutCategoriesRepository by
     Kosmos.Fixture {
@@ -116,7 +113,7 @@ val Kosmos.customShortcutCategoriesRepository by
             testDispatcher,
             shortcutCategoriesUtils,
             applicationContext,
-            inputGestureMaps
+            inputGestureMaps,
         )
     }
 

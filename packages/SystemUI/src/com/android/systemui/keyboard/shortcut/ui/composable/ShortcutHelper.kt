@@ -461,7 +461,7 @@ private fun EndSidePanel(
             SubCategoryContainerDualPane(
                 searchQuery = searchQuery,
                 subCategory = subcategory,
-                isCustomizing = isCustomizing,
+                isCustomizing = isCustomizing and category.type.includeInCustomization,
                 onCustomizationRequested = { requestInfo ->
                     when (requestInfo) {
                         is ShortcutCustomizationRequestInfo.Add ->
