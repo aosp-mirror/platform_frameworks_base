@@ -799,10 +799,11 @@ public abstract class WMShellBaseModule {
             Transitions transitions,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread Handler mainHandler,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            FocusTransitionObserver focusTransitionObserver) {
         return new KeyguardTransitionHandler(
                 shellInit, shellController, displayController, transitions, taskStackListener,
-                mainHandler, mainExecutor);
+                mainHandler, mainExecutor, focusTransitionObserver);
     }
 
     @WMSingleton
