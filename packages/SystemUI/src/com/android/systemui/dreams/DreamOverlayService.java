@@ -47,6 +47,7 @@ import androidx.lifecycle.ServiceLifecycleDispatcher;
 import androidx.lifecycle.ViewModelStore;
 
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
+import com.android.compose.animation.scene.SceneKey;
 import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -212,16 +213,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final Consumer<Boolean> mBouncerShowingConsumer = new Consumer<>() {
         @Override
         public void accept(Boolean bouncerShowing) {
-            mExecutor.execute(() -> {
-                if (mBouncerShowing == bouncerShowing) {
-                    return;
-                }
+            mExecutor.execute(() -> updateBouncerShowingLocked(bouncerShowing));
+        }
+    };
 
-                mBouncerShowing = bouncerShowing;
-
-                updateLifecycleStateLocked();
-                updateGestureBlockingLocked();
-            });
+    private final Consumer<SceneKey> mCurrentSceneConsumer = new Consumer<>() {
+        @Override
+        public void accept(SceneKey currentScene) {
+            mExecutor.execute(() -> updateBouncerShowingLocked(currentScene == Scenes.Bouncer));
         }
     };
 
@@ -425,8 +424,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mIsCommunalAvailableCallback));
         mFlows.add(collectFlow(getLifecycle(), communalInteractor.isCommunalVisible(),
                 mCommunalVisibleConsumer));
-        mFlows.add(collectFlow(getLifecycle(), keyguardInteractor.primaryBouncerShowing,
-                mBouncerShowingConsumer));
+        if (SceneContainerFlag.isEnabled()) {
+            mFlows.add(collectFlow(getLifecycle(), sceneInteractor.getCurrentScene(),
+                    mCurrentSceneConsumer));
+        } else {
+            mFlows.add(collectFlow(getLifecycle(), keyguardInteractor.primaryBouncerShowing,
+                    mBouncerShowingConsumer));
+        }
     }
 
     @NonNull
@@ -706,5 +710,16 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
         Log.w(TAG, "Removing dream overlay container view parent!");
         parentView.removeView(containerView);
+    }
+
+    private void updateBouncerShowingLocked(boolean bouncerShowing) {
+        if (mBouncerShowing == bouncerShowing) {
+            return;
+        }
+
+        mBouncerShowing = bouncerShowing;
+
+        updateLifecycleStateLocked();
+        updateGestureBlockingLocked();
     }
 }
