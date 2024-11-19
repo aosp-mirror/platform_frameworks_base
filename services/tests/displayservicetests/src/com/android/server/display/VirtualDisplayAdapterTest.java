@@ -335,10 +335,6 @@ public class VirtualDisplayAdapterTest {
             @Override
             public void onStopped() {
             }
-
-            @Override
-            public void onRequestedBrightnessChanged(float brightness) {
-            }
         };
     }
 }
