@@ -679,6 +679,18 @@ public final class MediaQualityManager {
     }
 
     /**
+     * Returns {@code true} if ambient backlight is enabled; {@code false} otherwise.
+     * @hide
+     */
+    public boolean isAmbientBacklightEnabled() {
+        try {
+            return mService.isAmbientBacklightEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Enables or disables the ambient backlight detection.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
