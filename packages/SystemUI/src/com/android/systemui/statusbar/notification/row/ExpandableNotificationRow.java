@@ -1371,6 +1371,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             items.add(NotificationMenuRow.createPartialConversationItem(mContext));
             items.add(NotificationMenuRow.createInfoItem(mContext));
             items.add(NotificationMenuRow.createSnoozeItem(mContext));
+            if (android.app.Flags.notificationClassificationUi()) {
+                items.add(NotificationMenuRow.createBundleItem(mContext));
+            }
             mMenuRow.setMenuItems(items);
         }
         if (existed) {

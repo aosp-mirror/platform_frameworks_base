@@ -2034,6 +2034,9 @@
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
 
+    <!-- [CHAR LIMIT=80] Text shown in feedback button in notification guts for a bundled notification -->
+    <string name="notification_guts_bundle_feedback">Provide Bundle Feedback</string>
+
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
 
