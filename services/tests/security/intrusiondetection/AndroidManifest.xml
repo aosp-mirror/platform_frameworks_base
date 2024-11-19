@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.android.server.security.forensic.tests">
+  package="com.android.server.security.intrusiondetection.tests">
 
        <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING"     />
        <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
@@ -25,6 +25,6 @@
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-         android:targetPackage="com.android.server.security.forensic.tests"
-         android:label="Frameworks Forensic Services Tests"/>
+         android:targetPackage="com.android.server.security.intrusiondetection.tests"
+         android:label="Frameworks IntrusionDetection Services Tests"/>
 </manifest>

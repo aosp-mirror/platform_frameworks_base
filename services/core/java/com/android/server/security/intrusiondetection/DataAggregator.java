@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.security.forensic;
+package com.android.server.security.intrusiondetection;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.security.forensic.ForensicEvent;
+import android.security.intrusiondetection.IntrusionDetectionEvent;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -30,22 +30,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataAggregator {
-    private static final String TAG = "Forensic DataAggregator";
+    private static final String TAG = "IntrusionDetection DataAggregator";
     private static final int MSG_SINGLE_DATA = 0;
     private static final int MSG_BATCH_DATA = 1;
     private static final int MSG_DISABLE = 2;
 
     private static final int STORED_EVENTS_SIZE_LIMIT = 1024;
-    private final ForensicService mForensicService;
+    private final IntrusionDetectionService mIntrusionDetectionService;
     private final ArrayList<DataSource> mDataSources;
 
     private Context mContext;
-    private List<ForensicEvent> mStoredEvents = new ArrayList<>();
+    private List<IntrusionDetectionEvent> mStoredEvents = new ArrayList<>();
     private ServiceThread mHandlerThread;
     private Handler mHandler;
 
-    public DataAggregator(Context context, ForensicService forensicService) {
-        mForensicService = forensicService;
+    public DataAggregator(Context context, IntrusionDetectionService intrusionDetectionService) {
+        mIntrusionDetectionService = intrusionDetectionService;
         mContext = context;
         mDataSources = new ArrayList<DataSource>();
     }
@@ -83,14 +83,14 @@ public class DataAggregator {
     /**
      * DataSource calls it to transmit a single event.
      */
-    public void addSingleData(ForensicEvent event) {
+    public void addSingleData(IntrusionDetectionEvent event) {
         mHandler.obtainMessage(MSG_SINGLE_DATA, event).sendToTarget();
     }
 
     /**
      * DataSource calls it to transmit list of events.
      */
-    public void addBatchData(List<ForensicEvent> events) {
+    public void addBatchData(List<IntrusionDetectionEvent> events) {
         mHandler.obtainMessage(MSG_BATCH_DATA, events).sendToTarget();
     }
 
@@ -104,17 +104,17 @@ public class DataAggregator {
         }
     }
 
-    private void onNewSingleData(ForensicEvent event) {
+    private void onNewSingleData(IntrusionDetectionEvent event) {
         if (mStoredEvents.size() < STORED_EVENTS_SIZE_LIMIT) {
             mStoredEvents.add(event);
         } else {
-            mForensicService.addNewData(mStoredEvents);
+            mIntrusionDetectionService.addNewData(mStoredEvents);
             mStoredEvents = new ArrayList<>();
         }
     }
 
-    private void onNewBatchData(List<ForensicEvent> events) {
-        mForensicService.addNewData(events);
+    private void onNewBatchData(List<IntrusionDetectionEvent> events) {
+        mIntrusionDetectionService.addNewData(events);
     }
 
     private void onDisable() {
@@ -135,10 +135,10 @@ public class DataAggregator {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SINGLE_DATA:
-                    mDataAggregator.onNewSingleData((ForensicEvent) msg.obj);
+                    mDataAggregator.onNewSingleData((IntrusionDetectionEvent) msg.obj);
                     break;
                 case MSG_BATCH_DATA:
-                    mDataAggregator.onNewBatchData((List<ForensicEvent>) msg.obj);
+                    mDataAggregator.onNewBatchData((List<IntrusionDetectionEvent>) msg.obj);
                     break;
                 case MSG_DISABLE:
                     mDataAggregator.onDisable();

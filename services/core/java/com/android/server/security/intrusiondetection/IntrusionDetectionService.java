@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server.security.forensic;
+package com.android.server.security.intrusiondetection;
 
-import static android.Manifest.permission.MANAGE_FORENSIC_STATE;
-import static android.Manifest.permission.READ_FORENSIC_STATE;
+import static android.Manifest.permission.MANAGE_INTRUSION_DETECTION_STATE;
+import static android.Manifest.permission.READ_INTRUSION_DETECTION_STATE;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -27,10 +27,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PermissionEnforcer;
 import android.os.RemoteException;
-import android.security.forensic.ForensicEvent;
-import android.security.forensic.IForensicService;
-import android.security.forensic.IForensicServiceCommandCallback;
-import android.security.forensic.IForensicServiceStateCallback;
+import android.security.intrusiondetection.IIntrusionDetectionService;
+import android.security.intrusiondetection.IIntrusionDetectionServiceCommandCallback;
+import android.security.intrusiondetection.IIntrusionDetectionServiceStateCallback;
+import android.security.intrusiondetection.IntrusionDetectionEvent;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -43,8 +43,8 @@ import java.util.List;
 /**
  * @hide
  */
-public class ForensicService extends SystemService {
-    private static final String TAG = "ForensicService";
+public class IntrusionDetectionService extends SystemService {
+    private static final String TAG = "IntrusionDetectionService";
 
     private static final int MAX_STATE_CALLBACK_NUM = 16;
     private static final int MSG_ADD_STATE_CALLBACK = 0;
@@ -53,39 +53,46 @@ public class ForensicService extends SystemService {
     private static final int MSG_DISABLE = 3;
     private static final int MSG_TRANSPORT = 4;
 
-    private static final int STATE_UNKNOWN = IForensicServiceStateCallback.State.UNKNOWN;
-    private static final int STATE_DISABLED = IForensicServiceStateCallback.State.DISABLED;
-    private static final int STATE_ENABLED = IForensicServiceStateCallback.State.ENABLED;
+    private static final int STATE_UNKNOWN =
+            IIntrusionDetectionServiceStateCallback.State.UNKNOWN;
+    private static final int STATE_DISABLED =
+            IIntrusionDetectionServiceStateCallback.State.DISABLED;
+    private static final int STATE_ENABLED =
+            IIntrusionDetectionServiceStateCallback.State.ENABLED;
 
-    private static final int ERROR_UNKNOWN = IForensicServiceCommandCallback.ErrorCode.UNKNOWN;
+    private static final int ERROR_UNKNOWN =
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.UNKNOWN;
     private static final int ERROR_PERMISSION_DENIED =
-            IForensicServiceCommandCallback.ErrorCode.PERMISSION_DENIED;
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.PERMISSION_DENIED;
     private static final int ERROR_INVALID_STATE_TRANSITION =
-            IForensicServiceCommandCallback.ErrorCode.INVALID_STATE_TRANSITION;
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.INVALID_STATE_TRANSITION;
     private static final int ERROR_TRANSPORT_UNAVAILABLE =
-            IForensicServiceCommandCallback.ErrorCode.TRANSPORT_UNAVAILABLE;
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.TRANSPORT_UNAVAILABLE;
     private static final int ERROR_DATA_SOURCE_UNAVAILABLE =
-            IForensicServiceCommandCallback.ErrorCode.DATA_SOURCE_UNAVAILABLE;
+            IIntrusionDetectionServiceCommandCallback.ErrorCode.DATA_SOURCE_UNAVAILABLE;
 
     private final Context mContext;
     private final Handler mHandler;
-    private final ForensicEventTransportConnection mForensicEventTransportConnection;
+    private final IntrusionDetectionEventTransportConnection
+            mIntrusionDetectionEventTransportConnection;
     private final DataAggregator mDataAggregator;
     private final BinderService mBinderService;
 
-    private final ArrayList<IForensicServiceStateCallback> mStateCallbacks = new ArrayList<>();
+    private final ArrayList<IIntrusionDetectionServiceStateCallback> mStateCallbacks =
+            new ArrayList<>();
     private volatile int mState = STATE_DISABLED;
 
-    public ForensicService(@NonNull Context context) {
+    public IntrusionDetectionService(@NonNull Context context) {
         this(new InjectorImpl(context));
     }
 
     @VisibleForTesting
-    ForensicService(@NonNull Injector injector) {
+    IntrusionDetectionService(@NonNull Injector injector) {
         super(injector.getContext());
         mContext = injector.getContext();
         mHandler = new EventHandler(injector.getLooper(), this);
-        mForensicEventTransportConnection = injector.getForensicEventransportConnection();
+        mIntrusionDetectionEventTransportConnection =
+                injector.getIntrusionDetectionEventransportConnection();
         mDataAggregator = injector.getDataAggregator(this);
         mBinderService = new BinderService(this, injector.getPermissionEnforcer());
     }
@@ -95,47 +102,48 @@ public class ForensicService extends SystemService {
         mState = state;
     }
 
-    private static final class BinderService extends IForensicService.Stub {
-        final ForensicService mService;
+    private static final class BinderService extends IIntrusionDetectionService.Stub {
+        final IntrusionDetectionService mService;
 
-        BinderService(ForensicService service, @NonNull PermissionEnforcer permissionEnforcer)  {
+        BinderService(IntrusionDetectionService service,
+                @NonNull PermissionEnforcer permissionEnforcer)  {
             super(permissionEnforcer);
             mService = service;
         }
 
         @Override
-        @EnforcePermission(READ_FORENSIC_STATE)
-        public void addStateCallback(IForensicServiceStateCallback callback) {
+        @EnforcePermission(READ_INTRUSION_DETECTION_STATE)
+        public void addStateCallback(IIntrusionDetectionServiceStateCallback callback) {
             addStateCallback_enforcePermission();
             mService.mHandler.obtainMessage(MSG_ADD_STATE_CALLBACK, callback).sendToTarget();
         }
 
         @Override
-        @EnforcePermission(READ_FORENSIC_STATE)
-        public void removeStateCallback(IForensicServiceStateCallback callback) {
+        @EnforcePermission(READ_INTRUSION_DETECTION_STATE)
+        public void removeStateCallback(IIntrusionDetectionServiceStateCallback callback) {
             removeStateCallback_enforcePermission();
             mService.mHandler.obtainMessage(MSG_REMOVE_STATE_CALLBACK, callback).sendToTarget();
         }
 
         @Override
-        @EnforcePermission(MANAGE_FORENSIC_STATE)
-        public void enable(IForensicServiceCommandCallback callback) {
+        @EnforcePermission(MANAGE_INTRUSION_DETECTION_STATE)
+        public void enable(IIntrusionDetectionServiceCommandCallback callback) {
             enable_enforcePermission();
             mService.mHandler.obtainMessage(MSG_ENABLE, callback).sendToTarget();
         }
 
         @Override
-        @EnforcePermission(MANAGE_FORENSIC_STATE)
-        public void disable(IForensicServiceCommandCallback callback) {
+        @EnforcePermission(MANAGE_INTRUSION_DETECTION_STATE)
+        public void disable(IIntrusionDetectionServiceCommandCallback callback) {
             disable_enforcePermission();
             mService.mHandler.obtainMessage(MSG_DISABLE, callback).sendToTarget();
         }
     }
 
     private static class EventHandler extends Handler {
-        private final ForensicService mService;
+        private final IntrusionDetectionService mService;
 
-        EventHandler(Looper looper, ForensicService service) {
+        EventHandler(Looper looper, IntrusionDetectionService service) {
             super(looper);
             mService = service;
         }
@@ -146,7 +154,7 @@ public class ForensicService extends SystemService {
                 case MSG_ADD_STATE_CALLBACK:
                     try {
                         mService.addStateCallback(
-                                (IForensicServiceStateCallback) msg.obj);
+                                (IIntrusionDetectionServiceStateCallback) msg.obj);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "RemoteException", e);
                     }
@@ -154,27 +162,27 @@ public class ForensicService extends SystemService {
                 case MSG_REMOVE_STATE_CALLBACK:
                     try {
                         mService.removeStateCallback(
-                                (IForensicServiceStateCallback) msg.obj);
+                                (IIntrusionDetectionServiceStateCallback) msg.obj);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "RemoteException", e);
                     }
                     break;
                 case MSG_ENABLE:
                     try {
-                        mService.enable((IForensicServiceCommandCallback) msg.obj);
+                        mService.enable((IIntrusionDetectionServiceCommandCallback) msg.obj);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "RemoteException", e);
                     }
                     break;
                 case MSG_DISABLE:
                     try {
-                        mService.disable((IForensicServiceCommandCallback) msg.obj);
+                        mService.disable((IIntrusionDetectionServiceCommandCallback) msg.obj);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "RemoteException", e);
                     }
                     break;
                 case MSG_TRANSPORT:
-                    mService.transport((List<ForensicEvent>) msg.obj);
+                    mService.transport((List<IntrusionDetectionEvent>) msg.obj);
                     break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
@@ -182,7 +190,8 @@ public class ForensicService extends SystemService {
         }
     }
 
-    private void addStateCallback(IForensicServiceStateCallback callback) throws RemoteException {
+    private void addStateCallback(IIntrusionDetectionServiceStateCallback callback)
+            throws RemoteException {
         for (int i = 0; i < mStateCallbacks.size(); i++) {
             if (mStateCallbacks.get(i).asBinder() == callback.asBinder()) {
                 return;
@@ -192,7 +201,7 @@ public class ForensicService extends SystemService {
         callback.onStateChange(mState);
     }
 
-    private void removeStateCallback(IForensicServiceStateCallback callback)
+    private void removeStateCallback(IIntrusionDetectionServiceStateCallback callback)
             throws RemoteException {
         for (int i = 0; i < mStateCallbacks.size(); i++) {
             if (mStateCallbacks.get(i).asBinder() == callback.asBinder()) {
@@ -216,15 +225,16 @@ public class ForensicService extends SystemService {
         }
     }
 
-    private void enable(IForensicServiceCommandCallback callback) throws RemoteException {
+    private void enable(IIntrusionDetectionServiceCommandCallback callback)
+            throws RemoteException {
         if (mState == STATE_ENABLED) {
             callback.onSuccess();
             return;
         }
 
-        // TODO: temporarily disable the following for the CTS ForensicManagerTest.
+        // TODO: temporarily disable the following for the CTS IntrusionDetectionManagerTest.
         //  Enable it when the transport component is ready.
-        // if (!mForensicEventTransportConnection.initialize()) {
+        // if (!mIntrusionDetectionEventTransportConnection.initialize()) {
         //     callback.onFailure(ERROR_TRANSPORT_UNAVAILABLE);
         //   return;
         // }
@@ -235,15 +245,16 @@ public class ForensicService extends SystemService {
         callback.onSuccess();
     }
 
-    private void disable(IForensicServiceCommandCallback callback) throws RemoteException {
+    private void disable(IIntrusionDetectionServiceCommandCallback callback)
+            throws RemoteException {
         if (mState == STATE_DISABLED) {
             callback.onSuccess();
             return;
         }
 
-        // TODO: temporarily disable the following for the CTS ForensicManagerTest.
+        // TODO: temporarily disable the following for the CTS IntrusionDetectionManagerTest.
         //  Enable it when the transport component is ready.
-        // mForensicEventTransportConnection.release();
+        // mIntrusionDetectionEventTransportConnection.release();
         mDataAggregator.disable();
         mState = STATE_DISABLED;
         notifyStateMonitors();
@@ -251,27 +262,27 @@ public class ForensicService extends SystemService {
     }
 
     /**
-     * Add a list of ForensicEvent.
+     * Add a list of IntrusionDetectionEvent.
      */
-    public void addNewData(List<ForensicEvent> events) {
+    public void addNewData(List<IntrusionDetectionEvent> events) {
         mHandler.obtainMessage(MSG_TRANSPORT, events).sendToTarget();
     }
 
-    private void transport(List<ForensicEvent> events) {
-        mForensicEventTransportConnection.addData(events);
+    private void transport(List<IntrusionDetectionEvent> events) {
+        mIntrusionDetectionEventTransportConnection.addData(events);
     }
 
     @Override
     public void onStart() {
         try {
-            publishBinderService(Context.FORENSIC_SERVICE, mBinderService);
+            publishBinderService(Context.INTRUSION_DETECTION_SERVICE, mBinderService);
         } catch (Throwable t) {
-            Slog.e(TAG, "Could not start the ForensicService.", t);
+            Slog.e(TAG, "Could not start the IntrusionDetectionService.", t);
         }
     }
 
     @VisibleForTesting
-    IForensicService getBinderService() {
+    IIntrusionDetectionService getBinderService() {
         return mBinderService;
     }
 
@@ -282,9 +293,9 @@ public class ForensicService extends SystemService {
 
         Looper getLooper();
 
-        ForensicEventTransportConnection getForensicEventransportConnection();
+        IntrusionDetectionEventTransportConnection getIntrusionDetectionEventransportConnection();
 
-        DataAggregator getDataAggregator(ForensicService forensicService);
+        DataAggregator getDataAggregator(IntrusionDetectionService intrusionDetectionService);
     }
 
     private static final class InjectorImpl implements Injector {
@@ -314,13 +325,15 @@ public class ForensicService extends SystemService {
         }
 
         @Override
-        public ForensicEventTransportConnection getForensicEventransportConnection() {
-            return new ForensicEventTransportConnection(mContext);
+        public IntrusionDetectionEventTransportConnection
+                getIntrusionDetectionEventransportConnection() {
+            return new IntrusionDetectionEventTransportConnection(mContext);
         }
 
         @Override
-        public DataAggregator getDataAggregator(ForensicService forensicService) {
-            return new DataAggregator(mContext, forensicService);
+        public DataAggregator getDataAggregator(
+                IntrusionDetectionService intrusionDetectionService) {
+            return new DataAggregator(mContext, intrusionDetectionService);
         }
     }
 }

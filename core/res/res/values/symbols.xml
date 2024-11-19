@@ -5703,8 +5703,8 @@
   <java-symbol type="string" name="identity_check_settings_action" />
   <java-symbol type="string" name="identity_check_settings_package_name" />
 
-  <!-- Forensic event transport -->
-  <java-symbol type="string" name="config_forensicEventTransport" />
+  <!-- Intrusion detection event transport -->
+  <java-symbol type="string" name="config_intrusionDetectionEventTransport" />
 
   <!-- Fingerprint screen off unlock config -->
   <java-symbol type="bool" name="config_screen_off_udfps_enabled" />

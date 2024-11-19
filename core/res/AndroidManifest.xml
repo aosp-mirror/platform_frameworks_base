@@ -4219,35 +4219,35 @@
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"
         android:featureFlag="android.security.aapm_api"/>
 
-    <!-- Allows an application to read the state of the ForensicService
+    <!-- Allows an application to read the state of the IntrusionDetectionService
          @FlaggedApi(android.security.Flags.FLAG_AFL_API)
          @SystemApi
          @hide -->
-    <permission android:name="android.permission.READ_FORENSIC_STATE"
+    <permission android:name="android.permission.READ_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"
         android:protectionLevel="signature|privileged" />
-    <uses-permission android:name="android.permission.READ_FORENSIC_STATE"
+    <uses-permission android:name="android.permission.READ_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"/>
 
-    <!-- Allows an application to change the state of the ForensicService
+    <!-- Allows an application to change the state of the IntrusionDetectionService
          @FlaggedApi(android.security.Flags.FLAG_AFL_API)
          @SystemApi
          @hide -->
-    <permission android:name="android.permission.MANAGE_FORENSIC_STATE"
+    <permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"
         android:protectionLevel="signature|privileged" />
-    <uses-permission android:name="android.permission.MANAGE_FORENSIC_STATE"
+    <uses-permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"/>
 
-    <!-- Must be required by any ForensicEventTransportService to ensure that
+    <!-- Must be required by any IntrusionDetectionEventTransportService to ensure that
          only the system can bind to it.
          @FlaggedApi(android.security.Flags.FLAG_AFL_API)
          @SystemApi
          @hide -->
-    <permission android:name="android.permission.BIND_FORENSIC_EVENT_TRANSPORT_SERVICE"
+    <permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE"
         android:featureFlag="android.security.afl_api"
         android:protectionLevel="signature" />
-    <uses-permission android:name="android.permission.BIND_FORENSIC_EVENT_TRANSPORT_SERVICE"
+    <uses-permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE"
         android:featureFlag="android.security.afl_api"/>
 
     <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->

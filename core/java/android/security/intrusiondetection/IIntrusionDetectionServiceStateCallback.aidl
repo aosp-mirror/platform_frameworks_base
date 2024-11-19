@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.server.security.forensic;
+package android.security.intrusiondetection;
 
-public interface DataSource {
-    /**
-     * Enable the data collection.
-     */
-    void enable();
-
-    /**
-     * Disable the data collection.
-     */
-    void disable();
-}
+/**
+ * @hide
+ */
+ oneway interface IIntrusionDetectionServiceStateCallback {
+    @Backing(type="int")
+    enum State{
+        UNKNOWN = 0,
+        DISABLED = 1,
+        ENABLED = 2,
+    }
+    void onStateChange(State state);
+ }

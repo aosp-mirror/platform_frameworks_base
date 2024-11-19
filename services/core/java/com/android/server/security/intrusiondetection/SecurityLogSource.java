@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.security.forensic;
+package com.android.server.security.intrusiondetection;
 
 import android.Manifest.permission;
 import android.annotation.RequiresPermission;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.Context;
-import android.security.forensic.ForensicEvent;
+import android.security.intrusiondetection.IntrusionDetectionEvent;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 public class SecurityLogSource implements DataSource {
 
-    private static final String TAG = "Forensic SecurityLogSource";
+    private static final String TAG = "IntrusionDetection SecurityLogSource";
 
     private SecurityEventCallback mEventCallback = new SecurityEventCallback();
     private DevicePolicyManager mDpm;
@@ -85,12 +85,12 @@ public class SecurityLogSource implements DataSource {
 
         @Override
         public void accept(List<SecurityEvent> events) {
-            List<ForensicEvent> forensicEvents =
+            List<IntrusionDetectionEvent> intrusionDetectionEvents =
                     events.stream()
                             .filter(event -> event != null)
-                            .map(event -> new ForensicEvent(event))
+                            .map(event -> new IntrusionDetectionEvent(event))
                             .collect(Collectors.toList());
-            mDataAggregator.addBatchData(forensicEvents);
+            mDataAggregator.addBatchData(intrusionDetectionEvents);
         }
     }
 }

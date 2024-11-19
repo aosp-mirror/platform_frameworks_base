@@ -9,7 +9,7 @@ package {
 }
 
 android_test {
-    name: "ForensicServiceTests",
+    name: "IntrusionDetectionServiceTests",
     srcs: [
         "src/**/*.java",
     ],
