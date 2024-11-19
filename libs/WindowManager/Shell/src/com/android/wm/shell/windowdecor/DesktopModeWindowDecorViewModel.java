@@ -78,6 +78,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.window.DesktopModeFlags;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
@@ -412,7 +413,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register window manager callbacks", e);
         }
-        if (DesktopModeStatus.canEnterDesktopMode(mContext)
+        if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(mContext)
                 && Flags.enableDesktopWindowingAppHandleEducation()) {
             mAppHandleEducationController.setAppHandleEducationTooltipCallbacks(
                     /* appHandleTooltipClickCallback= */(taskId) -> {
@@ -957,7 +958,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         public boolean handleMotionEvent(@Nullable View v, MotionEvent e) {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-            if (DesktopModeStatus.canEnterDesktopMode(mContext)
+            if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(mContext)
                     && !taskInfo.isFreeform()) {
                 return handleNonFreeformMotionEvent(decoration, v, e);
             } else {
@@ -1483,7 +1484,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         if (isPartOfDefaultHomePackage(taskInfo)) {
             return false;
         }
-        return DesktopModeStatus.canEnterDesktopMode(mContext)
+        final boolean isOnLargeScreen = taskInfo.getConfiguration().smallestScreenWidthDp
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
+        if (!DesktopModeStatus.canEnterDesktopMode(mContext)
+                && DesktopModeStatus.overridesShowAppHandle(mContext) && !isOnLargeScreen) {
+            // Devices with multiple screens may enable the app handle but it should not show on
+            // small screens
+            return false;
+        }
+        return DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(mContext)
                 && !DesktopWallpaperActivity.isWallpaperTask(taskInfo)
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
