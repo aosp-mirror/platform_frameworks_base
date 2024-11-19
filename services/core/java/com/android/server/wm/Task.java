@@ -128,7 +128,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -256,9 +255,6 @@ class Task extends TaskFragment {
     private static final String ATTR_MIN_HEIGHT = "min_height";
     private static final String ATTR_PERSIST_TASK_VERSION = "persist_task_version";
     private static final String ATTR_WINDOW_LAYOUT_AFFINITY = "window_layout_affinity";
-    private static final String ATTR_LAST_SNAPSHOT_TASK_SIZE = "last_snapshot_task_size";
-    private static final String ATTR_LAST_SNAPSHOT_CONTENT_INSETS = "last_snapshot_content_insets";
-    private static final String ATTR_LAST_SNAPSHOT_BUFFER_SIZE = "last_snapshot_buffer_size";
 
     // How long to wait for all background Activities to redraw following a call to
     // convertToTranslucent().
@@ -472,10 +468,6 @@ class Task extends TaskFragment {
     // NOTE: This value needs to be persisted with each task
     private TaskDescription mTaskDescription;
 
-    // Information about the last snapshot that should be persisted with the task to allow SystemUI
-    // to layout without loading all the task snapshots
-    final PersistedTaskSnapshotData mLastTaskSnapshotData;
-
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
 
@@ -635,14 +627,13 @@ class Task extends TaskFragment {
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
             boolean _autoRemoveRecents, int _userId, int _effectiveUid,
             String _lastDescription, long lastTimeMoved, boolean neverRelinquishIdentity,
-            TaskDescription _lastTaskDescription, PersistedTaskSnapshotData _lastSnapshotData,
-            int taskAffiliation, int prevTaskId, int nextTaskId, int callingUid,
-            String callingPackage, @Nullable String callingFeatureId, int resizeMode,
-            boolean supportsPictureInPicture, boolean _realActivitySuspended,
-            boolean userSetupComplete, int minWidth, int minHeight, ActivityInfo info,
-            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
-            boolean _createdByOrganizer, IBinder _launchCookie, boolean _deferTaskAppear,
-            boolean _removeWithTaskOrganizer) {
+            TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
+            int nextTaskId, int callingUid, String callingPackage,
+            @Nullable String callingFeatureId, int resizeMode, boolean supportsPictureInPicture,
+            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth, int minHeight,
+            ActivityInfo info, IVoiceInteractionSession _voiceSession,
+            IVoiceInteractor _voiceInteractor, boolean _createdByOrganizer, IBinder _launchCookie,
+            boolean _deferTaskAppear, boolean _removeWithTaskOrganizer) {
         super(atmService, null /* fragmentToken */, _createdByOrganizer, false /* isEmbedded */);
 
         mTaskId = _taskId;
@@ -652,9 +643,6 @@ class Task extends TaskFragment {
         mTaskDescription = _lastTaskDescription != null
                 ? _lastTaskDescription
                 : new TaskDescription();
-        mLastTaskSnapshotData = _lastSnapshotData != null
-                ? _lastSnapshotData
-                : new PersistedTaskSnapshotData();
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
@@ -3111,7 +3099,6 @@ class Task extends TaskFragment {
     }
 
     void onSnapshotChanged(TaskSnapshot snapshot) {
-        mLastTaskSnapshotData.set(snapshot);
         mAtmService.getTaskChangeNotificationController().notifyTaskSnapshotChanged(
                 mTaskId, snapshot);
     }
@@ -3990,19 +3977,6 @@ class Task extends TaskFragment {
         out.attributeInt(null, ATTR_MIN_HEIGHT, mMinHeight);
         out.attributeInt(null, ATTR_PERSIST_TASK_VERSION, PERSIST_TASK_VERSION);
 
-        if (mLastTaskSnapshotData.taskSize != null) {
-            out.attribute(null, ATTR_LAST_SNAPSHOT_TASK_SIZE,
-                    mLastTaskSnapshotData.taskSize.flattenToString());
-        }
-        if (mLastTaskSnapshotData.contentInsets != null) {
-            out.attribute(null, ATTR_LAST_SNAPSHOT_CONTENT_INSETS,
-                    mLastTaskSnapshotData.contentInsets.flattenToString());
-        }
-        if (mLastTaskSnapshotData.bufferSize != null) {
-            out.attribute(null, ATTR_LAST_SNAPSHOT_BUFFER_SIZE,
-                    mLastTaskSnapshotData.bufferSize.flattenToString());
-        }
-
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
             affinityIntent.saveToXml(out);
@@ -4069,7 +4043,6 @@ class Task extends TaskFragment {
         int taskId = INVALID_TASK_ID;
         final int outerDepth = in.getDepth();
         TaskDescription taskDescription = new TaskDescription();
-        PersistedTaskSnapshotData lastSnapshotData = new PersistedTaskSnapshotData();
         int taskAffiliation = INVALID_TASK_ID;
         int prevTaskId = INVALID_TASK_ID;
         int nextTaskId = INVALID_TASK_ID;
@@ -4176,15 +4149,6 @@ class Task extends TaskFragment {
                 case ATTR_PERSIST_TASK_VERSION:
                     persistTaskVersion = Integer.parseInt(attrValue);
                     break;
-                case ATTR_LAST_SNAPSHOT_TASK_SIZE:
-                    lastSnapshotData.taskSize = Point.unflattenFromString(attrValue);
-                    break;
-                case ATTR_LAST_SNAPSHOT_CONTENT_INSETS:
-                    lastSnapshotData.contentInsets = Rect.unflattenFromString(attrValue);
-                    break;
-                case ATTR_LAST_SNAPSHOT_BUFFER_SIZE:
-                    lastSnapshotData.bufferSize = Point.unflattenFromString(attrValue);
-                    break;
                 default:
                     if (!attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
                         Slog.w(TAG, "Task: Unknown attribute=" + attrName);
@@ -4278,7 +4242,6 @@ class Task extends TaskFragment {
                 .setLastTimeMoved(lastTimeOnTop)
                 .setNeverRelinquishIdentity(neverRelinquishIdentity)
                 .setLastTaskDescription(taskDescription)
-                .setLastSnapshotData(lastSnapshotData)
                 .setTaskAffiliation(taskAffiliation)
                 .setPrevAffiliateTaskId(prevTaskId)
                 .setNextAffiliateTaskId(nextTaskId)
@@ -6444,7 +6407,6 @@ class Task extends TaskFragment {
         private long mLastTimeMoved;
         private boolean mNeverRelinquishIdentity;
         private TaskDescription mLastTaskDescription;
-        private PersistedTaskSnapshotData mLastSnapshotData;
         private int mTaskAffiliation;
         private int mPrevAffiliateTaskId = INVALID_TASK_ID;
         private int mNextAffiliateTaskId = INVALID_TASK_ID;
@@ -6672,11 +6634,6 @@ class Task extends TaskFragment {
             return this;
         }
 
-        private Builder setLastSnapshotData(PersistedTaskSnapshotData lastSnapshotData) {
-            mLastSnapshotData = lastSnapshotData;
-            return this;
-        }
-
         private Builder setOrigActivity(ComponentName origActivity) {
             mOrigActivity = origActivity;
             return this;
@@ -6825,7 +6782,7 @@ class Task extends TaskFragment {
             return new Task(mAtmService, mTaskId, mIntent, mAffinityIntent, mAffinity,
                     mRootAffinity, mRealActivity, mOrigActivity, mRootWasReset, mAutoRemoveRecents,
                     mUserId, mEffectiveUid, mLastDescription, mLastTimeMoved,
-                    mNeverRelinquishIdentity, mLastTaskDescription, mLastSnapshotData,
+                    mNeverRelinquishIdentity, mLastTaskDescription,
                     mTaskAffiliation, mPrevAffiliateTaskId, mNextAffiliateTaskId, mCallingUid,
                     mCallingPackage, mCallingFeatureId, mResizeMode, mSupportsPictureInPicture,
                     mRealActivitySuspended, mUserSetupComplete, mMinWidth, mMinHeight,
