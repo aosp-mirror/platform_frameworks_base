@@ -16,14 +16,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 
-val Kosmos.keyguardLockWhileAwakeInteractor by
-    Kosmos.Fixture {
-        KeyguardLockWhileAwakeInteractor(
-            biometricSettingsRepository = biometricSettingsRepository,
-            keyguardEnabledInteractor = keyguardEnabledInteractor,
-            keyguardServiceLockNowInteractor = keyguardServiceLockNowInteractor,
-        )
-    }
+val Kosmos.keyguardServiceLockNowInteractor by
+    Kosmos.Fixture { KeyguardServiceLockNowInteractor(backgroundScope = testScope) }
