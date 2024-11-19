@@ -8110,8 +8110,13 @@ package android.media.quality {
     method @NonNull public java.util.List<java.lang.String> getPictureProfileAllowList();
     method @NonNull public java.util.List<java.lang.String> getPictureProfilePackageNames();
     method @NonNull public java.util.List<android.media.quality.PictureProfile> getPictureProfilesByPackage(@NonNull String);
+    method @NonNull public java.util.List<java.lang.String> getSoundProfileAllowList();
+    method @NonNull public java.util.List<java.lang.String> getSoundProfilePackageNames();
+    method @NonNull public java.util.List<android.media.quality.SoundProfile> getSoundProfilesByPackage(@NonNull String);
     method public void setAutoPictureQualityEnabled(boolean);
+    method public void setAutoSoundQualityEnabled(boolean);
     method public void setPictureProfileAllowList(@NonNull java.util.List<java.lang.String>);
+    method public void setSoundProfileAllowList(@NonNull java.util.List<java.lang.String>);
     method public void setSuperResolutionEnabled(boolean);
   }
 
@@ -8127,6 +8132,12 @@ package android.media.quality {
     method @FlaggedApi("android.media.tv.flags.apply_picture_profiles") public void writeToParcel(@NonNull android.os.Parcel, int);
     field @FlaggedApi("android.media.tv.flags.apply_picture_profiles") @NonNull public static final android.os.Parcelable.Creator<android.media.quality.PictureProfileHandle> CREATOR;
     field @NonNull public static final android.media.quality.PictureProfileHandle NONE;
+  }
+
+  public static final class SoundProfile.Builder {
+    method @NonNull public android.media.quality.SoundProfile.Builder setInputId(@NonNull String);
+    method @NonNull public android.media.quality.SoundProfile.Builder setPackageName(@NonNull String);
+    method @NonNull public android.media.quality.SoundProfile.Builder setProfileType(int);
   }
 
 }
