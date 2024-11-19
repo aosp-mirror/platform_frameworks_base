@@ -2170,6 +2170,174 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
+    public void testRemoveChildNotification_summaryForceGrouped() {
+        // Check that removing all child notifications from a group will trigger empty summary
+        // force grouping re-evaluation
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        final String pkg = "package";
+        // Post summaries without children, below the force grouping limit
+        for (int i = 0; i < AUTOGROUP_AT_COUNT - 1; i++) {
+            NotificationRecord summary = getNotificationRecord(pkg, i + 42, String.valueOf(i + 42),
+                    UserHandle.SYSTEM, "testGrp " + i, true);
+            notificationList.add(summary);
+            mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
+        }
+        // Post a valid (full) group
+        final int summaryId = 4242;
+        final int numChildren = 3;
+        final ArrayList<NotificationRecord> childrenToRemove = new ArrayList<>();
+        NotificationRecord summary = getNotificationRecord(pkg, summaryId,
+                String.valueOf(summaryId), UserHandle.SYSTEM, "testGrp " + summaryId, true);
+        notificationList.add(summary);
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        for (int i = 0; i < numChildren; i++) {
+            NotificationRecord child = getNotificationRecord(pkg, summaryId + 42,
+                    String.valueOf(i + 42), UserHandle.SYSTEM, "testGrp " + summaryId, false);
+            notificationList.add(child);
+            // schedule all children for removal
+            childrenToRemove.add(child);
+        }
+        mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
+        verifyZeroInteractions(mCallback);
+
+        // Remove all child notifications from the valid group => summary without children
+        Mockito.reset(mCallback);
+        for (NotificationRecord r: childrenToRemove) {
+            notificationList.remove(r);
+            mGroupHelper.onNotificationRemoved(r, notificationList);
+        }
+        // Only call onGroupedNotificationRemovedWithDelay with the summary notification
+        mGroupHelper.onGroupedNotificationRemovedWithDelay(summary, notificationList,
+                summaryByGroup);
+
+        // Check that the summaries were force grouped
+        final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey), anyInt(), eq(getNotificationAttributes(BASE_FLAGS)));
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey), eq(true));
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
+    public void testRemoveChildNotification_groupBecomesSingleton() {
+        // Check that removing child notifications from a group will trigger singleton force
+        // grouping re-evaluation
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        final String pkg = "package";
+        // Post singleton groups, under forced group limit
+        for (int i = 0; i < AUTOGROUP_SINGLETONS_AT_COUNT - 1; i++) {
+            NotificationRecord summary = getNotificationRecord(pkg, i,
+                    String.valueOf(i), UserHandle.SYSTEM, "testGrp " + i, true);
+            notificationList.add(summary);
+            NotificationRecord child = getNotificationRecord(pkg, i + 42,
+                    String.valueOf(i + 42), UserHandle.SYSTEM, "testGrp " + i, false);
+            notificationList.add(child);
+            summaryByGroup.put(summary.getGroupKey(), summary);
+            mGroupHelper.onNotificationPostedWithDelay(child, notificationList, summaryByGroup);
+            mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
+        }
+        // Post a valid (full) group
+        final int summaryId = 4242;
+        final int numChildren = 3;
+        final ArrayList<NotificationRecord> childrenToRemove = new ArrayList<>();
+        NotificationRecord summary = getNotificationRecord(pkg, summaryId,
+                String.valueOf(summaryId), UserHandle.SYSTEM, "testGrp " + summaryId, true);
+        notificationList.add(summary);
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        for (int i = 0; i < numChildren; i++) {
+            NotificationRecord child = getNotificationRecord(pkg, summaryId + 42,
+                    String.valueOf(i + 42), UserHandle.SYSTEM, "testGrp " + summaryId, false);
+            notificationList.add(child);
+
+            // schedule all children except one for removal
+            if (i < numChildren - 1) {
+                childrenToRemove.add(child);
+            }
+        }
+        mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
+        verifyZeroInteractions(mCallback);
+
+        // Remove some child notifications from the valid group, transform into a singleton group
+        Mockito.reset(mCallback);
+        for (NotificationRecord r: childrenToRemove) {
+            notificationList.remove(r);
+            mGroupHelper.onNotificationRemoved(r, notificationList);
+        }
+        // Only call onGroupedNotificationRemovedWithDelay with the summary notification
+        mGroupHelper.onGroupedNotificationRemovedWithDelay(summary, notificationList,
+                summaryByGroup);
+
+        // Check that the singleton groups were force grouped
+        final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey), anyInt(), eq(getNotificationAttributes(BASE_FLAGS)));
+        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey), eq(true));
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
+        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).removeAppProvidedSummary(
+                anyString());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
+    public void testRemoveAllGroupNotifications_noForceGrouping() {
+        // Check that removing all notifications from a group will not trigger any force grouping
+        // re-evaluation
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        final String pkg = "package";
+        // Post summaries without children, below the force grouping limit
+        for (int i = 0; i < AUTOGROUP_AT_COUNT - 1; i++) {
+            NotificationRecord summary = getNotificationRecord(pkg, i + 42, String.valueOf(i + 42),
+                    UserHandle.SYSTEM, "testGrp " + i, true);
+            notificationList.add(summary);
+            mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
+        }
+        // Post a valid (full) group
+        final int summaryId = 4242;
+        final int numChildren = 3;
+        final String groupToRemove = "testRemoveGrp";
+        NotificationRecord summary = getNotificationRecord(pkg, summaryId,
+                String.valueOf(summaryId), UserHandle.SYSTEM, groupToRemove + summaryId, true);
+        notificationList.add(summary);
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        for (int i = 0; i < numChildren; i++) {
+            NotificationRecord child = getNotificationRecord(pkg, summaryId + 42,
+                    String.valueOf(i + 42), UserHandle.SYSTEM, groupToRemove + summaryId, false);
+            notificationList.add(child);
+        }
+        mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
+        verifyZeroInteractions(mCallback);
+
+        // Remove all child notifications from the valid group => summary without children
+        Mockito.reset(mCallback);
+        for (NotificationRecord r: notificationList) {
+            if (r.getGroupKey().contains(groupToRemove)) {
+                r.isCanceled = true;
+                mGroupHelper.onNotificationRemoved(r, notificationList);
+            }
+        }
+        // Only call onGroupedNotificationRemovedWithDelay with the summary notification
+        mGroupHelper.onGroupedNotificationRemovedWithDelay(summary, notificationList,
+                summaryByGroup);
+        // Check that nothing was force grouped
+        verifyZeroInteractions(mCallback);
+    }
+
+    @Test
     @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testMoveAggregateGroups_updateChannel() {
         final String pkg = "package";
