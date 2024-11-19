@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"လိုကယ်တာမီနယ်"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"local shell အသုံးပြုခွင့်ကမ်းလှမ်းသော တာမင်နယ်အပလီကေးရှင်းဖွင့်ပါ"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ဆော့ဖ်ဝဲရေးမှု ပတ်ဝန်းကျင်"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android တွင် Linux တာမီနယ် လုပ်ဆောင်ရန်"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(စမ်းသပ်) Android တွင် Linux တာမီနယ်ကို လုပ်ဆောင်ရန်"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ပိတ်လိုက်ပါက Linux တာမီနယ်ဒေတာကို ရှင်းထုတ်ပါမည်"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP စစ်ဆေးမှု"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP စစ်ဆေးပုံကို သတ်မှတ်မည်"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"အမှားရှာဖွေဖယ်ရှားခြင်း"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ပြင်ပစက်"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ချိတ်ဆက်ကိရိယာ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ဤဖုန်း"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"ရိုးရိုး"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ဤစက်ပစ္စည်းတွင် ဖွင့်၍မရပါ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ပြောင်းရန် အကောင့်အဆင့်ကိုမြှင့်ပါ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ဤနေရာတွင် ဒေါင်းလုဒ်များ ဖွင့်မရပါ"</string>

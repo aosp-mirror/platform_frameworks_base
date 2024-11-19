@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ಪ್ರೊಫೈಲ್ ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="category_personal" msgid="6236798763159385225">"ವೈಯಕ್ತಿಕ"</string>
     <string name="category_work" msgid="4014193632325996115">"ಕೆಲಸ"</string>
-    <string name="category_private" msgid="4244892185452788977">"ಖಾಸಗಿ"</string>
+    <string name="category_private" msgid="4244892185452788977">"ಪ್ರೈವೆಟ್"</string>
     <string name="category_clone" msgid="1554511758987195974">"ಕ್ಲೋನ್"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ಡೆವಲಪರ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ಡೆವಲಪರ್ ಆಯ್ಕೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"ಸ್ಥಳೀಯ ಟರ್ಮಿನಲ್"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ಸ್ಥಳೀಯ ಶೆಲ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸುವ ಟರ್ಮಿನಲ್ ಆ್ಯಪ್‌ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ಡೆವಲಪ್‌ಮೆಂಟ್ ಎನ್ವಿರಾನ್‌ಮೆಂಟ್"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android ನಲ್ಲಿ Linux ಟರ್ಮಿನಲ್ ಅನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ಪ್ರಾಯೋಗಿಕ) Android ನಲ್ಲಿ Linux ಟರ್ಮಿನಲ್ ಅನ್ನು ರನ್ ಮಾಡಿ"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ನೀವು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದರೆ, Linux ಟರ್ಮಿನಲ್ ಡೇಟಾ ತೆರವುಗೊಳಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ಪರೀಕ್ಷಿಸುವಿಕೆ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ಪರಿಶೀಲನಾ ನಡವಳಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ಬಾಹ್ಯ ಸಾಧನ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ಕನೆಕ್ಟ್ ಮಾಡಿರುವ ಸಾಧನ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ಈ ಫೋನ್"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"ಅನಲಾಗ್"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ಈ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ಬದಲಾಯಿಸಲು ಖಾತೆಯನ್ನು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ಇಲ್ಲಿ ಡೌನ್‌ಲೋಡ್‌ಗಳನ್ನು ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
