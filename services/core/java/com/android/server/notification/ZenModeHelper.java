@@ -1941,7 +1941,17 @@ public class ZenModeHelper {
     @Nullable
     public Policy getNotificationPolicy(UserHandle user) {
         synchronized (mConfigLock) {
-            return getNotificationPolicy(getConfigLocked(user));
+            if (Flags.modesMultiuser()) {
+                // Return a fallback (default) policy for users without a zen config.
+                // Note that zen updates (setPolicy, setFilter) won't be applied, so this is mostly
+                // about preventing NPEs for careless callers.
+                ZenModeConfig config = getConfigLocked(user);
+                return config != null
+                        ? getNotificationPolicy(config)
+                        : getNotificationPolicy(mDefaultConfig);
+            } else {
+                return getNotificationPolicy(getConfigLocked(user));
+            }
         }
     }
 
