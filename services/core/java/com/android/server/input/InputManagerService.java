@@ -351,6 +351,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages loading PointerIcons
     private final PointerIconCache mPointerIconCache;
 
+    // Manages storage and retrieval of input data.
+    private final InputDataStore mInputDataStore;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -502,7 +505,9 @@ public class InputManagerService extends IInputManager.Stub
                 injector.getUEventManager());
         mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative, mDataStore);
         mStickyModifierStateController = new StickyModifierStateController();
-        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper());
+        mInputDataStore = new InputDataStore();
+        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper(),
+                mInputDataStore);
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
