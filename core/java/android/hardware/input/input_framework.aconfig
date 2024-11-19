@@ -88,6 +88,17 @@ flag {
 }
 
 flag {
+    name: "input_manager_lifecycle_support"
+    namespace: "input"
+    description: "Add support for Lifecycle support in input manager"
+    bug: "362473586"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     namespace: "input_native"
     name: "manage_key_gestures"
     description: "Manage key gestures through Input APIs"
