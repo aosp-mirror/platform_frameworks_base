@@ -38,6 +38,7 @@ import java.util.concurrent.Executor;
  * be changed to INVISIBLE in its view tree. This allows the {@link View} to transform in the
  * full-screen size leash without being constrained by the view tree's boundary or inheriting its
  * parent's alpha and transformation.
+ *
  * @hide
  */
 public class ViewUIComponent implements UIComponent {
@@ -98,9 +99,7 @@ public class ViewUIComponent implements UIComponent {
         mView.getViewTreeObserver().addOnDrawListener(mOnDrawListener);
 
         // Make the view invisible AFTER the surface is shown.
-        t.addTransactionCommittedListener(
-                        mView.getContext().getMainExecutor(),
-                        () -> mView.setVisibility(View.INVISIBLE))
+        t.addTransactionCommittedListener(mView::post, () -> mView.setVisibility(View.INVISIBLE))
                 .apply();
     }
 
@@ -118,7 +117,7 @@ public class ViewUIComponent implements UIComponent {
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.reparent(sc, null)
                 .addTransactionCommittedListener(
-                        mView.getContext().getMainExecutor(),
+                        mView::post,
                         () -> {
                             s.release();
                             sc.release();
@@ -235,41 +234,40 @@ public class ViewUIComponent implements UIComponent {
         mView.post(this::draw);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public static class Transaction implements UIComponent.Transaction<ViewUIComponent> {
         private final List<Runnable> mChanges = new ArrayList<>();
 
         @Override
         public Transaction setAlpha(ViewUIComponent ui, float alpha) {
-            mChanges.add(() -> ui.setAlpha(alpha));
+            mChanges.add(() -> ui.mView.post(() -> ui.setAlpha(alpha)));
             return this;
         }
 
         @Override
         public Transaction setVisible(ViewUIComponent ui, boolean visible) {
-            mChanges.add(() -> ui.setVisible(visible));
+            mChanges.add(() -> ui.mView.post(() -> ui.setVisible(visible)));
             return this;
         }
 
         @Override
         public Transaction setBounds(ViewUIComponent ui, Rect bounds) {
-            mChanges.add(() -> ui.setBounds(bounds));
+            mChanges.add(() -> ui.mView.post(() -> ui.setBounds(bounds)));
             return this;
         }
 
         @Override
         public Transaction attachToTransitionLeash(
                 ViewUIComponent ui, SurfaceControl transitionLeash, int w, int h) {
-            mChanges.add(() -> ui.attachToTransitionLeash(transitionLeash, w, h));
+            mChanges.add(
+                    () -> ui.mView.post(() -> ui.attachToTransitionLeash(transitionLeash, w, h)));
             return this;
         }
 
         @Override
         public Transaction detachFromTransitionLeash(
                 ViewUIComponent ui, Executor executor, Runnable onDone) {
-            mChanges.add(() -> ui.detachFromTransitionLeash(executor, onDone));
+            mChanges.add(() -> ui.mView.post(() -> ui.detachFromTransitionLeash(executor, onDone)));
             return this;
         }
 
