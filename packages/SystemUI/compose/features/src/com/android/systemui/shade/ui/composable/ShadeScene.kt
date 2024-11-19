@@ -270,6 +270,7 @@ private fun SceneScope.SingleShade(
         )
     val isEmptySpaceClickable by viewModel.isEmptySpaceClickable.collectAsStateWithLifecycle()
     val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
+    val isQsEnabled by viewModel.isQsEnabled.collectAsStateWithLifecycle()
 
     val shouldPunchHoleBehindScrim =
         layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
@@ -361,6 +362,7 @@ private fun SceneScope.SingleShade(
                     carouselController = mediaCarouselController,
                     modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Media),
                     usingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia,
+                    isQsEnabled = isQsEnabled,
                     isInSplitShade = false,
                 )
 
@@ -416,6 +418,7 @@ private fun SceneScope.SplitShade(
     val screenCornerRadius = LocalScreenCornerRadius.current
 
     val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsStateWithLifecycle()
+    val isQsEnabled by viewModel.isQsEnabled.collectAsStateWithLifecycle()
     val isCustomizerShowing by
         viewModel.qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
     val customizingAnimationDuration by
@@ -567,6 +570,7 @@ private fun SceneScope.SplitShade(
                                         Modifier.zIndex(1f)
                                     },
                                 carouselController = mediaCarouselController,
+                                isQsEnabled = isQsEnabled,
                                 isInSplitShade = true,
                             )
                         }
@@ -620,10 +624,14 @@ private fun SceneScope.ShadeMediaCarousel(
     mediaHost: MediaHost,
     carouselController: MediaCarouselController,
     mediaOffsetProvider: ShadeMediaOffsetProvider,
+    isInSplitShade: Boolean,
+    isQsEnabled: Boolean,
     modifier: Modifier = Modifier,
     usingCollapsedLandscapeMedia: Boolean = false,
-    isInSplitShade: Boolean,
 ) {
+    if (!isQsEnabled) {
+        return
+    }
     MediaCarousel(
         modifier = modifier.fillMaxWidth(),
         isVisible = isVisible,
