@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.app.Notification.CATEGORY_CALL;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -196,19 +194,6 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         NotificationContentDescription.contentDescForNotification(mContext, n);
 
         // no crash, good
-    }
-
-    @Test
-    public void testContentDescForNotification_noNotifContent() {
-        Notification n = new Notification.Builder(mContext, "test")
-                .setSmallIcon(0)
-                .setContentTitle("hello")
-                .setCategory(CATEGORY_CALL)
-                .build();
-        assertThat(NotificationContentDescription.contentDescForNotification(mContext, n)
-                .toString()).startsWith("com.android.systemui.tests notification");
-        assertThat(NotificationContentDescription.contentDescForNotification(mContext, n)
-                .toString()).doesNotContain("hello");
     }
 
     @Test

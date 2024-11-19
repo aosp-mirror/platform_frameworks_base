@@ -1270,27 +1270,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * To make users aware of system features such as the app header menu and its various
-     * functionalities, educational dialogs are shown to demonstrate how to find and utilize these
-     * features. Using this method, an activity can specify if it wants these educational dialogs to
-     * be shown. When set to {@code true}, these dialogs are not completely blocked; however, the
-     * system will be notified that they should not be shown unless necessary. If this API is not
-     * called, the system's educational dialogs are not limited by default.
+     * Requests to show the “Open in browser” education. “Open in browser” is a feature
+     * within the app header that allows users to switch from an app to the web. The feature
+     * is made available when an application is opened by a user clicking a link or when a
+     * link is provided by an application. Links can be provided by utilizing
+     * {@link AssistContent#EXTRA_AUTHENTICATING_USER_WEB_URI} or
+     * {@link AssistContent#setWebUri}.
      *
-     * <p>This method can be utilized when activities have states where showing an
-     * educational dialog would be disruptive to the user. For example, if a game application is
-     * expecting prompt user input, this method can be used to limit educational dialogs such as the
-     * dialogs that showcase the app header's features which, in this instance, would disrupt the
-     * user's experience if shown.</p>
-     *
-     * <p>Note that educational dialogs may be shown soon after this activity is launched, so
-     * this method must be called early if the intent is to limit the dialogs from the start.</p>
+     * <p>This method should be utilized when an activity wants to nudge the user to switch
+     * to the web application in cases where the web may provide the user with a better
+     * experience. Note that this method does not guarantee that the education will be shown.</p>
      */
     @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION)
-    public final void setLimitSystemEducationDialogs(boolean limitSystemEducationDialogs) {
+    public final void requestOpenInBrowserEducation() {
         try {
             ActivityTaskManager
-                  .getService().setLimitSystemEducationDialogs(mToken, limitSystemEducationDialogs);
+                  .getService().requestOpenInBrowserEducation(mToken);
         } catch (RemoteException e) {
             // Empty
         }

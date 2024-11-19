@@ -630,8 +630,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // The locusId associated with this activity, if set.
     private LocusId mLocusId;
 
-    // Whether the activity is requesting to limit the system's educational dialogs
-    public boolean mShouldLimitSystemEducationDialogs;
+    // The timestamp of the last request to show the "Open in browser" education
+    public long mRequestOpenInBrowserEducationTimestamp;
 
     // Whether the activity was launched from a bubble.
     private boolean mLaunchedFromBubble;
@@ -1623,6 +1623,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 newParent.setResumedActivity(this, "onParentChanged");
             }
             mAppCompatController.getTransparentPolicy().start();
+            if (mState == INITIALIZING && isRestrictedFixedOrientation(info.screenOrientation)) {
+                Slog.i(TAG, "Ignoring manifest-declared fixed orientation "
+                        + ActivityInfo.screenOrientationToString(info.screenOrientation)
+                        + " of " + this + " since target sdk 36");
+            }
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -3189,6 +3194,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean canReceiveKeys() {
         return getWindowConfiguration().canReceiveKeys() && !mWaitForEnteringPinnedMode;
+    }
+
+    /**
+     * Returns {@code true} if the orientation will be ignored for {@link #isUniversalResizeable()}.
+     */
+    private boolean isRestrictedFixedOrientation(
+            @ActivityInfo.ScreenOrientation int orientation) {
+        // Exclude "locked" because it is not explicit portrait or landscape.
+        return orientation != ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                && ActivityInfo.isFixedOrientation(orientation)
+                && isUniversalResizeable();
     }
 
     /**
@@ -7326,9 +7342,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mLocusId;
     }
 
-    void setLimitSystemEducationDialogs(boolean limitSystemEducationDialogs) {
-        if (mShouldLimitSystemEducationDialogs == limitSystemEducationDialogs) return;
-        mShouldLimitSystemEducationDialogs = limitSystemEducationDialogs;
+    void requestOpenInBrowserEducation() {
+        mRequestOpenInBrowserEducationTimestamp = System.currentTimeMillis();
         final Task task = getTask();
         if (task != null) {
             final boolean force = isVisibleRequested() && this == task.getTopNonFinishingActivity();
@@ -8123,7 +8138,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Setting requested orientation %s for %s",
                 ActivityInfo.screenOrientationToString(requestedOrientation), this);
-        setOrientation(requestedOrientation, this);
+        final int resolvedOrientation = setOrientation(requestedOrientation, this);
+        if (resolvedOrientation != requestedOrientation
+                && isRestrictedFixedOrientation(requestedOrientation)) {
+            Slog.i(TAG, "Ignoring requested fixed orientation "
+                    + ActivityInfo.screenOrientationToString(requestedOrientation)
+                    + " of " + this + " since target sdk 36");
+        }
 
         // Push the new configuration to the requested app in case where it's not pushed, e.g. when
         // the request is handled at task level with letterbox.
@@ -8214,9 +8235,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @ActivityInfo.ScreenOrientation
     protected int getOverrideOrientation() {
         int candidateOrientation = super.getOverrideOrientation();
-        if (candidateOrientation != ActivityInfo.SCREEN_ORIENTATION_LOCKED
-                && ActivityInfo.isFixedOrientation(candidateOrientation)
-                && isUniversalResizeable()) {
+        if (isRestrictedFixedOrientation(candidateOrientation)) {
             candidateOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
         return mAppCompatController.getOrientationPolicy()

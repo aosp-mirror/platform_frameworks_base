@@ -334,8 +334,8 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
 
             // Sides adjacent to split bar or task bar are not be animated.
             Insets margins;
-            final boolean isLandscape = mRootStageBounds.width() > mRootStageBounds.height();
-            if (isLandscape) { // Left and right splits.
+            final boolean isLeftRightSplit = mSplitScreenController.get().get().isLeftRightSplit();
+            if (isLeftRightSplit) {
                 margins = getLandscapeMargins(margin, taskbarExpanded);
             } else { // Top and bottom splits.
                 margins = getPortraitMargins(margin, taskbarExpanded);

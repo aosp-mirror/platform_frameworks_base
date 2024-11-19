@@ -182,7 +182,6 @@ import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_ARE
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
-import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.surfaceTrustedOverlay;
 
 import android.annotation.CallSuper;
@@ -1187,9 +1186,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (surfaceTrustedOverlay() && isWindowTrustedOverlay()) {
             getPendingTransaction().setTrustedOverlay(mSurfaceControl, true);
         }
-        if (secureWindowState()) {
-            getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
-        }
+        getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
         // All apps should be considered as occluding when computing TrustedPresentation Thresholds.
         final boolean canOccludePresentation = !mSession.mCanAddInternalSystemWindow;
         getPendingTransaction().setCanOccludePresentation(mSurfaceControl, canOccludePresentation);
@@ -6174,18 +6171,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setSecureLocked(boolean isSecure) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, getName());
-        if (secureWindowState()) {
-            if (mSurfaceControl == null) {
-                return;
-            }
-            getPendingTransaction().setSecure(mSurfaceControl, isSecure);
-        } else {
-            if (mWinAnimator.mSurfaceControl == null) {
-                return;
-            }
-            getPendingTransaction().setSecure(mWinAnimator.mSurfaceControl,
-                    isSecure);
+        if (mSurfaceControl == null) {
+            return;
         }
+        getPendingTransaction().setSecure(mSurfaceControl, isSecure);
         if (mDisplayContent != null) {
             mDisplayContent.refreshImeSecureFlag(getSyncTransaction());
         }

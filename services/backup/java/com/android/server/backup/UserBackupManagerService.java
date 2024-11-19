@@ -43,9 +43,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
-import android.app.ApplicationThreadConstants;
 import android.app.IActivityManager;
-import android.app.IBackupAgent;
 import android.app.PendingIntent;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations;
@@ -60,9 +58,6 @@ import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.app.backup.ISelectBackupTransportCallback;
-import android.app.compat.CompatChanges;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -83,7 +78,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
@@ -302,21 +296,10 @@ public class UserBackupManagerService {
     private static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
     private static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
 
-    /**
-     * Enables the OS making a decision on whether backup restricted mode should be used for apps
-     * that haven't explicitly opted in or out. See
-     * {@link PackageManager#PROPERTY_USE_RESTRICTED_BACKUP_MODE} for details.
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)
-    public static final long OS_DECIDES_BACKUP_RESTRICTED_MODE = 376661510;
-
     // Time delay for initialization operations that can be delayed so as not to consume too much
     // CPU on bring-up and increase time-to-UI.
     private static final long INITIALIZATION_DELAY_MILLIS = 3000;
 
-    // Timeout interval for deciding that a bind has taken too long.
-    private static final long BIND_TIMEOUT_INTERVAL = 10 * 1000;
     // Timeout interval for deciding that a clear-data has taken too long.
     private static final long CLEAR_DATA_TIMEOUT_INTERVAL = 30 * 1000;
 
@@ -365,22 +348,9 @@ public class UserBackupManagerService {
     // Backups that we haven't started yet.  Keys are package names.
     private final HashMap<String, BackupRequest> mPendingBackups = new HashMap<>();
 
-    private final ArraySet<String> mRestoreNoRestrictedModePackages = new ArraySet<>();
-    private final ArraySet<String> mBackupNoRestrictedModePackages = new ArraySet<>();
-
     // locking around the pending-backup management
     private final Object mQueueLock = new Object();
-
     private final UserBackupPreferences mBackupPreferences;
-
-    // The thread performing the sequence of queued backups binds to each app's agent
-    // in succession.  Bind notifications are asynchronously delivered through the
-    // Activity Manager; use this lock object to signal when a requested binding has
-    // completed.
-    private final Object mAgentConnectLock = new Object();
-    private IBackupAgent mConnectedAgent;
-    private volatile boolean mConnecting;
-
     private volatile boolean mBackupRunning;
     private volatile long mLastBackupPass;
 
@@ -410,6 +380,7 @@ public class UserBackupManagerService {
 
     private ActiveRestoreSession mActiveRestoreSession;
 
+    private final BackupAgentConnectionManager mBackupAgentConnectionManager;
     private final LifecycleOperationStorage mOperationStorage;
 
     private final Random mTokenGenerator = new Random();
@@ -547,6 +518,8 @@ public class UserBackupManagerService {
         mRegisterTransportsRequestedTime = 0;
         mPackageManager = packageManager;
         mOperationStorage = operationStorage;
+        mBackupAgentConnectionManager = new BackupAgentConnectionManager(mOperationStorage,
+                mPackageManager, this, mUserId);
         mTransportManager = transportManager;
         mFullBackupQueue = new ArrayList<>();
         mBackupHandler = backupHandler;
@@ -599,6 +572,8 @@ public class UserBackupManagerService {
         mAgentTimeoutParameters.start();
 
         mOperationStorage = new LifecycleOperationStorage(mUserId);
+        mBackupAgentConnectionManager = new BackupAgentConnectionManager(mOperationStorage,
+                mPackageManager, this, mUserId);
 
         Objects.requireNonNull(userBackupThread, "userBackupThread cannot be null");
         mBackupHandler = new BackupHandler(this, mOperationStorage, userBackupThread);
@@ -1660,67 +1635,6 @@ public class UserBackupManagerService {
         }
     }
 
-    /** Fires off a backup agent, blocking until it attaches or times out. */
-    @Nullable
-    public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode,
-            @BackupDestination int backupDestination) {
-        IBackupAgent agent = null;
-        synchronized (mAgentConnectLock) {
-            mConnecting = true;
-            mConnectedAgent = null;
-            boolean useRestrictedMode = shouldUseRestrictedBackupModeForPackage(mode,
-                    app.packageName);
-            try {
-                if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId,
-                        backupDestination, useRestrictedMode)) {
-                    Slog.d(TAG, addUserIdToLogMessage(mUserId, "awaiting agent for " + app));
-
-                    // success; wait for the agent to arrive
-                    // only wait 10 seconds for the bind to happen
-                    long timeoutMark = System.currentTimeMillis() + BIND_TIMEOUT_INTERVAL;
-                    while (mConnecting && mConnectedAgent == null
-                            && (System.currentTimeMillis() < timeoutMark)) {
-                        try {
-                            mAgentConnectLock.wait(5000);
-                        } catch (InterruptedException e) {
-                            // just bail
-                            Slog.w(TAG, addUserIdToLogMessage(mUserId, "Interrupted: " + e));
-                            mConnecting = false;
-                            mConnectedAgent = null;
-                        }
-                    }
-
-                    // if we timed out with no connect, abort and move on
-                    if (mConnecting) {
-                        Slog.w(
-                                TAG,
-                                addUserIdToLogMessage(mUserId, "Timeout waiting for agent " + app));
-                        mConnectedAgent = null;
-                    }
-                    if (DEBUG) {
-                        Slog.i(TAG, addUserIdToLogMessage(mUserId, "got agent " + mConnectedAgent));
-                    }
-                    agent = mConnectedAgent;
-                }
-            } catch (RemoteException e) {
-                // can't happen - ActivityManager is local
-            }
-        }
-        if (agent == null) {
-            mActivityManagerInternal.clearPendingBackup(mUserId);
-        }
-        return agent;
-    }
-
-    /** Unbind from a backup agent. */
-    public void unbindAgent(ApplicationInfo app) {
-        try {
-            mActivityManager.unbindBackupAgent(app);
-        } catch (RemoteException e) {
-            // Can't happen - activity manager is local
-        }
-    }
-
     /**
      * Clear an application's data after a failed restore, blocking until the operation completes or
      * times out.
@@ -2493,10 +2407,6 @@ public class UserBackupManagerService {
         AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, mUserId);
     }
 
-    // *****************************
-    // NEW UNIFIED RESTORE IMPLEMENTATION
-    // *****************************
-
     /** Schedule a backup pass for {@code packageName}. */
     public void dataChangedImpl(String packageName) {
         HashSet<String> targets = dataChangedTargets(packageName);
@@ -3120,91 +3030,6 @@ public class UserBackupManagerService {
                         /* caller */"BMS.reportDelayedRestoreResult");
             }
         }
-    }
-
-    /**
-     * Marks the given set of packages as packages that should not be put into restricted mode if
-     * they are started for the given {@link BackupAnnotations.OperationType}.
-     */
-    public void setNoRestrictedModePackages(Set<String> packageNames,
-            @BackupAnnotations.OperationType int opType) {
-        if (opType == BackupAnnotations.OperationType.BACKUP) {
-            mBackupNoRestrictedModePackages.clear();
-            mBackupNoRestrictedModePackages.addAll(packageNames);
-        } else if (opType == BackupAnnotations.OperationType.RESTORE) {
-            mRestoreNoRestrictedModePackages.clear();
-            mRestoreNoRestrictedModePackages.addAll(packageNames);
-        } else {
-            throw new IllegalArgumentException("opType must be BACKUP or RESTORE");
-        }
-    }
-
-    /**
-     * Clears the list of packages that should not be put into restricted mode for either backup or
-     * restore.
-     */
-    public void clearNoRestrictedModePackages() {
-        mBackupNoRestrictedModePackages.clear();
-        mRestoreNoRestrictedModePackages.clear();
-    }
-
-    /**
-     * If the app has specified {@link PackageManager#PROPERTY_USE_RESTRICTED_BACKUP_MODE}, then
-     * its value is returned. If it hasn't and it targets an SDK below
-     * {@link Build.VERSION_CODES#BAKLAVA} then returns true. If it targets a newer SDK, then
-     * returns the decision made by the {@link android.app.backup.BackupTransport}.
-     *
-     * <p>When this method is called, we should have already asked the transport and cached its
-     * response in {@link #mBackupNoRestrictedModePackages} or
-     * {@link #mRestoreNoRestrictedModePackages} so this method will immediately return without
-     * any IPC to the transport.
-     */
-    private boolean shouldUseRestrictedBackupModeForPackage(
-            @BackupAnnotations.OperationType int mode, String packageName) {
-        if (!Flags.enableRestrictedModeChanges()) {
-            return true;
-        }
-
-        // Key/Value apps are never put in restricted mode.
-        if (mode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
-                || mode == ApplicationThreadConstants.BACKUP_MODE_RESTORE) {
-            return false;
-        }
-
-        try {
-            PackageManager.Property property = mPackageManager.getPropertyAsUser(
-                    PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE,
-                    packageName, /* className= */ null,
-                    mUserId);
-            if (property.isBoolean()) {
-                // If the package has explicitly specified, we won't ask the transport.
-                return property.getBoolean();
-            } else {
-                Slog.w(TAG, PackageManager.PROPERTY_USE_RESTRICTED_BACKUP_MODE
-                        + "must be a boolean.");
-            }
-        } catch (NameNotFoundException e) {
-            // This is expected when the package has not defined the property in its manifest.
-        }
-
-        // The package has not specified the property. The behavior depends on the package's
-        // targetSdk.
-        // <36 gets the old behavior of always using restricted mode.
-        if (!CompatChanges.isChangeEnabled(OS_DECIDES_BACKUP_RESTRICTED_MODE, packageName,
-                UserHandle.of(mUserId))) {
-            return true;
-        }
-
-        // Apps targeting >=36 get the behavior decided by the transport.
-        // By this point, we should have asked the transport and cached its decision.
-        if ((mode == ApplicationThreadConstants.BACKUP_MODE_FULL
-                && mBackupNoRestrictedModePackages.contains(packageName))
-                || (mode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL
-                && mRestoreNoRestrictedModePackages.contains(packageName))) {
-            Slog.d(TAG, "Transport requested no restricted mode for: " + packageName);
-            return false;
-        }
-        return true;
     }
 
     private boolean startConfirmationUi(int token, String action) {
@@ -3898,83 +3723,6 @@ public class UserBackupManagerService {
     }
 
     /**
-     * Callback: a requested backup agent has been instantiated. This should only be called from the
-     * {@link ActivityManager}.
-     */
-    public void agentConnected(String packageName, IBinder agentBinder) {
-        synchronized (mAgentConnectLock) {
-            if (Binder.getCallingUid() == Process.SYSTEM_UID) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "agentConnected pkg=" + packageName + " agent=" + agentBinder));
-                mConnectedAgent = IBackupAgent.Stub.asInterface(agentBinder);
-                mConnecting = false;
-            } else {
-                Slog.w(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Non-system process uid="
-                                        + Binder.getCallingUid()
-                                        + " claiming agent connected"));
-            }
-            mAgentConnectLock.notifyAll();
-        }
-    }
-
-    /**
-     * Callback: a backup agent has failed to come up, or has unexpectedly quit. If the agent failed
-     * to come up in the first place, the agentBinder argument will be {@code null}. This should
-     * only be called from the {@link ActivityManager}.
-     */
-    public void agentDisconnected(String packageName) {
-        synchronized (mAgentConnectLock) {
-            if (Binder.getCallingUid() == Process.SYSTEM_UID) {
-                mConnectedAgent = null;
-                mConnecting = false;
-            } else {
-                Slog.w(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Non-system process uid="
-                                        + Binder.getCallingUid()
-                                        + " claiming agent disconnected"));
-            }
-            Slog.w(TAG, "agentDisconnected: the backup agent for " + packageName
-                    + " died: cancel current operations");
-
-            // Offload operation cancellation off the main thread as the cancellation callbacks
-            // might call out to BackupTransport. Other operations started on the same package
-            // before the cancellation callback has executed will also be cancelled by the callback.
-            Runnable cancellationRunnable = () -> {
-                // handleCancel() causes the PerformFullTransportBackupTask to go on to
-                // tearDownAgentAndKill: that will unbindBackupAgent in the Activity Manager, so
-                // that the package being backed up doesn't get stuck in restricted mode until the
-                // backup time-out elapses.
-                for (int token : mOperationStorage.operationTokensForPackage(packageName)) {
-                    if (MORE_DEBUG) {
-                        Slog.d(TAG, "agentDisconnected: will handleCancel(all) for token:"
-                                + Integer.toHexString(token));
-                    }
-                    handleCancel(token, true /* cancelAll */);
-                }
-            };
-            getThreadForAsyncOperation(/* operationName */ "agent-disconnected",
-                    cancellationRunnable).start();
-
-            mAgentConnectLock.notifyAll();
-        }
-    }
-
-    @VisibleForTesting
-    Thread getThreadForAsyncOperation(String operationName, Runnable operation) {
-        return new Thread(operation, operationName);
-    }
-
-    /**
      * An application being installed will need a restore pass, then the {@link PackageManager} will
      * need to be told when the restore is finished.
      */
@@ -4520,5 +4268,9 @@ public class UserBackupManagerService {
 
     public IBackupManager getBackupManagerBinder() {
         return mBackupManagerBinder;
+    }
+
+    public BackupAgentConnectionManager getBackupAgentConnectionManager() {
+        return mBackupAgentConnectionManager;
     }
 }

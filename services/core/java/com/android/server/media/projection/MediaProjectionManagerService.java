@@ -1006,9 +1006,9 @@ public final class MediaProjectionManagerService extends SystemService
         // Host app has 5 minutes to begin using the token before it is invalid.
         // Some apps show a dialog for the user to interact with (selecting recording resolution)
         // before starting capture, but after requesting consent.
-        final long mDefaultTimeoutMs = Duration.ofMinutes(5).toMillis();
+        final long mDefaultTimeoutMillis = Duration.ofMinutes(5).toMillis();
         // The creation timestamp in milliseconds, measured by {@link SystemClock#uptimeMillis}.
-        private final long mCreateTimeMs;
+        private final long mCreateTimeMillis;
         public final int uid;
         public final String packageName;
         public final UserHandle userHandle;
@@ -1017,7 +1017,7 @@ public final class MediaProjectionManagerService extends SystemService
         private final int mType;
         // Values for tracking token validity.
         // Timeout value to compare creation time against.
-        private final long mTimeoutMs = mDefaultTimeoutMs;
+        private final long mTimeoutMillis = mDefaultTimeoutMillis;
         private final int mDisplayId;
 
         private IMediaProjectionCallback mCallback;
@@ -1048,7 +1048,7 @@ public final class MediaProjectionManagerService extends SystemService
             userHandle = new UserHandle(UserHandle.getUserId(uid));
             mTargetSdkVersion = targetSdkVersion;
             mIsPrivileged = isPrivileged;
-            mCreateTimeMs = mClock.uptimeMillis();
+            mCreateTimeMillis = mClock.uptimeMillis();
             mActivityManagerInternal.notifyMediaProjectionEvent(uid, asBinder(),
                     MEDIA_PROJECTION_TOKEN_EVENT_CREATED);
             mDisplayId = displayId;
@@ -1209,7 +1209,7 @@ public final class MediaProjectionManagerService extends SystemService
                     }
                 }
                 Slog.d(TAG, "Content Recording: handling stopping this projection token"
-                        + " createTime= " + mCreateTimeMs
+                        + " createTime= " + mCreateTimeMillis
                         + " countStarts= " + mCountStarts);
                 stopProjectionLocked(this);
                 mToken.unlinkToDeath(mDeathEater, 0);
@@ -1273,7 +1273,7 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         long getCreateTimeMillis() {
-            return mCreateTimeMs;
+            return mCreateTimeMillis;
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
@@ -1281,8 +1281,8 @@ public final class MediaProjectionManagerService extends SystemService
         public boolean isValid() {
             isValid_enforcePermission();
             synchronized (mLock) {
-                final long curMs = mClock.uptimeMillis();
-                final boolean hasTimedOut = curMs - mCreateTimeMs > mTimeoutMs;
+                final long curMillis = mClock.uptimeMillis();
+                final boolean hasTimedOut = curMillis - mCreateTimeMillis > mTimeoutMillis;
                 final boolean virtualDisplayCreated = mVirtualDisplayId != INVALID_DISPLAY;
                 final boolean isValid =
                         !hasTimedOut && (mCountStarts <= 1) && !virtualDisplayCreated;

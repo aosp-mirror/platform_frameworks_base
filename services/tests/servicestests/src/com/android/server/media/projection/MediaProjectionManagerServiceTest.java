@@ -664,7 +664,7 @@ public class MediaProjectionManagerServiceTest {
                 mClockInjector);
         MediaProjectionManagerService.MediaProjection projection = createProjectionPreconditions(
                 service);
-        mClock.fastForward(projection.mDefaultTimeoutMs + 10);
+        mClock.fastForward(projection.mDefaultTimeoutMillis + 10);
 
         // Immediate timeout - so no longer valid.
         assertThat(projection.isValid()).isFalse();

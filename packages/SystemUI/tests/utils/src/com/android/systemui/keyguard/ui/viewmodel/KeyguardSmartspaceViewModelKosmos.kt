@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.keyguard.domain.interactor.keyguardSmartspaceInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.util.mockito.mock
 
 val Kosmos.keyguardSmartspaceViewModel by
@@ -28,5 +29,6 @@ val Kosmos.keyguardSmartspaceViewModel by
             smartspaceController = mock(),
             keyguardClockViewModel = keyguardClockViewModel,
             smartspaceInteractor = keyguardSmartspaceInteractor,
+            shadeInteractor = shadeInteractor,
         )
     }

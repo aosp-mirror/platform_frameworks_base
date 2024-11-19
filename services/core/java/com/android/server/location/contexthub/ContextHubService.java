@@ -326,8 +326,15 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         if (Flags.offloadApi()) {
-            mHubInfoRegistry = new HubInfoRegistry(mContextHubWrapper);
-            Log.i(TAG, "Enabling generic offload API");
+            HubInfoRegistry registry;
+            try {
+                registry = new HubInfoRegistry(mContextHubWrapper);
+                Log.i(TAG, "Enabling generic offload API");
+            } catch (UnsupportedOperationException e) {
+                registry = null;
+                Log.w(TAG, "Generic offload API not supported, disabling");
+            }
+            mHubInfoRegistry = registry;
         } else {
             mHubInfoRegistry = null;
             Log.i(TAG, "Disabling generic offload API");

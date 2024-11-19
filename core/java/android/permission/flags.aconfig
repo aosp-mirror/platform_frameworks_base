@@ -418,3 +418,12 @@ flag {
     description: "Add new checkOp APIs that accept attributionTag"
     bug: "240617242"
 }
+
+flag {
+    name: "device_policy_management_role_split_create_managed_profile_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "enterprise"
+    description: "Gives the device policy management role the ability to create a managed profile using new APIs"
+    bug: "375382324"
+}

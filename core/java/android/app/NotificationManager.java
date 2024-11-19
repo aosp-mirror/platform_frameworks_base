@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.Manifest.permission.POST_NOTIFICATIONS;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.notification.Flags.notificationClassification;
 
 import android.annotation.CallbackExecutor;
@@ -1597,11 +1599,15 @@ public class NotificationManager {
      * Returns whether notifications from the calling package are enabled.
      */
     public boolean areNotificationsEnabled() {
-        INotificationManager service = getService();
-        try {
-            return service.areNotificationsEnabled(mContext.getPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.nmBinderPerfPermissionCheck()) {
+            return mContext.checkSelfPermission(POST_NOTIFICATIONS) == PERMISSION_GRANTED;
+        } else {
+            INotificationManager service = getService();
+            try {
+                return service.areNotificationsEnabled(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 

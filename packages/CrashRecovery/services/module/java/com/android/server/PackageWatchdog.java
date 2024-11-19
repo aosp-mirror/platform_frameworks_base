@@ -218,7 +218,7 @@ public class PackageWatchdog {
     @GuardedBy("sPackageWatchdogLock")
     private static PackageWatchdog sPackageWatchdog;
 
-    private final Object mLock = new Object();
+    private static final Object sLock = new Object();
     // System server context
     private final Context mContext;
     // Handler to run short running tasks
@@ -228,7 +228,7 @@ public class PackageWatchdog {
     // Contains (observer-name -> observer-handle) that have ever been registered from
     // previous boots. Observers with all packages expired are periodically pruned.
     // It is saved to disk on system shutdown and repouplated on startup so it survives reboots.
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private final ArrayMap<String, ObserverInternal> mAllObservers = new ArrayMap<>();
     // File containing the XML data of monitored packages /data/system/package-watchdog.xml
     private final AtomicFile mPolicyFile;
@@ -244,26 +244,26 @@ public class PackageWatchdog {
     private final Set<String> mPackagesExemptFromImpactLevelThreshold = new ArraySet<>();
 
     // The set of packages that have been synced with the ExplicitHealthCheckController
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private Set<String> mRequestedHealthCheckPackages = new ArraySet<>();
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private boolean mIsPackagesReady;
     // Flag to control whether explicit health checks are supported or not
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private boolean mIsHealthCheckEnabled = DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED;
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private int mTriggerFailureDurationMs = DEFAULT_TRIGGER_FAILURE_DURATION_MS;
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private int mTriggerFailureCount = DEFAULT_TRIGGER_FAILURE_COUNT;
     // SystemClock#uptimeMillis when we last executed #syncState
     // 0 if no prune is scheduled.
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private long mUptimeAtLastStateSync;
     // If true, sync explicit health check packages with the ExplicitHealthCheckController.
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private boolean mSyncRequired = false;
 
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private long mLastMitigation = -1000000;
 
     @FunctionalInterface
@@ -303,7 +303,11 @@ public class PackageWatchdog {
         sPackageWatchdog = this;
     }
 
-    /** Creates or gets singleton instance of PackageWatchdog. */
+    /**
+     * Creates or gets singleton instance of PackageWatchdog.
+     *
+     * @param context The system server context.
+     */
     public static  @NonNull PackageWatchdog getInstance(@NonNull Context context) {
         synchronized (sPackageWatchdogLock) {
             if (sPackageWatchdog == null) {
@@ -319,7 +323,7 @@ public class PackageWatchdog {
      * @hide
      */
     public void onPackagesReady() {
-        synchronized (mLock) {
+        synchronized (sLock) {
             mIsPackagesReady = true;
             mHealthCheckController.setCallbacks(packageName -> onHealthCheckPassed(packageName),
                     packages -> onSupportedPackages(packages),
@@ -338,7 +342,7 @@ public class PackageWatchdog {
      * @hide
      */
     public void registerHealthObserver(PackageHealthObserver observer) {
-        synchronized (mLock) {
+        synchronized (sLock) {
             ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
                 internalObserver.registeredObserver = observer;
@@ -405,7 +409,7 @@ public class PackageWatchdog {
         mLongTaskHandler.post(() -> {
             syncState("observing new packages");
 
-            synchronized (mLock) {
+            synchronized (sLock) {
                 ObserverInternal oldObserver = mAllObservers.get(observer.getUniqueIdentifier());
                 if (oldObserver == null) {
                     Slog.d(TAG, observer.getUniqueIdentifier() + " started monitoring health "
@@ -437,7 +441,7 @@ public class PackageWatchdog {
      */
     public void unregisterHealthObserver(PackageHealthObserver observer) {
         mLongTaskHandler.post(() -> {
-            synchronized (mLock) {
+            synchronized (sLock) {
                 mAllObservers.remove(observer.getUniqueIdentifier());
             }
             syncState("unregistering observer: " + observer.getUniqueIdentifier());
@@ -458,7 +462,7 @@ public class PackageWatchdog {
             Slog.w(TAG, "Could not resolve a list of failing packages");
             return;
         }
-        synchronized (mLock) {
+        synchronized (sLock) {
             final long now = mSystemClock.uptimeMillis();
             if (Flags.recoverabilityDetection()) {
                 if (now >= mLastMitigation
@@ -469,7 +473,7 @@ public class PackageWatchdog {
             }
         }
         mLongTaskHandler.post(() -> {
-            synchronized (mLock) {
+            synchronized (sLock) {
                 if (mAllObservers.isEmpty()) {
                     return;
                 }
@@ -569,7 +573,7 @@ public class PackageWatchdog {
                               int currentObserverImpact,
                               int mitigationCount) {
         if (allowMitigations(currentObserverImpact, versionedPackage)) {
-            synchronized (mLock) {
+            synchronized (sLock) {
                 mLastMitigation = mSystemClock.uptimeMillis();
             }
             currentObserverToNotify.onExecuteHealthCheckMitigation(versionedPackage, failureReason,
@@ -599,7 +603,7 @@ public class PackageWatchdog {
      */
     @SuppressWarnings("GuardedBy")
     public void noteBoot() {
-        synchronized (mLock) {
+        synchronized (sLock) {
             // if boot count has reached threshold, start mitigation.
             // We wait until threshold number of restarts only for the first time. Perform
             // mitigations for every restart after that.
@@ -652,7 +656,7 @@ public class PackageWatchdog {
     // This currently adds about 7ms extra to shutdown thread
     /** @hide Writes the package information to file during shutdown. */
     public void writeNow() {
-        synchronized (mLock) {
+        synchronized (sLock) {
             // Must only run synchronous tasks as this runs on the ShutdownThread and no other
             // thread is guaranteed to run during shutdown.
             if (!mAllObservers.isEmpty()) {
@@ -671,7 +675,7 @@ public class PackageWatchdog {
      * passed and the health check service is stopped.
      */
     private void setExplicitHealthCheckEnabled(boolean enabled) {
-        synchronized (mLock) {
+        synchronized (sLock) {
             mIsHealthCheckEnabled = enabled;
             mHealthCheckController.setEnabled(enabled);
             mSyncRequired = true;
@@ -841,7 +845,10 @@ public class PackageWatchdog {
 
         /**
          * Returns {@code true} if this observer wishes to observe the given package, {@code false}
-         * otherwise
+         * otherwise.
+         * Any failing package can be passed on to the observer. Currently the packages that have
+         * ANRs and perform {@link android.service.watchdog.ExplicitHealthCheckService} are being
+         * passed to observers in these API.
          *
          * <p> A persistent observer may choose to start observing certain failing packages, even if
          * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
@@ -853,14 +860,14 @@ public class PackageWatchdog {
 
     @VisibleForTesting
     long getTriggerFailureCount() {
-        synchronized (mLock) {
+        synchronized (sLock) {
             return mTriggerFailureCount;
         }
     }
 
     @VisibleForTesting
     long getTriggerFailureDurationMs() {
-        synchronized (mLock) {
+        synchronized (sLock) {
             return mTriggerFailureDurationMs;
         }
     }
@@ -881,7 +888,7 @@ public class PackageWatchdog {
      */
     private void syncRequests() {
         boolean syncRequired = false;
-        synchronized (mLock) {
+        synchronized (sLock) {
             if (mIsPackagesReady) {
                 Set<String> packages = getPackagesPendingHealthChecksLocked();
                 if (mSyncRequired || !packages.equals(mRequestedHealthCheckPackages)
@@ -918,7 +925,7 @@ public class PackageWatchdog {
         Slog.i(TAG, "Health check passed for package: " + packageName);
         boolean isStateChanged = false;
 
-        synchronized (mLock) {
+        synchronized (sLock) {
             for (int observerIdx = 0; observerIdx < mAllObservers.size(); observerIdx++) {
                 ObserverInternal observer = mAllObservers.valueAt(observerIdx);
                 MonitoredPackage monitoredPackage = observer.getMonitoredPackage(packageName);
@@ -946,7 +953,7 @@ public class PackageWatchdog {
             supportedPackageTimeouts.put(info.getPackageName(), info.getHealthCheckTimeoutMillis());
         }
 
-        synchronized (mLock) {
+        synchronized (sLock) {
             Slog.d(TAG, "Received supported packages " + supportedPackages);
             Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
             while (oit.hasNext()) {
@@ -977,13 +984,13 @@ public class PackageWatchdog {
     }
 
     private void onSyncRequestNotified() {
-        synchronized (mLock) {
+        synchronized (sLock) {
             mSyncRequired = true;
             syncRequestsAsync();
         }
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private Set<String> getPackagesPendingHealthChecksLocked() {
         Set<String> packages = new ArraySet<>();
         Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
@@ -1009,7 +1016,7 @@ public class PackageWatchdog {
      * health check service and schedules the next state sync.
      */
     private void syncState(String reason) {
-        synchronized (mLock) {
+        synchronized (sLock) {
             Slog.i(TAG, "Syncing state, reason: " + reason);
             pruneObserversLocked();
 
@@ -1025,7 +1032,7 @@ public class PackageWatchdog {
         syncState("scheduled");
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private void scheduleNextSyncStateLocked() {
         long durationMs = getNextStateSyncMillisLocked();
         mShortTaskHandler.removeCallbacks(mSyncStateWithScheduledReason);
@@ -1043,7 +1050,7 @@ public class PackageWatchdog {
      *
      * @returns Long#MAX_VALUE if there are no observed packages.
      */
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private long getNextStateSyncMillisLocked() {
         long shortestDurationMs = Long.MAX_VALUE;
         for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
@@ -1064,7 +1071,7 @@ public class PackageWatchdog {
      * Removes {@code elapsedMs} milliseconds from all durations on monitored packages
      * and updates other internal state.
      */
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     private void pruneObserversLocked() {
         long elapsedMs = mUptimeAtLastStateSync == 0
                 ? 0 : mSystemClock.uptimeMillis() - mUptimeAtLastStateSync;
@@ -1092,7 +1099,7 @@ public class PackageWatchdog {
     private void onHealthCheckFailed(ObserverInternal observer,
             Set<MonitoredPackage> failedPackages) {
         mLongTaskHandler.post(() -> {
-            synchronized (mLock) {
+            synchronized (sLock) {
                 PackageHealthObserver registeredObserver = observer.registeredObserver;
                 if (registeredObserver != null) {
                     Iterator<MonitoredPackage> it = failedPackages.iterator();
@@ -1201,7 +1208,7 @@ public class PackageWatchdog {
      */
     @VisibleForTesting
     void updateConfigs() {
-        synchronized (mLock) {
+        synchronized (sLock) {
             mTriggerFailureCount = DeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_ROLLBACK,
                     PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
@@ -1230,7 +1237,7 @@ public class PackageWatchdog {
      */
     private boolean saveToFile() {
         Slog.i(TAG, "Saving observer state to file");
-        synchronized (mLock) {
+        synchronized (sLock) {
             FileOutputStream stream;
             try {
                 stream = mPolicyFile.startWrite();
@@ -1297,20 +1304,38 @@ public class PackageWatchdog {
 
     /** Dump status of every observer in mAllObservers. */
     public void dump(@NonNull PrintWriter pw) {
-        if (Flags.synchronousRebootInRescueParty() && RescueParty.isRecoveryTriggeredReboot()) {
+        if (Flags.synchronousRebootInRescueParty() && isRecoveryTriggeredReboot()) {
             dumpInternal(pw);
         } else {
-            synchronized (mLock) {
+            synchronized (sLock) {
                 dumpInternal(pw);
             }
         }
+    }
+
+    /**
+     * Check if we're currently attempting to reboot during mitigation. This method must return
+     * true if triggered reboot early during a boot loop, since the device will not be fully booted
+     * at this time.
+     * @hide
+     */
+    public static boolean isRecoveryTriggeredReboot() {
+        return isFactoryResetPropertySet() || isRebootPropertySet();
+    }
+
+    private static boolean isFactoryResetPropertySet() {
+        return CrashRecoveryProperties.attemptingFactoryReset().orElse(false);
+    }
+
+    private static boolean isRebootPropertySet() {
+        return CrashRecoveryProperties.attemptingReboot().orElse(false);
     }
 
     private void dumpInternal(@NonNull PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println("Package Watchdog status");
         ipw.increaseIndent();
-        synchronized (mLock) {
+        synchronized (sLock) {
             for (String observerName : mAllObservers.keySet()) {
                 ipw.println("Observer name: " + observerName);
                 ipw.increaseIndent();
@@ -1324,7 +1349,7 @@ public class PackageWatchdog {
     }
 
     @VisibleForTesting
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     void registerObserverInternal(ObserverInternal observerInternal) {
         mAllObservers.put(observerInternal.name, observerInternal);
     }
@@ -1333,15 +1358,15 @@ public class PackageWatchdog {
      * Represents an observer monitoring a set of packages along with the failure thresholds for
      * each package.
      *
-     * <p> Note, the PackageWatchdog#mLock must always be held when reading or writing
+     * <p> Note, the PackageWatchdog#sLock must always be held when reading or writing
      * instances of this class.
      */
     static class ObserverInternal {
         public final String name;
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private final ArrayMap<String, MonitoredPackage> mPackages = new ArrayMap<>();
         @Nullable
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public PackageHealthObserver registeredObserver;
         private int mMitigationCount;
 
@@ -1359,7 +1384,7 @@ public class PackageWatchdog {
          * Writes important {@link MonitoredPackage} details for this observer to file.
          * Does not persist any package failure thresholds.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public boolean writeLocked(XmlSerializer out) {
             try {
                 out.startTag(null, TAG_OBSERVER);
@@ -1387,7 +1412,7 @@ public class PackageWatchdog {
             mMitigationCount = mitigationCount;
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public void updatePackagesLocked(List<MonitoredPackage> packages) {
             for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
                 MonitoredPackage p = packages.get(pIndex);
@@ -1410,7 +1435,7 @@ public class PackageWatchdog {
          * health check passing, or an empty list if no package expired for which an explicit health
          * check was still pending
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private Set<MonitoredPackage> prunePackagesLocked(long elapsedMs) {
             Set<MonitoredPackage> failedPackages = new ArraySet<>();
             Iterator<MonitoredPackage> it = mPackages.values().iterator();
@@ -1435,7 +1460,7 @@ public class PackageWatchdog {
          * @returns {@code true} if failure threshold is exceeded, {@code false} otherwise
          * @hide
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public boolean onPackageFailureLocked(String packageName) {
             if (getMonitoredPackage(packageName) == null && registeredObserver.isPersistent()
                     && registeredObserver.mayObservePackage(packageName)) {
@@ -1454,7 +1479,7 @@ public class PackageWatchdog {
          *
          * @return a mapping of package names to {@link MonitoredPackage} objects.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public ArrayMap<String, MonitoredPackage> getMonitoredPackages() {
             return mPackages;
         }
@@ -1467,7 +1492,7 @@ public class PackageWatchdog {
          * @return the {@link MonitoredPackage} object associated with the package name if one
          *         exists, {@code null} otherwise.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         @Nullable
         public MonitoredPackage getMonitoredPackage(String packageName) {
             return mPackages.get(packageName);
@@ -1478,7 +1503,7 @@ public class PackageWatchdog {
          *
          * @param p: the {@link MonitoredPackage} to store.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public void putMonitoredPackage(MonitoredPackage p) {
             mPackages.put(p.getName(), p);
         }
@@ -1601,17 +1626,17 @@ public class PackageWatchdog {
      * Represents a package and its health check state along with the time
      * it should be monitored for.
      *
-     * <p> Note, the PackageWatchdog#mLock must always be held when reading or writing
+     * <p> Note, the PackageWatchdog#sLock must always be held when reading or writing
      * instances of this class.
      */
     class MonitoredPackage {
         private final String mPackageName;
         // Times when package failures happen sorted in ascending order
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private final LongArrayQueue mFailureHistory = new LongArrayQueue();
         // Times when an observer was called to mitigate this package's failure. Sorted in
         // ascending order.
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private final LongArrayQueue mMitigationCalls;
         // One of STATE_[ACTIVE|INACTIVE|PASSED|FAILED]. Updated on construction and after
         // methods that could change the health check state: handleElapsedTimeLocked and
@@ -1620,17 +1645,17 @@ public class PackageWatchdog {
         // Whether an explicit health check has passed.
         // This value in addition with mHealthCheckDurationMs determines the health check state
         // of the package, see #getHealthCheckStateLocked
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private boolean mHasPassedHealthCheck;
         // System uptime duration to monitor package.
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private long mDurationMs;
         // System uptime duration to check the result of an explicit health check
         // Initially, MAX_VALUE until we get a value from the health check service
         // and request health checks.
         // This value in addition with mHasPassedHealthCheck determines the health check state
         // of the package, see #getHealthCheckStateLocked
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private long mHealthCheckDurationMs = Long.MAX_VALUE;
 
         MonitoredPackage(String packageName, long durationMs,
@@ -1647,7 +1672,7 @@ public class PackageWatchdog {
         /** Writes the salient fields to disk using {@code out}.
          * @hide
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public void writeLocked(XmlSerializer out) throws IOException {
             out.startTag(null, TAG_PACKAGE);
             out.attribute(null, ATTR_NAME, getName());
@@ -1665,7 +1690,7 @@ public class PackageWatchdog {
          *
          * @return {@code true} if failure count exceeds a threshold, {@code false} otherwise
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public boolean onFailureLocked() {
             // Sliding window algorithm: find out if there exists a window containing failures >=
             // mTriggerFailureCount.
@@ -1685,7 +1710,7 @@ public class PackageWatchdog {
         /**
          * Notes the timestamp of a mitigation call into the observer.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public void noteMitigationCallLocked() {
             mMitigationCalls.addLast(mSystemClock.uptimeMillis());
         }
@@ -1696,7 +1721,7 @@ public class PackageWatchdog {
          *
          * @return the number of mitigation calls made in the de-escalation window.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public int getMitigationCountLocked() {
             try {
                 final long now = mSystemClock.uptimeMillis();
@@ -1716,7 +1741,7 @@ public class PackageWatchdog {
          *
          * @return a LongArrayQueue of the mitigation calls relative to the current system uptime.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public LongArrayQueue normalizeMitigationCalls() {
             LongArrayQueue normalized = new LongArrayQueue();
             final long now = mSystemClock.uptimeMillis();
@@ -1731,7 +1756,7 @@ public class PackageWatchdog {
          *
          * @return the new health check state
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public int setHealthCheckActiveLocked(long initialHealthCheckDurationMs) {
             if (initialHealthCheckDurationMs <= 0) {
                 Slog.wtf(TAG, "Cannot set non-positive health check duration "
@@ -1751,7 +1776,7 @@ public class PackageWatchdog {
          *
          * @return the new health check state
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public int handleElapsedTimeLocked(long elapsedMs) {
             if (elapsedMs <= 0) {
                 Slog.w(TAG, "Cannot handle non-positive elapsed time for package " + getName());
@@ -1769,7 +1794,7 @@ public class PackageWatchdog {
         }
 
         /** Explicitly update the monitoring duration of the package. */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public void updateHealthCheckDuration(long newDurationMs) {
             mDurationMs = newDurationMs;
         }
@@ -1780,7 +1805,7 @@ public class PackageWatchdog {
          *
          * @return the new {@link HealthCheckState health check state}
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         @HealthCheckState
         public int tryPassHealthCheckLocked() {
             if (mHealthCheckState != HealthCheckState.FAILED) {
@@ -1799,7 +1824,7 @@ public class PackageWatchdog {
         /**
          * Returns the current {@link HealthCheckState health check state}.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         @HealthCheckState
         public int getHealthCheckStateLocked() {
             return mHealthCheckState;
@@ -1810,7 +1835,7 @@ public class PackageWatchdog {
          *
          * @return the duration or {@link Long#MAX_VALUE} if the package should not be scheduled
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public long getShortestScheduleDurationMsLocked() {
             // Consider health check duration only if #isPendingHealthChecksLocked is true
             return Math.min(toPositive(mDurationMs),
@@ -1822,7 +1847,7 @@ public class PackageWatchdog {
          * Returns {@code true} if the total duration left to monitor the package is less than or
          * equal to 0 {@code false} otherwise.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public boolean isExpiredLocked() {
             return mDurationMs <= 0;
         }
@@ -1831,7 +1856,7 @@ public class PackageWatchdog {
          * Returns {@code true} if the package, {@link #getName} is expecting health check results
          * {@code false} otherwise.
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public boolean isPendingHealthChecksLocked() {
             return mHealthCheckState == HealthCheckState.ACTIVE
                     || mHealthCheckState == HealthCheckState.INACTIVE;
@@ -1843,7 +1868,7 @@ public class PackageWatchdog {
          *
          * @return the new {@link HealthCheckState health check state}
          */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         @HealthCheckState
         private int updateHealthCheckStateLocked() {
             int oldState = mHealthCheckState;
@@ -1898,7 +1923,7 @@ public class PackageWatchdog {
         }
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("sLock")
     @SuppressWarnings("GuardedBy")
     void saveAllObserversBootMitigationCountToMetadata(String filePath) {
         HashMap<String, Integer> bootMitigationCounts = new HashMap<>();
@@ -2001,7 +2026,7 @@ public class PackageWatchdog {
 
 
         /** Increments the boot counter, and returns whether the device is bootlooping. */
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         public boolean incrementAndTest() {
             if (Flags.recoverabilityDetection()) {
                 readAllObserversBootMitigationCountIfNecessary(METADATA_FILE);
@@ -2042,7 +2067,7 @@ public class PackageWatchdog {
             }
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private boolean performedMitigationsDuringWindow() {
             for (ObserverInternal observerInternal: mAllObservers.values()) {
                 if (observerInternal.getBootMitigationCount() > 0) {
@@ -2052,7 +2077,7 @@ public class PackageWatchdog {
             return false;
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         private void resetAllObserversBootMitigationCount() {
             for (int i = 0; i < mAllObservers.size(); i++) {
                 final ObserverInternal observer = mAllObservers.valueAt(i);
@@ -2061,7 +2086,7 @@ public class PackageWatchdog {
             saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
         }
 
-        @GuardedBy("mLock")
+        @GuardedBy("sLock")
         @SuppressWarnings("GuardedBy")
         void readAllObserversBootMitigationCountIfNecessary(String filePath) {
             File metadataFile = new File(filePath);
