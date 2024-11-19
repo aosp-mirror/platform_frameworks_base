@@ -4863,7 +4863,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
-    public void testCameraCompatAspectRatio_defualtAspectRatioAppliedWhenGreater() {
+    public void testCameraCompatAspectRatio_defaultAspectRatioAppliedWhenGreater() {
         // Needed to create camera compat policy in DisplayContent.
         allowDesktopMode();
         // Create display that has all stable insets and does not rotate.
