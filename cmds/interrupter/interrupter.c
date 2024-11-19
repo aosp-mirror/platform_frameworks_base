@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define _GNU_SOURCE
 
 /**
  * The probability of a syscall failing from 0.0 to 1.0
@@ -32,8 +33,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-/* For builds on glibc */
-#define __USE_GNU
 #include <dlfcn.h>
 
 #include "interrupter.h"
