@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -57,8 +59,9 @@ public class ZIndexModifierOperation extends DecoratorModifierOperation {
         serializer.append(indent, "ZINDEX = [" + mValue + "]");
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 

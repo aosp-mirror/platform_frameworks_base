@@ -19,6 +19,7 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -53,7 +54,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     float mSpacedBy = 0f;
 
     public ColumnLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -70,7 +71,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     public ColumnLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             int horizontalPositioning,
@@ -121,7 +122,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
 
     @Override
     public void computeWrapSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
             @NonNull MeasurePass measure,
@@ -145,7 +146,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
 
     @Override
     public void computeSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float minWidth,
             float maxWidth,
             float minHeight,
@@ -164,7 +165,17 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context, @NonNull MeasurePass measure) {
+    public float intrinsicHeight() {
+        float height = computeModifierDefinedHeight();
+        float componentHeights = 0f;
+        for (Component c : mChildrenComponents) {
+            componentHeights += c.intrinsicHeight();
+        }
+        return Math.max(height, componentHeights);
+    }
+
+    @Override
+    public void internalLayoutMeasure(@NonNull PaintContext context, @NonNull MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         DebugLog.s(
                 () ->
@@ -188,6 +199,16 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         float childrenWidth = 0f;
         float childrenHeight = 0f;
 
+        if (mComponentModifiers.hasHorizontalScroll()) {
+            selfWidth =
+                    mComponentModifiers.getHorizontalScrollDimension()
+                            - mPaddingLeft
+                            - mPaddingRight;
+        }
+        if (mComponentModifiers.hasVerticalScroll()) {
+            selfHeight =
+                    mComponentModifiers.getVerticalScrollDimension() - mPaddingTop - mPaddingBottom;
+        }
         boolean hasWeights = false;
         float totalWeights = 0f;
         for (Component child : mChildrenComponents) {
@@ -286,6 +307,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                 ty = verticalGap / 2f;
                 break;
         }
+
         for (Component child : mChildrenComponents) {
             ComponentMeasure childMeasure = measure.get(child);
             switch (mHorizontalPositioning) {

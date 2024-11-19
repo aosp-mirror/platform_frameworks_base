@@ -60,11 +60,11 @@ public abstract class DrawBase2 extends PaintOperation implements VariableSuppor
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         write(buffer, mV1, mV2);
     }
 
-    protected abstract void write(WireBuffer buffer, float v1, float v2);
+    protected abstract void write(@NonNull WireBuffer buffer, float v1, float v2);
 
     protected interface Maker {
         DrawBase2 create(float v1, float v2);

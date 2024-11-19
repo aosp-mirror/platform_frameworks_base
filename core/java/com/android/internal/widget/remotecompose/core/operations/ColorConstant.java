@@ -93,7 +93,7 @@ public class ColorConstant implements Operation {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

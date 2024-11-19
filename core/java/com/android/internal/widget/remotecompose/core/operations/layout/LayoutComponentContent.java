@@ -18,6 +18,7 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -35,7 +36,7 @@ public class LayoutComponentContent extends Component implements ComponentStartO
             float y,
             float width,
             float height,
-            Component parent,
+            @Nullable Component parent,
             int animationId) {
         super(parent, componentId, animationId, x, y, width, height);
     }

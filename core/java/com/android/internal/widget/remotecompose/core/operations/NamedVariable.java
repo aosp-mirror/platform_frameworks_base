@@ -33,16 +33,16 @@ import java.util.List;
 public class NamedVariable implements Operation {
     private static final int OP_CODE = Operations.NAMED_VARIABLE;
     private static final String CLASS_NAME = "NamedVariable";
-    public int mVarId;
-    public String mVarName;
-    public int mVarType;
+    public final int mVarId;
+    public final @NonNull String mVarName;
+    public final int mVarType;
     public static final int MAX_STRING_SIZE = 4000;
     public static final int COLOR_TYPE = 2;
     public static final int FLOAT_TYPE = 1;
     public static final int STRING_TYPE = 0;
     public static final int IMAGE_TYPE = 3;
 
-    public NamedVariable(int varId, int varType, String name) {
+    public NamedVariable(int varId, int varType, @NonNull String name) {
         this.mVarId = varId;
         this.mVarType = varType;
         this.mVarName = name;
@@ -111,7 +111,7 @@ public class NamedVariable implements Operation {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

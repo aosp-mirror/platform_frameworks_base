@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
+import android.annotation.NonNull;
+
 public interface DocumentedCompanionOperation {
-    void documentation(DocumentationBuilder doc);
+    void documentation(@NonNull DocumentationBuilder doc);
 }

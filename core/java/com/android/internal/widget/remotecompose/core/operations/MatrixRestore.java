@@ -37,7 +37,7 @@ public class MatrixRestore extends PaintOperation {
         apply(buffer);
     }
 
-    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         MatrixRestore op = new MatrixRestore();
         operations.add(op);
     }

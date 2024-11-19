@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
@@ -25,8 +28,8 @@ import java.util.Arrays;
 
 /** Paint Bundle represents a delta of changes to a paint object */
 public class PaintBundle {
-    int[] mArray = new int[200];
-    int[] mOutArray = null;
+    @NonNull int[] mArray = new int[200];
+    @Nullable int[] mOutArray = null;
     int mPos = 0;
 
     /**
@@ -35,7 +38,7 @@ public class PaintBundle {
      * @param paintContext
      * @param p
      */
-    public void applyPaintChange(PaintContext paintContext, PaintChanges p) {
+    public void applyPaintChange(@NonNull PaintContext paintContext, @NonNull PaintChanges p) {
         int i = 0;
         int mask = 0;
         if (mOutArray == null) {
@@ -138,12 +141,14 @@ public class PaintBundle {
     //        return "????" + id + "????";
     //    }
 
+    @NonNull
     private static String colorInt(int color) {
         String str = "000000000000" + Integer.toHexString(color);
         return "0x" + str.substring(str.length() - 8);
     }
 
-    private static String colorInt(int[] color) {
+    @NonNull
+    private static String colorInt(@NonNull int[] color) {
         String str = "[";
         for (int i = 0; i < color.length; i++) {
             if (i > 0) {
@@ -162,6 +167,7 @@ public class PaintBundle {
         return Float.toString(fValue);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder("\n");
@@ -244,7 +250,8 @@ public class PaintBundle {
         return ret.toString();
     }
 
-    private void registerFloat(int iv, RemoteContext context, VariableSupport support) {
+    private void registerFloat(
+            int iv, @NonNull RemoteContext context, @NonNull VariableSupport support) {
         float v = Float.intBitsToFloat(iv);
         if (Float.isNaN(v)) {
             context.listensTo(Utils.idFromNan(v), support);
@@ -252,7 +259,11 @@ public class PaintBundle {
     }
 
     int callRegisterGradient(
-            int cmd, int[] array, int i, RemoteContext context, VariableSupport support) {
+            int cmd,
+            int[] array,
+            int i,
+            @NonNull RemoteContext context,
+            @NonNull VariableSupport support) {
         int ret = i;
         int type = (cmd >> 16);
         int control = array[ret++];
@@ -343,7 +354,7 @@ public class PaintBundle {
         return ret;
     }
 
-    int callPrintGradient(int cmd, int[] array, int i, StringBuilder p) {
+    int callPrintGradient(int cmd, int[] array, int i, @NonNull StringBuilder p) {
         int ret = i;
         int type = (cmd >> 16);
         int tileMode = 0;
@@ -432,7 +443,7 @@ public class PaintBundle {
         return ret;
     }
 
-    int callSetGradient(int cmd, int[] array, int i, PaintChanges p) {
+    int callSetGradient(int cmd, @NonNull int[] array, int i, @NonNull PaintChanges p) {
         int ret = i;
         int gradientType = (cmd >> 16);
 
@@ -487,14 +498,14 @@ public class PaintBundle {
         return ret;
     }
 
-    public void writeBundle(WireBuffer buffer) {
+    public void writeBundle(@NonNull WireBuffer buffer) {
         buffer.writeInt(mPos);
         for (int index = 0; index < mPos; index++) {
             buffer.writeInt(mArray[index]);
         }
     }
 
-    public void readBundle(WireBuffer buffer) {
+    public void readBundle(@NonNull WireBuffer buffer) {
         int len = buffer.readInt();
         if (len <= 0 || len > 1024) {
             throw new RuntimeException("buffer corrupt paint len = " + len);
@@ -589,9 +600,9 @@ public class PaintBundle {
      * @param tileMode The Shader tiling mode
      */
     public void setLinearGradient(
-            int[] colors,
+            @NonNull int[] colors,
             int idMask,
-            float[] stops,
+            @Nullable float[] stops,
             float startX,
             float startY,
             float endX,
@@ -600,7 +611,7 @@ public class PaintBundle {
         //        int startPos = mPos;
         int len;
         mArray[mPos++] = GRADIENT | (LINEAR_GRADIENT << 16);
-        mArray[mPos++] = (idMask << 16) | (len = (colors == null) ? 0 : colors.length);
+        mArray[mPos++] = (idMask << 16) | (len = colors.length);
         for (int i = 0; i < len; i++) {
             mArray[mPos++] = colors[i];
         }
@@ -629,7 +640,12 @@ public class PaintBundle {
      *     spaced evenly.
      */
     public void setSweepGradient(
-            int[] colors, int idMask, float[] stops, float centerX, float centerY) {
+            @NonNull int[] colors,
+            int idMask,
+            @Nullable float[] stops, // TODO: rename positions to stops or stops to positions, but
+            // don't have both in the same file
+            float centerX,
+            float centerY) {
         int len;
         mArray[mPos++] = GRADIENT | (SWEEP_GRADIENT << 16);
         mArray[mPos++] = (idMask << 16) | (len = (colors == null) ? 0 : colors.length);
@@ -659,9 +675,9 @@ public class PaintBundle {
      * @param tileMode The Shader tiling mode
      */
     public void setRadialGradient(
-            int[] colors,
+            @NonNull int[] colors,
             int idMask,
-            float[] stops,
+            @Nullable float[] stops,
             float centerX,
             float centerY,
             float radius,
@@ -900,7 +916,7 @@ public class PaintBundle {
         mPos = 0;
     }
 
-    public static String blendModeString(int mode) {
+    public static @NonNull String blendModeString(int mode) {
         switch (mode) {
             case PaintBundle.BLEND_MODE_CLEAR:
                 return "CLEAR";
@@ -974,7 +990,7 @@ public class PaintBundle {
      * @param context
      * @param support
      */
-    public void registerVars(RemoteContext context, VariableSupport support) {
+    public void registerVars(@NonNull RemoteContext context, @NonNull VariableSupport support) {
         int i = 0;
         while (i < mPos) {
             int cmd = mArray[i++];
@@ -1020,7 +1036,7 @@ public class PaintBundle {
      *
      * @param context
      */
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         if (mOutArray == null) {
             mOutArray = Arrays.copyOf(mArray, mArray.length);
         } else {
@@ -1066,7 +1082,7 @@ public class PaintBundle {
         }
     }
 
-    private int fixFloatVar(int val, RemoteContext context) {
+    private int fixFloatVar(int val, @NonNull RemoteContext context) {
         float v = Float.intBitsToFloat(val);
         if (Float.isNaN(v)) {
             int id = Utils.idFromNan(v);
@@ -1075,12 +1091,13 @@ public class PaintBundle {
         return val;
     }
 
-    private int fixColor(int colorId, RemoteContext context) {
+    private int fixColor(int colorId, @NonNull RemoteContext context) {
         int n = context.getColor(colorId);
         return n;
     }
 
-    int updateFloatsInGradient(int cmd, int[] out, int[] array, int i, RemoteContext context) {
+    int updateFloatsInGradient(
+            int cmd, int[] out, int[] array, int i, @NonNull RemoteContext context) {
         int ret = i;
         int type = (cmd >> 16);
         int control = array[ret++];

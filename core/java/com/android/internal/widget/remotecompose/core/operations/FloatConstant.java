@@ -94,7 +94,7 @@ public class FloatConstant implements com.android.internal.widget.remotecompose.
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }
