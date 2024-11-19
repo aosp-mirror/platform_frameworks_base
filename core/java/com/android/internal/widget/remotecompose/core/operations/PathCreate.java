@@ -15,14 +15,15 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT_ARRAY;
-import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
+import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
@@ -32,16 +33,16 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.Arrays;
 import java.util.List;
 
-public class PathData extends Operation implements VariableSupport {
-    private static final int OP_CODE = Operations.DATA_PATH;
-    private static final String CLASS_NAME = "PathData";
+public class PathCreate extends PaintOperation implements VariableSupport {
+    private static final int OP_CODE = Operations.PATH_CREATE;
+    private static final String CLASS_NAME = "PathCreate";
     int mInstanceId;
     float[] mFloatPath;
     float[] mOutputPath;
 
-    PathData(int instanceId, float[] floatPath) {
+    PathCreate(int instanceId, float startX, float startY) {
         mInstanceId = instanceId;
-        mFloatPath = floatPath;
+        mFloatPath = new float[] {PathData.MOVE_NAN, startX, startY};
         mOutputPath = Arrays.copyOf(mFloatPath, mFloatPath.length);
     }
 
@@ -68,31 +69,22 @@ public class PathData extends Operation implements VariableSupport {
 
     @Override
     public void write(@NonNull WireBuffer buffer) {
-        apply(buffer, mInstanceId, mOutputPath);
+        apply(buffer, mInstanceId, mFloatPath[1], mFloatPath[2]);
     }
 
     @NonNull
     @Override
-    public String deepToString(@NonNull String indent) {
+    public String deepToString(String indent) {
         return pathString(mFloatPath);
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "PathData[" + mInstanceId + "] = " + "\"" + deepToString(" ") + "\"";
+        return "PathCreate[" + mInstanceId + "] = " + "\"" + deepToString(" ") + "\"";
     }
 
-    /**
-     * public float[] getFloatPath(PaintContext context) { float[] ret = mRetFloats; // Assume
-     * retFloats is declared elsewhere if (ret == null) { return mFloatPath; // Assume floatPath is
-     * declared elsewhere } float[] localRef = mRef; // Assume ref is of type Float[] if (localRef
-     * == null) { for (int i = 0; i < mFloatPath.length; i++) { ret[i] = mFloatPath[i]; } } else {
-     * for (int i = 0; i < mFloatPath.length; i++) { float lr = localRef[i]; if (Float.isNaN(lr)) {
-     * ret[i] = Utils.getActualValue(lr); } else { ret[i] = mFloatPath[i]; } } } return ret; }
-     */
     public static final int MOVE = 10;
-
     public static final int LINE = 11;
     public static final int QUADRATIC = 12;
     public static final int CONIC = 13;
@@ -121,13 +113,11 @@ public class PathData extends Operation implements VariableSupport {
         return OP_CODE;
     }
 
-    public static void apply(@NonNull WireBuffer buffer, int id, @NonNull float[] data) {
-        buffer.start(Operations.DATA_PATH);
+    public static void apply(@NonNull WireBuffer buffer, int id, float startX, float startY) {
+        buffer.start(OP_CODE);
         buffer.writeInt(id);
-        buffer.writeInt(data.length);
-        for (float datum : data) {
-            buffer.writeFloat(datum);
-        }
+        buffer.writeFloat(startX);
+        buffer.writeFloat(startY);
     }
 
     /**
@@ -137,13 +127,11 @@ public class PathData extends Operation implements VariableSupport {
      * @param operations the list of operations that will be added to
      */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
-        int imageId = buffer.readInt();
-        int len = buffer.readInt();
-        float[] data = new float[len];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = buffer.readFloat();
-        }
-        operations.add(new PathData(imageId, data));
+
+        int id = buffer.readInt();
+        float startX = buffer.readFloat();
+        float startY = buffer.readFloat();
+        operations.add(new PathCreate(id, startX, startY));
     }
 
     /**
@@ -154,17 +142,11 @@ public class PathData extends Operation implements VariableSupport {
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a Path ")
-                .field(DocumentedOperation.INT, "id", "id string")
-                .field(INT, "length", "id string")
-                .field(FLOAT_ARRAY, "pathData", "length", "path encoded as floats");
+                .field(DocumentedOperation.INT, "id", "id of path")
+                .field(FLOAT, "startX", "initial start x")
+                .field(FLOAT, "startX", "initial start y");
     }
 
-    /**
-     * Render a path as a string
-     *
-     * @param path path as a array of floats
-     * @return string describing the path
-     */
     @NonNull
     public static String pathString(@Nullable float[] path) {
         if (path == null) {
@@ -213,6 +195,9 @@ public class PathData extends Operation implements VariableSupport {
         }
         return str.toString();
     }
+
+    @Override
+    public void paint(PaintContext context) {}
 
     @Override
     public void apply(@NonNull RemoteContext context) {

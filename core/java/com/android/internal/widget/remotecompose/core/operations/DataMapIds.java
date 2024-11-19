@@ -31,7 +31,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.DataM
 import java.util.List;
 
 /** This is a map of strings to type & Id */
-public class DataMapIds implements Operation {
+public class DataMapIds extends Operation {
     private static final int OP_CODE = Operations.ID_MAP;
     private static final String CLASS_NAME = "DataMapIds";
     int mId;
@@ -105,6 +105,12 @@ public class DataMapIds implements Operation {
         }
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();

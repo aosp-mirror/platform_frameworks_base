@@ -29,12 +29,22 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Operation that defines a simple Color based on ID Mainly for colors in theming. */
-public class ColorConstant implements Operation {
+public class ColorConstant extends Operation {
     private static final int OP_CODE = Operations.COLOR_CONSTANT;
     private static final String CLASS_NAME = "ColorConstant";
+
+    /** the id of the color */
     public int mColorId;
+
+    /** the color value (AARRGGBB) */
     public int mColor;
 
+    /**
+     * Creat a color constant
+     *
+     * @param colorId id of color
+     * @param color AARRGGBB value
+     */
     public ColorConstant(int colorId, int color) {
         this.mColorId = colorId;
         this.mColor = color;
@@ -56,6 +66,11 @@ public class ColorConstant implements Operation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -73,12 +88,23 @@ public class ColorConstant implements Operation {
         buffer.writeInt(color);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int colorId = buffer.readInt();
         int color = buffer.readInt();
         operations.add(new ColorConstant(colorId, color));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Define a Color")

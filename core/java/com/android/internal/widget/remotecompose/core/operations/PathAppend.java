@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
+import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
@@ -32,14 +34,14 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.Arrays;
 import java.util.List;
 
-public class PathData extends Operation implements VariableSupport {
-    private static final int OP_CODE = Operations.DATA_PATH;
-    private static final String CLASS_NAME = "PathData";
+public class PathAppend extends PaintOperation implements VariableSupport {
+    private static final int OP_CODE = Operations.PATH_ADD;
+    private static final String CLASS_NAME = "PathAppend";
     int mInstanceId;
     float[] mFloatPath;
     float[] mOutputPath;
 
-    PathData(int instanceId, float[] floatPath) {
+    PathAppend(int instanceId, float[] floatPath) {
         mInstanceId = instanceId;
         mFloatPath = floatPath;
         mOutputPath = Arrays.copyOf(mFloatPath, mFloatPath.length);
@@ -73,14 +75,14 @@ public class PathData extends Operation implements VariableSupport {
 
     @NonNull
     @Override
-    public String deepToString(@NonNull String indent) {
-        return pathString(mFloatPath);
+    public String deepToString(String indent) {
+        return PathData.pathString(mFloatPath);
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "PathData[" + mInstanceId + "] = " + "\"" + deepToString(" ") + "\"";
+        return "PathAppend[" + mInstanceId + "] += " + "\"" + pathString(mOutputPath) + "\"";
     }
 
     /**
@@ -122,7 +124,7 @@ public class PathData extends Operation implements VariableSupport {
     }
 
     public static void apply(@NonNull WireBuffer buffer, int id, @NonNull float[] data) {
-        buffer.start(Operations.DATA_PATH);
+        buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(data.length);
         for (float datum : data) {
@@ -137,13 +139,13 @@ public class PathData extends Operation implements VariableSupport {
      * @param operations the list of operations that will be added to
      */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
-        int imageId = buffer.readInt();
+        int id = buffer.readInt();
         int len = buffer.readInt();
         float[] data = new float[len];
         for (int i = 0; i < data.length; i++) {
             data[i] = buffer.readFloat();
         }
-        operations.add(new PathData(imageId, data));
+        operations.add(new PathAppend(id, data));
     }
 
     /**
@@ -153,18 +155,35 @@ public class PathData extends Operation implements VariableSupport {
      */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
-                .description("Encode a Path ")
+                .description("Append to a Path")
                 .field(DocumentedOperation.INT, "id", "id string")
                 .field(INT, "length", "id string")
                 .field(FLOAT_ARRAY, "pathData", "length", "path encoded as floats");
     }
 
-    /**
-     * Render a path as a string
-     *
-     * @param path path as a array of floats
-     * @return string describing the path
-     */
+    @Override
+    public void paint(PaintContext context) {}
+
+    @Override
+    public void apply(@NonNull RemoteContext context) {
+        updateVariables(context);
+        float[] data = context.getPathData(mInstanceId);
+        float[] out = mOutputPath;
+        if (data != null) {
+            out = new float[data.length + mOutputPath.length];
+
+            for (int i = 0; i < data.length; i++) {
+                out[i] = data[i];
+            }
+            for (int i = 0; i < mOutputPath.length; i++) {
+                out[i + data.length] = mOutputPath[i];
+            }
+        } else {
+            System.out.println(">>>>>>>>>>> DATA IS NULL");
+        }
+        context.loadPathData(mInstanceId, out);
+    }
+
     @NonNull
     public static String pathString(@Nullable float[] path) {
         if (path == null) {
@@ -172,9 +191,6 @@ public class PathData extends Operation implements VariableSupport {
         }
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < path.length; i++) {
-            if (i != 0) {
-                str.append(" ");
-            }
             if (Float.isNaN(path[i])) {
                 int id = Utils.idFromNan(path[i]); // Assume idFromNan is defined elsewhere
                 if (id <= DONE) { // Assume DONE is a constant
@@ -207,15 +223,8 @@ public class PathData extends Operation implements VariableSupport {
                 } else {
                     str.append("(" + id + ")");
                 }
-            } else {
-                str.append(path[i]);
             }
         }
         return str.toString();
-    }
-
-    @Override
-    public void apply(@NonNull RemoteContext context) {
-        context.loadPathData(mInstanceId, mOutputPath);
     }
 }

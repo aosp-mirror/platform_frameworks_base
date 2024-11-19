@@ -31,6 +31,11 @@ package com.android.internal.widget.remotecompose.core.operations.utilities.touc
  * limitations under the License.
  */
 
+/**
+ * This computes an form of easing such that the values constrained to be consistent in velocity The
+ * easing function is also constrained by the configure To have: a maximum time to stop, a maximum
+ * velocity, a maximum acceleration
+ */
 public class VelocityEasing {
     private float mStartPos = 0;
     private float mStartV = 0;
@@ -46,6 +51,11 @@ public class VelocityEasing {
     private boolean mOneDimension = true;
     private float mTotalEasingDuration = 0;
 
+    /**
+     * get the duration the easing will take
+     *
+     * @return the duration for the easing
+     */
     public float getDuration() {
         if (mEasing != null) {
             return mTotalEasingDuration;
@@ -53,6 +63,12 @@ public class VelocityEasing {
         return mDuration;
     }
 
+    /**
+     * Get the velocity at time t
+     *
+     * @param t time in seconds
+     * @return the velocity units/second
+     */
     public float getV(float t) {
         if (mEasing == null) {
             for (int i = 0; i < mNumberOfStages; i++) {
@@ -71,6 +87,12 @@ public class VelocityEasing {
         return (float) getEasingDiff((t - mStage[lastStages].mStartTime));
     }
 
+    /**
+     * Get the position t seconds after the configure
+     *
+     * @param t time in seconds
+     * @return the position at time t
+     */
     public float getPos(float t) {
         if (mEasing == null) {
             for (int i = 0; i < mNumberOfStages; i++) {
@@ -91,6 +113,7 @@ public class VelocityEasing {
         return ret;
     }
 
+    @Override
     public String toString() {
         var s = " ";
         for (int i = 0; i < mNumberOfStages; i++) {
@@ -100,6 +123,17 @@ public class VelocityEasing {
         return s;
     }
 
+    /**
+     * Configure the Velocity easing curve The system is in arbitrary units
+     *
+     * @param currentPos the current position
+     * @param destination the destination
+     * @param currentVelocity the current velocity units/seconds
+     * @param maxTime the max time to achieve position
+     * @param maxAcceleration the max acceleration units/s^2
+     * @param maxVelocity the maximum velocity
+     * @param easing End in using this easing curve
+     */
     public void config(
             float currentPos,
             float destination,
