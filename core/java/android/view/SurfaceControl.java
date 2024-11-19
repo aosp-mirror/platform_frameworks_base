@@ -598,8 +598,11 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Request a flush of any pending jank classification data. May cause the registered
-         * listener to be invoked inband.
+         * Request a flush of any pending jank classification data.
+         * <p>
+         * May cause the registered listener to be invoked inband. Since jank is tracked by the
+         * system compositor by surface, flushing the data on one listener, will also cause other
+         * listeners on the same surface to receive jank classification data.
          */
         public void flush() {
             nativeFlushJankData(mNativeObject);
