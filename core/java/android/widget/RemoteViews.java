@@ -1559,6 +1559,16 @@ public class RemoteViews implements Parcelable, Filter {
             final Context context = ActivityThread.currentApplication();
 
             final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
+            String contextPackageName = context.getPackageName();
+            ComponentName intentComponent = intent.getComponent();
+            if (contextPackageName != null
+                    && intentComponent != null
+                    && (!contextPackageName.equals(intentComponent.getPackageName()))) {
+                // We shouldn't allow for connections to other packages
+                result.complete(new RemoteCollectionItems.Builder().build());
+                return result;
+            }
+
             context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
                     result.defaultExecutor(), new ServiceConnection() {
                         @Override
