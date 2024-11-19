@@ -16,8 +16,6 @@
 package com.android.ravenwoodtest.bivalenttest.compat
 
 import android.app.compat.CompatChanges
-import android.os.Build
-import android.platform.test.ravenwood.RavenwoodConfig
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.ravenwood.RavenwoodEnvironment.CompatIdsForTest
 import org.junit.Assert
@@ -26,14 +24,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class RavenwoodCompatFrameworkTest {
-    companion object {
-        @JvmField // Expose as a raw field, not as a property.
-        @RavenwoodConfig.Config
-        val config = RavenwoodConfig.Builder()
-            .setTargetSdkLevel(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-            .build()
-    }
-
     @Test
     fun testEnabled() {
         Assert.assertTrue(CompatChanges.isChangeEnabled(CompatIdsForTest.TEST_COMPAT_ID_1))

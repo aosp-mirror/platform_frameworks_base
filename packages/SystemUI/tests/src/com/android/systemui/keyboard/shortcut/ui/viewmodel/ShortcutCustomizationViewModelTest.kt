@@ -26,6 +26,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutCustomizationViewModelFactory
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
@@ -37,7 +38,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ShortcutCustomizationViewModelTest : SysuiTestCase() {
 
-    private val kosmos = Kosmos()
+    private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
     private val viewModel = kosmos.shortcutCustomizationViewModelFactory.create()
 

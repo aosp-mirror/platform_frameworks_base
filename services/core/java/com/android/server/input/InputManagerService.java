@@ -3031,6 +3031,11 @@ public class InputManagerService extends IInputManager.Stub
         return mKeyGestureController.getAppLaunchBookmarks();
     }
 
+    @Override
+    public void resetLockedModifierState() {
+        mNative.resetLockedModifierState();
+    }
+
     private void handleCurrentUserChanged(@UserIdInt int userId) {
         mCurrentUserId = userId;
         mKeyGestureController.setCurrentUserId(userId);

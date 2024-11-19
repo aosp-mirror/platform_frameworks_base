@@ -43,6 +43,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -178,6 +180,8 @@ constructor(
     val deviceUnlockStatus: StateFlow<DeviceUnlockStatus> =
         repository.deviceUnlockStatus.asStateFlow()
 
+    private val lockNowRequests = Channel<Unit>()
+
     override suspend fun onActivated(): Nothing {
         authenticationInteractor.authenticationMethod.collectLatest { authMethod ->
             if (!authMethod.isSecure) {
@@ -194,6 +198,11 @@ constructor(
         }
 
         awaitCancellation()
+    }
+
+    /** Locks the device instantly. */
+    fun lockNow() {
+        lockNowRequests.trySend(Unit)
     }
 
     private suspend fun handleLockAndUnlockEvents() {
@@ -225,10 +234,12 @@ constructor(
                     .map { (isAsleep, lastSleepReason) ->
                         if (isAsleep) {
                             if (
-                                lastSleepReason == WakeSleepReason.POWER_BUTTON &&
+                                (lastSleepReason == WakeSleepReason.POWER_BUTTON) &&
                                     authenticationInteractor.getPowerButtonInstantlyLocks()
                             ) {
                                 LockImmediately("locked instantly from power button")
+                            } else if (lastSleepReason == WakeSleepReason.SLEEP_BUTTON) {
+                                LockImmediately("locked instantly from sleep button")
                             } else {
                                 LockWithDelay("entering sleep")
                             }
@@ -256,6 +267,7 @@ constructor(
                         emptyFlow()
                     }
                 },
+                lockNowRequests.receiveAsFlow().map { LockImmediately("lockNow") },
             )
             .collectLatest(::onLockEvent)
     }

@@ -251,6 +251,7 @@ import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
 import com.android.server.security.authenticationpolicy.AuthenticationPolicyService;
+import com.android.server.security.authenticationpolicy.SecureLockDeviceService;
 import com.android.server.security.forensic.ForensicService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
@@ -2659,6 +2660,12 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(AuthService.class);
             t.traceEnd();
 
+            if (android.security.Flags.secureLockdown()) {
+                t.traceBegin("StartSecureLockDeviceService.Lifecycle");
+                mSystemServiceManager.startService(SecureLockDeviceService.Lifecycle.class);
+                t.traceEnd();
+            }
+
             if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
                 t.traceBegin("StartAuthenticationPolicyService");
                 mSystemServiceManager.startService(AuthenticationPolicyService.class);
@@ -3062,7 +3069,10 @@ public final class SystemServer implements Dumpable {
         if (com.android.ranging.flags.Flags.rangingStackEnabled()) {
             if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)
                     || context.getPackageManager().hasSystemFeature(
-                            PackageManager.FEATURE_WIFI_RTT)) {
+                            PackageManager.FEATURE_WIFI_RTT)
+                    || (com.android.ranging.flags.Flags.rangingCsEnabled()
+                            && context.getPackageManager().hasSystemFeature(
+                                    PackageManager.FEATURE_BLUETOOTH_LE_CHANNEL_SOUNDING))) {
                 t.traceBegin("RangingService");
                 // TODO: b/375264320 - Remove after RELEASE_RANGING_STACK is ramped to next.
                 try {

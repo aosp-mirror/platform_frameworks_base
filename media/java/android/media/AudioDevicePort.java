@@ -22,6 +22,7 @@ import android.os.Build;
 
 import com.android.aconfig.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -68,14 +69,14 @@ public class AudioDevicePort extends AudioPort {
         return new AudioDevicePort(
                 new AudioHandle(/* id= */ 0),
                 /* name= */ "testAudioDevicePort",
-                /* profiles= */ null,
+                /* profiles= */ new ArrayList<>(),
                 /* gains= */ null,
                 /* type= */ AudioManager.DEVICE_OUT_SPEAKER,
                 /* address= */ "testAddress",
                 /* speakerLayoutChannelMask= */ speakerLayoutChannelMask,
                 /* encapsulationModes= */ null,
                 /* encapsulationMetadataTypes= */ null,
-                /* descriptors= */ null);
+                /* descriptors= */ new ArrayList<>());
     }
 
     private final int mType;

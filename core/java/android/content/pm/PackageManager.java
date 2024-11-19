@@ -3200,6 +3200,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is capable of ranging with
+     * other devices using channel sounding via Bluetooth Low Energy radio.
+     */
+    @FlaggedApi(com.android.ranging.flags.Flags.FLAG_RANGING_CS_ENABLED)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_BLUETOOTH_LE_CHANNEL_SOUNDING =
+             "android.hardware.bluetooth_le.channel_sounding";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a camera facing away
      * from the screen.
      */

@@ -103,6 +103,7 @@ package android {
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String BROADCAST_CLOSE_SYSTEM_DIALOGS = "android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS";
     field @Deprecated public static final String BROADCAST_NETWORK_PRIVILEGED = "android.permission.BROADCAST_NETWORK_PRIVILEGED";
+    field @FlaggedApi("android.media.audio.concurrent_audio_record_bypass_permission") public static final String BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION = "android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION";
     field public static final String BYPASS_ROLE_QUALIFICATION = "android.permission.BYPASS_ROLE_QUALIFICATION";
     field public static final String CALL_AUDIO_INTERCEPTION = "android.permission.CALL_AUDIO_INTERCEPTION";
     field public static final String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
@@ -229,6 +230,7 @@ package android {
     field public static final String MANAGE_ROTATION_RESOLVER = "android.permission.MANAGE_ROTATION_RESOLVER";
     field public static final String MANAGE_SAFETY_CENTER = "android.permission.MANAGE_SAFETY_CENTER";
     field public static final String MANAGE_SEARCH_UI = "android.permission.MANAGE_SEARCH_UI";
+    field @FlaggedApi("android.security.secure_lockdown") public static final String MANAGE_SECURE_LOCK_DEVICE = "android.permission.MANAGE_SECURE_LOCK_DEVICE";
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final String MANAGE_SMARTSPACE = "android.permission.MANAGE_SMARTSPACE";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
@@ -3869,6 +3871,7 @@ package android.content {
     field public static final String APP_INTEGRITY_SERVICE = "app_integrity";
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final String AUDIO_DEVICE_VOLUME_SERVICE = "audio_device_volume";
+    field @FlaggedApi("android.security.secure_lockdown") public static final String AUTHENTICATION_POLICY_SERVICE = "authentication_policy";
     field public static final String BACKUP_SERVICE = "backup";
     field public static final String BATTERY_STATS_SERVICE = "batterystats";
     field public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 1048576; // 0x100000
@@ -12854,6 +12857,36 @@ package android.security.advancedprotection {
     field public static final String FEATURE_ID_ENABLE_MTE = "android.security.advancedprotection.feature_enable_mte";
     field public static final String SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION = "android.security.advancedprotection.type_blocked_interaction";
     field public static final String SUPPORT_DIALOG_TYPE_DISABLED_SETTING = "android.security.advancedprotection.type_disabled_setting";
+  }
+
+}
+
+package android.security.authenticationpolicy {
+
+  @FlaggedApi("android.security.secure_lockdown") public final class AuthenticationPolicyManager {
+    method @FlaggedApi("android.security.secure_lockdown") @RequiresPermission(android.Manifest.permission.MANAGE_SECURE_LOCK_DEVICE) public int disableSecureLockDevice(@NonNull android.security.authenticationpolicy.DisableSecureLockDeviceParams);
+    method @FlaggedApi("android.security.secure_lockdown") @RequiresPermission(android.Manifest.permission.MANAGE_SECURE_LOCK_DEVICE) public int enableSecureLockDevice(@NonNull android.security.authenticationpolicy.EnableSecureLockDeviceParams);
+    field @FlaggedApi("android.security.secure_lockdown") public static final int ERROR_ALREADY_ENABLED = 6; // 0x6
+    field @FlaggedApi("android.security.secure_lockdown") public static final int ERROR_INSUFFICIENT_BIOMETRICS = 5; // 0x5
+    field @FlaggedApi("android.security.secure_lockdown") public static final int ERROR_INVALID_PARAMS = 3; // 0x3
+    field @FlaggedApi("android.security.secure_lockdown") public static final int ERROR_NO_BIOMETRICS_ENROLLED = 4; // 0x4
+    field @FlaggedApi("android.security.secure_lockdown") public static final int ERROR_UNKNOWN = 0; // 0x0
+    field @FlaggedApi("android.security.secure_lockdown") public static final int ERROR_UNSUPPORTED = 2; // 0x2
+    field @FlaggedApi("android.security.secure_lockdown") public static final int SUCCESS = 1; // 0x1
+  }
+
+  @FlaggedApi("android.security.secure_lockdown") public final class DisableSecureLockDeviceParams implements android.os.Parcelable {
+    ctor public DisableSecureLockDeviceParams(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.authenticationpolicy.DisableSecureLockDeviceParams> CREATOR;
+  }
+
+  @FlaggedApi("android.security.secure_lockdown") public final class EnableSecureLockDeviceParams implements android.os.Parcelable {
+    ctor public EnableSecureLockDeviceParams(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.authenticationpolicy.EnableSecureLockDeviceParams> CREATOR;
   }
 
 }

@@ -278,7 +278,11 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
         testScope.runTest {
             fakeSystemSource.setGroups(
                 groupWithShortcutLabels("first Foo shortcut1", "first bar shortcut1"),
-                groupWithShortcutLabels("second foO shortcut2", "second bar shortcut2"),
+                groupWithShortcutLabels(
+                    "second foO shortcut2",
+                    "second bar shortcut2",
+                    groupLabel = SECOND_SIMPLE_GROUP_LABEL,
+                ),
             )
             fakeMultiTaskingSource.setGroups(
                 groupWithShortcutLabels("third FoO shortcut1", "third bar shortcut1")
@@ -298,7 +302,10 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
                             ShortcutCategory(
                                 System,
                                 subCategoryWithShortcutLabels("first Foo shortcut1"),
-                                subCategoryWithShortcutLabels("second foO shortcut2"),
+                                subCategoryWithShortcutLabels(
+                                    "second foO shortcut2",
+                                    subCategoryLabel = SECOND_SIMPLE_GROUP_LABEL,
+                                ),
                             ),
                     ),
                     ShortcutCategoryUi(
@@ -380,16 +387,23 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             assertThat(activeUiState.defaultSelectedCategory).isInstanceOf(CurrentApp::class.java)
         }
 
-    private fun groupWithShortcutLabels(vararg shortcutLabels: String) =
-        KeyboardShortcutGroup(SIMPLE_GROUP_LABEL, shortcutLabels.map { simpleShortcutInfo(it) })
-            .apply { packageName = "test.package.name" }
+    private fun groupWithShortcutLabels(
+        vararg shortcutLabels: String,
+        groupLabel: String = FIRST_SIMPLE_GROUP_LABEL,
+    ) =
+        KeyboardShortcutGroup(groupLabel, shortcutLabels.map { simpleShortcutInfo(it) }).apply {
+            packageName = "test.package.name"
+        }
 
     private fun simpleShortcutInfo(label: String) =
         KeyboardShortcutInfo(label, KeyEvent.KEYCODE_A, KeyEvent.META_CTRL_ON)
 
-    private fun subCategoryWithShortcutLabels(vararg shortcutLabels: String) =
+    private fun subCategoryWithShortcutLabels(
+        vararg shortcutLabels: String,
+        subCategoryLabel: String = FIRST_SIMPLE_GROUP_LABEL,
+    ) =
         ShortcutSubCategory(
-            label = SIMPLE_GROUP_LABEL,
+            label = subCategoryLabel,
             shortcuts = shortcutLabels.map { simpleShortcut(it) },
         )
 
@@ -402,6 +416,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
         }
 
     companion object {
-        private const val SIMPLE_GROUP_LABEL = "simple group"
+        private const val FIRST_SIMPLE_GROUP_LABEL = "simple group 1"
+        private const val SECOND_SIMPLE_GROUP_LABEL = "simple group 2"
     }
 }

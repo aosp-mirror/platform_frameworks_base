@@ -19,6 +19,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.notetask.NoteTaskEntryPoint.QS_NOTES_TILE
 import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -44,10 +45,19 @@ internal class NoteTaskInfoTest : SysuiTestCase() {
     }
 
     @Test
-    fun launchMode_keyguardUnlocked_launchModeAppBubble() {
+    fun launchMode_keyguardUnlocked_launchModeAppBubble_withDefaultExpandBehavior() {
         val underTest = DEFAULT_INFO.copy(isKeyguardLocked = false)
 
-        assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.AppBubble)
+        assertThat(underTest.launchMode)
+            .isEqualTo(NoteTaskLaunchMode.AppBubble(NoteTaskBubbleExpandBehavior.DEFAULT))
+    }
+
+    @Test
+    fun launchMode_keyguardUnlocked_qsTileEntryPoint_launchModeAppBubble_withKeepIfExpandedExpandBehavior() {
+        val underTest = DEFAULT_INFO.copy(isKeyguardLocked = false, entryPoint = QS_NOTES_TILE)
+
+        assertThat(underTest.launchMode)
+            .isEqualTo(NoteTaskLaunchMode.AppBubble(NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED))
     }
 
     private companion object {

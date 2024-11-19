@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.UserHandle
+import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
 import kotlinx.coroutines.CoroutineDispatcher
@@ -33,14 +34,29 @@ import kotlinx.coroutines.CoroutineDispatcher
 class FakeNoteTaskBubbleController(
     unUsed1: Context,
     unsUsed2: CoroutineDispatcher,
-    private val optionalBubbles: Optional<Bubbles>
+    private val optionalBubbles: Optional<Bubbles>,
 ) : NoteTaskBubblesController(unUsed1, unsUsed2) {
     override suspend fun areBubblesAvailable() = optionalBubbles.isPresent
 
-    override suspend fun showOrHideAppBubble(intent: Intent, userHandle: UserHandle, icon: Icon) {
+    override suspend fun showOrHideAppBubble(
+        intent: Intent,
+        userHandle: UserHandle,
+        icon: Icon,
+        bubbleExpandBehavior: NoteTaskBubbleExpandBehavior,
+    ) {
         optionalBubbles.ifPresentOrElse(
-            { bubbles -> bubbles.showOrHideAppBubble(intent, userHandle, icon) },
-            { throw IllegalAccessException() }
+            { bubbles ->
+                if (
+                    bubbleExpandBehavior == NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED &&
+                        bubbles.isBubbleExpanded(
+                            Bubble.getAppBubbleKeyForApp(intent.`package`, userHandle)
+                        )
+                ) {
+                    return@ifPresentOrElse
+                }
+                bubbles.showOrHideAppBubble(intent, userHandle, icon)
+            },
+            { throw IllegalAccessException() },
         )
     }
 }

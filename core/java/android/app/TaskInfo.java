@@ -340,10 +340,10 @@ public class TaskInfo {
     public int requestedVisibleTypes;
 
     /**
-     * Whether the top activity has requested to limit educational dialogs shown by the system.
+     * The timestamp of the top activity's last request to show the "Open in Browser" education.
      * @hide
      */
-    public boolean isTopActivityLimitSystemEducationDialogs;
+    public long topActivityRequestOpenInBrowserEducationTimestamp;
 
     /**
      * Encapsulate specific App Compat information.
@@ -493,8 +493,8 @@ public class TaskInfo {
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && requestedVisibleTypes == that.requestedVisibleTypes
-                && isTopActivityLimitSystemEducationDialogs
-                    == that.isTopActivityLimitSystemEducationDialogs
+                && topActivityRequestOpenInBrowserEducationTimestamp
+                    == that.topActivityRequestOpenInBrowserEducationTimestamp
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo)
                 && Objects.equals(topActivityMainWindowFrame, that.topActivityMainWindowFrame);
     }
@@ -571,7 +571,7 @@ public class TaskInfo {
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
         requestedVisibleTypes = source.readInt();
-        isTopActivityLimitSystemEducationDialogs = source.readBoolean();
+        topActivityRequestOpenInBrowserEducationTimestamp = source.readLong();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
         topActivityMainWindowFrame = source.readTypedObject(Rect.CREATOR);
     }
@@ -627,7 +627,7 @@ public class TaskInfo {
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
         dest.writeInt(requestedVisibleTypes);
-        dest.writeBoolean(isTopActivityLimitSystemEducationDialogs);
+        dest.writeLong(topActivityRequestOpenInBrowserEducationTimestamp);
         dest.writeTypedObject(appCompatTaskInfo, flags);
         dest.writeTypedObject(topActivityMainWindowFrame, flags);
     }
@@ -672,8 +672,8 @@ public class TaskInfo {
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
                 + " requestedVisibleTypes=" + requestedVisibleTypes
-                + " isTopActivityLimitSystemEducationDialogs="
-                + isTopActivityLimitSystemEducationDialogs
+                + " topActivityRequestOpenInBrowserEducationTimestamp="
+                + topActivityRequestOpenInBrowserEducationTimestamp
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + " topActivityMainWindowFrame=" + topActivityMainWindowFrame
                 + "}";
