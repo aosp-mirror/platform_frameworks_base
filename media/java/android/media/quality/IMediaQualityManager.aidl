@@ -67,4 +67,5 @@ interface IMediaQualityManager {
 
     void setAmbientBacklightSettings(in AmbientBacklightSettings settings);
     void setAmbientBacklightEnabled(in boolean enabled);
+    boolean isAmbientBacklightEnabled();
 }
