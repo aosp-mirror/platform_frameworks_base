@@ -11425,6 +11425,10 @@ public class AudioService extends IAudioService.Stub
         return mSpatializerHelper.canBeSpatialized(attributes, format);
     }
 
+    public @NonNull List<Integer> getSpatializedChannelMasks() {
+        return mSpatializerHelper.getSpatializedChannelMasks();
+    }
+
     /** @see Spatializer.SpatializerInfoDispatcherStub */
     public void registerSpatializerCallback(
             @NonNull ISpatializerCallback cb) {

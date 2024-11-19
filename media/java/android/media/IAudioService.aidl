@@ -640,6 +640,9 @@ interface IAudioService {
 
     boolean canBeSpatialized(in AudioAttributes aa, in AudioFormat af);
 
+    /* Returns a List<Integer> */
+    List getSpatializedChannelMasks();
+
     void registerSpatializerCallback(in ISpatializerCallback cb);
 
     void unregisterSpatializerCallback(in ISpatializerCallback cb);
