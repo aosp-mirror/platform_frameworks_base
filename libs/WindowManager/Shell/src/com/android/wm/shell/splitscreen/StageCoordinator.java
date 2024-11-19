@@ -1709,8 +1709,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
-        outTopOrLeftBounds.set(mSplitLayout.getBounds1());
-        outBottomOrRightBounds.set(mSplitLayout.getBounds2());
+        outTopOrLeftBounds.set(mSplitLayout.getTopLeftBounds());
+        outBottomOrRightBounds.set(mSplitLayout.getBottomRightBounds());
     }
 
     private void runForActiveStages(Consumer<StageTaskListener> consumer) {
@@ -1857,8 +1857,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
         mRecentTasks.ifPresent(recentTasks -> {
-            Rect topLeftBounds = mSplitLayout.getBounds1();
-            Rect bottomRightBounds = mSplitLayout.getBounds2();
+            Rect topLeftBounds = new Rect();
+            mSplitLayout.copyTopLeftBounds(topLeftBounds);
+            Rect bottomRightBounds = new Rect();
+            mSplitLayout.copyBottomRightBounds(bottomRightBounds);
+
             int sideStageTopTaskId;
             int mainStageTopTaskId;
             if (enableFlexibleSplit()) {
@@ -2392,7 +2395,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         boolean updated = layout.applyTaskChanges(wct, topLeftStage.mRootTaskInfo,
                 bottomRightStage.mRootTaskInfo);
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "updateWindowBounds: topLeftStage=%s bottomRightStage=%s",
-                layout.getBounds1(), layout.getBounds2());
+                layout.getTopLeftBounds(), layout.getBottomRightBounds());
         return updated;
     }
 
@@ -2420,7 +2423,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 applyResizingOffset);
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
                 "updateSurfaceBounds: topLeftStage=%s bottomRightStage=%s",
-                layout.getBounds1(), layout.getBounds2());
+                layout.getTopLeftBounds(), layout.getBottomRightBounds());
     }
 
     @Override
@@ -2541,12 +2544,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private Rect getSideStageBounds() {
         return mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
-                ? mSplitLayout.getBounds1() : mSplitLayout.getBounds2();
+                ? mSplitLayout.getTopLeftBounds() : mSplitLayout.getBottomRightBounds();
     }
 
     private Rect getMainStageBounds() {
         return mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT
-                ? mSplitLayout.getBounds2() : mSplitLayout.getBounds1();
+                ? mSplitLayout.getBottomRightBounds() : mSplitLayout.getTopLeftBounds();
     }
 
     /**
@@ -2559,11 +2562,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Split Layout doesn't actually keep track of the bounds based on the stage,
             // it only knows that bounds1 is leftTop position and bounds2 is bottomRight position
             // We'll then assume this method is to get bounds of bottomRight stage
-            mSplitLayout.getBounds2(rect);
+            mSplitLayout.copyBottomRightBounds(rect);
         }  else if (mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT) {
-            mSplitLayout.getBounds1(rect);
+            mSplitLayout.copyTopLeftBounds(rect);
         } else {
-            mSplitLayout.getBounds2(rect);
+            mSplitLayout.copyBottomRightBounds(rect);
         }
     }
 
@@ -2577,12 +2580,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Split Layout doesn't actually keep track of the bounds based on the stage,
             // it only knows that bounds1 is leftTop position and bounds2 is bottomRight position
             // We'll then assume this method is to get bounds of topLeft stage
-            mSplitLayout.getBounds1(rect);
+            mSplitLayout.copyTopLeftBounds(rect);
         } else {
             if (mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT) {
-                mSplitLayout.getBounds2(rect);
+                mSplitLayout.copyBottomRightBounds(rect);
             } else {
-                mSplitLayout.getBounds1(rect);
+                mSplitLayout.copyTopLeftBounds(rect);
             }
         }
     }
