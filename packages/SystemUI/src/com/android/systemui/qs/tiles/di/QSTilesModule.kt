@@ -28,6 +28,7 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProviderImpl
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
+import com.android.systemui.shade.ShadeDisplayAware
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -66,6 +67,6 @@ interface QSTilesModule {
 
     companion object {
 
-        @Provides fun provideTilesTheme(context: Context): Theme = context.theme
+        @Provides fun provideTilesTheme(@ShadeDisplayAware context: Context): Theme = context.theme
     }
 }

@@ -31,6 +31,8 @@ import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,7 +101,7 @@ fun Category(title: String? = null, content: @Composable ColumnScope.() -> Unit)
             verticalArrangement =
                 if (isSpaExpressiveEnabled) Arrangement.spacedBy(SettingsDimension.paddingTiny)
                 else Arrangement.Top,
-            content = content,
+            content = { CompositionLocalProvider(LocalIsInCategory provides true) { content() } },
         )
     }
 }
@@ -109,15 +111,14 @@ fun Category(title: String? = null, content: @Composable ColumnScope.() -> Unit)
  *
  * @param list The list of items to display.
  * @param entry The entry for each list item according to its index in list.
- * @param key Optional. The key for each item in list to provide unique item identifiers, making
- * the list more efficient.
- * @param title Optional. Category title for each item or each group of items in the list. It
- * should be decided by the index.
+ * @param key Optional. The key for each item in list to provide unique item identifiers, making the
+ *   list more efficient.
+ * @param title Optional. Category title for each item or each group of items in the list. It should
+ *   be decided by the index.
  * @param bottomPadding Optional. Bottom outside padding of the category.
  * @param state Optional. State of LazyList.
  * @param content Optional. Content to be shown at the top of the category.
  */
-
 @Composable
 fun LazyCategory(
     list: List<Any>,
@@ -144,16 +145,18 @@ fun LazyCategory(
             verticalArrangement = Arrangement.spacedBy(SettingsDimension.paddingTiny),
             state = state,
         ) {
-            item { content() }
+            item { CompositionLocalProvider(LocalIsInCategory provides true) { content() } }
 
             items(count = list.size, key = key) {
                 title?.invoke(it)?.let { title -> CategoryTitle(title) }
-                val entryPreference = entry(it)
-                entryPreference()
+                CompositionLocalProvider(LocalIsInCategory provides true) { entry(it)() }
             }
         }
     }
 }
+
+/** LocalIsInCategory containing the if the current composable is in a category. */
+internal val LocalIsInCategory = compositionLocalOf { false }
 
 @Preview
 @Composable

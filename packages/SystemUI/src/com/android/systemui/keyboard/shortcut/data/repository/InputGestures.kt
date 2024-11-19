@@ -81,7 +81,7 @@ object InputGestures {
             KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to AppCategories,
         )
 
-    val gestureToInternalKeyboardShortcutGroupLabelMap =
+    val gestureToInternalKeyboardShortcutGroupLabelResIdMap =
         mapOf(
             // System Category
             KEY_GESTURE_TYPE_HOME to R.string.shortcut_helper_category_system_controls,
@@ -129,7 +129,7 @@ object InputGestures {
                 R.string.keyboard_shortcut_group_applications,
         )
 
-    val gestureToInternalKeyboardShortcutInfoLabelMap =
+    val gestureToInternalKeyboardShortcutInfoLabelResIdMap =
         mapOf(
             // System Category
             KEY_GESTURE_TYPE_HOME to R.string.group_system_access_home_screen,

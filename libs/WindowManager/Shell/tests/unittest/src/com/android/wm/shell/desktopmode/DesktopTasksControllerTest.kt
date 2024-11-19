@@ -116,6 +116,7 @@ import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.UNKNOWN
 import com.android.wm.shell.shared.split.SplitScreenConstants
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_UNDEFINED
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -3158,7 +3159,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     runOpenNewWindow(task)
     verify(splitScreenController)
       .startIntent(any(), anyInt(), any(), any(),
-        optionsCaptor.capture(), anyOrNull(), eq(true)
+        optionsCaptor.capture(), anyOrNull(), eq(true), eq(SPLIT_INDEX_UNDEFINED)
       )
     assertThat(ActivityOptions.fromBundle(optionsCaptor.value).launchWindowingMode)
       .isEqualTo(WINDOWING_MODE_MULTI_WINDOW)
@@ -3174,7 +3175,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     verify(splitScreenController)
       .startIntent(
         any(), anyInt(), any(), any(),
-        optionsCaptor.capture(), anyOrNull(), eq(true)
+        optionsCaptor.capture(), anyOrNull(), eq(true), eq(SPLIT_INDEX_UNDEFINED)
       )
     assertThat(ActivityOptions.fromBundle(optionsCaptor.value).launchWindowingMode)
       .isEqualTo(WINDOWING_MODE_MULTI_WINDOW)

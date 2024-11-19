@@ -1676,30 +1676,36 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param orientation the specified orientation. Needs to be one of {@link ScreenOrientation}.
      * @param requestingContainer the container which orientation request has changed. Mostly used
      *                            to ensure it gets correct configuration.
+     * @return the resolved override orientation of this window container.
      */
-    void setOrientation(@ScreenOrientation int orientation,
+    @ScreenOrientation
+    int setOrientation(@ScreenOrientation int orientation,
             @Nullable WindowContainer requestingContainer) {
         if (getOverrideOrientation() == orientation) {
-            return;
+            return orientation;
         }
-
         setOverrideOrientation(orientation);
         final WindowContainer parent = getParent();
-        if (parent != null) {
-            if (getConfiguration().orientation != getRequestedConfigurationOrientation()
-                    // Update configuration directly only if the change won't be dispatched from
-                    // ancestor. This prevents from computing intermediate configuration when the
-                    // parent also needs to be updated from the ancestor. E.g. the app requests
-                    // portrait but the task is still in landscape. While updating from display,
-                    // the task can be updated to portrait first so the configuration can be
-                    // computed in a consistent environment.
-                    && (inMultiWindowMode()
-                        || !handlesOrientationChangeFromDescendant(orientation))) {
-                // Resolve the requested orientation.
-                onConfigurationChanged(parent.getConfiguration());
-            }
-            onDescendantOrientationChanged(requestingContainer);
+        if (parent == null) {
+            return orientation;
         }
+        // The derived class can return a result that is different from the given orientation.
+        final int resolvedOrientation = getOverrideOrientation();
+        if (getConfiguration().orientation != getRequestedConfigurationOrientation(
+                false /* forDisplay */, resolvedOrientation)
+                // Update configuration directly only if the change won't be dispatched from
+                // ancestor. This prevents from computing intermediate configuration when the
+                // parent also needs to be updated from the ancestor. E.g. the app requests
+                // portrait but the task is still in landscape. While updating from display,
+                // the task can be updated to portrait first so the configuration can be
+                // computed in a consistent environment.
+                && (inMultiWindowMode()
+                        || !handlesOrientationChangeFromDescendant(orientation))) {
+            // Resolve the requested orientation.
+            onConfigurationChanged(parent.getConfiguration());
+        }
+        onDescendantOrientationChanged(requestingContainer);
+        return resolvedOrientation;
     }
 
     @ScreenOrientation

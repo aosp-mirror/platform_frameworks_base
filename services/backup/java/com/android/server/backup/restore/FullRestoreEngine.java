@@ -410,11 +410,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
                             // All set; now set up the IPC and launch the agent
                             setUpPipes();
-                            mAgent = mBackupManagerService.bindToAgentSynchronous(mTargetApp,
-                                    FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)
-                                            ? ApplicationThreadConstants.BACKUP_MODE_RESTORE
-                                            : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL,
-                                    mBackupEligibilityRules.getBackupDestination());
+                            mAgent = bindToAgent(info);
                             mAgentPackage = pkg;
                         } catch (IOException | NameNotFoundException e) {
                             // fall through to error handling
@@ -805,15 +801,12 @@ public class FullRestoreEngine extends RestoreEngine {
         return packages.contains(packageName);
     }
 
-    void sendOnRestorePackage(String name) {
-        if (mObserver != null) {
-            try {
-                // TODO: use a more user-friendly name string
-                mObserver.onRestorePackage(name);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "full restore observer went away: restorePackage");
-                mObserver = null;
-            }
-        }
+    private IBackupAgent bindToAgent(FileMetadata info) {
+        return mBackupManagerService.getBackupAgentConnectionManager().bindToAgentSynchronous(
+                mTargetApp,
+                FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)
+                        ? ApplicationThreadConstants.BACKUP_MODE_RESTORE
+                        : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL,
+                mBackupEligibilityRules.getBackupDestination());
     }
 }

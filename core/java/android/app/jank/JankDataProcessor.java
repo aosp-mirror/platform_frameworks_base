@@ -59,7 +59,6 @@ public class JankDataProcessor {
      * @param appUid the uid of the app.
      */
     public void processJankData(List<JankData> jankData, String activityName, int appUid) {
-        mCurrentBatchCount++;
         // add all the previous and active states to the pending states list.
         mStateTracker.retrieveAllStates(mPendingStates);
 
@@ -79,9 +78,8 @@ public class JankDataProcessor {
             }
         }
         // At this point we have attributed all frames to a state.
-        if (mCurrentBatchCount >= LOG_BATCH_FREQUENCY) {
-            logMetricCounts();
-        }
+        incrementBatchCountAndMaybeLogStats();
+
         // return the StatData object back to the pool to be reused.
         jankDataProcessingComplete();
     }
@@ -91,7 +89,73 @@ public class JankDataProcessor {
      * stats
      */
     public void mergeJankStats(AppJankStats jankStats, String activityName) {
-        // TODO b/377572463 Add Merging Logic
+        // Each state has a key which is a combination of widget category, widget id and widget
+        // state, this key is also used to identify pending stats, a pending stat is essentially a
+        // state with frames associated with it.
+        String stateKey = mStateTracker.getStateKey(jankStats.getWidgetCategory(),
+                jankStats.getWidgetId(), jankStats.getWidgetState());
+
+        if (mPendingJankStats.containsKey(stateKey)) {
+            mergeExistingStat(stateKey, jankStats);
+        } else {
+            mergeNewStat(stateKey, activityName, jankStats);
+        }
+
+        incrementBatchCountAndMaybeLogStats();
+    }
+
+    private void mergeExistingStat(String stateKey, AppJankStats jankStat) {
+        PendingJankStat pendingStat = mPendingJankStats.get(stateKey);
+
+        pendingStat.mJankyFrames += jankStat.getJankyFrameCount();
+        pendingStat.mTotalFrames += jankStat.getTotalFrameCount();
+
+        mergeOverrunHistograms(pendingStat.mFrameOverrunBuckets,
+                jankStat.getFrameOverrunHistogram().getBucketCounters());
+    }
+
+    private void mergeNewStat(String stateKey, String activityName, AppJankStats jankStats) {
+        // Check if we have space for a new stat
+        if (mPendingJankStats.size() > MAX_IN_MEMORY_STATS) {
+            return;
+        }
+
+        PendingJankStat pendingStat = mPendingJankStatsPool.acquire();
+        if (pendingStat == null) {
+            pendingStat = new PendingJankStat();
+
+        }
+        pendingStat.clearStats();
+
+        pendingStat.mActivityName = activityName;
+        pendingStat.mUid = jankStats.getUid();
+        pendingStat.mWidgetId = jankStats.getWidgetId();
+        pendingStat.mWidgetCategory = jankStats.getWidgetCategory();
+        pendingStat.mWidgetState = jankStats.getWidgetState();
+        pendingStat.mTotalFrames = jankStats.getTotalFrameCount();
+        pendingStat.mJankyFrames = jankStats.getJankyFrameCount();
+
+        mergeOverrunHistograms(pendingStat.mFrameOverrunBuckets,
+                jankStats.getFrameOverrunHistogram().getBucketCounters());
+
+        mPendingJankStats.put(stateKey, pendingStat);
+    }
+
+    private void mergeOverrunHistograms(int[] mergeTarget, int[] mergeSource) {
+        // The length of each histogram should be identical, if they are not then its possible the
+        // buckets are not in sync, these records should not be recorded.
+        if (mergeTarget.length != mergeSource.length) return;
+
+        for (int i = 0; i < mergeTarget.length; i++) {
+            mergeTarget[i] += mergeSource[i];
+        }
+    }
+
+    private void incrementBatchCountAndMaybeLogStats() {
+        mCurrentBatchCount++;
+        if (mCurrentBatchCount >= LOG_BATCH_FREQUENCY) {
+            logMetricCounts();
+        }
     }
 
     /**

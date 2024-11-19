@@ -33,6 +33,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.backup.BackupAgentConnectionManager;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.OperationStorage;
 import com.android.server.backup.TransportManager;
@@ -66,6 +67,8 @@ public class PerformFullTransportBackupTaskTest {
     @Mock
     UserBackupManagerService mBackupManagerService;
     @Mock
+    BackupAgentConnectionManager mBackupAgentConnectionManager;
+    @Mock
     BackupTransportClient mBackupTransportClient;
     @Mock
     CountDownLatch mLatch;
@@ -95,6 +98,8 @@ public class PerformFullTransportBackupTaskTest {
         when(mBackupManagerService.isSetupComplete()).thenReturn(true);
         when(mBackupManagerService.getAgentTimeoutParameters()).thenReturn(
                 mBackupAgentTimeoutParameters);
+        when(mBackupManagerService.getBackupAgentConnectionManager()).thenReturn(
+                mBackupAgentConnectionManager);
         when(mBackupManagerService.getTransportManager()).thenReturn(mTransportManager);
         when(mTransportManager.getCurrentTransportClient(any())).thenReturn(mTransportConnection);
         when(mTransportConnection.connectOrThrow(any())).thenReturn(mBackupTransportClient);
@@ -142,11 +147,11 @@ public class PerformFullTransportBackupTaskTest {
 
         mTask.run();
 
-        InOrder inOrder = inOrder(mBackupManagerService);
-        inOrder.verify(mBackupManagerService).setNoRestrictedModePackages(
+        InOrder inOrder = inOrder(mBackupAgentConnectionManager);
+        inOrder.verify(mBackupAgentConnectionManager).setNoRestrictedModePackages(
                 eq(Set.of("package1")),
                 eq(BackupAnnotations.OperationType.BACKUP));
-        inOrder.verify(mBackupManagerService).clearNoRestrictedModePackages();
+        inOrder.verify(mBackupAgentConnectionManager).clearNoRestrictedModePackages();
     }
 
     private void createTask(String[] packageNames) {

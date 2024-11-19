@@ -702,7 +702,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             }
 
             // Clear this to avoid using the memory until reboot.
-            mUserBackupManagerService.clearNoRestrictedModePackages();
+            mUserBackupManagerService
+                    .getBackupAgentConnectionManager().clearNoRestrictedModePackages();
 
             Slog.i(TAG, "Full data backup pass finished.");
             mUserBackupManagerService.getWakelock().release();
@@ -741,7 +742,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             }
             packageNames = transport.getPackagesThatShouldNotUseRestrictedMode(packageNames,
                     BACKUP);
-            mUserBackupManagerService.setNoRestrictedModePackages(packageNames, BACKUP);
+            mUserBackupManagerService.getBackupAgentConnectionManager().setNoRestrictedModePackages(
+                    packageNames, BACKUP);
         } catch (RemoteException e) {
             Slog.i(TAG, "Failed to retrieve no restricted mode packages from transport");
         }

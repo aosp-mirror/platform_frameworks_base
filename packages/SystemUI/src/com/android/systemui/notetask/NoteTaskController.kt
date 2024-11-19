@@ -84,7 +84,7 @@ constructor(
     private val userTracker: UserTracker,
     private val secureSettings: SecureSettings,
     @Application private val applicationScope: CoroutineScope,
-    @Background private val bgCoroutineContext: CoroutineContext
+    @Background private val bgCoroutineContext: CoroutineContext,
 ) {
 
     @VisibleForTesting val infoReference = AtomicReference<NoteTaskInfo?>()
@@ -98,7 +98,7 @@ constructor(
         if (key != Bubble.getAppBubbleKeyForApp(info.packageName, info.user)) return
 
         // Safe guard mechanism, this callback should only be called for app bubbles.
-        if (info.launchMode != NoteTaskLaunchMode.AppBubble) return
+        if (info.launchMode !is NoteTaskLaunchMode.AppBubble) return
 
         if (isExpanding) {
             debugLog { "onBubbleExpandChanged - expanding: $info" }
@@ -117,10 +117,8 @@ constructor(
             } else {
                 getUserForHandlingNotesTaking(entryPoint)
             }
-        activityContext.startActivityAsUser(
-            createNotesRoleHolderSettingsIntent(),
-            user
-        )
+
+        activityContext.startActivityAsUser(createNotesRoleHolderSettingsIntent(), user)
     }
 
     /**
@@ -140,8 +138,7 @@ constructor(
                 entryPoint == QUICK_AFFORDANCE -> {
                 userTracker.userProfiles
                     .firstOrNull { userManager.isManagedProfile(it.id) }
-                    ?.userHandle
-                    ?: userTracker.userHandle
+                    ?.userHandle ?: userTracker.userHandle
             }
             // On work profile devices, SysUI always run in the main user.
             else -> userTracker.userHandle
@@ -158,19 +155,14 @@ constructor(
      *
      * That will let users open other apps in full screen, and take contextual notes.
      */
-    fun showNoteTask(
-        entryPoint: NoteTaskEntryPoint,
-    ) {
+    fun showNoteTask(entryPoint: NoteTaskEntryPoint) {
         if (!isEnabled) return
 
         showNoteTaskAsUser(entryPoint, getUserForHandlingNotesTaking(entryPoint))
     }
 
     /** A variant of [showNoteTask] which launches note task in the given [user]. */
-    fun showNoteTaskAsUser(
-        entryPoint: NoteTaskEntryPoint,
-        user: UserHandle,
-    ) {
+    fun showNoteTaskAsUser(entryPoint: NoteTaskEntryPoint, user: UserHandle) {
         if (!isEnabled) return
 
         applicationScope.launch("$TAG#showNoteTaskAsUser") {
@@ -178,10 +170,7 @@ constructor(
         }
     }
 
-    private suspend fun awaitShowNoteTaskAsUser(
-        entryPoint: NoteTaskEntryPoint,
-        user: UserHandle,
-    ) {
+    private suspend fun awaitShowNoteTaskAsUser(entryPoint: NoteTaskEntryPoint, user: UserHandle) {
         if (!isEnabled) return
 
         if (!noteTaskBubblesController.areBubblesAvailable()) {
@@ -222,7 +211,13 @@ constructor(
                     val intent = createNoteTaskIntent(info)
                     val icon =
                         Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
-                    noteTaskBubblesController.showOrHideAppBubble(intent, user, icon)
+                    noteTaskBubblesController.showOrHideAppBubble(
+                        intent,
+                        user,
+                        icon,
+                        info.launchMode.bubbleExpandBehavior,
+                    )
+
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     debugLog { "onShowNoteTask - opened as app bubble: $info" }
                 }
@@ -399,8 +394,8 @@ constructor(
         const val EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE = "extra_shortcut_badge_override_package"
 
         /** Returns notes role holder settings intent. */
-        fun createNotesRoleHolderSettingsIntent() = Intent(Intent.ACTION_MANAGE_DEFAULT_APP).
-            putExtra(Intent.EXTRA_ROLE_NAME, ROLE_NOTES)
+        fun createNotesRoleHolderSettingsIntent() =
+            Intent(Intent.ACTION_MANAGE_DEFAULT_APP).putExtra(Intent.EXTRA_ROLE_NAME, ROLE_NOTES)
     }
 }
 

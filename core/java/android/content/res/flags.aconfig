@@ -105,3 +105,12 @@ flag {
     # This flag is used to control aapt2 behavior.
     is_fixed_read_only: true
 }
+
+flag {
+    name: "resources_minor_version_support"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for supporting minor version in Resources"
+    bug: "373535266"
+    is_fixed_read_only: true
+}

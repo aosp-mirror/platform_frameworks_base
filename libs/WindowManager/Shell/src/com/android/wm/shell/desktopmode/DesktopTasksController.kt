@@ -70,6 +70,8 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
+import com.android.window.flags.Flags.enableMoveToNextDisplayShortcut
+import com.android.wm.shell.Flags.enableFlexibleSplit
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
@@ -102,6 +104,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useDesktopOverrideDensity
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_UNDEFINED
 import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -1512,11 +1515,15 @@ class DesktopTasksController(
             WINDOWING_MODE_MULTI_WINDOW -> {
                 val splitPosition = splitScreenController
                     .determineNewInstancePosition(callingTaskInfo)
+                // TODO(b/349828130) currently pass in index_undefined until we can revisit these
+                //  specific cases in the future.
+                val splitIndex = if (enableFlexibleSplit())
+                    splitScreenController.determineNewInstanceIndex(callingTaskInfo) else
+                    SPLIT_INDEX_UNDEFINED
                 splitScreenController.startIntent(
                     launchIntent, context.userId, fillIn, splitPosition,
                     options.toBundle(), null /* hideTaskToken */,
-                    true /* forceLaunchNewTask */
-                )
+                    true /* forceLaunchNewTask */, splitIndex)
             }
             WINDOWING_MODE_FREEFORM -> {
                 val wct = WindowContainerTransaction()
@@ -1660,6 +1667,13 @@ class DesktopTasksController(
                 desktopImmersiveController.exitImmersiveIfApplicable(
                     transition, wct, task.displayId
                 )
+            }
+        } else if (taskRepository.isActiveTask(task.taskId)) {
+            // If a freeform task receives a request for a fullscreen launch, apply the same
+            // changes we do for similar transitions. The task not having WINDOWING_MODE_UNDEFINED
+            // set when needed can interfere with future split / multi-instance transitions.
+            return WindowContainerTransaction().also { wct ->
+                addMoveToFullscreenChanges(wct, task)
             }
         }
         return null

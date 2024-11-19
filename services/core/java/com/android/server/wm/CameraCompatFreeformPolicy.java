@@ -38,7 +38,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.CameraCompatTaskInfo;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -46,7 +45,6 @@ import android.view.Surface;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.WmProtoLogGroups;
-import com.android.window.flags.Flags;
 
 /**
  * Policy for camera compatibility freeform treatment.
@@ -124,26 +122,6 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         return appBoundsChanged || displayRotationChanged;
     }
 
-    /**
-     * Whether activity is eligible for camera compatibility free-form treatment.
-     *
-     * <p>The treatment is applied to a fixed-orientation camera activity in free-form windowing
-     * mode. The treatment letterboxes or pillarboxes the activity to the expected orientation and
-     * provides changes to the camera and display orientation signals to match those expected on a
-     * portrait device in that orientation (for example, on a standard phone).
-     *
-     * <p>The treatment is enabled when the following conditions are met:
-     * <ul>
-     *     <li>Property gating the camera compatibility free-form treatment is enabled.
-     *     <li>Activity isn't opted out by the device manufacturer with override.
-     * </ul>
-     */
-    @VisibleForTesting
-    boolean isCameraCompatForFreeformEnabledForActivity(@NonNull ActivityRecord activity) {
-        return Flags.enableCameraCompatForDesktopWindowing() && !activity.info.isChangeEnabled(
-                ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
-    }
-
     @Override
     public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
             @NonNull String cameraId) {
@@ -159,14 +137,8 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         }
 
         cameraActivity.recomputeConfiguration();
-        updateCameraCompatMode(cameraActivity);
         cameraActivity.getTask().dispatchTaskInfoChangedIfNeeded(/* force= */ true);
         cameraActivity.ensureActivityConfiguration(/* ignoreVisibility= */ false);
-    }
-
-    private void updateCameraCompatMode(@NonNull ActivityRecord cameraActivity) {
-        cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
-                .setFreeformCameraCompatMode(getCameraCompatMode(cameraActivity));
     }
 
     @Override
@@ -277,7 +249,8 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     boolean isTreatmentEnabledForActivity(@NonNull ActivityRecord activity,
             boolean checkOrientation) {
         int orientation = activity.getRequestedConfigurationOrientation();
-        return isCameraCompatForFreeformEnabledForActivity(activity)
+        return activity.mAppCompatController.getAppCompatCameraOverrides()
+                .shouldApplyFreeformTreatmentForCameraCompat()
                 && mCameraStateMonitor.isCameraRunningForActivity(activity)
                 && (!checkOrientation || orientation != ORIENTATION_UNDEFINED)
                 && activity.inFreeformWindowingMode()

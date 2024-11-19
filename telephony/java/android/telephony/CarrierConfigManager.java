@@ -9734,6 +9734,35 @@ public class CarrierConfigManager {
             "carrier_supported_satellite_services_per_provider_bundle";
 
     /**
+     * A PersistableBundle that contains a list of key-value pairs, where the values are integer
+     * arrays.
+     * <p>
+     * Keys are the IDs of regional satellite configs as strings and values are
+     * integer arrays of earfcns in the corresponding regions.
+     *
+     * An example config for two regions "1" and "2":
+     * <pre>{@code
+     * <carrier_config>
+     *   <pbundle_as_map name="regional_satellite_earfcn_bundle">
+     *     <int-array name = "1" num = "2">
+     *       <item value = "100"/>
+     *       <item value = "200"/>
+     *     </int-array>
+     *     <int-array name = "2" num = "1">
+     *       <item value = "200"/>
+     *     </int-array>
+     *   </pbundle_as_map>
+     * </carrier_config>
+     * }</pre>
+     * <p>
+     * This config is empty by default.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_REGIONAL_SATELLITE_EARFCN_BUNDLE =
+            "regional_satellite_earfcn_bundle";
+
+    /**
      * This config enables modem to scan satellite PLMNs specified as per
      * {@link #KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE} and attach to same
      * in case cellular networks are not enabled. This will need specific agreement between
@@ -11263,6 +11292,9 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putPersistableBundle(
                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
+                PersistableBundle.EMPTY);
+        sDefaults.putPersistableBundle(
+                KEY_REGIONAL_SATELLITE_EARFCN_BUNDLE,
                 PersistableBundle.EMPTY);
         sDefaults.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, 180);

@@ -32,6 +32,7 @@ import com.android.systemui.qs.tiles.impl.saver.domain.DataSaverDialogDelegate
 import com.android.systemui.qs.tiles.impl.saver.domain.model.DataSaverTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.settings.UserFileManager
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.DataSaverController
 import javax.inject.Inject
@@ -42,7 +43,7 @@ import kotlinx.coroutines.withContext
 class DataSaverTileUserActionInteractor
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @Main private val coroutineContext: CoroutineContext,
     @Background private val backgroundContext: CoroutineContext,
     private val dataSaverController: DataSaverController,

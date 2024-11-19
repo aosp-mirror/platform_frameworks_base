@@ -98,6 +98,8 @@ interface NativeInputManagerService {
 
     void toggleCapsLock(int deviceId);
 
+    void resetLockedModifierState();
+
     void displayRemoved(int displayId);
 
     void setInputDispatchMode(boolean enabled, boolean frozen);
@@ -368,6 +370,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void toggleCapsLock(int deviceId);
+
+        @Override
+        public native void resetLockedModifierState();
 
         @Override
         public native void displayRemoved(int displayId);

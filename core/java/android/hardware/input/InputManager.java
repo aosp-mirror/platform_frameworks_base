@@ -260,7 +260,7 @@ public final class InputManager {
     }
 
     /**
-     * Custom input gesture error: Input gesture already exists
+     * Custom input gesture result success
      *
      * @hide
      */
@@ -1584,6 +1584,21 @@ public final class InputManager {
                 result.add(new InputGestureData(data));
             }
             return result;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resets locked modifier state (i.e.. Caps Lock, Num Lock, Scroll Lock state)
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public void resetLockedModifierState() {
+        try {
+            mIm.resetLockedModifierState();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
