@@ -325,7 +325,7 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        if (Flags.offloadApi()) {
+        if (Flags.offloadApi() && Flags.offloadImplementation()) {
             HubInfoRegistry registry;
             try {
                 registry = new HubInfoRegistry(mContextHubWrapper);
