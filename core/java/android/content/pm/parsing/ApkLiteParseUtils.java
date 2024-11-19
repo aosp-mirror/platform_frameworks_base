@@ -660,7 +660,7 @@ public class ApkLiteParseUtils {
                                     SharedLibraryInfo.TYPE_SDK_PACKAGE));
                             break;
                         case TAG_STATIC_LIBRARY:
-                            isSdkLibrary = true;
+                            isStaticLibrary = true;
                             // Mirrors ParsingPackageUtils#parseStaticLibrary until lite and full
                             // parsing are combined
                             String staticLibName = parser.getAttributeValue(
