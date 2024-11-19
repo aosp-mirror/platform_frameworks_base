@@ -45,6 +45,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isGone
+import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.apptoweb.isBrowserApp
 import com.android.wm.shell.shared.split.SplitScreenConstants
@@ -218,7 +219,8 @@ class HandleMenu(
                             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
                             WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                     view = handleMenuView.rootView,
-                    forciblyShownTypes = if (forceShowSystemBars) { systemBars() } else { 0 }
+                    forciblyShownTypes = if (forceShowSystemBars) { systemBars() } else { 0 },
+                    ignoreCutouts = Flags.showAppHandleLargeScreens()
                 )
             } else {
                 parentDecor.addWindow(
