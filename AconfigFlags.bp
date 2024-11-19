@@ -56,7 +56,7 @@ aconfig_declarations_group {
         "android.media.tv.flags-aconfig-java",
         "android.multiuser.flags-aconfig-java",
         "android.net.platform.flags-aconfig-java",
-        "android.net.vcn.flags-aconfig-java",
+        "android.net.vcn.flags-aconfig-java-export",
         "android.net.wifi.flags-aconfig-java",
         "android.nfc.flags-aconfig-java",
         "android.os.flags-aconfig-java",
@@ -1170,16 +1170,21 @@ java_aconfig_library {
 }
 
 // VCN
+// TODO:376339506 Move the VCN code, the flag declaration and
+// java_aconfig_library to framework-connectivity-b
 aconfig_declarations {
     name: "android.net.vcn.flags-aconfig",
     package: "android.net.vcn",
-    container: "system",
+    container: "com.android.tethering",
+    exportable: true,
     srcs: ["core/java/android/net/vcn/*.aconfig"],
 }
 
 java_aconfig_library {
-    name: "android.net.vcn.flags-aconfig-java",
+    name: "android.net.vcn.flags-aconfig-java-export",
     aconfig_declarations: "android.net.vcn.flags-aconfig",
+    mode: "exported",
+    min_sdk_version: "35",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
