@@ -23,18 +23,20 @@ import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTH
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.fakeInputManager
-import android.os.SystemClock
-import android.view.KeyEvent.ACTION_DOWN
-import android.view.KeyEvent.KEYCODE_A
-import android.view.KeyEvent.META_CTRL_ON
-import android.view.KeyEvent.META_META_ON
-import androidx.compose.ui.input.key.KeyEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsInputGestureData
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.expectedStandardAddShortcutUiState
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.expectedStandardDeleteShortcutUiState
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.goHomeInputGestureData
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyDownEventWithActionKeyPressed
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyDownEventWithoutActionKeyPressed
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyUpEventWithActionKeyPressed
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardAddCustomShortcutRequestInfo
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardAddShortcutRequest
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardDeleteCustomShortcutRequestInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutCustomizationViewModelFactory
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
@@ -97,7 +99,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     @Test
     fun uiState_correctlyUpdatedWhenDeleteShortcutCustomizationIsRequested() {
         testScope.runTest {
-            viewModel.onShortcutCustomizationRequested(standardDeleteShortcutRequest)
+            viewModel.onShortcutCustomizationRequested(standardDeleteCustomShortcutRequestInfo)
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
 
             assertThat(uiState).isEqualTo(expectedStandardDeleteShortcutUiState)
@@ -120,7 +122,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     fun uiState_consumedOnDeleteDialogShown() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            viewModel.onShortcutCustomizationRequested(standardDeleteShortcutRequest)
+            viewModel.onShortcutCustomizationRequested(standardDeleteCustomShortcutRequestInfo)
             viewModel.onDialogShown()
 
             assertThat(
@@ -168,7 +170,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     fun uiState_errorMessage_isEmptyByDefault() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            viewModel.onShortcutCustomizationRequested(allAppsShortcutCustomizationRequest)
+            viewModel.onShortcutCustomizationRequested(standardAddCustomShortcutRequestInfo)
             viewModel.onDialogShown()
 
             assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).errorMessage)
@@ -227,6 +229,21 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    fun uiState_becomesInactiveAfterSuccessfullyDeletingShortcut() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            whenever(inputManager.getCustomInputGestures(any()))
+                .thenReturn(listOf(goHomeInputGestureData, allAppsInputGestureData))
+            whenever(inputManager.removeCustomInputGesture(any()))
+                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_SUCCESS)
+
+            openDeleteShortcutDialogAndDeleteShortcut()
+
+            assertThat(uiState).isEqualTo(ShortcutCustomizationUiState.Inactive)
+        }
+    }
+
+    @Test
     fun onKeyPressed_handlesKeyEvents_whereActionKeyIsAlsoPressed() {
         testScope.runTest {
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
@@ -281,7 +298,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     private suspend fun openAddShortcutDialogAndSetShortcut() {
-        viewModel.onShortcutCustomizationRequested(allAppsShortcutCustomizationRequest)
+        viewModel.onShortcutCustomizationRequested(standardAddCustomShortcutRequestInfo)
         viewModel.onDialogShown()
 
         viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
@@ -290,71 +307,10 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         viewModel.onSetShortcut()
     }
 
-    private val keyDownEventWithoutActionKeyPressed =
-        KeyEvent(
-            android.view.KeyEvent(
-                /* downTime = */ SystemClock.uptimeMillis(),
-                /* eventTime = */ SystemClock.uptimeMillis(),
-                /* action = */ ACTION_DOWN,
-                /* code = */ KEYCODE_A,
-                /* repeat = */ 0,
-                /* metaState = */ META_CTRL_ON,
-            )
-        )
+    private suspend fun openDeleteShortcutDialogAndDeleteShortcut() {
+        viewModel.onShortcutCustomizationRequested(standardDeleteCustomShortcutRequestInfo)
+        viewModel.onDialogShown()
 
-    private val keyDownEventWithActionKeyPressed =
-        KeyEvent(
-            android.view.KeyEvent(
-                /* downTime = */ SystemClock.uptimeMillis(),
-                /* eventTime = */ SystemClock.uptimeMillis(),
-                /* action = */ ACTION_DOWN,
-                /* code = */ KEYCODE_A,
-                /* repeat = */ 0,
-                /* metaState = */ META_CTRL_ON or META_META_ON,
-            )
-        )
-
-    private val keyUpEventWithActionKeyPressed =
-        KeyEvent(
-            android.view.KeyEvent(
-                /* downTime = */ SystemClock.uptimeMillis(),
-                /* eventTime = */ SystemClock.uptimeMillis(),
-                /* action = */ ACTION_DOWN,
-                /* code = */ KEYCODE_A,
-                /* repeat = */ 0,
-                /* metaState = */ 0,
-            )
-        )
-
-    private val standardAddShortcutRequest =
-        ShortcutCustomizationRequestInfo.Add(
-            label = "Standard shortcut",
-            categoryType = ShortcutCategoryType.System,
-            subCategoryLabel = "Standard subcategory",
-        )
-
-    private val standardDeleteShortcutRequest =
-        ShortcutCustomizationRequestInfo.Delete(
-            label = "Standard shortcut",
-            categoryType = ShortcutCategoryType.System,
-            subCategoryLabel = "Standard subcategory",
-        )
-
-    private val allAppsShortcutCustomizationRequest =
-        ShortcutCustomizationRequestInfo.Add(
-            label = "Open apps list",
-            categoryType = ShortcutCategoryType.System,
-            subCategoryLabel = "System controls",
-        )
-
-    private val expectedStandardAddShortcutUiState =
-        ShortcutCustomizationUiState.AddShortcutDialog(
-            shortcutLabel = "Standard shortcut",
-            defaultCustomShortcutModifierKey =
-                ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
-            isDialogShowing = false,
-        )
-
-    private val expectedStandardDeleteShortcutUiState =
-        ShortcutCustomizationUiState.DeleteShortcutDialog(isDialogShowing = false)
+        viewModel.deleteShortcutCurrentlyBeingCustomized()
+    }
 }
