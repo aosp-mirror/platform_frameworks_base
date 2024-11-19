@@ -236,6 +236,7 @@ aidl_interface {
         "android/os/GpuHeadroomParamsInternal.aidl",
         "android/os/IHintManager.aidl",
         "android/os/IHintSession.aidl",
+        "android/os/SessionCreationConfig.aidl",
     ],
     unstable: true,
     backend: {
