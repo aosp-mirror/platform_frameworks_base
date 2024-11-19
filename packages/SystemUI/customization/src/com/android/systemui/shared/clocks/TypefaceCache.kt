@@ -17,13 +17,18 @@
 package com.android.systemui.shared.clocks
 
 import android.graphics.Typeface
+import com.android.systemui.animation.FontCacheImpl
 import com.android.systemui.animation.TypefaceVariantCache
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.core.MessageBuffer
 import java.lang.ref.ReferenceQueue
 import java.lang.ref.WeakReference
 
-class TypefaceCache(messageBuffer: MessageBuffer, val typefaceFactory: (String) -> Typeface) {
+class TypefaceCache(
+    messageBuffer: MessageBuffer,
+    val animationFrameCount: Int,
+    val typefaceFactory: (String) -> Typeface,
+) {
     private val logger = Logger(messageBuffer, this::class.simpleName!!)
 
     private data class CacheKey(val res: String, val fvar: String?)
@@ -44,6 +49,7 @@ class TypefaceCache(messageBuffer: MessageBuffer, val typefaceFactory: (String) 
     // result, once a typeface is no longer being used, it is unlikely to be recreated immediately.
     private val cache = mutableMapOf<CacheKey, WeakTypefaceRef>()
     private val queue = ReferenceQueue<Typeface>()
+    private val fontCache = FontCacheImpl(animationFrameCount)
 
     fun getTypeface(res: String): Typeface {
         checkQueue()
@@ -62,6 +68,9 @@ class TypefaceCache(messageBuffer: MessageBuffer, val typefaceFactory: (String) 
     fun getVariantCache(res: String): TypefaceVariantCache {
         val baseTypeface = getTypeface(res)
         return object : TypefaceVariantCache {
+            override val fontCache = this@TypefaceCache.fontCache
+            override val animationFrameCount = this@TypefaceCache.animationFrameCount
+
             override fun getTypefaceForVariant(fvar: String?): Typeface? {
                 checkQueue()
                 val key = CacheKey(res, fvar)

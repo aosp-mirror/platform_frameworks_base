@@ -49,7 +49,7 @@ class SimpleDigitalClockTextViewTest : SysuiTestCase() {
                     context,
                     context.resources,
                     ClockSettings(),
-                    TypefaceCache(messageBuffer) {
+                    TypefaceCache(messageBuffer, 20) {
                         // TODO(b/364680873): Move constant to config_clockFontFamily when shipping
                         return@TypefaceCache Typeface.create(
                             "google-sans-flex-clock",
