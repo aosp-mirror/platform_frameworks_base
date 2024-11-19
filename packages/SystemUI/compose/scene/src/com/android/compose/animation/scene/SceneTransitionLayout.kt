@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
@@ -68,7 +69,7 @@ fun SceneTransitionLayout(
         swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
-        builder,
+        builder = builder,
     )
 }
 
@@ -261,6 +262,18 @@ interface BaseContentScope : ElementStateScope {
      * lists keep a constant size during transitions even if its elements are growing/shrinking.
      */
     fun Modifier.noResizeDuringTransitions(): Modifier
+
+    /**
+     * A [NestedSceneTransitionLayout] will share its elements with its ancestor STLs therefore
+     * enabling sharedElement transitions between them.
+     */
+    // TODO(b/380070506): Add more parameters when default params are supported in Kotlin 2.0.21
+    @Composable
+    fun NestedSceneTransitionLayout(
+        state: SceneTransitionLayoutState,
+        modifier: Modifier,
+        builder: SceneTransitionLayoutScope.() -> Unit,
+    )
 }
 
 typealias SceneScope = ContentScope
@@ -677,6 +690,9 @@ internal fun SceneTransitionLayoutForTesting(
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
+    sharedElementMap: MutableMap<ElementKey, Element> = remember { mutableMapOf() },
+    ancestorContentKeys: List<ContentKey> = emptyList(),
+    lookaheadScope: LookaheadScope? = null,
     builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
@@ -691,6 +707,9 @@ internal fun SceneTransitionLayoutForTesting(
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = builder,
                 animationScope = animationScope,
+                elements = sharedElementMap,
+                ancestorContentKeys = ancestorContentKeys,
+                lookaheadScope = lookaheadScope,
             )
             .also { onLayoutImpl?.invoke(it) }
     }
@@ -704,6 +723,24 @@ internal fun SceneTransitionLayoutForTesting(
             error(
                 "This SceneTransitionLayout was bound to a different SceneTransitionLayoutState" +
                     " that was used when creating it, which is not supported"
+            )
+        }
+        if (layoutImpl.elements != sharedElementMap) {
+            error(
+                "This SceneTransitionLayout was bound to a different elements map that was used " +
+                    "when creating it, which is not supported"
+            )
+        }
+        if (layoutImpl.ancestorContentKeys != ancestorContentKeys) {
+            error(
+                "This SceneTransitionLayout was bound to a different ancestorContents that was " +
+                    "used when creating it, which is not supported"
+            )
+        }
+        if (lookaheadScope != null && layoutImpl.lookaheadScope != lookaheadScope) {
+            error(
+                "This SceneTransitionLayout was bound to a different lookaheadScope that was " +
+                    "used when creating it, which is not supported"
             )
         }
 

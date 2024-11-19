@@ -16,6 +16,8 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -82,6 +84,10 @@ interface TransitionTestAssertionScope {
     fun onElement(element: ElementKey, scene: SceneKey? = null): SemanticsNodeInteraction
 }
 
+val Default4FrameLinearTransition: TransitionBuilder.() -> Unit = {
+    spec = tween(16 * 4, easing = LinearEasing)
+}
+
 /**
  * Test the transition between [fromSceneContent] and [toSceneContent] at different points in time.
  *
@@ -90,10 +96,13 @@ interface TransitionTestAssertionScope {
 fun ComposeContentTestRule.testTransition(
     fromSceneContent: @Composable ContentScope.() -> Unit,
     toSceneContent: @Composable ContentScope.() -> Unit,
-    transition: TransitionBuilder.() -> Unit,
+    transition: TransitionBuilder.() -> Unit = Default4FrameLinearTransition,
     layoutModifier: Modifier = Modifier,
     fromScene: SceneKey = TestScenes.SceneA,
     toScene: SceneKey = TestScenes.SceneB,
+    changeState: CoroutineScope.(MutableSceneTransitionLayoutState) -> Unit = { state ->
+        state.setTargetScene(toScene, animationScope = this)
+    },
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     testTransition(
@@ -104,7 +113,7 @@ fun ComposeContentTestRule.testTransition(
                     transitions { from(fromScene, to = toScene, builder = transition) },
                 )
             },
-        to = toScene,
+        changeState = changeState,
         transitionLayout = { state ->
             SceneTransitionLayout(state, layoutModifier) {
                 scene(fromScene, content = fromSceneContent)

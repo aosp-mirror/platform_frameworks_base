@@ -70,7 +70,39 @@ internal class SceneTransitionLayoutImpl(
      * animations.
      */
     internal val animationScope: CoroutineScope,
+
+    /**
+     * The map of [Element]s.
+     *
+     * Important: [Element]s from this map should never be accessed during composition because the
+     * Elements are added when the associated Modifier.element() node is attached to the Modifier
+     * tree, i.e. after composition.
+     */
+    internal val elements: MutableMap<ElementKey, Element> = mutableMapOf(),
+
+    /**
+     * When this STL is a [NestedSceneTransitionLayout], this is a list of [ContentKey]s of where
+     * this STL is composed in within its ancestors.
+     *
+     * The root STL holds an emptyList. With each nesting level the parent is supposed to add
+     * exactly one scene to the list, therefore the size of this list is equal to the nesting depth
+     * of this STL.
+     *
+     * This is used to know in which content of the ancestors a sharedElement appears in.
+     */
+    internal val ancestorContentKeys: List<ContentKey> = emptyList(),
+    lookaheadScope: LookaheadScope? = null,
 ) {
+
+    /**
+     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
+     * layout. For [NestedSceneTransitionLayout]s this scope is the scope of the root STL, such that
+     * offset computations can be shared among all children.
+     */
+    private var _lookaheadScope: LookaheadScope? = lookaheadScope
+    internal val lookaheadScope: LookaheadScope
+        get() = _lookaheadScope!!
+
     /**
      * The map of [Scene]s.
      *
@@ -87,15 +119,6 @@ internal class SceneTransitionLayoutImpl(
     private var _overlays: MutableMap<OverlayKey, Overlay>? = null
     private val overlays
         get() = _overlays ?: SnapshotStateMap<OverlayKey, Overlay>().also { _overlays = it }
-
-    /**
-     * The map of [Element]s.
-     *
-     * Important: [Element]s from this map should never be accessed during composition because the
-     * Elements are added when the associated Modifier.element() node is attached to the Modifier
-     * tree, i.e. after composition.
-     */
-    internal val elements = mutableMapOf<ElementKey, Element>()
 
     /**
      * The map of contents of movable elements.
@@ -137,13 +160,6 @@ internal class SceneTransitionLayoutImpl(
                 ?: UserActionDistanceScopeImpl(layoutImpl = this).also {
                     _userActionDistanceScope = it
                 }
-
-    /**
-     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
-     * layout.
-     */
-    internal lateinit var lookaheadScope: LookaheadScope
-        private set
 
     internal var lastSize: IntSize = IntSize.Zero
 
@@ -347,7 +363,12 @@ internal class SceneTransitionLayoutImpl(
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
-                lookaheadScope = this
+                if (_lookaheadScope == null) {
+                    // We can't init this in a SideEffect as other NestedSTLs are already calling
+                    // this during composition. However, when composition is canceled
+                    // SceneTransitionLayoutImpl is discarded as well. So it's fine to do this here.
+                    _lookaheadScope = this
+                }
 
                 BackHandler()
                 Scenes()
