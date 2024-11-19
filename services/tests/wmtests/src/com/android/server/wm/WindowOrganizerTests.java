@@ -82,9 +82,9 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.util.ArrayMap;
 import android.util.Rational;
 import android.view.Display;
@@ -544,6 +544,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testSetActivityWindowingMode() {
         final ActivityRecord record = makePipableActivity();
         final Task rootTask = record.getRootTask();
@@ -1302,7 +1303,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
-    @DisableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
+    @RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testEnterPipParams() {
         final StubOrganizer o = new StubOrganizer();
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o);
@@ -1318,7 +1319,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
-    @DisableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
+    @RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testChangePipParams() {
         class ChangeSavingOrganizer extends StubOrganizer {
             RunningTaskInfo mChangedInfo;
@@ -1890,6 +1891,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    @RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testResumeTopsWhenLeavingPinned() {
         final ActivityRecord home = new ActivityBuilder(mAtm).setTask(
                 mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask()).build();
