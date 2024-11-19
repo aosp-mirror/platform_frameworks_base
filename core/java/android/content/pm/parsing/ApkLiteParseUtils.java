@@ -465,6 +465,7 @@ public class ApkLiteParseUtils {
         boolean hasDeviceAdminReceiver = false;
 
         boolean isSdkLibrary = false;
+        boolean isStaticLibrary = false;
         List<String> usesSdkLibraries = new ArrayList<>();
         long[] usesSdkLibrariesVersionsMajor = new long[0];
         String[][] usesSdkLibrariesCertDigests = new String[0][0];
@@ -659,6 +660,7 @@ public class ApkLiteParseUtils {
                                     SharedLibraryInfo.TYPE_SDK_PACKAGE));
                             break;
                         case TAG_STATIC_LIBRARY:
+                            isSdkLibrary = true;
                             // Mirrors ParsingPackageUtils#parseStaticLibrary until lite and full
                             // parsing are combined
                             String staticLibName = parser.getAttributeValue(
@@ -812,7 +814,7 @@ public class ApkLiteParseUtils {
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
                         hasDeviceAdminReceiver, isSdkLibrary, usesSdkLibraries,
-                        usesSdkLibrariesVersionsMajor, usesSdkLibrariesCertDigests,
+                        usesSdkLibrariesVersionsMajor, usesSdkLibrariesCertDigests, isStaticLibrary,
                         usesStaticLibraries, usesStaticLibrariesVersions,
                         usesStaticLibrariesCertDigests, updatableSystem, emergencyInstaller,
                         declaredLibraries));

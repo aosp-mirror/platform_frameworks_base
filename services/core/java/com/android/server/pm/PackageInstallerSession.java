@@ -1092,6 +1092,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isInstallDpcPackagesPermissionGranted = (snapshot.checkUidPermission(
                 android.Manifest.permission.INSTALL_DPC_PACKAGES, mInstallerUid)
                 == PackageManager.PERMISSION_GRANTED);
+        boolean isInstallDependencyPackagesPermissionGranted = false;
+        if (Flags.sdkDependencyInstaller()) {
+            isInstallDependencyPackagesPermissionGranted = (snapshot.checkUidPermission(
+                    android.Manifest.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES, mInstallerUid)
+                    == PackageManager.PERMISSION_GRANTED);
+        }
         // Also query the package uid for archived packages, so that the user confirmation
         // dialog can be displayed for updating archived apps.
         final int targetPackageUid = snapshot.getPackageUid(packageName,
@@ -1113,10 +1119,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isEmergencyInstall =
                 isEmergencyInstallerEnabled(packageName, snapshot, userId, mInstallerUid);
+        boolean isSdkOrStaticLibraryInstall = false;
+        synchronized (mLock) {
+            if (mPackageLite != null) {
+                isSdkOrStaticLibraryInstall =
+                        mPackageLite.isIsSdkLibrary() || mPackageLite.isIsStaticLibrary();
+            }
+        }
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
                 || (isSelfUpdatePermissionGranted && isSelfUpdate)
-                || (isInstallDpcPackagesPermissionGranted && hasDeviceAdminReceiver);
+                || (isInstallDpcPackagesPermissionGranted && hasDeviceAdminReceiver)
+                || (isInstallDependencyPackagesPermissionGranted && isSdkOrStaticLibraryInstall);
         final boolean isInstallerRoot = (mInstallerUid == Process.ROOT_UID);
         final boolean isInstallerSystem = (mInstallerUid == Process.SYSTEM_UID);
         final boolean isInstallerShell = (mInstallerUid == Process.SHELL_UID);
