@@ -84,8 +84,8 @@ constructor(
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .build()
 
-    fun onRingerButtonClicked(ringerMode: RingerMode) {
-        if (drawerState.value is RingerDrawerState.Open) {
+    fun onRingerButtonClicked(ringerMode: RingerMode, isSelectedButton: Boolean = false) {
+        if (drawerState.value is RingerDrawerState.Open && !isSelectedButton) {
             Events.writeEvent(Events.EVENT_RINGER_TOGGLE, ringerMode.value)
             provideTouchFeedback(ringerMode)
             maybeShowToast(ringerMode)
