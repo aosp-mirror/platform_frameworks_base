@@ -3160,12 +3160,16 @@ public class Notification implements Parcelable
                 callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
-        }
 
-        if (Flags.apiRichOngoing()) {
-            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON, Icon.class));
-            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_START_ICON, Icon.class));
-            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_END_ICON, Icon.class));
+
+            if (Flags.apiRichOngoing()) {
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON,
+                    Icon.class));
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_START_ICON,
+                    Icon.class));
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_END_ICON,
+                    Icon.class));
+            }
         }
 
         if (mBubbleMetadata != null) {
