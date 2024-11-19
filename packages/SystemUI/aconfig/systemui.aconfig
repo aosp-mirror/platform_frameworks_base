@@ -1780,6 +1780,16 @@ flag {
 }
 
 flag {
+    name: "notification_reentrant_dismiss"
+    namespace: "systemui"
+    description: "Posts to avoid a crashing reentrant pipeline run"
+    bug: "328328054"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+      }
+}
+
+flag {
     name: "stoppable_fgs_system_app"
     namespace: "systemui"
     description: "System app with foreground service can opt in to be stoppable."
