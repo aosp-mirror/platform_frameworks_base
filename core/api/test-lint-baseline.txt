@@ -2139,6 +2139,8 @@ UnflaggedApi: android.os.BugreportParams#BUGREPORT_MODE_MAX_VALUE:
     New API must be flagged with @FlaggedApi: field android.os.BugreportParams.BUGREPORT_MODE_MAX_VALUE
 UnflaggedApi: android.os.PowerManager#isBatterySaverSupported():
     New API must be flagged with @FlaggedApi: method android.os.PowerManager.isBatterySaverSupported()
+UnflaggedApi: android.os.PowerManager#isInteractive(int):
+    New API must be flagged with @FlaggedApi: method android.os.PowerManager.isInteractive(int)
 UnflaggedApi: android.os.UserHandle#USER_CURRENT:
     New API must be flagged with @FlaggedApi: field android.os.UserHandle.USER_CURRENT
 UnflaggedApi: android.os.UserManager#getAliveUsers():
