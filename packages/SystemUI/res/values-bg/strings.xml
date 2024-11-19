@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Вход"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Слухови апарати"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Включва се..."</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Яркостта не може да се коригира, защото се контролира\n от приложението на екрана"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Авт. ориентация"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматично завъртане на екрана"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Местоположение"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Кликнете за сдвояване на ново устройство"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Предварително зададените настройки не бяха актуализирани"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Предварително зададено"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Избрано"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Инструменти"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Надписи на живо"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Бележка"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се отблокира ли микрофонът на устройството?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се отблокира ли камерата на устройството?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се отблокират ли камерата и микрофонът на устройството?"</string>
@@ -871,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Превключване към приложението вдясно/отдолу в режима на разделен екран"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Превключване към приложението вляво/отгоре в режима на разделен екран"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"При разделен екран: замяна на дадено приложение с друго"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Преместване на активния прозорец между екраните"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Въвеждане"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Превключване към следващия език"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Превключване към предишния език"</string>
@@ -1221,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Използвайте по-малко от <xliff:g id="LENGTH">%1$d</xliff:g> знака"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер на компилацията"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номерът на компилацията е копиран в буферната памет."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"Отворен разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Приспособления за разговор"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Докоснете разговор, за да го добавите към началния си екран"</string>
@@ -1356,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"За по-висока разделителна способност обърнете телефона"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Разгъване на сгъваемо устройство"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Обръщане на сгъваемо устройство"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"затворено"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"отворено"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1415,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Достъпност"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Клавишни комбинации"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Персонализиране на клавишните комбинации"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Натиснете клавиш, за да зададете клавишна комбинация"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Търсете клавишни комбинации"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Няма резултати от търсенето"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за свиване"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Икона на клавиша за действия или клавиша Meta"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Икона на плюс"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Персонализиране"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Готово"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за разгъване"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Манипулатор за преместване с плъзгане"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Настройки на клавиатурата"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Задаване на клавишна комбинация"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Отказ"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Натиснете клавиш"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Клавишната комбинация вече се използва. Опитайте с друг клавиш."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навигирайте посредством клавиатурата си"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Научете за клавишните комбинации"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навигирайте посредством сензорния панел"</string>
@@ -1449,7 +1445,7 @@
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Преглед на скорошните приложения"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Прекарайте три пръста наляво или надясно по сензорния панел"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Плъзнете три пръста наляво или надясно по сензорния панел"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Чудесно!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Изпълнихте жеста за връщане назад."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Към началния екран"</string>
@@ -1457,7 +1453,7 @@
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Отлично!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Изпълнихте жеста за преминаване към началния екран"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Преглед на скорошните приложения"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Прекарайте три пръста нагоре по сензорния панел и задръжте"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Плъзнете три пръста нагоре по сензорния панел и задръжте"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Отлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Изпълнихте жеста за преглед на скорошните приложения."</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Преглед на всички приложения"</string>

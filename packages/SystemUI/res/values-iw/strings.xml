@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"קלט"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"מכשירי שמיעה"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ההפעלה מתבצעת…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"לא ניתן להתאים את הבהירות כי היא\n נשלטת על ידי האפליקציה העליונה"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"סיבוב אוטומטי"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"סיבוב אוטומטי של המסך"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"מיקום"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"צריך ללחוץ כדי להתאים מכשיר חדש"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"לא ניתן לעדכן את ההגדרה הקבועה מראש"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"הגדרה קבועה מראש"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"נבחר"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"כלים"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"כתוביות מיידיות"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"פתק"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"לבטל את חסימת המיקרופון של המכשיר?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"לבטל את חסימת המצלמה של המכשיר?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"לבטל את חסימת המצלמה והמיקרופון של המכשיר?"</string>
@@ -593,8 +593,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"כן, אפשר להתחיל"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"אין התראות"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"אין התראות חדשות"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"הפוגת ההתראות מופעלת"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"עוצמת הקול וההתראות במכשיר מופחתות אוטומטית למשך עד 2 דקות כשמתקבלות יותר מדי התראות בבת אחת."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"השבתה"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"יש לבטל את הנעילה כדי לראות התראות ישנות"</string>
@@ -872,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"מעבר לאפליקציה משמאל או למטה בזמן שימוש במסך מפוצל"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"מעבר לאפליקציה מימין או למעלה בזמן שימוש במסך מפוצל"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"כשהמסך מפוצל: החלפה בין אפליקציה אחת לאחרת"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"העברת החלון הפעיל בין מסכים"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"קלט"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"מעבר לשפה הבאה"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"מעבר לשפה הקודמת"</string>
@@ -1222,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"אפשר להזין עד <xliff:g id="LENGTH">%1$d</xliff:g> תווים"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"‏מספר Build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"‏מספר ה-Build הועתק ללוח."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"פתיחת שיחה"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ווידג\'טים של שיחות"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"יש להקיש על שיחה כדי להוסיף אותה למסך הבית"</string>
@@ -1357,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"כדי לצלם תמונה ברזולוציה גבוהה יותר, כדאי להפוך את הטלפון"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"מכשיר מתקפל עובר למצב לא מקופל"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"מכשיר מתקפל עובר למצב מהופך"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"מצב מקופל"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"מצב לא מקופל"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‏%1$s‏ / %2$s"</string>
@@ -1416,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"נגישות"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"מקשי קיצור"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"התאמה אישית של מקשי הקיצור"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"יש ללחוץ על מקש כדי להקצות מקש קיצור"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"קיצורי דרך לחיפוש"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"אין תוצאות חיפוש"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"סמל הכיווץ"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"סמל מקש הפעולה (\"מטא\")"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"סמל הפלוס"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"התאמה אישית"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"סיום"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"סמל ההרחבה"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"או"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"נקודת האחיזה לגרירה"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"הגדרות המקלדת"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"הגדרה של מקש קיצור"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ביטול"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"יש ללחוץ על מקש"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"שילוב המקשים הזה כבר בשימוש. אפשר לנסות מקש אחר."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ניווט באמצעות המקלדת"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"מידע על מקשי קיצור"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ניווט באמצעות לוח המגע"</string>
@@ -1452,19 +1447,19 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"חזרה"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"מחליקים שמאלה או ימינה עם שלוש אצבעות על לוח המגע"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"איזה יופי!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"השלמת את התנועה \'הקודם\'."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"סיימת לתרגל את התנועה \'הקודם\'."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"מעבר למסך הבית"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"מחליקים כלפי מעלה עם שלוש אצבעות על לוח המגע"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"מעולה!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"סיימת לתרגל את תנועת החזרה למסך הבית"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"הצגת האפליקציות האחרונות"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"מחליקים למעלה ולוחצים לחיצה ארוכה עם שלוש אצבעות על לוח המגע"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"מחליקים למעלה עם שלוש אצבעות על לוח המגע ומשאירים אותן במגע עם הלוח"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"מעולה!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"השלמת את התנועה להצגת האפליקציות האחרונות."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"סיימת לתרגל את התנועה להצגת האפליקציות האחרונות."</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"צפייה בכל האפליקציות"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"צריך להקיש על מקש הפעולה במקלדת"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"כל הכבוד!"</string>
-    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"השלמת את התנועה להצגת כל האפליקציות"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"סיימת לתרגל את התנועה להצגת כל האפליקציות"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"התאורה האחורית במקלדת"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏רמה %1$d מתוך %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"שליטה במכשירים"</string>
