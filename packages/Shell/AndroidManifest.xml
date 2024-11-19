@@ -938,7 +938,6 @@
 
     <!-- Permission required for CTS test - CtsPackageManagerTestCases-->
     <uses-permission android:name="android.permission.DOMAIN_VERIFICATION_AGENT" />
-    <uses-permission android:name="android.permission.VERIFICATION_AGENT" />
 
     <!-- Permission required for Cts test - CtsInputTestCases -->
     <uses-permission
