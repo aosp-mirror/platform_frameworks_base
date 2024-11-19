@@ -30,15 +30,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -46,7 +39,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
@@ -57,10 +49,10 @@ import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.panels.dagger.PaginatedBaseLayoutType
 import com.android.systemui.qs.panels.ui.compose.Dimensions.FooterHeight
 import com.android.systemui.qs.panels.ui.compose.Dimensions.InterPageSpacing
+import com.android.systemui.qs.panels.ui.viewmodel.EditModeButtonViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.PaginatedGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.ui.compose.borderOnFocus
-import com.android.systemui.res.R
 import javax.inject.Inject
 
 class PaginatedGridLayout
@@ -70,11 +62,7 @@ constructor(
     @PaginatedBaseLayoutType private val delegateGridLayout: PaginatableGridLayout,
 ) : GridLayout by delegateGridLayout {
     @Composable
-    override fun SceneScope.TileGrid(
-        tiles: List<TileViewModel>,
-        modifier: Modifier,
-        editModeStart: () -> Unit,
-    ) {
+    override fun SceneScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
         val viewModel =
             rememberViewModel(traceName = "PaginatedGridLayout-TileGrid") {
                 viewModelFactory.create()
@@ -131,14 +119,12 @@ constructor(
             ) {
                 val page = pages[it]
 
-                with(delegateGridLayout) {
-                    TileGrid(tiles = page, modifier = Modifier, editModeStart = {})
-                }
+                with(delegateGridLayout) { TileGrid(tiles = page, modifier = Modifier) }
             }
             FooterBar(
                 buildNumberViewModelFactory = viewModel.buildNumberViewModelFactory,
                 pagerState = pagerState,
-                editModeStart = editModeStart,
+                editButtonViewModelFactory = viewModel.editModeButtonViewModelFactory,
             )
         }
     }
@@ -153,7 +139,7 @@ private object Dimensions {
 private fun FooterBar(
     buildNumberViewModelFactory: BuildNumberViewModel.Factory,
     pagerState: PagerState,
-    editModeStart: () -> Unit,
+    editButtonViewModelFactory: EditModeButtonViewModel.Factory,
 ) {
     // Use requiredHeight so it won't be squished if the view doesn't quite fit. As this is
     // expected to be inside a scrollable container, this should not be an issue.
@@ -189,24 +175,7 @@ private fun FooterBar(
         )
         Row(Modifier.weight(1f)) {
             Spacer(modifier = Modifier.weight(1f))
-            CompositionLocalProvider(
-                value = LocalContentColor provides MaterialTheme.colorScheme.onSurface
-            ) {
-                IconButton(
-                    onClick = editModeStart,
-                    shape = RoundedCornerShape(CornerSize(28.dp)),
-                    modifier =
-                        Modifier.borderOnFocus(
-                            color = MaterialTheme.colorScheme.secondary,
-                            cornerSize = CornerSize(FooterHeight / 2),
-                        ),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(id = R.string.qs_edit),
-                    )
-                }
-            }
+            EditModeButton(viewModelFactory = editButtonViewModelFactory)
         }
     }
 }

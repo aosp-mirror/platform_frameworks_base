@@ -719,7 +719,6 @@ constructor(
                                                     max =
                                                         QuickSettingsShade.Dimensions.GridMaxHeight
                                                 ),
-                                        containerViewModel.editModeViewModel::startEditing,
                                     )
                                 }
                             }

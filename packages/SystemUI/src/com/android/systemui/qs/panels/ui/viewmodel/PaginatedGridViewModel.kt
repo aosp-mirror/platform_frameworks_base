@@ -38,6 +38,7 @@ constructor(
     paginatedGridInteractor: PaginatedGridInteractor,
     inFirstPageViewModel: InFirstPageViewModel,
     val buildNumberViewModelFactory: BuildNumberViewModel.Factory,
+    val editModeButtonViewModelFactory: EditModeButtonViewModel.Factory,
     private val falsingInteractor: FalsingInteractor,
 ) : IconTilesViewModel by iconTilesViewModel, ExclusiveActivatable() {
 
