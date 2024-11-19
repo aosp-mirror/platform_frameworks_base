@@ -22,9 +22,9 @@ sealed interface ShortcutCustomizationUiState {
     data class AddShortcutDialog(
         val shortcutLabel: String,
         val shouldShowErrorMessage: Boolean,
-        val isValidKeyCombination: Boolean,
         val defaultCustomShortcutModifierKey: ShortcutKey.Icon.ResIdIcon,
         val isDialogShowing: Boolean,
+        val pressedKeys: List<ShortcutKey> = emptyList(),
     ) : ShortcutCustomizationUiState
 
     data object Inactive : ShortcutCustomizationUiState
