@@ -16,22 +16,20 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.util.Log
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.wm.shell.dagger.WMSingleton
-import javax.inject.Inject
+import com.android.internal.logging.UiEventLogger.UiEventEnum
+import com.android.internal.protolog.ProtoLog
+import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 
 /** Log Aster UIEvents for desktop windowing mode. */
-@WMSingleton
-class DesktopModeUiEventLogger
-@Inject
-constructor(
-    private val mUiEventLogger: UiEventLogger,
-    private val mInstanceIdSequence: InstanceIdSequence
+class DesktopModeUiEventLogger(
+    private val uiEventLogger: UiEventLogger,
 ) {
+    private val instanceIdSequence = InstanceIdSequence(Integer.MAX_VALUE)
+
     /**
      * Logs an event for a CUI, on a particular package.
      *
@@ -41,14 +39,14 @@ constructor(
      */
     fun log(uid: Int, packageName: String, event: DesktopUiEventEnum) {
         if (packageName.isEmpty() || uid < 0) {
-            Log.d(TAG, "Skip logging since package name is empty or bad uid")
+            logD("Skip logging since package name is empty or bad uid")
             return
         }
-        mUiEventLogger.log(event, uid, packageName)
+        uiEventLogger.log(event, uid, packageName)
     }
 
     /** Retrieves a new instance id for a new interaction. */
-    fun getNewInstanceId(): InstanceId = mInstanceIdSequence.newInstanceId()
+    fun getNewInstanceId(): InstanceId = instanceIdSequence.newInstanceId()
 
     /**
      * Logs an event as part of a particular CUI, on a particular package.
@@ -66,28 +64,32 @@ constructor(
         event: DesktopUiEventEnum
     ) {
         if (packageName.isEmpty() || uid < 0) {
-            Log.d(TAG, "Skip logging since package name is empty or bad uid")
+            logD("Skip logging since package name is empty or bad uid")
             return
         }
-        mUiEventLogger.logWithInstanceId(event, uid, packageName, instanceId)
+        uiEventLogger.logWithInstanceId(event, uid, packageName, instanceId)
+    }
+
+    private fun logD(msg: String, vararg arguments: Any?) {
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
+    }
+
+    /** Enums for logging desktop windowing mode UiEvents. */
+    enum class DesktopUiEventEnum(private val mId: Int) : UiEventEnum {
+
+        @UiEvent(doc = "Resize the window in desktop windowing mode by dragging the edge")
+        DESKTOP_WINDOW_EDGE_DRAG_RESIZE(1721),
+        @UiEvent(doc = "Resize the window in desktop windowing mode by dragging the corner")
+        DESKTOP_WINDOW_CORNER_DRAG_RESIZE(1722),
+        @UiEvent(doc = "Tap on the window header maximize button in desktop windowing mode")
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_TAP(1723),
+        @UiEvent(doc = "Double tap on window header to maximize it in desktop windowing mode")
+        DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_MAXIMIZE(1724);
+
+        override fun getId(): Int = mId
     }
 
     companion object {
-        /** Enums for logging desktop windowing mode UiEvents. */
-        enum class DesktopUiEventEnum(private val mId: Int) : UiEventLogger.UiEventEnum {
-
-            @UiEvent(doc = "Resize the window in desktop windowing mode by dragging the edge")
-            DESKTOP_WINDOW_EDGE_DRAG_RESIZE(1721),
-            @UiEvent(doc = "Resize the window in desktop windowing mode by dragging the corner")
-            DESKTOP_WINDOW_CORNER_DRAG_RESIZE(1722),
-            @UiEvent(doc = "Tap on the window header maximize button in desktop windowing mode")
-            DESKTOP_WINDOW_MAXIMIZE_BUTTON_TAP(1723),
-            @UiEvent(doc = "Double tap on window header to maximize it in desktop windowing mode")
-            DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_MAXIMIZE(1724);
-
-            override fun getId(): Int = mId
-        }
-
         private const val TAG = "DesktopModeUiEventLogger"
     }
 }

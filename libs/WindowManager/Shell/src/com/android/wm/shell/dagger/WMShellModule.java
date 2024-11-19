@@ -82,6 +82,7 @@ import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeKeyGestureHandler;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
+import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTaskChangeListener;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -1206,6 +1207,14 @@ public abstract class WMShellModule {
             @ShellMainThread CoroutineScope mainScope) {
         return new DesktopRepositoryInitializerImpl(context, desktopPersistentRepository,
                 mainScope);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopModeUiEventLogger provideDesktopUiEventLogger(
+            UiEventLogger uiEventLogger
+    ) {
+        return new DesktopModeUiEventLogger(uiEventLogger);
     }
 
     //
